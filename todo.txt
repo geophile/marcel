@@ -1,0 +1,72 @@
+- Complete Python string parsing
+
+- Complete shell string parsing (termination on things other than EOL
+  and whiteapce).
+
+- Licensing header
+
+core.py:
+
+- Pipline pickling (replace/restore function)
+
+- command state
+
+- ctrl-c handling
+
+- namespaces (add_to_namespace, namespace)
+
+error.py:
+
+- PickleableException (transmission of stacks)
+
+util.py:
+
+- remove_cr_lf
+
+- clone (pickling)
+
+- scp, ssh via spawning. Is there a native way to do this?
+
+- quote
+
+- print_stack
+
+- Pipeline.run_local logic seems wrong. Pipeline can have mixture of
+  local and non-local ops?
+
+- Forks
+
+- All varieties of formatting (for out op)
+
+- Debugging & verbosity level
+
+- Inside an osh shell, errors shouldn't terminate the shell, just the command.
+
+- Is Generator needed?
+
+- Write OshArgParser.exit to avoid SystemExit on argparse error.
+
+- Make File comparisons work -- based on absolute path.
+
+- Add -r/--reverse option to sort.
+
+- "ls -1" looks too much like "ls -l"
+
+- Should the name of map be changed? f as in osh1? apply? map doesn't
+  really make sense when used as a generator. Could have gen handle
+  this case through a function argument mutually exclusive with other
+  args. So "gen 5" works like it always had, but "gen (5)" generates a
+  5?!
+
+- What happens to processes that disappear? E.g. ps | .... ps yields
+  non-existent processes which are then used downstream. Can this even
+  happen?
+
+- Symlink listing: include referenced file
+
+- ps: If commandline blank, take contents of status file? That's what
+  ps appears to do.
+
+- more/less commands
+
+- File navigation (parent, children, ...)

@@ -1,0 +1,195 @@
+Make osh into a real shell
+
+Python application.
+
+Launch from the command-line and go into a REPL loop. But it should
+also be possible to have osh as a real shell, e.g. listed in
+/etc/passwd.
+
+Goals:
+
+1. Command-line: osh as a shell, e.g. type "ls" and get a
+   listing of files. "ls" is preferable to "ls()".
+
+2. Scripting: It's dumb to invent a language, so make the scripting
+   language exactly python.
+
+3. API: Usable from python, as with the current osh API.
+
+#1 and #2 are in conflict. So how about merging #2 and #3? So osh.ls()
+and other commands would go to stdout and stderr? Should be an option
+for capturing their output too.
+
+
+Features
+
+Shells to study for answers on features:
+
+- bash
+- zsh
+- There was another osh-like shell on HN a while ago.
+- fish
+
+Environment variables
+
+Prompt formatting
+
+Current directory and stack of directories (pushd/popd)
+
+Invoke editor
+
+Quoting
+
+Combining command pipelines and python. Can piping syntax be
+implemented as straight python? Maybe, but then command args have to
+be passed as function args, e.g. ps('axww') | more()
+
+Globbing (wildcards)
+
+Completion
+
+
+----------------------------------------------------------------------
+
+Syntax
+
+- Traditional pipe character instead of ^.
+
+- Is it possible to avoid requiring $? If no output requested, assume
+  default output at end. Provide explicit way to suppress output, just
+  in case.
+
+
+There are a number of tokens that are common to Python and most shells: | > >> < << & [ ]
+
+So python code like functions have to be quoted. Which is a problem
+for an API that takes shell commands, e.g. gen 5 | f 'x: x + 1' turns
+into osh('gen 5 | f "x: x + 1"'). I.e., the quoted function has to be
+tweaked, here to use " instead of '.
+
+So delimit python code with something else. Parens:
+
+gen 5 | f(x: x + 1)
+->
+osh('gen 5 | f(x: x + 1)')
+
+This doesn't work well for agg:
+- There may be two functions (define group, aggregate)
+- They are interleaved with other arguments, e.g. agg -g 'x, y: x' 0 'sum, x, y: sum + y'
+
+squish has multiple functions. Typically doesn't use lambdas, but could.
+
+
+agg -g (x, y: x) 0 (sum, x, y: sum + y)
+
+squish (x, y: x + y) . (x, y: max(x, y))
+
+----------------------------------------------------------------------
+
+Command line tokens:
+
+- commands
+- flags
+- python exprs
+- arbitrary strings
+- globs
+
+Strings can be python strings, unquoted strings:
+
+- likeThis
+- like\ this
+- like"  "this
+- likethis*
+- likethis?
+- likethi[s]
+
+*, ?, [] are globs if used unquoted and unescaped. Otherwise, they have no special meaning.
+
+Globbing implies that there is a notion of current directory, and then
+the globbing searches files in the current directory.
+
+There is no distinction between python strings and "aribtrary"
+strings. E.g., "b" is a python string, and ls "b"* finds files whose
+name begins with b.
+
+So a "python string" must be parsed inside a python expr, so that the
+expr can be successfully parsed. But on the command line, it's just
+another string.
+
+----------------------------------------------------------------------
+
+Osh1 core structure:
+
+BaseOp:  commands and pipelines
+
+- state
+  - _parent
+  - _next_op
+  - _receiver
+  - _command_state
+
+- setup
+- execute
+- send
+- send_complete
+- receive
+- receive_complete
+
+
+Op(BaseOp):  commands excluding pipelines
+
+- args
+
+
+Pipeline(BaseOp):
+
+- state
+  - _first_op
+  - _thread_state
+
+- setup sets last receiver to pipeline's receiver.
+
+
+Generator(Op)
+
+
+RunLocal(Generator)
+
+----------------------------------------------------------------------
+
+Arg processing:
+
+CLI:
+
+- _gen() -> Gen()
+
+- Op init calls ArgsCLI with command-line description (flags, # anon
+  args)
+
+- Parsing generates add_arg and args_done calls. 
+
+  - add_arg calls args.add_token which accumulates tokens.
+
+  - args_done checks #anon, calls _process_a_token for each token to
+    organize the flags and args for command exection.
+
+API:
+
+- Builds on top of CLI mechanism.
+
+- gen() args create Options, anon args, Args object. 
+
+- Then _Gen().process_args(*args), which calls add_arg and args_done.
+
+----------------------------------------------------------------------
+
+bash:
+
+ls -l file:     list the file
+ls -l dir:      list dir contents
+ls -l glob:     list the qualifying files and dir contents. 
+
+ls -ld file:    list the file
+ls -ld dir:     list dir without contents
+ls -ld glob:    list the qualifying files and dirs without contents
+

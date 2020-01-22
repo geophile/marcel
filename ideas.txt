@@ -1,0 +1,148 @@
+Structured Output:
+
+ls -l doesn't make sense for osh. Allow for formatting options:
+
+- Varying levels of detail. E.g. ls | out -l0 would produce just
+  filenames. ls | out -l1 would do be the equivalent of ls -l, and ls
+  | out -l2 would be even more detail.
+
+- This applies to other objects too, e.g. Process.
+
+----------------------------------------------------------------------
+
+Functions and ops
+
+- There is already a ps command and a processes() function.
+
+- There is a cd command. There is no cd function, which would be
+  useful, e.g. to simulate du -hs:
+
+  ls -d | cd(...) | ls -fr(...) | map (f: (1, f.size)) | red + +
+
+For each directory in current directory: cd to it, then recursively
+find files, counting and summing sizes.
+
+Needs ls and cd working as functions.
+
+
+
+
+ls -d | map (dir: ls(-fr, dir)) | expand | map (f: (1, f.size)) | red + +
+
+
+ls -d | (dir: (dir, ls('-fr', dir)) | expand 1 | (f: (dir, 1, f.size)) | red . + +
+
+- An explicit "map" is noisy and can be inferred.
+
+- But inside the function, we're supposed to have pure python. How are
+  flags specified? (ls -fr)
+
+- Environment variables: 
+
+    ls -d | (dir: ls -fr $dir) | ...
+
+  yechh. It means we have two kinds of variables, two kinds of
+  function. And the function syntax is now no longer always python.
+
+  But that's the case anyway, if we use "ls -fr | ..." on the command
+  line and "ls('-fr') | ..." in Python.
+
+  Hmm.
+
+What about Python syntax everywhere?
+
+  (ls('-d')) | (dir: (dir, ls('-fr', dir))) | expand 1 | (dir, f: (dir, 1, f.size)) | red . + +
+
+
+Maybe shell syntax is defined to be syntactic sugar for function invocation. So 
+
+      ls -fr d/*
+
+is equivalent to
+
+      (ls('-fr d/*'))
+
+And either is acceptable as input? The function then has to yield a
+stream, not a sequence.
+
+Could have a "stream" operator, e.g. stream (ls()), but that's
+basically "ls() | expand". And stream is less general.
+
+----------------------------------------------------------------------
+
+send/receive vs. yield
+
+Could write operators as python generators, providing output via
+yield. For operators other than the first, an input source is
+needed. E.g., here is map.receive:
+
+    def receive(self, x):
+        self.send(self.f(*x))
+
+Instead, it would be
+
+    def run(self):
+        try:
+            input = self.input.run()
+            while True:
+                yield self.f(next(input))
+        except StopIteration:
+            ...
+
+So instead of calling self.send (implying something downstream), you
+know about the thing upstream (self.input). And yield is native
+python, not an osh API.
+
+So for the first item in a pipeline, it would just be "yield", and
+there is no dependence on other operators. This allows ps(), ls(),
+etc. to be used as functions or operators.
+        
+----------------------------------------------------------------------
+
+Realization!
+
+processes() is a function returning a list of Process. ps() is a
+command generating a stream of Process. They can't be unified without
+making processes() generate a stream, perhaps using yield. But in
+other situations, we really want ordinary functions, e.g. for use in
+map and select.
+
+So:
+
+ls:
+
+- The kinds of functions used in map and select are ordinary python
+  functions. Leave those alone, they are fine as is.
+
+- If we want to unify ps()/ps, or ls()/ls, then we need python
+  generators. 
+
+Here is the implementation of ls()
+
+- It creates an instance of class Ls.
+
+- Ls extends Op.
+
+- Ls has fields corresponding to the flags of the ls operator, and a
+  few others.
+
+- Ls has a __doc__ string, returned by doc().
+
+- Initialization is done by setup() (after flag parsing)
+
+- Ls has a parser, and returns it using arg_parser()
+
+- execute() does the work, eventually calling send()
+
+ps:
+
+Similar to the above, but execute simply invokes processes(). Which
+returns a list. It could easily be reformulted to be a generator.
+
+----------------------------------------------------------------------
+
+Unifying API and CLI:
+
+- Instead of ls() -> Ls() -> setup(): parser could hold on to args,
+  and then just invoke ls(args). Ls() could have parent class do arg
+  parsing. Get rid of setup, doing post-parse work in Ls().
