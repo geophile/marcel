@@ -141,6 +141,11 @@ returns a list. It could easily be reformulted to be a generator.
 
 ----------------------------------------------------------------------
 
+yield is more expensive than send/receive. See
+experiments/sendreceive_vs_yield.py.
+
+----------------------------------------------------------------------
+
 Unifying API and CLI:
 
 - Instead of ls() -> Ls() -> setup(): parser could hold on to args,
