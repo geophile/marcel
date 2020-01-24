@@ -350,9 +350,20 @@ def test_red():
 
 
 def test_expand():
-    # Expand non-sequence
+    # Test singletons
     Test.run('gen 5 | expand',
              expected_out=[0, 1, 2, 3, 4])
+    Test.run('gen 5 | map (x: ([x, x],)) | expand',
+             expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
+    Test.run('gen 5 | map (x: ((x, x),)) | expand',
+             expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
+    Test.run('gen 5 | expand 0',
+             expected_out=[0, 1, 2, 3, 4])
+    Test.run('gen 5 | map (x: ([x, x],)) | expand 0',
+             expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
+    Test.run('gen 5 | map (x: ((x, x),)) | expand 0',
+             expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
+    # Test non-singletons
     Test.run('gen 5 | map (x: (x, -x)) | expand',
              expected_out=[0, 0, 1, -1, 2, -2, 3, -3, 4, -4])
     Test.run('gen 5 | map (x: (x, -x)) | expand 0',
@@ -413,8 +424,15 @@ def test_expand():
                            (200, 3, -3),
                            (100, 4, -4),
                            (200, 4, -4)])
-    # TODO: Expand file. How to get a File object into the test?
-
+    # Expand file
+    with open('/tmp/test_expand_1', 'w') as file:
+        file.writelines(['abc\n', 'def\n'])  # lf at end of file
+    with open('/tmp/test_expand_2', 'w') as file:
+        file.writelines(['ghi\n', 'jkl'])    # No lf at end of file
+    Test.run('ls /tmp/test_expand_? | expand',
+             expected_out=['abc\n', 'def\n', 'ghi\n', 'jkl'])
+    os.remove('/tmp/test_expand_1')
+    os.remove('/tmp/test_expand_2')
 
 
 def test_no_such_op():
@@ -422,13 +440,13 @@ def test_no_such_op():
 
 
 def main():
-    test_gen()
-    test_out()
-    test_sort()
-    test_map()
-    test_ls()
-    test_select()
-    test_red()
+    # test_gen()
+    # test_out()
+    # test_sort()
+    # test_map()
+    # test_ls()
+    # test_select()
+    # test_red()
     test_expand()
     # test_ps()  How?
     test_no_such_op()

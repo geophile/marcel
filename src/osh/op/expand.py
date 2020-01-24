@@ -101,12 +101,18 @@ class Expander:
 
     @staticmethod
     def expand(x):
-        # TODO: Generators
         if is_sequence(x):
-            return x
-        elif is_file(x):
-            with open(x, 'r') as file:
-                return file.readlines()
+            if len(x) > 1:
+                return x
+            only = x[0]
+            # TODO: Generators
+            if is_sequence(only):
+                return only
+            elif is_file(only):
+                with open(only.path, 'r') as file:
+                    return file.readlines()
+            else:
+                return x
         else:
             return [x]
 

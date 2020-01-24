@@ -3,12 +3,6 @@ import grp
 import collections.abc
 
 
-def normalize_output(x):
-    if not (isinstance(x, tuple) or isinstance(x, list)):
-        x = (x,)
-    return tuple(x)
-
-
 def username(uid):
     return pwd.getpwuid(uid).pw_name
 
@@ -28,3 +22,10 @@ def is_generator(x):
 def is_file(x):
     # Why not isinstance: Importing osh.file results in circular imports
     return x.__class__.__name__ == 'File'
+
+
+def normalize_output(x):
+    return x if is_sequence(x) else (x,)
+    # if not is_sequence(x):
+    #     x = (x,)
+    # return tuple(x)

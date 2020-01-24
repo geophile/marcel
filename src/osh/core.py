@@ -239,7 +239,7 @@ class Command:
             out.file = False
             out.csv = False
             out.format = '%s'
-            pipeline.connect(out)
+            pipeline.last_op.connect(out)
         self.pipeline = pipeline
 
     def __repr__(self):
