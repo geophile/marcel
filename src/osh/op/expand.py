@@ -109,8 +109,16 @@ class Expander:
             if is_sequence(only):
                 return only
             elif is_file(only):
+                lines = []
                 with open(only.path, 'r') as file:
-                    return file.readlines()
+                    for line in file.readlines():
+                        # Remove EOL whitespace
+                        if line.endswith('\r\n') or line.endswith('\n\r'):
+                            line = line[:-2]
+                        elif line.endswith('\r') or line.endswith('\n'):
+                            line = line[:-1]
+                        lines.append(line)
+                return lines
             else:
                 return x
         else:
@@ -142,7 +150,7 @@ class ComponentExpander(Expander):
             pre = sequence[:self.position]
             post = sequence[(self.position + 1):]
             send = self.op.send
-            for x in Expander.expand(sequence[self.position]):
+            for x in Expander.expand([sequence[self.position]]):
                 send(pre + (x,) + post)
 
 

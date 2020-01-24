@@ -350,87 +350,92 @@ def test_red():
 
 
 def test_expand():
-    # Test singletons
-    Test.run('gen 5 | expand',
-             expected_out=[0, 1, 2, 3, 4])
-    Test.run('gen 5 | map (x: ([x, x],)) | expand',
-             expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
-    Test.run('gen 5 | map (x: ((x, x),)) | expand',
-             expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
-    Test.run('gen 5 | expand 0',
-             expected_out=[0, 1, 2, 3, 4])
-    Test.run('gen 5 | map (x: ([x, x],)) | expand 0',
-             expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
-    Test.run('gen 5 | map (x: ((x, x),)) | expand 0',
-             expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
-    # Test non-singletons
-    Test.run('gen 5 | map (x: (x, -x)) | expand',
-             expected_out=[0, 0, 1, -1, 2, -2, 3, -3, 4, -4])
-    Test.run('gen 5 | map (x: (x, -x)) | expand 0',
-             expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
-    Test.run('gen 5 | map (x: (x, -x)) | expand 1',
-             expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
-    Test.run('gen 5 | map (x: (x, -x)) | expand 2',
-             expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
-    # Expand list
-    Test.run('gen 5 | map (x: ([100, 200], x, -x)) | expand 0',
-             expected_out=[(100, 0, 0),
-                           (200, 0, 0),
-                           (100, 1, -1),
-                           (200, 1, -1),
-                           (100, 2, -2),
-                           (200, 2, -2),
-                           (100, 3, -3),
-                           (200, 3, -3),
-                           (100, 4, -4),
-                           (200, 4, -4)])
-    Test.run('gen 5 | map (x: (x, [100, 200], -x)) | expand 1',
-             expected_out=[(0, 100, 0),
-                           (0, 200, 0),
-                           (1, 100, -1),
-                           (1, 200, -1),
-                           (2, 100, -2),
-                           (2, 200, -2),
-                           (3, 100, -3),
-                           (3, 200, -3),
-                           (4, 100, -4),
-                           (4, 200, -4)])
-    Test.run('gen 5 | map (x: (x, -x, [100, 200])) | expand 2',
-             expected_out=[(0, 0, 100),
-                           (0, 0, 200),
-                           (1, -1, 100),
-                           (1, -1, 200),
-                           (2, -2, 100),
-                           (2, -2, 200),
-                           (3, -3, 100),
-                           (3, -3, 200),
-                           (4, -4, 100),
-                           (4, -4, 200)])
-    Test.run('gen 5 | map (x: (x, -x, [100, 200])) | expand 3',
-             expected_out=[(0, 0, [100, 200]),
-                           (1, -1, [100, 200]),
-                           (2, -2, [100, 200]),
-                           (3, -3, [100, 200]),
-                           (4, -4, [100, 200])])
-    # Expand tuple
-    Test.run('gen 5 | map (x: ((100, 200), x, -x)) | expand 0',
-             expected_out=[(100, 0, 0),
-                           (200, 0, 0),
-                           (100, 1, -1),
-                           (200, 1, -1),
-                           (100, 2, -2),
-                           (200, 2, -2),
-                           (100, 3, -3),
-                           (200, 3, -3),
-                           (100, 4, -4),
-                           (200, 4, -4)])
+    # # Test singletons
+    # Test.run('gen 5 | expand',
+    #          expected_out=[0, 1, 2, 3, 4])
+    # Test.run('gen 5 | map (x: ([x, x],)) | expand',
+    #          expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
+    # Test.run('gen 5 | map (x: ((x, x),)) | expand',
+    #          expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
+    # Test.run('gen 5 | expand 0',
+    #          expected_out=[0, 1, 2, 3, 4])
+    # Test.run('gen 5 | map (x: ([x, x],)) | expand 0',
+    #          expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
+    # Test.run('gen 5 | map (x: ((x, x),)) | expand 0',
+    #          expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
+    # # Test non-singletons
+    # Test.run('gen 5 | map (x: (x, -x)) | expand',
+    #          expected_out=[0, 0, 1, -1, 2, -2, 3, -3, 4, -4])
+    # Test.run('gen 5 | map (x: (x, -x)) | expand 0',
+    #          expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
+    # Test.run('gen 5 | map (x: (x, -x)) | expand 1',
+    #          expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
+    # Test.run('gen 5 | map (x: (x, -x)) | expand 2',
+    #          expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
+    # # Expand list
+    # Test.run('gen 5 | map (x: ([100, 200], x, -x)) | expand 0',
+    #          expected_out=[(100, 0, 0),
+    #                        (200, 0, 0),
+    #                        (100, 1, -1),
+    #                        (200, 1, -1),
+    #                        (100, 2, -2),
+    #                        (200, 2, -2),
+    #                        (100, 3, -3),
+    #                        (200, 3, -3),
+    #                        (100, 4, -4),
+    #                        (200, 4, -4)])
+    # Test.run('gen 5 | map (x: (x, [100, 200], -x)) | expand 1',
+    #          expected_out=[(0, 100, 0),
+    #                        (0, 200, 0),
+    #                        (1, 100, -1),
+    #                        (1, 200, -1),
+    #                        (2, 100, -2),
+    #                        (2, 200, -2),
+    #                        (3, 100, -3),
+    #                        (3, 200, -3),
+    #                        (4, 100, -4),
+    #                        (4, 200, -4)])
+    # Test.run('gen 5 | map (x: (x, -x, [100, 200])) | expand 2',
+    #          expected_out=[(0, 0, 100),
+    #                        (0, 0, 200),
+    #                        (1, -1, 100),
+    #                        (1, -1, 200),
+    #                        (2, -2, 100),
+    #                        (2, -2, 200),
+    #                        (3, -3, 100),
+    #                        (3, -3, 200),
+    #                        (4, -4, 100),
+    #                        (4, -4, 200)])
+    # Test.run('gen 5 | map (x: (x, -x, [100, 200])) | expand 3',
+    #          expected_out=[(0, 0, [100, 200]),
+    #                        (1, -1, [100, 200]),
+    #                        (2, -2, [100, 200]),
+    #                        (3, -3, [100, 200]),
+    #                        (4, -4, [100, 200])])
+    # # Expand tuple
+    # Test.run('gen 5 | map (x: ((100, 200), x, -x)) | expand 0',
+    #          expected_out=[(100, 0, 0),
+    #                        (200, 0, 0),
+    #                        (100, 1, -1),
+    #                        (200, 1, -1),
+    #                        (100, 2, -2),
+    #                        (200, 2, -2),
+    #                        (100, 3, -3),
+    #                        (200, 3, -3),
+    #                        (100, 4, -4),
+    #                        (200, 4, -4)])
     # Expand file
     with open('/tmp/test_expand_1', 'w') as file:
         file.writelines(['abc\n', 'def\n'])  # lf at end of file
     with open('/tmp/test_expand_2', 'w') as file:
         file.writelines(['ghi\n', 'jkl'])    # No lf at end of file
-    Test.run('ls /tmp/test_expand_? | expand',
-             expected_out=['abc\n', 'def\n', 'ghi\n', 'jkl'])
+    # Test.run('ls /tmp/test_expand_? | expand',
+    #          expected_out=['abc', 'def', 'ghi', 'jkl'])
+    Test.run('ls /tmp/test_expand_? | map (f: (f.abspath, f)) | expand 1',
+             expected_out=[('/tmp/test_expand_1', 'abc'),
+                           ('/tmp/test_expand_1', 'def'),
+                           ('/tmp/test_expand_2', 'ghi'),
+                           ('/tmp/test_expand_2', 'jkl')])
     os.remove('/tmp/test_expand_1')
     os.remove('/tmp/test_expand_2')
 

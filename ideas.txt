@@ -151,3 +151,7 @@ Unifying API and CLI:
 - Instead of ls() -> Ls() -> setup(): parser could hold on to args,
   and then just invoke ls(args). Ls() could have parent class do arg
   parsing. Get rid of setup, doing post-parse work in Ls().
+
+======================================================================
+
+cat is "ls | expand". Add an abstraction mechanism? 

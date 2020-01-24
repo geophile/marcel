@@ -70,3 +70,5 @@ util.py:
 - more/less commands
 
 - File navigation (parent, children, ...)
+
+- ~ expansion
