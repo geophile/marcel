@@ -100,7 +100,7 @@ def test_gen():
     Test.run('gen 3 -p 3 99 | out',
              expected_err='unrecognized arguments: 99')
     Test.run('gen 3 -10 -p 4 | out',
-             expected_err='Padding incompatible START < 0')
+             expected_err='Padding incompatible with START < 0')
 
 
 def test_out():
@@ -192,79 +192,79 @@ def test_ls():
     pathlib.Path(f212).touch()
     # Tests
     # 0/1/r flags with file
-    Test.run('ls /tmp/testls/a1 | sort',
+    Test.run('ls /tmp/testls/a1 | map (f: f.abspath) | sort',
              expected_out=sorted([a1]))
-    Test.run('ls -0 /tmp/testls/a1 | sort',
+    Test.run('ls -0 /tmp/testls/a1 | map (f: f.abspath) | sort',
              expected_out=sorted([a1]))
-    Test.run('ls -1 /tmp/testls/a1 | sort',
+    Test.run('ls -1 /tmp/testls/a1 | map (f: f.abspath) | sort',
              expected_out=sorted([a1]))
-    Test.run('ls -r /tmp/testls/a1 | sort',
+    Test.run('ls -r /tmp/testls/a1 | map (f: f.abspath) | sort',
              expected_out=sorted([a1]))
     # 0/1/r flags with directory
-    Test.run('ls /tmp/testls | sort',
-             expected_out=sorted([a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21]))
-    Test.run('ls -0 /tmp/testls | sort',
+    Test.run('ls /tmp/testls | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2, b1, b2, d1, d2]))
-    Test.run('ls -1 /tmp/testls | sort',
+    Test.run('ls -0 /tmp/testls | map (f: f.abspath) | sort',
+             expected_out=sorted([a1, a2, b1, b2, d1, d2]))
+    Test.run('ls -1 /tmp/testls | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21]))
-    Test.run('ls -r /tmp/testls | sort',
+    Test.run('ls -r /tmp/testls | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
     # 0/1/r flags with pattern matching files
-    Test.run('ls /tmp/testls/a? | sort',
+    Test.run('ls /tmp/testls/a? | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2]))
-    Test.run('ls -0 /tmp/testls/a? | sort',
+    Test.run('ls -0 /tmp/testls/a? | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2]))
-    Test.run('ls -1 /tmp/testls/a? | sort',
+    Test.run('ls -1 /tmp/testls/a? | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2]))
-    Test.run('ls -r /tmp/testls/a? | sort',
+    Test.run('ls -r /tmp/testls/a? | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2]))
     # 0/1/r flags with pattern matching directories
-    Test.run('ls /tmp/testls/d? | sort',
-             expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21]))
-    Test.run('ls -0 /tmp/testls/d? | sort',
+    Test.run('ls /tmp/testls/d? | map (f: f.abspath) | sort',
              expected_out=sorted([d1, d2]))
-    Test.run('ls -1 /tmp/testls/d? | sort',
+    Test.run('ls -0 /tmp/testls/d? | map (f: f.abspath) | sort',
+             expected_out=sorted([d1, d2]))
+    Test.run('ls -1 /tmp/testls/d? | map (f: f.abspath) | sort',
              expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21]))
-    Test.run('ls -r /tmp/testls/d? | sort',
+    Test.run('ls -r /tmp/testls/d? | map (f: f.abspath) | sort',
              expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
     # In current directory, test 0/1/r flags with file
     ENV.cd(pathlib.Path(tmp))
-    Test.run('ls -0 testls/b1 | sort',
+    Test.run('ls -0 testls/b1 | map (f: f.abspath) | sort',
              expected_out=sorted([b1]))
-    Test.run('ls -1 testls/b1 | sort',
+    Test.run('ls -1 testls/b1 | map (f: f.abspath) | sort',
              expected_out=sorted([b1]))
-    Test.run('ls -r testls/b1 | sort',
+    Test.run('ls -r testls/b1 | map (f: f.abspath) | sort',
              expected_out=sorted([b1]))
     # In current directory, test 0/1/r flags with directory
-    Test.run('ls -0 testls | sort',
+    Test.run('ls -0 testls | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2, b1, b2, d1, d2]))
-    Test.run('ls -1 testls | sort',
+    Test.run('ls -1 testls | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21]))
-    Test.run('ls -r testls | sort',
+    Test.run('ls -r testls | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
     # In current directory, test 0/1/r flags with pattern matching directories
-    Test.run('ls -0 testls/*2 | sort',
+    Test.run('ls -0 testls/*2 | map (f: f.abspath) | sort',
              expected_out=sorted([a2, b2, d2]))
-    Test.run('ls -1 testls/*2 | sort',
+    Test.run('ls -1 testls/*2 | map (f: f.abspath) | sort',
              expected_out=sorted([a2, b2, d2, f21, f22, f23, d21]))
-    Test.run('ls -r testls/*2 | sort',
+    Test.run('ls -r testls/*2 | map (f: f.abspath) | sort',
              expected_out=sorted([a2, b2, d2, f21, f22, f23, d21, f211, f212]))
     # Test f/d/s flags
-    Test.run('ls -fr /tmp/testls | sort',
+    Test.run('ls -fr /tmp/testls | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2, b1, b2, f11, f12, f13, f21, f22, f23, f211, f212]))
-    Test.run('ls -dr /tmp/testls | sort',
+    Test.run('ls -dr /tmp/testls | map (f: f.abspath) | sort',
              expected_out=sorted([d1, d2, d21]))
-    Test.run('ls -fdr /tmp/testls | sort',
+    Test.run('ls -fdr /tmp/testls | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2, b1, b2, d1, d2, f11, f12, f13, f21, f22, f23, d21, f211, f212]))
     # TODO: symlinks
     # Test multiple filenames/globs
     ENV.cd(pathlib.Path(base))
-    Test.run('ls -0 a1 b* | sort',
+    Test.run('ls -0 a1 b* | map (f: f.abspath) | sort',
              expected_out=sorted([a1, b1, b2]))
-    Test.run('ls -0 *2 d1/f* | sort',
+    Test.run('ls -0 *2 d1/f* | map (f: f.abspath) | sort',
              expected_out=sorted([a2, b2, f11, f12, f13, d2]))
     # Test multiple globs, with files qualifying multiple times. Should be reported once. (Linux ls gets this wrong.)
-    Test.run('ls -0 a* *1 | sort',
+    Test.run('ls -0 a* *1 | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2, b1, d1]))
 
 
@@ -349,20 +349,89 @@ def test_red():
                            (9, 4, 900, 4, 17, 1700)])
 
 
+def test_expand():
+    # Expand non-sequence
+    Test.run('gen 5 | expand',
+             expected_out=[0, 1, 2, 3, 4])
+    Test.run('gen 5 | map (x: (x, -x)) | expand',
+             expected_out=[0, 0, 1, -1, 2, -2, 3, -3, 4, -4])
+    Test.run('gen 5 | map (x: (x, -x)) | expand 0',
+             expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
+    Test.run('gen 5 | map (x: (x, -x)) | expand 1',
+             expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
+    Test.run('gen 5 | map (x: (x, -x)) | expand 2',
+             expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
+    # Expand list
+    Test.run('gen 5 | map (x: ([100, 200], x, -x)) | expand 0',
+             expected_out=[(100, 0, 0),
+                           (200, 0, 0),
+                           (100, 1, -1),
+                           (200, 1, -1),
+                           (100, 2, -2),
+                           (200, 2, -2),
+                           (100, 3, -3),
+                           (200, 3, -3),
+                           (100, 4, -4),
+                           (200, 4, -4)])
+    Test.run('gen 5 | map (x: (x, [100, 200], -x)) | expand 1',
+             expected_out=[(0, 100, 0),
+                           (0, 200, 0),
+                           (1, 100, -1),
+                           (1, 200, -1),
+                           (2, 100, -2),
+                           (2, 200, -2),
+                           (3, 100, -3),
+                           (3, 200, -3),
+                           (4, 100, -4),
+                           (4, 200, -4)])
+    Test.run('gen 5 | map (x: (x, -x, [100, 200])) | expand 2',
+             expected_out=[(0, 0, 100),
+                           (0, 0, 200),
+                           (1, -1, 100),
+                           (1, -1, 200),
+                           (2, -2, 100),
+                           (2, -2, 200),
+                           (3, -3, 100),
+                           (3, -3, 200),
+                           (4, -4, 100),
+                           (4, -4, 200)])
+    Test.run('gen 5 | map (x: (x, -x, [100, 200])) | expand 3',
+             expected_out=[(0, 0, [100, 200]),
+                           (1, -1, [100, 200]),
+                           (2, -2, [100, 200]),
+                           (3, -3, [100, 200]),
+                           (4, -4, [100, 200])])
+    # Expand tuple
+    Test.run('gen 5 | map (x: ((100, 200), x, -x)) | expand 0',
+             expected_out=[(100, 0, 0),
+                           (200, 0, 0),
+                           (100, 1, -1),
+                           (200, 1, -1),
+                           (100, 2, -2),
+                           (200, 2, -2),
+                           (100, 3, -3),
+                           (200, 3, -3),
+                           (100, 4, -4),
+                           (200, 4, -4)])
+    # TODO: Expand file. How to get a File object into the test?
+
+
+
 def test_no_such_op():
     Test.run('gen 5 | abc', expected_err='abc is not recognized as a command')
 
 
 def main():
-    # test_gen()
-    # test_out()
-    # test_sort()
-    # test_ls()
-    # test_map()
-    # test_select()
+    test_gen()
+    test_out()
+    test_sort()
+    test_map()
+    test_ls()
+    test_select()
     test_red()
+    test_expand()
     # test_ps()  How?
-    # test_no_such_op()
+    test_no_such_op()
     # test cd: absolute, relative, target does not exist
     print('Test failures: %s' % Test.failures)
 

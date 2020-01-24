@@ -23,6 +23,13 @@ class OshArgParser(argparse.ArgumentParser):
                 raise argparse.ArgumentTypeError(message)
         return arg_checker
 
+    @staticmethod
+    def check_non_negative(s):
+        n = int(s)
+        if n < 0:
+            raise ValueError()
+        return n
+
 
 class BaseOp(object):
     """Base class for all osh ops, and for pipelines, (sequences of
@@ -92,7 +99,7 @@ class BaseOp(object):
         except osh.error.CommandKiller:
             raise
         except Exception as e:
-            osh.error.exception_handler(e, self.receiver, object)
+            osh.error.exception_handler(e, self.receiver, None)
 
     def receive(self, x):
         """Implemented by a op class to process an input object.

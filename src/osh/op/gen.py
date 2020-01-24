@@ -26,23 +26,15 @@ class GenArgParser(osh.core.OshArgParser):
         self.add_argument('count',
                           nargs='?',
                           default='0',
-                          type=super().constrained_type(GenArgParser.check_non_negative,
+                          type=super().constrained_type(osh.core.OshArgParser.check_non_negative,
                                                         'must be non-negative'))
         self.add_argument('start',
                           nargs='?',
                           default='0',
                           type=int)
 
-    @staticmethod
-    def check_non_negative(s):
-        n = int(s)
-        if n < 0:
-            raise ValueError()
-        return n
-
 
 class Gen(osh.core.Op):
-
     argparser = GenArgParser()
 
     def __init__(self):
@@ -65,7 +57,7 @@ class Gen(osh.core.Op):
             if self.count == 0:
                 Gen.argparser.error('Padding incompatible with unbounded output')
             elif self.start < 0:
-                Gen.argparser.error('Padding incompatible START < 0')
+                Gen.argparser.error('Padding incompatible with START < 0')
             else:
                 max_length = len(str(self.start + self.count - 1))
                 if max_length > self.pad:

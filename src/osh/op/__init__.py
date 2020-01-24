@@ -1,5 +1,6 @@
 __all__ = [
     'cd',
+    'expand',
     'gen',
     'ls',
     'map',
