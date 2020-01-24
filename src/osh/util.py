@@ -25,7 +25,4 @@ def is_file(x):
 
 
 def normalize_output(x):
-    return x if is_sequence(x) else (x,)
-    # if not is_sequence(x):
-    #     x = (x,)
-    # return tuple(x)
+    return tuple(x) if is_sequence(x) and not isinstance(x, str) else (x,)
