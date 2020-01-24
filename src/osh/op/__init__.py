@@ -2,6 +2,7 @@ __all__ = [
     'cd',
     'expand',
     'gen',
+    'head',
     'ls',
     'map',
     'out',
@@ -9,5 +10,6 @@ __all__ = [
     'pwd',
     'red',
     'select',
-    'sort'
+    'sort',
+    'tail'
 ]

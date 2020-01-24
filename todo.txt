@@ -72,3 +72,5 @@ util.py:
 - File navigation (parent, children, ...)
 
 - ~ expansion
+
+- Run arbitrary executables

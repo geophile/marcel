@@ -440,6 +440,36 @@ def test_expand():
     os.remove('/tmp/test_expand_2')
 
 
+def test_head():
+    Test.run('gen 100 | head 0',
+             expected_out=[])
+    Test.run('gen 100 | head 1',
+             expected_out=[0])
+    Test.run('gen 100 | head 2',
+             expected_out=[0, 1])
+    Test.run('gen 100 | head 3',
+             expected_out=[0, 1, 2])
+    Test.run('gen 3 | head 3',
+             expected_out=[0, 1, 2])
+    Test.run('gen 3 | head 4',
+             expected_out=[0, 1, 2])
+
+
+def test_tail():
+    Test.run('gen 100 | tail 0',
+             expected_out=[])
+    Test.run('gen 100 | tail 1',
+             expected_out=[99])
+    Test.run('gen 100 | tail 2',
+             expected_out=[98, 99])
+    Test.run('gen 100 | tail 3',
+             expected_out=[97, 98, 99])
+    Test.run('gen 3 | tail 3',
+             expected_out=[0, 1, 2])
+    Test.run('gen 3 | tail 4',
+             expected_out=[0, 1, 2])
+
+
 def test_no_such_op():
     Test.run('gen 5 | abc', expected_err='abc is not recognized as a command')
 
@@ -453,6 +483,8 @@ def main():
     test_select()
     test_red()
     test_expand()
+    test_head()
+    test_tail()
     # test_ps()  How?
     test_no_such_op()
     # test cd: absolute, relative, target does not exist
