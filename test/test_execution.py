@@ -470,6 +470,13 @@ def test_tail():
              expected_out=[0, 1, 2])
 
 
+def test_reverse():
+    Test.run('gen 5 | select (x: False) | reverse',
+             expected_out=[])
+    Test.run('gen 5 | reverse',
+             expected_out=[4, 3, 2, 1, 0])
+
+
 def test_no_such_op():
     Test.run('gen 5 | abc', expected_err='abc is not recognized as a command')
 
@@ -485,6 +492,7 @@ def main():
     test_expand()
     test_head()
     test_tail()
+    test_reverse()
     # test_ps()  How?
     test_no_such_op()
     # test cd: absolute, relative, target does not exist

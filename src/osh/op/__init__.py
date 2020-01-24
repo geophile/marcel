@@ -9,6 +9,7 @@ __all__ = [
     'ps',
     'pwd',
     'red',
+    'reverse',
     'select',
     'sort',
     'tail'
