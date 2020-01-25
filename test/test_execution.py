@@ -428,7 +428,7 @@ def test_expand():
     with open('/tmp/test_expand_1', 'w') as file:
         file.writelines(['abc\n', 'def\n'])  # lf at end of file
     with open('/tmp/test_expand_2', 'w') as file:
-        file.writelines(['ghi\n', 'jkl'])    # No lf at end of file
+        file.writelines(['ghi\n', 'jkl'])  # No lf at end of file
     Test.run('ls /tmp/test_expand_? | expand',
              expected_out=['abc', 'def', 'ghi', 'jkl'])
     Test.run('ls /tmp/test_expand_? | map (f: (f.abspath, f)) | expand 1',
@@ -517,6 +517,40 @@ def test_unique():
              expected_out=[0, 1, 2])
 
 
+def test_window():
+    Test.run('gen 10 | window (x: False)',
+             expected_out=[((0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,))])
+    Test.run('gen 10 | window (x: True)',
+             expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
+    Test.run('gen 10 | window -o 1',
+             expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
+    Test.run('gen 10 | window -o 3',
+             expected_out=[((0,), (1,), (2,)),
+                           ((1,), (2,), (3,)),
+                           ((2,), (3,), (4,)),
+                           ((3,), (4,), (5,)),
+                           ((4,), (5,), (6,)),
+                           ((5,), (6,), (7,)),
+                           ((6,), (7,), (8,)),
+                           ((7,), (8,), (9,)),
+                           ((8,), (9,), (None,)),
+                           ((9,), (None,), (None,))])
+    Test.run('gen 10 | window -d 1',
+             expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
+    Test.run('gen 10 | window -d 3',
+             expected_out=[((0,), (1,), (2,)),
+                           ((3,), (4,), (5,)),
+                           ((6,), (7,), (8,)),
+                           ((9,), (None,), (None,))])
+    # Negative-test args
+    Test.run('gen 10 | window -d 3 -o 2',
+             expected_err='argument -o/--overlap: not allowed with argument -d/--disjoint')
+    Test.run('gen 10 | window',
+             expected_err='Incorrect arguments given for window')
+    Test.run('gen 10 | window -o 3 (x: True)',
+             expected_err='Incorrect arguments given for window')
+
+
 def test_no_such_op():
     Test.run('gen 5 | abc', expected_err='abc is not recognized as a command')
 
@@ -536,6 +570,7 @@ def main():
     test_reverse()
     test_squish()
     test_unique()
+    test_window()
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
     print('Test failures: %s' % Test.failures)

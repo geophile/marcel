@@ -35,7 +35,7 @@ class Squish(osh.core.Op):
     def __init__(self):
         super().__init__()
         self.function = None  # Source
-        self.f = None  # The actual functions
+        self.f = None  # The actual function
 
     def __repr__(self):
         return 'squish(function = %s' % str(self.function) if self.function else 'squish()'

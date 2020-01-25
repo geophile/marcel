@@ -15,5 +15,6 @@ __all__ = [
     'squish',
     'tail',
     'timer',
-    'unique'
+    'unique',
+    'window'
 ]
