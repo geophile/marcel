@@ -477,11 +477,33 @@ def test_reverse():
              expected_out=[4, 3, 2, 1, 0])
 
 
+def test_squish():
+    Test.run('gen 5 | squish',
+             expected_out=[0, 1, 2, 3, 4])
+    Test.run('gen 5 | squish +',
+             expected_out=[0, 1, 2, 3, 4])
+    Test.run('gen 5 | map (x: (x, -x)) | squish',
+             expected_out=[0, 0, 0, 0, 0])
+    Test.run('gen 5 | map (x: (x, -x)) | squish +',
+             expected_out=[0, 0, 0, 0, 0])
+    Test.run('gen 5 | map (x: (x, -x)) | squish min',
+             expected_out=[0, -1, -2, -3, -4])
+    Test.run('gen 5 | map (x: (x, -x)) | squish max',
+             expected_out=[0, 1, 2, 3, 4])
+    Test.run('gen 5 | map (x: ([-x, x], [-x, x])) | squish +',
+             expected_out=[(0, 0, 0, 0),
+                           (-1, 1, -1, 1),
+                           (-2, 2, -2, 2),
+                           (-3, 3, -3, 3),
+                           (-4, 4, -4, 4)])
+
+
 def test_no_such_op():
     Test.run('gen 5 | abc', expected_err='abc is not recognized as a command')
 
 
 def main():
+    test_no_such_op()
     test_gen()
     test_out()
     test_sort()
@@ -493,9 +515,9 @@ def main():
     test_head()
     test_tail()
     test_reverse()
-    # test_ps()  How?
-    test_no_such_op()
-    # test cd: absolute, relative, target does not exist
+    test_squish()
+    # TODO: test_ps()  How?
+    # TODO: test cd: absolute, relative, target does not exist
     print('Test failures: %s' % Test.failures)
 
 

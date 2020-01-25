@@ -141,7 +141,12 @@ class Op(BaseOp):
         assert False
 
     def source_to_function(self, source):
-        return self.functions.get(source, None)
+        function = self.functions.get(source, None)
+        if function is None:
+            function = Op.symbol_to_function(source)
+            if function is None:
+                raise osh.error.CommandKiller('Unrecognized function: %s' % source)
+        return function
 
     # For use by subclasses
 
@@ -152,6 +157,29 @@ class Op(BaseOp):
     @classmethod
     def op_name(cls):
         return cls.__name__.lower()
+
+    @staticmethod
+    def symbol_to_function(symbol):
+        if symbol == '+':
+            return lambda x, y: x + y
+        elif symbol == '*':
+            return lambda x, y: x * y
+        elif symbol == '^':
+            return lambda x, y: x ^ y
+        elif symbol == '&':
+            return lambda x, y: x & y
+        elif symbol == '|':
+            return lambda x, y: x | y
+        elif symbol == 'and':
+            return lambda x, y: x and y
+        elif symbol == 'or':
+            return lambda x, y: x or y
+        elif symbol == 'max':
+            return lambda x, y: max(x, y)
+        elif symbol == 'min':
+            return lambda x, y: min(x, y)
+        else:
+            return None
 
 
 class Pipeline(BaseOp):

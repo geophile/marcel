@@ -101,7 +101,7 @@ class Red(osh.core.Op):
         self.reducer = None
 
     def __repr__(self):
-        return 'red(incremental=%s, function=[%s])' % (self.incremental, self.function)
+        return 'red(incremental = %s, function = %s)' % (self.incremental, self.function)
 
     # BaseOp
 
@@ -119,10 +119,6 @@ class Red(osh.core.Op):
             else:
                 data_positions.append(i)
                 f = self.source_to_function(function_source)
-                if f is None:
-                    f = Red.symbol_to_function(function_source)
-                    if f is None:
-                        raise osh.error.CommandKiller('Unrecognized function: %s' % function_source)
             self.f.append(f)
         if len(grouping_positions) == 0:
             self.reducer = NonGroupingReducer(self.f, self)
@@ -141,29 +137,6 @@ class Red(osh.core.Op):
         return Red.argparser
 
     # For use by this class
-
-    @staticmethod
-    def symbol_to_function(symbol):
-        if symbol == '+':
-            return lambda x, y: x + y
-        elif symbol == '*':
-            return lambda x, y: x * y
-        elif symbol == '^':
-            return lambda x, y: x ^ y
-        elif symbol == '&':
-            return lambda x, y: x & y
-        elif symbol == '|':
-            return lambda x, y: x | y
-        elif symbol == 'and':
-            return lambda x, y: x and y
-        elif symbol == 'or':
-            return lambda x, y: x or y
-        elif symbol == 'max':
-            return lambda x, y: max(x, y)
-        elif symbol == 'min':
-            return lambda x, y: min(x, y)
-        else:
-            return None
 
     @staticmethod
     def is_grouping(function):

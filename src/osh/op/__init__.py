@@ -12,5 +12,6 @@ __all__ = [
     'reverse',
     'select',
     'sort',
+    'squish',
     'tail'
 ]
