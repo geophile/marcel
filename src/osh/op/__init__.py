@@ -13,5 +13,6 @@ __all__ = [
     'select',
     'sort',
     'squish',
-    'tail'
+    'tail',
+    'timer'
 ]

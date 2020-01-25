@@ -12,7 +12,6 @@ will generate C{10} (= C{1 + 2 + 3 + 4}).
 If no C{FUNCTION} is provided, then C{+} is assumed.
 """
 
-import argparse
 import functools
 
 import osh.core

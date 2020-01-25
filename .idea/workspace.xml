@@ -2,13 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/osh/op/squish.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/osh/op/timer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/osh/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/core.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/osh/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/op/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/osh/op/red.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/op/red.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/osh/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/util.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_execution.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_execution.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/osh/op/squish.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/op/squish.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -214,7 +211,7 @@
       <workItem from="1579703976488" duration="88000" />
       <workItem from="1579704079513" duration="2660000" />
       <workItem from="1579737437529" duration="12695000" />
-      <workItem from="1579809562894" duration="29098000" />
+      <workItem from="1579809562894" duration="30817000" />
     </task>
     <servers />
   </component>
