@@ -58,6 +58,24 @@ class Process:
     def __eq__(self, other):
         return self.pid == other.pid
 
+    def __ne__(self, other):
+        return self.pid != other.pid
+
+    def __lt__(self, other):
+        return self.pid < other.pid
+
+    def __le__(self, other):
+        return self.pid <= other.pid
+
+    def __gt__(self, other):
+        return self.pid > other.pid
+
+    def __ge__(self, other):
+        return self.pid >= other.pid
+
+    def __hash__(self):
+        return self.pid.__hash__()
+
     pid = property(lambda self: self._pid,
                    doc='The PID of this C{Process}.')
 

@@ -14,5 +14,6 @@ __all__ = [
     'sort',
     'squish',
     'tail',
-    'timer'
+    'timer',
+    'unique'
 ]

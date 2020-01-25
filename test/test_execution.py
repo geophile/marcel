@@ -498,6 +498,25 @@ def test_squish():
                            (-4, 4, -4, 4)])
 
 
+def test_unique():
+    Test.run('gen 10 | unique',
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    Test.run('gen 10 | select (x: False) | unique',
+             expected_out=[])
+    Test.run('gen 10 | unique -c',
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    Test.run('gen 10 | select (x: False) | unique -c',
+             expected_out=[])
+    Test.run('gen 10 | map (x: x // 3) | unique',
+             expected_out=[0, 1, 2, 3])
+    Test.run('gen 10 | map (x: x // 3) | unique -c',
+             expected_out=[0, 1, 2, 3])
+    Test.run('gen 10 | map (x: x // 3) | unique --consecutive',
+             expected_out=[0, 1, 2, 3])
+    Test.run('gen 10 | map (x: x % 3) | unique',
+             expected_out=[0, 1, 2])
+
+
 def test_no_such_op():
     Test.run('gen 5 | abc', expected_err='abc is not recognized as a command')
 
@@ -516,6 +535,7 @@ def main():
     test_tail()
     test_reverse()
     test_squish()
+    test_unique()
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
     print('Test failures: %s' % Test.failures)

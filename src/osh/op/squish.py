@@ -15,7 +15,6 @@ If no C{FUNCTION} is provided, then C{+} is assumed.
 import functools
 
 import osh.core
-from osh.util import *
 
 
 def squish():
