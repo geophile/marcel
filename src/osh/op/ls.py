@@ -30,7 +30,7 @@ import pathlib
 
 import osh.core
 from osh.env import ENV
-from osh.file import File
+from osh.object.file import File
 
 
 def ls():

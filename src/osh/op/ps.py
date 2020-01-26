@@ -8,7 +8,7 @@ C{-o} omits the osh process itself from the process list.
 import os
 
 import osh.core
-import osh.process
+import osh.object.process
 
 
 def ps():
@@ -41,7 +41,7 @@ class Ps(osh.core.Op):
 
     def execute(self):
         this_pid = os.getpid()
-        for process in osh.process.processes():
+        for process in osh.object.process.processes():
             if process.pid != this_pid or not self.omit_self:
                 self.send(process)
 

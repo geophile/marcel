@@ -42,10 +42,8 @@ Note that an empty nested sequence results in no output, (as for
 C{('c', [], 'z')}.)
 """
 
-import types
-
 import osh.core
-import osh.file
+import osh.object.file
 from osh.util import *
 
 
