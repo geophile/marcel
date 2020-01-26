@@ -18,9 +18,10 @@ class Token:
     SINGLE_QUOTE = "'"
     DOUBLE_QUOTE = '"'
     QUOTES = SINGLE_QUOTE + DOUBLE_QUOTE
-    ESCAPE = '\\'
+    ESCAPE_CHAR = '\\'
     OPEN = '('
     CLOSE = ')'
+    CARET = '^'
     PIPE = '|'
     # TODO: [...] are used in traditional shells and in osh. Need to do something else for osh.
     BEGIN = '['
@@ -57,6 +58,9 @@ class Token:
         return False
 
     def is_pipe(self):
+        return False
+
+    def is_caret(self):
         return False
 
     def is_expr(self):
@@ -117,12 +121,12 @@ class PythonString(Token):
                         break
                 else:
                     chars.append(c)
-            elif c == Token.ESCAPE:
+            elif c == Token.ESCAPE_CHAR:
                 c = self.next_char()
                 if c in Token.ESCAPABLE:
                     chars.append(c)
                 else:
-                    chars.append(Token.ESCAPE)
+                    chars.append(Token.ESCAPE_CHAR)
                     chars.append(c)
             elif c.isspace():
                 if quote:
@@ -206,6 +210,8 @@ class ShellString(Token):
                 break
             elif c.isspace():
                 if quote is None:
+                    # Exclude the space from the string
+                    self.end -= 1
                     break
                 else:
                     chars.append(c)
@@ -216,7 +222,7 @@ class ShellString(Token):
                     quote = None
                 else:
                     chars.append(c)
-            elif c == Token.ESCAPE:
+            elif c == Token.ESCAPE_CHAR:
                 if quote is None:
                     # TODO: ESCAPE at end of line
                     c = self.next_char()
@@ -227,10 +233,10 @@ class ShellString(Token):
                     # TODO: no next char
                     c = self.next_char()
                     # TODO: Other escaped chars inside double quotes
-                    if c == Token.ESCAPE:
+                    if c == Token.ESCAPE_CHAR:
                         chars.append(c)
                     else:
-                        chars.append(Token.ESCAPE)
+                        chars.append(Token.ESCAPE_CHAR)
                         chars.append(c)
                 else:
                     raise osh.error.CommandKiller('Malformed string: %s' % self.text[self.start:self.end])
@@ -259,6 +265,15 @@ class Pipe(OneCharSymbol):
         return True
 
 
+class Caret(OneCharSymbol):
+
+    def __init__(self, text, position):
+        super().__init__(text, position, Token.CARET)
+
+    def is_caret(self):
+        return True
+
+
 class Begin(OneCharSymbol):
 
     def __init__(self, text, position):
@@ -283,6 +298,7 @@ class ParseState(Enum):
     FORK_START = auto()
     FORK_END = auto()
     OP = auto()
+    ESCAPE = auto()
     ARGS = auto()
 
 
@@ -310,6 +326,11 @@ class Parser(Token):
     def start_action(self, token):
         if token.is_fork():
             self.state = ParseState.FORK_START
+        elif token.is_caret():
+            op_name = 'escape'
+            op_module = OP_MODULES.named(op_name)
+            self.op = getattr(op_module, op_name)()
+            self.state = ParseState.ESCAPE
         elif token.is_string():
             op_name = token.value()
             op_module = OP_MODULES.named(op_name)
@@ -350,6 +371,13 @@ class Parser(Token):
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected string or pipe')
 
+    def escape_action(self, token):
+        if token.is_string():
+            self.args.append(token.value())
+            self.state = ParseState.ARGS
+        else:
+            raise UnexpectedTokenError(self.text, self.end, 'Expected escape command')
+
     def args_action(self, token):
         if token is None:
             self.finish_op()
@@ -372,6 +400,7 @@ class Parser(Token):
         try:
             token = self.next_token()
             while self.state != ParseState.END:
+                import sys
                 if self.state == ParseState.START:
                     self.start_action(token)
                 elif self.state == ParseState.FORK_START:
@@ -380,6 +409,8 @@ class Parser(Token):
                     self.fork_end_action(token)
                 elif self.state == ParseState.OP:
                     self.op_action(token)
+                elif self.state == ParseState.ESCAPE:
+                    self.escape_action(token)
                 elif self.state == ParseState.ARGS:
                     self.args_action(token)
                 else:
@@ -399,6 +430,8 @@ class Parser(Token):
                 token = PythonExpression(self.text, self.end)
             elif c == Token.PIPE:
                 token = Pipe(self.text, self.end)
+            elif c == Token.CARET:
+                token = Caret(self.text, self.end)
             elif c == Token.BEGIN:
                 token = Begin(self.text, self.end)
             elif c == Token.END:

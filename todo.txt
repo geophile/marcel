@@ -40,15 +40,11 @@ util.py:
 
 - Debugging & verbosity level
 
-- Inside an osh shell, errors shouldn't terminate the shell, just the command.
-
 - Is Generator needed?
 
 - Write OshArgParser.exit to avoid SystemExit on argparse error.
 
 - Make File comparisons work -- based on absolute path.
-
-- Add -r/--reverse option to sort.
 
 - "ls -1" looks too much like "ls -l"
 
@@ -73,4 +69,9 @@ util.py:
 
 - ~ expansion
 
-- Run arbitrary executables
+- ^emacs works -- a new window running GUI emacs is created. So does
+  ^emacs -nw, doing exactly the right thing (non-graphical, in current
+  terminal). But ^vi does not. Nothing appears to happen. But vi is
+  listening for input, so :q exits. stderr complains about not being a
+  terminal, but this isn't visible. Vi DOES work if subprocess.run
+  omits stdout=PIPE and stderr=PIPE.

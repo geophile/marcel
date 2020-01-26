@@ -1,5 +1,6 @@
 __all__ = [
     'cd',
+    'escape',
     'expand',
     'gen',
     'head',

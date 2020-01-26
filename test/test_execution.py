@@ -80,6 +80,10 @@ class Test:
         os.remove(filename)
 
 
+def test_no_such_op():
+    Test.run('gen 5 | abc', expected_err='abc is not recognized as a command')
+
+
 def test_gen():
     Test.run('gen 5 | out',
              expected_out=[(0,), (1,), (2,), (3,), (4,)])
@@ -551,26 +555,30 @@ def test_window():
              expected_err='Incorrect arguments given for window')
 
 
-def test_no_such_op():
-    Test.run('gen 5 | abc', expected_err='abc is not recognized as a command')
+def test_escape():
+    Test.run('ls a b',
+             expected_out=['hello  world\n'])
+    Test.run('^echo hello\ \ world',
+             expected_out=['hello  world\n'])
 
 
 def main():
-    test_no_such_op()
-    test_gen()
-    test_out()
-    test_sort()
-    test_map()
-    test_ls()
-    test_select()
-    test_red()
-    test_expand()
-    test_head()
-    test_tail()
-    test_reverse()
-    test_squish()
-    test_unique()
-    test_window()
+    # test_no_such_op()
+    # test_gen()
+    # test_out()
+    # test_sort()
+    # test_map()
+    # test_ls()
+    # test_select()
+    # test_red()
+    # test_expand()
+    # test_head()
+    # test_tail()
+    # test_reverse()
+    # test_squish()
+    # test_unique()
+    # test_window()
+    test_escape()
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
     print('Test failures: %s' % Test.failures)

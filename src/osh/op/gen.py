@@ -35,6 +35,7 @@ class GenArgParser(osh.core.OshArgParser):
 
 
 class Gen(osh.core.Op):
+
     argparser = GenArgParser()
 
     def __init__(self):
