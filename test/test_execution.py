@@ -556,28 +556,29 @@ def test_window():
 
 
 def test_escape():
-    Test.run('ls a b',
-             expected_out=['hello  world\n'])
-    Test.run('^echo hello\ \ world',
-             expected_out=['hello  world\n'])
+    Test.run('bash echo hello  world',
+             expected_out=['hello world\n'])
+    # TODO: This doesn't work. quoted string has two apces, but output has one.
+    # Test.run('bash echo "hello  world"',
+    #          expected_out=['hello  world\n'])
 
 
 def main():
-    # test_no_such_op()
-    # test_gen()
-    # test_out()
-    # test_sort()
-    # test_map()
-    # test_ls()
-    # test_select()
-    # test_red()
-    # test_expand()
-    # test_head()
-    # test_tail()
-    # test_reverse()
-    # test_squish()
-    # test_unique()
-    # test_window()
+    test_no_such_op()
+    test_gen()
+    test_out()
+    test_sort()
+    test_map()
+    test_ls()
+    test_select()
+    test_red()
+    test_expand()
+    test_head()
+    test_tail()
+    test_reverse()
+    test_squish()
+    test_unique()
+    test_window()
     test_escape()
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist

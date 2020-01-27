@@ -21,7 +21,6 @@ class Token:
     ESCAPE_CHAR = '\\'
     OPEN = '('
     CLOSE = ')'
-    CARET = '^'
     PIPE = '|'
     FORK = '@'
     BEGIN = '['
@@ -60,13 +59,10 @@ class Token:
     def is_pipe(self):
         return False
 
-    def is_caret(self):
-        return False
-
-    def is_fork(self):
-        return False
-
     def is_expr(self):
+        return False
+
+    def is_begin(self):
         return False
 
     def is_end(self):
@@ -268,15 +264,6 @@ class Pipe(OneCharSymbol):
         return True
 
 
-class Caret(OneCharSymbol):
-
-    def __init__(self, text, position):
-        super().__init__(text, position, Token.CARET)
-
-    def is_caret(self):
-        return True
-
-
 class Fork(OneCharSymbol):
 
     def __init__(self, text, position):
@@ -291,7 +278,7 @@ class Begin(OneCharSymbol):
     def __init__(self, text, position):
         super().__init__(text, position, Token.BEGIN)
 
-    def is_fork(self):
+    def is_begin(self):
         return True
 
 
@@ -332,18 +319,13 @@ class Parser(Token):
         super().__init__(text, 0)
         self.state = ParseState.START
         self.pipeline = osh.core.Pipeline()
+        self.fork_spec = None
         self.op = None
         self.args = []
-        self.nesting = 0
 
     def start_action(self, token):
         if token.is_fork():
             self.state = ParseState.FORK_START
-        elif token.is_caret():
-            op_name = 'escape'
-            op_module = OP_MODULES.named(op_name)
-            self.op = getattr(op_module, op_name)()
-            self.state = ParseState.ESCAPE
         elif token.is_string():
             op_name = token.value()
             op_module = OP_MODULES.named(op_name)
@@ -356,13 +338,24 @@ class Parser(Token):
         assert token is None
 
     def fork_start_action(self, token):
-        pass
+        if token.is_string():
+            x = token.value()
+            self.fork_spec = int(x) if x.isdigit() else x
+            self.state = ParseState.FORK_SPEC
+        else:
+            raise UnexpectedTokenError(self.text, self.end, 'Expected fork specification')
 
     def fork_end_action(self, token):
         if token.is_pipe():
             self.state = ParseState.START
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected pipe or end of input')
+
+    def fork_spec_action(self, token):
+        if token.is_begin():
+            self.state = ParseState.START
+        else:
+            raise UnexpectedTokenError(self.text, self.end, 'Expected pipeline begin')
 
     def op_action(self, token):
         if token is None:
@@ -420,6 +413,8 @@ class Parser(Token):
                     self.fork_start_action(token)
                 elif self.state == ParseState.FORK_END:
                     self.fork_end_action(token)
+                elif self.state == ParseState.FORK_SPEC:
+                    self.fork_spec_action(token)
                 elif self.state == ParseState.OP:
                     self.op_action(token)
                 elif self.state == ParseState.ESCAPE:
@@ -443,12 +438,12 @@ class Parser(Token):
                 token = PythonExpression(self.text, self.end)
             elif c == Token.PIPE:
                 token = Pipe(self.text, self.end)
-            elif c == Token.CARET:
-                token = Caret(self.text, self.end)
             elif c == Token.BEGIN:
                 token = Begin(self.text, self.end)
             elif c == Token.END:
                 token = End(self.text, self.end)
+            elif c == Token.FORK:
+                token = Fork(self.text, self.end)
             else:
                 token = ShellString(self.text, self.end)
             self.end = token.end
@@ -463,6 +458,9 @@ class Parser(Token):
         except SystemExit as e:
             # A failed parse raises SystemExit!
             raise osh.error.CommandKiller('Incorrect usage of %s' % self.op)
+
+    def end_fork(self):
+        pass
 
     def skip_whitespace(self):
         c = self.peek_char()

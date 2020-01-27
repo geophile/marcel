@@ -77,3 +77,5 @@ util.py:
   omits stdout=PIPE and stderr=PIPE.
 
 - redirection
+
+- Replace ^ (for escape to bash) with a real op, e.g. bash.

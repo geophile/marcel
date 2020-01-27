@@ -1,6 +1,6 @@
 __all__ = [
+    'bash',
     'cd',
-    'escape',
     'expand',
     'gen',
     'head',
