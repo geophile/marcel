@@ -155,3 +155,8 @@ Unifying API and CLI:
 ======================================================================
 
 cat is "ls | expand". Add an abstraction mechanism? 
+
+======================================================================
+
+Instead of stdout, stderr: One output stream. stdout -> stream as
+is. stderr -> Error objects.

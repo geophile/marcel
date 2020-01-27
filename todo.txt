@@ -75,3 +75,5 @@ util.py:
   listening for input, so :q exits. stderr complains about not being a
   terminal, but this isn't visible. Vi DOES work if subprocess.run
   omits stdout=PIPE and stderr=PIPE.
+
+- redirection

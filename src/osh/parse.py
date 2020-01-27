@@ -23,7 +23,7 @@ class Token:
     CLOSE = ')'
     CARET = '^'
     PIPE = '|'
-    # TODO: [...] are used in traditional shells and in osh. Need to do something else for osh.
+    FORK = '@'
     BEGIN = '['
     END = ']'
 
@@ -61,6 +61,9 @@ class Token:
         return False
 
     def is_caret(self):
+        return False
+
+    def is_fork(self):
         return False
 
     def is_expr(self):
@@ -274,6 +277,15 @@ class Caret(OneCharSymbol):
         return True
 
 
+class Fork(OneCharSymbol):
+
+    def __init__(self, text, position):
+        super().__init__(text, position, Token.FORK)
+
+    def is_fork(self):
+        return True
+
+
 class Begin(OneCharSymbol):
 
     def __init__(self, text, position):
@@ -296,6 +308,7 @@ class ParseState(Enum):
     START = auto()
     END = auto()
     FORK_START = auto()
+    FORK_SPEC = auto()
     FORK_END = auto()
     OP = auto()
     ESCAPE = auto()
