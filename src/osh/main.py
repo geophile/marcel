@@ -15,7 +15,7 @@ def run_command(line):
             command = Command(pipeline)
             command.execute()
         except CommandKiller as e:
-            print(e, file=sys.stderr)
+            print('(%s) %s' % (type(e), e), file=sys.stderr)
 
 
 def process_input(handle_line):

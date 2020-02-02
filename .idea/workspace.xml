@@ -2,9 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/experiments/pipelinecopy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/osh/op/fork.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/osh/op/labelthread.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/osh/op/escape.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/op/escape.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ideas.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ideas.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/osh/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/core.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/osh/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/osh/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/op/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/osh/parse.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/parse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/osh/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/util.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/test_execution.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_execution.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/todo.txt" afterDir="false" />
     </list>
@@ -42,7 +49,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/osh" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/experiments/pipelinecopy.py" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="vcs.Git" />
@@ -84,6 +91,28 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/osh/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pipelinecopy" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="osh2" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/usr/bin/python3.7" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/experiments" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/pipelinecopy.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -207,6 +236,7 @@
       <item itemvalue="Python.test_parsing" />
       <item itemvalue="Python.test_execution" />
       <item itemvalue="Python.ssh" />
+      <item itemvalue="Python.pipelinecopy" />
       <item itemvalue="Python.test_readchar" />
       <item itemvalue="Python.osh" />
     </list>
@@ -236,7 +266,8 @@
       <workItem from="1579703976488" duration="88000" />
       <workItem from="1579704079513" duration="2660000" />
       <workItem from="1579737437529" duration="12695000" />
-      <workItem from="1579809562894" duration="56076000" />
+      <workItem from="1579809562894" duration="66176000" />
+      <workItem from="1580411097535" duration="23472000" />
     </task>
     <servers />
   </component>
@@ -266,15 +297,26 @@
           </properties>
           <option name="timeStamp" value="19" />
         </breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/osh/util.py</url>
+          <line>49</line>
+          <option name="timeStamp" value="52" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/osh/util.py</url>
+          <line>43</line>
+          <option name="timeStamp" value="53" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/osh2$test_extract_string.coverage" NAME="test_tokenizing Coverage Results" MODIFIED="1578087938886" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$ssh.coverage" NAME="ssh Coverage Results" MODIFIED="1580142771947" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/osh" />
+    <SUITE FILE_PATH="coverage/osh2$pipelinecopy.coverage" NAME="pipelinecopy Coverage Results" MODIFIED="1580432566769" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/osh2$test_parsing.coverage" NAME="test_parsing Coverage Results" MODIFIED="1578772660138" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$test_readchar.coverage" NAME="test_readchar Coverage Results" MODIFIED="1579462922290" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
-    <SUITE FILE_PATH="coverage/osh2$test_execution.coverage" NAME="test_execution Coverage Results" MODIFIED="1580146649802" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/osh2$test_execution.coverage" NAME="test_execution Coverage Results" MODIFIED="1580591488866" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$test_extract_python.coverage" NAME="test_embedded_python Coverage Results" MODIFIED="1578065607672" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$parseusingpyparsing.coverage" NAME="parseusingpyparsing Coverage Results" MODIFIED="1577902706592" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/osh" />
     <SUITE FILE_PATH="coverage/osh2$experiment.coverage" NAME="teststring Coverage Results" MODIFIED="1577843220460" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />

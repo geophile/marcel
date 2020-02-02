@@ -32,16 +32,21 @@ class OshArgParser(argparse.ArgumentParser):
 
 
 class BaseOp(object):
-    """Base class for all osh ops, and for pipelines, (sequences of
-    commands). Methods of this class implement the op execution and
+    """Base class for all osh ops, and for pipelines (sequences of
+    ops). Methods of this class implement the op execution and
     inter-op communication. The send* commands are used by subclasses to
     send output to downstream commands. The receive* commands are implemented
     by subclasses to receive and process input from upstream commands.
     """
 
     def __init__(self):
-        self.parent = None
+        # The pipeline to which this op belongs.
+        self.pipeline = None
+        # The next op in the pipeline, or None if this is the last op in the pipeline.
         self.next_op = None
+        # receiver is where op output is sent. Same as next_op unless this is the last
+        # op in the pipeline. In which case, the receiver is that of the pipeline containing
+        # this one.
         self.receiver = None
         self.command_state = None
 
@@ -58,8 +63,7 @@ class BaseOp(object):
         if message is None:
             message = self.doc()
         print(message, file=sys.stderr)
-        # TODO: Raise OshKiller instead?
-        sys.exit(-1)
+        raise osh.error.CommandKiller(None)
 
     def doc(self):
         """Print op usage information.
@@ -67,8 +71,7 @@ class BaseOp(object):
         assert False
 
     def setup(self):
-        """Setup is executed just prior to op execution. Will be called with self.thread_state
-        = None before any forking, providing a chance to set up state shared by threads of a fork.
+        """Setup is executed just prior to op execution. 
         """
         assert False
 
@@ -119,7 +122,6 @@ class BaseOp(object):
     
     def connect(self, new_op):
         self.next_op = new_op
-        self.receiver = new_op
         return self
 
 
@@ -150,7 +152,7 @@ class Op(BaseOp):
 
     # For use by subclasses
 
-    thread_state = property(lambda self: self.parent.thread_state)
+    thread_label = property(lambda self: self.pipeline.thread_label)
 
     # For use by this class
 
@@ -188,7 +190,7 @@ class Pipeline(BaseOp):
         BaseOp.__init__(self)
         self.first_op = None
         self.last_op = None
-        self.thread_state = None
+        self.thread_label = None
 
     def __repr__(self):
         buffer = []
@@ -203,13 +205,10 @@ class Pipeline(BaseOp):
     def setup(self):
         op = self.first_op
         while op:
+            if op.receiver is None:
+                op.receiver = op.next_op
             op.setup()
-            next_op = op.next_op
-            if next_op:
-                op.receiver = next_op
-            else:
-                op.receiver = self.pipeline_receiver()
-            op = next_op
+            op = op.next_op
 
     def execute(self):
         try:
@@ -225,15 +224,6 @@ class Pipeline(BaseOp):
     def receive_complete(self):
         self.first_op.receive_complete()
 
-    # Pipeline runtime
-
-    def set_thread_state(self, thread_state):
-        self.thread_state = thread_state
-
-    # For use in setting up output for forks. Set this pipeline's receiver to op's receiver
-    def set_receiver(self, op):
-        self.last_op.receiver = op
-
     # Pipeline compile-time
 
     def append(self, op):
@@ -242,24 +232,14 @@ class Pipeline(BaseOp):
         else:
             self.first_op = op
         self.last_op = op
-        op.parent = self
+        op.pipeline = self
         return self
-
-    # For use by this class
-
-    def pipeline_receiver(self):
-        receiver = self.next_op
-        if receiver is None:
-            parent = self.parent
-            if parent:
-                receiver = parent.pipeline_receiver()
-        return receiver
 
 
 class Command:
 
     def __init__(self, pipeline):
-        # Append an "out %s" op at the end, if there is no output op there already.
+        # Append an "out %s" op at the end of pipeline, if there is no output op there already.
         from osh.op.out import Out
         if not isinstance(pipeline.last_op, Out):
             out = Out()
@@ -267,7 +247,7 @@ class Command:
             out.file = False
             out.csv = False
             out.format = '%s'
-            pipeline.last_op.connect(out)
+            pipeline.append(out)
         self.pipeline = pipeline
 
     def __repr__(self):

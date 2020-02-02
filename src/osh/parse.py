@@ -3,6 +3,8 @@ from enum import Enum, auto
 from osh.opmodules import OP_MODULES
 import osh.core
 import osh.error
+import osh.op.fork
+from osh.util import *
 
 
 class MalformedStringError(Exception):
@@ -318,7 +320,8 @@ class Parser(Token):
     def __init__(self, text):
         super().__init__(text, 0)
         self.state = ParseState.START
-        self.pipeline = osh.core.Pipeline()
+        self.pipelines = Stack()
+        self.pipelines.push(osh.core.Pipeline())
         self.fork_spec = None
         self.op = None
         self.args = []
@@ -346,13 +349,18 @@ class Parser(Token):
             raise UnexpectedTokenError(self.text, self.end, 'Expected fork specification')
 
     def fork_end_action(self, token):
-        if token.is_pipe():
+        if token is None:
+            self.state = ParseState.END
+        elif token.is_pipe():
             self.state = ParseState.START
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected pipe or end of input')
 
     def fork_spec_action(self, token):
         if token.is_begin():
+            fork_pipeline = osh.core.Pipeline()
+            self.pipelines.push(fork_pipeline)
+            self.op = fork_pipeline
             self.state = ParseState.START
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected pipeline begin')
@@ -372,7 +380,8 @@ class Parser(Token):
             self.finish_op()
             self.state = ParseState.START
         elif token.is_end():
-            self.end_fork()
+            self.finish_op()
+            self.finish_pipeline()
             self.state = ParseState.FORK_END
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected string or pipe')
@@ -397,7 +406,8 @@ class Parser(Token):
             self.finish_op()
             self.state = ParseState.START
         elif token.is_end():
-            self.end_fork()
+            self.finish_op()
+            self.finish_pipeline()
             self.state = ParseState.FORK_END
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected string or pipe')
@@ -406,7 +416,8 @@ class Parser(Token):
         try:
             token = self.next_token()
             while self.state != ParseState.END:
-                import sys
+                # import sys
+                # print('token = %s' % token, file=sys.__stdout__)
                 if self.state == ParseState.START:
                     self.start_action(token)
                 elif self.state == ParseState.FORK_START:
@@ -425,7 +436,9 @@ class Parser(Token):
                     assert False
                 token = self.next_token()
             self.end_action(token)
-            return self.pipeline
+            pipeline = self.pipelines.pop()
+            assert self.pipelines.is_empty()
+            return pipeline
         except Exception as e:
             raise osh.error.CommandKiller(e)
 
@@ -452,15 +465,21 @@ class Parser(Token):
     def finish_op(self):
         try:
             self.op.arg_parser().parse_args(self.args, namespace=self.op)
-            self.pipeline.append(self.op)
+            self.pipeline().append(self.op)
             self.op = None
             self.args = []
         except SystemExit as e:
             # A failed parse raises SystemExit!
             raise osh.error.CommandKiller('Incorrect usage of %s' % self.op)
 
-    def end_fork(self):
-        pass
+    def finish_pipeline(self):
+        fork_pipeline = self.pipelines.pop()
+        main_pipeline = self.pipelines.top()
+        main_pipeline.append(osh.op.fork.Fork(self.fork_spec, fork_pipeline))
+        self.fork_spec = None
+
+    def pipeline(self):
+        return self.pipelines.top()
 
     def skip_whitespace(self):
         c = self.peek_char()

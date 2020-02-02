@@ -6,6 +6,7 @@ import pathlib
 
 from osh.env import ENV
 from osh.main import run_command
+import osh.error
 
 
 class Test:
@@ -58,6 +59,8 @@ class Test:
         except Exception as e:
             print('%s: Terminated by uncaught exception: %s' % (command, e))
             Test.failures += 1
+        except osh.error.CommandKiller as e:
+            print('%s: Terminated by CommandKiller: %s' % (command, e))
 
     @staticmethod
     def file_contents(filename):
@@ -563,23 +566,37 @@ def test_escape():
     #          expected_out=['hello  world\n'])
 
 
+def test_fork():
+    Test.run('@3 [ gen 3 ]',
+             expected_out=[(0, 0), (0, 1), (0, 2),
+                           (1, 0), (1, 1), (1, 2),
+                           (2, 0), (2, 1), (2, 2)])
+    Test.run('@1 [ gen 3 100 ]',
+             expected_out=[(0, 100), (0, 101), (0, 102)])
+    # Test.run('@3 [ gen 3 100 ] | sort',
+    #          expected_out=[(0, 100), (0, 101), (0, 102),
+    #                        (1, 100), (1, 101), (1, 102),
+    #                        (2, 100), (2, 101), (2, 102)])
+
+
 def main():
-    test_no_such_op()
-    test_gen()
-    test_out()
-    test_sort()
-    test_map()
-    test_ls()
-    test_select()
-    test_red()
-    test_expand()
-    test_head()
-    test_tail()
-    test_reverse()
-    test_squish()
-    test_unique()
-    test_window()
-    test_escape()
+    # test_no_such_op()
+    # test_gen()
+    # test_out()
+    # test_sort()
+    # test_map()
+    # test_ls()
+    # test_select()
+    # test_red()
+    # test_expand()
+    # test_head()
+    # test_tail()
+    # test_reverse()
+    # test_squish()
+    # test_unique()
+    # test_window()
+    # test_escape()
+    test_fork()
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
     print('Test failures: %s' % Test.failures)

@@ -78,4 +78,6 @@ util.py:
 
 - redirection
 
-- Replace ^ (for escape to bash) with a real op, e.g. bash.
+- Organize internal ops -- Fork, LabelThread
+
+- osh1 fork has to be first in top-level pipeline. Relax this?
