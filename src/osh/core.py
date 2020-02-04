@@ -3,6 +3,7 @@ import argparse
 
 import osh.util
 import osh.error
+import osh.function
 
 
 class OshArgParser(argparse.ArgumentParser):
@@ -11,8 +12,7 @@ class OshArgParser(argparse.ArgumentParser):
         super().__init__(prog=op_name)
 
     def exit(self, status=0, message=None):
-        # TODO: Use this to avoid SystemExit on argparse error
-        super().exit(status, message)
+        raise osh.error.CommandKiller(message)
 
     @staticmethod
     def constrained_type(check_and_convert, message):
@@ -30,6 +30,10 @@ class OshArgParser(argparse.ArgumentParser):
             raise ValueError()
         return n
 
+    @staticmethod
+    def check_function(s):
+        return osh.function.Function(s)
+
 
 class BaseOp(object):
     """Base class for all osh ops, and for pipelines (sequences of
@@ -40,8 +44,6 @@ class BaseOp(object):
     """
 
     def __init__(self):
-        # The pipeline to which this op belongs.
-        self.pipeline = None
         # The next op in the pipeline, or None if this is the last op in the pipeline.
         self.next_op = None
         # receiver is where op output is sent. Same as next_op unless this is the last
@@ -54,6 +56,12 @@ class BaseOp(object):
 
     def __repr__(self):
         assert False
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
     # BaseOp runtime
 
@@ -70,10 +78,16 @@ class BaseOp(object):
         """
         assert False
 
-    def setup(self):
-        """Setup is executed just prior to op execution. 
+    def setup_1(self):
+        """setup_1 is run after command-line parsing and before setup_2. It is intended for
+        the initialization of op state except for fork pipeline copying.
         """
         assert False
+
+    def setup_2(self):
+        """setup_2 is run after setup_1 and before execution. It is intended for fork pipeline copying.
+        """
+        pass
 
     def execute(self):
         """Execute the op.
@@ -133,7 +147,6 @@ class Op(BaseOp):
     
     def __init__(self):
         BaseOp.__init__(self)
-        self.functions = {}  # source -> function
 
     def __repr__(self):
         # TODO: Render args
@@ -141,18 +154,6 @@ class Op(BaseOp):
 
     def arg_parser(self):
         assert False
-
-    def source_to_function(self, source):
-        function = self.functions.get(source, None)
-        if function is None:
-            function = Op.symbol_to_function(source)
-            if function is None:
-                raise osh.error.CommandKiller('Unrecognized function: %s' % source)
-        return function
-
-    # For use by subclasses
-
-    thread_label = property(lambda self: self.pipeline.thread_label)
 
     # For use by this class
 
@@ -190,7 +191,6 @@ class Pipeline(BaseOp):
         BaseOp.__init__(self)
         self.first_op = None
         self.last_op = None
-        self.thread_label = None
 
     def __repr__(self):
         buffer = []
@@ -202,12 +202,20 @@ class Pipeline(BaseOp):
 
     # BaseOp
 
-    def setup(self):
+    def setup_1(self):
         op = self.first_op
         while op:
             if op.receiver is None:
                 op.receiver = op.next_op
-            op.setup()
+            op.setup_1()
+            op = op.next_op
+
+    def setup_2(self):
+        op = self.first_op
+        while op:
+            if op.receiver is None:
+                op.receiver = op.next_op
+            op.setup_2()
             op = op.next_op
 
     def execute(self):
@@ -232,7 +240,6 @@ class Pipeline(BaseOp):
         else:
             self.first_op = op
         self.last_op = op
-        op.pipeline = self
         return self
 
 
@@ -255,7 +262,8 @@ class Command:
 
     def execute(self):
         try:
-            self.pipeline.setup()
+            self.pipeline.setup_1()
+            self.pipeline.setup_2()
             self.pipeline.execute()
             self.pipeline.receive_complete()
         except BaseException as e:

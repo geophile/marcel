@@ -12,7 +12,6 @@ class PipelineThread(threading.Thread):
         super().__init__()
         self.thread_label = thread_label
         self.pipeline = pipeline_copy
-        self.pipeline.thread_label = thread_label
         self.terminating_exception = None
 
     def __repr__(self):
@@ -38,16 +37,19 @@ class Fork(osh.core.Op):
     def doc(self):
         assert False
 
-    def setup(self):
-        label_thread_op = LabelThread()
-        self.fork_pipeline.append(label_thread_op)
-        label_thread_op.receiver = self.receiver
+    def setup_1(self):
+        self.fork_pipeline.append(LabelThread())
+        # Don't set label_thread_op.receiver here. Don't want the receiver cloned, we want all the cloned
+        # pipelines connected to the same receiver.
+
+    def setup_2(self):
         for thread_label in self.thread_labels():
             pipeline_copy = clone(self.fork_pipeline)
             label_thread_op_copy = pipeline_copy.last_op
             assert isinstance(label_thread_op_copy, LabelThread)
             label_thread_op_copy.set_label(thread_label)
-            pipeline_copy.setup()
+            pipeline_copy.setup_1()
+            label_thread_op_copy.receiver = self.receiver
             self.threads.append(PipelineThread(thread_label, pipeline_copy))
 
     def execute(self):

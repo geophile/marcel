@@ -20,7 +20,11 @@ class SortArgParser(osh.core.OshArgParser):
     
     def __init__(self):
         super().__init__('sort')
-        self.add_argument('key', nargs='?', default=None)
+        self.add_argument('key',
+                          nargs='?',
+                          default=None,
+                          type=super().constrained_type(osh.core.OshArgParser.check_function,
+                                                        'not a valid function'))
         
 
 class Sort(osh.core.Op):
@@ -40,7 +44,7 @@ class Sort(osh.core.Op):
     def doc(self):
         return __doc__
 
-    def setup(self):
+    def setup_1(self):
         pass
     
     def receive(self, x):
@@ -48,8 +52,7 @@ class Sort(osh.core.Op):
     
     def receive_complete(self):
         if self.key:
-            key = self.source_to_function(self.key)
-            self.contents.sort(key=lambda t: key(*t))
+            self.contents.sort(key=lambda t: self.key(*t))
         else:
             self.contents.sort()
         for x in self.contents:

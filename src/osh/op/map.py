@@ -14,7 +14,9 @@ class MapArgParser(osh.core.OshArgParser):
 
     def __init__(self):
         super().__init__('map')
-        self.add_argument('function')
+        self.add_argument('function',
+                          type=super().constrained_type(osh.core.OshArgParser.check_function,
+                                                        'not a valid function'))
 
 
 # map can be used as a generator (function with no args) or
@@ -26,25 +28,24 @@ class Map(osh.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.function = None  # source, from the command line
-        self.f = None  # The actual function
+        self.function = None
 
     def __repr__(self):
-        return 'map(%s)' % self.function
+        return 'map(%s)' % self.function.source
 
     # BaseOp
     
     def doc(self):
         return __doc__
 
-    def setup(self):
-        self.f = self.source_to_function(self.function)
+    def setup_1(self):
+        pass
 
     def receive(self, x):
-        self.send(self.f(*x))
+        self.send(self.function(*x))
 
     def execute(self):
-        self.send(self.f())
+        self.send(self.function())
 
     # Op
 

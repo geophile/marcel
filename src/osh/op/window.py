@@ -64,6 +64,7 @@ import sys
 
 import osh.core
 import osh.error
+import osh.function
 
 
 def window():
@@ -74,7 +75,10 @@ class WindowArgsParser(osh.core.OshArgParser):
 
     def __init__(self):
         super().__init__('window')
-        self.add_argument('predicate', nargs='?')
+        self.add_argument('predicate',
+                          nargs='?',
+                          type=super().constrained_type(osh.core.OshArgParser.check_function,
+                                                        'not a valid function'))
         fixed_size = self.add_mutually_exclusive_group()
         fixed_size.add_argument('-o', '--overlap',
                                 type=super().constrained_type(osh.core.OshArgParser.check_non_negative,
@@ -90,8 +94,7 @@ class Window(osh.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.predicate = None  # Source
-        self.p = None  # The actual predicate
+        self.predicate = None
         self.overlap = None
         self.disjoint = None
         self.window_generator = None
@@ -107,7 +110,7 @@ class Window(osh.core.Op):
             buffer.append(self.disjoint)
         if self.predicate:
             buffer.append('predicate=')
-            buffer.append(self.predicate)
+            buffer.append(self.predicate.source)
         buffer.append(')')
         return ''.join(buffer)
 
@@ -116,7 +119,7 @@ class Window(osh.core.Op):
     def doc(self):
         return __doc__
 
-    def setup(self):
+    def setup_1(self):
         # Exactly one of predicate, overlap, disjoint should be set. Not sure that argparse is up to that.
         count = 1 if self.predicate is not None else 0
         count += 1 if self.overlap is not None else 0
@@ -124,7 +127,6 @@ class Window(osh.core.Op):
         if count != 1:
             raise osh.error.CommandKiller('Incorrect arguments given for window.')
         if self.predicate:
-            self.p = self.source_to_function(self.predicate)
             self.window_generator = PredicateWindow(self)
         elif self.overlap:
             self.window_generator = OverlapWindow(self)
@@ -170,7 +172,7 @@ class PredicateWindow(WindowBase):
         super().__init__(op)
 
     def receive(self, x):
-        if self.op.p(*x):
+        if self.op.predicate(*x):
             self.flush()
         self.window.append(x)
 

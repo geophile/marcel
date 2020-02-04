@@ -48,7 +48,7 @@ util.py:
 
 - "ls -1" looks too much like "ls -l"
 
-- Should the name of map be changed? f as in osh1? apply? map doesn't
+- Should the name of map be changed? f as in o? apply? map doesn't
   really make sense when used as a generator. Could have gen handle
   this case through a function argument mutually exclusive with other
   args. So "gen 5" works like it always had, but "gen (5)" generates a
@@ -81,3 +81,7 @@ util.py:
 - Organize internal ops -- Fork, LabelThread
 
 - osh1 fork has to be first in top-level pipeline. Relax this?
+
+- CommandKiller shouldn't print stack. (dev only),
+  default_exception_handler too.
+

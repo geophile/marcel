@@ -77,7 +77,7 @@ class Expand(osh.core.Op):
     def doc(self):
         return __doc__
 
-    def setup(self):
+    def setup_1(self):
         self.expander = SequenceExpander(self) if self.position is None else ComponentExpander(self)
 
     def receive(self, x):

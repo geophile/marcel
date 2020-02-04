@@ -3,6 +3,7 @@ from enum import Enum, auto
 from osh.opmodules import OP_MODULES
 import osh.core
 import osh.error
+import osh.function
 import osh.op.fork
 from osh.util import *
 
@@ -72,9 +73,6 @@ class Token:
 
     def value(self):
         return None
-
-    def function(self):
-        assert False
 
 
 # Python string literals are specified here:
@@ -176,16 +174,6 @@ class PythonExpression(Token):
                 self.end = PythonString(self.text, self.end - 1).end
         if self.text[self.end - 1] != Token.CLOSE:
             raise osh.error.CommandKiller('Malformed Python expression %s' % self.text[self.start:self.end])
-
-    def function(self):
-        source = self.value().strip()
-        if source.split()[0] in ('lambda', 'lambda:'):
-            return eval(source)
-        else:
-            try:
-                return eval('lambda ' + source)
-            except SyntaxError:
-                return eval('lambda: ' + source)
 
 
 class ShellString(Token):
@@ -373,7 +361,6 @@ class Parser(Token):
             self.args.append(token.value())
             self.state = ParseState.ARGS
         elif token.is_expr():
-            self.op.functions[token.value()] = token.function()
             self.args.append(token.value())
             self.state = ParseState.ARGS
         elif token.is_pipe():
@@ -400,7 +387,6 @@ class Parser(Token):
         elif token.is_string():
             self.args.append(token.value())
         elif token.is_expr():
-            self.op.functions[token.value()] = token.function()
             self.args.append(token.value())
         elif token.is_pipe():
             self.finish_op()
@@ -463,14 +449,10 @@ class Parser(Token):
         return token
 
     def finish_op(self):
-        try:
-            self.op.arg_parser().parse_args(self.args, namespace=self.op)
-            self.pipeline().append(self.op)
-            self.op = None
-            self.args = []
-        except SystemExit as e:
-            # A failed parse raises SystemExit!
-            raise osh.error.CommandKiller('Incorrect usage of %s' % self.op)
+        self.op.arg_parser().parse_args(self.args, namespace=self.op)
+        self.pipeline().append(self.op)
+        self.op = None
+        self.args = []
 
     def finish_pipeline(self):
         fork_pipeline = self.pipelines.pop()

@@ -15,6 +15,7 @@ If no C{FUNCTION} is provided, then C{+} is assumed.
 import functools
 
 import osh.core
+import osh.function
 
 
 def squish():
@@ -25,7 +26,10 @@ class SquishArgParser(osh.core.OshArgParser):
 
     def __init__(self):
         super().__init__('squish')
-        self.add_argument('function', nargs='?')
+        self.add_argument('function',
+                          nargs='?',
+                          type=super().constrained_type(osh.core.OshArgParser.check_function,
+                                                        'not a valid function'))
 
 
 class Squish(osh.core.Op):
@@ -34,8 +38,7 @@ class Squish(osh.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.function = None  # Source
-        self.f = None  # The actual function
+        self.function = None
 
     def __repr__(self):
         return 'squish(function = %s' % str(self.function) if self.function else 'squish()'
@@ -45,11 +48,12 @@ class Squish(osh.core.Op):
     def doc(self):
         return __doc__
 
-    def setup(self):
-        self.f = self.source_to_function(self.function if self.function else '+')
+    def setup_1(self):
+        if self.function is None:
+            self.function = osh.function.Function('+')
 
     def receive(self, x):
-        self.send(functools.reduce(self.f, x))
+        self.send(functools.reduce(self.function, x))
 
     # Op
 

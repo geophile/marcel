@@ -5,15 +5,30 @@ import io
 import pickle
 
 
-class Op:
+class BaseOp:
+
+    def __init__(self):
+        self.base = 111
+
+
+class Op(BaseOp):
 
     def __init__(self, name, f):
+        super().__init__()
         self.name = name
         self.f = f
         self.next = None
 
     def __repr__(self):
-        return 'Op(#%s, %s)' % (hash(self), self.name)
+        return 'Op(#%s, %s, %s)' % (hash(self), self.name, self.base)
+
+    def __getstate__(self):
+        print('getstate %s' % self)
+        return self.__dict__
+
+    def __setstate__(self, state):
+        print('setstate (%s) %s' % (type(state), state))
+        self.__dict__.update(state)
 
     def connect(self, next):
         self.next = next

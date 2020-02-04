@@ -32,7 +32,7 @@ class Bash(osh.core.Op):
     def doc(self):
         return self.__doc__
 
-    def setup(self):
+    def setup_1(self):
         pass
 
     def execute(self):

@@ -15,7 +15,9 @@ class SelectArgParser(osh.core.OshArgParser):
 
     def __init__(self):
         super().__init__('select')
-        self.add_argument('function')
+        self.add_argument('function',
+                          type=super().constrained_type(osh.core.OshArgParser.check_function,
+                                                        'not a valid function'))
 
 
 class Select(osh.core.Op):
@@ -24,8 +26,7 @@ class Select(osh.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.function = None  # source, from the command line
-        self.predicate = None  # The actual function
+        self.function = None
 
     def __repr__(self):
         return 'select(%s)' % self.function
@@ -35,11 +36,11 @@ class Select(osh.core.Op):
     def doc(self):
         return __doc__
 
-    def setup(self):
-        self.predicate = self.source_to_function(self.function)
+    def setup_1(self):
+        pass
 
     def receive(self, x):
-        if self.predicate(*x):
+        if self.function(*x):
             self.send(x)
 
     # Op

@@ -40,20 +40,20 @@ def clone(x):
     try:
         buffer = io.BytesIO()
         pickler = pickle.Pickler(buffer)
-        print('Pickling %s' % str(x))
         pickler.dump(x)
         buffer.seek(0)
         unpickler = pickle.Unpickler(buffer)
-        return unpickler.load()
+        copy = unpickler.load()
+        return copy
     except Exception as e:
+        print('Cloning error: (%s) %s' % (type(e), e), file=sys.__stderr__)
         print_stack()
-        # print('Cloning error: (%s) %s' % (type(e), e))
 
 
 def print_stack():
     exception_type, exception, trace = sys.exc_info()
     print('Caught %s: %s' % (exception_type, exception))
-    traceback.print_tb(trace)
+    traceback.print_tb(trace, file=sys.__stderr__)
 
 
 class Stack:

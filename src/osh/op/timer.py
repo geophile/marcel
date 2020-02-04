@@ -66,7 +66,7 @@ class Timer(osh.core.Op):
     def doc(self):
         return __doc__
 
-    def setup(self):
+    def setup_1(self):
         self.interval = self.parse_interval(self.interval)
         self.metronome = Metronome(self)
 

@@ -193,3 +193,17 @@ ls -ld file:    list the file
 ls -ld dir:     list dir without contents
 ls -ld glob:    list the qualifying files and dirs without contents
 
+----------------------------------------------------------------------
+
+setup before execution doesn't work well.
+
+Things get messy due to forking, which uses setup to create pipeline
+copies. That copying requires setup to have run completely on some of
+the things being copied.
+
+There need to be two passes before execution.
+
+1. Make sure all ops are set up.
+
+2. Pipeline copying (on complete setup ops)
+

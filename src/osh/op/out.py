@@ -47,26 +47,32 @@ class Out(osh.core.Op):
         self.file = None
         self.csv = False
         self.format = None
-        self.output = sys.stdout
+        self.output = None
 
     def __repr__(self):
         return ('out(append=%s file=%s csv=%s format=%s)' %
                 (self.append, self.file, self.csv, Out.ensure_quoted(self.format)))
+
+    # def __getstate__(self):
+    #     self.output = None
+    #     return self.__dict__
+    #
+    # def __setstate__(self, state):
+    #     self.__dict__.update(state)
+    #     self.initialize_output()
 
     # BaseOp
 
     def doc(self):
         return __doc__
 
-    def setup(self):
+    def setup_1(self):
         if self.csv and self.format:
             Out.argparser.error('-c/--csv and FORMAT specifications are incompatible')
-        output_filename = self.append if self.append else self.file
-        if output_filename:
-            output_mode = 'a' if self.append else 'w'
-            self.output = open(output_filename, mode=output_mode)
+        # self.ensure_output_initialized()
 
     def receive(self, x):
+        self.ensure_output_initialized()
         if self.format:
             try:
                 formatted_x = self.format % x
@@ -93,7 +99,8 @@ class Out(osh.core.Op):
         self.send(x)
 
     def receive_complete(self):
-        if self.output != sys.stdout:
+        self.ensure_output_initialized()
+        if self.output != sys.stdout and self.output is not None:
             self.output.close()
         self.send_complete()
 
@@ -103,6 +110,12 @@ class Out(osh.core.Op):
         return Out.argparser
 
     # For use by this class
+
+    def ensure_output_initialized(self):
+        if self.output is None:
+            self.output = (open(self.append, mode='a') if self.append else
+                           open(self.file, mode='w') if self.file else
+                           sys.stdout)
 
     @staticmethod
     def ensure_quoted(x):

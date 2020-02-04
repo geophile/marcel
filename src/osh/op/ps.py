@@ -36,7 +36,7 @@ class Ps(osh.core.Op):
     def doc(self):
         return __doc__
 
-    def setup(self):
+    def setup_1(self):
         pass
 
     def execute(self):

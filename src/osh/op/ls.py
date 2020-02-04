@@ -88,7 +88,7 @@ class Ls(osh.core.Op):
     def doc(self):
         return __doc__
 
-    def setup(self):
+    def setup_1(self):
         if not (self.d0 or self.d1 or self.dr):
             self.d0 = True
         if not (self.file or self.dir or self.symlink):

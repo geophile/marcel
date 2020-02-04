@@ -16,6 +16,8 @@ An C{error_handler} is a function with these arguments:
 
 import sys
 
+from osh.util import *
+
 
 # Exception thrown by exception handler needs to terminate command. By extending
 # BaseException, it is not intercepted by "except Exception".
@@ -24,6 +26,7 @@ class CommandKiller(BaseException):
     def __init__(self, cause):
         super().__init__()
         self.cause = cause
+        # print_stack()
 
     def __str__(self):
         return str(self.cause)
@@ -53,6 +56,7 @@ def _default_exception_handler(exception, op, command_input, thread=None):
     buffer.append(': ')
     buffer.append(str(exception))
     print(''.join(buffer), file=sys.stderr)
+    print_stack()
 
 
 def set_exception_handler(handler):

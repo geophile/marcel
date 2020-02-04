@@ -4,6 +4,7 @@ import readline
 from osh.core import Command
 from osh.error import CommandKiller
 from osh.parse import Parser
+from osh.util import *
 
 PROMPT = '>'
 
@@ -15,7 +16,7 @@ def run_command(line):
             command = Command(pipeline)
             command.execute()
         except CommandKiller as e:
-            print('(%s) %s' % (type(e), e), file=sys.stderr)
+            print(e, file=sys.stderr)
 
 
 def process_input(handle_line):

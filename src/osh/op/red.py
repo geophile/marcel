@@ -86,7 +86,10 @@ class RedArgParser(osh.core.OshArgParser):
         super().__init__('red')
         self.add_argument('-i', '--incremental',
                           action='store_true')
-        self.add_argument('function', nargs=argparse.REMAINDER)
+        self.add_argument('function',
+                          nargs=argparse.REMAINDER,
+                          type=super().constrained_type(osh.core.OshArgParser.check_function,
+                                                        'not a valid function'))
 
 
 class Red(osh.core.Op):
@@ -96,34 +99,31 @@ class Red(osh.core.Op):
     def __init__(self):
         super().__init__()
         self.incremental = None
-        self.function = None  # Source
-        self.f = []  # The actual functions
+        self.function = None
         self.reducer = None
 
     def __repr__(self):
-        return 'red(incremental = %s, function = %s)' % (self.incremental, self.function)
+        return 'red(incremental = %s, function = %s)' % (self.incremental, [f.source for f in self.function])
 
     # BaseOp
 
     def doc(self):
         return self.__doc__
 
-    def setup(self):
+    def setup_1(self):
         grouping_positions = []
         data_positions = []
         for i in range(len(self.function)):
-            function_source = self.function[i]
-            if Red.is_grouping(function_source):
+            function = self.function[i]
+            if Red.is_grouping(function.source):
                 grouping_positions.append(i)
-                f = None
+                self.function[i] = None
             else:
                 data_positions.append(i)
-                f = self.source_to_function(function_source)
-            self.f.append(f)
         if len(grouping_positions) == 0:
-            self.reducer = NonGroupingReducer(self.f, self)
+            self.reducer = NonGroupingReducer(self)
         else:
-            self.reducer = GroupingReducer(self.f, grouping_positions, data_positions, self)
+            self.reducer = GroupingReducer(self, grouping_positions, data_positions)
 
     def receive(self, x):
         self.reducer.receive(x)
@@ -145,10 +145,10 @@ class Red(osh.core.Op):
 
 class Reducer:
 
-    def __init__(self, reducers, op):
-        self.reducers = reducers
+    def __init__(self, op):
+        self.function = op.function
         self.op = op
-        self.n = len(reducers)
+        self.n = len(self.function)
 
     def receive(self, x):
         assert False
@@ -159,8 +159,8 @@ class Reducer:
 
 class NonGroupingReducer(Reducer):
 
-    def __init__(self, reducers, op):
-        super().__init__(reducers, op)
+    def __init__(self, op):
+        super().__init__(op)
         self.accumulator = None
 
     def receive(self, x):
@@ -169,9 +169,9 @@ class NonGroupingReducer(Reducer):
             accumulator = list(x)
             self.accumulator = accumulator
         else:
-            reducers = self.reducers
+            function = self.function
             for i in range(self.n):
-                accumulator[i] = reducers[i](accumulator[i], x[i])
+                accumulator[i] = function[i](accumulator[i], x[i])
         if self.op.incremental:
             self.op.send(normalize_output(x + tuple(accumulator)))
 
@@ -183,9 +183,9 @@ class NonGroupingReducer(Reducer):
 
 class GroupingReducer(Reducer):
 
-    def __init__(self, reducers, grouping_positions, data_positions, op):
-        super().__init__(reducers, op)
-        self.reducers = reducers
+    def __init__(self, op, grouping_positions, data_positions):
+        super().__init__(op)
+        self.function = op.function
         self.grouping_positions = grouping_positions
         self.data_positions = data_positions
         self.accumulators = {}  # group -> accumulator
@@ -198,7 +198,7 @@ class GroupingReducer(Reducer):
             self.accumulators[group] = accumulator
         else:
             for i in range(self.n):
-                reducer = self.reducers[i]
+                reducer = self.function[i]
                 if reducer:
                     accumulator[i] = reducer(accumulator[i], x[i])
                 # else: x[i] is part of the group

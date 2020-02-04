@@ -42,7 +42,7 @@ class Cd(osh.core.Op):
     def doc(self):
         return self.__doc__
 
-    def setup(self):
+    def setup_1(self):
         self.directory = pathlib.Path(self.directory)
 
     def execute(self):

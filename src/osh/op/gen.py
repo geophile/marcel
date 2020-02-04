@@ -53,7 +53,7 @@ class Gen(osh.core.Op):
     def doc(self):
         return self.__doc__
 
-    def setup(self):
+    def setup_1(self):
         if self.pad is not None:
             if self.count == 0:
                 Gen.argparser.error('Padding incompatible with unbounded output')

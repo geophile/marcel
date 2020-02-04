@@ -41,6 +41,10 @@ class Test:
         Test.failures += 1
 
     @staticmethod
+    def run_unwrapped(command, expected_out=None, expected_err=None, file=None):
+        run_command(command)
+
+    @staticmethod
     def run(command, expected_out=None, expected_err=None, file=None):
         out = io.StringIO()
         err = io.StringIO()
@@ -550,7 +554,7 @@ def test_window():
                            ((6,), (7,), (8,)),
                            ((9,), (None,), (None,))])
     # Negative-test args
-    Test.run('gen 10 | window -d 3 -o 2',
+    Test.run('gen 10 | window -d 33 -o 22',
              expected_err='argument -o/--overlap: not allowed with argument -d/--disjoint')
     Test.run('gen 10 | window',
              expected_err='Incorrect arguments given for window')
@@ -567,38 +571,43 @@ def test_escape():
 
 
 def test_fork():
-    Test.run('@3 [ gen 3 ]',
-             expected_out=[(0, 0), (0, 1), (0, 2),
-                           (1, 0), (1, 1), (1, 2),
-                           (2, 0), (2, 1), (2, 2)])
     Test.run('@1 [ gen 3 100 ]',
              expected_out=[(0, 100), (0, 101), (0, 102)])
-    # Test.run('@3 [ gen 3 100 ] | sort',
-    #          expected_out=[(0, 100), (0, 101), (0, 102),
-    #                        (1, 100), (1, 101), (1, 102),
-    #                        (2, 100), (2, 101), (2, 102)])
+    Test.run('@3 [ gen 3 100 ] | sort',
+             expected_out=[(0, 100), (0, 101), (0, 102),
+                           (1, 100), (1, 101), (1, 102),
+                           (2, 100), (2, 101), (2, 102)])
+
+
+def main_stable():
+    test_no_such_op()
+    test_gen()
+    test_out()
+    test_sort()
+    test_map()
+    test_ls()
+    test_select()
+    test_red()
+    test_expand()
+    test_head()
+    test_tail()
+    test_reverse()
+    test_squish()
+    test_unique()
+    test_window()
+    test_escape()
+    test_fork()
+
+
+def main_dev():
+    pass
+    # TODO: test_ps()  How?
+    # TODO: test cd: absolute, relative, target does not exist
 
 
 def main():
-    # test_no_such_op()
-    # test_gen()
-    # test_out()
-    # test_sort()
-    # test_map()
-    # test_ls()
-    # test_select()
-    # test_red()
-    # test_expand()
-    # test_head()
-    # test_tail()
-    # test_reverse()
-    # test_squish()
-    # test_unique()
-    # test_window()
-    # test_escape()
-    test_fork()
-    # TODO: test_ps()  How?
-    # TODO: test cd: absolute, relative, target does not exist
+    main_stable()
+    main_dev()
     print('Test failures: %s' % Test.failures)
 
 

@@ -37,7 +37,7 @@ class Unique(osh.core.Op):
     def doc(self):
         return __doc__
 
-    def setup(self):
+    def setup_1(self):
         self.uniquer = ConsecutiveUniquer(self) if self.consecutive else GeneralUniquer(self)
 
     def receive(self, x):
