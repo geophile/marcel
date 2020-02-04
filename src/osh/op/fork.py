@@ -38,11 +38,12 @@ class Fork(osh.core.Op):
         assert False
 
     def setup_1(self):
-        self.fork_pipeline.append(LabelThread())
-        # Don't set label_thread_op.receiver here. Don't want the receiver cloned, we want all the cloned
-        # pipelines connected to the same receiver.
+        # Could append the LabelThread op here, but it would be wrong to set its receiver here.
+        # Don't want the receiver cloned, we want all the cloned pipelines connected to the same receiver.
+        pass
 
     def setup_2(self):
+        self.fork_pipeline.append(LabelThread())
         for thread_label in self.thread_labels():
             pipeline_copy = clone(self.fork_pipeline)
             label_thread_op_copy = pipeline_copy.last_op
