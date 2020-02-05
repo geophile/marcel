@@ -1,3 +1,6 @@
+import osh.env
+
+
 class Function:
 
     symbols = {
@@ -18,7 +21,13 @@ class Function:
         self.source = source.strip()
         self.function = None
         # create_function makes sure that the function source is correct, throwing an exception if not.
-        self.create_function()
+        try:
+            self.create_function()
+        except BaseException as e:
+            print('(%s) %s' % (type(e), e))
+
+    def __repr__(self):
+        return self.source
 
     def __call__(self, *args, **kwargs):
         # Unpickling preserves source but not function, (and doesn't call __init__),
@@ -36,12 +45,13 @@ class Function:
         self.__dict__.update(state)
 
     def create_function(self):
+        env = osh.env.ENV
         self.function = Function.symbols.get(self.source, None)
         if self.function is None:
             if self.source.split()[0] in ('lambda', 'lambda:'):
-                self.function = eval(self.source)
+                self.function = eval(self.source, env.globals())
             else:
                 try:
-                    self.function = eval('lambda ' + self.source)
+                    self.function = eval('lambda ' + self.source, env.globals())
                 except SyntaxError:
-                    self.function = eval('lambda: ' + self.source)
+                    self.function = eval('lambda: ' + self.source, env.globals())

@@ -219,12 +219,7 @@ class Pipeline(BaseOp):
             op = op.next_op
 
     def execute(self):
-        try:
-            self.first_op.execute()
-        except osh.error.CommandKiller:
-            raise
-        except Exception as e:
-            osh.error.exception_handler(e, self.first_op, None)
+        self.first_op.execute()
 
     def receive(self, x):
         self.first_op.receive(x)

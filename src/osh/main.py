@@ -1,12 +1,10 @@
-import sys
 import readline
 
 from osh.core import Command
 from osh.error import CommandKiller
 from osh.parse import Parser
 from osh.util import *
-
-PROMPT = '>'
+import osh.env
 
 
 def run_command(line):
@@ -24,7 +22,7 @@ def process_input(handle_line):
     try:
         while True:
             try:
-                line = input('> ')
+                line = input(osh.env.ENV.prompt())
                 handle_line(line)
             except KeyboardInterrupt:  # ctrl-C
                 print()
@@ -33,6 +31,8 @@ def process_input(handle_line):
 
 
 def main():
+    config_path = sys.argv[1] if len(sys.argv) > 1 else None
+    osh.env.Environment.initialize(config_path)
     process_input(run_command)
 
 

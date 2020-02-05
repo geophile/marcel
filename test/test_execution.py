@@ -41,7 +41,7 @@ class Test:
         Test.failures += 1
 
     @staticmethod
-    def run_unwrapped(command, expected_out=None, expected_err=None, file=None):
+    def run_unwrapped(command):
         run_command(command)
 
     @staticmethod
@@ -579,6 +579,27 @@ def test_fork():
                            (2, 100), (2, 101), (2, 102)])
 
 
+def test_namespace():
+    config_file = '/tmp/.osh2rc'
+    config_path = pathlib.Path(config_file)
+    # Default namespace has just __builtins__
+    config_path.unlink()
+    config_path.touch()
+    osh.env.Environment.initialize(config_file)
+    Test.run('map (globals().keys())',
+             expected_out=["dict_keys(['__builtins__'])"])
+    # Try to use an undefined symbol
+    Test.run('map (pi)',
+             expected_err="name 'pi' is not defined")
+    # Try a namespace importing symbols in the math module
+    config_path.unlink()
+    with open(config_file, 'w') as file:
+        file.writelines('from math import *')
+    osh.env.Environment.initialize(config_file)
+    Test.run('map (pi)',
+             expected_out=['3.141592653589793'])
+
+
 def main_stable():
     test_no_such_op()
     test_gen()
@@ -597,6 +618,7 @@ def main_stable():
     test_window()
     test_escape()
     test_fork()
+    test_namespace()
 
 
 def main_dev():
@@ -606,7 +628,7 @@ def main_dev():
 
 
 def main():
-    main_stable()
+    # main_stable()
     main_dev()
     print('Test failures: %s' % Test.failures)
 
