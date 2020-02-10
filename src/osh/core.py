@@ -136,7 +136,6 @@ class BaseOp(object):
     
     def connect(self, new_op):
         self.next_op = new_op
-        return self
 
 
 class Op(BaseOp):
@@ -231,12 +230,19 @@ class Pipeline(BaseOp):
 
     def append(self, op):
         if self.last_op:
+            assert self.first_op is not None
             self.last_op.connect(op)
         else:
             self.first_op = op
         self.last_op = op
-        return self
 
+    def prepend(self, op):
+        if self.first_op:
+            assert self.last_op is not None
+            op.connect(self.first_op)
+        else:
+            self.first_op = op
+        self.last_op = op
 
 class Command:
 

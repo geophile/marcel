@@ -603,6 +603,11 @@ def test_namespace():
     reset_environment()
 
 
+def test_remote():
+    Test.run('@jao [ gen 3 ]',
+             expected_out=[('localhost', 0), ('localhost', 1), ('localhost', 2)])
+
+
 def reset_environment():
     osh.env.Environment.initialize('./.osh2rc')
 
@@ -629,7 +634,7 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_remote()
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
 
