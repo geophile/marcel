@@ -100,7 +100,7 @@ class Expander:
     @staticmethod
     def expand(x):
         if is_sequence(x):
-            if len(x) > 1:
+            if len(x) != 1:
                 return x
             only = x[0]
             # TODO: Generators

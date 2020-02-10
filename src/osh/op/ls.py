@@ -29,7 +29,7 @@ import argparse
 import pathlib
 
 import osh.core
-from osh.env import ENV
+import osh.env
 from osh.object.file import File
 
 
@@ -96,11 +96,11 @@ class Ls(osh.core.Op):
             self.dir = True
             self.symlink = True
         if len(self.filename) == 0:
-            self.filename = [ENV.pwd().as_posix()]
+            self.filename = [osh.env.ENV.pwd().as_posix()]
 
     def execute(self):
         for filename in self.filename:
-            x = (ENV.pwd() / filename).resolve()
+            x = (osh.env.ENV.pwd() / filename).resolve()
             if x.exists():
                 if x.is_dir():
                     for file in x.iterdir():
@@ -114,7 +114,7 @@ class Ls(osh.core.Op):
                     pattern = filename[1:]
                     paths = root.glob(pattern)
                 else:
-                    paths = ENV.pwd().glob(filename)
+                    paths = osh.env.ENV.pwd().glob(filename)
                 for path in paths:
                     self.visit(path, 0)
 

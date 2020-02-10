@@ -1,6 +1,7 @@
 import pathlib
 
 import osh.error
+import osh.object.cluster
 
 
 ENV = None
@@ -39,6 +40,10 @@ class Environment:
 
     def globals(self):
         return self._globals
+
+    def cluster(self, name):
+        symbol = self._globals.get(name, None)
+        return symbol if symbol and type(symbol) is osh.object.cluster.Cluster else None
 
     def read_config(self, requested_config_path):
         config_path = (pathlib.Path(requested_config_path)

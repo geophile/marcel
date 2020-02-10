@@ -1,3 +1,6 @@
+import osh.object.host
+
+
 class Cluster:
 
     def __init__(self, name):
@@ -7,7 +10,7 @@ class Cluster:
         self._identity = None
 
     def __repr__(self):
-        return '%s[%s]' % (self._name, ', '.join(self._hosts))
+        return '%s[%s]' % (self._name, ', '.join([str(host) for host in self._hosts]))
 
     @property
     def name(self):
@@ -18,21 +21,21 @@ class Cluster:
         return self._hosts
 
     @hosts.setter
-    def hosts(self, x):
-        self._hosts = x
+    def hosts(self, hosts):
+        self._hosts = [osh.object.host.Host(host) for host in hosts]
 
     @property
     def user(self):
         return self._user
 
     @user.setter
-    def user(self, x):
-        self._user = x
+    def user(self, user):
+        self._user = user
 
     @property
     def identity(self):
         return self._identity
 
     @identity.setter
-    def identity(self, x):
-        self._identity = x
+    def identity(self, identity):
+        self._identity = identity

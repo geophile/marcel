@@ -85,3 +85,6 @@ util.py:
 - CommandKiller shouldn't print stack. (dev only),
   default_exception_handler too.
 
+- Get rid of default and related exception handlers? (See ideas.txt on replacing stderr.)
+
+- LOOK AT SHLEX MODULE -- COMMAND-LINE PARSING AND QUOTING

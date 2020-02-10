@@ -4,9 +4,9 @@ import shutil
 import contextlib
 import pathlib
 
-from osh.env import ENV
 from osh.main import run_command
 import osh.error
+import osh.env
 
 
 class Test:
@@ -143,9 +143,9 @@ def test_out():
 
 
 def test_sort():
-    # TODO: test rows, e.g. gen 5 | f (x: (x, x)) | sort
     Test.run('gen 5 | sort | out %s', expected_out=[0, 1, 2, 3, 4])
     Test.run('gen 5 | sort (lambda x: -x) | out %s', expected_out=[4, 3, 2, 1, 0])
+    Test.run('gen 5 | map (x: (-x, x)) | sort | out %s', expected_out=[(-4, 4), (-3, 3), (-2, 2), (-1, 1), (0, 0)])
 
 
 def test_ls():
@@ -239,7 +239,7 @@ def test_ls():
     Test.run('ls -r /tmp/testls/d? | map (f: f.abspath) | sort',
              expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
     # In current directory, test 0/1/r flags with file
-    ENV.cd(pathlib.Path(tmp))
+    osh.env.ENV.cd(pathlib.Path(tmp))
     Test.run('ls -0 testls/b1 | map (f: f.abspath) | sort',
              expected_out=sorted([b1]))
     Test.run('ls -1 testls/b1 | map (f: f.abspath) | sort',
@@ -269,7 +269,7 @@ def test_ls():
              expected_out=sorted([a1, a2, b1, b2, d1, d2, f11, f12, f13, f21, f22, f23, d21, f211, f212]))
     # TODO: symlinks
     # Test multiple filenames/globs
-    ENV.cd(pathlib.Path(base))
+    osh.env.ENV.cd(pathlib.Path(base))
     Test.run('ls -0 a1 b* | map (f: f.abspath) | sort',
              expected_out=sorted([a1, b1, b2]))
     Test.run('ls -0 *2 d1/f* | map (f: f.abspath) | sort',
@@ -583,6 +583,7 @@ def test_namespace():
     config_file = '/tmp/.osh2rc'
     config_path = pathlib.Path(config_file)
     # Default namespace has just __builtins__
+    config_path.touch()
     config_path.unlink()
     config_path.touch()
     osh.env.Environment.initialize(config_file)
@@ -598,6 +599,12 @@ def test_namespace():
     osh.env.Environment.initialize(config_file)
     Test.run('map (pi)',
              expected_out=['3.141592653589793'])
+    # Reset environment
+    reset_environment()
+
+
+def reset_environment():
+    osh.env.Environment.initialize('./.osh2rc')
 
 
 def main_stable():
@@ -628,7 +635,8 @@ def main_dev():
 
 
 def main():
-    # main_stable()
+    reset_environment()
+    main_stable()
     main_dev()
     print('Test failures: %s' % Test.failures)
 

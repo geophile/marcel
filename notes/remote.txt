@@ -1,0 +1,60 @@
+osh1:
+
+- Fork creates copies of its pipeline and assigns one to each thread.
+
+- In case of a remote fork, the pipeline is wrapped by a Remote operator.
+
+- Remote executes by creating a Spawn object, which:
+
+    - Creates an ssh command invoking remoteosh
+
+    - Setting up input, output and error streams.
+
+    - The pipeline to be executed remotely is sent on the input stream.
+
+    - stdout and stderr come back on the output and error streams.
+
+    - Wait for output to complete (Popen.wait)
+
+    - Close input stream
+
+    - ctrl-c calls spawn.kill_all_processes. If the process is
+      communicating remotely, then a kill signal is sent. In any case,
+      the process itself is killed.
+
+- remoteosh
+
+    - Gets pipeline from stdin and runs it in a thread.
+
+    - If kill signal shows up, then kill the process running the
+      pipeline, and descendents.
+
+    - If stdin (which carried the pipeline) is closed, then again,
+      kill self and descendents.
+
+Spawn relies on Popen and pipes, which has this warning:
+
+      Warning: This will deadlock when using stdout=PIPE and/or
+      stderr=PIPE and the child process generates enough output to a
+      pipe such that it blocks waiting for the OS pipe buffer to
+      accept more data. Use communicate() to avoid that.
+
+So if there is a lot of output from the remote process, then the use
+of Popen.wait to wait for output to complete is a bad idea.
+
+
+----------------------------------------------------------------------
+
+osh2:
+
+subprocess.run() can capture output or specify PIPE. PIPE seems to
+buffer all output. Popen.PIPE would allow for Spawn-like buffering, I
+think.
+
+Just do the buffering. If the volume of data being accumulated becomes
+an issue, then I can do something more complicated then.
+
+Although: Besides the memory requirement, there is the delay -- no
+output back on the client until execution is finished.
+
+See socket.makefile

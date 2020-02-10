@@ -10,7 +10,7 @@ import pathlib
 
 import osh.core
 import osh.error
-from osh.env import ENV
+import osh.env
 
 
 def cd():
@@ -46,7 +46,7 @@ class Cd(osh.core.Op):
         self.directory = pathlib.Path(self.directory)
 
     def execute(self):
-        ENV.cd(self.directory)
+        osh.env.ENV.cd(self.directory)
 
     # Op
 

@@ -1,1 +1,1 @@
-from osh.cluster import Cluster
+from osh.object.cluster import Cluster

@@ -15,11 +15,11 @@ def processes(*dummy):
     object in the list may correspond to a process that has terminated by the time
     you use the object.
     """
-    processes = []
+    process_list = []
     for file in os.listdir('/proc'):
         if file.isdigit():
-            processes.append(Process(int(file)))
-    return processes
+            process_list.append(Process(int(file)))
+    return process_list
 
 
 class Process:
@@ -34,6 +34,7 @@ class Process:
         """
         self._pid = pid
         self._status = self._read_status_file()
+        self._descendents = None
         if self._status is not None:
             self._init_parent()
             self._init_state()
@@ -73,9 +74,6 @@ class Process:
     def __ge__(self, other):
         return self.pid >= other.pid
 
-    def __hash__(self):
-        return self.pid.__hash__()
-
     pid = property(lambda self: self._pid,
                    doc='The PID of this C{Process}.')
 
@@ -97,10 +95,31 @@ class Process:
     env = property(lambda self: self._env, 
                    doc='A map describing the environment in effect during the creation of this C{Process}.')
 
+    descendents = property(lambda self: self._find_descendents())
+
     def kill(self, signal=None):
         """Send the indicated C{signal} to this process.
         """
         os.kill(self._pid, signal)
+
+    def _find_descendents(self):
+        if self._descendents is None:
+            processes = set()
+            for file in os.listdir('/proc'):
+                if file.isdigit():
+                    processes.add(Process(int(file)))
+            descendents = set()
+            descendents.add(self)
+            more = True
+            while more:
+                more = False
+                for p in processes:
+                    if p.parent in descendents and p not in descendents:
+                        descendents.add(p)
+                        more = True
+            descendents.remove(self)
+            self._descendents = list(descendents)
+        return self._descendents
 
     def _read_status_file(self):
         try:

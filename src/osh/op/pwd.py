@@ -3,11 +3,8 @@
 Output the current directory.
 """
 
-import pathlib
-
-import osh.core
 import osh.error
-from osh.env import ENV
+import osh.env
 
 
 def pwd():
@@ -39,7 +36,7 @@ class Pwd(osh.core.Op):
         pass
 
     def execute(self):
-        self.send(ENV.pwd())
+        self.send(osh.env.ENV.pwd())
 
     # Op
 
