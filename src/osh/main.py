@@ -1,10 +1,10 @@
 import readline
 
+import osh.env
 from osh.core import Command
-from osh.error import CommandKiller
+from osh.error import KillCommandException
 from osh.parse import Parser
 from osh.util import *
-import osh.env
 
 
 def run_command(line):
@@ -13,7 +13,7 @@ def run_command(line):
             pipeline = Parser(line).parse()
             command = Command(pipeline)
             command.execute()
-        except CommandKiller as e:
+        except KillCommandException as e:
             print(e, file=sys.stderr)
 
 

@@ -60,8 +60,6 @@ tuples::
     ((9,), (None,), (None,))
 """
 
-import sys
-
 import osh.core
 import osh.error
 import osh.function
@@ -125,9 +123,10 @@ class Window(osh.core.Op):
         count += 1 if self.overlap is not None else 0
         count += 1 if self.disjoint is not None else 0
         if count != 1:
-            raise osh.error.CommandKiller('Incorrect arguments given for window.')
+            raise osh.error.KillCommandException('Incorrect arguments given for window.')
         if self.predicate:
             self.window_generator = PredicateWindow(self)
+            self.predicate.set_op(self)
         elif self.overlap:
             self.window_generator = OverlapWindow(self)
             self.n = self.overlap

@@ -1,9 +1,9 @@
-import sys
 import argparse
+import sys
 
-import osh.util
 import osh.error
 import osh.function
+import osh.util
 
 
 class OshArgParser(argparse.ArgumentParser):
@@ -12,7 +12,7 @@ class OshArgParser(argparse.ArgumentParser):
         super().__init__(prog=op_name)
 
     def exit(self, status=0, message=None):
-        raise osh.error.CommandKiller(message)
+        raise osh.error.KillCommandException(message)
 
     @staticmethod
     def constrained_type(check_and_convert, message):
@@ -71,7 +71,7 @@ class BaseOp(object):
         if message is None:
             message = self.doc()
         print(message, file=sys.stderr)
-        raise osh.error.CommandKiller(None)
+        raise osh.error.KillCommandException(None)
 
     def doc(self):
         """Print op usage information.
@@ -98,25 +98,20 @@ class BaseOp(object):
         """Called by a op class to send an object of op output to
         the next op.
         """
-        try:
-            if self.receiver:
+        if self.receiver:
+            try:
                 self.receiver.receive(osh.util.normalize_output(x))
-        except osh.error.CommandKiller:
-            raise
-        except Exception as e:
-            osh.error.exception_handler(e, self.receiver, x)
+            except osh.error.KillAndResumeException:
+                # Just need to stop the exception from propagating and killing
+                # everything. The exception __init__ already printed to stderr.
+                pass
 
     def send_complete(self):
         """Called by a op class to indicate that there will
         be no more output from the op.
         """
-        try:
-            if self.receiver:
-                self.receiver.receive_complete()
-        except osh.error.CommandKiller:
-            raise
-        except Exception as e:
-            osh.error.exception_handler(e, self.receiver, None)
+        if self.receiver:
+            self.receiver.receive_complete()
 
     def receive(self, x):
         """Implemented by a op class to process an input object.
@@ -268,4 +263,4 @@ class Command:
             self.pipeline.execute()
             self.pipeline.receive_complete()
         except BaseException as e:
-            raise osh.error.CommandKiller(e)
+            raise osh.error.KillCommandException(e)

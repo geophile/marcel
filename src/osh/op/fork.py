@@ -1,7 +1,6 @@
 import threading
 
 import osh.core
-import osh.op
 from osh.op.labelthread import LabelThread
 from osh.util import clone
 
@@ -40,7 +39,7 @@ class Fork(osh.core.Op):
 
     def setup_1(self):
         if self.remote:
-            self.fork_pipeline.prepend(Remote())
+            self.fork_pipeline.prepend(osh.op.remote.Remote())
         self.fork_pipeline.append(LabelThread())
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
@@ -82,5 +81,5 @@ class Fork(osh.core.Op):
                 labels = [str(host) for host in cluster.hosts]
                 self.remote = True
         if labels is None:
-            raise osh.error.CommandKiller('Invalid fork spec @%s' % self.fork_spec)
+            raise osh.error.KillCommandException('Invalid fork spec @%s' % self.fork_spec)
         return labels

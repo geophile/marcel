@@ -47,10 +47,12 @@ class Bash(osh.core.Op):
             print(outcome.stderr, file=sys.stderr)
         else:
             output = outcome.stdout.split('\n')
+            if len(output[-1]) == 0:
+                output = output[:-1]
             for line in output:
                 self.send(line)
 
-    # TODO: Escape not as first op in pipeline. Input stream somehow gets mapped to stdin.
+    # TODO: bash not as first op in pipeline. Input stream somehow gets mapped to stdin.
 
     # Op
 

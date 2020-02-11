@@ -1,5 +1,5 @@
-import socket
 import ipaddress
+import socket
 
 import osh.error
 
@@ -17,7 +17,7 @@ class Host:
                 self.ip_addr = ipaddress.ip_address(socket.gethostbyname(host))
                 self.name = host
             except socket.gaierror:
-                raise osh.error.CommandKiller('Cannot understand %s as a host name or as an IP address.' % host)
+                raise osh.error.KillCommandException('Cannot understand %s as a host name or as an IP address.' % host)
 
     def __repr__(self):
         return self.host

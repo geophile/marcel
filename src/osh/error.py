@@ -14,14 +14,12 @@ An C{error_handler} is a function with these arguments:
     - C{thread}: The thread on which the stderr output occurred,
 """
 
-import sys
-
 from osh.util import *
 
 
-# Exception thrown by exception handler needs to terminate command. By extending
-# BaseException, it is not intercepted by "except Exception".
-class CommandKiller(BaseException):
+# Exception for terminating command. By extending BaseException, this exception
+# cannot be caught by "except Exception".
+class KillCommandException(BaseException):
 
     def __init__(self, cause):
         super().__init__()
@@ -30,6 +28,20 @@ class CommandKiller(BaseException):
 
     def __str__(self):
         return str(self.cause)
+
+
+# Exception thrown to indicate that an op cannot complete for the current input,
+# but command execution should continue.
+class KillAndResumeException(BaseException):
+
+    def __init__(self, op, input, message):
+        super().__init__()
+        self.op = op
+        self.message = message
+        print('%s failed on %s: %s' % (op, input, message), file=sys.stderr)
+
+    def __str__(self):
+        return 'KillAndResumeException(op=%s, cause=%s)' % (self.op, self.message)
 
 
 def _format_input_for_reporting(command_input, buffer):
@@ -68,7 +80,7 @@ def set_exception_handler(handler):
         try:
             handler(exception, op, command_input, thread)
         except Exception as e:
-            raise CommandKiller(e)
+            raise KillCommandException(e)
     exception_handler = wrap_provided_exception_handler
 
 
@@ -92,7 +104,7 @@ def set_stderr_handler(handler):
         try:
             handler(line, op, command_input, thread)
         except Exception as e:
-            raise CommandKiller(e)
+            raise KillCommandException(e)
     global stderr_handler
     stderr_handler = wrap_provided_stderr_handler
 

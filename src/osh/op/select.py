@@ -37,7 +37,7 @@ class Select(osh.core.Op):
         return __doc__
 
     def setup_1(self):
-        pass
+        self.function.set_op(self)
 
     def receive(self, x):
         if self.function(*x):

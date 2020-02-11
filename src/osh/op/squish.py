@@ -51,6 +51,7 @@ class Squish(osh.core.Op):
     def setup_1(self):
         if self.function is None:
             self.function = osh.function.Function('+')
+        self.function.set_op(self)
 
     def receive(self, x):
         self.send(functools.reduce(self.function, x))

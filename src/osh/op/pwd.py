@@ -3,8 +3,8 @@
 Output the current directory.
 """
 
-import osh.error
 import osh.env
+import osh.error
 
 
 def pwd():

@@ -1,10 +1,10 @@
 from enum import Enum, auto
 
-from osh.opmodules import OP_MODULES
 import osh.core
 import osh.error
 import osh.function
 import osh.op.fork
+from osh.opmodules import OP_MODULES
 from osh.util import *
 
 
@@ -173,7 +173,7 @@ class PythonExpression(Token):
             elif c in Token.QUOTES:
                 self.end = PythonString(self.text, self.end - 1).end
         if self.text[self.end - 1] != Token.CLOSE:
-            raise osh.error.CommandKiller('Malformed Python expression %s' % self.text[self.start:self.end])
+            raise osh.error.KillCommandException('Malformed Python expression %s' % self.text[self.start:self.end])
 
 
 class ShellString(Token):
@@ -228,7 +228,7 @@ class ShellString(Token):
                         chars.append(Token.ESCAPE_CHAR)
                         chars.append(c)
                 else:
-                    raise osh.error.CommandKiller('Malformed string: %s' % self.text[self.start:self.end])
+                    raise osh.error.KillCommandException('Malformed string: %s' % self.text[self.start:self.end])
             else:
                 chars.append(c)
         self.string = ''.join(chars)
@@ -426,7 +426,7 @@ class Parser(Token):
             assert self.pipelines.is_empty()
             return pipeline
         except Exception as e:
-            raise osh.error.CommandKiller(e)
+            raise osh.error.KillCommandException(e)
 
     def next_token(self):
         token = None

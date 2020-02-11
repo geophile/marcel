@@ -3,7 +3,6 @@ import pathlib
 import osh.error
 import osh.object.cluster
 
-
 ENV = None
 
 
@@ -35,8 +34,8 @@ class Environment:
         try:
             self._current_dir = new_dir.resolve(strict=True)
         except FileNotFoundError:
-            raise osh.error.CommandKiller('Cannot cd into %s from %s. Target %s does not exist.' %
-                                          (directory, self._current_dir, new_dir))
+            raise osh.error.KillCommandException('Cannot cd into %s from %s. Target %s does not exist.' %
+                                                 (directory, self._current_dir, new_dir))
 
     def globals(self):
         return self._globals

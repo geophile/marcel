@@ -16,7 +16,7 @@ class OpModules:
         try:
             return self.modules[name]
         except KeyError:
-            raise osh.error.CommandKiller('%s is not recognized as a command' % name)
+            raise osh.error.KillCommandException('%s is not recognized as a command' % name)
 
 
 OP_MODULES = OpModules()

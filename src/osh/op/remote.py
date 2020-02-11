@@ -1,13 +1,12 @@
-import subprocess
 import io
 import pickle
+import subprocess
 import sys
 
 import osh.ssh
 
 
 class Remote(osh.core.Op):
-
     def __init__(self, host, pipeline):
         super().__init__()
         self.host = host
@@ -15,7 +14,7 @@ class Remote(osh.core.Op):
         self.process = None
 
     def __repr__(self):
-        return 'remote()'
+        return 'remote(host=%s)' % self.host
 
     # BaseOp
 

@@ -20,11 +20,9 @@ class Function:
     def __init__(self, source):
         self.source = source.strip()
         self.function = None
+        self.op = None
         # create_function makes sure that the function source is correct, throwing an exception if not.
-        try:
-            self.create_function()
-        except BaseException as e:
-            print('(%s) %s' % (type(e), e))
+        self.create_function()
 
     def __repr__(self):
         return self.source
@@ -35,7 +33,16 @@ class Function:
         if self.function is None:
             self.create_function()
         assert self.function is not None
-        return self.function(*args, **kwargs)
+        try:
+            return self.function(*args, **kwargs)
+        except Exception as e:
+            function_input = []
+            if len(args) > 0:
+                function_input.append(str(args))
+            if len(kwargs) > 0:
+                function_input.append(str(kwargs))
+            function_input_string = ', '.join(function_input)
+            raise osh.error.KillAndResumeException(self.op, function_input_string, str(e))
 
     def __getstate__(self):
         self.function = None
@@ -43,6 +50,9 @@ class Function:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
+
+    def set_op(self, op):
+        self.op = op
 
     def create_function(self):
         env = osh.env.ENV

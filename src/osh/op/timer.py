@@ -122,7 +122,7 @@ class Timer(osh.core.Op):
             ss = int(interval[colon2 + 1:])
             return hh * 3600 + mm * 60 + ss
         except Exception as e:
-            raise osh.error.CommandKiller('Bad interval format: %s' % e)
+            raise osh.error.KillCommandException('Bad interval format: %s' % e)
 
     def register_tick(self):
         self.lock.acquire()

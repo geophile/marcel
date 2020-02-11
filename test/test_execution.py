@@ -5,7 +5,6 @@ import contextlib
 import pathlib
 
 from osh.main import run_command
-import osh.error
 import osh.env
 
 
@@ -63,8 +62,8 @@ class Test:
         except Exception as e:
             print('%s: Terminated by uncaught exception: %s' % (command, e))
             Test.failures += 1
-        except osh.error.CommandKiller as e:
-            print('%s: Terminated by CommandKiller: %s' % (command, e))
+        except osh.error.KillCommandException as e:
+            print('%s: Terminated by KillCommandException: %s' % (command, e))
 
     @staticmethod
     def file_contents(filename):
@@ -112,6 +111,10 @@ def test_gen():
              expected_err='unrecognized arguments: 99')
     Test.run('gen 3 -10 -p 4 | out',
              expected_err='Padding incompatible with START < 0')
+    # Error along with output
+    Test.run('gen 3 | map (x: 6 / x)',
+             expected_out=[6.0, 3.0],
+             expected_err='division by zero')
 
 
 def test_out():
@@ -562,10 +565,10 @@ def test_window():
              expected_err='Incorrect arguments given for window')
 
 
-def test_escape():
+def test_bash():
     Test.run('bash echo hello  world',
-             expected_out=['hello world\n'])
-    # TODO: This doesn't work. quoted string has two apces, but output has one.
+             expected_out=['hello world'])
+    # TODO: This doesn't work. quoted string has two spaces, but output has one.
     # Test.run('bash echo "hello  world"',
     #          expected_out=['hello  world\n'])
 
@@ -606,6 +609,9 @@ def test_namespace():
 def test_remote():
     Test.run('@jao [ gen 3 ]',
              expected_out=[('localhost', 0), ('localhost', 1), ('localhost', 2)])
+    Test.run('@jao [ gen 3 | map (x: 6 / x) ]',
+             expected_out=[('localhost', 6.0), ('localhost', 3.0)],
+             expected_err='division by zero')
 
 
 def reset_environment():
@@ -628,7 +634,7 @@ def main_stable():
     test_squish()
     test_unique()
     test_window()
-    test_escape()
+    test_bash()
     test_fork()
     test_namespace()
 

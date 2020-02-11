@@ -7,8 +7,6 @@ to the values obtained by applying the KEY function to the input objects.
 KEY                        Obtains the sort key. If omitted, the object itself is used as the sort key.
 """
 
-import sys
-
 import osh.core
 
 
@@ -45,7 +43,8 @@ class Sort(osh.core.Op):
         return __doc__
 
     def setup_1(self):
-        pass
+        if self.key:
+            self.key.set_op(self)
     
     def receive(self, x):
         self.contents.append(x)

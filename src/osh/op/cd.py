@@ -9,8 +9,8 @@ TODO: .. and .
 import pathlib
 
 import osh.core
-import osh.error
 import osh.env
+import osh.error
 
 
 def cd():
