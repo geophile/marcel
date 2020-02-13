@@ -6,6 +6,11 @@ import pathlib
 
 from osh.main import run_command
 import osh.env
+import osh.core
+import osh.object.host
+from osh.util import *
+
+Error = osh.core.OshError
 
 
 class Test:
@@ -19,8 +24,31 @@ class Test:
         path.open()
 
     @staticmethod
-    def check_eq(command, expected, actual):
-        if expected != actual:
+    def check_ok(command, expected, actual):
+        expected = expected.split('\n')
+        actual = actual.split('\n')
+        ok = True
+        n = len(expected)
+        if len(actual) == n:
+            i = 0
+            while ok and i < n:
+                e = expected[i]
+                a = actual[i]
+                e_error = e.startswith('Error(') and e.endswith(')')
+                a_error = a.startswith('Error(') and a.endswith(')')
+                if e_error and a_error:
+                    # Check that e message is a substring of a message
+                    e_message = e[6:-1]
+                    a_message = a[6:-1]
+                    ok = e_message in a_message
+                elif e_error or a_error:
+                    ok = False
+                else:
+                    ok = a == e
+                i += 1
+        else:
+            ok = False
+        if not ok:
             print('%s failed:' % command)
             print('    expected:\n<<<%s>>>' % expected)
             print('    actual:\n<<<%s>>>' % actual)
@@ -52,15 +80,15 @@ class Test:
                 run_command(command)
             actual_out = Test.file_contents(file) if file else out.getvalue()
             actual_err = err.getvalue()
-            Test.check_eq(command,
-                          Test.to_string(expected_out) if expected_out else '',
-                          actual_out)
+            if expected_out:
+                Test.check_ok(command, Test.to_string(expected_out), actual_out)
             if expected_err:
                 Test.check_substring(command, expected_err, actual_err)
             elif actual_err:
                 Test.fail(command, 'Unexpected error: %s' % actual_err)
         except Exception as e:
             print('%s: Terminated by uncaught exception: %s' % (command, e))
+            print_stack()
             Test.failures += 1
         except osh.error.KillCommandException as e:
             print('%s: Terminated by KillCommandException: %s' % (command, e))
@@ -91,8 +119,12 @@ def test_no_such_op():
 
 
 def test_gen():
+    # Explicit out
     Test.run('gen 5 | out',
              expected_out=[(0,), (1,), (2,), (3,), (4,)])
+    # Implicit out
+    Test.run('gen 5',
+             expected_out=[0, 1, 2, 3, 4])
     Test.run('gen 5 10 | out',
              expected_out=[(10,), (11,), (12,), (13,), (14,)])
     Test.run('gen 5 10 123 | out',
@@ -112,9 +144,8 @@ def test_gen():
     Test.run('gen 3 -10 -p 4 | out',
              expected_err='Padding incompatible with START < 0')
     # Error along with output
-    Test.run('gen 3 | map (x: 6 / x)',
-             expected_out=[6.0, 3.0],
-             expected_err='division by zero')
+    Test.run('gen 3 -1 | map (x: 5 / x)',
+             expected_out=[-5.0, Error('division by zero'), 5.0])
 
 
 def test_out():
@@ -607,11 +638,11 @@ def test_namespace():
 
 
 def test_remote():
+    localhost = osh.object.host.Host('localhost', None)
     Test.run('@jao [ gen 3 ]',
-             expected_out=[('localhost', 0), ('localhost', 1), ('localhost', 2)])
-    Test.run('@jao [ gen 3 | map (x: 6 / x) ]',
-             expected_out=[('localhost', 6.0), ('localhost', 3.0)],
-             expected_err='division by zero')
+             expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
+    Test.run('@jao [ gen 3 -1 | map (x: 5 / x) ]',
+             expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
 
 
 def reset_environment():

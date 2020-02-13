@@ -18,9 +18,9 @@ class Environment:
 
     def __init__(self, config_file):
         self._globals = {}
-        self.read_config(config_file)
         self._current_dir = pathlib.Path.cwd()
         self._prompt = Environment.DEFAULT_PROMPT
+        self.read_config(config_file)
 
     def prompt(self):
         return self._prompt

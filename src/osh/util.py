@@ -1,6 +1,7 @@
 import collections.abc
 import grp
 import io
+import pathlib
 import pickle
 import pwd
 import sys
@@ -74,3 +75,18 @@ class Stack:
 
     def is_empty(self):
         return len(self.contents) == 0
+
+
+class Trace:
+
+    def __init__(self, tracefile):
+        self.path = pathlib.Path(tracefile)
+        self.path.touch(mode=0o666, exist_ok=True)
+        self.path.unlink()
+        self.file = self.path.open(mode='w')
+
+    def write(self, line):
+        print(line, file=self.file, flush=True)
+
+    def close(self):
+        self.file.close()

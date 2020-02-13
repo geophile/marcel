@@ -1,14 +1,12 @@
 #!/usr/bin/python3
 
 import os
-import sys
-import io
-import pickle
 import threading
 import signal
 
 import osh.core
 import osh.object.process
+from osh.util import *
 
 # stdin carries the following from the client process:
 #   - The pipeline to be executed
@@ -17,20 +15,29 @@ import osh.object.process
 # on a thread so that stdin can be monitored for the kill signal and then acted upon.
 
 
+TRACE = Trace('/tmp/remoteosh.log')
+
+
 class PickleOutput(osh.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.pickler = pickle.Pickler(io.BytesIO())
+        self.pickler = pickle.Pickler(sys.stdout.buffer)
 
-    def setup(self):
+    def setup_1(self):
         pass
 
     def receive(self, x):
+        TRACE.write('Pickling %s' % x)
         self.pickler.dump(x)
 
+    def receive_error(self, error):
+        TRACE.write('Pickling error: (%s) %s' % (type(error), error))
+        self.pickler.dump(error)
+        super().receive_error(error)
+
     def receive_complete(self):
-        pass
+        sys.stdout.buffer.close()
 
 
 class PipelineRunner(threading.Thread):
@@ -44,6 +51,7 @@ class PipelineRunner(threading.Thread):
         self.pipeline.setup_1()
         # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
         # supporting more than one level of nesting.
+        TRACE.write('About to run %s' % self.pipeline)
         self.pipeline.execute()
         self.pipeline.receive_complete()
 
@@ -60,19 +68,27 @@ def kill_self_and_descendents(signal_id):
 
 
 def main():
-    input = pickle.Unpickler(sys.stdin)
+    osh.env.Environment.initialize(None)
+    # Use sys.stdin.buffer because we want binary data, not the text version
+    input = pickle.Unpickler(sys.stdin.buffer)
     pipeline = input.load()
+    TRACE.write('pipeline: %s' % pipeline)
     pipeline_runner = PipelineRunner(pipeline)
     pipeline_runner.start()
     try:
         signal_id = input.load()
+        TRACE.write('Received signal %s' % signal_id)
         kill_self_and_descendents(signal_id)
     except EOFError:
         # Client closed the socket, so kill won't arrive. The thread executing the pipeline
         # should have ended, so kill if it hasn't.
+        TRACE.write('Received EOF')
         pipeline_runner.join(0.1)
         if pipeline_runner.is_alive():
             kill_self_and_descendents(signal.SIGKILL)
+    finally:
+        TRACE.write('Exiting')
+        TRACE.close()
 
 
 main()

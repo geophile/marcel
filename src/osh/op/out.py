@@ -38,7 +38,6 @@ class OutArgParser(osh.core.OshArgParser):
 
 
 class Out(osh.core.Op):
-
     argparser = OutArgParser()
 
     def __init__(self):
@@ -75,28 +74,34 @@ class Out(osh.core.Op):
         self.ensure_output_initialized()
         if self.format:
             try:
-                formatted_x = self.format % x
+                formatted = self.format % x
             except Exception as e:
                 # If there is one %s in the format, and the object is longer,
                 # then convert it to a string
                 if self.format.count('%') == 1 and self.format.count('%s') == 1:
-                    formatted_x = self.format % str(x)
+                    formatted = self.format % str(x)
                 else:
                     raise e
         elif self.csv:
-            formatted_x = (', '.join([Out.ensure_quoted(x) for x in x])
-                           if type(x) in (list, tuple)
-                           else str(x))
+            if type(x) in (list, tuple):
+                formatted = ', '.join([Out.ensure_quoted(x) for x in x])
+            else:
+                formatted = str(x)
         else:
-            formatted_x = (('(' + Out.ensure_quoted(x[0]) + ',)'
-                            if len(x) == 1
-                            else '(' + ', '.join([Out.ensure_quoted(x) for x in x]) + ')')
-                           if type(x) in (list, tuple)
-                           else str(x))
+            if type(x) in (list, tuple):
+                if len(x) == 1:
+                    formatted = '(' + Out.ensure_quoted(x[0]) + ',)'
+                else:
+                    formatted = '(' + ', '.join([Out.ensure_quoted(x) for x in x]) + ')'
+            else:
+                formatted = str(x)
         # Relying on print to provide the \n appears to result in a race condition.
-        print(formatted_x, file=self.output)
-        self.output.flush()
+        print(formatted, file=self.output, flush=True)
         self.send(x)
+
+    def receive_error(self, error):
+        print(error, file=self.output, flush=True)
+        super().receive_error(error)
 
     def receive_complete(self):
         self.ensure_output_initialized()

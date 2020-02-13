@@ -1,9 +1,8 @@
 import argparse
-import sys
 
 import osh.error
 import osh.function
-import osh.util
+from osh.util import *
 
 
 class OshArgParser(argparse.ArgumentParser):
@@ -100,11 +99,9 @@ class BaseOp(object):
         """
         if self.receiver:
             try:
-                self.receiver.receive(osh.util.normalize_output(x))
-            except osh.error.KillAndResumeException:
-                # Just need to stop the exception from propagating and killing
-                # everything. The exception __init__ already printed to stderr.
-                pass
+                self.receiver.receive_input_or_error(x)
+            except osh.error.KillAndResumeException as e:
+                self.receive_input_or_error(OshError(e))
 
     def send_complete(self):
         """Called by a op class to indicate that there will
@@ -113,10 +110,19 @@ class BaseOp(object):
         if self.receiver:
             self.receiver.receive_complete()
 
+    def receive_input_or_error(self, x):
+        if isinstance(x, OshError):
+            self.receive_error(x)
+        else:
+            self.receive(normalize_output(x))
+
     def receive(self, x):
         """Implemented by a op class to process an input object.
         """
         pass
+
+    def receive_error(self, error):
+        self.send(error)
 
     def receive_complete(self):
         """Implemented by a op class to do any cleanup required
@@ -154,29 +160,6 @@ class Op(BaseOp):
     @classmethod
     def op_name(cls):
         return cls.__name__.lower()
-
-    @staticmethod
-    def symbol_to_function(symbol):
-        if symbol == '+':
-            return lambda x, y: x + y
-        elif symbol == '*':
-            return lambda x, y: x * y
-        elif symbol == '^':
-            return lambda x, y: x ^ y
-        elif symbol == '&':
-            return lambda x, y: x & y
-        elif symbol == '|':
-            return lambda x, y: x | y
-        elif symbol == 'and':
-            return lambda x, y: x and y
-        elif symbol == 'or':
-            return lambda x, y: x or y
-        elif symbol == 'max':
-            return lambda x, y: max(x, y)
-        elif symbol == 'min':
-            return lambda x, y: min(x, y)
-        else:
-            return None
 
 
 class Pipeline(BaseOp):
@@ -231,13 +214,6 @@ class Pipeline(BaseOp):
             self.first_op = op
         self.last_op = op
 
-    def prepend(self, op):
-        if self.first_op:
-            assert self.last_op is not None
-            op.connect(self.first_op)
-        else:
-            self.first_op = op
-        self.last_op = op
 
 class Command:
 
@@ -264,3 +240,18 @@ class Command:
             self.pipeline.receive_complete()
         except BaseException as e:
             raise osh.error.KillCommandException(e)
+
+
+class OshError:
+
+    def __init__(self, cause):
+        self.message = str(cause)
+        self.host = None
+
+    def __repr__(self):
+        return ('Error(%s)' % self.message
+                if self.host is None else
+                'Error(%s, %s)' % (self.host, self.message))
+
+    def set_host(self, host):
+        self.host = host

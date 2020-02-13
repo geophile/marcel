@@ -36,12 +36,12 @@ class KillAndResumeException(BaseException):
 
     def __init__(self, op, input, message):
         super().__init__()
-        self.op = op
+        self.op = str(op)
+        self.input = input
         self.message = message
-        print('%s failed on %s: %s' % (op, input, message), file=sys.stderr)
 
     def __str__(self):
-        return 'KillAndResumeException(op=%s, cause=%s)' % (self.op, self.message)
+        return '%s failed on %s: %s' % (self.op, self.input, self.message)
 
 
 def _format_input_for_reporting(command_input, buffer):

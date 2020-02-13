@@ -22,7 +22,7 @@ class Cluster:
 
     @hosts.setter
     def hosts(self, hosts):
-        self._hosts = [osh.object.host.Host(host) for host in hosts]
+        self._hosts = [osh.object.host.Host(host, self) for host in hosts]
 
     @property
     def user(self):

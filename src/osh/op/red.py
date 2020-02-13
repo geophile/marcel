@@ -174,11 +174,11 @@ class NonGroupingReducer(Reducer):
             for i in range(self.n):
                 accumulator[i] = function[i](accumulator[i], x[i])
         if self.op.incremental:
-            self.op.send(normalize_output(x + tuple(accumulator)))
+            self.op.send(x + tuple(accumulator))
 
     def receive_complete(self):
         if not self.op.incremental:
-            self.op.send(normalize_output(self.accumulator))
+            self.op.send(self.accumulator)
         self.op.send_complete()
 
 
@@ -204,12 +204,12 @@ class GroupingReducer(Reducer):
                     accumulator[i] = reducer(accumulator[i], x[i])
                 # else: x[i] is part of the group
         if self.op.incremental:
-            self.op.send(normalize_output(x + tuple(self.data(accumulator))))
+            self.op.send(x + tuple(self.data(accumulator)))
 
     def receive_complete(self):
         if not self.op.incremental:
             for _, data in self.accumulators.items():
-                self.op.send(normalize_output(data))
+                self.op.send(data)
         self.op.send_complete()
 
     def group(self, x):

@@ -30,8 +30,13 @@ def process_input(handle_line):
         print()
 
 
-def main():
+def args():
     config_path = sys.argv[1] if len(sys.argv) > 1 else None
+    return config_path
+
+
+def main():
+    config_path = args()
     osh.env.Environment.initialize(config_path)
     process_input(run_command)
 

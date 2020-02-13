@@ -24,7 +24,11 @@ class LabelThread(osh.core.Op):
 
     def receive(self, x):
         assert self.label is not None
-        self.send(normalize_output(self.label + x))
+        self.send(self.label + x)
+
+    def receive_error(self, error):
+        error.set_host(self.label[0])
+        self.send(error)
 
     # LabelThread
 

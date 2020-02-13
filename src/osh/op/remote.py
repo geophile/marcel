@@ -7,9 +7,9 @@ import osh.ssh
 
 
 class Remote(osh.core.Op):
-    def __init__(self, host, pipeline):
+    def __init__(self, pipeline):
         super().__init__()
-        self.host = host
+        self.host = None
         self.pipeline = pipeline
         self.process = None
 
@@ -19,32 +19,45 @@ class Remote(osh.core.Op):
     # BaseOp
 
     def setup_1(self):
-        command = [
+        pass
+
+    def execute(self):
+        # Start the remote process
+        command = ' '.join([
             'ssh',
-            self.host.ip_addr,
             '-l',
             self.host.user,
+            self.host.ip_addr,
             'remoteosh.py'
-        ]
+        ])
         self.process = subprocess.Popen(command,
                                         stdin=subprocess.PIPE,
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE,
                                         shell=True,
                                         universal_newlines=False)
+        # Pickle the pipeline so that it can be sent to the remote process
         buffer = io.BytesIO()
         pickler = pickle.Pickler(buffer)
         pickler.dump(self.pipeline)
         buffer.seek(0)
-        self.process.stdin.write(buffer.read())
-        self.process.stdin.close()
-
-    def execute(self):
+        stdout, stderr = self.process.communicate(input=buffer.getvalue())
+        # Wait for completion (already guaranteed by communicate returning?)
         self.process.wait()
-        stderr = self.process.stderr.read().decode('utf-8').split('\n')
-        for line in stderr:
+        # Handle results
+        stderr_lines = stderr.decode('utf-8').split('\n')
+        if len(stderr_lines[-1]) == 0:
+            del stderr_lines[-1]
+        for line in stderr_lines:
             print(line, file=sys.stderr)
-        stdout = pickle.Unpickler(self.process.stdout.read()).load()
-        for x in stdout:
-            self.send(x)
-        self.send_complete()
+        input = pickle.Unpickler(io.BytesIO(stdout))
+        try:
+            while True:
+                self.send(input.load())
+        except EOFError:
+            self.send_complete()
+
+    # Remote
+
+    def set_host(self, host):
+        self.host = host
