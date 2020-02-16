@@ -126,14 +126,13 @@ class Ls(osh.core.Op):
     # For use by this class
 
     def visit(self, path, level):
-        interesting = (level == 0 or
-                       level == 1 and (self.d1 or self.dr) or
-                       self.dr)
-        if interesting:
-            self.send_path(path)
-            if path.is_dir():
+        self.send_path(path)
+        if path.is_dir() and ((level == 0 and (self.d1 or self.dr)) or self.dr):
+            try:
                 for file in path.iterdir():
                     self.visit(file, level + 1)
+            except PermissionError as e:
+                self.send(osh.core.OshError('Cannot explore %s: permission denied' % path))
 
     def send_path(self, path):
         if path.is_file() and self.file or path.is_dir() and self.dir or path.is_symlink() and self.symlink:

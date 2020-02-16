@@ -1,13 +1,15 @@
-import pathlib
+import getpass
+import socket
 
 import osh.error
 import osh.object.cluster
+from osh.util import *
 
 ENV = None
+SHELL_ID = 'M'
 
 
 class Environment:
-
     CONFIG_PATH_NAME = '.osh2rc'
     DEFAULT_PROMPT = '> '
 
@@ -17,13 +19,21 @@ class Environment:
         ENV = Environment(config_file)
 
     def __init__(self, config_file):
-        self._globals = {}
+        self._user = getpass.getuser()
+        self._homedir = pathlib.Path.home()
         self._current_dir = pathlib.Path.cwd()
-        self._prompt = Environment.DEFAULT_PROMPT
+        self._hostname = socket.gethostname()
+        self._globals = {}
         self.read_config(config_file)
 
     def prompt(self):
-        return self._prompt
+        if self._current_dir == self._homedir:
+            return '%s %s@%s:~$ ' % (SHELL_ID, self._user, self._hostname)
+        elif self._current_dir.as_posix().startswith(self._homedir.as_posix()):
+            relative_to_home = self._current_dir.as_posix()[len(self._homedir.as_posix()):]
+            return '%s %s@%s:~%s$ ' % (SHELL_ID, self._user, self._hostname, relative_to_home)
+        else:
+            return '%s %s@%s:%s$ ' % (SHELL_ID, self._user, self._hostname, self._current_dir.as_posix())
 
     def pwd(self):
         return self._current_dir
