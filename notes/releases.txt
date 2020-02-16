@@ -1,0 +1,17 @@
+0.1
+
+- Rename to marcel
+
+- Bug 1
+
+- Modern formatting
+
+    - For out op
+    - Internally
+
+- Redirection: < > >>
+
+- For now: prompt shows user and directory. E.g. (from bash):
+
+    jao@cheese:~/git/osh2$ cd
+    jao@cheese:~$ 

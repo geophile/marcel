@@ -9,8 +9,6 @@ core.py:
 
 - command state
 
-- ctrl-c handling
-
 - namespaces (add_to_namespace, namespace)
 
 error.py:
@@ -19,14 +17,9 @@ util.py:
 
 - quote
 
-- Pipeline.run_local logic seems wrong. Pipeline can have mixture of
-  local and non-local ops?
-
 - All varieties of formatting (for out op)
 
 - Debugging & verbosity level
-
-- Is Generator needed?
 
 - Make File comparisons work -- based on absolute path.
 

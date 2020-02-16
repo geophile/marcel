@@ -1,0 +1,6 @@
+1: ls should render files as relative to the requested directory
+
+E.g. ls /tmp should show file_in_tmp, not /tmp/file_in_tmp.
+
+----------------------------------------------------------------------
+

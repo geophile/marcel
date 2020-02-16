@@ -20,3 +20,51 @@
 
 - Get rid of default and related exception handlers? (See ideas.txt on replacing stderr.)
 
+----------------------------------------------------------------------
+
+yield is more expensive than send/receive. See
+experiments/sendreceive_vs_yield.py.
+
+----------------------------------------------------------------------
+
+Instead of stdout, stderr: One output stream. stdout -> stream as
+is. stderr -> Error objects.
+
+KillAndResumeException does some things right. Raises an exception and
+allows for continuation of the command. What's wrong: Prints to
+stderr, which isn't all that helpful. Really want to pass the error
+along through ops until it hopefully reaches an out. So send/receive
+needs to check for errors and pass them through.
+
+UPDATE:
+
+OK, now OshErrors show up in the stream:
+
+    > gen 3 -1 | map (x: 5 / x)
+    -5.0
+    map(x: 5 / x) failed on (0,): division by zero
+    5.0
+
+The middle line of output is an OshError object. This enables testing
+for errors, filtering them out, redirecting them to a file, etc.
+
+But if the error happens remotely:
+
+    > @jao [ gen 3 -1 | map (x: 5 / x) ]
+    (localhost, -5.0)
+    (localhost, map(x: 5 / x) failed on (0,): division by zero)
+    (localhost, 5.0)
+
+The error is now embedded and harder to test for. 
+
+Idea:
+
+- OshError is always embedded, typically in a 1-tuple.
+
+- Testing for error looks for an OshError anywhere inside the tuple.
+
+----------------------------------------------------------------------
+
+- ctrl-c handling
+
+----------------------------------------------------------------------\
