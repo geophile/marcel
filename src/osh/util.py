@@ -5,6 +5,7 @@ import pathlib
 import pickle
 import pwd
 import sys
+import time
 import traceback
 
 
@@ -51,10 +52,12 @@ def clone(x):
         print_stack()
 
 
-def print_stack():
+def print_stack(file=None):
+    if file is None:
+        file = sys.__stderr__
     exception_type, exception, trace = sys.exc_info()
-    print('Caught %s: %s' % (exception_type, exception))
-    traceback.print_tb(trace, file=sys.__stderr__)
+    print('Caught %s: %s' % (exception_type, exception), file=file)
+    traceback.print_tb(trace, file=file)
 
 
 class Stack:
@@ -86,7 +89,7 @@ class Trace:
         self.file = self.path.open(mode='w')
 
     def write(self, line):
-        print(line, file=self.file, flush=True)
+        print('%s: %s' % (time.time(), line), file=self.file, flush=True)
 
     def close(self):
         self.file.close()

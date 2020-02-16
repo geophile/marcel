@@ -2,7 +2,7 @@ import threading
 
 import osh.core
 from osh.op.labelthread import LabelThread
-from osh.util import clone
+from osh.util import *
 
 
 class PipelineThread(threading.Thread):
@@ -21,7 +21,6 @@ class PipelineThread(threading.Thread):
             self.pipeline.execute()
         except Exception as e:
             self.terminating_exception = e
-            osh.util.print_stack()
 
 
 class Fork(osh.core.Op):
@@ -73,9 +72,31 @@ class Fork(osh.core.Op):
             thread.start()
         for thread in self.threads:
             while thread.isAlive():
-                thread.join(0.1)
-            if thread.terminating_exception:
-                osh.error.exception_handler(thread.terminating_exception, self, None, thread)
+                try:
+                    thread.join(0.1)
+                except BaseException as e:
+                    print('%s terminated by (%s) %s' % (thread, type(e), e))
+                    thread.terminating_exception = e
+        # Threads may complete normally or fail with a variety of exceptions. Merge them into a single action
+        # for the termination of the fork op.
+        kill_command = None
+        kill_and_resume = None
+        ctrl_c = None
+        for thread in self.threads:
+            e = thread.terminating_exception
+            if e:
+                if isinstance(e, osh.error.KillCommandException):
+                    kill_command = e
+                if isinstance(e, osh.error.KillAndResumeException):
+                    kill_and_resume = e
+                if isinstance(e, KeyboardInterrupt):
+                    ctrl_c = e
+        if kill_command:
+            raise osh.error.KillCommandException(kill_command)
+        if ctrl_c:
+            raise KeyboardInterrupt()
+        if kill_and_resume:
+            raise osh.error.KillAndResumeException(self, None, str(kill_and_resume))
 
     # Op
 

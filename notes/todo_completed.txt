@@ -1,0 +1,22 @@
+- Pipline pickling (replace/restore function)
+
+- PickleableException (transmission of stacks): Stacks aren't
+  reported, but errors are now transmissible.
+
+- remove_cr_lf
+
+- clone (pickling)
+
+- scp, ssh via spawning. Is there a native way to do this?
+
+- print_stack
+
+- Forks
+
+- Write OshArgParser.exit to avoid SystemExit on argparse error.
+
+- CommandKiller shouldn't print stack. (dev only),
+  default_exception_handler too.
+
+- Get rid of default and related exception handlers? (See ideas.txt on replacing stderr.)
+

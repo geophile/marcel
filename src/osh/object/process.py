@@ -74,6 +74,8 @@ class Process:
     def __ge__(self, other):
         return self.pid >= other.pid
 
+    exists = property(lambda self: self._status is not None)
+
     pid = property(lambda self: self._pid,
                    doc='The PID of this C{Process}.')
 
@@ -114,7 +116,7 @@ class Process:
             while more:
                 more = False
                 for p in processes:
-                    if p.parent in descendents and p not in descendents:
+                    if p.exists and p._parent in descendents and p not in descendents:
                         descendents.add(p)
                         more = True
             descendents.remove(self)

@@ -1,3 +1,7 @@
+Name: marcel. As in Marcel the Shell.
+
+----------------------------------------------------------------------
+
 Structured Output:
 
 ls -l doesn't make sense for osh. Allow for formatting options:
@@ -200,3 +204,37 @@ Environment variables:
 
 - current directory
 - current thread (in case of a fork)
+
+----------------------------------------------------------------------
+
+Doing more with pipelines:
+
+Pipelines should be first-class objects:
+
+- A form of abstraction: Assign a pipeline to a variable, then use it
+  in commands and to build other pipelines.
+
+- Pipelines can be passed to operators. E.g. there could be a join
+  operator, taking two pipelines as inputs. In fact, the remote fork
+  is such an operator.
+
+File counts and sizes under current directory:
+
+    file_counts_and_sizes = [ ls -fr | map (f: (1, f.size)) | red + + ]
+    file_counts_and_sizes  # executes the pipeline
+
+In a given directory:
+
+    file_counts_and_sizes = [dir: ls -fr dir | map (f: (1, f.size)) | red + + ]
+
+    file_counts_and_sizes '/tmp/foobar'
+
+Composing:
+
+    python_processes = [ ps | select (p: 'python' in p.commandline) ]
+    python_processes | map (p: (p.pid, p.size, p.state))
+
+Join, with args literal pipeline args:
+
+    ext_sizes = [dir: ls -fr dir | map (f: (f.extension, f.size)) ]
+    join [ ext_sizes '/home/jao' ] (L, R: L.extension == R.extension) [ ext_size '/home/alo' ]

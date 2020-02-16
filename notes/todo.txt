@@ -7,8 +7,6 @@
 
 core.py:
 
-- Pipline pickling (replace/restore function)
-
 - command state
 
 - ctrl-c handling
@@ -17,32 +15,18 @@ core.py:
 
 error.py:
 
-- PickleableException (transmission of stacks)
-
 util.py:
-
-- remove_cr_lf
-
-- clone (pickling)
-
-- scp, ssh via spawning. Is there a native way to do this?
 
 - quote
 
-- print_stack
-
 - Pipeline.run_local logic seems wrong. Pipeline can have mixture of
   local and non-local ops?
-
-- Forks
 
 - All varieties of formatting (for out op)
 
 - Debugging & verbosity level
 
 - Is Generator needed?
-
-- Write OshArgParser.exit to avoid SystemExit on argparse error.
 
 - Make File comparisons work -- based on absolute path.
 
@@ -81,10 +65,5 @@ util.py:
 - Organize internal ops -- Fork, LabelThread
 
 - osh1 fork has to be first in top-level pipeline. Relax this?
-
-- CommandKiller shouldn't print stack. (dev only),
-  default_exception_handler too.
-
-- Get rid of default and related exception handlers? (See ideas.txt on replacing stderr.)
 
 - LOOK AT SHLEX MODULE -- COMMAND-LINE PARSING AND QUOTING

@@ -2,6 +2,7 @@ import io
 import pickle
 import subprocess
 import sys
+import time
 
 import osh.ssh
 
@@ -43,7 +44,7 @@ class Remote(osh.core.Op):
         buffer.seek(0)
         stdout, stderr = self.process.communicate(input=buffer.getvalue())
         # Wait for completion (already guaranteed by communicate returning?)
-        self.process.wait()
+        returncode = self.process.wait()
         # Handle results
         stderr_lines = stderr.decode('utf-8').split('\n')
         if len(stderr_lines[-1]) == 0:

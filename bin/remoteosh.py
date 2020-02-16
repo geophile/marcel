@@ -28,7 +28,6 @@ class PickleOutput(osh.core.Op):
         pass
 
     def receive(self, x):
-        TRACE.write('Pickling %s' % x)
         self.pickler.dump(x)
 
     def receive_error(self, error):
@@ -37,6 +36,7 @@ class PickleOutput(osh.core.Op):
         super().receive_error(error)
 
     def receive_complete(self):
+        TRACE.write('Closing stdout')
         sys.stdout.buffer.close()
 
 
@@ -51,20 +51,39 @@ class PipelineRunner(threading.Thread):
         self.pipeline.setup_1()
         # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
         # supporting more than one level of nesting.
-        TRACE.write('About to run %s' % self.pipeline)
-        self.pipeline.execute()
+        TRACE.write('PipelineRunner: About to run %s' % self.pipeline)
+        try:
+            self.pipeline.execute()
+        except BaseException as e:
+            TRACE.write('PipelineRunner.run caught %s: %s' % (type(e), e))
+            print_stack(file=TRACE.file)
+            raise
+        TRACE.write('PipelineRunner: Execution complete.')
         self.pipeline.receive_complete()
 
 
 def kill_self_and_descendents(signal_id):
-    pid = os.getpid()
+    TRACE.write('In kill_self_and_descendents')
     try:
-        process = osh.object.process.Process(pid)
-        for p in process.descendents:
-            p.kill(signal_id)
-        process.kill(signal_id)
-    except Exception as e:
-        print('Caught exception while killing process %s and descendents: %s' % (pid, e))
+        pid = os.getpid()
+        try:
+            process = osh.object.process.Process(pid)
+            for p in process.descendents:
+                TRACE.write('Killing descendent pid %s' % p.pid)
+                p.kill(signal_id)
+            # TRACE.write('About to close stdout, closed = %s' % sys.stdout.closed)
+            # sys.stdout.close()
+            # TRACE.write('stdout closed, closed = %s' % sys.stdout.closed)
+            # sys.stderr.close()
+            # Suicide
+            TRACE.write('Killing self, pid = %s' % pid)
+            process.kill(signal_id)
+        except Exception as e:
+            TRACE.write('Caught exception while killing process %s and descendents: %s' % (pid, e))
+            print_stack(TRACE.file)
+    except BaseException as e:
+        TRACE.write('Caught %s in kill_self_and_descendents: %s' % (type(e), e))
+        print_stack(TRACE.file)
 
 
 def main():
@@ -80,12 +99,12 @@ def main():
         TRACE.write('Received signal %s' % signal_id)
         kill_self_and_descendents(signal_id)
     except EOFError:
-        # Client closed the socket, so kill won't arrive. The thread executing the pipeline
-        # should have ended, so kill if it hasn't.
         TRACE.write('Received EOF')
-        pipeline_runner.join(0.1)
-        if pipeline_runner.is_alive():
-            kill_self_and_descendents(signal.SIGKILL)
+        while pipeline_runner.is_alive():
+            TRACE.write('PipelineRunner alive: %s' % pipeline_runner.is_alive())
+            pipeline_runner.join(0.1)
+        TRACE.write('PipelineRunner alive: %s' % pipeline_runner.is_alive())
+        kill_self_and_descendents(signal.SIGKILL)
     finally:
         TRACE.write('Exiting')
         TRACE.close()

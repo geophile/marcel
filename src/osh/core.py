@@ -233,13 +233,30 @@ class Command:
         return str(self.pipeline)
 
     def execute(self):
-        try:
-            self.pipeline.setup_1()
-            self.pipeline.setup_2()
-            self.pipeline.execute()
-            self.pipeline.receive_complete()
-        except BaseException as e:
-            raise osh.error.KillCommandException(e)
+        self.pipeline.setup_1()
+        self.pipeline.setup_2()
+        self.pipeline.execute()
+        self.pipeline.receive_complete()
+        # def ctrl_c_handler(signal, frame):
+        #     print('IN CTRL-C HANDLER')
+        #     import traceback
+        #     traceback.print_stack(f=frame)
+        #     raise KeyboardInterrupt
+        # import signal
+        # original_ctrl_c_handler = signal.signal(signal.SIGINT, ctrl_c_handler)
+        # try:
+        #     self.pipeline.setup_1()
+        #     self.pipeline.setup_2()
+        #     self.pipeline.execute()
+        #     self.pipeline.receive_complete()
+        # except KeyboardInterrupt:
+        #     print('%s interrupted by CTRL-C' % self.pipeline)
+        #     raise
+        # except BaseException as e:
+        #     print('Command ended by exception: %s' % e, file=sys.stderr, flush=True)
+        #     raise osh.error.KillCommandException(e)
+        # finally:
+        #     signal.signal(signal.SIGINT, original_ctrl_c_handler)
 
 
 class OshError:
