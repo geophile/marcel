@@ -2,13 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/osh/object/colorscheme.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/osh/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/osh/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/osh/object/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/object/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/osh/object/colorscheme.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/object/colorscheme.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/osh/object/file.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/object/file.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/osh/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/osh/util.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -390,7 +389,7 @@
       <workItem from="1581386275034" duration="27163000" />
       <workItem from="1581541748352" duration="735000" />
       <workItem from="1581561268903" duration="17734000" />
-      <workItem from="1581794718614" duration="27268000" />
+      <workItem from="1581794718614" duration="30345000" />
     </task>
     <servers />
   </component>
@@ -441,6 +440,11 @@
           <line>9</line>
           <option name="timeStamp" value="144" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/osh/object/file.py</url>
+          <line>6</line>
+          <option name="timeStamp" value="150" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
@@ -457,7 +461,7 @@
     <SUITE FILE_PATH="coverage/osh2$test_parsing.coverage" NAME="test_parsing Coverage Results" MODIFIED="1578772660138" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$test_readchar.coverage" NAME="test_readchar Coverage Results" MODIFIED="1579462922290" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/osh2$test_execution.coverage" NAME="test_execution Coverage Results" MODIFIED="1581888644563" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
-    <SUITE FILE_PATH="coverage/osh2$osh2.coverage" NAME="osh2 Coverage Results" MODIFIED="1581956249265" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$" />
+    <SUITE FILE_PATH="coverage/osh2$osh2.coverage" NAME="osh2 Coverage Results" MODIFIED="1581959489708" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$" />
     <SUITE FILE_PATH="coverage/osh2$parseusingpyparsing.coverage" NAME="parseusingpyparsing Coverage Results" MODIFIED="1577902706592" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/osh" />
     <SUITE FILE_PATH="coverage/osh2$stdin.coverage" NAME="stdin Coverage Results" MODIFIED="1581348934605" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/osh2$trypopen.coverage" NAME="trypopen Coverage Results" MODIFIED="1581515992735" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />

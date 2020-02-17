@@ -60,6 +60,12 @@ def print_stack(file=None):
     traceback.print_tb(trace, file=file)
 
 
+def colorize(s, color):
+    return (s
+            if color is None else
+            '\033[%s;38;5;%sm%s\033[0m' % (1 if color.bold else 0, color.code, s))
+
+
 class Stack:
 
     def __init__(self):

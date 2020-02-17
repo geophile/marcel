@@ -1,6 +1,8 @@
 import pathlib
+import shutil
 
 from osh.util import *
+import osh.env
 
 DIR_MASK = 0o040000
 FILE_MASK = 0o100000
@@ -30,7 +32,7 @@ class File:
             '{:8s}'.format(username(self.uid)),
             '{:8s}'.format(groupname(self.gid)),
             '{:12}'.format(self.size),
-            self.abspath
+            colorize(self.abspath, self._highlight_color())
         ]
         return ' '.join(buffer)
 
@@ -104,6 +106,18 @@ class File:
             File._rwx(mode & 0o7)
         ]
         return ''.join(buffer)
+
+    def _highlight_color(self):
+        extension = self.path.suffix.lower()
+        color_scheme = osh.env.ENV.color_scheme()
+        highlight = color_scheme.ls_extension.get(extension)
+        if highlight is None:
+            highlight = (
+                color_scheme.ls_executable if shutil.which(self.abspath) is not None else
+                color_scheme.ls_link if self.path.is_symlink() else
+                color_scheme.ls_dir if self.path.is_dir() else
+                color_scheme.ls_file)
+        return highlight
 
     @staticmethod
     def _rwx(m):

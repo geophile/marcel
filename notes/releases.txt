@@ -16,4 +16,7 @@
     jao@cheese:~/git/osh2$ cd
     jao@cheese:~$ 
 
-- Colorization for prompt.
++ Colorization for prompt.
+
+- Colorization for ls.
+

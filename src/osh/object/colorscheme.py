@@ -23,12 +23,12 @@ blue_bold = Color(0, 0, 5, bold)
 class ColorScheme:
 
     def __init__(self):
-        self.prompt_shell_indicator = red
-        self.prompt_who = white_bold
-        self.prompt_dir = white_bold
-        self.ls_file = white
-        self.ls_dir = white
-        self.ls_link = white
+        self.prompt_shell_indicator = None
+        self.prompt_who = None
+        self.prompt_dir = None
+        self.ls_file = None
+        self.ls_dir = None
+        self.ls_link = None
         self.ls_extension = {}
 
 
