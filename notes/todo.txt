@@ -11,8 +11,6 @@ core.py:
 
 - namespaces (add_to_namespace, namespace)
 
-error.py:
-
 util.py:
 
 - quote
@@ -60,3 +58,7 @@ util.py:
 - osh1 fork has to be first in top-level pipeline. Relax this?
 
 - LOOK AT SHLEX MODULE -- COMMAND-LINE PARSING AND QUOTING
+
+
+- .osh2rc might want a cluster named jao and a terminal profile named
+  jao. Need separate namespaces for these things.

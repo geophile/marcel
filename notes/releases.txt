@@ -11,7 +11,9 @@
 
 - Redirection: < > >>
 
-- For now: prompt shows user and directory. E.g. (from bash):
++ For now: prompt shows user and directory. E.g. (from bash):
 
     jao@cheese:~/git/osh2$ cd
     jao@cheese:~$ 
+
+- Colorization for prompt.
