@@ -20,6 +20,8 @@ FORMAT                     A Python formatter specifying how an object should be
 import sys
 
 import osh.core
+import osh.env
+from osh.util import *
 
 
 def out():
@@ -96,12 +98,16 @@ class Out(osh.core.Op):
             else:
                 formatted = str(x)
         # Relying on print to provide the \n appears to result in a race condition.
-        print(formatted, file=self.output, flush=True)
-        self.send(x)
+        try:
+            print(formatted, file=self.output, flush=True)
+        except Exception as e:  # E.g. UnicodeEncodeError
+            error = osh.core.OshError(e)
+            self.print_error(error)
+        finally:
+            self.send(x)
 
     def receive_error(self, error):
-        print(error, file=self.output, flush=True)
-        super().receive_error(error)
+        self.print_error(error)
 
     def receive_complete(self):
         self.ensure_output_initialized()
@@ -122,6 +128,9 @@ class Out(osh.core.Op):
                            open(self.file, mode='w') if self.file else
                            sys.stdout)
 
+    def print_error(self, error):
+        print(colorize(str(error), Out.highlight_color(error)), file=self.output, flush=True)
+
     @staticmethod
     def ensure_quoted(x):
         if x is None:
@@ -137,3 +146,7 @@ class Out(osh.core.Op):
                 return "'%s'" % x.replace("'", "\\'")
         else:
             return str(x)
+
+    @staticmethod
+    def highlight_color(x):
+        return osh.env.ENV.color_scheme().error if isinstance(x, osh.core.OshError) else None

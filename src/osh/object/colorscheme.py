@@ -30,6 +30,7 @@ class ColorScheme:
         self.ls_dir = None
         self.ls_link = None
         self.ls_extension = {}
+        self.error = None
 
 
 

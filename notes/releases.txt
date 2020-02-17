@@ -18,5 +18,4 @@
 
 + Colorization for prompt.
 
-- Colorization for ls.
-
++ Colorization for ls.
