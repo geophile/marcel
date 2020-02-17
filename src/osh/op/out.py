@@ -129,7 +129,7 @@ class Out(osh.core.Op):
                            sys.stdout)
 
     def print_error(self, error):
-        print(colorize(str(error), Out.highlight_color(error)), file=self.output, flush=True)
+        print(error, file=self.output, flush=True)
 
     @staticmethod
     def ensure_quoted(x):
@@ -146,7 +146,3 @@ class Out(osh.core.Op):
                 return "'%s'" % x.replace("'", "\\'")
         else:
             return str(x)
-
-    @staticmethod
-    def highlight_color(x):
-        return osh.env.ENV.color_scheme().error if isinstance(x, osh.core.OshError) else None

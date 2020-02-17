@@ -2,6 +2,7 @@ import argparse
 
 import osh.error
 import osh.function
+import osh.env
 from osh.util import *
 
 
@@ -20,6 +21,7 @@ class OshArgParser(argparse.ArgumentParser):
                 return check_and_convert(s)
             except Exception:
                 raise argparse.ArgumentTypeError(message)
+
         return arg_checker
 
     @staticmethod
@@ -134,7 +136,7 @@ class BaseOp(object):
         return False
 
     # BaseOp compile-time
-    
+
     def connect(self, new_op):
         self.next_op = new_op
 
@@ -144,7 +146,7 @@ class Op(BaseOp):
     """
 
     # object
-    
+
     def __init__(self):
         BaseOp.__init__(self)
 
@@ -246,9 +248,10 @@ class OshError:
         self.host = None
 
     def __repr__(self):
-        return ('Error(%s)' % self.message
-                if self.host is None else
-                'Error(%s, %s)' % (self.host, self.message))
+        description = ('Error(%s)' % self.message
+                       if self.host is None else
+                       'Error(%s, %s)' % (self.host, self.message))
+        return colorize(description, osh.env.ENV.color_scheme().error)
 
     def set_host(self, host):
         self.host = host
