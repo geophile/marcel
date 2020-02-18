@@ -7,7 +7,7 @@ import osh.object.cluster
 from osh.util import *
 
 ENV = None
-SHELL_ID = 'M'
+DEFAULT_PROMPT = ['$ ']
 
 
 class Environment:
@@ -22,8 +22,13 @@ class Environment:
         self._user = getpass.getuser()
         self._homedir = pathlib.Path.home()
         self._current_dir = pathlib.Path.cwd()
-        self._hostname = socket.gethostname()
-        self._globals = {}
+        self._host = socket.gethostname()
+        self._globals = {
+            'USER': self._user,
+            'HOME': self._homedir.as_posix(),
+            'HOST': self._host,
+            'PWD': self._current_dir.as_posix()
+        }
         self._color_scheme = None
         self.read_config(config_file)  # Sets _globals
         self._color_scheme = self._globals.get('COLOR_SCHEME', None)
@@ -33,18 +38,19 @@ class Environment:
             self._color_schema = osh.object.colorscheme.ColorScheme()
 
     def prompt(self):
-        color_scheme = self.color_scheme()
-        prefix = colorize(str(SHELL_ID) + ' ', color_scheme.prompt_shell_indicator)
-        user_host = colorize('%s@%s' % (self._user, self._hostname), color_scheme.prompt_who)
-        if self._current_dir == self._homedir:
-            dir = '~'
-        elif self._current_dir.as_posix().startswith(self._homedir.as_posix()):
-            dir = '~' + self._current_dir.as_posix()[len(self._homedir.as_posix()):]
-        else:
-            dir = self._current_dir.as_posix()
-        colon = colorize(':', color_scheme.prompt_separator)
-        dir = colorize(dir, color_scheme.prompt_dir)
-        return '%s%s%s%s$ ' % (prefix, user_host, colon, dir)
+        prompt_list = self._globals.get('PROMPT', DEFAULT_PROMPT)
+        buffer = []
+        color = None
+        for x in prompt_list:
+            if isinstance(x, osh.object.colorscheme.Color):
+                color = x
+            else:
+                if callable(x):
+                    x = x()
+                if color is not None:
+                    x = colorize(x, color)
+                buffer.append(x)
+        return ''.join(buffer)
 
     def pwd(self):
         return self._current_dir
@@ -54,6 +60,7 @@ class Environment:
         new_dir = self._current_dir / directory
         try:
             self._current_dir = new_dir.resolve(strict=True)
+            self._globals['PWD'] = self._current_dir.as_posix()
             # So that executables have the same view of the current directory.
             os.chdir(self._current_dir)
         except FileNotFoundError:

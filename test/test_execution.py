@@ -629,7 +629,7 @@ def test_namespace():
     config_path.touch()
     osh.env.Environment.initialize(config_file)
     Test.run('map (globals().keys())',
-             expected_out=["dict_keys(['__builtins__'])"])
+             expected_out=["dict_keys(['USER', 'HOME', 'HOST', 'PWD', '__builtins__'])"])
     # Try to use an undefined symbol
     Test.run('map (pi)',
              expected_out=[Error("name 'pi' is not defined")])
