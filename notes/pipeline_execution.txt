@@ -1,0 +1,53 @@
+Command:
+
+- Calls on pipeline:
+    - setup_1
+    - setup_2
+    - execute
+    - receive_complete
+
+Pipeline:
+- Delegates to first_op:
+    - setup_1
+    - setup_2
+    - execute
+    - receive
+    - receive_complete
+
+BaseOp:
+
+- send:
+
+    - Calls receiver.receive_input_or_error()
+    - ... which can throw an exception
+    - ... in which case self.receive_input_or_error(OshError(e)). Equivalent to self.receive_error(OshError(e))
+    *** Should that be self.receive_input_or_error? Or self.receiver.receive_input_or_error?
+
+- receive: 
+
+    - Can throw exception
+    - Implemented by each op
+    - op calls send to continue downstream execution
+
+- receive_input_or_error:
+
+    - Called by BaseOp.send
+    - Calls receive_error or receive on op
+
+- execute implemented by op.
+
+    *** If op throws exception it kills the shell. No handling as in recive_input_or_error.
+
+----------------------------------------------------------------------
+
+Get rid of execute:
+
+- Use send(None) instead, which handles errors.
+
+- May need to check input in some ops, e.g. in map:
+
+    def receive(self, x):
+        self.send(self.function(*x))
+
+    def execute(self):
+        self.send(self.function())
