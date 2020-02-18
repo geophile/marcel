@@ -62,3 +62,10 @@ util.py:
 
 - .osh2rc might want a cluster named jao and a terminal profile named
   jao. Need separate namespaces for these things.
+
+
+- OshError, File __repr__ do colorization. This is only correct for
+  osh output. How can osh output be distinguished from other string
+  conversions?
+
+- Provide a default color scheme, better than everything = None.

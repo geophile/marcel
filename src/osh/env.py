@@ -1,4 +1,5 @@
 import getpass
+import os
 import socket
 
 import osh.error
@@ -52,6 +53,8 @@ class Environment:
         new_dir = self._current_dir / directory
         try:
             self._current_dir = new_dir.resolve(strict=True)
+            # So that executables have the same view of the current directory.
+            os.chdir(self._current_dir)
         except FileNotFoundError:
             raise osh.error.KillCommandException('Cannot cd into %s from %s. Target %s does not exist.' %
                                                  (directory, self._current_dir, new_dir))
