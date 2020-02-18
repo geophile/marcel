@@ -42,8 +42,9 @@ class Environment:
             dir = '~' + self._current_dir.as_posix()[len(self._homedir.as_posix()):]
         else:
             dir = self._current_dir.as_posix()
+        colon = colorize(':', color_scheme.prompt_separator)
         dir = colorize(dir, color_scheme.prompt_dir)
-        return '%s%s%s$ ' % (prefix, user_host, dir)
+        return '%s%s%s%s$ ' % (prefix, user_host, colon, dir)
 
     def pwd(self):
         return self._current_dir

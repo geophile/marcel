@@ -26,6 +26,7 @@ class ColorScheme:
         self.prompt_shell_indicator = None
         self.prompt_who = None
         self.prompt_dir = None
+        self.prompt_separator = None
         self.ls_file = None
         self.ls_dir = None
         self.ls_link = None

@@ -219,3 +219,14 @@ Cascading these is a switch:
 
     if p1 [pipe1] | if p2 [pipe2] | if p3 [pipe3] | ...
 
+----------------------------------------------------------------------
+
+For objects to be rendered (file, process, error):
+
+- __repr__ does the usual pythonic thing.
+
+- render_compact: With color, for use when the thing is rendered in a
+  tuple of size > 1.
+
+- render_full: With color, for use when the thing is rendered on its
+  own, (tuple of size 1).

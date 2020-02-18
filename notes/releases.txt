@@ -2,14 +2,12 @@
 
 - Rename to marcel
 
-- Bug 1
+- Bug 1. Related: see ideas.txt about render_compact/render_full.
 
 - Modern formatting
 
     - For out op
     - Internally
-
-- Redirection: < > >>
 
 + For now: prompt shows user and directory. E.g. (from bash):
 
@@ -19,3 +17,15 @@
 + Colorization for prompt.
 
 + Colorization for ls.
+
+- README.md
+
+----------------------------------------------------------------------
+
+0.2
+
+- bash commands that do pagination don't work, e.g. more, man.
+
+- Run executables without requiring invocation of bash op.
+
+- Redirection: < > >>
