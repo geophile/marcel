@@ -4,13 +4,14 @@ import shutil
 import contextlib
 import pathlib
 
+import osh.object.error
 from osh.main import run_command
 import osh.env
 import osh.core
 import osh.object.host
 from osh.util import *
 
-Error = osh.core.OshError
+Error = osh.object.error.OshError
 
 
 class Test:

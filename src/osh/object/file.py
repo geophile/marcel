@@ -27,14 +27,7 @@ class File:
         self.os_stat = None
 
     def __repr__(self):
-        buffer = [
-            self._mode_string(),
-            '{:8s}'.format(username(self.uid)),
-            '{:8s}'.format(groupname(self.gid)),
-            '{:12}'.format(self.size),
-            colorize(self.abspath, self._highlight_color())
-        ]
-        return ' '.join(buffer)
+        return self.abspath
 
     def __eq__(self, other):
         return self.path.as_posix() == other.path.as_posix()
@@ -88,6 +81,17 @@ class File:
     islink = property(lambda self: self.mode & FILE_TYPE_MASK == LINK_MASK,
                       doc="""True iff this file is a symlink.""")
 
+    # Rendering
+
+    def render_compact(self):
+        return self.abspath
+
+    def render_full(self):
+        line = self._formatted_metadata()
+        # Colorize the path
+        line[-1] = colorize(line[-1])
+        return ' '.join(line)
+
     # For use by this class
 
     def _stat(self):
@@ -118,6 +122,14 @@ class File:
                 color_scheme.ls_dir if self.path.is_dir() else
                 color_scheme.ls_file)
         return highlight
+
+    def _formatted_metadata(self):
+        return [
+            self._mode_string(),
+            '{:8s}'.format(username(self.uid)),
+            '{:8s}'.format(groupname(self.gid)),
+            '{:12}'.format(self.size),
+            self.abspath]
 
     @staticmethod
     def _rwx(m):

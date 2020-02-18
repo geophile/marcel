@@ -21,6 +21,7 @@ import sys
 
 import osh.core
 import osh.env
+import osh.object.error
 from osh.util import *
 
 
@@ -101,7 +102,7 @@ class Out(osh.core.Op):
         try:
             print(formatted, file=self.output, flush=True)
         except Exception as e:  # E.g. UnicodeEncodeError
-            error = osh.core.OshError(e)
+            error = osh.object.error.OshError(e)
             self.print_error(error)
         finally:
             self.send(x)

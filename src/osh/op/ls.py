@@ -30,6 +30,7 @@ import pathlib
 
 import osh.core
 import osh.env
+import osh.object.error
 from osh.object.file import File
 
 
@@ -132,7 +133,7 @@ class Ls(osh.core.Op):
                 for file in path.iterdir():
                     self.visit(file, level + 1)
             except PermissionError as e:
-                self.send(osh.core.OshError('Cannot explore %s: permission denied' % path))
+                self.send(osh.object.error.OshError('Cannot explore %s: permission denied' % path))
 
     def send_path(self, path):
         if path.is_file() and self.file or path.is_dir() and self.dir or path.is_symlink() and self.symlink:

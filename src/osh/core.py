@@ -3,6 +3,7 @@ import argparse
 import osh.error
 import osh.function
 import osh.env
+from osh.object.error import OshError
 from osh.util import *
 
 
@@ -103,7 +104,7 @@ class BaseOp(object):
             try:
                 self.receiver.receive_input_or_error(x)
             except osh.error.KillAndResumeException as e:
-                self.receive_input_or_error(OshError(e))
+                self.receiver.receive_error(OshError(e))
 
     def send_complete(self):
         """Called by a op class to indicate that there will
@@ -241,17 +242,3 @@ class Command:
         self.pipeline.receive_complete()
 
 
-class OshError:
-
-    def __init__(self, cause):
-        self.message = str(cause)
-        self.host = None
-
-    def __repr__(self):
-        description = ('Error(%s)' % self.message
-                       if self.host is None else
-                       'Error(%s, %s)' % (self.host, self.message))
-        return colorize(description, osh.env.ENV.color_scheme().error)
-
-    def set_host(self, host):
-        self.host = host
