@@ -42,10 +42,8 @@ class Map(osh.core.Op):
         self.function.set_op(self)
 
     def receive(self, x):
-        self.send(self.function(*x))
-
-    def execute(self):
-        self.send(self.function())
+        output = self.function() if x is None else self.function(*x)
+        self.send(output)
 
     # Op
 

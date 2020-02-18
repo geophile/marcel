@@ -91,11 +91,6 @@ class BaseOp(object):
         """
         pass
 
-    def execute(self):
-        """Execute the op.
-        """
-        assert False
-
     def send(self, x):
         """Called by a op class to send an object of op output to
         the next op.
@@ -198,11 +193,13 @@ class Pipeline(BaseOp):
             op.setup_2()
             op = op.next_op
 
-    def execute(self):
-        self.first_op.execute()
-
     def receive(self, x):
-        self.first_op.receive(x)
+        try:
+            self.first_op.receive(x)
+        except osh.error.KillAndResumeException as e:
+            receiver = self.first_op.receiver
+            if receiver:
+                receiver.receive_error(OshError(e))
 
     def receive_complete(self):
         self.first_op.receive_complete()
@@ -228,7 +225,7 @@ class Command:
             out.append = False
             out.file = False
             out.csv = False
-            out.format = '%s'
+            # out.format = '%s'
             pipeline.append(out)
         self.pipeline = pipeline
 
@@ -238,7 +235,5 @@ class Command:
     def execute(self):
         self.pipeline.setup_1()
         self.pipeline.setup_2()
-        self.pipeline.execute()
+        self.pipeline.receive(None)
         self.pipeline.receive_complete()
-
-

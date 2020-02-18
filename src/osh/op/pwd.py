@@ -35,7 +35,8 @@ class Pwd(osh.core.Op):
     def setup_1(self):
         pass
 
-    def execute(self):
+    def receive(self, x):
+        assert x is None, x
         self.send(osh.env.ENV.pwd())
 
     # Op

@@ -99,7 +99,8 @@ class Ls(osh.core.Op):
         if len(self.filename) == 0:
             self.filename = [osh.env.ENV.pwd().as_posix()]
 
-    def execute(self):
+    def receive(self, x):
+        assert x is None, x
         for filename in self.filename:
             x = (osh.env.ENV.pwd() / filename).resolve()
             if x.exists():

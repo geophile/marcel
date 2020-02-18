@@ -27,10 +27,12 @@ class ColorScheme:
         self.prompt_who = None
         self.prompt_dir = None
         self.prompt_separator = None
-        self.ls_file = None
-        self.ls_dir = None
-        self.ls_link = None
-        self.ls_extension = {}
+        self.file_file = None
+        self.file_dir = None
+        self.file_link = None
+        self.file_extension = {}
+        self.process_pid = None
+        self.process_commandline = None
         self.error = None
 
 

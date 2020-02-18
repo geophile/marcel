@@ -39,7 +39,8 @@ class Ps(osh.core.Op):
     def setup_1(self):
         pass
 
-    def execute(self):
+    def receive(self, x):
+        assert x is None, x
         this_pid = os.getpid()
         for process in osh.object.process.processes():
             if process.pid != this_pid or not self.omit_self:

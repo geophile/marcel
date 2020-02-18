@@ -22,7 +22,8 @@ class Remote(osh.core.Op):
     def setup_1(self):
         pass
 
-    def execute(self):
+    def receive(self, x):
+        assert x is None, x
         # Start the remote process
         command = ' '.join([
             'ssh',
@@ -44,7 +45,7 @@ class Remote(osh.core.Op):
         buffer.seek(0)
         stdout, stderr = self.process.communicate(input=buffer.getvalue())
         # Wait for completion (already guaranteed by communicate returning?)
-        returncode = self.process.wait()
+        self.process.wait()
         # Handle results
         stderr_lines = stderr.decode('utf-8').split('\n')
         if len(stderr_lines[-1]) == 0:
@@ -54,7 +55,8 @@ class Remote(osh.core.Op):
         input = pickle.Unpickler(io.BytesIO(stdout))
         try:
             while True:
-                self.send(input.load())
+                x = input.load()
+                self.send(x)
         except EOFError:
             self.send_complete()
 

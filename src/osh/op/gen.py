@@ -66,7 +66,8 @@ class Gen(osh.core.Op):
                 else:
                     self.format = '%%0%sd' % self.pad
 
-    def execute(self):
+    def receive(self, x):
+        assert x is None, x
         if self.count is None or self.count == 0:
             x = self.start
             while True:

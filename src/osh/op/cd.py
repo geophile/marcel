@@ -45,7 +45,8 @@ class Cd(osh.core.Op):
     def setup_1(self):
         self.directory = pathlib.Path(self.directory)
 
-    def execute(self):
+    def receive(self, x):
+        assert x is None, x
         osh.env.ENV.cd(self.directory)
 
     # Op

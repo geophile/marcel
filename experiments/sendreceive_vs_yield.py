@@ -13,13 +13,10 @@ class Op:
         self.next_op = next_op
         next_op.prev_op = self
 
-    def execute(self):
-        for i in range(self.n):
-            self.next_op.receive(self.output(i))
-
     def receive(self, x):
         for i in range(self.n):
-            self.next_op.receive(x + self.output(i))
+            output = self.output(i)
+            self.next_op.receive(output if x is None else x + output)
 
     def pull(self):
         prev_op = self.prev_op
@@ -75,7 +72,7 @@ def main():
     a.connect(b)
     b.connect(c)
     c.connect(t)
-    measure('send/receive', lambda: a.execute())
+    measure('send/receive', lambda: a.receive(None))
     measure('yield', lambda: t.pull())
 
 main()

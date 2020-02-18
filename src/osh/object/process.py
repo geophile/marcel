@@ -8,6 +8,10 @@ import os
 import os.path
 import pathlib
 
+import osh.object.renderable
+import osh.object.colorscheme
+from osh.util import *
+
 
 def processes(*dummy):
     """Returns a list of process objects based on the current contents of C{/proc}.
@@ -22,7 +26,7 @@ def processes(*dummy):
     return process_list
 
 
-class Process:
+class Process(osh.object.renderable.Renderable):
     """A C{Process} object represents a process with a particular PID. The process may or may not
     be running when the C{Process} object is used. It is conceivable that the C{Process} object
     does not represent the same process that was identified by the PID when the C{Process} object
@@ -44,14 +48,7 @@ class Process:
             self._init_rss()
 
     def __repr__(self):
-        """Returns a string describing this C{Process}.
-        """
-        buffer = [
-            '--' if self._status is None else '  ',
-            '{:6n}'.format(self.pid),
-            self.commandline
-        ]
-        return ' '.join(buffer)
+        return self.render_compact()
 
     def __hash__(self):
         return self._pid
@@ -73,6 +70,8 @@ class Process:
 
     def __ge__(self, other):
         return self.pid >= other.pid
+
+    # Process
 
     exists = property(lambda self: self._status is not None)
 
@@ -103,6 +102,27 @@ class Process:
         """Send the indicated C{signal} to this process.
         """
         os.kill(self._pid, signal)
+
+    # Renderable
+
+    def render_compact(self):
+        return 'process(%s)' % self.pid
+
+    def render_full(self, color):
+        pid = '{:6n}'.format(self.pid)
+        commandline = self.commandline
+        if color:
+            color_scheme = osh.env.ENV.color_scheme()
+            pid = colorize(pid, color_scheme.process_pid)
+            commandline = colorize(commandline, color_scheme.process_commandline)
+        buffer = [
+            '--' if self._status is None else '  ',
+            pid,
+            commandline
+        ]
+        return ' '.join(buffer)
+
+    # For use by this class
 
     def _find_descendents(self):
         if self._descendents is None:

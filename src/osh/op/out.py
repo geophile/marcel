@@ -22,6 +22,7 @@ import sys
 import osh.core
 import osh.env
 import osh.object.error
+import osh.object.renderable
 from osh.util import *
 
 
@@ -55,14 +56,6 @@ class Out(osh.core.Op):
         return ('out(append=%s file=%s csv=%s format=%s)' %
                 (self.append, self.file, self.csv, Out.ensure_quoted(self.format)))
 
-    # def __getstate__(self):
-    #     self.output = None
-    #     return self.__dict__
-    #
-    # def __setstate__(self, state):
-    #     self.__dict__.update(state)
-    #     self.initialize_output()
-
     # BaseOp
 
     def doc(self):
@@ -71,36 +64,42 @@ class Out(osh.core.Op):
     def setup_1(self):
         if self.csv and self.format:
             Out.argparser.error('-c/--csv and FORMAT specifications are incompatible')
-        # self.ensure_output_initialized()
 
     def receive(self, x):
         self.ensure_output_initialized()
         if self.format:
             try:
-                formatted = self.format % x
+                out = self.format % x
             except Exception as e:
+                # TODO: This sucks. At least check for the right exception: TypeError
                 # If there is one %s in the format, and the object is longer,
                 # then convert it to a string
                 if self.format.count('%') == 1 and self.format.count('%s') == 1:
-                    formatted = self.format % str(x)
+                    out = self.format % str(x)
                 else:
                     raise e
         elif self.csv:
-            if type(x) in (list, tuple):
-                formatted = ', '.join([Out.ensure_quoted(x) for x in x])
-            else:
-                formatted = str(x)
+            out = (', '.join([Out.ensure_quoted(y) for y in x])
+                   if type(x) in (list, tuple) else
+                   str(x))
         else:
             if type(x) in (list, tuple):
                 if len(x) == 1:
-                    formatted = '(' + Out.ensure_quoted(x[0]) + ',)'
+                    out = x[0]
+                    if isinstance(out, osh.object.renderable.Renderable):
+                        out = out.render_full(self.use_color())
                 else:
-                    formatted = '(' + ', '.join([Out.ensure_quoted(x) for x in x]) + ')'
+                    buffer = []
+                    for y in x:
+                        if isinstance(y, osh.object.renderable.Renderable):
+                            y = y.render_compact()
+                        buffer.append(Out.ensure_quoted(y))
+                    out = '(' + ', '.join(buffer) + ')'
             else:
-                formatted = str(x)
+                out = str(x)
         # Relying on print to provide the \n appears to result in a race condition.
         try:
-            print(formatted, file=self.output, flush=True)
+            print(out, file=self.output, flush=True)
         except Exception as e:  # E.g. UnicodeEncodeError
             error = osh.object.error.OshError(e)
             self.print_error(error)
@@ -108,6 +107,7 @@ class Out(osh.core.Op):
             self.send(x)
 
     def receive_error(self, error):
+        self.ensure_output_initialized()
         self.print_error(error)
 
     def receive_complete(self):
@@ -130,7 +130,20 @@ class Out(osh.core.Op):
                            sys.stdout)
 
     def print_error(self, error):
-        print(error, file=self.output, flush=True)
+        print(self.render(error, True), file=self.output, flush=True)
+
+    def render(self, x, full):
+        if x is None:
+            return None
+        elif isinstance(x, osh.object.renderable.Renderable):
+            return (x.render_full(self.use_color())
+                    if full else
+                    x.render_compact())
+        else:
+            return str(x)
+
+    def use_color(self):
+        return self.output == sys.__stdout__
 
     @staticmethod
     def ensure_quoted(x):

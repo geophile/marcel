@@ -18,7 +18,7 @@ class PipelineThread(threading.Thread):
 
     def run(self):
         try:
-            self.pipeline.execute()
+            self.pipeline.receive(None)
         except Exception as e:
             self.terminating_exception = e
 
@@ -67,7 +67,8 @@ class Fork(osh.core.Op):
             label_thread_op.receiver = self.receiver
             self.threads.append(PipelineThread(thread_label, pipeline_copy))
 
-    def execute(self):
+    def receive(self, x):
+        assert x is None, x
         for thread in self.threads:
             thread.start()
         for thread in self.threads:

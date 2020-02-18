@@ -3,6 +3,7 @@ import shutil
 
 from osh.util import *
 import osh.env
+import osh.object.renderable
 
 DIR_MASK = 0o040000
 FILE_MASK = 0o100000
@@ -10,7 +11,7 @@ LINK_MASK = 0o120000
 FILE_TYPE_MASK = DIR_MASK | FILE_MASK | LINK_MASK
 
 
-class File:
+class File(osh.object.renderable.Renderable):
     """Represents a file or directory.
     """
 
@@ -27,7 +28,7 @@ class File:
         self.os_stat = None
 
     def __repr__(self):
-        return self.abspath
+        return self.render_compact()
 
     def __eq__(self, other):
         return self.path.as_posix() == other.path.as_posix()
@@ -81,15 +82,15 @@ class File:
     islink = property(lambda self: self.mode & FILE_TYPE_MASK == LINK_MASK,
                       doc="""True iff this file is a symlink.""")
 
-    # Rendering
+    # Renderable
 
     def render_compact(self):
         return self.abspath
 
-    def render_full(self):
+    def render_full(self, color):
         line = self._formatted_metadata()
-        # Colorize the path
-        line[-1] = colorize(line[-1])
+        if color:
+            line[-1] = colorize(line[-1], self._highlight_color())
         return ' '.join(line)
 
     # For use by this class
@@ -114,13 +115,13 @@ class File:
     def _highlight_color(self):
         extension = self.path.suffix.lower()
         color_scheme = osh.env.ENV.color_scheme()
-        highlight = color_scheme.ls_extension.get(extension)
+        highlight = color_scheme.file_extension.get(extension)
         if highlight is None:
             highlight = (
-                color_scheme.ls_executable if shutil.which(self.abspath) is not None else
-                color_scheme.ls_link if self.path.is_symlink() else
-                color_scheme.ls_dir if self.path.is_dir() else
-                color_scheme.ls_file)
+                color_scheme.file_executable if shutil.which(self.abspath) is not None else
+                color_scheme.file_link if self.path.is_symlink() else
+                color_scheme.file_dir if self.path.is_dir() else
+                color_scheme.file_file)
         return highlight
 
     def _formatted_metadata(self):

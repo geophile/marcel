@@ -53,7 +53,7 @@ class PipelineRunner(threading.Thread):
         # supporting more than one level of nesting.
         TRACE.write('PipelineRunner: About to run %s' % self.pipeline)
         try:
-            self.pipeline.execute()
+            self.pipeline.receive(None)
         except BaseException as e:
             TRACE.write('PipelineRunner.run caught %s: %s' % (type(e), e))
             print_stack(file=TRACE.file)

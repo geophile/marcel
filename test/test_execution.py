@@ -1,8 +1,6 @@
 import os
-import io
 import shutil
 import contextlib
-import pathlib
 
 import osh.object.error
 from osh.main import run_command
@@ -12,6 +10,7 @@ import osh.object.host
 from osh.util import *
 
 Error = osh.object.error.OshError
+start_dir = os.getcwd()
 
 
 class Test:
@@ -26,8 +25,8 @@ class Test:
 
     @staticmethod
     def check_ok(command, expected, actual):
-        expected = expected.split('\n')
-        actual = actual.split('\n')
+        expected = Test.remove_empty_line_at_end(expected.split('\n'))
+        actual = Test.remove_empty_line_at_end(actual.split('\n'))
         ok = True
         n = len(expected)
         if len(actual) == n:
@@ -114,6 +113,12 @@ class Test:
     def delete_file(filename):
         os.remove(filename)
 
+    @staticmethod
+    def remove_empty_line_at_end(lines):
+        if len(lines[-1]) == 0:
+            del lines[-1]
+        return lines
+
 
 def test_no_such_op():
     Test.run('gen 5 | abc', expected_err='abc is not recognized as a command')
@@ -122,22 +127,22 @@ def test_no_such_op():
 def test_gen():
     # Explicit out
     Test.run('gen 5 | out',
-             expected_out=[(0,), (1,), (2,), (3,), (4,)])
+             expected_out=[0, 1, 2, 3, 4])
     # Implicit out
     Test.run('gen 5',
              expected_out=[0, 1, 2, 3, 4])
     Test.run('gen 5 10 | out',
-             expected_out=[(10,), (11,), (12,), (13,), (14,)])
+             expected_out=[10, 11, 12, 13, 14])
     Test.run('gen 5 10 123 | out',
              expected_err='unrecognized arguments: 123')
     Test.run('gen 5 -5 | out',
-             expected_out=[(-5,), (-4,), (-3,), (-2,), (-1,)])
+             expected_out=[-5, -4, -3, -2, -1])
     Test.run('gen 3 -p 2 | out',
-             expected_out=[('00',), ('01',), ('02',)])
+             expected_out=['00', '01', '02'])
     Test.run('gen 3 --pad 2 | out',
-             expected_out=[('00',), ('01',), ('02',)])
+             expected_out=['00', '01', '02'])
     Test.run('gen 3 99 -p 3 | out',
-             expected_out=[('099',), ('100',), ('101',)])
+             expected_out=['099', '100', '101'])
     Test.run('gen 3 99 -p 2 | out',
              expected_err='Padding too small')
     Test.run('gen 3 -p 3 99 | out',
@@ -162,15 +167,15 @@ def test_out():
     Test.run('gen 3 | out -c %s',
              expected_err='-c/--csv and FORMAT specifications are incompatible')
     Test.run('gen 3 | out -f %s' % output_filename,
-             expected_out=[(0,), (1,), (2,)], file=output_filename)
+             expected_out=[0, 1, 2], file=output_filename)
     Test.run('gen 3 | out --file %s' % output_filename,
-             expected_out=[(0,), (1,), (2,)], file=output_filename)
+             expected_out=[0, 1, 2], file=output_filename)
     Test.delete_file(output_filename)
     Test.run('gen 3 | out -a %s' % output_filename,
-             expected_out=[(0,), (1,), (2,)],
+             expected_out=[0, 1, 2],
              file=output_filename)
     Test.run('gen 3 | out --append %s' % output_filename,
-             expected_out=[(0,), (1,), (2,), (0,), (1,), (2,)],
+             expected_out=[0, 1, 2, 0, 1, 2],
              file=output_filename)
     Test.run('gen 3 | out -a %s -f %s' % (output_filename, output_filename),
              expected_err='argument -f/--file: not allowed with argument -a/--append')
@@ -312,6 +317,7 @@ def test_ls():
     # Test multiple globs, with files qualifying multiple times. Should be reported once. (Linux ls gets this wrong.)
     Test.run('ls -0 a* *1 | map (f: f.abspath) | sort',
              expected_out=sorted([a1, a2, b1, d1]))
+    reset_environment()
 
 
 def test_map():
@@ -626,7 +632,7 @@ def test_namespace():
              expected_out=["dict_keys(['__builtins__'])"])
     # Try to use an undefined symbol
     Test.run('map (pi)',
-             expected_err="name 'pi' is not defined")
+             expected_out=[Error("name 'pi' is not defined")])
     # Try a namespace importing symbols in the math module
     config_path.unlink()
     with open(config_file, 'w') as file:
@@ -648,6 +654,7 @@ def test_remote():
 
 def reset_environment():
     osh.env.Environment.initialize('./.osh2rc')
+    os.chdir(start_dir)
 
 
 def main_stable():
