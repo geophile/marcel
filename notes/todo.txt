@@ -69,3 +69,5 @@ util.py:
   conversions?
 
 - Provide a default color scheme, better than everything = None.
+
+- File render_full should include time.
