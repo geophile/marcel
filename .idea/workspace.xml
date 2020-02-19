@@ -38,7 +38,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/bin" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
@@ -67,7 +67,7 @@
   </component>
   <component name="RunManager" selected="Python.test_execution">
     <configuration name="call" type="PythonConfigurationType" factoryName="Python">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -89,7 +89,7 @@
       <method v="2" />
     </configuration>
     <configuration name="captureoutput" type="PythonConfigurationType" factoryName="Python">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -111,7 +111,7 @@
       <method v="2" />
     </configuration>
     <configuration name="eval" type="PythonConfigurationType" factoryName="Python">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -133,7 +133,7 @@
       <method v="2" />
     </configuration>
     <configuration name="osh2" type="PythonConfigurationType" factoryName="Python">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -155,7 +155,7 @@
       <method v="2" />
     </configuration>
     <configuration name="pipelinecopy" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -177,7 +177,7 @@
       <method v="2" />
     </configuration>
     <configuration name="ssh" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -199,7 +199,7 @@
       <method v="2" />
     </configuration>
     <configuration name="stdin" type="PythonConfigurationType" factoryName="Python">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -221,7 +221,7 @@
       <method v="2" />
     </configuration>
     <configuration name="test_execution" type="PythonConfigurationType" factoryName="Python">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -243,7 +243,7 @@
       <method v="2" />
     </configuration>
     <configuration name="test_parsing" type="PythonConfigurationType" factoryName="Python">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -265,7 +265,7 @@
       <method v="2" />
     </configuration>
     <configuration name="test_readchar" type="PythonConfigurationType" factoryName="Python">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -287,7 +287,7 @@
       <method v="2" />
     </configuration>
     <configuration name="test_tokenizing" type="PythonConfigurationType" factoryName="Python">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -309,7 +309,7 @@
       <method v="2" />
     </configuration>
     <configuration name="trypopen" type="PythonConfigurationType" factoryName="Python">
-      <module name="osh2" />
+      <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>

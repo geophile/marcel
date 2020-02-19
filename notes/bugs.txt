@@ -4,7 +4,9 @@ E.g. ls /tmp should show file_in_tmp, not /tmp/file_in_tmp.
 
 ----------------------------------------------------------------------
 
-2: Line wrapping is broken, (when typing commands). See GNU readline horizontal-scroll-mode. 
+2: Line wrapping is broken, (when typing commands)
+
+See GNU readline horizontal-scroll-mode.
 https://tiswww.cwru.edu/php/chet/readline/rluserman.html#SEC10
 
 ----------------------------------------------------------------------

@@ -4,9 +4,8 @@ import os
 import threading
 import signal
 
-import osh.core
-import osh.object.process
-from osh.util import *
+from marcel import osh
+import marcel.osh.object.process
 
 # stdin carries the following from the client process:
 #   - The pipeline to be executed
@@ -18,7 +17,7 @@ from osh.util import *
 TRACE = Trace('/tmp/remoteosh.log')
 
 
-class PickleOutput(osh.core.Op):
+class PickleOutput(marcel.osh.core.Op):
 
     def __init__(self):
         super().__init__()
@@ -67,7 +66,7 @@ def kill_self_and_descendents(signal_id):
     try:
         pid = os.getpid()
         try:
-            process = osh.object.process.Process(pid)
+            process = marcel.osh.object.process.Process(pid)
             for p in process.descendents:
                 TRACE.write('Killing descendent pid %s' % p.pid)
                 p.kill(signal_id)
@@ -87,7 +86,7 @@ def kill_self_and_descendents(signal_id):
 
 
 def main():
-    osh.env.Environment.initialize(None)
+    marcel.osh.env.Environment.initialize(None)
     # Use sys.stdin.buffer because we want binary data, not the text version
     input = pickle.Unpickler(sys.stdin.buffer)
     pipeline = input.load()
