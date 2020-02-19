@@ -104,8 +104,9 @@ class Ls(osh.core.Op):
         for filename in self.filename:
             x = (osh.env.ENV.pwd() / filename).resolve()
             if x.exists():
+                # TODO: Can this be simplified, having visit() do the only directory iteration?
                 if x.is_dir():
-                    for file in x.iterdir():
+                    for file in sorted(x.iterdir()):
                         self.visit(file, 0)
                 else:
                     self.visit(x, 0)
@@ -131,7 +132,7 @@ class Ls(osh.core.Op):
         self.send_path(path)
         if path.is_dir() and ((level == 0 and (self.d1 or self.dr)) or self.dr):
             try:
-                for file in path.iterdir():
+                for file in sorted(path.iterdir()):
                     self.visit(file, level + 1)
             except PermissionError as e:
                 self.send(osh.object.error.OshError('Cannot explore %s: permission denied' % path))

@@ -72,4 +72,26 @@ An unfortunate aspect of this approach is that the interleaving of normal output
 A marcel pipeline generates a stream of values, and each value has a type. This allows for normal
 and error output to be combined in one stream, since error values can be identified by type.
 
-For example, 
+For example, directory `/tmp/d` has three directories:
+ 
+    M jao@cheese:/tmp/d$ ls
+    drwxr-xr-x jao      jao              4096 /tmp/d/hi
+    dr-------- z        z                4096 /tmp/d/nope
+    drwxr-xr-x jao      jao              4096 /tmp/d/welcome
+
+The `nope` directory cannot be visited, due to permissions. If we try to list all files
+and directories recursively:  
+    
+    M jao@cheese:/tmp/d$ ls -r
+    drwxr-xr-x jao      jao              4096 /tmp/d/hi
+    -rw-r--r-- jao      jao                 0 /tmp/d/hi/a.txt
+    -rw-r--r-- jao      jao                 0 /tmp/d/hi/b.txt
+    dr-------- z        z                4096 /tmp/d/nope
+    Error(Cannot explore /tmp/d/nope: permission denied)
+    drwxr-xr-x jao      jao              4096 /tmp/d/welcome
+    -rw-r--r-- jao      jao                 0 /tmp/d/welcome/c.txt
+    -rw-r--r-- jao      jao                 0 /tmp/d/welcome/d.txt
+
+Notice that the nope directory is listed as before, but we get an error on the attempt
+to go inside of it. The error indicates when the attempt was made -- between listing
+the `nope` and `welcome` directories.
