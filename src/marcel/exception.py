@@ -14,6 +14,8 @@ An C{error_handler} is a function with these arguments:
     - C{thread}: The thread on which the stderr output occurred,
 """
 
+from marcel.util import *
+
 
 # Exception for terminating command. By extending BaseException, this exception
 # cannot be caught by "except Exception".

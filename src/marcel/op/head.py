@@ -4,21 +4,23 @@ The first N items of the input sequence are passed on as output. All other input
 is ignored. N must be an integer.
 """
 
+import marcel.core
+
 
 def head():
     return Head()
 
 
-class HeadArgParser(marcel.osh.core.OshArgParser):
+class HeadArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('head')
         self.add_argument('n',
-                          type=super().constrained_type(marcel.osh.core.OshArgParser.check_non_negative,
+                          type=super().constrained_type(marcel.core.OshArgParser.check_non_negative,
                                                         'must be non-negative'))
 
 
-class Head(marcel.osh.core.Op):
+class Head(marcel.core.Op):
 
     argparser = HeadArgParser()
 

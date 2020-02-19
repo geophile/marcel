@@ -2,19 +2,21 @@ import argparse
 import subprocess
 import sys
 
+import marcel.core
+
 
 def bash():
     return Bash()
 
 
-class BashArgParser(marcel.osh.core.OshArgParser):
+class BashArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('bash')
         self.add_argument('args',  nargs=argparse.REMAINDER)
 
 
-class Bash(marcel.osh.core.Op):
+class Bash(marcel.core.Op):
 
     argparser = BashArgParser()
 

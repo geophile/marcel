@@ -30,6 +30,9 @@ Notes:
     - dst is 1 if Daylight Savings Time is in effect, 0 otherwise.
 """
 
+import marcel.core
+import marcel.exception
+
 import threading
 import time
 
@@ -38,7 +41,7 @@ def timer():
     return Timer()
 
 
-class TimerArgParser(marcel.osh.core.OshArgParser):
+class TimerArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('timer')
@@ -46,7 +49,7 @@ class TimerArgParser(marcel.osh.core.OshArgParser):
         self.add_argument('interval')
 
 
-class Timer(marcel.osh.core.Op):
+class Timer(marcel.core.Op):
 
     argparser = TimerArgParser()
 
@@ -121,7 +124,7 @@ class Timer(marcel.osh.core.Op):
             ss = int(interval[colon2 + 1:])
             return hh * 3600 + mm * 60 + ss
         except Exception as e:
-            raise marcel.osh.error.KillCommandException('Bad interval format: %s' % e)
+            raise marcel.exception.KillCommandException('Bad interval format: %s' % e)
 
     def register_tick(self):
         self.lock.acquire()

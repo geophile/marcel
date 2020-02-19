@@ -3,18 +3,20 @@
 Input objects are sent to the output stream in the opposite order, (last-in first-out).
 """
 
+import marcel.core
+
 
 def reverse():
     return Reverse()
 
 
-class ReverseArgParser(marcel.osh.core.OshArgParser):
+class ReverseArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('reverse')
 
 
-class Reverse(marcel.osh.core.Op):
+class Reverse(marcel.core.Op):
 
     argparser = ReverseArgParser()
 

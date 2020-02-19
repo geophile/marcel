@@ -3,24 +3,26 @@
 Each value from the input sequence is mapped to an output value by FUNCTION.
 """
 
+import marcel.core
+
 
 def map():
     return Map()
 
 
-class MapArgParser(marcel.osh.core.OshArgParser):
+class MapArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('map')
         self.add_argument('function',
-                          type=super().constrained_type(marcel.osh.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
                                                         'not a valid function'))
 
 
 # map can be used as a generator (function with no args) or
 # downstream. That's why receive and execute are both defined.
 
-class Map(marcel.osh.core.Op):
+class Map(marcel.core.Op):
 
     argparser = MapArgParser()
 

@@ -2,7 +2,8 @@ __all__ = [
     'core',
     'config',
     'env',
-    'error',
+    'exception',
+    'function',
     'opmodules',
     'parse',
     'util'

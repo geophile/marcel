@@ -3,18 +3,21 @@
 Output the current directory.
 """
 
+import marcel.core
+import marcel.env
+
 
 def pwd():
     return Pwd()
 
 
-class PwdArgParser(marcel.osh.core.OshArgParser):
+class PwdArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('pwd')
 
 
-class Pwd(marcel.osh.core.Op):
+class Pwd(marcel.core.Op):
 
     argparser = PwdArgParser()
 
@@ -34,7 +37,7 @@ class Pwd(marcel.osh.core.Op):
 
     def receive(self, x):
         assert x is None, x
-        self.send(marcel.osh.env.ENV.pwd())
+        self.send(marcel.env.ENV.pwd())
 
     # Op
 

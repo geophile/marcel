@@ -4,21 +4,23 @@ C{FUNCTION} is applied to input elements. Elements for which C{FUNCTION}
 evaluates to true are emitted as output..
 """
 
+import marcel.core
+
 
 def select():
     return Select()
 
 
-class SelectArgParser(marcel.osh.core.OshArgParser):
+class SelectArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('select')
         self.add_argument('function',
-                          type=super().constrained_type(marcel.osh.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
                                                         'not a valid function'))
 
 
-class Select(marcel.osh.core.Op):
+class Select(marcel.core.Op):
 
     argparser = SelectArgParser()
 

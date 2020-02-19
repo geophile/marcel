@@ -1,4 +1,4 @@
-import marcel.osh.object.host
+import marcel.object.host
 
 
 class Cluster:
@@ -22,7 +22,7 @@ class Cluster:
 
     @hosts.setter
     def hosts(self, hosts):
-        self._hosts = [marcel.osh.object.host.Host(host, self) for host in hosts]
+        self._hosts = [marcel.object.host.Host(host, self) for host in hosts]
 
     @property
     def user(self):

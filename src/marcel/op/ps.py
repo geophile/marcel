@@ -7,15 +7,15 @@ C{-o} omits the osh process itself from the process list.
 
 import os
 
-from marcel import osh
-import marcel.osh.object.process
+import marcel.core
+import marcel.object.process
 
 
 def ps():
     return Ps()
 
 
-class PsArgParser(marcel.osh.core.OshArgParser):
+class PsArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('ps')
@@ -23,7 +23,7 @@ class PsArgParser(marcel.osh.core.OshArgParser):
                           action='store_true')
 
 
-class Ps(marcel.osh.core.Op):
+class Ps(marcel.core.Op):
 
     argparser = PsArgParser()
 
@@ -42,7 +42,7 @@ class Ps(marcel.osh.core.Op):
     def receive(self, x):
         assert x is None, x
         this_pid = os.getpid()
-        for process in marcel.osh.object.process.processes():
+        for process in marcel.object.process.processes():
             if process.pid != this_pid or not self.omit_self:
                 self.send(process)
 

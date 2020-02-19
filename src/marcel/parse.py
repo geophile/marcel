@@ -1,8 +1,12 @@
 from enum import Enum, auto
 
-from marcel import osh
-import marcel.osh.op.fork
-from marcel.osh import OP_MODULES
+import marcel.core
+import marcel.core
+import marcel.exception
+import marcel.exception
+import marcel.op.fork
+import marcel.opmodules
+from marcel.util import *
 
 
 class MalformedStringError(Exception):
@@ -170,7 +174,7 @@ class PythonExpression(Token):
             elif c in Token.QUOTES:
                 self.end = PythonString(self.text, self.end - 1).end
         if self.text[self.end - 1] != Token.CLOSE:
-            raise marcel.osh.error.KillCommandException('Malformed Python expression %s' % self.text[self.start:self.end])
+            raise marcel.exception.KillCommandException('Malformed Python expression %s' % self.text[self.start:self.end])
 
 
 class ShellString(Token):
@@ -225,7 +229,7 @@ class ShellString(Token):
                         chars.append(Token.ESCAPE_CHAR)
                         chars.append(c)
                 else:
-                    raise marcel.osh.error.KillCommandException('Malformed string: %s' % self.text[self.start:self.end])
+                    raise marcel.exception.KillCommandException('Malformed string: %s' % self.text[self.start:self.end])
             else:
                 chars.append(c)
         self.string = ''.join(chars)
@@ -306,7 +310,7 @@ class Parser(Token):
         super().__init__(text, 0)
         self.state = ParseState.START
         self.pipelines = Stack()
-        self.pipelines.push(marcel.osh.core.Pipeline())
+        self.pipelines.push(marcel.core.Pipeline())
         self.fork_spec = None
         self.op = None
         self.args = []
@@ -316,7 +320,7 @@ class Parser(Token):
             self.state = ParseState.FORK_START
         elif token.is_string():
             op_name = token.value()
-            op_module = OP_MODULES.named(op_name)
+            op_module = marcel.opmodules.OP_MODULES.named(op_name)
             self.op = getattr(op_module, op_name)()
             self.state = ParseState.OP
         else:
@@ -343,7 +347,7 @@ class Parser(Token):
 
     def fork_spec_action(self, token):
         if token.is_begin():
-            fork_pipeline = marcel.osh.core.Pipeline()
+            fork_pipeline = marcel.core.Pipeline()
             self.pipelines.push(fork_pipeline)
             self.op = fork_pipeline
             self.state = ParseState.START
@@ -423,7 +427,7 @@ class Parser(Token):
             assert self.pipelines.is_empty()
             return pipeline
         except Exception as e:
-            raise marcel.osh.error.KillCommandException(e)
+            raise marcel.exception.KillCommandException(e)
 
     def next_token(self):
         token = None
@@ -454,7 +458,7 @@ class Parser(Token):
     def finish_pipeline(self):
         fork_pipeline = self.pipelines.pop()
         main_pipeline = self.pipelines.top()
-        main_pipeline.append(marcel.osh.op.fork.Fork(self.fork_spec, fork_pipeline))
+        main_pipeline.append(marcel.op.fork.Fork(self.fork_spec, fork_pipeline))
         self.fork_spec = None
 
     def pipeline(self):

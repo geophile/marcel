@@ -8,8 +8,9 @@ import os
 import os.path
 import pathlib
 
-from marcel import osh
-import marcel.osh.object.colorscheme
+import marcel.env
+import marcel.object.renderable
+from marcel.util import *
 
 
 def processes(*dummy):
@@ -25,7 +26,7 @@ def processes(*dummy):
     return process_list
 
 
-class Process(marcel.osh.object.renderable.Renderable):
+class Process(marcel.object.renderable.Renderable):
     """A C{Process} object represents a process with a particular PID. The process may or may not
     be running when the C{Process} object is used. It is conceivable that the C{Process} object
     does not represent the same process that was identified by the PID when the C{Process} object
@@ -111,7 +112,7 @@ class Process(marcel.osh.object.renderable.Renderable):
         pid = '{:6n}'.format(self.pid)
         commandline = self.commandline
         if color:
-            color_scheme = marcel.osh.env.ENV.color_scheme()
+            color_scheme = marcel.env.ENV.color_scheme()
             pid = colorize(pid, color_scheme.process_pid)
             commandline = colorize(commandline, color_scheme.process_commandline)
         buffer = [

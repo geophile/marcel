@@ -1,14 +1,18 @@
-import os
-import shutil
 import contextlib
+import io
+import os
+import pathlib
+import shutil
 
-from marcel import osh
-from marcel.osh import run_command
-import marcel.osh.env
-import marcel.osh.core
-import marcel.osh.object.host
+import marcel.env
+import marcel.core
+import marcel.main
+import marcel.object.error
+import marcel.object.host
+from marcel.util import *
 
-Error = marcel.osh.object.error.OshError
+Error = marcel.object.error.Error
+run_command = marcel.main.run_command
 start_dir = os.getcwd()
 
 
@@ -89,7 +93,7 @@ class Test:
             print('%s: Terminated by uncaught exception: %s' % (command, e))
             print_stack()
             Test.failures += 1
-        except marcel.osh.error.KillCommandException as e:
+        except marcel.exception.KillCommandException as e:
             print('%s: Terminated by KillCommandException: %s' % (command, e))
 
     @staticmethod
@@ -278,7 +282,7 @@ def test_ls():
     Test.run('ls -r /tmp/testls/d? | map (f: f.abspath) | sort',
              expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
     # In current directory, test 0/1/r flags with file
-    marcel.osh.env.ENV.cd(pathlib.Path(tmp))
+    marcel.env.ENV.cd(pathlib.Path(tmp))
     Test.run('ls -0 testls/b1 | map (f: f.abspath) | sort',
              expected_out=sorted([b1]))
     Test.run('ls -1 testls/b1 | map (f: f.abspath) | sort',
@@ -308,7 +312,7 @@ def test_ls():
              expected_out=sorted([a1, a2, b1, b2, d1, d2, f11, f12, f13, f21, f22, f23, d21, f211, f212]))
     # TODO: symlinks
     # Test multiple filenames/globs
-    marcel.osh.env.ENV.cd(pathlib.Path(base))
+    marcel.env.ENV.cd(pathlib.Path(base))
     Test.run('ls -0 a1 b* | map (f: f.abspath) | sort',
              expected_out=sorted([a1, b1, b2]))
     Test.run('ls -0 *2 d1/f* | map (f: f.abspath) | sort',
@@ -626,7 +630,7 @@ def test_namespace():
     config_path.touch()
     config_path.unlink()
     config_path.touch()
-    marcel.osh.env.Environment.initialize(config_file)
+    marcel.env.Environment.initialize(config_file)
     Test.run('map (globals().keys())',
              expected_out=["dict_keys(['USER', 'HOME', 'HOST', 'PWD', '__builtins__'])"])
     # Try to use an undefined symbol
@@ -636,7 +640,7 @@ def test_namespace():
     config_path.unlink()
     with open(config_file, 'w') as file:
         file.writelines('from math import *')
-    marcel.osh.env.Environment.initialize(config_file)
+    marcel.env.Environment.initialize(config_file)
     Test.run('map (pi)',
              expected_out=['3.141592653589793'])
     # Reset environment
@@ -644,7 +648,7 @@ def test_namespace():
 
 
 def test_remote():
-    localhost = marcel.osh.object.host.Host('localhost', None)
+    localhost = marcel.object.host.Host('localhost', None)
     Test.run('@jao [ gen 3 ]',
              expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
     Test.run('@jao [ gen 3 -1 | map (x: 5 / x) ]',
@@ -652,12 +656,11 @@ def test_remote():
 
 
 def reset_environment():
-    marcel.osh.env.Environment.initialize('./.osh2rc')
+    marcel.env.Environment.initialize('./.osh2rc')
     os.chdir(start_dir)
 
 
 def main_stable():
-    test_no_such_op()
     test_gen()
     test_out()
     test_sort()
@@ -675,6 +678,7 @@ def main_stable():
     test_bash()
     test_fork()
     test_namespace()
+    test_no_such_op()
 
 
 def main_dev():

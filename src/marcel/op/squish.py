@@ -14,25 +14,25 @@ If no C{FUNCTION} is provided, then C{+} is assumed.
 
 import functools
 
-from marcel import osh
-import marcel.osh.function
+import marcel.core
+import marcel.function
 
 
 def squish():
     return Squish()
 
 
-class SquishArgParser(marcel.osh.core.OshArgParser):
+class SquishArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('squish')
         self.add_argument('function',
                           nargs='?',
-                          type=super().constrained_type(marcel.osh.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
                                                         'not a valid function'))
 
 
-class Squish(marcel.osh.core.Op):
+class Squish(marcel.core.Op):
 
     argparser = SquishArgParser()
 
@@ -50,7 +50,7 @@ class Squish(marcel.osh.core.Op):
 
     def setup_1(self):
         if self.function is None:
-            self.function = marcel.osh.function.Function('+')
+            self.function = marcel.function.Function('+')
         self.function.set_op(self)
 
     def receive(self, x):

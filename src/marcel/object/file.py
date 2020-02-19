@@ -1,8 +1,9 @@
 import pathlib
 import shutil
 
-from marcel import osh
-import marcel.osh.object.renderable
+import marcel.env
+import marcel.object.renderable
+from marcel.util import *
 
 DIR_MASK = 0o040000
 FILE_MASK = 0o100000
@@ -10,7 +11,7 @@ LINK_MASK = 0o120000
 FILE_TYPE_MASK = DIR_MASK | FILE_MASK | LINK_MASK
 
 
-class File(marcel.osh.object.renderable.Renderable):
+class File(marcel.object.renderable.Renderable):
     """Represents a file or directory.
     """
 
@@ -113,7 +114,7 @@ class File(marcel.osh.object.renderable.Renderable):
 
     def _highlight_color(self):
         extension = self.path.suffix.lower()
-        color_scheme = marcel.osh.env.ENV.color_scheme()
+        color_scheme = marcel.env.ENV.color_scheme()
         highlight = color_scheme.file_extension.get(extension)
         if highlight is None:
             highlight = (

@@ -22,6 +22,8 @@
 
 + Generalize prompt: sequence of strings, env vars, colors.
 
+- Support ~
+
 ----------------------------------------------------------------------
 
 0.2

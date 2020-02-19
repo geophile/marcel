@@ -7,23 +7,25 @@ to the values obtained by applying the KEY function to the input objects.
 KEY                        Obtains the sort key. If omitted, the object itself is used as the sort key.
 """
 
+import marcel.core
+
 
 def sort():
     return Sort()
 
 
-class SortArgParser(marcel.osh.core.OshArgParser):
+class SortArgParser(marcel.core.OshArgParser):
     
     def __init__(self):
         super().__init__('sort')
         self.add_argument('key',
                           nargs='?',
                           default=None,
-                          type=super().constrained_type(marcel.osh.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
                                                         'not a valid function'))
         
 
-class Sort(marcel.osh.core.Op):
+class Sort(marcel.core.Op):
 
     argparser = SortArgParser()
 

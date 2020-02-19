@@ -60,29 +60,32 @@ tuples::
     ((9,), (None,), (None,))
 """
 
+import marcel.core
+import marcel.exception
+
 
 def window():
     return Window()
 
 
-class WindowArgsParser(marcel.osh.core.OshArgParser):
+class WindowArgsParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('window')
         self.add_argument('predicate',
                           nargs='?',
-                          type=super().constrained_type(marcel.osh.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
                                                         'not a valid function'))
         fixed_size = self.add_mutually_exclusive_group()
         fixed_size.add_argument('-o', '--overlap',
-                                type=super().constrained_type(marcel.osh.core.OshArgParser.check_non_negative,
+                                type=super().constrained_type(marcel.core.OshArgParser.check_non_negative,
                                                               'must be non-negative'))
         fixed_size.add_argument('-d', '--disjoint',
-                                type=super().constrained_type(marcel.osh.core.OshArgParser.check_non_negative,
+                                type=super().constrained_type(marcel.core.OshArgParser.check_non_negative,
                                                               'must be non-negative'))
 
 
-class Window(marcel.osh.core.Op):
+class Window(marcel.core.Op):
 
     argparser = WindowArgsParser()
 
@@ -119,7 +122,7 @@ class Window(marcel.osh.core.Op):
         count += 1 if self.overlap is not None else 0
         count += 1 if self.disjoint is not None else 0
         if count != 1:
-            raise marcel.osh.error.KillCommandException('Incorrect arguments given for window.')
+            raise marcel.exception.KillCommandException('Incorrect arguments given for window.')
         if self.predicate:
             self.window_generator = PredicateWindow(self)
             self.predicate.set_op(self)

@@ -1,8 +1,12 @@
 import argparse
 
-from marcel import osh
-import marcel.osh.function
-from marcel.osh import OshError
+import marcel.exception
+import marcel.exception
+import marcel.function
+import marcel.object.error
+from marcel.util import *
+
+Error = marcel.object.error.Error
 
 
 class OshArgParser(argparse.ArgumentParser):
@@ -11,7 +15,7 @@ class OshArgParser(argparse.ArgumentParser):
         super().__init__(prog=op_name)
 
     def exit(self, status=0, message=None):
-        raise marcel.osh.error.KillCommandException(message)
+        raise marcel.exception.KillCommandException(message)
 
     @staticmethod
     def constrained_type(check_and_convert, message):
@@ -19,6 +23,7 @@ class OshArgParser(argparse.ArgumentParser):
             try:
                 return check_and_convert(s)
             except Exception:
+                print_stack()
                 raise argparse.ArgumentTypeError(message)
 
         return arg_checker
@@ -32,7 +37,7 @@ class OshArgParser(argparse.ArgumentParser):
 
     @staticmethod
     def check_function(s):
-        return marcel.osh.function.Function(s)
+        return marcel.function.Function(s)
 
 
 class BaseOp(object):
@@ -71,7 +76,7 @@ class BaseOp(object):
         if message is None:
             message = self.doc()
         print(message, file=sys.stderr)
-        raise marcel.osh.error.KillCommandException(None)
+        raise marcel.exception.KillCommandException(None)
 
     def doc(self):
         """Print op usage information.
@@ -96,8 +101,8 @@ class BaseOp(object):
         if self.receiver:
             try:
                 self.receiver.receive_input_or_error(x)
-            except marcel.osh.error.KillAndResumeException as e:
-                self.receiver.receive_error(OshError(e))
+            except marcel.exception.KillAndResumeException as e:
+                self.receiver.receive_error(Error(e))
 
     def send_complete(self):
         """Called by a op class to indicate that there will
@@ -107,7 +112,7 @@ class BaseOp(object):
             self.receiver.receive_complete()
 
     def receive_input_or_error(self, x):
-        if isinstance(x, OshError):
+        if isinstance(x, Error):
             self.receive_error(x)
         else:
             self.receive(normalize_output(x))
@@ -194,10 +199,10 @@ class Pipeline(BaseOp):
     def receive(self, x):
         try:
             self.first_op.receive(x)
-        except marcel.osh.error.KillAndResumeException as e:
+        except marcel.exception.KillAndResumeException as e:
             receiver = self.first_op.receiver
             if receiver:
-                receiver.receive_error(OshError(e))
+                receiver.receive_error(Error(e))
 
     def receive_complete(self):
         self.first_op.receive_complete()
@@ -211,27 +216,3 @@ class Pipeline(BaseOp):
         else:
             self.first_op = op
         self.last_op = op
-
-
-class Command:
-
-    def __init__(self, pipeline):
-        # Append an "out %s" op at the end of pipeline, if there is no output op there already.
-        from marcel.osh import Out
-        if not isinstance(pipeline.last_op, Out):
-            out = Out()
-            out.append = False
-            out.file = False
-            out.csv = False
-            # out.format = '%s'
-            pipeline.append(out)
-        self.pipeline = pipeline
-
-    def __repr__(self):
-        return str(self.pipeline)
-
-    def execute(self):
-        self.pipeline.setup_1()
-        self.pipeline.setup_2()
-        self.pipeline.receive(None)
-        self.pipeline.receive_complete()

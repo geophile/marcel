@@ -3,8 +3,10 @@ import pickle
 import subprocess
 import sys
 
+import marcel.core
 
-class Remote(marcel.osh.core.Op):
+
+class Remote(marcel.core.Op):
     def __init__(self, pipeline):
         super().__init__()
         self.host = None

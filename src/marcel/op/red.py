@@ -70,14 +70,17 @@ be computed as follows::
 The output stream would be C{('a', 1, 1), ('a', 2, 3), ('b', 3, 3), ('b', 4, 7)}.
 
 """
+
 import argparse
+
+import marcel.core
 
 
 def red():
     return Red()
 
 
-class RedArgParser(marcel.osh.core.OshArgParser):
+class RedArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('red')
@@ -85,11 +88,11 @@ class RedArgParser(marcel.osh.core.OshArgParser):
                           action='store_true')
         self.add_argument('function',
                           nargs=argparse.REMAINDER,
-                          type=super().constrained_type(marcel.osh.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
                                                         'not a valid function'))
 
 
-class Red(marcel.osh.core.Op):
+class Red(marcel.core.Op):
 
     argparser = RedArgParser()
 

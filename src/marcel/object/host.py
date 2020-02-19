@@ -1,6 +1,8 @@
 import ipaddress
 import socket
 
+import marcel.exception
+
 
 class Host:
 
@@ -16,7 +18,8 @@ class Host:
                 self.ip_addr = str(ipaddress.ip_address(socket.gethostbyname(host)))
                 self.name = host
             except socket.gaierror:
-                raise marcel.osh.error.KillCommandException('Cannot understand %s as a host name or as an IP address.' % host)
+                raise marcel.exception.KillCommandException(
+                    'Cannot understand %s as a host name or as an IP address.' % host)
 
     def __repr__(self):
         return self.host

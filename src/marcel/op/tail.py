@@ -4,21 +4,23 @@ The last N items of the input sequence are passed on as output. All other input
 is ignored. N must be an integer.
 """
 
+import marcel.core
+
 
 def tail():
     return Tail()
 
 
-class TailArgParser(marcel.osh.core.OshArgParser):
+class TailArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('tail')
         self.add_argument('n',
-                          type=super().constrained_type(marcel.osh.core.OshArgParser.check_non_negative,
+                          type=super().constrained_type(marcel.core.OshArgParser.check_non_negative,
                                                         'must be non-negative'))
 
 
-class Tail(marcel.osh.core.Op):
+class Tail(marcel.core.Op):
 
     argparser = TailArgParser()
 

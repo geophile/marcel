@@ -1,9 +1,14 @@
 import getpass
 import os
+import pathlib
 import socket
+import sys
 
-from marcel import osh
-import marcel.osh.object.cluster
+import marcel.exception
+import marcel.object.cluster
+import marcel.object.colorscheme
+import marcel.object.colorscheme
+from marcel.util import *
 
 ENV = None
 DEFAULT_PROMPT = ['$ ']
@@ -31,17 +36,17 @@ class Environment:
         self._color_scheme = None
         self.read_config(config_file)  # Sets _globals
         self._color_scheme = self._globals.get('COLOR_SCHEME', None)
-        if not isinstance(self._color_scheme, marcel.osh.object.colorscheme.ColorScheme):
+        if not isinstance(self._color_scheme, marcel.object.colorscheme.ColorScheme):
             if self._color_scheme is not None:
                 print('Invalid COLOR_SCHEME specified, using defafult', file=sys.stderr)
-            self._color_schema = marcel.osh.object.colorscheme.ColorScheme()
+            self._color_schema = marcel.object.colorscheme.ColorScheme()
 
     def prompt(self):
         prompt_list = self._globals.get('PROMPT', DEFAULT_PROMPT)
         buffer = []
         color = None
         for x in prompt_list:
-            if isinstance(x, marcel.osh.object.colorscheme.Color):
+            if isinstance(x, marcel.object.colorscheme.Color):
                 color = x
             else:
                 if callable(x):
@@ -63,7 +68,7 @@ class Environment:
             # So that executables have the same view of the current directory.
             os.chdir(self._current_dir)
         except FileNotFoundError:
-            raise marcel.osh.error.KillCommandException('Cannot cd into %s from %s. Target %s does not exist.' %
+            raise marcel.exception.KillCommandException('Cannot cd into %s from %s. Target %s does not exist.' %
                                                         (directory, self._current_dir, new_dir))
 
     def globals(self):
@@ -71,10 +76,10 @@ class Environment:
 
     def cluster(self, name):
         symbol = self._globals.get(name, None)
-        return symbol if symbol and type(symbol) is marcel.osh.object.cluster.Cluster else None
+        return symbol if symbol and type(symbol) is marcel.object.cluster.Cluster else None
 
     def color_scheme(self):
-        assert isinstance(self._color_scheme, marcel.osh.object.colorscheme.ColorScheme), self._color_scheme
+        assert isinstance(self._color_scheme, marcel.object.colorscheme.ColorScheme), self._color_scheme
         return self._color_scheme
 
     def read_config(self, requested_config_path):
@@ -85,4 +90,3 @@ class Environment:
             with open(config_path.as_posix()) as config_file:
                 config_source = config_file.read()
                 exec(config_source, self._globals)
-

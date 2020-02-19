@@ -8,19 +8,22 @@ is specified.
 
 """
 
+import marcel.core
+from marcel.util import *
+
 
 def unique():
     return Unique()
 
 
-class UniqueArgParser(marcel.osh.core.OshArgParser):
+class UniqueArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('unique')
         self.add_argument('-c', '--consecutive', action='store_true')
 
 
-class Unique(marcel.osh.core.Op):
+class Unique(marcel.core.Op):
 
     argparser = UniqueArgParser()
 

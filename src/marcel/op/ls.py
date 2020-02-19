@@ -28,16 +28,17 @@ and symlinks are all listed.
 import argparse
 import pathlib
 
-from marcel import osh
-import marcel.osh.object.error
-from marcel.osh import File
+import marcel.core
+import marcel.env
+import marcel.object.error
+import marcel.object.file
 
 
 def ls():
     return Ls()
 
 
-class LsArgParser(marcel.osh.core.OshArgParser):
+class LsArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('ls')
@@ -51,7 +52,7 @@ class LsArgParser(marcel.osh.core.OshArgParser):
         self.add_argument('filename', nargs=argparse.REMAINDER)
 
 
-class Ls(marcel.osh.core.Op):
+class Ls(marcel.core.Op):
 
     argparser = LsArgParser()
 
@@ -96,12 +97,12 @@ class Ls(marcel.osh.core.Op):
             self.dir = True
             self.symlink = True
         if len(self.filename) == 0:
-            self.filename = [marcel.osh.env.ENV.pwd().as_posix()]
+            self.filename = [marcel.env.ENV.pwd().as_posix()]
 
     def receive(self, x):
         assert x is None, x
         for filename in self.filename:
-            x = (marcel.osh.env.ENV.pwd() / filename).resolve()
+            x = (marcel.env.ENV.pwd() / filename).resolve()
             if x.exists():
                 # TODO: Can this be simplified, having visit() do the only directory iteration?
                 if x.is_dir():
@@ -116,7 +117,7 @@ class Ls(marcel.osh.core.Op):
                     pattern = filename[1:]
                     paths = root.glob(pattern)
                 else:
-                    paths = marcel.osh.env.ENV.pwd().glob(filename)
+                    paths = marcel.env.ENV.pwd().glob(filename)
                 for path in paths:
                     self.visit(path, 0)
 
@@ -134,11 +135,11 @@ class Ls(marcel.osh.core.Op):
                 for file in sorted(path.iterdir()):
                     self.visit(file, level + 1)
             except PermissionError as e:
-                self.send(marcel.osh.object.error.OshError('Cannot explore %s: permission denied' % path))
+                self.send(marcel.object.error.Error('Cannot explore %s: permission denied' % path))
 
     def send_path(self, path):
         if path.is_file() and self.file or path.is_dir() and self.dir or path.is_symlink() and self.symlink:
-            file = File(path)
+            file = marcel.object.file.File(path)
             if file not in self.emitted:
                 self.emitted.add(file)
                 self.send(file)

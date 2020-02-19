@@ -1,4 +1,7 @@
-class LabelThread(marcel.osh.core.Op):
+import marcel.core
+
+
+class LabelThread(marcel.core.Op):
 
     def __init__(self):
         super().__init__()

@@ -1,6 +1,13 @@
 import threading
 
-from marcel.osh import LabelThread
+import marcel.core
+import marcel.env
+import marcel.exception
+import marcel.op.labelthread
+import marcel.op.labelthread
+import marcel.op.remote
+import marcel.op.remote
+from marcel.util import *
 
 
 class PipelineThread(threading.Thread):
@@ -21,7 +28,7 @@ class PipelineThread(threading.Thread):
             self.terminating_exception = e
 
 
-class Fork(marcel.osh.core.Op):
+class Fork(marcel.core.Op):
 
     def __init__(self, fork_spec, fork_pipeline):
         super().__init__()
@@ -45,11 +52,11 @@ class Fork(marcel.osh.core.Op):
         # Otherwise: it needs to be pickled by Remote and sent to the host executing it.
         # The pipeline executing locally is a new one containing just the Remote op.
         if self.remote:
-            pipeline = marcel.osh.core.Pipeline()
-            remote_op = marcel.osh.op.remote.Remote(self.fork_pipeline)
+            pipeline = marcel.core.Pipeline()
+            remote_op = marcel.op.remote.Remote(self.fork_pipeline)
             pipeline.append(remote_op)
             self.fork_pipeline = pipeline
-        self.fork_pipeline.append(LabelThread())
+        self.fork_pipeline.append(marcel.op.labelthread.LabelThread())
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
         pass
@@ -58,7 +65,7 @@ class Fork(marcel.osh.core.Op):
         for thread_label in self.thread_labels:
             pipeline_copy = clone(self.fork_pipeline)
             label_thread_op = pipeline_copy.last_op
-            assert isinstance(label_thread_op, LabelThread)
+            assert isinstance(label_thread_op, marcel.op.labelthread.LabelThread)
             Fork.attach_thread_label(pipeline_copy.first_op, thread_label)  # In case it's Remote
             Fork.attach_thread_label(label_thread_op, thread_label)  # LabelThread
             pipeline_copy.setup_1()
@@ -84,18 +91,18 @@ class Fork(marcel.osh.core.Op):
         for thread in self.threads:
             e = thread.terminating_exception
             if e:
-                if isinstance(e, marcel.osh.error.KillCommandException):
+                if isinstance(e, marcel.exception.KillCommandException):
                     kill_command = e
-                if isinstance(e, marcel.osh.error.KillAndResumeException):
+                if isinstance(e, marcel.exception.KillAndResumeException):
                     kill_and_resume = e
                 if isinstance(e, KeyboardInterrupt):
                     ctrl_c = e
         if kill_command:
-            raise marcel.osh.error.KillCommandException(kill_command)
+            raise marcel.exception.KillCommandException(kill_command)
         if ctrl_c:
             raise KeyboardInterrupt()
         if kill_and_resume:
-            raise marcel.osh.error.KillAndResumeException(self, None, str(kill_and_resume))
+            raise marcel.exception.KillAndResumeException(self, None, str(kill_and_resume))
 
     # Op
 
@@ -108,17 +115,17 @@ class Fork(marcel.osh.core.Op):
         if type(self.fork_spec) is int:
             self.thread_labels = [x for x in range(self.fork_spec)]
         elif type(self.fork_spec) is str:
-            cluster = marcel.osh.env.ENV.cluster(self.fork_spec)
+            cluster = marcel.env.ENV.cluster(self.fork_spec)
             if cluster:
                 self.thread_labels = [host for host in cluster.hosts]
                 self.remote = True
         if self.thread_labels is None:
-            raise marcel.osh.error.KillCommandException('Invalid fork spec @%s' % self.fork_spec)
+            raise marcel.exception.KillCommandException('Invalid fork spec @%s' % self.fork_spec)
 
     @staticmethod
     def attach_thread_label(op, thread_label):
-        if isinstance(op, LabelThread):
+        if isinstance(op, marcel.op.labelthread.LabelThread):
             op.set_label(thread_label)
-        elif isinstance(op, marcel.osh.op.remote.Remote):
+        elif isinstance(op, marcel.op.remote.Remote):
             op.set_host(thread_label)
 

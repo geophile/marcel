@@ -1,4 +1,4 @@
-from osh.config import *
+from marcel.config import *
 
 jao = Cluster('jao')
 jao.hosts = ['localhost']

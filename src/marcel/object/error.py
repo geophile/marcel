@@ -1,9 +1,9 @@
-from marcel import osh
-import marcel.osh.object.renderable
-from marcel.osh import colorize
+import marcel.env
+import marcel.object.renderable
+from marcel.util import *
 
 
-class OshError(marcel.osh.object.renderable.Renderable):
+class Error(marcel.object.renderable.Renderable):
 
     def __init__(self, cause):
         self.message = str(cause)
@@ -22,7 +22,7 @@ class OshError(marcel.osh.object.renderable.Renderable):
     def render_full(self, color):
         out = self.render_compact()
         if color:
-            out = colorize(out, marcel.osh.env.ENV.color_scheme().error)
+            out = colorize(out, marcel.env.ENV.color_scheme().error)
         return out
 
     # OshError

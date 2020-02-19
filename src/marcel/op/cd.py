@@ -8,12 +8,15 @@ TODO: .. and .
 
 import pathlib
 
+import marcel.core
+import marcel.env
+
 
 def cd():
     return Cd()
 
 
-class CdArgParser(marcel.osh.core.OshArgParser):
+class CdArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('cd')
@@ -22,7 +25,7 @@ class CdArgParser(marcel.osh.core.OshArgParser):
                           default='0')
 
 
-class Cd(marcel.osh.core.Op):
+class Cd(marcel.core.Op):
 
     argparser = CdArgParser()
 
@@ -43,7 +46,7 @@ class Cd(marcel.osh.core.Op):
 
     def receive(self, x):
         assert x is None, x
-        marcel.osh.env.ENV.cd(self.directory)
+        marcel.env.ENV.cd(self.directory)
 
     # Op
 

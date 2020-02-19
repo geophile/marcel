@@ -10,12 +10,14 @@ then the sequence does not terminate.
                            C{START} >= 0.
 """
 
+import marcel.core
+
 
 def gen():
     return Gen()
 
 
-class GenArgParser(marcel.osh.core.OshArgParser):
+class GenArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('gen')
@@ -24,7 +26,7 @@ class GenArgParser(marcel.osh.core.OshArgParser):
         self.add_argument('count',
                           nargs='?',
                           default='0',
-                          type=super().constrained_type(marcel.osh.core.OshArgParser.check_non_negative,
+                          type=super().constrained_type(marcel.core.OshArgParser.check_non_negative,
                                                         'must be non-negative'))
         self.add_argument('start',
                           nargs='?',
@@ -32,7 +34,7 @@ class GenArgParser(marcel.osh.core.OshArgParser):
                           type=int)
 
 
-class Gen(marcel.osh.core.Op):
+class Gen(marcel.core.Op):
 
     argparser = GenArgParser()
 

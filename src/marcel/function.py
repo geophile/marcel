@@ -1,3 +1,7 @@
+import marcel.env
+import marcel.exception
+
+
 class Function:
 
     symbols = {
@@ -39,7 +43,7 @@ class Function:
             if len(kwargs) > 0:
                 function_input.append(str(kwargs))
             function_input_string = ', '.join(function_input)
-            raise marcel.osh.error.KillAndResumeException(self.op, function_input_string, str(e))
+            raise marcel.exception.KillAndResumeException(self.op, function_input_string, str(e))
 
     def __getstate__(self):
         self.function = None
@@ -52,7 +56,7 @@ class Function:
         self.op = op
 
     def create_function(self):
-        env = marcel.osh.env.ENV
+        env = marcel.env.ENV
         self.function = Function.symbols.get(self.source, None)
         if self.function is None:
             if self.source.split()[0] in ('lambda', 'lambda:'):

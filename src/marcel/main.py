@@ -1,17 +1,41 @@
 import readline
+import sys
 
-from marcel.osh import Command
-from marcel.osh import KillCommandException
-from marcel.osh.parse import Parser
+import marcel.core
+import marcel.env
+import marcel.exception
+import marcel.op.out
+import marcel.parse
+
+
+class Command:
+
+    def __init__(self, pipeline):
+        # Append an "out %s" op at the end of pipeline, if there is no output op there already.
+        if not isinstance(pipeline.last_op, marcel.op.out.Out):
+            out = marcel.op.out.Out()
+            out.append = False
+            out.file = False
+            out.csv = False
+            pipeline.append(out)
+        self.pipeline = pipeline
+
+    def __repr__(self):
+        return str(self.pipeline)
+
+    def execute(self):
+        self.pipeline.setup_1()
+        self.pipeline.setup_2()
+        self.pipeline.receive(None)
+        self.pipeline.receive_complete()
 
 
 def run_command(line):
     if line:
         try:
-            pipeline = Parser(line).parse()
-            command = Command(pipeline)
-            command.execute()
-        except KillCommandException as e:
+            pipeline = marcel.parse.Parser(line).parse()
+            Command(pipeline).execute()
+        except marcel.exception.KillCommandException as e:
             print(e, file=sys.stderr)
 
 
@@ -20,7 +44,7 @@ def process_input(handle_line):
     try:
         while True:
             try:
-                line = input(marcel.osh.env.ENV.prompt())
+                line = input(marcel.env.ENV.prompt())
                 handle_line(line)
             except KeyboardInterrupt:  # ctrl-C
                 print()
@@ -35,7 +59,7 @@ def args():
 
 def main():
     config_path = args()
-    marcel.osh.env.Environment.initialize(config_path)
+    marcel.env.Environment.initialize(config_path)
     process_input(run_command)
 
 

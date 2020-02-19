@@ -19,16 +19,16 @@ FORMAT                     A Python formatter specifying how an object should be
 
 import sys
 
-from marcel import osh
-import marcel.osh.object.error
-import marcel.osh.object.renderable
+import marcel.core
+import marcel.object.error
+import marcel.object.renderable
 
 
 def out():
     return Out()
 
 
-class OutArgParser(marcel.osh.core.OshArgParser):
+class OutArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('out')
@@ -39,7 +39,7 @@ class OutArgParser(marcel.osh.core.OshArgParser):
         self.add_argument('format', nargs='?')
 
 
-class Out(marcel.osh.core.Op):
+class Out(marcel.core.Op):
     argparser = OutArgParser()
 
     def __init__(self):
@@ -84,12 +84,12 @@ class Out(marcel.osh.core.Op):
             if type(x) in (list, tuple):
                 if len(x) == 1:
                     out = x[0]
-                    if isinstance(out, marcel.osh.object.renderable.Renderable):
+                    if isinstance(out, marcel.object.renderable.Renderable):
                         out = out.render_full(self.use_color())
                 else:
                     buffer = []
                     for y in x:
-                        if isinstance(y, marcel.osh.object.renderable.Renderable):
+                        if isinstance(y, marcel.object.renderable.Renderable):
                             y = y.render_compact()
                         buffer.append(Out.ensure_quoted(y))
                     out = '(' + ', '.join(buffer) + ')'
@@ -99,7 +99,7 @@ class Out(marcel.osh.core.Op):
         try:
             print(out, file=self.output, flush=True)
         except Exception as e:  # E.g. UnicodeEncodeError
-            error = marcel.osh.object.error.OshError(e)
+            error = marcel.object.error.Error(e)
             self.print_error(error)
         finally:
             self.send(x)
@@ -133,7 +133,7 @@ class Out(marcel.osh.core.Op):
     def render(self, x, full):
         if x is None:
             return None
-        elif isinstance(x, marcel.osh.object.renderable.Renderable):
+        elif isinstance(x, marcel.object.renderable.Renderable):
             return (x.render_full(self.use_color())
                     if full else
                     x.render_compact())

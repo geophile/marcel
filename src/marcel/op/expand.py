@@ -42,22 +42,25 @@ Note that an empty nested sequence results in no output, (as for
 C{('c', [], 'z')}.)
 """
 
+import marcel.core
+from marcel.util import *
+
 
 def expand():
     return Expand()
 
 
-class ExpandArgParser(marcel.osh.core.OshArgParser):
+class ExpandArgParser(marcel.core.OshArgParser):
 
     def __init__(self):
         super().__init__('expand')
         self.add_argument('position',
                           nargs='?',
-                          type=super().constrained_type(marcel.osh.core.OshArgParser.check_non_negative,
+                          type=super().constrained_type(marcel.core.OshArgParser.check_non_negative,
                                                         'must be non-negative'))
 
 
-class Expand(marcel.osh.core.Op):
+class Expand(marcel.core.Op):
     argparser = ExpandArgParser()
 
     def __init__(self):
