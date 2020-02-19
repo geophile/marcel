@@ -20,7 +20,7 @@
 
 - README.md
 
-- Generalize prompt: sequence of strings, env vars, colors.
++ Generalize prompt: sequence of strings, env vars, colors.
 
 ----------------------------------------------------------------------
 

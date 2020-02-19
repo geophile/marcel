@@ -63,7 +63,7 @@ def print_stack(file=None):
 def colorize(s, color):
     return (s
             if color is None else
-            '\033[%s;38;5;%sm%s\033[0m' % (1 if color.bold else 0, color.code, s))
+            '\033[%sm\033[38;5;%sm%s\033[0m' % (1 if color.bold else 0, color.code, s))
 
 
 class Stack:
