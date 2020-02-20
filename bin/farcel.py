@@ -15,7 +15,7 @@ from marcel.util import *
 # on a thread so that stdin can be monitored for the kill signal and then acted upon.
 
 
-TRACE = Trace('/tmp/remoteosh.log')
+TRACE = Trace('/tmp/farcel.log')
 
 
 class PickleOutput(marcel.core.Op):

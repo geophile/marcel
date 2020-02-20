@@ -11,12 +11,12 @@ def select():
     return Select()
 
 
-class SelectArgParser(marcel.core.OshArgParser):
+class SelectArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('select')
         self.add_argument('function',
-                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.ArgParser.check_function,
                                                         'not a valid function'))
 
 

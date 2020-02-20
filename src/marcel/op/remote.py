@@ -29,7 +29,7 @@ class Remote(marcel.core.Op):
             '-l',
             self.host.user,
             self.host.ip_addr,
-            'remoteosh.py'
+            'farcel.py'
         ])
         self.process = subprocess.Popen(command,
                                         stdin=subprocess.PIPE,

@@ -16,7 +16,7 @@ def unique():
     return Unique()
 
 
-class UniqueArgParser(marcel.core.OshArgParser):
+class UniqueArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('unique')

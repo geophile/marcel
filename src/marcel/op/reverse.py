@@ -10,7 +10,7 @@ def reverse():
     return Reverse()
 
 
-class ReverseArgParser(marcel.core.OshArgParser):
+class ReverseArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('reverse')

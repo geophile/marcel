@@ -9,7 +9,7 @@ from marcel.util import *
 Error = marcel.object.error.Error
 
 
-class OshArgParser(argparse.ArgumentParser):
+class ArgParser(argparse.ArgumentParser):
 
     def __init__(self, op_name):
         super().__init__(prog=op_name)

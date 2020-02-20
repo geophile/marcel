@@ -50,13 +50,13 @@ def expand():
     return Expand()
 
 
-class ExpandArgParser(marcel.core.OshArgParser):
+class ExpandArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('expand')
         self.add_argument('position',
                           nargs='?',
-                          type=super().constrained_type(marcel.core.OshArgParser.check_non_negative,
+                          type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
                                                         'must be non-negative'))
 
 

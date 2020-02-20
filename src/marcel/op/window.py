@@ -68,20 +68,20 @@ def window():
     return Window()
 
 
-class WindowArgsParser(marcel.core.OshArgParser):
+class WindowArgsParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('window')
         self.add_argument('predicate',
                           nargs='?',
-                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.ArgParser.check_function,
                                                         'not a valid function'))
         fixed_size = self.add_mutually_exclusive_group()
         fixed_size.add_argument('-o', '--overlap',
-                                type=super().constrained_type(marcel.core.OshArgParser.check_non_negative,
+                                type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
                                                               'must be non-negative'))
         fixed_size.add_argument('-d', '--disjoint',
-                                type=super().constrained_type(marcel.core.OshArgParser.check_non_negative,
+                                type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
                                                               'must be non-negative'))
 
 

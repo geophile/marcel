@@ -15,7 +15,7 @@ def ps():
     return Ps()
 
 
-class PsArgParser(marcel.core.OshArgParser):
+class PsArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('ps')

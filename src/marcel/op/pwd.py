@@ -11,7 +11,7 @@ def pwd():
     return Pwd()
 
 
-class PwdArgParser(marcel.core.OshArgParser):
+class PwdArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('pwd')

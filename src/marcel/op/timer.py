@@ -41,7 +41,7 @@ def timer():
     return Timer()
 
 
-class TimerArgParser(marcel.core.OshArgParser):
+class TimerArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('timer')

@@ -624,7 +624,7 @@ def test_fork():
 
 
 def test_namespace():
-    config_file = '/tmp/.osh2rc'
+    config_file = '/tmp/.marcel.py'
     config_path = pathlib.Path(config_file)
     # Default namespace has just __builtins__
     config_path.touch()
@@ -656,7 +656,7 @@ def test_remote():
 
 
 def reset_environment():
-    marcel.env.Environment.initialize('./.osh2rc')
+    marcel.env.Environment.initialize('./.marcel.py')
     os.chdir(start_dir)
 
 

@@ -80,7 +80,7 @@ def red():
     return Red()
 
 
-class RedArgParser(marcel.core.OshArgParser):
+class RedArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('red')
@@ -88,7 +88,7 @@ class RedArgParser(marcel.core.OshArgParser):
                           action='store_true')
         self.add_argument('function',
                           nargs=argparse.REMAINDER,
-                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.ArgParser.check_function,
                                                         'not a valid function'))
 
 

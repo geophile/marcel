@@ -14,14 +14,14 @@ def sort():
     return Sort()
 
 
-class SortArgParser(marcel.core.OshArgParser):
+class SortArgParser(marcel.core.ArgParser):
     
     def __init__(self):
         super().__init__('sort')
         self.add_argument('key',
                           nargs='?',
                           default=None,
-                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.ArgParser.check_function,
                                                         'not a valid function'))
         
 

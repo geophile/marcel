@@ -38,7 +38,7 @@ def ls():
     return Ls()
 
 
-class LsArgParser(marcel.core.OshArgParser):
+class LsArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('ls')

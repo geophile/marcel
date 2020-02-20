@@ -15,7 +15,7 @@ DEFAULT_PROMPT = ['$ ']
 
 
 class Environment:
-    CONFIG_PATH_NAME = '.osh2rc'
+    CONFIG_PATH_NAME = '.marcel.py'
 
     @staticmethod
     def initialize(config_file):

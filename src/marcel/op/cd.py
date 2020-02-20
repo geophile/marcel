@@ -16,7 +16,7 @@ def cd():
     return Cd()
 
 
-class CdArgParser(marcel.core.OshArgParser):
+class CdArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('cd')

@@ -22,13 +22,13 @@ def squish():
     return Squish()
 
 
-class SquishArgParser(marcel.core.OshArgParser):
+class SquishArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('squish')
         self.add_argument('function',
                           nargs='?',
-                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.ArgParser.check_function,
                                                         'not a valid function'))
 
 

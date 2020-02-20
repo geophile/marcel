@@ -9,7 +9,7 @@ def bash():
     return Bash()
 
 
-class BashArgParser(marcel.core.OshArgParser):
+class BashArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('bash')

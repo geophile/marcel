@@ -17,7 +17,7 @@ def gen():
     return Gen()
 
 
-class GenArgParser(marcel.core.OshArgParser):
+class GenArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('gen')
@@ -26,7 +26,7 @@ class GenArgParser(marcel.core.OshArgParser):
         self.add_argument('count',
                           nargs='?',
                           default='0',
-                          type=super().constrained_type(marcel.core.OshArgParser.check_non_negative,
+                          type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
                                                         'must be non-negative'))
         self.add_argument('start',
                           nargs='?',

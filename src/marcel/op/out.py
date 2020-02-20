@@ -28,7 +28,7 @@ def out():
     return Out()
 
 
-class OutArgParser(marcel.core.OshArgParser):
+class OutArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('out')

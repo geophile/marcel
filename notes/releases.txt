@@ -1,6 +1,6 @@
 0.1
 
-- Rename to marcel
++ Rename to marcel
 
 - Bug 1. Related: see ideas.txt about render_compact/render_full.
 

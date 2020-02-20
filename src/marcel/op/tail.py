@@ -11,12 +11,12 @@ def tail():
     return Tail()
 
 
-class TailArgParser(marcel.core.OshArgParser):
+class TailArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('tail')
         self.add_argument('n',
-                          type=super().constrained_type(marcel.core.OshArgParser.check_non_negative,
+                          type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
                                                         'must be non-negative'))
 
 

@@ -10,12 +10,12 @@ def map():
     return Map()
 
 
-class MapArgParser(marcel.core.OshArgParser):
+class MapArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('map')
         self.add_argument('function',
-                          type=super().constrained_type(marcel.core.OshArgParser.check_function,
+                          type=super().constrained_type(marcel.core.ArgParser.check_function,
                                                         'not a valid function'))
 
 
