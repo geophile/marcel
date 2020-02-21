@@ -43,7 +43,7 @@ def code_call(n):
     stop = time_ns()
     x = l['x']
     assert x == n, x
-    print('G = %s' % G)
+    print('G = ' + G)
     return (stop - start) / 1000000
 
 
@@ -53,6 +53,6 @@ eval_msec = eval_call(N)
 code_msec = code_call(N)
 eval_penalty = eval_msec / direct_msec
 code_penalty = code_msec / direct_msec
-print('direct: %s nsec per call' % (direct_msec / N))
-print('eval:   %s nsec per call, %s x slower than direct' % (eval_msec / N, eval_penalty))
-print('code:   %s nsec per call, %s x slower than direct' % (code_msec / N, code_penalty))
+print('direct: {} nsec per call'.format(direct_msec / N))
+print('eval:   {} nsec per call, {} x slower than direct'.format(eval_msec / N, eval_penalty))
+print('code:   {} nsec per call, {} x slower than direct'.format(code_msec / N, code_penalty))

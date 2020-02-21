@@ -106,7 +106,7 @@ class Process(marcel.object.renderable.Renderable):
     # Renderable
 
     def render_compact(self):
-        return 'process(%s)' % self.pid
+        return 'process({})'.format(self.pid)
 
     def render_full(self, color):
         pid = '{:6n}'.format(self.pid)

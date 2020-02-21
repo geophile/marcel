@@ -34,7 +34,7 @@ class Op:
                 yield self.output(i)
 
     def output(self, i):
-        return (('%s%s' % (self.label, i)),)
+        return '{}{}'.format(self.label, i),
 
 
 class Terminal(Op):
@@ -43,14 +43,12 @@ class Terminal(Op):
         super().__init__(None, None)
 
     def receive(self, x):
-        # print('Received (send/receive) %s' % str(x))
         pass
 
     def pull(self):
         source = self.prev_op.pull()
         try:
             while True:
-                # print('Received (yield) %s' % str(next(source)))
                 str(next(source))
         except StopIteration:
             pass
@@ -61,7 +59,7 @@ def measure(label, function):
     function()
     stop = time_ns()
     msec = (stop - start) / 1000000
-    print('%s: %s msec' % (label, msec))
+    print('{}: {} msec'.format(label, msec))
 
 
 def main():
@@ -74,5 +72,6 @@ def main():
     c.connect(t)
     measure('send/receive', lambda: a.receive(None))
     measure('yield', lambda: t.pull())
+
 
 main()

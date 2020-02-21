@@ -31,7 +31,7 @@ class PickleOutput(marcel.core.Op):
         self.pickler.dump(x)
 
     def receive_error(self, error):
-        TRACE.write('Pickling error: (%s) %s' % (type(error), error))
+        TRACE.write('Pickling error: ({}) {}'.format(type(error), error))
         self.pickler.dump(error)
         super().receive_error(error)
 
@@ -51,11 +51,11 @@ class PipelineRunner(threading.Thread):
         self.pipeline.setup_1()
         # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
         # supporting more than one level of nesting.
-        TRACE.write('PipelineRunner: About to run %s' % self.pipeline)
+        TRACE.write('PipelineRunner: About to run {}'.format(self.pipeline))
         try:
             self.pipeline.receive(None)
         except BaseException as e:
-            TRACE.write('PipelineRunner.run caught %s: %s' % (type(e), e))
+            TRACE.write('PipelineRunner.run caught {}: {}'.format(type(e), e))
             print_stack(file=TRACE.file)
             raise
         self.pipeline.receive_complete()
@@ -69,20 +69,16 @@ def kill_self_and_descendents(signal_id):
         try:
             process = marcel.object.process.Process(pid)
             for p in process.descendents:
-                TRACE.write('Killing descendent pid %s' % p.pid)
+                TRACE.write('Killing descendent pid {}'.format(p.pid))
                 p.kill(signal_id)
-            # TRACE.write('About to close stdout, closed = %s' % sys.stdout.closed)
-            # sys.stdout.close()
-            # TRACE.write('stdout closed, closed = %s' % sys.stdout.closed)
-            # sys.stderr.close()
             # Suicide
-            TRACE.write('Killing self, pid = %s' % pid)
+            TRACE.write('Killing self, pid = {}'.format(pid))
             process.kill(signal_id)
         except Exception as e:
-            TRACE.write('Caught exception while killing process %s and descendents: %s' % (pid, e))
+            TRACE.write('Caught exception while killing process {} and descendents: {}'.format(pid, e))
             print_stack(TRACE.file)
     except BaseException as e:
-        TRACE.write('Caught %s in kill_self_and_descendents: %s' % (type(e), e))
+        TRACE.write('Caught {} in kill_self_and_descendents: {}'.format(type(e), e))
         print_stack(TRACE.file)
 
 
@@ -91,19 +87,19 @@ def main():
     # Use sys.stdin.buffer because we want binary data, not the text version
     input = pickle.Unpickler(sys.stdin.buffer)
     pipeline = input.load()
-    TRACE.write('pipeline: %s' % pipeline)
+    TRACE.write('pipeline: {}'.format(pipeline))
     pipeline_runner = PipelineRunner(pipeline)
     pipeline_runner.start()
     try:
         signal_id = input.load()
-        TRACE.write('Received signal %s' % signal_id)
+        TRACE.write('Received signal {}'.format(signal_id))
         kill_self_and_descendents(signal_id)
     except EOFError:
         TRACE.write('Received EOF')
         while pipeline_runner.is_alive():
-            TRACE.write('PipelineRunner alive: %s' % pipeline_runner.is_alive())
+            TRACE.write('PipelineRunner alive: {}'.format(pipeline_runner.is_alive()))
             pipeline_runner.join(0.1)
-        TRACE.write('PipelineRunner alive: %s' % pipeline_runner.is_alive())
+        TRACE.write('PipelineRunner alive: {}'.format(pipeline_runner.is_alive()))
         kill_self_and_descendents(signal.SIGKILL)
     finally:
         TRACE.write('Exiting')

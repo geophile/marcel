@@ -1,0 +1,19 @@
+    @jao [ gen 3 ] | red . +
+
+Should produce (localhost, 3). But it produces that output TWICE.  The
+problem is that Reduce.receive_complete, which outputs its
+accumulator, is reached twice, once from the nested pipeline, once
+from the fork op.
+
+    pipeline(
+        fork(jao, 
+             pipeline(
+                 remote(host=None) | labelthread())) 
+        | 
+        red(incremental = None, function = [None, '+']) 
+        | 
+        out(append=False file=False csv=False format=None))
+
+The red op is the receiver for both labelthread (on each copy of the
+pipeline) and for fork.
+

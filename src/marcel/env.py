@@ -58,14 +58,7 @@ class Environment:
                 if color is not None:
                     x = colorize(x, color)
                 buffer.append(x)
-        prompt = ''.join(buffer)
-        # # EXPERIMENT -- see bug 2 ###################################################
-        # # Try forcing cursor to exactly where it should be.
-        # # \033[nG: Move to the indicated column (1-based).
-        # # \033[0K: Kill from cursor to end of line.
-        # prompt += '\033[%sG\033[0K' % (position + 1)
-        # # END OF EXPERIMENT #########################################################
-        return prompt
+        return ''.join(buffer)
 
     def pwd(self):
         return self._current_dir
@@ -79,8 +72,8 @@ class Environment:
             # So that executables have the same view of the current directory.
             os.chdir(self._current_dir)
         except FileNotFoundError:
-            raise marcel.exception.KillCommandException('Cannot cd into %s from %s. Target %s does not exist.' %
-                                                        (directory, self._current_dir, new_dir))
+            raise marcel.exception.KillCommandException(
+                'Cannot cd into {} from {}. Target {} does not exist.'.format(directory, self._current_dir, new_dir))
 
     def globals(self):
         return self._globals

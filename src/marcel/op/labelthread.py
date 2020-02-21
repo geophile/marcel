@@ -8,7 +8,7 @@ class LabelThread(marcel.core.Op):
         self.label = None
 
     def __repr__(self):
-        return (('labelthread(%s)' % self.label)
+        return ('labelthread({})'.format(self.label)
                 if self.label
                 else 'labelthread()')
 

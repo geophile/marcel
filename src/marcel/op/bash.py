@@ -25,7 +25,7 @@ class Bash(marcel.core.Op):
         self.args = None
 
     def __repr__(self):
-        return 'bash(args=%s)' % str(self.args)
+        return 'bash(args={})'.format(self.args)
 
     # BaseOp
 
@@ -44,7 +44,7 @@ class Bash(marcel.core.Op):
                                  stderr=subprocess.PIPE,
                                  universal_newlines=True)
         if outcome.returncode != 0:
-            print('Escaped command failed with exit code %s: %s' % (outcome.returncode, ' '.join(self.args)))
+            print('Escaped command failed with exit code {}: {}'.format(outcome.returncode, ' '.join(self.args)))
             print(outcome.stderr, file=sys.stderr)
         else:
             output = outcome.stdout.split('\n')

@@ -11,7 +11,7 @@ import marcel.parse
 class Command:
 
     def __init__(self, pipeline):
-        # Append an "out %s" op at the end of pipeline, if there is no output op there already.
+        # Append an out op at the end of pipeline, if there is no output op there already.
         if not isinstance(pipeline.last_op, marcel.op.out.Out):
             out = marcel.op.out.Out()
             out.append = False

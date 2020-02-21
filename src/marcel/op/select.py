@@ -29,7 +29,7 @@ class Select(marcel.core.Op):
         self.function = None
 
     def __repr__(self):
-        return 'select(%s)' % self.function
+        return 'select({})'.format(self.function)
 
     # BaseOp
     

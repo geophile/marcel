@@ -174,7 +174,8 @@ class PythonExpression(Token):
             elif c in Token.QUOTES:
                 self.end = PythonString(self.text, self.end - 1).end
         if self.text[self.end - 1] != Token.CLOSE:
-            raise marcel.exception.KillCommandException('Malformed Python expression %s' % self.text[self.start:self.end])
+            raise marcel.exception.KillCommandException(
+                'Malformed Python expression {}}'.format(self.text[self.start:self.end]))
 
 
 class ShellString(Token):
@@ -229,7 +230,8 @@ class ShellString(Token):
                         chars.append(Token.ESCAPE_CHAR)
                         chars.append(c)
                 else:
-                    raise marcel.exception.KillCommandException('Malformed string: %s' % self.text[self.start:self.end])
+                    raise marcel.exception.KillCommandException(
+                        'Malformed string: {}'.format(self.text[self.start:self.end]))
             else:
                 chars.append(c)
         self.string = ''.join(chars)
@@ -301,7 +303,7 @@ class UnexpectedTokenError(Exception):
         self.message = message
 
     def __repr__(self):
-        return 'Parsing error at %s: %s' % (self.text[self.position:self.position + 20], self.message)
+        return 'Parsing error at {}: {}}'.format(self.text[self.position:self.position + 20], self.message)
 
 
 class Parser(Token):
@@ -403,8 +405,6 @@ class Parser(Token):
         try:
             token = self.next_token()
             while self.state != ParseState.END:
-                # import sys
-                # print('token = %s' % token, file=sys.__stdout__)
                 if self.state == ParseState.START:
                     self.start_action(token)
                 elif self.state == ParseState.FORK_START:

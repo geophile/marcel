@@ -12,7 +12,7 @@ process = subprocess.Popen(args=['./hello_kitty_out_err.py'],
 process.stdin.write(buffer.read())
 process.stdin.close()
 process.wait()
-print('returncode: %s' % process.returncode)
+print('returncode: {}'.format(process.returncode))
 print('stdout:')
 print(process.stdout.read().decode('utf-8'))
 print('stderr:')

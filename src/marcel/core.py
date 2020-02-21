@@ -176,7 +176,7 @@ class Pipeline(BaseOp):
         while op:
             buffer.append(str(op))
             op = op.next_op
-        return 'pipeline(%s)' % (' | '.join(buffer))
+        return 'pipeline({})'.format(' | '.join(buffer))
 
     # BaseOp
 

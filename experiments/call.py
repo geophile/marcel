@@ -5,12 +5,12 @@ class F:
         self.x = x
 
     def __call__(self, *args, **kwargs):
-        print('call: args = %s, kwargs = %s' % (args, kwargs))
+        print('call: args = {}, kwargs = {}'.format(args, kwargs))
         return self.function(*args, **kwargs) + self.x
 
 
 def f(a, b, **kwargs):
-    print('Calling f(%s, %s, %s)' % (a, b, kwargs))
+    print('Calling f({}, {}, {})'.format(a, b, kwargs))
     return a + b
 
 

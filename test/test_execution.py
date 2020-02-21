@@ -52,22 +52,22 @@ class Test:
         else:
             ok = False
         if not ok:
-            print('%s failed:' % command)
-            print('    expected:\n<<<%s>>>' % expected)
-            print('    actual:\n<<<%s>>>' % actual)
+            print('{} failed:'.format(command))
+            print('    expected:\n<<<{}>>>'.format(expected))
+            print('    actual:\n<<<{}>>>'.format(actual))
             Test.failures += 1
 
     @staticmethod
     def check_substring(command, expected, actual):
         if expected not in actual:
-            print('%s failed. Expected substring not found in actual:' % command)
-            print('    expected:\n<<<%s>>>' % expected)
-            print('    actual:\n<<<%s>>>' % actual)
+            print('{} failed. Expected substring not found in actual:'.format(command))
+            print('    expected:\n<<<{}>>>'.format(expected))
+            print('    actual:\n<<<{}>>>'.format(actual))
             Test.failures += 1
 
     @staticmethod
     def fail(command, message):
-        print('%s failed: %s' % (command, message))
+        print('{} failed: {}'.format(command, message))
         Test.failures += 1
 
     @staticmethod
@@ -76,7 +76,7 @@ class Test:
 
     @staticmethod
     def run(command, expected_out=None, expected_err=None, file=None):
-        print('TESTING: %s' % command)
+        print('TESTING: {}'.format(command))
         out = io.StringIO()
         err = io.StringIO()
         try:
@@ -89,13 +89,13 @@ class Test:
             if expected_err:
                 Test.check_substring(command, expected_err, actual_err)
             elif actual_err:
-                Test.fail(command, 'Unexpected error: %s' % actual_err)
+                Test.fail(command, 'Unexpected error: {}'.format(actual_err))
         except Exception as e:
-            print('%s: Terminated by uncaught exception: %s' % (command, e))
+            print('{}: Terminated by uncaught exception: {}'.format(command, e))
             print_stack()
             Test.failures += 1
         except marcel.exception.KillCommandException as e:
-            print('%s: Terminated by KillCommandException: %s' % (command, e))
+            print('{}: Terminated by KillCommandException: {}'.format(command, e))
 
     @staticmethod
     def file_contents(filename):
@@ -160,7 +160,7 @@ def test_gen():
 
 def test_out():
     output_filename = '/tmp/out.txt'
-    Test.run('gen 3 | out %s',
+    Test.run('gen 3 | out {}',
              expected_out=[0, 1, 2])
     Test.run('gen 3',
              expected_out=[0, 1, 2])
@@ -168,28 +168,28 @@ def test_out():
              expected_out=[0, 1, 2])
     Test.run('gen 3 | out --csv',
              expected_out=[0, 1, 2])
-    Test.run('gen 3 | out -c %s',
+    Test.run('gen 3 | out -c {}',
              expected_err='-c/--csv and FORMAT specifications are incompatible')
-    Test.run('gen 3 | out -f %s' % output_filename,
+    Test.run('gen 3 | out -f {}'.format(output_filename),
              expected_out=[0, 1, 2], file=output_filename)
-    Test.run('gen 3 | out --file %s' % output_filename,
+    Test.run('gen 3 | out --file {}'.format(output_filename),
              expected_out=[0, 1, 2], file=output_filename)
     Test.delete_file(output_filename)
-    Test.run('gen 3 | out -a %s' % output_filename,
+    Test.run('gen 3 | out -a {}'.format(output_filename),
              expected_out=[0, 1, 2],
              file=output_filename)
-    Test.run('gen 3 | out --append %s' % output_filename,
+    Test.run('gen 3 | out --append {}'.format(output_filename),
              expected_out=[0, 1, 2, 0, 1, 2],
              file=output_filename)
-    Test.run('gen 3 | out -a %s -f %s' % (output_filename, output_filename),
+    Test.run('gen 3 | out -a {} -f {}'.format(output_filename, output_filename),
              expected_err='argument -f/--file: not allowed with argument -a/--append')
     Test.delete_file(output_filename)
 
 
 def test_sort():
-    Test.run('gen 5 | sort | out %s', expected_out=[0, 1, 2, 3, 4])
-    Test.run('gen 5 | sort (lambda x: -x) | out %s', expected_out=[4, 3, 2, 1, 0])
-    Test.run('gen 5 | map (x: (-x, x)) | sort | out %s', expected_out=[(-4, 4), (-3, 3), (-2, 2), (-1, 1), (0, 0)])
+    Test.run('gen 5 | sort', expected_out=[0, 1, 2, 3, 4])
+    Test.run('gen 5 | sort (lambda x: -x)', expected_out=[4, 3, 2, 1, 0])
+    Test.run('gen 5 | map (x: (-x, x)) | sort', expected_out=[(-4, 4), (-3, 3), (-2, 2), (-1, 1), (0, 0)])
 
 
 def test_ls():
@@ -698,7 +698,7 @@ def main():
     reset_environment()
     main_stable()
     main_dev()
-    print('Test failures: %s' % Test.failures)
+    print('Test failures: {}'.format(Test.failures))
 
 
 main()

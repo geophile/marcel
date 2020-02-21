@@ -48,7 +48,7 @@ def clone(x):
         copy = unpickler.load()
         return copy
     except Exception as e:
-        print('Cloning error: (%s) %s' % (type(e), e), file=sys.__stderr__)
+        print('Cloning error: ({}) {}'.format(type(e), e), file=sys.__stderr__)
         print_stack()
 
 
@@ -56,7 +56,7 @@ def print_stack(file=None):
     if file is None:
         file = sys.__stderr__
     exception_type, exception, trace = sys.exc_info()
-    print('Caught %s: %s' % (exception_type, exception), file=file)
+    print('Caught {}: {}'.format(exception_type, exception), file=file)
     traceback.print_tb(trace, file=file)
 
 
@@ -65,7 +65,10 @@ def colorize(s, color):
     # https://stackoverflow.com/questions/9468435/how-to-fix-column-calculation-in-python-readline-if-using-color-prompt
     return (s
             if color is None else
-            '\001\033[%sm\002\001\033[38;5;%sm\002%s\001\033[0m\002' % (1 if color.bold else 0, color.code, s))
+            '\001\033[{}m\002\001\033[38;5;{}m\002{}\001\033[0m\002'.format(
+                1 if color.bold else 0,
+                color.code,
+                s))
 
 
 class Stack:
@@ -97,7 +100,7 @@ class Trace:
         self.file = self.path.open(mode='w')
 
     def write(self, line):
-        print('%s: %s' % (time.time(), line), file=self.file, flush=True)
+        print('{}: {}'.format(time.time(), line), file=self.file, flush=True)
 
     def close(self):
         self.file.close()

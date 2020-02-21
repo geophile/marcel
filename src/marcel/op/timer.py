@@ -124,7 +124,7 @@ class Timer(marcel.core.Op):
             ss = int(interval[colon2 + 1:])
             return hh * 3600 + mm * 60 + ss
         except Exception as e:
-            raise marcel.exception.KillCommandException('Bad interval format: %s' % e)
+            raise marcel.exception.KillCommandException('Bad interval format: {}'.format(e))
 
     def register_tick(self):
         self.lock.acquire()

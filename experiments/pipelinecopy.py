@@ -20,14 +20,12 @@ class Op(BaseOp):
         self.next = None
 
     def __repr__(self):
-        return 'Op(#%s, %s, %s)' % (hash(self), self.name, self.base)
+        return 'Op(#{}, {}, {})'.format(hash(self), self.name, self.base)
 
     def __getstate__(self):
-        print('getstate %s' % self)
         return self.__dict__
 
     def __setstate__(self, state):
-        print('setstate (%s) %s' % (type(state), state))
         self.__dict__.update(state)
 
     def connect(self, next):
@@ -38,17 +36,17 @@ class Op(BaseOp):
 
 
 def f(op):
-    return 'In f(%s)' % op.name
+    return 'In f({})'.format(op.name)
 
 
 def g(op):
-    return 'In g(%s)' % op.name
+    return 'In g({})'.format(op.name)
 
 
 def traverse(label, op):
     print(label)
     while op:
-        print('    %s: %s' % (op, op.run()))
+        print('    {}: {}'.format(op, op.run()))
         op = op.next
 
 

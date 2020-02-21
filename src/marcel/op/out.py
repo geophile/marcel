@@ -51,8 +51,11 @@ class Out(marcel.core.Op):
         self.output = None
 
     def __repr__(self):
-        return ('out(append=%s file=%s csv=%s format=%s)' %
-                (self.append, self.file, self.csv, Out.ensure_quoted(self.format)))
+        return ('out(append={}, file={}, csv={}, format={})'.format(
+            self.append,
+            self.file,
+            self.csv,
+            Out.ensure_quoted(self.format)))
 
     # BaseOp
 
@@ -66,16 +69,7 @@ class Out(marcel.core.Op):
     def receive(self, x):
         self.ensure_output_initialized()
         if self.format:
-            try:
-                out = self.format % x
-            except Exception as e:
-                # TODO: This sucks. At least check for the right exception: TypeError
-                # If there is one %s in the format, and the object is longer,
-                # then convert it to a string
-                if self.format.count('%') == 1 and self.format.count('%s') == 1:
-                    out = self.format % str(x)
-                else:
-                    raise e
+            out = self.format.format(*x)
         elif self.csv:
             out = (', '.join([Out.ensure_quoted(y) for y in x])
                    if type(x) in (list, tuple) else
@@ -151,10 +145,10 @@ class Out(marcel.core.Op):
             return str(x)
         elif isinstance(x, str):
             if "'" not in x:
-                return "'%s'" % x
+                return "'{}'".format(x)
             elif '"' not in x:
-                return '"%s"' % x
+                return '"{}"'.format(x)
             else:
-                return "'%s'" % x.replace("'", "\\'")
+                return "'{}'".format(x.replace("'", "\\'"))
         else:
             return str(x)

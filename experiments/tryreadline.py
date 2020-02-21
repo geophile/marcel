@@ -6,4 +6,4 @@ while True:
     line = input('> ')
     if line == 'exit':
         break
-    print('RECEIVED: %s' % line)
+    print('RECEIVED: ' + line)

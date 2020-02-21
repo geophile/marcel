@@ -10,7 +10,7 @@ class Cluster:
         self._identity = None
 
     def __repr__(self):
-        return '%s[%s]' % (self._name, ', '.join([str(host) for host in self._hosts]))
+        return '{}[{}]'.format(self._name, ', '.join([str(host) for host in self._hosts]))
 
     @property
     def name(self):

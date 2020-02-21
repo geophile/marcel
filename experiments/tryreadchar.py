@@ -34,7 +34,7 @@ def main():
             line += 1
             text = ''
             
-        print('key: %s' % k)
+        print('key: ' + k)
         if k == LF:
             print('LF')
         elif k == CR:

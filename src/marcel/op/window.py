@@ -100,10 +100,10 @@ class Window(marcel.core.Op):
     def __repr__(self):
         buffer = ['window(']
         if self.overlap:
-            buffer.append('overlap=%s')
+            buffer.append('overlap=')
             buffer.append(self.overlap)
         if self.disjoint:
-            buffer.append('disjoint=%s')
+            buffer.append('disjoint=')
             buffer.append(self.disjoint)
         if self.predicate:
             buffer.append('predicate=')

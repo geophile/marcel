@@ -19,7 +19,7 @@ class PipelineThread(threading.Thread):
         self.terminating_exception = None
 
     def __repr__(self):
-        return 'PipelineThread(%s)' % self.thread_label
+        return 'PipelineThread({})'.format(self.thread_label)
 
     def run(self):
         try:
@@ -41,7 +41,7 @@ class Fork(marcel.core.Op):
         self.generate_thread_labels()
 
     def __repr__(self):
-        return 'fork(%s, %s)' % (self.fork_spec, self.fork_pipeline)
+        return 'fork({}, {})'.format(self.fork_spec, self.fork_pipeline)
 
     # BaseOp
 
@@ -120,7 +120,7 @@ class Fork(marcel.core.Op):
                 self.thread_labels = [host for host in cluster.hosts]
                 self.remote = True
         if self.thread_labels is None:
-            raise marcel.exception.KillCommandException('Invalid fork spec @%s' % self.fork_spec)
+            raise marcel.exception.KillCommandException('Invalid fork spec @{}'.format(self.fork_spec))
 
     @staticmethod
     def attach_thread_label(op, thread_label):

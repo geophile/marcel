@@ -46,7 +46,7 @@ class Gen(marcel.core.Op):
         self.format = None
 
     def __repr__(self):
-        return 'gen(count=%s, start=%s, pad=%s)' % (self.count, self.start, self.pad)
+        return 'gen(count={}, start={}, pad={})'.format(self.count, self.start, self.pad)
 
     # BaseOp
 
@@ -64,7 +64,7 @@ class Gen(marcel.core.Op):
                 if max_length > self.pad:
                     Gen.argparser.error('Padding too small.')
                 else:
-                    self.format = '%%0%sd' % self.pad
+                    self.format = '{:>0' + str(self.pad) + '}'
 
     def receive(self, x):
         assert x is None, x
@@ -85,4 +85,4 @@ class Gen(marcel.core.Op):
     # For use by this class
 
     def apply_padding(self, x):
-        return (self.format % x) if self.format else x
+        return (self.format.format(x)) if self.format else x

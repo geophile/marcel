@@ -5,7 +5,7 @@ outcome = subprocess.run('./hello_out_err.py',
                          stderr=subprocess.PIPE,
                          shell=True,
                          text=False)
-print('returncode: %s' % outcome.returncode)
+print('returncode: {}'.format(outcome.returncode))
 print('stdout:')
 print(outcome.stdout.decode('utf-8'))
 print('stderr:')
