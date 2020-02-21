@@ -45,16 +45,27 @@ class Environment:
         prompt_list = self._globals.get('PROMPT', DEFAULT_PROMPT)
         buffer = []
         color = None
+        position = 0
         for x in prompt_list:
             if isinstance(x, marcel.object.colorscheme.Color):
                 color = x
             else:
                 if callable(x):
                     x = x()
+                    position += len(x)
+                else:
+                    position += len(str(x))
                 if color is not None:
                     x = colorize(x, color)
                 buffer.append(x)
-        return ''.join(buffer)
+        prompt = ''.join(buffer)
+        # # EXPERIMENT -- see bug 2 ###################################################
+        # # Try forcing cursor to exactly where it should be.
+        # # \033[nG: Move to the indicated column (1-based).
+        # # \033[0K: Kill from cursor to end of line.
+        # prompt += '\033[%sG\033[0K' % (position + 1)
+        # # END OF EXPERIMENT #########################################################
+        return prompt
 
     def pwd(self):
         return self._current_dir

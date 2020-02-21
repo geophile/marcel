@@ -76,6 +76,7 @@ class Test:
 
     @staticmethod
     def run(command, expected_out=None, expected_err=None, file=None):
+        print('TESTING: %s' % command)
         out = io.StringIO()
         err = io.StringIO()
         try:
@@ -651,8 +652,14 @@ def test_remote():
     localhost = marcel.object.host.Host('localhost', None)
     Test.run('@jao [ gen 3 ]',
              expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
+    # Handling of remote errors
     Test.run('@jao [ gen 3 -1 | map (x: 5 / x) ]',
              expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
+    # Bug 4
+    Test.run('@jao [ gen 3 ] | red . +',
+             expected_out=[(localhost, 3)])
+    Test.run('@jao [ gen 10 | map (x: (x%2, x)) | red . + ]',
+             expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
 
 
 def reset_environment():

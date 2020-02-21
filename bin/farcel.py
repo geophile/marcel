@@ -58,8 +58,8 @@ class PipelineRunner(threading.Thread):
             TRACE.write('PipelineRunner.run caught %s: %s' % (type(e), e))
             print_stack(file=TRACE.file)
             raise
-        TRACE.write('PipelineRunner: Execution complete.')
         self.pipeline.receive_complete()
+        TRACE.write('PipelineRunner: Execution complete.')
 
 
 def kill_self_and_descendents(signal_id):

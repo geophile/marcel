@@ -24,6 +24,7 @@ class PipelineThread(threading.Thread):
     def run(self):
         try:
             self.pipeline.receive(None)
+            self.pipeline.receive_complete()
         except Exception as e:
             self.terminating_exception = e
 
@@ -81,7 +82,6 @@ class Fork(marcel.core.Op):
                 try:
                     thread.join(0.1)
                 except BaseException as e:
-                    print('%s terminated by (%s) %s' % (thread, type(e), e))
                     thread.terminating_exception = e
         # Threads may complete normally or fail with a variety of exceptions. Merge them into a single action
         # for the termination of the fork op.
