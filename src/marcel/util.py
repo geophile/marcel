@@ -38,6 +38,14 @@ def normalize_output(x):
     return tuple(x) if is_sequence_except_string(x) else (x,)
 
 
+def normalize_path(x):
+    x = pathlib.Path(x)
+    if x.as_posix().startswith('~'):
+        x = x.expanduser()
+    return x
+
+
+
 def clone(x):
     try:
         buffer = io.BytesIO()

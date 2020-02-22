@@ -4,10 +4,10 @@
 
 - Bug 1. Related: see ideas.txt about render_compact/render_full.
 
-- Modern formatting
++ Modern formatting
 
-    - For out op
-    - Internally
+    + For out op
+    + Internally
 
 + For now: prompt shows user and directory. E.g. (from bash):
 
@@ -22,11 +22,15 @@
 
 + Generalize prompt: sequence of strings, env vars, colors.
 
-- Support ~. See os.path.expanduser
++ Support ~. See os.path.expanduser
 
 - Syntax: Don't require white space between tokens.
 
 + Bug 2
+
+- rm
+
+- cat. ls | expand does the same thing, but that's kind of ridiculous.
 
 ----------------------------------------------------------------------
 

@@ -46,7 +46,8 @@ class Cd(marcel.core.Op):
 
     def receive(self, x):
         assert x is None, x
-        marcel.env.ENV.cd(self.directory)
+        dir = self.directory.expanduser().resolve()
+        marcel.env.ENV.cd(dir)
 
     # Op
 

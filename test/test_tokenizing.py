@@ -31,10 +31,10 @@ def test_one(tokenizer, line):
     try:
         actual = tokenizer(text).value()
         if expected != actual:
-            print('input: {}\texpected: {}}\tactual: {}}'.format(text, expected, actual))
+            print('input: {}\texpected: {}\tactual: {}'.format(text, expected, actual))
     except Exception as e:
         if e.__class__.__name__ != expected:
-            print('input: {}\texpected:{}\terror: ({}, {}})'.format(text, expected, e.__name__, e))
+            print('input: {}\texpected:{}\terror: ({}, {})'.format(text, expected, e.__name__, e))
 
 
 def test_all(input_filename, tokenizer):

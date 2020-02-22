@@ -81,7 +81,7 @@ class Ls(marcel.core.Op):
             include += 'd'
         if self.symlink:
             include += 's'
-        return ('ls(depth={}}, include={}}, filename={}})'.format(
+        return ('ls(depth={}, include={}, filename={})'.format(
             depth,
             include,
             [str(p) for p in self.filename]))
@@ -104,6 +104,7 @@ class Ls(marcel.core.Op):
     def receive(self, x):
         assert x is None, x
         for filename in self.filename:
+            filename = pathlib.Path(filename).expanduser()
             x = (marcel.env.ENV.pwd() / filename).resolve()
             if x.exists():
                 # TODO: Can this be simplified, having visit() do the only directory iteration?

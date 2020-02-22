@@ -175,7 +175,7 @@ class PythonExpression(Token):
                 self.end = PythonString(self.text, self.end - 1).end
         if self.text[self.end - 1] != Token.CLOSE:
             raise marcel.exception.KillCommandException(
-                'Malformed Python expression {}}'.format(self.text[self.start:self.end]))
+                'Malformed Python expression {}'.format(self.text[self.start:self.end]))
 
 
 class ShellString(Token):
@@ -303,7 +303,7 @@ class UnexpectedTokenError(Exception):
         self.message = message
 
     def __repr__(self):
-        return 'Parsing error at {}: {}}'.format(self.text[self.position:self.position + 20], self.message)
+        return 'Parsing error at {}: {}'.format(self.text[self.position:self.position + 20], self.message)
 
 
 class Parser(Token):
