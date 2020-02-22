@@ -67,7 +67,6 @@ class Gen(marcel.core.Op):
                     self.format = '{:>0' + str(self.pad) + '}'
 
     def receive(self, x):
-        assert x is None, x
         if self.count is None or self.count == 0:
             x = self.start
             while True:
@@ -81,6 +80,9 @@ class Gen(marcel.core.Op):
 
     def arg_parser(self):
         return Gen.argparser
+
+    def must_be_first_in_pipeline(self):
+        return True
 
     # For use by this class
 

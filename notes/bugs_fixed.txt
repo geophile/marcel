@@ -44,3 +44,12 @@ FIXED
   prompt. Confusing.
 
 - Show link and target (different colors)
+
+----------------------------------------------------------------------
+
+FIXED
+
+7. assert x is None in op.recieve() is a problem
+
+Incorrect usage, such as "ls | bash emacs" causes the assertion to
+fail and kills the shell. Should be a usage error instead.

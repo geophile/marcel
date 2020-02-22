@@ -36,14 +36,22 @@
 
 - Bug 7.
 
-- Bug 8.
++ Bug 8.
+
++ cd with no args.
+
 
 ----------------------------------------------------------------------
 
 0.2
 
-- bash commands that do pagination don't work, e.g. more, man.
-
 - Run executables without requiring invocation of bash op.
 
+- bash commands that do pagination don't work, e.g. more, man.
+
+- su: Need to do a bash su, but then somehow land in marcel again.
+
+- pushd/popd
+
 - Redirection: < > >>
+

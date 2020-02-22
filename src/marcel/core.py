@@ -144,8 +144,6 @@ class Op(BaseOp):
     """Base class for all osh ops, (excluding pipelines).
     """
 
-    # object
-
     def __init__(self):
         BaseOp.__init__(self)
 
@@ -153,10 +151,13 @@ class Op(BaseOp):
         # TODO: Render args
         return self.op_name()
 
+    # Op
+
     def arg_parser(self):
         assert False
 
-    # For use by this class
+    def must_be_first_in_pipeline(self):
+        return False
 
     @classmethod
     def op_name(cls):
@@ -187,6 +188,9 @@ class Pipeline(BaseOp):
                 op.receiver = op.next_op
             op.setup_1()
             op = op.next_op
+            if isinstance(op, Op):
+                if op.must_be_first_in_pipeline():
+                    raise marcel.exception.KillCommandException('%s cannot receive input from a pipe' % op.op_name())
 
     def setup_2(self):
         op = self.first_op

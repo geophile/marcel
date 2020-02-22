@@ -36,10 +36,12 @@ class Pwd(marcel.core.Op):
         pass
 
     def receive(self, x):
-        assert x is None, x
         self.send(marcel.env.ENV.pwd())
 
     # Op
 
     def arg_parser(self):
         return Pwd.argparser
+
+    def must_be_first_in_pipeline(self):
+        return True

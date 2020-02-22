@@ -74,7 +74,6 @@ class Fork(marcel.core.Op):
             self.threads.append(PipelineThread(thread_label, pipeline_copy))
 
     def receive(self, x):
-        assert x is None, x
         for thread in self.threads:
             thread.start()
         for thread in self.threads:
@@ -108,6 +107,9 @@ class Fork(marcel.core.Op):
 
     def arg_parser(self):
         assert False
+
+    def must_be_first_in_pipeline(self):
+        return True
 
     # For use by this class
 

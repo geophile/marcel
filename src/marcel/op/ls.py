@@ -102,7 +102,6 @@ class Ls(marcel.core.Op):
             self.filename = [marcel.env.ENV.pwd().as_posix()]
 
     def receive(self, x):
-        assert x is None, x
         for filename in self.filename:
             filename = pathlib.Path(filename).expanduser()
             x = (marcel.env.ENV.pwd() / filename).resolve()
@@ -129,6 +128,9 @@ class Ls(marcel.core.Op):
 
     def arg_parser(self):
         return Ls.argparser
+
+    def must_be_first_in_pipeline(self):
+        return True
 
     # For use by this class
 

@@ -22,7 +22,6 @@ class Remote(marcel.core.Op):
         pass
 
     def receive(self, x):
-        assert x is None, x
         # Start the remote process
         command = ' '.join([
             'ssh',
@@ -58,6 +57,11 @@ class Remote(marcel.core.Op):
                 self.send(x)
         except EOFError:
             self.send_complete()
+
+    # Op
+
+    def must_be_first_in_pipeline(self):
+        return True
 
     # Remote
 

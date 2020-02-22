@@ -73,3 +73,7 @@ util.py:
 - File render_full should include time.
 
 - out.receive does a lot of work. Precompute whatever can be.
+
+- cd with no args.
+
+- pushd/popd

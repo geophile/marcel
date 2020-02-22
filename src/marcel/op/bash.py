@@ -36,7 +36,6 @@ class Bash(marcel.core.Op):
         pass
 
     def receive(self, x):
-        assert x is None, x
         outcome = subprocess.run(' '.join(self.args),
                                  shell=True,
                                  executable='/bin/bash',
@@ -59,3 +58,6 @@ class Bash(marcel.core.Op):
 
     def arg_parser(self):
         return Bash.argparser
+
+    def must_be_first_in_pipeline(self):
+        return True

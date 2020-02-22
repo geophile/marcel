@@ -1,9 +1,7 @@
-"""C{cd DIRECTORY}
+"""C{cd [DIRECTORY]}
 
-Change the current directory to the given directory.
-
-TODO: no args -> home directory
-TODO: .. and .
+Change the current directory to the given directory. If the DIRECTORY argument is omitted, change the
+current directory to the home directory.
 """
 
 import pathlib
@@ -22,7 +20,7 @@ class CdArgParser(marcel.core.ArgParser):
         super().__init__('cd')
         self.add_argument('directory',
                           nargs='?',
-                          default='0')
+                          default='~')
 
 
 class Cd(marcel.core.Op):
@@ -45,7 +43,6 @@ class Cd(marcel.core.Op):
         self.directory = pathlib.Path(self.directory)
 
     def receive(self, x):
-        assert x is None, x
         dir = self.directory.expanduser().resolve()
         marcel.env.ENV.cd(dir)
 
@@ -53,3 +50,6 @@ class Cd(marcel.core.Op):
 
     def arg_parser(self):
         return Cd.argparser
+
+    def must_be_first_in_pipeline(self):
+        return True

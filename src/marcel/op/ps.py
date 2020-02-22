@@ -40,7 +40,6 @@ class Ps(marcel.core.Op):
         pass
 
     def receive(self, x):
-        assert x is None, x
         this_pid = os.getpid()
         for process in marcel.object.process.processes():
             if process.pid != this_pid or not self.omit_self:
@@ -50,3 +49,6 @@ class Ps(marcel.core.Op):
 
     def arg_parser(self):
         return Ps.argparser
+
+    def must_be_first_in_pipeline(self):
+        return True
