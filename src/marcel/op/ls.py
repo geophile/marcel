@@ -115,12 +115,13 @@ class Ls(marcel.core.Op):
                     self.visit(x, 0)
             else:
                 # filename might be a glob. But if it isn't, this still works.
-                if filename.startswith('/'):
+                if filename.is_absolute():
                     root = pathlib.Path('/')
-                    pattern = filename[1:]
+                    pattern = filename.as_posix()[1:]
                     paths = root.glob(pattern)
                 else:
-                    paths = marcel.env.ENV.pwd().glob(filename)
+                    pattern = str(filename)
+                    paths = marcel.env.ENV.pwd().glob(pattern)
                 for path in paths:
                     self.visit(path, 0)
 

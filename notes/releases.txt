@@ -32,6 +32,12 @@
 
 - cat. ls | expand does the same thing, but that's kind of ridiculous.
 
+- Bug 6.
+
+- Bug 7.
+
+- Bug 8.
+
 ----------------------------------------------------------------------
 
 0.2

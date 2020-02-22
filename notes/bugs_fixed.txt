@@ -33,3 +33,14 @@ FIXED
 @jao [ gen 3 ] | red . +
 
 Should produce (localhost, 3). But it produces that output TWICE.
+
+----------------------------------------------------------------------
+
+FIXED
+
+8. Fix rendering of links
+
+- Color schema shows link using same color as directory in
+  prompt. Confusing.
+
+- Show link and target (different colors)

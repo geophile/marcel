@@ -2,33 +2,21 @@
 
 E.g. ls /tmp should show file_in_tmp, not /tmp/file_in_tmp.
 
-----------------------------------------------------------------------
+What bash does:
 
-FIXED?
+- ls -l one directory: files are relative to that directory
 
-2: Line wrapping is broken, (when typing commands)
+- ls -l multiple directories: Listing looks like this:
 
-See GNU readline horizontal-scroll-mode.
-https://tiswww.cwru.edu/php/chet/readline/rluserman.html#SEC10
+     dir1:
+     <ls -l listing relative to dir1>
 
-I think this is fixed (see util.py). But if not, I was about to send
-this to stackoverflow:
+     dir2:
+     <ls -l listing relative to dir2>
 
-I am implementing a shell with some novel features, in Python 3. My code uses the input() function and readline module to read command lines, support command history, line editing, and so on. I'm passing a prompt, which includes ANSI escape codes (for color) to the input function, and things are mostly working.
-
-But occasionally, something will go wrong:
-
-- Only a prefix of the prompt is printed.
-
-- If I recall a command and edit it, the editing goes to the wrong position within the line.
-
-- Sometimes, typing a long line, wrapping will occur far too early, before the end of the terminal line is reached.
-
-These problems are not highly reproducible. However, so far, it appears that omitting the ANSI escapes from the prompt fixes the problem.
-
-I have googled this problem extensively, and the closest match I've been able to locate is this: https://stackoverflow.com/questions/17432993/adding-ansi-color-escape-sequences-to-a-bash-prompt-results-in-bad-cursor-positi. But this seems to be a different problem. (My problem seems involves input(), the readline module, and the underlying GNU readline library, not bash.)
-
-I'm looking for advice on a direction to pursue.
+I don't like that highly formatted listing (for multiple
+directories). So for one directory, make the listing relative. For
+multiple directories, list absolute paths.
 
 ----------------------------------------------------------------------
 
@@ -77,18 +65,21 @@ KeyError: 'getgrgid(): gid not found: 143'
 
 ----------------------------------------------------------------------
 
-FIXED
-
-4. Receive_complete called too many times following remote fork
-
-@jao [ gen 3 ] | red . +
-
-Should produce (localhost, 3). But it produces that output TWICE.
-
-----------------------------------------------------------------------
-
 5. Unspecified behavior for red
 
 red . + does something given inputs of size 3. What is supposed to
 happen? Document and test for it.
 
+----------------------------------------------------------------------
+
+6. File.render_full should include date/time
+
+Linux does (day, month, time) for recent, (day, month, year) for
+older. 
+
+----------------------------------------------------------------------
+
+7. assert x is None in op.recieve() is a problem
+
+Incorrect usage, such as "ls | bash emacs" causes the assertion to
+fail and kills the shell. Should be a usage error instead.
