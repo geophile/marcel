@@ -15,16 +15,11 @@ class File(marcel.object.renderable.Renderable):
     """Represents a file or directory.
     """
 
-    def __init__(self, directory, file=None):
-        # Restrictive requirements that I may want to relax later
-        assert isinstance(directory, pathlib.Path), directory
-        assert directory.is_absolute(), directory
-        if file and not isinstance(file, pathlib.Path):
-            file = pathlib.Path(file)
-            assert not file.is_absolute(), file
-        self.dir = directory
-        self.file = file
-        self.path = directory / file if file else directory
+    def __init__(self, path):
+        assert path is not None
+        if not isinstance(path, pathlib.Path):
+            path = pathlib.Path(path)
+        self.path = path
         self.os_stat = None
 
     def __repr__(self):
@@ -85,7 +80,7 @@ class File(marcel.object.renderable.Renderable):
     # Renderable
 
     def render_compact(self):
-        return self.abspath
+        return self.path
 
     def render_full(self, color):
         line = self._formatted_metadata()
@@ -124,7 +119,7 @@ class File(marcel.object.renderable.Renderable):
             '{:8s}'.format(username(self.uid)),
             '{:8s}'.format(groupname(self.gid)),
             '{:12}'.format(self.size),
-            self.abspath]
+            self.path.as_posix()]
 
     @staticmethod
     def _highlight_color(path):

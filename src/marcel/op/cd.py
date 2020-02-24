@@ -42,7 +42,7 @@ class Cd(marcel.core.Op):
     def setup_1(self):
         self.directory = pathlib.Path(self.directory)
 
-    def receive(self, x):
+    def receive(self, _):
         dir = self.directory.expanduser().resolve()
         marcel.env.ENV.cd(dir)
 

@@ -77,3 +77,8 @@ util.py:
 - cd with no args.
 
 - pushd/popd
+
+- What are the rules for ls & symbolic links? Need some equivalent to
+  bash "ls -ld"?
+
+- File comparisons need to account for display_base.

@@ -24,8 +24,8 @@ class Environment:
 
     def __init__(self, config_file):
         self._user = getpass.getuser()
-        self._homedir = pathlib.Path.home()
-        self._current_dir = pathlib.Path.cwd()
+        self._homedir = pathlib.Path.home().resolve()
+        self._current_dir = pathlib.Path.cwd().resolve()
         self._host = socket.gethostname()
         self._globals = {
             'USER': self._user,

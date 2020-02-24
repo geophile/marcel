@@ -66,7 +66,7 @@ class Gen(marcel.core.Op):
                 else:
                     self.format = '{:>0' + str(self.pad) + '}'
 
-    def receive(self, x):
+    def receive(self, _):
         if self.count is None or self.count == 0:
             x = self.start
             while True:

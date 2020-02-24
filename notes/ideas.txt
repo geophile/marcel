@@ -230,3 +230,9 @@ For objects to be rendered (file, process, error):
 
 - render_full: With color, for use when the thing is rendered on its
   own, (tuple of size 1).
+
+----------------------------------------------------------------------
+
+- Allow cd to be mid-pipeline. It establishes an env that applies
+  downstream only. I.e., logically, each op establishes a new COPY of
+  the env, and can make changes not visible upstream.

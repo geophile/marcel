@@ -21,7 +21,7 @@ class Remote(marcel.core.Op):
     def setup_1(self):
         pass
 
-    def receive(self, x):
+    def receive(self, _):
         # Start the remote process
         command = ' '.join([
             'ssh',
@@ -53,8 +53,7 @@ class Remote(marcel.core.Op):
         input = pickle.Unpickler(io.BytesIO(stdout))
         try:
             while True:
-                x = input.load()
-                self.send(x)
+                self.send(input.load())
         except EOFError:
             self.send_complete()
 

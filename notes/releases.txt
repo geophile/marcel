@@ -30,11 +30,9 @@
 
 - rm
 
-- cat. ls | expand does the same thing, but that's kind of ridiculous.
-
 - Bug 6.
 
-- Bug 7.
++ Bug 7.
 
 + Bug 8.
 
@@ -54,4 +52,6 @@
 - pushd/popd
 
 - Redirection: < > >>
+
+- cat. ls | expand does the same thing, but that's kind of ridiculous.
 

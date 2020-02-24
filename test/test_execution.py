@@ -193,7 +193,13 @@ def test_sort():
 
 
 def test_ls():
-    # base/
+    def relative(base, x):
+        x_path = pathlib.Path(x)
+        base_path = pathlib.Path(base)
+        display_path = x_path.relative_to(base_path)
+        return display_path
+
+    # testls/
     #     a1
     #     a2
     #     b1
@@ -209,8 +215,9 @@ def test_ls():
     #         d21/
     #             f211
     #             f212
+    dot = pathlib.Path('.')
     tmp = '/tmp'  # tmp/
-    base = '/tmp/testls'  # base/
+    testls = '/tmp/testls'  # testls/
     a1 = '/tmp/testls/a1'  # a1
     a2 = '/tmp/testls/a2'  # a2
     b1 = '/tmp/testls/b1'  # b1
@@ -227,9 +234,9 @@ def test_ls():
     f211 = '/tmp/testls/d2/d21/f211'  # f211
     f212 = '/tmp/testls/d2/d21/f212'  # f212
     # Start clean
-    shutil.rmtree(base, ignore_errors=True)
+    shutil.rmtree(testls, ignore_errors=True)
     # Create test data
-    os.mkdir(base)
+    os.mkdir(testls)
     os.mkdir(d1)
     os.mkdir(d2)
     os.mkdir(d21)
@@ -246,81 +253,116 @@ def test_ls():
     pathlib.Path(f211).touch()
     pathlib.Path(f212).touch()
     # Tests
+    # No files specified
+    marcel.env.ENV.cd(pathlib.Path(testls))
+    Test.run('ls | map (f: f.render_compact())',
+             expected_out=sorted(relative(testls, x) for x in
+                                 [testls, a1, a2, b1, b2, d1, d2]))
+    Test.run('ls -0 | map (f: f.render_compact())',
+             expected_out=sorted(relative(testls, x) for x in
+                                 [testls]))
+    Test.run('ls -1 | map (f: f.render_compact())',
+             expected_out=sorted(relative(testls, x) for x in
+                                 [testls, a1, a2, b1, b2, d1, d2]))
+    Test.run('ls -r | map (f: f.render_compact())',
+             expected_out=sorted(relative(testls, x) for x in
+                                 [testls, a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
     # 0/1/r flags with file
-    Test.run('ls /tmp/testls/a1 | map (f: f.abspath) | sort',
+    Test.run('ls /tmp/testls/a1 | map (f: f.render_compact())',
              expected_out=sorted([a1]))
-    Test.run('ls -0 /tmp/testls/a1 | map (f: f.abspath) | sort',
+    Test.run('ls -0 /tmp/testls/a1 | map (f: f.render_compact())',
              expected_out=sorted([a1]))
-    Test.run('ls -1 /tmp/testls/a1 | map (f: f.abspath) | sort',
+    Test.run('ls -1 /tmp/testls/a1 | map (f: f.render_compact())',
              expected_out=sorted([a1]))
-    Test.run('ls -r /tmp/testls/a1 | map (f: f.abspath) | sort',
+    Test.run('ls -r /tmp/testls/a1 | map (f: f.render_compact())',
              expected_out=sorted([a1]))
     # 0/1/r flags with directory
-    Test.run('ls /tmp/testls | map (f: f.abspath) | sort',
-             expected_out=sorted([a1, a2, b1, b2, d1, d2]))
-    Test.run('ls -0 /tmp/testls | map (f: f.abspath) | sort',
-             expected_out=sorted([a1, a2, b1, b2, d1, d2]))
-    Test.run('ls -1 /tmp/testls | map (f: f.abspath) | sort',
-             expected_out=sorted([a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21]))
-    Test.run('ls -r /tmp/testls | map (f: f.abspath) | sort',
-             expected_out=sorted([a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
+    Test.run('ls /tmp/testls | map (f: f.render_compact())',
+             expected_out=sorted([relative('/tmp/testls', x) for x in
+                                  [testls, a1, a2, b1, b2, d1, d2]]))
+    Test.run('ls -0 /tmp/testls | map (f: f.render_compact())',
+             expected_out=sorted([relative('/tmp/testls', x) for x in
+                                  [testls]]))
+    Test.run('ls -1 /tmp/testls | map (f: f.render_compact())',
+             expected_out=sorted([relative('/tmp/testls', x) for x in
+                                  [testls, a1, a2, b1, b2, d1, d2]]))
+    Test.run('ls -r /tmp/testls | map (f: f.render_compact())',
+             expected_out=sorted([relative('/tmp/testls', x) for x in
+                                  [testls, a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]]))
     # 0/1/r flags with pattern matching files
-    Test.run('ls /tmp/testls/a? | map (f: f.abspath) | sort',
+    Test.run('ls /tmp/testls/a? | map (f: f.render_compact())',
              expected_out=sorted([a1, a2]))
-    Test.run('ls -0 /tmp/testls/a? | map (f: f.abspath) | sort',
+    Test.run('ls -0 /tmp/testls/a? | map (f: f.render_compact())',
              expected_out=sorted([a1, a2]))
-    Test.run('ls -1 /tmp/testls/a? | map (f: f.abspath) | sort',
+    Test.run('ls -1 /tmp/testls/a? | map (f: f.render_compact())',
              expected_out=sorted([a1, a2]))
-    Test.run('ls -r /tmp/testls/a? | map (f: f.abspath) | sort',
+    Test.run('ls -r /tmp/testls/a? | map (f: f.render_compact())',
              expected_out=sorted([a1, a2]))
     # 0/1/r flags with pattern matching directories
-    Test.run('ls /tmp/testls/d? | map (f: f.abspath) | sort',
-             expected_out=sorted([d1, d2]))
-    Test.run('ls -0 /tmp/testls/d? | map (f: f.abspath) | sort',
-             expected_out=sorted([d1, d2]))
-    Test.run('ls -1 /tmp/testls/d? | map (f: f.abspath) | sort',
+    Test.run('ls /tmp/testls/d? | map (f: f.render_compact())',
              expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21]))
-    Test.run('ls -r /tmp/testls/d? | map (f: f.abspath) | sort',
+    Test.run('ls -0 /tmp/testls/d? | map (f: f.render_compact())',
+             expected_out=sorted([d1, d2]))
+    Test.run('ls -1 /tmp/testls/d? | map (f: f.render_compact())',
+             expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21]))
+    Test.run('ls -r /tmp/testls/d? | map (f: f.render_compact())',
              expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
     # In current directory, test 0/1/r flags with file
     marcel.env.ENV.cd(pathlib.Path(tmp))
-    Test.run('ls -0 testls/b1 | map (f: f.abspath) | sort',
+    Test.run('ls testls/b1 | map (f: f.render_compact())',
              expected_out=sorted([b1]))
-    Test.run('ls -1 testls/b1 | map (f: f.abspath) | sort',
+    Test.run('ls -0 testls/b1 | map (f: f.render_compact())',
              expected_out=sorted([b1]))
-    Test.run('ls -r testls/b1 | map (f: f.abspath) | sort',
+    Test.run('ls -1 testls/b1 | map (f: f.render_compact())',
+             expected_out=sorted([b1]))
+    Test.run('ls -r testls/b1 | map (f: f.render_compact())',
              expected_out=sorted([b1]))
     # In current directory, test 0/1/r flags with directory
-    Test.run('ls -0 testls | map (f: f.abspath) | sort',
-             expected_out=sorted([a1, a2, b1, b2, d1, d2]))
-    Test.run('ls -1 testls | map (f: f.abspath) | sort',
-             expected_out=sorted([a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21]))
-    Test.run('ls -r testls | map (f: f.abspath) | sort',
-             expected_out=sorted([a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
+    marcel.env.ENV.cd(pathlib.Path(tmp))
+    Test.run('ls testls | map (f: f.render_compact())',
+             expected_out=sorted([relative(testls, x) for x in
+                                  [testls, a1, a2, b1, b2, d1, d2]]))
+    Test.run('ls -0 testls | map (f: f.render_compact())',
+             expected_out=sorted([relative(testls, testls)]))
+    Test.run('ls -1 testls | map (f: f.render_compact())',
+             expected_out=sorted([relative(testls, x) for x in
+                                  [testls, a1, a2, b1, b2, d1, d2]]))
+    Test.run('ls -r testls | map (f: f.render_compact())',
+             expected_out=sorted([relative(testls, x) for x in
+                                  [testls, a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]]))
     # In current directory, test 0/1/r flags with pattern matching directories
-    Test.run('ls -0 testls/*2 | map (f: f.abspath) | sort',
-             expected_out=sorted([a2, b2, d2]))
-    Test.run('ls -1 testls/*2 | map (f: f.abspath) | sort',
+    marcel.env.ENV.cd(pathlib.Path(tmp))
+    Test.run('ls testls/*2 | map (f: f.render_compact())',
              expected_out=sorted([a2, b2, d2, f21, f22, f23, d21]))
-    Test.run('ls -r testls/*2 | map (f: f.abspath) | sort',
+    Test.run('ls -0 testls/*2 | map (f: f.render_compact())',
+             expected_out=sorted([a2, b2, d2]))
+    Test.run('ls -1 testls/*2 | map (f: f.render_compact())',
+             expected_out=sorted([a2, b2, d2, f21, f22, f23, d21]))
+    Test.run('ls -r testls/*2 | map (f: f.render_compact())',
              expected_out=sorted([a2, b2, d2, f21, f22, f23, d21, f211, f212]))
     # Test f/d/s flags
-    Test.run('ls -fr /tmp/testls | map (f: f.abspath) | sort',
-             expected_out=sorted([a1, a2, b1, b2, f11, f12, f13, f21, f22, f23, f211, f212]))
-    Test.run('ls -dr /tmp/testls | map (f: f.abspath) | sort',
-             expected_out=sorted([d1, d2, d21]))
-    Test.run('ls -fdr /tmp/testls | map (f: f.abspath) | sort',
-             expected_out=sorted([a1, a2, b1, b2, d1, d2, f11, f12, f13, f21, f22, f23, d21, f211, f212]))
-    # TODO: symlinks
+    marcel.env.ENV.cd(pathlib.Path(tmp))
+    Test.run('ls -fr /tmp/testls | map (f: f.render_compact())',
+             expected_out=sorted([relative(testls, x) for x in
+                                  [a1, a2, b1, b2, f11, f12, f13, f21, f22, f23, f211, f212]]))
+    Test.run('ls -dr /tmp/testls | map (f: f.render_compact())',
+             expected_out=sorted([relative(testls, x) for x in
+                                  [testls, d1, d2, d21]]))
+    Test.run('ls -fdr /tmp/testls | map (f: f.render_compact())',
+             expected_out=sorted([relative(testls, x) for x in
+                                  [testls, a1, a2, b1, b2, d1, d2, f11, f12, f13, f21, f22, f23, d21, f211, f212]]))
     # Test multiple filenames/globs
-    marcel.env.ENV.cd(pathlib.Path(base))
-    Test.run('ls -0 a1 b* | map (f: f.abspath) | sort',
+    marcel.env.ENV.cd(pathlib.Path(testls))
+    Test.run('ls -0 a1 b* | map (f: f.render_compact())',
              expected_out=sorted([a1, b1, b2]))
-    Test.run('ls -0 *2 d1/f* | map (f: f.abspath) | sort',
+    Test.run('ls -0 *2 d1/f* | map (f: f.render_compact())',
              expected_out=sorted([a2, b2, f11, f12, f13, d2]))
-    # Test multiple globs, with files qualifying multiple times. Should be reported once. (Linux ls gets this wrong.)
-    Test.run('ls -0 a* *1 | map (f: f.abspath) | sort',
+    # Test multiple globs, with files qualifying multiple times. Should be reported once.
+    # (Linux ls gets this wrong IMHO.)
+    marcel.env.ENV.cd(pathlib.Path(testls))
+    Test.run('ls -0 a* *1 | map (f: f.render_compact())',
              expected_out=sorted([a1, a2, b1, d1]))
+    # TODO: symlinks
     reset_environment()
 
 
@@ -689,14 +731,15 @@ def main_stable():
 
 
 def main_dev():
-    test_remote()
+    # test_remote()
+    test_ls()
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
 
 
 def main():
     reset_environment()
-    main_stable()
+    # main_stable()
     main_dev()
     print('Test failures: {}'.format(Test.failures))
 

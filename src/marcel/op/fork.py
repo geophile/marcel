@@ -73,7 +73,7 @@ class Fork(marcel.core.Op):
             label_thread_op.receiver = self.receiver
             self.threads.append(PipelineThread(thread_label, pipeline_copy))
 
-    def receive(self, x):
+    def receive(self, _):
         for thread in self.threads:
             thread.start()
         for thread in self.threads:

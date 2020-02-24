@@ -1,0 +1,236 @@
+ls behavior has a lot of subtleties:
+
+- How far to descend when listing.
+
+- When to follow links.
+
+- Print relative or absolute paths.
+
+The bash ls command has to deal with all these, and it provides good
+guidance, but not always answers that make sense for marcel. E.g. 
+
+    jao@cheese:~$ ls -l s*
+    -rw-rw-r-- 1 jao  jao    3509 Nov  1 14:35 sandy.txt
+    -rw-rw-r-- 1 jao  jao    2268 Jun 12  2019 stupid.txt
+    -rw-r--r-- 1 root root 348899 Dec 24 12:47 system76-logs.tgz
+    
+    sailboat:
+    total 4
+    -rw-rw-r-- 1 jao jao 3358 May 11  2019 notes.txt
+    
+    snap:
+    total 4
+    drwxr-xr-x 4 jao jao 4096 Aug 11  2019 spotify
+
+In my home directory, s* identifies some files (sandy.txt, stupid.txt,
+system76-logs.tgz) and two directories (sailboat, snap). ls -l s*
+lists the files and for each directory, the directory contents. The
+output has a complex structure, with sections separated by blank
+lines, each section handling one directory. Except for the current
+directory, each section identifies the directory and gives the
+filecount, (e.g. snap:, total 4).
+
+Marcel doesn't want ls doing any formatting, (and introducing
+"section" objects into output would be cheating, and complicate
+downstream processing of file listings). This would make more sense:
+
+        sailboat
+        sailboat/notes.txt
+        sandy.txt
+        snap
+        snap/spotify
+        stupid.txt
+        system76-logs.tgz
+
+The ls command is currently as follows:
+
+    ls -01rfds FILENAME ...
+
+-0: Current directory only.
+-1: Explore identified directories to one level, (i.e., their immediate contents).
+-r: Explore recursively.
+
+-f: Output files
+-d: Output directories
+-s: Output symlinks
+
+FILENAME: glob pattern
+
+If all none of the fds flags are specified, then all kinds of objects
+are output: files, directories, and symlinks.
+
+----------------------------------------------------------------------
+
+ls processing:
+
+1) Expand all the filenames. This means:
+
+   - Resolving ~
+   - Expanding globs
+
+This yields the "roots": a set of files (i.e., actual files,
+directories, symlinks) to be explored.
+
+2) For each root, determine whether to explore it, (i.e. if it is a
+directory, whether to descend into it).
+
+3) When encountering an item to be reported, check whether that kind
+of object is being output, (as determined by the fds flags).
+
+4) For each item to be output, determine whether it is described by an
+absolute path, or relative to some base.
+
+The fds flags determine what is reported (step 3), not explored (step
+2).
+
+----------------------------------------------------------------------
+
+What bash does:
+
+ls -l some_file: 
+
+    - List the file, using exactly the path given.
+
+ls -l some_dir:
+
+    - List the contents of the directory, with file names relative to
+      the directory.
+
+ls -ld some_dir:
+
+    - Exactly like "ls -l some_file". The directory is treated as a file, and
+      just listed, using exactly the path given.
+
+ls -l relative_glob
+
+    - relative_glob: E.g. "*"
+
+    - list files relative to current directory.
+
+    - explore directories, with each directory in its own section, e.g.
+
+              dir_name:
+              total: ...
+              -rw-rw-rw ...   file1.txt
+              -rw-rw-rw ...   file2.txt
+    
+    - Symlinks are listed as "link -> target"
+
+ls -ld relative_glob:
+
+    - Same as without the -d flag, except directories are not explored.
+
+ls -l absolute_glob:
+
+    - absolute_glob: E.g. some_other_directory/*
+
+    - Like relative glob, but paths to files and directories are
+      absolute. Directory contents are relative, e.g.
+
+          jao@cheese:~$ ls -l /tmp/ls/?*
+          -rw-r--r-- 1 jao jao    0 Feb 22 18:10 /tmp/ls/f
+          lrwxrwxrwx 1 jao jao    1 Feb 22 18:10 /tmp/ls/sd -> d
+          lrwxrwxrwx 1 jao jao    1 Feb 22 18:10 /tmp/ls/sf -> f
+          
+          /tmp/ls/d:
+          total 0
+          -rw-r--r-- 1 jao jao 0 Feb 22 18:10 df
+
+ls -ld absolute_glob:
+
+    - absolute_glob: E.g. some_other_directory/*
+
+    - -d suppresses directory exploration.
+
+Symbolic links are never followed. -H follows them, if listed on the
+command line. (Expanded by glob counts.)
+
+The following are all equivalent:
+
+- ls -l
+- ls -l .
+- ls -ld *
+
+In other words: The default thing to explore is ., not *.
+
+----------------------------------------------------------------------
+
+Revised design:
+
+- Default flag is -1
+- Default FILENAME is .
+
+- ls: List current dir with contents
+- ls -0: List current dir without contents.
+- ls -1: List current dir with contents.
+- ls *: List current dir contents, and subdir contents.
+- ls -0 *: List current dir contents.
+- ls -1 *: List current dir contents, and subdir contents
+
+When listing current dir, use ".", not name relative to parent.
+
+----------------------------------------------------------------------
+
+
+Revised ls processing:
+
+Default depth flag: -1
+Default FILENAME: .
+
+1) Expand all the filenames. This means:
+
+   - Expanding ~
+   - Resolve globs
+
+1a) Expand ~
+
+1b) Compute the *base*: The longest prefix common to all filenames,
+(resulting from 1a). base is None if there is no common prefix.
+
+1c) Resolve globs, yielding a set of *roots*: files (i.e., actual
+files, directories, symlinks) to be explored.
+
+2) For each root, determine whether to explore it, (i.e. if it is a
+directory, whether to descend into it), based on 01r flags.
+
+- Roots are at level 0
+- Root directory contents are at level 1
+
+3) When encountering an item to be reported, check whether that kind
+of object is being output, (as determined by the fds flags).
+
+4) For each item to be output, determine whether it is described by an
+absolute path, or relative to the base.
+
+----------------------------------------------------------------------
+
+Rendering of paths (absolute or relative?)
+
+bash:
+
+- ls -ld:                relative
+- ls -ld .:              relative
+- ls -ld absolute_dir:   relative
+- ls -ld relative_dir:   relative
+- ls -ld /tmp/test*:     relative to each selected dir
+- ls -ld /tmp/testls/*:  absolute!!!
+
+- ls -ld /tmp/testls/a* b*:  Mixed!
+
+-rw-r--r-- 1 jao jao 0 Feb 23 23:23 b1
+-rw-r--r-- 1 jao jao 0 Feb 23 23:23 b2
+-rw-r--r-- 1 jao jao 0 Feb 23 23:23 /tmp/testls/a1
+-rw-r--r-- 1 jao jao 0 Feb 23 23:23 /tmp/testls/a2
+
+Apparent rules:
+
+- Find the roots, expanding globs.
+- List top-level root as is.
+- If top-level root is a directory, list its contents relatively.
+
+----------------------------------------------------------------------
+
+marcel rules:
+
+- If there is one root, and it's a directory, list files relative to it.
+- Otherwise: absolute.

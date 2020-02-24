@@ -39,7 +39,7 @@ class Ps(marcel.core.Op):
     def setup_1(self):
         pass
 
-    def receive(self, x):
+    def receive(self, _):
         this_pid = os.getpid()
         for process in marcel.object.process.processes():
             if process.pid != this_pid or not self.omit_self:

@@ -35,7 +35,7 @@ class Bash(marcel.core.Op):
     def setup_1(self):
         pass
 
-    def receive(self, x):
+    def receive(self, _):
         outcome = subprocess.run(' '.join(self.args),
                                  shell=True,
                                  executable='/bin/bash',

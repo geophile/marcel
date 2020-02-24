@@ -35,7 +35,7 @@ class Pwd(marcel.core.Op):
     def setup_1(self):
         pass
 
-    def receive(self, x):
+    def receive(self, _):
         self.send(marcel.env.ENV.pwd())
 
     # Op
