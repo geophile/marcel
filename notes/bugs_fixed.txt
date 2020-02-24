@@ -1,3 +1,27 @@
+FIXED
+
+1: ls should render files as relative to the requested directory
+
+E.g. ls /tmp should show file_in_tmp, not /tmp/file_in_tmp.
+
+What bash does:
+
+- ls -l one directory: files are relative to that directory
+
+- ls -l multiple directories: Listing looks like this:
+
+     dir1:
+     <ls -l listing relative to dir1>
+
+     dir2:
+     <ls -l listing relative to dir2>
+
+I don't like that highly formatted listing (for multiple
+directories). So for one directory, make the listing relative. For
+multiple directories, list absolute paths.
+
+----------------------------------------------------------------------
+
 FIXED?
 
 2: Line wrapping is broken, (when typing commands)
