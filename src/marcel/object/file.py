@@ -120,6 +120,7 @@ class File(marcel.object.renderable.Renderable):
     def _formatted_metadata(self):
         return [
             self._mode_string(),
+            ' ',
             '{:8s}'.format(username(self.uid)),
             '{:8s}'.format(groupname(self.gid)),
             '{:12}'.format(self.size),

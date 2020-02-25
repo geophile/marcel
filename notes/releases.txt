@@ -24,11 +24,9 @@
 
 + Support ~. See os.path.expanduser
 
-- Syntax: Don't require white space between tokens.
++ Syntax: Don't require white space between tokens.
 
 + Bug 2
-
-- rm
 
 + Bug 6.
 
@@ -54,4 +52,6 @@
 - Redirection: < > >>
 
 - cat. ls | expand does the same thing, but that's kind of ridiculous.
+
+- rm
 

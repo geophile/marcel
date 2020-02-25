@@ -3,7 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/osh" beforeDir="false" afterPath="$PROJECT_DIR$/bin/osh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/object/file.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/object/file.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/parse.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/parse.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -164,7 +166,7 @@
       <workItem from="1582245695233" duration="1617000" />
       <workItem from="1582248186212" duration="32274000" />
       <workItem from="1582397372760" duration="22520000" />
-      <workItem from="1582601274337" duration="3327000" />
+      <workItem from="1582601274337" duration="5601000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

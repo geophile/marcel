@@ -29,6 +29,7 @@ class Token:
     FORK = '@'
     BEGIN = '['
     END = ']'
+    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END]
 
     def __init__(self, text, position):
         self.text = text
@@ -196,12 +197,11 @@ class ShellString(Token):
         chars = []
         while True:
             c = self.next_char()
-            # TODO: Other terminating conditions, e.g. (
             if c is None:
                 break
-            elif c.isspace():
+            elif c.isspace() or c in Token.STRING_TERMINATING:
                 if quote is None:
-                    # Exclude the space from the string
+                    # c is part of the next token
                     self.end -= 1
                     break
                 else:
