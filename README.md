@@ -42,11 +42,12 @@ the `lambda` keyword to be omitted).
 specified as part of the implementation of
 the `Process` object. 
 
-
+```
       921 /usr/bin/python3 /usr/lib/system76-driver/system76-daemon
       933 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
      2228 /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-daemon
      2295 /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-notification
+```
 
 
 Another Example
@@ -54,6 +55,7 @@ Another Example
 Find all files recursively, and then find the sum of file sizes,
  grouped by extension:
 
+```
     M jao@cheese:~/git/marcel$ ls -fr | map (f: (f.path.suffix, 1, f.size)) | red . + +
     ('.xml', 5, 28176)
     ('.iml', 1, 819)
@@ -63,7 +65,8 @@ Find all files recursively, and then find the sum of file sizes,
     ('.sample', 11, 18844)
     ('.pyc', 43, 129403)
     ('.md', 1, 1378)
-    
+```
+
 * `ls -fr`: List just files (`-f`) recursively (`-r`).
 
 * `map(f: (f.path.suffix, 1, f.size))`: Map each file, `f`, to a tuple containing the file's 
@@ -79,10 +82,12 @@ Remote access
 Marcel can submit commands to all of the nodes in a cluster, and then combine the results.
 For example, a cluster named `qa` can be configured in `~/.marcel.py`:
 
+```
     qa = Cluster('qa')
     qa.hosts = ['192.168.10.100', '192.168.10.101']
     qa.user = 'qa_joe'
     qa.identity = '~qa_joe/home/.ssh/id_rsa'
+```
 
 Then, to get a list of files in `/usr/local/bin` in each node of the cluster:
 
@@ -92,7 +97,7 @@ Then, to get a list of files in `/usr/local/bin` in each node of the cluster:
 
 - The output includes an identification of the node that produced the output, e.g.
 
-
+```
     ('192.168.100.0', .)
     ('192.168.100.0', decompile)
     ('192.168.100.0', nosetests)
@@ -103,6 +108,8 @@ Then, to get a list of files in `/usr/local/bin` in each node of the cluster:
     ('192.168.100.1', decompile)
     ('192.168.100.1', erdo)
     ('192.168.100.1', movements)
+```
+
 
 Errors
 ======
@@ -113,14 +120,17 @@ and error output to be combined in one stream, since error values can be identif
 
 For example, directory `/tmp/d` has three directories:
  
+ ```
     M jao@cheese:/tmp/d$ ls
     drwxr-xr-x jao      jao              4096 /tmp/d/hi
     dr-------- z        z                4096 /tmp/d/nope
     drwxr-xr-x jao      jao              4096 /tmp/d/welcome
+```
 
 The `nope` directory cannot be visited, due to permissions. If we try to list all files
 and directories recursively:  
-    
+
+```
     M jao@cheese:/tmp/d$ ls -r
     drwxr-xr-x jao      jao              4096 /tmp/d/hi
     -rw-r--r-- jao      jao                 0 /tmp/d/hi/a.txt
@@ -130,6 +140,7 @@ and directories recursively:
     drwxr-xr-x jao      jao              4096 /tmp/d/welcome
     -rw-r--r-- jao      jao                 0 /tmp/d/welcome/c.txt
     -rw-r--r-- jao      jao                 0 /tmp/d/welcome/d.txt
+```
 
 Notice that the nope directory is listed as before, but we get an error on the attempt
 to go inside of it. The error indicates when the attempt was made -- between listing
@@ -146,6 +157,7 @@ README, and comments in the code), and lots of features and commands are missing
 Marcel is obviously not ready to be the shell I would use routinely. If you want to try it out, use a script
 like this:
 
+```
     #!/bin/bash
 
     MARCEL_HOME=~/git/marcel/src
@@ -154,5 +166,6 @@ like this:
     PYTHONPATH=$MARCEL_HOME
 
     python3 $MARCEL_MAIN
-    
+```
+
 If you want examples of marcel usage, take a look at `src/marcel/test/test_execution.py`.
