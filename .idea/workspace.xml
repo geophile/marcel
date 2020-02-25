@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/marcel/op/version.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/__init__.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -164,7 +167,7 @@
       <workItem from="1582245695233" duration="1617000" />
       <workItem from="1582248186212" duration="32274000" />
       <workItem from="1582397372760" duration="22520000" />
-      <workItem from="1582601274337" duration="10716000" />
+      <workItem from="1582601274337" duration="11586000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

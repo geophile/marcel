@@ -20,5 +20,6 @@ __all__ = [
     'tail',
     'timer',
     'unique',
+    'version',
     'window'
 ]
