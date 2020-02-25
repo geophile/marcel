@@ -90,7 +90,7 @@ For example, a cluster named `qa` can be configured in `~/.marcel.py`:
 
 Then, to get a list of files in `/usr/local/bin` in each node of the cluster:
 
-    M jao@cheese:~$ @jao [ ls /usr/local/bin ]
+    M jao@cheese:~$ @qa [ ls /usr/local/bin ]
 
 - `@qa [ ... ]` executes the bracketed commands on each node of the `qa` cluster.
 
