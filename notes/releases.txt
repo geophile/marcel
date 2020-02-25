@@ -18,7 +18,7 @@
 
 + Colorization for ls.
 
-- README.md
++ README.md
 
 + Generalize prompt: sequence of strings, env vars, colors.
 
