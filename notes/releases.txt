@@ -2,7 +2,7 @@
 
 + Rename to marcel
 
-- Bug 1. Related: see ideas.txt about render_compact/render_full.
++ Bug 1. Related: see ideas.txt about render_compact/render_full.
 
 + Modern formatting
 
@@ -30,7 +30,7 @@
 
 - rm
 
-- Bug 6.
++ Bug 6.
 
 + Bug 7.
 

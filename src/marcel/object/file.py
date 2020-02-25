@@ -1,5 +1,6 @@
 import pathlib
 import shutil
+import time
 
 import marcel.env
 import marcel.object.renderable
@@ -122,7 +123,13 @@ class File(marcel.object.renderable.Renderable):
             '{:8s}'.format(username(self.uid)),
             '{:8s}'.format(groupname(self.gid)),
             '{:12}'.format(self.size),
+            ' ',
+            self._formatted_mtime(),
+            ' ',
             self.display_path.as_posix()]
+
+    def _formatted_mtime(self):
+        return time.strftime('%Y %b %d %H:%M:%S', time.localtime(self.path.lstat().st_mtime))
 
     @staticmethod
     def _highlight_color(path):

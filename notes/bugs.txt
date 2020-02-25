@@ -50,7 +50,4 @@ happen? Document and test for it.
 
 ----------------------------------------------------------------------
 
-6. File.render_full should include date/time
-
-Linux does (day, month, time) for recent, (day, month, year) for
-older. 
+9. 
