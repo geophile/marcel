@@ -158,3 +158,4 @@ like this:
 
     python3 $MARCEL_MAIN
     
+If you want examples of marcel usage, take a look at `src/marcel/test/test_execution.py`.
