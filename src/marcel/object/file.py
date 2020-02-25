@@ -15,11 +15,12 @@ class File(marcel.object.renderable.Renderable):
     """Represents a file or directory.
     """
 
-    def __init__(self, path):
+    def __init__(self, path, base=None):
         assert path is not None
         if not isinstance(path, pathlib.Path):
             path = pathlib.Path(path)
         self.path = path
+        self.display_path = path.relative_to(base) if base else path
         self.os_stat = None
 
     def __repr__(self):
@@ -80,7 +81,7 @@ class File(marcel.object.renderable.Renderable):
     # Renderable
 
     def render_compact(self):
-        return self.path
+        return self.display_path
 
     def render_full(self, color):
         line = self._formatted_metadata()
@@ -91,6 +92,8 @@ class File(marcel.object.renderable.Renderable):
             link_target = self.path.resolve()
             if color:
                 link_target = colorize(link_target, self._highlight_color(link_target))
+            if isinstance(link_target, pathlib.Path):
+                link_target = link_target.as_posix()
             line.append(link_target)
         return ' '.join(line)
 
@@ -119,7 +122,7 @@ class File(marcel.object.renderable.Renderable):
             '{:8s}'.format(username(self.uid)),
             '{:8s}'.format(groupname(self.gid)),
             '{:12}'.format(self.size),
-            self.path.as_posix()]
+            self.display_path.as_posix()]
 
     @staticmethod
     def _highlight_color(path):
@@ -128,7 +131,9 @@ class File(marcel.object.renderable.Renderable):
         highlight = color_scheme.file_extension.get(extension)
         if highlight is None:
             highlight = (
-                color_scheme.file_executable if shutil.which(path.as_posix()) is not None else
+                # which must check path.resolve(), not path. If the path is relative, and the name
+                # is also an executable on PATH, then highlighting will be incorrect. See bug 8.
+                color_scheme.file_executable if shutil.which(path.resolve().as_posix()) is not None else
                 color_scheme.file_link if path.is_symlink() else
                 color_scheme.file_dir if path.is_dir() else
                 color_scheme.file_file)

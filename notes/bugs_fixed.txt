@@ -77,3 +77,14 @@ FIXED
 
 Incorrect usage, such as "ls | bash emacs" causes the assertion to
 fail and kills the shell. Should be a usage error instead.
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+8. Highlighting confusion
+
+If a directory (or file) matches the name of an executable, then the
+highlighting is wrong. It is highlighted as an executable, not what it
+really is.

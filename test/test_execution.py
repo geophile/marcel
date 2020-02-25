@@ -198,7 +198,6 @@ def test_ls():
         base_path = pathlib.Path(base)
         display_path = x_path.relative_to(base_path)
         return display_path
-
     # testls/
     #     a1
     #     a2
@@ -731,15 +730,14 @@ def main_stable():
 
 
 def main_dev():
-    # test_remote()
-    test_ls()
+    test_remote()
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
 
 
 def main():
     reset_environment()
-    # main_stable()
+    main_stable()
     main_dev()
     print('Test failures: {}'.format(Test.failures))
 

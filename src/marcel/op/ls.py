@@ -167,9 +167,7 @@ class Ls(marcel.core.Op):
     def send_path(self, path, base):
         if path.is_file() and self.file or path.is_dir() and self.dir or path.is_symlink() and self.symlink:
             file_id = Ls.fileid(path)
-            if base:
-                path = path.relative_to(base)
-            file = marcel.object.file.File(path)
+            file = marcel.object.file.File(path, base)
             if file_id not in self.emitted:
                 self.emitted.add(file_id)
                 self.send(file)
