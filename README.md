@@ -18,8 +18,7 @@ and passes Python objects,
 as Marcel does. Marcel improves on osh in a number of ways:
 
 * Marcel is a full-fledged shell.
-* A planned abstraction mechanism is to offer pipelines as first-class constructs. This will allow for more complex commands  
-(which combine multiple pipelines), and the composition of pipelines.
+* A planned abstraction mechanism is to offer pipelines as first-class constructs. This will allow for more complex commands (which combine multiple pipelines), and the composition of pipelines.
 * Marcel started with the osh code base (for commands and pipelines), but cleaned up a number of ugly hacks and non-pythonic constructs.
 * Osh requires Python 2.x. Marcel requires Python 3.x. (Whether you regard that as an improvement is obviously subjective.)
 
