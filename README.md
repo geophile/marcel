@@ -148,6 +148,13 @@ the `hi` and `welcome` directories.
 Normal output from this command comprises tuples of size 1, each containing a `File` object. The error
 is carried by an `Error` object. Filtering can be performed to separate out normal and error output when desired.
 
+Licensing
+=========
+
+The predecessor project ([osh](https://github.com/geophile.osh)) was
+GPL. I've removed those headers, and will revisit the license issue,
+but there will be no restrictions on the use of this software.
+
 Status
 ======
 

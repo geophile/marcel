@@ -1,18 +1,3 @@
-Name: marcel. As in Marcel the Shell.
-
-----------------------------------------------------------------------
-
-Structured Output:
-
-ls -l doesn't make sense for osh. Allow for formatting options:
-
-- Varying levels of detail. E.g. ls | out -l0 would produce just
-  filenames. ls | out -l1 would do be the equivalent of ls -l, and ls
-  | out -l2 would be even more detail.
-
-- This applies to other objects too, e.g. Process.
-
-----------------------------------------------------------------------
 
 Functions and ops
 
@@ -218,18 +203,6 @@ The destination could be a file or a pipeline.
 Cascading these is a switch:
 
     if p1 [pipe1] | if p2 [pipe2] | if p3 [pipe3] | ...
-
-----------------------------------------------------------------------
-
-For objects to be rendered (file, process, error):
-
-- __repr__ does the usual pythonic thing.
-
-- render_compact: Without color, for use when the thing is rendered in a
-  tuple of size > 1.
-
-- render_full: With color, for use when the thing is rendered on its
-  own, (tuple of size 1).
 
 ----------------------------------------------------------------------
 

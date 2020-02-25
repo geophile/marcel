@@ -5,25 +5,15 @@
 
 - Licensing header
 
-core.py:
-
-- command state
-
-- namespaces (add_to_namespace, namespace)
-
 util.py:
 
 - quote
-
-- All varieties of formatting (for out op)
 
 - Debugging & verbosity level
 
 - Make File comparisons work -- based on absolute path.
 
-- "ls -1" looks too much like "ls -l"
-
-- Should the name of map be changed? f as in o? apply? map doesn't
+- Should the name of map be changed? f as in osh? apply? map doesn't
   really make sense when used as a generator. Could have gen handle
   this case through a function argument mutually exclusive with other
   args. So "gen 5" works like it always had, but "gen (5)" generates a
@@ -33,16 +23,12 @@ util.py:
   non-existent processes which are then used downstream. Can this even
   happen?
 
-- Symlink listing: include referenced file
-
 - ps: If commandline blank, take contents of status file? That's what
   ps appears to do.
 
 - more/less commands
 
 - File navigation (parent, children, ...)
-
-- ~ expansion
 
 - ^emacs works -- a new window running GUI emacs is created. So does
   ^emacs -nw, doing exactly the right thing (non-graphical, in current
@@ -59,26 +45,9 @@ util.py:
 
 - LOOK AT SHLEX MODULE -- COMMAND-LINE PARSING AND QUOTING
 
-
-- .osh2rc might want a cluster named jao and a terminal profile named
-  jao. Need separate namespaces for these things.
-
-
-- OshError, File __repr__ do colorization. This is only correct for
-  osh output. How can osh output be distinguished from other string
-  conversions?
-
-- Provide a default color scheme, better than everything = None.
-
-- File render_full should include time.
+- .marcel.py might want a cluster named jao and a terminal profile
+  named jao. Need separate namespaces for these things.
 
 - out.receive does a lot of work. Precompute whatever can be.
 
-- cd with no args.
-
 - pushd/popd
-
-- What are the rules for ls & symbolic links? Need some equivalent to
-  bash "ls -ld"?
-
-- File comparisons need to account for display_base.

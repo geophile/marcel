@@ -1,3 +1,23 @@
+
+0.2
+
+- Run executables without requiring invocation of bash op.
+
+- bash commands that do pagination don't work, e.g. more, man.
+
+- su: Need to do a bash su, but then somehow land in marcel again.
+
+- pushd/popd
+
+- Redirection: < > >>. > and >> are taken are of by out -f and out -a,
+  aren't they?
+
+- cat. ls | expand does the same thing, but that's kind of ridiculous.
+
+- rm
+
+----------------------------------------------------------------------
+
 0.1
 
 + Rename to marcel
@@ -35,23 +55,3 @@
 + Bug 8.
 
 + cd with no args.
-
-
-----------------------------------------------------------------------
-
-0.2
-
-- Run executables without requiring invocation of bash op.
-
-- bash commands that do pagination don't work, e.g. more, man.
-
-- su: Need to do a bash su, but then somehow land in marcel again.
-
-- pushd/popd
-
-- Redirection: < > >>
-
-- cat. ls | expand does the same thing, but that's kind of ridiculous.
-
-- rm
-
