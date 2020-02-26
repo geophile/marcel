@@ -21,6 +21,7 @@ class Environment:
     def initialize(config_file):
         global ENV
         ENV = Environment(config_file)
+        return ENV
 
     def __init__(self, config_file):
         self._user = getpass.getuser()
@@ -94,3 +95,6 @@ class Environment:
             with open(config_path.as_posix()) as config_file:
                 config_source = config_file.read()
                 exec(config_source, self._globals)
+
+    def getenv(self, var):
+        return self._globals.get(var, None)

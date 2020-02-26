@@ -1,0 +1,41 @@
+What should be tab-completed?
+
+- Op names
+
+- Flags?
+
+- Expected args? Basically, turning tab completion into help facility.
+
+- cd: directories
+
+- ls: files, symlinks, directories
+
+----------------------------------------------------------------------
+
+bash:
+
+- Does command completion
+
+- Does file completion for current directory only (with no
+  input). Then, it looks for completions of what's been typed.
+
+- "ls -" does flag completion (just listing them, no help). Long versions only.
+
+- file completion seems to be done for all commands, even when it
+  doesn't make sense (e.g. ps)
+
+- ps doesn't do flag completion.
+
+----------------------------------------------------------------------
+
+General command completion:
+
+For an op: set of op names.
+
+After op:
+
+      -: list flags for the op
+      
+      other: for an op expecting filenames: Contents of pwd, and /
+
+Parser state and op are needed.
