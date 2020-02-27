@@ -333,7 +333,7 @@ class Parser(Token):
         self.pipelines.push(marcel.core.Pipeline())
         self.fork_spec = None
         self.op = None
-        self.last_op_name = None  # For use by tab completion
+        self.last_op = None
         self.args = []
 
     def start_action(self, token):
@@ -341,11 +341,11 @@ class Parser(Token):
             self.state = ParseState.FORK_START
         elif token.is_string():
             op_name = token.value()
-            self.last_op_name = op_name
             op_module = marcel.opmodules.OP_MODULES.named(op_name)
             if op_module is None:
                 raise UnknownOpError(self.text, op_name)
             self.op = getattr(op_module, op_name)()
+            self.last_op = self.op
             self.state = ParseState.OP
         elif token is None:
             raise PrematureEndError(self.text)

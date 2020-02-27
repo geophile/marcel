@@ -7,38 +7,51 @@ import marcel.op
 from marcel.util import *
 
 
+DEBUG = False
+
+
+def debug(message):
+    if DEBUG:
+        print(message)
+
+
 class TabCompleter:
     OPS = marcel.op.public
     FILENAME_OPS = ['cd', 'ls', 'out']
 
     def __init__(self):
-        readline.set_completer(TabCompleter.complete)
+        readline.set_completer(self.complete)
         # Removed '-', '/' from readline.get_completer_delims()
         readline.set_completer_delims(' \t\n`~!@#$%^&*()=+[{]}\\|;:\'",<>?')
         self.op_name = None
 
-    @staticmethod
-    def complete(text, state):
+    def complete(self, text, state):
+        debug('complete: line = {}, text = {}'.format(readline.get_line_buffer(), text))
         # Parse the text so far, to get information needed for tab completion. It is expected that
         # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
         # which can be ignored. The important point is that the parse will set Parser.op.
         parser = marcel.parse.Parser(readline.get_line_buffer())
         try:
             parser.parse(partial_text=True)
+            debug('parse succeeded')
         except marcel.parse.PrematureEndError:
+            debug('premature end')
             pass
         except Exception as e:
+            debug('caught ({}) {}'.format(type(e), e))
             # Don't do tab completion
             return None
-        op_name = parser.last_op_name
-        if op_name is None:
+        debug('parser.op: {}'.format(parser.op))
+        if parser.last_op is None:
             candidates = TabCompleter.complete_op(text)
-        elif text.startswith('-'):
-            candidates = TabCompleter.complete_flag(text, op_name)
-        elif op_name in TabCompleter.FILENAME_OPS:
-            candidates = TabCompleter.complete_filename(text)
         else:
-            return None
+            self.op_name = parser.last_op.op_name()
+            if text.startswith('-'):
+                candidates = TabCompleter.complete_flag(text, self.op_name)
+            elif self.op_name in TabCompleter.FILENAME_OPS:
+                candidates = TabCompleter.complete_filename(text)
+            else:
+                return None
         return candidates[state]
 
     @staticmethod
