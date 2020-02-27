@@ -291,7 +291,6 @@ class ParseState(Enum):
     FORK_SPEC = auto()
     FORK_END = auto()
     OP = auto()
-    ESCAPE = auto()
     ARGS = auto()
 
 
@@ -302,8 +301,27 @@ class UnexpectedTokenError(Exception):
         self.position = position
         self.message = message
 
-    def __repr__(self):
-        return 'Parsing error at {}: {}'.format(self.text[self.position:self.position + 20], self.message)
+    def __str__(self):
+        return 'Parsing error at position {} of "{}": {}'.format(self.position, self.text, self.message)
+
+
+class PrematureEndError(UnexpectedTokenError):
+
+    def __init__(self, text):
+        super().__init__(text, None, None)
+
+    def __str__(self):
+        return 'Command ended prematurely: {}'.format(self.text)
+
+
+class UnknownOpError(UnexpectedTokenError):
+
+    def __init__(self, text, op_name):
+        super().__init__(text, None, None)
+        self.op_name = op_name
+
+    def __str__(self):
+        return 'Unknown op {} in {}'.format(self.op_name, self.text)
 
 
 class Parser(Token):
@@ -315,6 +333,7 @@ class Parser(Token):
         self.pipelines.push(marcel.core.Pipeline())
         self.fork_spec = None
         self.op = None
+        self.last_op_name = None  # For use by tab completion
         self.args = []
 
     def start_action(self, token):
@@ -322,9 +341,14 @@ class Parser(Token):
             self.state = ParseState.FORK_START
         elif token.is_string():
             op_name = token.value()
+            self.last_op_name = op_name
             op_module = marcel.opmodules.OP_MODULES.named(op_name)
+            if op_module is None:
+                raise UnknownOpError(self.text, op_name)
             self.op = getattr(op_module, op_name)()
             self.state = ParseState.OP
+        elif token is None:
+            raise PrematureEndError(self.text)
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected string')
 
@@ -336,6 +360,8 @@ class Parser(Token):
             x = token.value()
             self.fork_spec = int(x) if x.isdigit() else x
             self.state = ParseState.FORK_SPEC
+        elif token is None:
+            raise PrematureEndError(self.text)
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected fork specification')
 
@@ -353,6 +379,8 @@ class Parser(Token):
             self.pipelines.push(fork_pipeline)
             self.op = fork_pipeline
             self.state = ParseState.START
+        elif token is None:
+            raise PrematureEndError(self.text)
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected pipeline begin')
 
@@ -376,13 +404,6 @@ class Parser(Token):
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected string or pipe')
 
-    def escape_action(self, token):
-        if token.is_string():
-            self.args.append(token.value())
-            self.state = ParseState.ARGS
-        else:
-            raise UnexpectedTokenError(self.text, self.end, 'Expected escape command')
-
     def args_action(self, token):
         if token is None:
             self.finish_op()
@@ -401,7 +422,8 @@ class Parser(Token):
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected string or pipe')
 
-    def parse(self):
+    # partial_text is True for parsing done during tab completion
+    def parse(self, partial_text=False):
         try:
             token = self.next_token()
             while self.state != ParseState.END:
@@ -415,8 +437,6 @@ class Parser(Token):
                     self.fork_spec_action(token)
                 elif self.state == ParseState.OP:
                     self.op_action(token)
-                elif self.state == ParseState.ESCAPE:
-                    self.escape_action(token)
                 elif self.state == ParseState.ARGS:
                     self.args_action(token)
                 else:
@@ -426,7 +446,11 @@ class Parser(Token):
             pipeline = self.pipelines.pop()
             assert self.pipelines.is_empty()
             return pipeline
+        except UnknownOpError as e:
+            if not partial_text:
+                raise marcel.exception.KillCommandException(e)
         except Exception as e:
+            print_stack()
             raise marcel.exception.KillCommandException(e)
 
     def next_token(self):
@@ -450,7 +474,10 @@ class Parser(Token):
         return token
 
     def finish_op(self):
-        self.op.arg_parser().parse_args(self.args, namespace=self.op)
+        try:
+            self.op.arg_parser().parse_args(self.args, namespace=self.op)
+        except BaseException as e:
+            print('arg parsing failed: ({}) {}'.format(type(e), e))
         self.pipeline().append(self.op)
         self.op = None
         self.args = []

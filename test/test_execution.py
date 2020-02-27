@@ -12,7 +12,6 @@ import marcel.object.host
 from marcel.util import *
 
 Error = marcel.object.error.Error
-run_command = marcel.main.run_command
 start_dir = os.getcwd()
 
 
@@ -72,7 +71,7 @@ class Test:
 
     @staticmethod
     def run_unwrapped(command):
-        run_command(command)
+        marcel.main.Main.run_command(command)
 
     @staticmethod
     def run(command, expected_out=None, expected_err=None, file=None):
@@ -81,7 +80,7 @@ class Test:
         err = io.StringIO()
         try:
             with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-                run_command(command)
+                marcel.main.Main.run_command(command)
             actual_out = Test.file_contents(file) if file else out.getvalue()
             actual_err = err.getvalue()
             if expected_out:
@@ -730,14 +729,15 @@ def main_stable():
 
 
 def main_dev():
-    test_remote()
+    # test_remote()
+    Test.run_unwrapped('ls -')
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
 
 
 def main():
     reset_environment()
-    main_stable()
+    # main_stable()
     main_dev()
     print('Test failures: {}'.format(Test.failures))
 

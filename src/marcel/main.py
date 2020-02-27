@@ -54,13 +54,14 @@ class Main:
             while True:
                 try:
                     line = input(marcel.env.ENV.prompt())
-                    self.run_command(line)
+                    Main.run_command(line)
                 except KeyboardInterrupt:  # ctrl-C
                     print()
         except EOFError:  # ctrl-D
             print()
 
-    def run_command(self, line):
+    @staticmethod
+    def run_command(line):
         if line:
             try:
                 parser = marcel.parse.Parser(line)
