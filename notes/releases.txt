@@ -3,7 +3,9 @@
 
 - Run executables without requiring invocation of bash op.
 
-- bash commands that do pagination don't work, e.g. more, man.
+- Tab completion for executables, not just ops.
+
++ bash commands that do pagination don't work, e.g. more, man.
 
 - su: Need to do a bash su, but then somehow land in marcel again.
 
@@ -17,6 +19,11 @@
 - rm
 
 + tab completion
+
+- Bugs:
+
+  - 3
+  - 9
 
 ----------------------------------------------------------------------
 
