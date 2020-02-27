@@ -447,6 +447,10 @@ class Parser(Token):
             assert self.pipelines.is_empty()
             return pipeline
         except UnknownOpError as e:
+            # An unknown op could occur because someone got an op wrong. I.e., we are parsing complete text
+            # (partial_text is False) and the op is just wrong. But it could also occur if we are doing tab
+            # completion (partial_text is True), and we have an op prefix, which is the whole point of
+            # tab completion. In the latter case, the UnknownOpError is not exceptional.
             if not partial_text:
                 raise marcel.exception.KillCommandException(e)
         except Exception as e:
