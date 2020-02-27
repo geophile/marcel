@@ -124,7 +124,7 @@ class Test:
 
 
 def test_no_such_op():
-    Test.run('gen 5 | abc', expected_err='abc is not recognized as a command')
+    Test.run('gen 5 | abc', expected_err='Unknown op abc')
 
 
 def test_gen():
@@ -729,15 +729,14 @@ def main_stable():
 
 
 def main_dev():
-    # test_remote()
-    Test.run_unwrapped('ls -')
+    test_remote()
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
 
 
 def main():
     reset_environment()
-    # main_stable()
+    main_stable()
     main_dev()
     print('Test failures: {}'.format(Test.failures))
 

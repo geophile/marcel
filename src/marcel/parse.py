@@ -454,7 +454,6 @@ class Parser(Token):
             if not partial_text:
                 raise marcel.exception.KillCommandException(e)
         except Exception as e:
-            print_stack()
             raise marcel.exception.KillCommandException(e)
 
     def next_token(self):
@@ -478,10 +477,7 @@ class Parser(Token):
         return token
 
     def finish_op(self):
-        try:
-            self.op.arg_parser().parse_args(self.args, namespace=self.op)
-        except BaseException as e:
-            print('arg parsing failed: ({}) {}'.format(type(e), e))
+        self.op.arg_parser().parse_args(self.args, namespace=self.op)
         self.pipeline().append(self.op)
         self.op = None
         self.args = []
