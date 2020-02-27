@@ -1,23 +1,26 @@
+import pathlib
 import readline
 
 import marcel.core
+import marcel.env
 import marcel.op
 
 
 class TabCompleter:
-
     OPS = marcel.op.public
     FILENAME_OPS = ['cd', 'ls', 'out']
 
     def __init__(self):
-        readline.set_completer(lambda text, state: self.complete(text, state))
-        # Removed '-' from readline.get_completer_delims()
-        readline.set_completer_delims(' \t\n`~!@#$%^&*()=+[{]}\\|;:\'",<>/?')
+        readline.set_completer(TabCompleter.complete)
+        # Removed '-', '/' from readline.get_completer_delims()
+        readline.set_completer_delims(' \t\n`~!@#$%^&*()=+[{]}\\|;:\'",<>?')
         self.op_name = None
 
-    def complete(self, text, state):
+    @staticmethod
+    def complete(text, state):
         line = readline.get_line_buffer()
         op_name = TabCompleter.op_name(line)
+        print('line: {}, text: {}'.format(line, text))
         if op_name is None:
             candidates = TabCompleter.complete_op(text)
         elif text.startswith('-'):
@@ -25,7 +28,6 @@ class TabCompleter:
         elif op_name in TabCompleter.FILENAME_OPS:
             candidates = TabCompleter.complete_filename(text)
         else:
-            # TODO: Is this right?
             return None
         return candidates[state]
 
@@ -49,7 +51,15 @@ class TabCompleter:
 
     @staticmethod
     def complete_filename(text):
-        return []
+        current_dir = marcel.env.ENV.pwd()
+        if text:
+            base, pattern_prefix = (('/', text[1:])
+                                    if text.startswith('/') else
+                                    ('.', text))
+            filenames = [p.as_posix() for p in pathlib.Path(base).glob(pattern_prefix + '*')]
+        else:
+            filenames = ['/'] + [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
+        return filenames
 
     @staticmethod
     def op_name(line):

@@ -3,19 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/gen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/ls.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/ls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/out.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/out.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/ps.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/ps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/red.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/red.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/timer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/timer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/unique.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/unique.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/window.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/window.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/opmodules.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/opmodules.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/tabcompleter.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/tabcompleter.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -179,7 +166,7 @@
       <workItem from="1582248186212" duration="32274000" />
       <workItem from="1582397372760" duration="22520000" />
       <workItem from="1582601274337" duration="26495000" />
-      <workItem from="1582747507777" duration="5774000" />
+      <workItem from="1582747507777" duration="9751000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
