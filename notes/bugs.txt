@@ -69,7 +69,13 @@ map: error: argument function: not a valid function
 
 ----------------------------------------------------------------------
 
-10.
+10. sort all by itself produces None as output
 
+This seems wrong:
 
+     M jao@cheese:~/git/marcel$ sort
+     None
 
+----------------------------------------------------------------------
+
+11. 

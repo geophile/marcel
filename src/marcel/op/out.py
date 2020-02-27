@@ -31,7 +31,7 @@ def out():
 class OutArgParser(marcel.core.ArgParser):
 
     def __init__(self):
-        super().__init__('out')
+        super().__init__('out', ['-a', '--append', '-f', '--file', '-c', '--csv'])
         file_group = self.add_mutually_exclusive_group()
         file_group.add_argument('-a', '--append', required=False)
         file_group.add_argument('-f', '--file', required=False)

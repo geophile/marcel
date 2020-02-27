@@ -44,7 +44,7 @@ def timer():
 class TimerArgParser(marcel.core.ArgParser):
 
     def __init__(self):
-        super().__init__('timer')
+        super().__init__('timer', ['-c', '--components'])
         self.add_argument('-c', '--components', action='store_true')
         self.add_argument('interval')
 

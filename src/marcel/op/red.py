@@ -83,7 +83,7 @@ def red():
 class RedArgParser(marcel.core.ArgParser):
 
     def __init__(self):
-        super().__init__('red')
+        super().__init__('red', ['-i', '--incremental'])
         self.add_argument('-i', '--incremental',
                           action='store_true')
         self.add_argument('function',

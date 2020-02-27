@@ -64,7 +64,6 @@ class Main:
         if line:
             try:
                 parser = marcel.parse.Parser(line)
-                self.tab_completer.set_parser(parser)
                 pipeline = parser.parse()
                 Command(pipeline).execute()
             except marcel.exception.KillCommandException as e:

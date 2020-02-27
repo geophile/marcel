@@ -14,7 +14,7 @@ def version():
 class VersionArgParser(marcel.core.ArgParser):
 
     def __init__(self):
-        super().__init__('gen')
+        super().__init__('version')
 
 
 class Version(marcel.core.Op):

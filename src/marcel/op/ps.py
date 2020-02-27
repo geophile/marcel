@@ -18,7 +18,7 @@ def ps():
 class PsArgParser(marcel.core.ArgParser):
 
     def __init__(self):
-        super().__init__('ps')
+        super().__init__('ps', ['-o', '--omit-self'])
         self.add_argument('-o', '--omit-self',
                           action='store_true')
 

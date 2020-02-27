@@ -42,18 +42,19 @@ def ls():
 class LsArgParser(marcel.core.ArgParser):
 
     def __init__(self):
-        super().__init__('ls')
+        super().__init__('ls', ['-0', '-1', '-r', '-f', '--file', '-d', '--dir', '-s', '--symlink'])
         depth_group = self.add_mutually_exclusive_group()
         depth_group.add_argument('-0', action='store_true', dest='d0')
         depth_group.add_argument('-1', action='store_true', dest='d1')
         depth_group.add_argument('-r', action='store_true', dest='dr')
-        self.add_argument('-f', action='store_true', dest='file')
-        self.add_argument('-d', action='store_true', dest='dir')
-        self.add_argument('-s', action='store_true', dest='symlink')
+        self.add_argument('-f', '--file', action='store_true')
+        self.add_argument('-d', '--dir', action='store_true')
+        self.add_argument('-s', '--symlink', action='store_true')
         self.add_argument('filename', nargs=argparse.REMAINDER)
 
 
 class Ls(marcel.core.Op):
+
     argparser = LsArgParser()
 
     def __init__(self):

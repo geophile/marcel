@@ -9,7 +9,7 @@ class OpModules:
     def __init__(self):
         self.modules = {}
         import marcel.op
-        for op_name in marcel.op.__all__:
+        for op_name in marcel.op.public:
             op_module = importlib.import_module('marcel.op.{}'.format(op_name))
             self.modules[op_name] = op_module
 

@@ -11,8 +11,11 @@ Error = marcel.object.error.Error
 
 class ArgParser(argparse.ArgumentParser):
 
-    def __init__(self, op_name):
+    op_flags = {'gen': ['-p', '--pad']}  # op name -> [flags], for use in tab completion
+
+    def __init__(self, op_name, flags=None):
         super().__init__(prog=op_name)
+        ArgParser.op_flags[op_name] = flags
 
     def exit(self, status=0, message=None):
         raise marcel.exception.KillCommandException(message)

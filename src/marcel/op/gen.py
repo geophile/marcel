@@ -20,7 +20,7 @@ def gen():
 class GenArgParser(marcel.core.ArgParser):
 
     def __init__(self):
-        super().__init__('gen')
+        super().__init__('gen', ['-p', '--pad'])
         self.add_argument('-p', '--pad',
                           type=int)
         self.add_argument('count',

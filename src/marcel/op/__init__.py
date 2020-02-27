@@ -1,18 +1,15 @@
-__all__ = [
+public = [
     'bash',
     'cd',
     'expand',
-    'fork',
     'gen',
     'head',
-    'labelthread',
     'ls',
     'map',
     'out',
     'ps',
     'pwd',
     'red',
-    'remote',
     'reverse',
     'select',
     'sort',
@@ -23,3 +20,13 @@ __all__ = [
     'version',
     'window'
 ]
+
+private = [
+    'fork',
+    'labelthread',
+    'remote',
+]
+
+
+__all__ = public + private
+

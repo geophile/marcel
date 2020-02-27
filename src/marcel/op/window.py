@@ -71,7 +71,7 @@ def window():
 class WindowArgsParser(marcel.core.ArgParser):
 
     def __init__(self):
-        super().__init__('window')
+        super().__init__('window', ['-o', '--overlap', '-d', '--disjoint'])
         self.add_argument('predicate',
                           nargs='?',
                           type=super().constrained_type(marcel.core.ArgParser.check_function,

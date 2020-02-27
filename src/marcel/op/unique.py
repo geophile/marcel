@@ -19,7 +19,7 @@ def unique():
 class UniqueArgParser(marcel.core.ArgParser):
 
     def __init__(self):
-        super().__init__('unique')
+        super().__init__('unique', ['-c', '--consecutive'])
         self.add_argument('-c', '--consecutive', action='store_true')
 
 
