@@ -22,7 +22,7 @@ multiple directories, list absolute paths.
 
 ----------------------------------------------------------------------
 
-FIXED?
+FIXED
 
 2: Line wrapping is broken, (when typing commands)
 
@@ -52,6 +52,53 @@ I'm looking for advice on a direction to pursue.
 
 FIXED
 
+3. Getting the group of some gids kills the shell
+
+M jao@cheese:~$ ls -fr /opt
+Traceback (most recent call last):
+  File "/home/jao/git/osh2/src/osh/main.py", line 45, in <module>
+    main()
+  File "/home/jao/git/osh2/src/osh/main.py", line 41, in main
+    process_input(run_command)
+  File "/home/jao/git/osh2/src/osh/main.py", line 26, in process_input
+    handle_line(line)
+  File "/home/jao/git/osh2/src/osh/main.py", line 15, in run_command
+    command.execute()
+  File "/home/jao/git/osh2/src/osh/core.py", line 238, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/osh2/src/osh/core.py", line 198, in receive
+    self.first_op.receive(x)
+  File "/home/jao/git/osh2/src/osh/op/ls.py", line 109, in receive
+    self.visit(file, 0)
+  File "/home/jao/git/osh2/src/osh/op/ls.py", line 135, in visit
+    self.visit(file, level + 1)
+  File "/home/jao/git/osh2/src/osh/op/ls.py", line 135, in visit
+    self.visit(file, level + 1)
+  File "/home/jao/git/osh2/src/osh/op/ls.py", line 135, in visit
+    self.visit(file, level + 1)
+  [Previous line repeated 1 more time]
+  File "/home/jao/git/osh2/src/osh/op/ls.py", line 131, in visit
+    self.send_path(path)
+  File "/home/jao/git/osh2/src/osh/op/ls.py", line 144, in send_path
+    self.send(file)
+  File "/home/jao/git/osh2/src/osh/core.py", line 100, in send
+    self.receiver.receive_input_or_error(x)
+  File "/home/jao/git/osh2/src/osh/core.py", line 115, in receive_input_or_error
+    self.receive(normalize_output(x))
+  File "/home/jao/git/osh2/src/osh/op/out.py", line 90, in receive
+    out = out.render_full(self.use_color())
+  File "/home/jao/git/osh2/src/osh/object/file.py", line 91, in render_full
+    line = self._formatted_metadata()
+  File "/home/jao/git/osh2/src/osh/object/file.py", line 131, in _formatted_metadata
+    '{:8s}'.format(groupname(self.gid)),
+  File "/home/jao/git/osh2/src/osh/util.py", line 17, in groupname
+    return grp.getgrgid(gid).gr_name
+KeyError: 'getgrgid(): gid not found: 143'
+
+----------------------------------------------------------------------
+
+FIXED
+
 4. Receive_complete called too many times following remote fork
 
 @jao [ gen 3 ] | red . +
@@ -68,6 +115,21 @@ FIXED
   prompt. Confusing.
 
 - Show link and target (different colors)
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+6. File.render_full should include date/time
+
+Linux does (day, month, time) for recent, (day, month, year) for
+older. 
+
+E.g.
+
+lrwxrwxrwx 1 root   root          31 Feb 26  2019  x-www-browser -> /etc/alternatives/x-www-browser
+-rwxr-xr-x 1 root   root       18712 Sep  5 07:15  xxd
 
 ----------------------------------------------------------------------
 

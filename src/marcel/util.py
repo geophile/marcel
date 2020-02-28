@@ -10,11 +10,17 @@ import traceback
 
 
 def username(uid):
-    return pwd.getpwuid(uid).pw_name
+    try:
+        return pwd.getpwuid(uid).pw_name
+    except KeyError:
+        return str(uid)
 
 
 def groupname(gid):
-    return grp.getgrgid(gid).gr_name
+    try:
+        return grp.getgrgid(gid).gr_name
+    except KeyError:
+        return str(gid)
 
 
 def is_sequence(x):

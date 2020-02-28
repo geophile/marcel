@@ -3,9 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/object/file.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/object/file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/bash.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/bash.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_execution.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_execution.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/util.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -192,7 +190,7 @@
       <workItem from="1582397372760" duration="22520000" />
       <workItem from="1582601274337" duration="26495000" />
       <workItem from="1582747507777" duration="28181000" />
-      <workItem from="1582923590946" duration="1908000" />
+      <workItem from="1582923590946" duration="3105000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -239,11 +237,6 @@
           <url>file://$PROJECT_DIR$/src/marcel/osh/op/fork.py</url>
           <line>34</line>
           <option name="timeStamp" value="156" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/marcel/op/bash.py</url>
-          <line>69</line>
-          <option name="timeStamp" value="161" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
