@@ -725,11 +725,12 @@ def main_stable():
     test_bash()
     test_fork()
     test_namespace()
+    test_remote()
     test_no_such_op()
 
 
 def main_dev():
-    test_remote()
+    pass
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
 

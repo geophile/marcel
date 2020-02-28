@@ -82,7 +82,7 @@ class File(marcel.object.renderable.Renderable):
     # Renderable
 
     def render_compact(self):
-        return self.display_path
+        return str(self.display_path)
 
     def render_full(self, color):
         line = self._formatted_metadata()
