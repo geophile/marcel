@@ -3,6 +3,7 @@ import subprocess
 import sys
 
 import marcel.core
+import marcel.object.error
 
 
 def bash():
@@ -53,15 +54,12 @@ class Bash(marcel.core.Op):
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
                                      universal_newlines=True)
-            if outcome.returncode != 0:
-                print('Escaped command failed with exit code {}: {}'.format(outcome.returncode, ' '.join(self.args)))
-                print(outcome.stderr, file=sys.stderr)
-            else:
-                output = outcome.stdout.split('\n')
-                if len(output[-1]) == 0:
-                    output = output[:-1]
-                for line in output:
-                    self.send(line)
+            # stdout
+            for line in Bash.normalize_output(outcome.stdout):
+                self.send(line)
+            # stderr
+            for line in Bash.normalize_output(outcome.stderr):
+                self.send(marcel.object.error.Error(line))
 
     # TODO: bash not as first op in pipeline. Input stream somehow gets mapped to stdin.
 
@@ -72,3 +70,12 @@ class Bash(marcel.core.Op):
 
     def must_be_first_in_pipeline(self):
         return True
+
+    # For use by this class
+
+    @staticmethod
+    def normalize_output(x):
+        x = x.split('\n')
+        if len(x[-1]) == 0:
+            x = x[:-1]
+        return x

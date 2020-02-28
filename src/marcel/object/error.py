@@ -25,7 +25,7 @@ class Error(marcel.object.renderable.Renderable):
             out = colorize(out, marcel.env.ENV.color_scheme().error)
         return out
 
-    # OshError
+    # Error
 
     def set_host(self, host):
         self.host = host

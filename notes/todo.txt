@@ -51,3 +51,5 @@ util.py:
 - out.receive does a lot of work. Precompute whatever can be.
 
 - pushd/popd
+
+- How do exit codes fit in?
