@@ -53,3 +53,7 @@ util.py:
 - pushd/popd
 
 - How do exit codes fit in?
+
+- Redirection: < > >>. > and >> are taken care of by out -f and out -a,
+  aren't they?
+

@@ -11,9 +11,6 @@
 
 - pushd/popd
 
-- Redirection: < > >>. > and >> are taken care of by out -f and out -a,
-  aren't they?
-
 - cat. ls | expand does the same thing, but that's kind of ridiculous.
 
 - rm
