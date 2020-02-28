@@ -150,3 +150,25 @@ FIXED
 If a directory (or file) matches the name of an executable, then the
 highlighting is wrong. It is highlighted as an executable, not what it
 really is.
+
+----------------------------------------------------------------------
+
+FIXED
+
+9. Syntax error in map function not handled correctly
+
+M jao@cheese:~/git/marcel/src/marcel$ ps | map (p: (p.pid, p.commandline.split()[0] if p.commandline else '')
+Caught <class 'SyntaxError'>: invalid syntax (<string>, line 1)
+  File "/home/jao/git/marcel/src/marcel/core.py", line 24, in arg_checker
+    return check_and_convert(s)
+  File "/home/jao/git/marcel/src/marcel/core.py", line 40, in check_function
+    return marcel.function.Function(s)
+  File "/home/jao/git/marcel/src/marcel/function.py", line 26, in __init__
+    self.create_function()
+  File "/home/jao/git/marcel/src/marcel/function.py", line 68, in create_function
+    self.function = eval('lambda: ' + self.source, env.globals())
+usage: map [-h] function
+map: error: argument function: not a valid function
+
+- There shouldn't be a stack, just an error message.
+
