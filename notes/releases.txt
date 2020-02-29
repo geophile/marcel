@@ -1,11 +1,15 @@
 
 0.2
 
++ For executables: Start a list of executables that are
+  interactive. Use this to pass --interactive flag to bash as
+  necessary.
+
 + Run executables without requiring invocation of bash op.
 
 + Doesn't allow for bash op's --interactive flag.
 
-- Tab completion for executables, not just ops. But the commands get
++ Tab completion for executables, not just ops. But the commands get
   lost with all the other options. Also, ls, ps are both op and
   executable.
 
@@ -17,9 +21,16 @@
 
 - cat. ls | expand does the same thing, but that's kind of ridiculous.
 
-- rm
-- mv
-- cp
+- File commands:
+
+    - rm
+    - mv
+    - cp
+
+- Make the File object more useful by adding more methods. Maybe
+  extend Path?
+
+- date/time arithmetic (since files have temporal info).
 
 + tab completion
 

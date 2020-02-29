@@ -20,6 +20,14 @@ class BashArgParser(marcel.core.ArgParser):
 
 
 class Bash(marcel.core.Op):
+
+    INTERACTIVE_EXECUTABLES = {
+        'emacs',
+        'less',
+        'man',
+        'more',
+        'vi'
+    }
     argparser = BashArgParser()
 
     def __init__(self):
@@ -38,6 +46,8 @@ class Bash(marcel.core.Op):
         return self.__doc__
 
     def setup_1(self):
+        if self.args[0] in Bash.INTERACTIVE_EXECUTABLES:
+            self.interactive = True
         self.runner = Interactive(self) if self.interactive else NonInteractive(self)
 
     def receive(self, x):

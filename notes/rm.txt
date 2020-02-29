@@ -1,0 +1,24 @@
+rm behavior
+
+Listing things to be removed is convenient. So is recursion.
+
+But it is more general to have a pipeline feeding into rm. The
+pipeline can do recursion, filtering, etc.
+
+Allow both?
+
+    rm [FILENAME ...]
+
+If filenames are given, then rm must be first in pipeline.
+
+If filenames are omitted, then remove piped-in files.
+
+Flags:
+
+- No recursion flag. Handle that via pipeline.
+
+- -s|--safe flag: Don't remove non-empty directories
+
+----------------------------------------------------------------------
+
+ls ... | rm
