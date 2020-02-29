@@ -48,6 +48,7 @@ class Bash(marcel.core.Op):
 
     def receive_complete(self):
         self.runner.run()
+        self.send_complete()
 
     # Op
 
@@ -79,8 +80,6 @@ class NonInteractive:
         # stderr
         for line in NonInteractive.normalize_output(stderr):
             op.send(marcel.object.error.Error(line))
-        #
-        op.send_complete()
 
     @staticmethod
     def normalize_output(x):
@@ -108,4 +107,3 @@ class Interactive:
         if process.returncode != 0:
             print('Escaped command failed with exit code {}: {}'.format(process.returncode, ' '.join(self.op.args)))
             print(process.stderr, file=sys.stderr)
-        self.op.send_complete()
