@@ -1,3 +1,4 @@
+import os
 import pathlib
 import readline
 
@@ -24,6 +25,7 @@ class TabCompleter:
         # Removed '-', '/' from readline.get_completer_delims()
         readline.set_completer_delims(' \t\n`~!@#$%^&*()=+[{]}\\|;:\'",<>?')
         self.op_name = None
+        self.executables = None
 
     def complete(self, text, state):
         debug('complete: line = {}, text = {}'.format(readline.get_line_buffer(), text))
@@ -43,7 +45,7 @@ class TabCompleter:
             return None
         debug('parser.op: {}'.format(parser.op))
         if parser.last_op is None:
-            candidates = TabCompleter.complete_op(text)
+            candidates = self.complete_op(text)
         else:
             self.op_name = parser.last_op.op_name()
             if text.startswith('-'):
@@ -54,13 +56,15 @@ class TabCompleter:
                 return None
         return candidates[state]
 
-    @staticmethod
-    def complete_op(text):
+    def complete_op(self, text):
         candidates = []
-        for op in TabCompleter.OPS:
-            op_with_space = op + ' '
-            if op_with_space.startswith(text):
-                candidates.append(op_with_space)
+        if len(text) > 0:
+            self.ensure_executables()
+            for command_set in [TabCompleter.OPS, self.executables]:
+                for command in command_set:
+                    command_with_space = command + ' '
+                    if command_with_space.startswith(text):
+                        candidates.append(command_with_space)
         return candidates
 
     @staticmethod
@@ -88,3 +92,12 @@ class TabCompleter:
     def op_name(line):
         first = line.split()[0]
         return first if first in TabCompleter.OPS else None
+
+    def ensure_executables(self):
+        if self.executables is None:
+            self.executables = []
+            path = os.environ['PATH'].split(':')
+            for p in path:
+                for f in os.listdir(p):
+                    if is_executable(f):
+                        self.executables.append(f)

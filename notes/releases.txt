@@ -3,7 +3,11 @@
 
 - Run executables without requiring invocation of bash op.
 
-- Tab completion for executables, not just ops.
+- Doesn't allow for bash op's --interactive flag.
+
+- Tab completion for executables, not just ops. But the commands get
+  lost with all the other options. Also, ls, ps are both op and
+  executable.
 
 + bash commands that do pagination don't work, e.g. more, man.
 

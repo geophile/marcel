@@ -4,6 +4,7 @@ import io
 import pathlib
 import pickle
 import pwd
+import shutil
 import sys
 import time
 import traceback
@@ -38,6 +39,10 @@ def is_generator(x):
 def is_file(x):
     # Why not isinstance: Importing osh.file results in circular imports
     return x.__class__.__name__ == 'File'
+
+
+def is_executable(x):
+    return shutil.which(x) is not None
 
 
 def normalize_output(x):

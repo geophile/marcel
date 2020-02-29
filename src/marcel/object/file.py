@@ -141,7 +141,7 @@ class File(marcel.object.renderable.Renderable):
             highlight = (
                 # which must check path.resolve(), not path. If the path is relative, and the name
                 # is also an executable on PATH, then highlighting will be incorrect. See bug 8.
-                color_scheme.file_executable if shutil.which(path.resolve().as_posix()) is not None else
+                color_scheme.file_executable if is_executable(path.resolve().as_posix()) else
                 color_scheme.file_link if path.is_symlink() else
                 color_scheme.file_dir if path.is_dir() else
                 color_scheme.file_file)
