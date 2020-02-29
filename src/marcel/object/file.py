@@ -21,13 +21,36 @@ class File(marcel.object.renderable.Renderable):
             path = pathlib.Path(path)
         self.path = path
         self.display_path = path.relative_to(base) if base else path
-        self.os_stat = None
+        self.lstat = None
 
     def __repr__(self):
         return self.render_compact()
 
     def __getattr__(self, attr):
         return getattr(self.path, attr)
+
+    stat = property(lambda self: self._lstat(),
+                     doc="""lstat of this file""")
+    mode = property(lambda self: self._lstat()[0],
+                    doc="""mode of this file.""")
+    inode = property(lambda self: self._lstat()[1],
+                     doc="""inode of this file.""")
+    device = property(lambda self: self._lstat()[2],
+                      doc="""device of this file.""")
+    links = property(lambda self: self._lstat()[3],
+                     doc=""" Number of links of this file.""")
+    uid = property(lambda self: self._lstat()[4],
+                   doc="""Owner of this file.""")
+    gid = property(lambda self: self._lstat()[5],
+                   doc="""Owning group of this file.""")
+    size = property(lambda self: self._lstat()[6],
+                    doc="""Size of this file (bytes).""")
+    atime = property(lambda self: self._lstat()[7],
+                     doc="""Access time of this file.""")
+    mtime = property(lambda self: self._lstat()[8],
+                     doc="""Modify time of this file.""")
+    ctime = property(lambda self: self._lstat()[9],
+                     doc="""Change time of this file.""")
 
     # Renderable
 
@@ -51,7 +74,7 @@ class File(marcel.object.renderable.Renderable):
     # For use by this class
 
     def _formatted_metadata(self):
-        lstat = self.lstat()  # Not stat. Don't want to follow symlinks here.
+        lstat = self._lstat()  # Not stat. Don't want to follow symlinks here.
         return [
             self._mode_string(lstat.st_mode),
             ' ',
@@ -62,6 +85,11 @@ class File(marcel.object.renderable.Renderable):
             self._formatted_mtime(lstat.st_mtime),
             ' ',
             self.display_path.as_posix()]
+
+    def _lstat(self):
+        if self.lstat is None:
+            self.lstat = self.path.lstat()
+        return self.lstat
 
     @staticmethod
     def _mode_string(mode):

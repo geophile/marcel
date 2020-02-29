@@ -27,10 +27,8 @@
     - mv
     - cp
 
-- Make the File object more useful by adding more methods. Maybe
++ Make the File object more useful by adding more methods. Maybe
   extend Path?
-
-- date/time arithmetic (since files have temporal info).
 
 + tab completion
 
