@@ -531,7 +531,7 @@ def test_expand():
         file.writelines(['ghi\n', 'jkl'])  # No lf at end of file
     Test.run('ls /tmp/test_expand_? | expand',
              expected_out=['abc', 'def', 'ghi', 'jkl'])
-    Test.run('ls /tmp/test_expand_? | map (f: (f.abspath, f)) | expand 1',
+    Test.run('ls /tmp/test_expand_? | map (f: (str(f), f)) | expand 1',
              expected_out=[('/tmp/test_expand_1', 'abc'),
                            ('/tmp/test_expand_1', 'def'),
                            ('/tmp/test_expand_2', 'ghi'),
