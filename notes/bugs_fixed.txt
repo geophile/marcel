@@ -172,3 +172,17 @@ map: error: argument function: not a valid function
 
 - There shouldn't be a stack, just an error message.
 
+----------------------------------------------------------------------
+
+FIXED
+
+12. Arguments to bash executable not being processed?
+
+jao@cheese:~/git/marcel$ bash -i less README.md
+Missing filename ("less --help" for help)
+M jao@cheese:~/git/marcel$ bash -i ls *.md
+bin  experiments  notes  README.md  src  test
+M jao@cheese:~/git/marcel$ bash -i which which
+Escaped command failed with exit code 1: which which
+None
+

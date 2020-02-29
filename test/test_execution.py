@@ -122,6 +122,10 @@ class Test:
             del lines[-1]
         return lines
 
+    @staticmethod
+    def cd(path):
+        marcel.env.ENV.cd(pathlib.Path(path))
+
 
 def test_no_such_op():
     Test.run('gen 5 | abc', expected_err='Unknown op abc')
@@ -252,7 +256,7 @@ def test_ls():
     pathlib.Path(f212).touch()
     # Tests
     # No files specified
-    marcel.env.ENV.cd(pathlib.Path(testls))
+    Test.cd(testls)
     Test.run('ls | map (f: f.render_compact())',
              expected_out=sorted(relative(testls, x) for x in
                                  [testls, a1, a2, b1, b2, d1, d2]))
@@ -306,7 +310,7 @@ def test_ls():
     Test.run('ls -r /tmp/testls/d? | map (f: f.render_compact())',
              expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
     # In current directory, test 0/1/r flags with file
-    marcel.env.ENV.cd(pathlib.Path(tmp))
+    Test.cd(tmp)
     Test.run('ls testls/b1 | map (f: f.render_compact())',
              expected_out=sorted([b1]))
     Test.run('ls -0 testls/b1 | map (f: f.render_compact())',
@@ -316,7 +320,7 @@ def test_ls():
     Test.run('ls -r testls/b1 | map (f: f.render_compact())',
              expected_out=sorted([b1]))
     # In current directory, test 0/1/r flags with directory
-    marcel.env.ENV.cd(pathlib.Path(tmp))
+    Test.cd(tmp)
     Test.run('ls testls | map (f: f.render_compact())',
              expected_out=sorted([relative(testls, x) for x in
                                   [testls, a1, a2, b1, b2, d1, d2]]))
@@ -329,7 +333,7 @@ def test_ls():
              expected_out=sorted([relative(testls, x) for x in
                                   [testls, a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]]))
     # In current directory, test 0/1/r flags with pattern matching directories
-    marcel.env.ENV.cd(pathlib.Path(tmp))
+    Test.cd(tmp)
     Test.run('ls testls/*2 | map (f: f.render_compact())',
              expected_out=sorted([a2, b2, d2, f21, f22, f23, d21]))
     Test.run('ls -0 testls/*2 | map (f: f.render_compact())',
@@ -339,7 +343,7 @@ def test_ls():
     Test.run('ls -r testls/*2 | map (f: f.render_compact())',
              expected_out=sorted([a2, b2, d2, f21, f22, f23, d21, f211, f212]))
     # Test f/d/s flags
-    marcel.env.ENV.cd(pathlib.Path(tmp))
+    Test.cd(tmp)
     Test.run('ls -fr /tmp/testls | map (f: f.render_compact())',
              expected_out=sorted([relative(testls, x) for x in
                                   [a1, a2, b1, b2, f11, f12, f13, f21, f22, f23, f211, f212]]))
@@ -350,14 +354,14 @@ def test_ls():
              expected_out=sorted([relative(testls, x) for x in
                                   [testls, a1, a2, b1, b2, d1, d2, f11, f12, f13, f21, f22, f23, d21, f211, f212]]))
     # Test multiple filenames/globs
-    marcel.env.ENV.cd(pathlib.Path(testls))
+    Test.cd(testls)
     Test.run('ls -0 a1 b* | map (f: f.render_compact())',
              expected_out=sorted([a1, b1, b2]))
     Test.run('ls -0 *2 d1/f* | map (f: f.render_compact())',
              expected_out=sorted([a2, b2, f11, f12, f13, d2]))
     # Test multiple globs, with files qualifying multiple times. Should be reported once.
     # (Linux ls gets this wrong IMHO.)
-    marcel.env.ENV.cd(pathlib.Path(testls))
+    Test.cd(testls)
     Test.run('ls -0 a* *1 | map (f: f.render_compact())',
              expected_out=sorted([a1, a2, b1, d1]))
     # TODO: symlinks

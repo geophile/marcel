@@ -28,43 +28,56 @@ class TabCompleter:
         self.executables = None
 
     def complete(self, text, state):
-        debug('complete: line = {}, text = {}'.format(readline.get_line_buffer(), text))
-        # Parse the text so far, to get information needed for tab completion. It is expected that
-        # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
-        # which can be ignored. The important point is that the parse will set Parser.op.
-        parser = marcel.parse.Parser(readline.get_line_buffer())
-        try:
-            parser.parse(partial_text=True)
-            debug('parse succeeded')
-        except marcel.parse.PrematureEndError:
-            debug('premature end')
-            pass
-        except Exception as e:
-            debug('caught ({}) {}'.format(type(e), e))
-            # Don't do tab completion
-            return None
-        debug('parser.op: {}'.format(parser.op))
-        if parser.last_op is None:
-            candidates = self.complete_op(text)
+        line = readline.get_line_buffer()
+        debug('complete: line={}, text={}'.format(line, text))
+        if len(line.strip()) == 0:
+            candidates = TabCompleter.OPS
         else:
-            self.op_name = parser.last_op.op_name()
-            if text.startswith('-'):
-                candidates = TabCompleter.complete_flag(text, self.op_name)
-            elif self.op_name in TabCompleter.FILENAME_OPS:
-                candidates = TabCompleter.complete_filename(text)
-            else:
+            # Parse the text so far, to get information needed for tab completion. It is expected that
+            # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
+            # which can be ignored. The important point is that the parse will set Parser.op.
+            parser = marcel.parse.Parser(line)
+            try:
+                parser.parse(partial_text=True)
+                debug('parse succeeded')
+            except marcel.parse.PrematureEndError:
+                debug('premature end')
+                pass
+            except Exception as e:
+                debug('caught ({}) {}'.format(type(e), e))
+                # Don't do tab completion
                 return None
+            debug('parser.op: {}'.format(parser.op))
+            if parser.last_op is None:
+                candidates = self.complete_op(text)
+            else:
+                self.op_name = parser.last_op.op_name()
+                if text.startswith('-'):
+                    candidates = TabCompleter.complete_flag(text, self.op_name)
+                elif self.op_name in TabCompleter.FILENAME_OPS:
+                    candidates = TabCompleter.complete_filename(text)
+                else:
+                    return None
         return candidates[state]
 
     def complete_op(self, text):
         candidates = []
         if len(text) > 0:
-            self.ensure_executables()
-            for command_set in [TabCompleter.OPS, self.executables]:
-                for command in command_set:
-                    command_with_space = command + ' '
-                    if command_with_space.startswith(text):
-                        candidates.append(command_with_space)
+            # Display marcel ops.
+            # Display executables only if there are no qualifying ops.
+            for op in TabCompleter.OPS:
+                op_with_space = op + ' '
+                if op_with_space.startswith(text):
+                    candidates.append(op_with_space)
+            if len(candidates) == 0:
+                self.ensure_executables()
+                for command_set in [TabCompleter.OPS, self.executables]:
+                    for ex in self.executables:
+                        ex_with_space = ex + ' '
+                        if ex_with_space.startswith(text):
+                            candidates.append(ex_with_space)
+        else:
+            candidates = TabCompleter.OPS
         return candidates
 
     @staticmethod

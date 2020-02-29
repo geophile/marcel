@@ -99,7 +99,8 @@ class Interactive:
         self.op = op
 
     def run(self):
-        process = subprocess.Popen(self.op.args,
+        command = ' '.join(self.op.args)
+        process = subprocess.Popen(command,
                                    shell=True,
                                    executable='/bin/bash',
                                    universal_newlines=True)

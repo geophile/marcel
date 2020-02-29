@@ -45,8 +45,9 @@ class Main:
         self.tab_completer = marcel.tabcompleter.TabCompleter()
         readline.set_history_length(MARCEL_HISTORY_LENGTH)
         readline.read_history_file(self.history_file())
-        readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('tab: complete')
+        readline.parse_and_bind('set editing-mode emacs')
+        readline.parse_and_bind('set completion-query-items 50')
         atexit.register(lambda: self.shutdown())
 
     def run(self):

@@ -336,6 +336,9 @@ class Parser(Token):
         self.last_op = None
         self.args = []
 
+    def __repr__(self):
+        return 'parser({})'.format(self.text)
+
     def start_action(self, token):
         if token.is_fork():
             self.state = ParseState.FORK_START
