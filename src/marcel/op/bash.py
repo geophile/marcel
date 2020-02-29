@@ -41,7 +41,10 @@ class Bash(marcel.core.Op):
         self.runner = Interactive(self) if self.interactive else NonInteractive(self)
 
     def receive(self, x):
-        self.input.append(x)
+        if x is not None:
+            if len(x) == 1:
+                x = x[0]
+            self.input.append(str(x))
 
     def receive_complete(self):
         self.runner.run()
@@ -88,12 +91,7 @@ class NonInteractive:
 
     @staticmethod
     def to_string(input):
-        buffer = []
-        for t in input:
-            if is_sequence_except_string(t):
-                t = t[0]
-            buffer.append(str(t))
-        return '\n'.join(buffer)
+        return '\n'.join(input)
 
 
 class Interactive:

@@ -57,3 +57,11 @@ util.py:
 - Redirection: < > >>. > and >> are taken care of by out -f and out -a,
   aren't they?
 
+----------------------------------------------------------------------
+
+Executables (without the bash op)
+
+- How to invoke the bash --interactive flag?
+
+- What if there is an arg that is significant to marcel parsing, e.g. [, (.
+
