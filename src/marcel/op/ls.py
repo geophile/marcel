@@ -6,7 +6,7 @@ Generates a stream of C{osh.file.File}s.
 
 -1                         Include the contents of only the topmost directories.
 
--r                         Include the contents of all directories, recursively.
+-r | --recursive           Include the contents of directories, recursively.
 
 -f                         List files.
 
@@ -33,6 +33,7 @@ import marcel.core
 import marcel.env
 import marcel.object.error
 import marcel.object.file
+import marcel.op.filenames
 
 
 def ls():
@@ -46,7 +47,7 @@ class LsArgParser(marcel.core.ArgParser):
         depth_group = self.add_mutually_exclusive_group()
         depth_group.add_argument('-0', action='store_true', dest='d0')
         depth_group.add_argument('-1', action='store_true', dest='d1')
-        depth_group.add_argument('-r', action='store_true', dest='dr')
+        depth_group.add_argument('-r', '--recursive', action='store_true', dest='dr')
         self.add_argument('-f', '--file', action='store_true')
         self.add_argument('-d', '--dir', action='store_true')
         self.add_argument('-s', '--symlink', action='store_true')
@@ -103,8 +104,8 @@ class Ls(marcel.core.Op):
             self.filename = [marcel.env.ENV.pwd().as_posix()]
 
     def receive(self, _):
-        paths = self.paths()
-        roots = Ls.roots(paths)
+        paths = marcel.op.filenames.normalize_paths(self.filename)
+        roots = marcel.op.filenames.roots(marcel.env.ENV.pwd(), paths)
         # Paths will be displayed relative to a root if there is one root and it is a directory.
         base = roots[0] if len(roots) == 1 and roots[0].is_dir() else None
         for root in sorted(roots):
@@ -119,42 +120,6 @@ class Ls(marcel.core.Op):
         return True
 
     # For use by this class
-
-    def paths(self):
-        # Resolve ~
-        # Resolve . and ..
-        # Convert to Path
-        # Eliminate duplicates
-        paths = []
-        path_set = set()  # For avoiding duplicates
-        for i in range(len(self.filename)):
-            # Resolve . and ..
-            filename = os.path.normpath(self.filename[i])
-            # Convert to Path and resolve ~
-            path = pathlib.Path(filename).expanduser()
-            # Make absolute. Don't use Path.resolve(), which follows symlinks.
-            if not path.is_absolute():
-                path = pathlib.Path.cwd() / path
-            if path not in path_set:
-                paths.append(path)
-                path_set.add(path)
-        return paths
-
-    @staticmethod
-    def roots(paths):
-        roots = []
-        current_dir = marcel.env.ENV.pwd()
-        for path in paths:
-            if path.exists():
-                roots.append(path)
-            else:
-                path_str = path.as_posix()
-                glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
-                                           if path.is_absolute() else
-                                           (current_dir, path_str))
-                for root in sorted(glob_base.glob(glob_pattern)):
-                    roots.append(root)
-        return roots
 
     def visit(self, root, level, base):
         self.send_path(root, base)

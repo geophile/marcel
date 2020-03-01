@@ -22,3 +22,14 @@ Flags:
 ----------------------------------------------------------------------
 
 ls ... | rm
+
+- Similar to find . | xargs rm
+
+- ls -r would locate directories before contained files. So:
+
+      ls -r ... | rm
+
+  would delete d before d/f. So when we get to d/f, it's
+  gone. Actually, it's weirder than that. Would ls succeed as it tries
+  to iterate over d?
+

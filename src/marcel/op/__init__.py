@@ -11,6 +11,7 @@ public = [
     'pwd',
     'red',
     'reverse',
+    'rm',
     'select',
     'sort',
     'squish',

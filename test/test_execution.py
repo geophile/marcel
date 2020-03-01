@@ -70,31 +70,41 @@ class Test:
         Test.failures += 1
 
     @staticmethod
-    def run_unwrapped(command):
-        marcel.main.Main.run_command(command)
-
-    @staticmethod
-    def run(command, expected_out=None, expected_err=None, file=None):
-        print('TESTING: {}'.format(command))
-        out = io.StringIO()
-        err = io.StringIO()
-        try:
-            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-                marcel.main.Main.run_command(command)
-            actual_out = Test.file_contents(file) if file else out.getvalue()
-            actual_err = err.getvalue()
-            if expected_out:
-                Test.check_ok(command, Test.to_string(expected_out), actual_out)
-            if expected_err:
-                Test.check_substring(command, expected_err, actual_err)
-            elif actual_err:
-                Test.fail(command, 'Unexpected error: {}'.format(actual_err))
-        except Exception as e:
-            print('{}: Terminated by uncaught exception: {}'.format(command, e))
-            print_stack()
-            Test.failures += 1
-        except marcel.exception.KillCommandException as e:
-            print('{}: Terminated by KillCommandException: {}'.format(command, e))
+    def run(test,
+            verification=None,
+            expected_out=None,
+            expected_err=None,
+            file=None):
+        # test is the thing being tested. Usually it will produce output that can be used for verification.
+        # For operations with side effects (e.g. rm), a separate verification command is needed.
+        if verification is None and expected_out is None and expected_err is None and file is None:
+            marcel.main.Main.run_command(test)
+        else:
+            print('TESTING: {}'.format(test))
+            out = io.StringIO()
+            err = io.StringIO()
+            try:
+                if verification is None:
+                    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                        marcel.main.Main.run_command(test)
+                else:
+                    marcel.main.Main.run_command(test)
+                    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                        marcel.main.Main.run_command(verification)
+                actual_out = Test.file_contents(file) if file else out.getvalue()
+                actual_err = err.getvalue()
+                if expected_out:
+                    Test.check_ok(test, Test.to_string(expected_out), actual_out)
+                if expected_err:
+                    Test.check_substring(test, expected_err, actual_err)
+                elif actual_err:
+                    Test.fail(test, 'Unexpected error: {}'.format(actual_err))
+            except Exception as e:
+                print('{}: Terminated by uncaught exception: {}'.format(test, e))
+                print_stack()
+                Test.failures += 1
+            except marcel.exception.KillCommandException as e:
+                print('{}: Terminated by KillCommandException: {}'.format(test, e))
 
     @staticmethod
     def file_contents(filename):
@@ -201,6 +211,7 @@ def test_ls():
         base_path = pathlib.Path(base)
         display_path = x_path.relative_to(base_path)
         return display_path
+
     # testls/
     #     a1
     #     a2
@@ -706,6 +717,64 @@ def test_remote():
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
 
 
+def test_rm():
+    def setup(dir):
+        Test.cd(tmp)
+        Test.run('bash rm -rf base')
+        Test.run('mkdir base')
+        Test.cd(base)
+        Test.run('mkdir d1')
+        Test.run('mkdir d2')
+        Test.run('touch d1/f11')
+        Test.run('touch d1/f12')
+        Test.run('touch d2/f21')
+        Test.run('touch d2/f22')
+        Test.run('touch f1')
+        Test.run('touch f2')
+        Test.cd(dir)
+
+    dot = '.'
+    tmp = '/tmp'
+    base = '/tmp/base'
+    d1 = 'd1'
+    d2 = 'd2'
+    f1 = 'f1'
+    f2 = 'f2'
+    f11 = 'd1/f11'
+    f12 = 'd1/f12'
+    f21 = 'd2/f21'
+    f22 = 'd2/f22'
+
+    # Remove a file
+    setup(base)
+    Test.run('ls -r /tmp/base | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f1, f2]))
+    Test.run(test='rm f1',
+             verification='ls -r /tmp/base | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
+    Test.run(test='rm d1/f11 d1/f12',
+             verification='ls -r /tmp/base | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, d2, f21, f22, f2]))
+    # Remove a file via absolute path
+    setup('/home/jao')
+    Test.run(test='rm /tmp/base/f1',
+             verification='ls -r /tmp/base | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
+    Test.run(test='rm /tmp/base/d1/f11 /tmp/base/d1/f12',
+             verification='ls -r /tmp/base | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, d2, f21, f22, f2]))
+    # Remove a directory
+    setup(base)
+    Test.run(test='rm /tmp/base/d1',
+             verification='ls -r /tmp/base | map (f: f.render_compact())',
+             expected_out=sorted([dot, d2, f21, f22, f1, f2]))
+    # Remove via glob
+    setup(base)
+    Test.run(test='rm /tmp/base/*2',
+             verification='ls -r /tmp/base | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, f1]))
+
+
 def reset_environment():
     marcel.env.Environment.initialize('./.marcel.py')
     os.chdir(start_dir)
@@ -730,6 +799,7 @@ def main_stable():
     test_fork()
     test_namespace()
     test_remote()
+    test_rm()
     test_no_such_op()
 
 

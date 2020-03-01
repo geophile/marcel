@@ -26,9 +26,7 @@ class ArgParser(argparse.ArgumentParser):
             try:
                 return check_and_convert(s)
             except Exception:
-                print_stack()
                 raise argparse.ArgumentTypeError(message)
-
         return arg_checker
 
     @staticmethod

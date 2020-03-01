@@ -64,8 +64,9 @@ class Function:
             else:
                 try:
                     self.function = eval('lambda ' + self.source, env.globals())
-                except SyntaxError:
+                except Exception:
                     try:
                         self.function = eval('lambda: ' + self.source, env.globals())
-                    except SyntaxError:
-                        raise marcel.exception.KillCommandException('Invalid function syntax: {}'.format(self.source))
+                    except Exception:
+                        raise marcel.exception.KillCommandException(
+                            'Invalid function syntax: {}'.format(self.source))

@@ -65,3 +65,8 @@ Executables (without the bash op)
 
 - What if there is an arg that is significant to marcel parsing, e.g. [, (.
 
+----------------------------------------------------------------------
+
+- Tab completion for ops should tailor the list to whether the op
+  being completed is first in the pipline, or downstream. E.g., don't
+  show select as a first op.

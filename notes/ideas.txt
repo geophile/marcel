@@ -209,3 +209,20 @@ Cascading these is a switch:
 - Allow cd to be mid-pipeline. It establishes an env that applies
   downstream only. I.e., logically, each op establishes a new COPY of
   the env, and can make changes not visible upstream.
+
+----------------------------------------------------------------------
+
+Files & times:
+
+Getting a file's mtime is kind of a pain, e.g. (f:
+f.stat().st_mtime). That's a floating point number representing
+seconds since the epoch. Might want to improve in two ways:
+
+1) File.mtime attribute.
+
+2) Type of File.mtime is a Time object, that has convenient methods
+for rendering, construction, deltas. 
+
+But #2 starts overlapping with Python time, datetime, etc. Don't want
+to do that, but we do want something for use on the command
+line. E.g., select files not modified in the past year.
