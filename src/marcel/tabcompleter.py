@@ -99,6 +99,12 @@ class TabCompleter:
             if text == '~/':
                 home = pathlib.Path(text).expanduser()
                 filenames = os.listdir(home.as_posix())
+            elif text.startswith('~/'):
+                base = pathlib.Path('~/').expanduser()
+                base_length = len(base.as_posix())
+                pattern = text[2:] + '*'
+                filenames = ['~' + f[base_length:] + ' '
+                             for f in [p.as_posix() for p in base.glob(pattern)]]
             elif text.startswith('~'):
                 find_user = text[1:]
                 self.ensure_homedirs()
@@ -110,7 +116,7 @@ class TabCompleter:
                 base, pattern_prefix = (('/', text[1:])
                                         if text.startswith('/') else
                                         ('.', text))
-                filenames = [p.as_posix() for p in pathlib.Path(base).glob(pattern_prefix + '*')]
+                filenames = [p.as_posix() + ' ' for p in pathlib.Path(base).glob(pattern_prefix + '*')]
         else:
             filenames = ['/'] + [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
         debug('complete_filename candidates for {}: {}'.format(text, filenames))
