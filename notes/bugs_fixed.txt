@@ -186,3 +186,9 @@ M jao@cheese:~/git/marcel$ bash -i which which
 Escaped command failed with exit code 1: which which
 None
 
+----------------------------------------------------------------------
+
+FIXED
+
+13. Tab completion for op isn't working after the first op in a pipeline
+

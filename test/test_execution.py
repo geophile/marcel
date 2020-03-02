@@ -890,6 +890,7 @@ def main_stable():
 
 
 def main_dev():
+    Test.run('map')
     pass
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
@@ -897,7 +898,7 @@ def main_dev():
 
 def main():
     reset_environment()
-    main_stable()
+    # main_stable()
     main_dev()
     print('Test failures: {}'.format(Test.failures))
 

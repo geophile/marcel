@@ -48,10 +48,10 @@ class TabCompleter:
                 # Don't do tab completion
                 return None
             debug('parser.op: {}'.format(parser.op))
-            if parser.last_op is None:
+            if parser.op is None:
                 candidates = self.complete_op(text)
             else:
-                self.op_name = parser.last_op.op_name()
+                self.op_name = parser.op.op_name()
                 if text.startswith('-'):
                     candidates = TabCompleter.complete_flag(text, self.op_name)
                 elif self.op_name in TabCompleter.FILENAME_OPS:
@@ -61,6 +61,7 @@ class TabCompleter:
         return candidates[state]
 
     def complete_op(self, text):
+        debug('complete_op, text = {}'.format(text))
         candidates = []
         if len(text) > 0:
             # Display marcel ops.
@@ -76,6 +77,7 @@ class TabCompleter:
                         ex_with_space = ex + ' '
                         if ex_with_space.startswith(text):
                             candidates.append(ex_with_space)
+            debug('complete_op candidates for {}: {}'.format(text, candidates))
         else:
             candidates = TabCompleter.OPS
         return candidates
@@ -87,6 +89,7 @@ class TabCompleter:
         for f in flags:
             if f.startswith(text):
                 candidates.append(f)
+        debug('complete_flag candidates for {}: {}'.format(text, candidates))
         return candidates
 
     @staticmethod
@@ -99,6 +102,7 @@ class TabCompleter:
             filenames = [p.as_posix() for p in pathlib.Path(base).glob(pattern_prefix + '*')]
         else:
             filenames = ['/'] + [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
+        debug('complete_filename candidates for {}: {}'.format(text, filenames))
         return filenames
 
     @staticmethod

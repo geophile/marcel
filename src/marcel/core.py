@@ -20,6 +20,9 @@ class ArgParser(argparse.ArgumentParser):
     def exit(self, status=0, message=None):
         raise marcel.exception.KillCommandException(message)
 
+    def print_usage(self, _=None):
+        pass
+
     @staticmethod
     def constrained_type(check_and_convert, message):
         def arg_checker(s):

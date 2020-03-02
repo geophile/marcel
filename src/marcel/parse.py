@@ -333,13 +333,13 @@ class Parser(Token):
         self.pipelines.push(marcel.core.Pipeline())
         self.fork_spec = None
         self.op = None
-        self.last_op = None
         self.args = []
 
     def __repr__(self):
         return 'parser({})'.format(self.text)
 
     def start_action(self, token):
+        self.op = None
         if token.is_fork():
             self.state = ParseState.FORK_START
         elif token.is_string():
@@ -478,8 +478,11 @@ class Parser(Token):
         op_name = token.value()
         op_module = marcel.opmodules.OP_MODULES.named(op_name)
         if op_module:
-            self.op = getattr(op_module, op_name)()
-            self.last_op = self.op
+            try:
+                self.op = getattr(op_module, op_name)()
+            except BaseException:
+                print_stack()
+                raise
         else:
             # op_name might be an executable
             if is_executable(op_name):
@@ -487,15 +490,12 @@ class Parser(Token):
                 bash_module = marcel.opmodules.OP_MODULES.named('bash')
                 self.op = getattr(bash_module, 'bash')()
                 self.args.append(op_name)
-                # Don't need to set last_op. That is needed for tab completion, which isn't attempted
-                # for executables.
             else:
                 raise UnknownOpError(self.text, op_name)
 
     def finish_op(self):
         self.op.arg_parser().parse_args(self.args, namespace=self.op)
         self.pipeline().append(self.op)
-        self.op = None
         self.args = []
 
     def finish_pipeline(self):

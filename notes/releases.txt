@@ -1,3 +1,8 @@
+0.3
+
+- cat. ls | expand does the same thing, but that's kind of ridiculous.
+
+----------------------------------------------------------------------
 
 0.2
 
@@ -19,12 +24,10 @@
 
 - pushd/popd/dirs
 
-- cat. ls | expand does the same thing, but that's kind of ridiculous.
-
 - File commands:
 
     + rm
-    - mv
+    + mv
     - cp
 
 + Make the File object more useful by adding more methods. Maybe
@@ -37,7 +40,7 @@
   + 3
   + 9
   + 12
-  - 13
+  + 13
   - 14
 
 ----------------------------------------------------------------------

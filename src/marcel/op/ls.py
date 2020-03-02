@@ -86,7 +86,7 @@ class Ls(marcel.core.Op):
         return ('ls(depth={}, include={}, filename={})'.format(
             depth,
             include,
-            [str(p) for p in self.filename]))
+            [str(p) for p in self.filename] if self.filename else '?'))
 
     # BaseOp
 
