@@ -478,11 +478,7 @@ class Parser(Token):
         op_name = token.value()
         op_module = marcel.opmodules.OP_MODULES.named(op_name)
         if op_module:
-            try:
-                self.op = getattr(op_module, op_name)()
-            except BaseException:
-                print_stack()
-                raise
+            self.op = getattr(op_module, op_name)()
         else:
             # op_name might be an executable
             if is_executable(op_name):

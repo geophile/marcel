@@ -192,3 +192,7 @@ FIXED
 
 13. Tab completion for op isn't working after the first op in a pipeline
 
+----------------------------------------------------------------------
+
+14. Tab expansion for files doesn't work if path starts with ~
+

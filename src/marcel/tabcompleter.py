@@ -22,10 +22,11 @@ class TabCompleter:
 
     def __init__(self):
         readline.set_completer(self.complete)
-        # Removed '-', '/' from readline.get_completer_delims()
-        readline.set_completer_delims(' \t\n`~!@#$%^&*()=+[{]}\\|;:\'",<>?')
+        # Removed '-', '/', '~' from readline.get_completer_delims()
+        readline.set_completer_delims(' \t\n`!@#$%^&*()=+[{]}\\|;:\'",<>?')
         self.op_name = None
         self.executables = None
+        self.homedirs = None
 
     def complete(self, text, state):
         line = readline.get_line_buffer()
@@ -55,7 +56,7 @@ class TabCompleter:
                 if text.startswith('-'):
                     candidates = TabCompleter.complete_flag(text, self.op_name)
                 elif self.op_name in TabCompleter.FILENAME_OPS:
-                    candidates = TabCompleter.complete_filename(text)
+                    candidates = self.complete_filename(text)
                 else:
                     return None
         return candidates[state]
@@ -72,11 +73,10 @@ class TabCompleter:
                     candidates.append(op_with_space)
             if len(candidates) == 0:
                 self.ensure_executables()
-                for command_set in [TabCompleter.OPS, self.executables]:
-                    for ex in self.executables:
-                        ex_with_space = ex + ' '
-                        if ex_with_space.startswith(text):
-                            candidates.append(ex_with_space)
+                for ex in self.executables:
+                    ex_with_space = ex + ' '
+                    if ex_with_space.startswith(text):
+                        candidates.append(ex_with_space)
             debug('complete_op candidates for {}: {}'.format(text, candidates))
         else:
             candidates = TabCompleter.OPS
@@ -92,14 +92,25 @@ class TabCompleter:
         debug('complete_flag candidates for {}: {}'.format(text, candidates))
         return candidates
 
-    @staticmethod
-    def complete_filename(text):
+    def complete_filename(self, text):
+        debug('complete_filenames, text = {}'.format(text))
         current_dir = marcel.env.ENV.pwd()
         if text:
-            base, pattern_prefix = (('/', text[1:])
-                                    if text.startswith('/') else
-                                    ('.', text))
-            filenames = [p.as_posix() for p in pathlib.Path(base).glob(pattern_prefix + '*')]
+            if text == '~/':
+                home = pathlib.Path(text).expanduser()
+                filenames = os.listdir(home.as_posix())
+            elif text.startswith('~'):
+                find_user = text[1:]
+                self.ensure_homedirs()
+                filenames = []
+                for username in self.homedirs.keys():
+                    if username.startswith(find_user):
+                        filenames.append('~' + username + ' ')
+            else:
+                base, pattern_prefix = (('/', text[1:])
+                                        if text.startswith('/') else
+                                        ('.', text))
+                filenames = [p.as_posix() for p in pathlib.Path(base).glob(pattern_prefix + '*')]
         else:
             filenames = ['/'] + [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
         debug('complete_filename candidates for {}: {}'.format(text, filenames))
@@ -118,3 +129,16 @@ class TabCompleter:
                 for f in os.listdir(p):
                     if is_executable(f):
                         self.executables.append(f)
+
+    def ensure_homedirs(self):
+        if self.homedirs is None:
+            self.homedirs = {}
+            # TODO: This is a hack. Is there a better way?
+            with open('/etc/passwd', 'r') as passwds:
+                users = passwds.readlines()
+            for line in users:
+                fields = line.split(':')
+                username = fields[0]
+                homedir = fields[5]
+                self.homedirs[username] = homedir
+
