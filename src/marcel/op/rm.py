@@ -1,4 +1,4 @@
-"""C{rm [FILENAME ...]}
+"""C{rm FILENAME ...}
 
 FILENAME                   Filename or glob pattern.
 

@@ -6,6 +6,7 @@ public = [
     'head',
     'ls',
     'map',
+    'mv',
     'out',
     'ps',
     'pwd',

@@ -27,6 +27,7 @@ def normalize_paths(filenames):
 
 def roots(current_dir, paths):
     roots = []
+    roots_set = set()
     for path in paths:
         if path.exists():
             roots.append(path)
@@ -35,6 +36,8 @@ def roots(current_dir, paths):
             glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
                                        if path.is_absolute() else
                                        (current_dir, path_str))
-            for root in sorted(glob_base.glob(glob_pattern)):
-                roots.append(root)
+            for root in glob_base.glob(glob_pattern):
+                if root not in roots_set:
+                    roots_set.add(root)
+                    roots.append(root)
     return roots

@@ -70,6 +70,14 @@ class Test:
         Test.failures += 1
 
     @staticmethod
+    def run_and_capture_output(command):
+        out = io.StringIO()
+        err = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            marcel.main.Main.run_command(command)
+        return out.getvalue(), err.getvalue()
+
+    @staticmethod
     def run(test,
             verification=None,
             expected_out=None,
@@ -81,18 +89,14 @@ class Test:
             marcel.main.Main.run_command(test)
         else:
             print('TESTING: {}'.format(test))
-            out = io.StringIO()
-            err = io.StringIO()
             try:
                 if verification is None:
-                    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-                        marcel.main.Main.run_command(test)
+                    actual_out, actual_err = Test.run_and_capture_output(test)
                 else:
-                    marcel.main.Main.run_command(test)
-                    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-                        marcel.main.Main.run_command(verification)
-                actual_out = Test.file_contents(file) if file else out.getvalue()
-                actual_err = err.getvalue()
+                    Test.run_and_capture_output(test)
+                    actual_out, actual_err = Test.run_and_capture_output(verification)
+                if file:
+                    actual_out = Test.file_contents(file)
                 if expected_out:
                     Test.check_ok(test, Test.to_string(expected_out), actual_out)
                 if expected_err:
@@ -773,6 +777,87 @@ def test_rm():
     Test.run(test='rm /tmp/base/*2',
              verification='ls -r /tmp/base | map (f: f.render_compact())',
              expected_out=sorted([dot, d1, f11, f12, f1]))
+    # Erroneous
+    Test.run('rm',
+             expected_err='required: filename')
+
+
+def test_mv():
+    def setup(dir):
+        Test.cd(tmp)
+        Test.run('bash rm -rf base')
+        Test.run('mkdir base')
+        Test.cd(base)
+        Test.run('mkdir d1')
+        Test.run('mkdir d2')
+        Test.run('touch d1/f11')
+        Test.run('touch d1/f12')
+        Test.run('touch d2/f21')
+        Test.run('touch d2/f22')
+        Test.run('touch f1')
+        Test.run('touch f2')
+        Test.cd(dir)
+    dot = '.'
+    tmp = '/tmp'
+    base = '/tmp/base'
+    d1 = 'd1'
+    d2 = 'd2'
+    f1 = 'f1'
+    f2 = 'f2'
+    f11 = 'd1/f11'
+    f12 = 'd1/f12'
+    f21 = 'd2/f21'
+    f22 = 'd2/f22'
+    f1_in_d1 = 'd1/f1'
+    f2_in_d1 = 'd1/f2'
+    d2_in_d1 = 'd1/d2'
+    f21_in_d1 = 'd1/d2/f21'
+    f22_in_d1 = 'd1/d2/f22'
+    d1_in_d2 = 'd2/d1'
+    f11_in_d2 = 'd2/d1/f11'
+    f12_in_d2 = 'd2/d1/f12'
+    t = 't'
+    # Move one file to missing target
+    setup(base)
+    Test.run(test='mv f1 t',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2, t]))
+    # Move one file to existing file
+    setup(base)
+    Test.run(test='mv f1 f2',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
+    # Move one file to existing directory
+    setup(base)
+    Test.run(test='mv f1 d1',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, f1_in_d1, d2, f21, f22, f2]))
+    # Move multiple files to missing target
+    setup(base)
+    Test.run(test='mv ?1 f? t',
+             expected_err='Cannot move multiple sources to a non-existent target')
+    # Move multiple files to existing file
+    setup(base)
+    Test.run(test='mv ?1 f? f1',
+             expected_err='Cannot move multiple sources to a file target')
+    # Move multiple files to existing directory
+    setup(base)
+    Test.run(test='mv ?2 f? d1',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
+    # Move file over self
+    setup(base)
+    Test.run(test='mv ?2 f? d1',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
+    # Move directory into self. First check the error, then the result
+    setup(base)
+    Test.run(test='mv d1 d2 d2',
+             expected_out=[Error('Cannot move directory over self')])
+    setup(base)
+    Test.run(test='mv d1 d2 d2',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted([dot, d2, f21, f22, d1_in_d2, f11_in_d2, f12_in_d2, f1, f2]))
 
 
 def reset_environment():
@@ -800,6 +885,7 @@ def main_stable():
     test_namespace()
     test_remote()
     test_rm()
+    test_mv()
     test_no_such_op()
 
 

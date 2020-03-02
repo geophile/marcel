@@ -17,13 +17,13 @@
 
 - su: Need to do a bash su, but then somehow land in marcel again.
 
-- pushd/popd
+- pushd/popd/dirs
 
 - cat. ls | expand does the same thing, but that's kind of ridiculous.
 
 - File commands:
 
-    - rm
+    + rm
     - mv
     - cp
 

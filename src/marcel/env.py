@@ -74,7 +74,7 @@ class Environment:
             os.chdir(self._current_dir)
         except FileNotFoundError:
             raise marcel.exception.KillCommandException(
-                'Cannot cd into {} from {}. Target {} does not exist.'.format(directory, self._current_dir, new_dir))
+                'Cannot cd into {} from {}. Directory does not exist.'.format(directory, self._current_dir))
 
     def globals(self):
         return self._globals
