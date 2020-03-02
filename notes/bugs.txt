@@ -30,5 +30,14 @@ drwxr-xr-x   jao      jao              4096   2020 Feb 25 09:38:13   test
 
 ----------------------------------------------------------------------
 
+15. File expansion not working for path beginning with ~/
 
-15. 
+E.g.
+
+  M jao@cheese:~/git/marcel/src/marcel$ ls ~/ac
+
+(There are two files whose names start with "ac")
+
+----------------------------------------------------------------------
+
+17. 

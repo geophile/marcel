@@ -48,7 +48,8 @@ class Rm(marcel.core.Op):
         paths = marcel.op.filenames.normalize_paths(self.filename)
         roots = marcel.op.filenames.roots(marcel.env.ENV.pwd(), paths)
         for root in roots:
-            Rm.remove(root)
+            self.remove(root)
+        self.send_complete()
 
     # Op
 
@@ -60,12 +61,13 @@ class Rm(marcel.core.Op):
 
     # For use by this class
 
-    @staticmethod
-    def remove(root):
+    def remove(self, root):
         try:
             if root.is_dir():
                 shutil.rmtree(root)
             else:  # This works for files and symlinks
                 root.unlink()
+        except PermissionError as e:
+            self.send(marcel.object.error.Error(e))
         except FileNotFoundError:
             pass

@@ -194,5 +194,34 @@ FIXED
 
 ----------------------------------------------------------------------
 
+FIXED
+
 14. Tab expansion for files doesn't work if path starts with ~
 
+----------------------------------------------------------------------
+
+FIXED
+
+16. Permission error on rm of directory crashes shell
+
+M jao@cheese:/tmp$ rm rd
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/src/marcel/main.py", line 88, in <module>
+    Main().run()
+  File "/home/jao/git/marcel/src/marcel/main.py", line 58, in run
+    Main.run_command(line)
+  File "/home/jao/git/marcel/src/marcel/main.py", line 70, in run_command
+    Command(pipeline).execute()
+  File "/home/jao/git/marcel/src/marcel/main.py", line 36, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/marcel/src/marcel/core.py", line 209, in receive
+    self.first_op.receive(x)
+  File "/home/jao/git/marcel/src/marcel/op/rm.py", line 51, in receive
+    Rm.remove(root)
+  File "/home/jao/git/marcel/src/marcel/op/rm.py", line 67, in remove
+    shutil.rmtree(root)
+  File "/usr/lib/python3.7/shutil.py", line 498, in rmtree
+    onerror(os.rmdir, path, sys.exc_info())
+  File "/usr/lib/python3.7/shutil.py", line 496, in rmtree
+    os.rmdir(path)
+PermissionError: [Errno 1] Operation not permitted: '/tmp/rd'

@@ -1,5 +1,7 @@
 0.3
 
+- su: Need to do a bash su, but then somehow land in marcel again.
+
 - cat. ls | expand does the same thing, but that's kind of ridiculous.
 
 ----------------------------------------------------------------------
@@ -19,8 +21,6 @@
   executable.
 
 + bash commands that do pagination don't work, e.g. more, man.
-
-- su: Need to do a bash su, but then somehow land in marcel again.
 
 - pushd/popd/dirs
 
@@ -42,6 +42,8 @@
   + 12
   + 13
   + 14
+  - 15
+  + 16
 
 ----------------------------------------------------------------------
 
@@ -82,3 +84,4 @@
 + Bug 8.
 
 + cd with no args.
+
