@@ -18,7 +18,11 @@ def debug(message):
 
 class TabCompleter:
     OPS = marcel.op.public
-    FILENAME_OPS = ['cd', 'ls', 'out']
+    FILENAME_OPS = ['cd',
+                    'ls',
+                    'mv',
+                    'out',
+                    'rm']
 
     def __init__(self):
         readline.set_completer(self.complete)

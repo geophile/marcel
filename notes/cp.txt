@@ -1,0 +1,53 @@
+Interesting flags from bash cp man page:
+
+       --attributes-only
+              don't copy the file data, just the attributes
+
+       --backup[=CONTROL]
+              make a backup of each existing destination file
+
+       -b     like --backup but does not accept an argument
+
+       -d     same as --no-dereference --preserve=links
+
+       -H     follow command-line symbolic links in SOURCE
+
+       -l, --link
+              hard link files instead of copying
+
+       -L, --dereference
+              always follow symbolic links in SOURCE
+
+       -n, --no-clobber
+              do not overwrite an existing file (overrides a previous -i option)
+
+       -P, --no-dereference
+              never follow symbolic links in SOURCE
+
+       -R, -r, --recursive
+              copy directories recursively
+
+       -s, --symbolic-link
+              make symbolic links instead of copying
+
+
+-H: What does this do?
+
+-L: What does this do? Sounds like -H. See the find man page. Find has
+HLP flags relating to symlinks. Seems to be related.
+
+-s: Seems like ln -s, except that it has to stay in the same directory.
+
+----------------------------------------------------------------------
+
+Initially, do:
+
+
+  -l: Create a hard link to the file
+  -P: Copy symlink as is. If link target is relative, then copy may not make sense.
+  -r
+
+----------------------------------------------------------------------
+
+cp can create hard links and symbolic links. This overlaps with the ln
+command. (ln does hard link, or symbolic if -s specified.)
