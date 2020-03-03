@@ -748,7 +748,6 @@ def test_rm():
     f12 = 'd1/f12'
     f21 = 'd2/f21'
     f22 = 'd2/f22'
-
     # Remove a file
     setup(base)
     Test.run('ls -r /tmp/base | map (f: f.render_compact())',
@@ -777,9 +776,15 @@ def test_rm():
     Test.run(test='rm /tmp/base/*2',
              verification='ls -r /tmp/base | map (f: f.render_compact())',
              expected_out=sorted([dot, d1, f11, f12, f1]))
+    # Remove via piping
+    setup(base)
+    Test.run(test='ls /tmp/base/*2 | rm',
+             verification='ls -r /tmp/base | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, f1]))
     # Erroneous
-    Test.run('rm',
-             expected_err='required: filename')
+    setup(base)
+    Test.run('ls /tmp/base/*2 | rm f1',
+             expected_err='rm cannot receive input from a pipe')
 
 
 def test_mv():

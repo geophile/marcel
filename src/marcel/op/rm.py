@@ -68,7 +68,8 @@ class Rm(marcel.core.Op):
             # Remove files passed in.
             if len(x) != 1 or not isinstance(x[0], marcel.object.file.File):
                 raise marcel.exception.KillAndResumeException('rm input must be a 1-tuple containing a File')
-            self.remove(x[0])
+            print('rm {}'.format(x))
+            self.remove(x[0].path)
 
     # Op
 
