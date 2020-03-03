@@ -55,21 +55,21 @@ class Rm(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
-        pass
+        if len(self.filename) == 0:
+            self.filename = None
 
     def receive(self, x):
-        if len(self.filename) > 0:
+        if self.filename is None:
+            # Remove files passed in.
+            if len(x) != 1 or not isinstance(x[0], marcel.object.file.File):
+                raise marcel.exception.KillAndResumeException('rm input must be a 1-tuple containing a File')
+            self.remove(x[0].path)
+        else:
             # Remove specified files
             paths = marcel.op.filenames.normalize_paths(self.filename)
             roots = marcel.op.filenames.roots(marcel.env.ENV.pwd(), paths)
             for root in roots:
                 self.remove(root)
-        else:
-            # Remove files passed in.
-            if len(x) != 1 or not isinstance(x[0], marcel.object.file.File):
-                raise marcel.exception.KillAndResumeException('rm input must be a 1-tuple containing a File')
-            print('rm {}'.format(x))
-            self.remove(x[0].path)
 
     # Op
 
@@ -77,6 +77,7 @@ class Rm(marcel.core.Op):
         return Rm.argparser
 
     def must_be_first_in_pipeline(self):
+        # This is checked before setup_1 converts empty filename  list to None.
         return len(self.filename) > 0
 
     # For use by this class

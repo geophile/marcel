@@ -863,6 +863,11 @@ def test_mv():
     Test.run(test='mv d1 d2 d2',
              verification='ls -r | map (f: f.render_compact())',
              expected_out=sorted([dot, d2, f21, f22, d1_in_d2, f11_in_d2, f12_in_d2, f1, f2]))
+    # Pipe in files to be moved
+    setup(base)
+    Test.run(test='ls ?2 f? | mv d1',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
 
 
 def reset_environment():
