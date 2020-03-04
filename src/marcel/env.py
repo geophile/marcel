@@ -42,24 +42,9 @@ class Environment:
                 print('Invalid COLOR_SCHEME specified, using defafult', file=sys.stderr)
             self._color_schema = marcel.object.colorscheme.ColorScheme()
 
-    def prompt(self):
-        prompt_list = self._globals.get('PROMPT', DEFAULT_PROMPT)
-        buffer = []
-        color = None
-        position = 0
-        for x in prompt_list:
-            if isinstance(x, marcel.object.colorscheme.Color):
-                color = x
-            else:
-                if callable(x):
-                    x = x()
-                    position += len(x)
-                else:
-                    position += len(str(x))
-                if color is not None:
-                    x = colorize(x, color)
-                buffer.append(x)
-        return ''.join(buffer)
+    def prompts(self):
+        return (self._prompt_string(self._globals.get('PROMPT', DEFAULT_PROMPT)),
+                self._prompt_string(self._globals.get('CONTINUATION_PROMPT', DEFAULT_PROMPT)))
 
     def pwd(self):
         return self._current_dir
@@ -98,3 +83,22 @@ class Environment:
 
     def getenv(self, var):
         return self._globals.get(var, None)
+
+    @staticmethod
+    def _prompt_string(prompt_pieces):
+        buffer = []
+        color = None
+        position = 0
+        for x in prompt_pieces:
+            if isinstance(x, marcel.object.colorscheme.Color):
+                color = x
+            else:
+                if callable(x):
+                    x = x()
+                    position += len(x)
+                else:
+                    position += len(str(x))
+                if color is not None:
+                    x = colorize(x, color)
+                buffer.append(x)
+        return ''.join(buffer)

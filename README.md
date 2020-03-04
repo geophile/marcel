@@ -52,7 +52,7 @@ the `Process` object.
 Another Example
 ---------------
 Find all files recursively, and then find the sum of file sizes,
- grouped by extension:
+grouped by extension:
 
 ```
     M jao@cheese:~/git/marcel$ ls -fr | map (f: (f.path.suffix, 1, f.size)) | red . + +
@@ -74,6 +74,35 @@ extension, the integer 1, and the file size.
 * `red . + +`: Reduce the incoming stream, grouping by the file extensions (in the tuple position identified by
 the `.`), and summing up the `1`s (to obtain the count for that extension), 
 and the sizes.
+
+Executables
+===========
+
+In addition to using built-in operators, you can, of course, call any executable provided by
+the operating system. Pipelines may contain a mixture of operators and executables. The stdout of
+an executable pipes into an operator as a string. Output from an operator is turned into a string
+when it is piped into an executable.
+
+For example, this command scans `/etc/passwd` and lists the usernames of 
+users whose shell is `/bin/bash`. The output is condensed into one line through
+the use of `xargs` and `echo`. 
+
+    cat /etc/passwd | map (line: line.split(':')) | select (*line: line[-1] == '/bin/bash') | map (*line: line[0]) | xargs echo
+
+* `cat /etc/passwd`: Obtain the contents of the file. Lines are piped to subsequent commands.
+
+* `map (line: line.split(':'))`: Split the lines at the `:` separators, yielding 7-tuples.
+
+* `select (*line: line[-1] == '/bin/bash')`: select those lines in which the last field is `/bin/bash`.
+
+* `map (*line: line[0]) |`: Keep the username field of each input tuple.
+
+* `xargs echo`: Combine the incoming usernames into a single line, which is printed to `stdout`.
+
+Note that the first and last parts of the pipeline are Linux executables, while the other steps
+rely on marcel operators.
+
+
 
 Remote access
 =============

@@ -6,9 +6,11 @@ import sys
 import marcel.core
 import marcel.env
 import marcel.exception
+import marcel.multilineinput
 import marcel.op.out
 import marcel.parse
 import marcel.tabcompleter
+from marcel.util import *
 
 
 MARCEL_HISTORY_FILE = '.marcel_history'
@@ -43,6 +45,7 @@ class Main:
         config_path = Main.args()
         self.env = marcel.env.Environment.initialize(config_path)
         self.tab_completer = marcel.tabcompleter.TabCompleter()
+        self.multi_line_input = marcel.multilineinput.MultiLineInput('\\')
         readline.set_history_length(MARCEL_HISTORY_LENGTH)
         readline.read_history_file(self.history_file())
         readline.parse_and_bind('tab: complete')
@@ -54,7 +57,7 @@ class Main:
         try:
             while True:
                 try:
-                    line = input(marcel.env.ENV.prompt())
+                    line = self.multi_line_input.input(*marcel.env.ENV.prompts())
                     Main.run_command(line)
                 except KeyboardInterrupt:  # ctrl-C
                     print()
