@@ -1,6 +1,7 @@
 public = [
     'bash',
     'cd',
+    'edit',
     'expand',
     'gen',
     'head',

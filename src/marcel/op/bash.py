@@ -26,6 +26,7 @@ class Bash(marcel.core.Op):
         'less',
         'man',
         'more',
+        'psql',
         'vi'
     }
     argparser = BashArgParser()

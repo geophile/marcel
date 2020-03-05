@@ -27,7 +27,7 @@
 
     + rm
     + mv
-    - cp
+    - cp & ln
 
 + Make the File object more useful by adding more methods. Maybe
   extend Path?
@@ -43,8 +43,9 @@
   + 14
   + 15
   + 16
+  + 19
 
-- Line continuation
++ Line continuation
 
 ----------------------------------------------------------------------
 

@@ -237,3 +237,14 @@ Traceback (most recent call last):
   File "/usr/lib/python3.7/shutil.py", line 496, in rmtree
     os.rmdir(path)
 PermissionError: [Errno 1] Operation not permitted: '/tmp/rd'
+
+----------------------------------------------------------------------
+
+18. Following restart, multilines history is wrong
+
+A multiline command is recalled one line at a time.
+
+----------------------------------------------------------------------
+
+19. Crash on first run of marcel if .marcel_history doesn't exist
+

@@ -6,7 +6,7 @@ import sys
 import marcel.core
 import marcel.env
 import marcel.exception
-import marcel.multilineinput
+import marcel.multilinereader
 import marcel.op.out
 import marcel.parse
 import marcel.tabcompleter
@@ -45,9 +45,9 @@ class Main:
         config_path = Main.args()
         self.env = marcel.env.Environment.initialize(config_path)
         self.tab_completer = marcel.tabcompleter.TabCompleter()
-        self.multi_line_input = marcel.multilineinput.MultiLineInput('\\')
+        history_file = self.history_file()
+        self.multiline_reader = marcel.multilinereader.MultiLineReader(history_file=history_file)
         readline.set_history_length(MARCEL_HISTORY_LENGTH)
-        readline.read_history_file(self.history_file())
         readline.parse_and_bind('tab: complete')
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
@@ -57,7 +57,7 @@ class Main:
         try:
             while True:
                 try:
-                    line = self.multi_line_input.input(*marcel.env.ENV.prompts())
+                    line = self.multiline_reader.input(*marcel.env.ENV.prompts())
                     Main.run_command(line)
                 except KeyboardInterrupt:  # ctrl-C
                     print()

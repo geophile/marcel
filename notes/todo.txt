@@ -74,22 +74,3 @@ Glob patterns and marcel syntax both use [].
 
 Could handle the situation by being context-sensitive during the
 parse.
-
-----------------------------------------------------------------------
-
-Multi-line input
-
-- Detect continuation at end of line
-    - Has to be done in each token class
-
-- If detected, suppress execution, and switch to a secondary prompt.
-
-- History recall is tricky. When the multi-line command is finally
-  complete, can the history be edited to replace the multiple lines
-  with one line with embedded \n? And will that work properly with
-  execution and editing of recalled lines? 
-
-  See remove/replace_history_item.
-
-- Add something like psql \e. Open the current, possibly multiline
-  command in EDITOR.

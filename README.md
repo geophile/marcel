@@ -87,7 +87,13 @@ For example, this command scans `/etc/passwd` and lists the usernames of
 users whose shell is `/bin/bash`. The output is condensed into one line through
 the use of `xargs` and `echo`. 
 
-    cat /etc/passwd | map (line: line.split(':')) | select (*line: line[-1] == '/bin/bash') | map (*line: line[0]) | xargs echo
+    cat /etc/passwd | \
+    map (line: line.split(':')) | \
+    select (*line: line[-1] == '/bin/bash') | \
+    map (*line: line[0]) | \
+    xargs echo
+
+* The command is broken up across a few lines using a \ at the end of each non-terminal line.
 
 * `cat /etc/passwd`: Obtain the contents of the file. Lines are piped to subsequent commands.
 
