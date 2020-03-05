@@ -45,8 +45,7 @@ class Main:
         config_path = Main.args()
         self.env = marcel.env.Environment.initialize(config_path)
         self.tab_completer = marcel.tabcompleter.TabCompleter()
-        history_file = self.history_file()
-        self.multiline_reader = marcel.multilinereader.MultiLineReader(history_file=history_file)
+        self.multiline_reader = marcel.multilinereader.MultiLineReader(history_file=self.history_file())
         readline.set_history_length(MARCEL_HISTORY_LENGTH)
         readline.parse_and_bind('tab: complete')
         readline.parse_and_bind('set editing-mode emacs')
@@ -75,7 +74,7 @@ class Main:
                 print(e, file=sys.stderr)
 
     def shutdown(self):
-        readline.write_history_file(self.history_file())
+        self.multiline_reader.close()
 
     def history_file(self):
         home = self.env.getenv('HOME')

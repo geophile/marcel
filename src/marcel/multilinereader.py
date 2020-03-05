@@ -25,8 +25,9 @@ class MultiLineReader:
         then multiline items in the history file will not be recalled correctly across process
         boundaries."""
         self.continuation = continuation
+        self.history_file = history_file
         if history_file:
-            self._fix_history(history_file)
+            self._fix_history()
 
     def input(self, prompt, continuation_prompt):
         """Get input from the user, similar to the Python input() function. The prompt is printed
@@ -53,6 +54,9 @@ class MultiLineReader:
         lines[-1] += self.continuation
         return ''.join([line[:-len(self.continuation)] for line in lines])
 
+    def close(self):
+        readline.write_history_file(self.history_file)
+
     # A line recalled from history is a single string, constructed by joining together the individual lines
     # with \n. Return the original multi-line form. Return None if the input was not a joined-together line
     # from history.
@@ -70,9 +74,9 @@ class MultiLineReader:
                 lines.append(line[start:])
         return lines if start > 0 else None
 
-    def _fix_history(self, history_file):
+    def _fix_history(self):
         try:
-            readline.read_history_file(history_file)
+            readline.read_history_file(self.history_file)
         except FileNotFoundError:
             return
         # Rebuild history items, concatenating lines when indicated by continuation strings.
