@@ -252,3 +252,9 @@ FIXED
 
 19. Crash on first run of marcel if .marcel_history doesn't exist
 
+
+----------------------------------------------------------------------
+
+20. edit op isn't working
+
+Wasn't quite finished.

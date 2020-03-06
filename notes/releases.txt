@@ -44,7 +44,7 @@
   + 15
   + 16
   + 19
-  - 20
+  + 20
 
 + Line continuation
 

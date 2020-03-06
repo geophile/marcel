@@ -2,13 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/bugs_fixed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs_fixed.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/globalstate.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/globalstate.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/multilinereader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/multilinereader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/edit.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/edit.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -246,7 +243,7 @@
       <workItem from="1583293956943" duration="8053000" />
       <workItem from="1583376360977" duration="683000" />
       <workItem from="1583418953746" duration="28323000" />
-      <workItem from="1583511378231" duration="4940000" />
+      <workItem from="1583511378231" duration="5468000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

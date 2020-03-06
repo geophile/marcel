@@ -89,7 +89,7 @@ class Main:
         readline.parse_and_bind('tab: complete')
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
-        readline.set_pre_input_hook(hook)
+        readline.set_pre_input_hook(self.insert_edited_command)
         self.reader = Reader(self.global_state, self.history_file())
 
     def history_file(self):
@@ -110,12 +110,6 @@ class Main:
             readline.insert_text(command)
             readline.redisplay()
 
-MAIN = None
-
-def hook():
-    global MAIN
-    readline.insert_text(MAIN.reader.take_edited_command())
-    readline.redisplay()
 
 if __name__ == '__main__':
     MAIN = Main()
