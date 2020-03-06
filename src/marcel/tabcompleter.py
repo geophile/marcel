@@ -3,7 +3,6 @@ import pathlib
 import readline
 
 import marcel.core
-import marcel.env
 import marcel.op
 from marcel.util import *
 

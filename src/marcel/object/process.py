@@ -8,7 +8,6 @@ import os
 import os.path
 import pathlib
 
-import marcel.env
 import marcel.object.renderable
 from marcel.util import *
 

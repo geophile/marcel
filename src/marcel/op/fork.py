@@ -1,7 +1,6 @@
 import threading
 
 import marcel.core
-import marcel.env
 import marcel.exception
 import marcel.op.labelthread
 import marcel.op.labelthread

@@ -7,7 +7,6 @@ current directory to the home directory.
 import pathlib
 
 import marcel.core
-import marcel.env
 
 
 def cd():

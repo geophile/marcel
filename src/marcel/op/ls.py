@@ -30,7 +30,6 @@ import os.path
 import pathlib
 
 import marcel.core
-import marcel.env
 import marcel.object.error
 import marcel.object.file
 import marcel.op.filenames

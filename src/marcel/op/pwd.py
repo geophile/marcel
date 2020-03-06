@@ -4,7 +4,6 @@ Output the current directory.
 """
 
 import marcel.core
-import marcel.env
 
 
 def pwd():
