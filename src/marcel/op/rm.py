@@ -45,6 +45,7 @@ class Rm(marcel.core.Op):
     def __init__(self):
         super().__init__()
         self.filename = None
+        self.current_dir = None
 
     def __repr__(self):
         return 'rm({})'.format(self.filename)
@@ -57,6 +58,7 @@ class Rm(marcel.core.Op):
     def setup_1(self):
         if len(self.filename) == 0:
             self.filename = None
+        self.current_dir = self.global_state().env.pwd()
 
     def receive(self, x):
         if self.filename is None:
@@ -67,7 +69,7 @@ class Rm(marcel.core.Op):
         else:
             # Remove specified files
             paths = marcel.op.filenames.normalize_paths(self.filename)
-            roots = marcel.op.filenames.roots(marcel.env.ENV.pwd(), paths)
+            roots = marcel.op.filenames.roots(self.current_dir, paths)
             for root in roots:
                 self.remove(root)
 

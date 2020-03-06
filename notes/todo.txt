@@ -74,3 +74,8 @@ Glob patterns and marcel syntax both use [].
 
 Could handle the situation by being context-sensitive during the
 parse.
+
+----------------------------------------------------------------------
+
+Change string formatting from '...'.format(...) to f'...' where possible.
+

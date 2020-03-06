@@ -14,9 +14,7 @@ class MapArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('map')
-        self.add_argument('function',
-                          type=super().constrained_type(marcel.core.ArgParser.check_function,
-                                                        'not a valid function'))
+        self.add_argument('function')
 
 
 # map can be used as a generator (function with no args) or
@@ -39,6 +37,7 @@ class Map(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
+        self.function = marcel.function.Function(self.function, self.global_state().env.globals())
         self.function.set_op(self)
 
     def receive(self, x):

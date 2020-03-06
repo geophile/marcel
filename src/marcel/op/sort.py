@@ -18,11 +18,7 @@ class SortArgParser(marcel.core.ArgParser):
     
     def __init__(self):
         super().__init__('sort')
-        self.add_argument('key',
-                          nargs='?',
-                          default=None,
-                          type=super().constrained_type(marcel.core.ArgParser.check_function,
-                                                        'not a valid function'))
+        self.add_argument('key', nargs='?', default=None)
         
 
 class Sort(marcel.core.Op):
@@ -44,6 +40,7 @@ class Sort(marcel.core.Op):
 
     def setup_1(self):
         if self.key:
+            self.key = marcel.function.Function(self.key, self.global_state().env.globals())
             self.key.set_op(self)
     
     def receive(self, x):

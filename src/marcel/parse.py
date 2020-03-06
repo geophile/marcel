@@ -452,6 +452,8 @@ class Parser(Token):
             if not partial_text:
                 raise marcel.exception.KillCommandException(e)
         except Exception as e:
+            print(f'{type(e)}: {e}')
+            print_stack()
             raise marcel.exception.KillCommandException(e)
 
     def next_token(self):

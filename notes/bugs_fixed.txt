@@ -240,11 +240,15 @@ PermissionError: [Errno 1] Operation not permitted: '/tmp/rd'
 
 ----------------------------------------------------------------------
 
+FIXED
+
 18. Following restart, multilines history is wrong
 
 A multiline command is recalled one line at a time.
 
 ----------------------------------------------------------------------
+
+FIXED
 
 19. Crash on first run of marcel if .marcel_history doesn't exist
 

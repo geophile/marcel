@@ -38,6 +38,7 @@ class Mv(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
+        self.current_dir = None
         self.filename = None
         self.source = []
         self.target = None
@@ -52,6 +53,7 @@ class Mv(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
+        self.current_dir = self.global_state().env.pwd()
         self.source = self.filename[:-1]
         self.target = pathlib.Path(self.filename[-1]).resolve()
         self.target_posix = self.target.as_posix()
@@ -78,7 +80,7 @@ class Mv(marcel.core.Op):
                 self.move(x[0].path)
             else:
                 paths = marcel.op.filenames.normalize_paths(self.source)
-                roots = marcel.op.filenames.roots(marcel.env.ENV.pwd(), paths)
+                roots = marcel.op.filenames.roots(self.current_dir, paths)
                 for root in roots:
                     if root.is_dir() and root.samefile(self.target):
                         self.send(marcel.object.error.Error('Cannot move directory over self: {}'.format(root)))

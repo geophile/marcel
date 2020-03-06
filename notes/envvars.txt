@@ -1,0 +1,56 @@
+Environment variables, .marcel.py, configuration, globals
+
+All these things are muddy right now.
+
+- Environment has _vars which includes:
+
+  - USER, HOME, HOST, PWD: environment variables.
+
+  - Everything from .marcel.py, which is:
+
+    - from marcel.config import * (which is a bad idiom, apparently),
+      which brings in: Cluster, everything in the colorscheme module,
+      COLOR_SCHEME, VERSION.
+
+    - My marcel.py: from math import *, datetime, a few functions, a Cluster (jao), 
+      a ColorScheme (jao_term), image_highlight, PROMPT, CONTINUATION_PROMPT, COLOR_SCHEME
+      (overriding marcel.config)
+
+- These are accessible via Environment.globals(), which gets used to
+  eval function source code for function-valued args (e.g. map).
+
+----------------------------------------------------------------------
+
+Reconsidering these pieces:
+
+- The pythonic way is to have namespaces, probably nested. Could root
+  these in the environment.
+
+- .marcel.py definitions must be available to commands: cluster
+  definitions, functions.
+
+- .marcel.py is also a convenient place to specify prompts, and the
+  colors they use. But if these activities define symbols, those
+  symbols are available in the namespace used for functions. So
+  something like this:
+
+  CLUSTERS.define(name='jao',
+                  hosts=['jao1', 'jao2'],
+                  user='jao',
+                  identity='/home/jao/.ssh/id_rsa')
+
+  Is CLUSTERS and environment var? Does it come from marcel.config?
+
+
+
+
+
+Environment variables:
+
+- USER
+- HOME
+- HOST
+- PWD
+- PROMPT
+- CONTINUATION_PROMPT
+- VERSION

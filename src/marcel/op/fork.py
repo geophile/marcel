@@ -26,6 +26,8 @@ class PipelineThread(threading.Thread):
             self.pipeline.receive(None)
             self.pipeline.receive_complete()
         except Exception as e:
+            # print(f'{type(e)}: {e}')
+            # print_stack()
             self.terminating_exception = e
 
 
@@ -38,7 +40,6 @@ class Fork(marcel.core.Op):
         self.fork_pipeline = fork_pipeline
         self.thread_labels = None
         self.threads = []
-        self.generate_thread_labels()
 
     def __repr__(self):
         return 'fork({}, {})'.format(self.fork_spec, self.fork_pipeline)
@@ -49,18 +50,22 @@ class Fork(marcel.core.Op):
         assert False
 
     def setup_1(self):
+        self.generate_thread_labels()
+        # The fork_pipeline is not a top-level pipeline (executed from main), so it's global state isn't
+        # set yet. This op's owning pipeline has its global state by now. So set the fork_pipeline's global state.
+        self.fork_pipeline.set_global_state(self.global_state())
         # If the fork pipeline executes locally, then it can be used as is.
         # Otherwise: it needs to be pickled by Remote and sent to the host executing it.
         # The pipeline executing locally is a new one containing just the Remote op.
         if self.remote:
             pipeline = marcel.core.Pipeline()
+            pipeline.set_global_state(self.global_state())
             remote_op = marcel.op.remote.Remote(self.fork_pipeline)
             pipeline.append(remote_op)
             self.fork_pipeline = pipeline
         self.fork_pipeline.append(marcel.op.labelthread.LabelThread())
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
-        pass
 
     def setup_2(self):
         for thread_label in self.thread_labels:
@@ -81,6 +86,8 @@ class Fork(marcel.core.Op):
                 try:
                     thread.join(0.1)
                 except BaseException as e:
+                    # print(f'{type(e)}: {e}')
+                    # print_stack()
                     thread.terminating_exception = e
         # Threads may complete normally or fail with a variety of exceptions. Merge them into a single action
         # for the termination of the fork op.
@@ -117,7 +124,7 @@ class Fork(marcel.core.Op):
         if type(self.fork_spec) is int:
             self.thread_labels = [x for x in range(self.fork_spec)]
         elif type(self.fork_spec) is str:
-            cluster = marcel.env.ENV.cluster(self.fork_spec)
+            cluster = self.global_state().env.cluster(self.fork_spec)
             if cluster:
                 self.thread_labels = [host for host in cluster.hosts]
                 self.remote = True

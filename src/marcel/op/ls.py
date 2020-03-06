@@ -67,6 +67,7 @@ class Ls(marcel.core.Op):
         self.dir = False
         self.symlink = False
         self.filename = None
+        self.current_dir = None
         self.emitted = set()  # Contains (device, inode)
 
     def __repr__(self):
@@ -94,6 +95,7 @@ class Ls(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
+        self.current_dir = self.global_state().env.pwd()
         if not (self.d0 or self.d1 or self.dr):
             self.d1 = True
         if not (self.file or self.dir or self.symlink):
@@ -101,11 +103,11 @@ class Ls(marcel.core.Op):
             self.dir = True
             self.symlink = True
         if len(self.filename) == 0:
-            self.filename = [marcel.env.ENV.pwd().as_posix()]
+            self.filename = [self.current_dir.as_posix()]
 
     def receive(self, _):
         paths = marcel.op.filenames.normalize_paths(self.filename)
-        roots = marcel.op.filenames.roots(marcel.env.ENV.pwd(), paths)
+        roots = marcel.op.filenames.roots(self.current_dir, paths)
         # Paths will be displayed relative to a root if there is one root and it is a directory.
         base = roots[0] if len(roots) == 1 and roots[0].is_dir() else None
         for root in sorted(roots):

@@ -18,8 +18,9 @@ class Function:
         '.': lambda x, y: None
     }
 
-    def __init__(self, source):
+    def __init__(self, source, globals):
         self.source = source.strip()
+        self.globals = globals
         self.function = None
         self.op = None
         # create_function makes sure that the function source is correct, throwing an exception if not.
@@ -56,17 +57,16 @@ class Function:
         self.op = op
 
     def create_function(self):
-        env = marcel.env.ENV
         self.function = Function.symbols.get(self.source, None)
         if self.function is None:
             if self.source.split()[0] in ('lambda', 'lambda:'):
-                self.function = eval(self.source, env.globals())
+                self.function = eval(self.source, self.globals)
             else:
                 try:
-                    self.function = eval('lambda ' + self.source, env.globals())
+                    self.function = eval('lambda ' + self.source, self.globals)
                 except Exception:
                     try:
-                        self.function = eval('lambda: ' + self.source, env.globals())
+                        self.function = eval('lambda: ' + self.source, self.globals)
                     except Exception:
                         raise marcel.exception.KillCommandException(
                             'Invalid function syntax: {}'.format(self.source))

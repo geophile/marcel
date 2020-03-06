@@ -57,15 +57,15 @@ class File(marcel.object.renderable.Renderable):
     def render_compact(self):
         return str(self.display_path)
 
-    def render_full(self, color):
+    def render_full(self, color_scheme):
         line = self._formatted_metadata()
-        if color:
-            line[-1] = colorize(line[-1], self._highlight_color(self))
+        if color_scheme:
+            line[-1] = colorize(line[-1], self._highlight_color(self, color_scheme))
         if self.is_symlink():
             line.append('->')
             link_target = self.resolve()
-            if color:
-                link_target = colorize(link_target, self._highlight_color(link_target))
+            if color_scheme:
+                link_target = colorize(link_target, self._highlight_color(link_target, color_scheme))
             if isinstance(link_target, pathlib.Path):
                 link_target = link_target.as_posix()
             line.append(link_target)
@@ -108,9 +108,8 @@ class File(marcel.object.renderable.Renderable):
         return time.strftime('%Y %b %d %H:%M:%S', time.localtime(mtime))
 
     @staticmethod
-    def _highlight_color(path):
+    def _highlight_color(path, color_scheme):
         extension = path.suffix.lower()
-        color_scheme = marcel.env.ENV.color_scheme()
         highlight = color_scheme.file_extension.get(extension)
         if highlight is None:
             highlight = (

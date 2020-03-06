@@ -108,11 +108,10 @@ class Process(marcel.object.renderable.Renderable):
     def render_compact(self):
         return 'process({})'.format(self.pid)
 
-    def render_full(self, color):
+    def render_full(self, color_scheme):
         pid = '{:6n}'.format(self.pid)
         commandline = self.commandline
-        if color:
-            color_scheme = marcel.env.ENV.color_scheme()
+        if color_scheme:
             pid = colorize(pid, color_scheme.process_pid)
             commandline = colorize(commandline, color_scheme.process_commandline)
         buffer = [

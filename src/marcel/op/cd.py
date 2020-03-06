@@ -44,7 +44,7 @@ class Cd(marcel.core.Op):
 
     def receive(self, _):
         dir = self.directory.expanduser().resolve()
-        marcel.env.ENV.cd(dir)
+        self.global_state().env.cd(dir)
 
     # Op
 

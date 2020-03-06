@@ -84,12 +84,8 @@ class RedArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('red', ['-i', '--incremental'])
-        self.add_argument('-i', '--incremental',
-                          action='store_true')
-        self.add_argument('function',
-                          nargs=argparse.REMAINDER,
-                          type=super().constrained_type(marcel.core.ArgParser.check_function,
-                                                        'not a valid function'))
+        self.add_argument('-i', '--incremental', action='store_true')
+        self.add_argument('function', nargs=argparse.REMAINDER)
 
 
 class Red(marcel.core.Op):
@@ -116,13 +112,14 @@ class Red(marcel.core.Op):
         grouping_positions = []
         data_positions = []
         for i in range(len(self.function)):
-            function = self.function[i]
+            function = marcel.function.Function(self.function[i], self.global_state().env.globals())
             function.set_op(self)
             if Red.is_grouping(function.source):
                 grouping_positions.append(i)
                 self.function[i] = None
             else:
                 data_positions.append(i)
+                self.function[i] = function
         if len(grouping_positions) == 0:
             self.reducer = NonGroupingReducer(self)
         else:

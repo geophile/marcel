@@ -39,10 +39,6 @@ class ArgParser(argparse.ArgumentParser):
             raise ValueError()
         return n
 
-    @staticmethod
-    def check_function(s):
-        return marcel.function.Function(s)
-
 
 class BaseOp(object):
     """Base class for all osh ops, and for pipelines (sequences of
@@ -53,6 +49,8 @@ class BaseOp(object):
     """
 
     def __init__(self):
+        # The pipeline to which this op belongs
+        self.owner = None
         # The next op in the pipeline, or None if this is the last op in the pipeline.
         self.next_op = None
         # receiver is where op output is sent. Same as next_op unless this is the last
@@ -91,7 +89,6 @@ class BaseOp(object):
         """setup_1 is run after command-line parsing and before setup_2. It is intended for
         the initialization of op state except for fork pipeline copying.
         """
-        assert False
 
     def setup_2(self):
         """setup_2 is run after setup_1 and before execution. It is intended for fork pipeline copying.
@@ -138,7 +135,13 @@ class BaseOp(object):
     def run_local(self):
         return False
 
+    def global_state(self):
+        return self.owner.global_state
+
     # BaseOp compile-time
+
+    def set_owner(self, pipeline):
+        self.owner = pipeline
 
     def connect(self, new_op):
         self.next_op = new_op
@@ -172,6 +175,7 @@ class Pipeline(BaseOp):
 
     def __init__(self):
         BaseOp.__init__(self)
+        self.global_state = None
         self.first_op = None
         self.last_op = None
 
@@ -182,6 +186,9 @@ class Pipeline(BaseOp):
             buffer.append(str(op))
             op = op.next_op
         return 'pipeline({})'.format(' | '.join(buffer))
+
+    def set_global_state(self, global_state):
+        self.global_state = global_state
 
     # BaseOp
 
@@ -218,6 +225,7 @@ class Pipeline(BaseOp):
     # Pipeline compile-time
 
     def append(self, op):
+        op.set_owner(self)
         if self.last_op:
             assert self.first_op is not None
             self.last_op.connect(op)

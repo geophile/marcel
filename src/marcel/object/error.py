@@ -19,10 +19,10 @@ class Error(marcel.object.renderable.Renderable):
                 if self.host is None else
                 'Error({}, {})'.format(self.host, self.message))
 
-    def render_full(self, color):
+    def render_full(self, color_scheme):
         out = self.render_compact()
-        if color:
-            out = colorize(out, marcel.env.ENV.color_scheme().error)
+        if color_scheme:
+            out = colorize(out, color_scheme.error)
         return out
 
     # Error

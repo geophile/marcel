@@ -72,10 +72,7 @@ class WindowArgsParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('window', ['-o', '--overlap', '-d', '--disjoint'])
-        self.add_argument('predicate',
-                          nargs='?',
-                          type=super().constrained_type(marcel.core.ArgParser.check_function,
-                                                        'not a valid function'))
+        self.add_argument('predicate', nargs='?')
         fixed_size = self.add_mutually_exclusive_group()
         fixed_size.add_argument('-o', '--overlap',
                                 type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
@@ -117,6 +114,8 @@ class Window(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
+        if self.predicate:
+            self.predicate = marcel.function.Function(self.predicate, self.global_state().env.globals())
         # Exactly one of predicate, overlap, disjoint should be set. Not sure that argparse is up to that.
         count = 1 if self.predicate is not None else 0
         count += 1 if self.overlap is not None else 0

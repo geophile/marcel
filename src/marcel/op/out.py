@@ -79,7 +79,7 @@ class Out(marcel.core.Op):
                 if len(x) == 1:
                     out = x[0]
                     if isinstance(out, marcel.object.renderable.Renderable):
-                        out = out.render_full(self.use_color())
+                        out = out.render_full(self.color_scheme())
                 else:
                     buffer = []
                     for y in x:
@@ -128,14 +128,16 @@ class Out(marcel.core.Op):
         if x is None:
             return None
         elif isinstance(x, marcel.object.renderable.Renderable):
-            return (x.render_full(self.use_color())
+            return (x.render_full(self.color_scheme())
                     if full else
                     x.render_compact())
         else:
             return str(x)
 
-    def use_color(self):
-        return self.output == sys.__stdout__
+    def color_scheme(self):
+        return (self.global_state().env.color_scheme()
+                if self.output == sys.__stdout__ else
+                None)
 
     @staticmethod
     def ensure_quoted(x):
