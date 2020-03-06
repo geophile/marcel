@@ -17,6 +17,7 @@ def debug(message):
 
 
 class TabCompleter:
+
     OPS = marcel.op.public
     FILENAME_OPS = ['cd',
                     'ls',
@@ -24,13 +25,14 @@ class TabCompleter:
                     'out',
                     'rm']
 
-    def __init__(self):
-        readline.set_completer(self.complete)
-        # Removed '-', '/', '~' from readline.get_completer_delims()
-        readline.set_completer_delims(' \t\n`!@#$%^&*()=+[{]}\\|;:\'",<>?')
+    def __init__(self, global_state):
+        self.global_state = global_state
         self.op_name = None
         self.executables = None
         self.homedirs = None
+        readline.set_completer(self.complete)
+        # Removed '-', '/', '~' from readline.get_completer_delims()
+        readline.set_completer_delims(' \t\n`!@#$%^&*()=+[{]}\\|;:\'",<>?')
 
     def complete(self, text, state):
         line = readline.get_line_buffer()
@@ -66,7 +68,7 @@ class TabCompleter:
         return candidates[state]
 
     def complete_op(self, text):
-        debug('complete_op, text = {}'.format(text))
+        debug('complete_op, text = <{}>'.format(text))
         candidates = []
         if len(text) > 0:
             # Display marcel ops.
@@ -93,12 +95,12 @@ class TabCompleter:
         for f in flags:
             if f.startswith(text):
                 candidates.append(f)
-        debug('complete_flag candidates for {}: {}'.format(text, candidates))
+        debug('complete_flag candidates for <{}>: {}'.format(text, candidates))
         return candidates
 
     def complete_filename(self, text):
-        debug('complete_filenames, text = {}'.format(text))
-        current_dir = marcel.env.ENV.pwd()
+        debug('complete_filenames, text = <{}>'.format(text))
+        current_dir = self.global_state.env.pwd()
         if text:
             if text == '~/':
                 home = pathlib.Path(text).expanduser()

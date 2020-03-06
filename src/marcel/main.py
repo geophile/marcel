@@ -57,9 +57,9 @@ class Main:
     def __init__(self):
         config_path = Main.args()
         self.env = marcel.env.Environment(config_path)
-        self.tab_completer = marcel.tabcompleter.TabCompleter()
-        self.reader = None
         self.global_state = marcel.globalstate.GlobalState(self.env)
+        self.tab_completer = marcel.tabcompleter.TabCompleter(self.global_state)
+        self.reader = None
         self.initialize_input()
         atexit.register(self.shutdown)
 
