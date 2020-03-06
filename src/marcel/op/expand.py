@@ -69,7 +69,7 @@ class Expand(marcel.core.Op):
         self.expander = None
 
     def __repr__(self):
-        return 'expand()' if self.position is None else 'expand(position={})'.format(self.position)
+        return 'expand()' if self.position is None else f'expand({self.position})'
 
     # BaseOp interface
 
@@ -158,4 +158,4 @@ class NotExpandableException(Exception):
         self.not_expandable = not_expandable
 
     def __str__(self):
-        return 'Object of type {} cannot be expanded: {}'.format(type(self.not_expandable), self.not_expandable)
+        return f'Object of type {type(self.not_expandable)} cannot be expanded: {self.not_expandable}'

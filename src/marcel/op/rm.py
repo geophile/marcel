@@ -47,7 +47,7 @@ class Rm(marcel.core.Op):
         self.current_dir = None
 
     def __repr__(self):
-        return 'rm({})'.format(self.filename)
+        return f'rm({self.filename})'
 
     # BaseOp
 

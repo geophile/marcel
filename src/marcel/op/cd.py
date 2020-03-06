@@ -31,7 +31,7 @@ class Cd(marcel.core.Op):
         self.directory = None
 
     def __repr__(self):
-        return 'cd({})'.format(self.directory)
+        return f'cd({self.directory})'
 
     # BaseOp
 

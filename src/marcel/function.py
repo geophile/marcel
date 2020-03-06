@@ -68,4 +68,4 @@ class Function:
                         self.function = eval('lambda: ' + self.source, self.globals)
                     except Exception:
                         raise marcel.exception.KillCommandException(
-                            'Invalid function syntax: {}'.format(self.source))
+                            f'Invalid function syntax: {self.source}')

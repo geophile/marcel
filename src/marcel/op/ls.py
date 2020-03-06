@@ -83,10 +83,8 @@ class Ls(marcel.core.Op):
             include += 'd'
         if self.symlink:
             include += 's'
-        return ('ls(depth={}, include={}, filename={})'.format(
-            depth,
-            include,
-            [str(p) for p in self.filename] if self.filename else '?'))
+        filenames = [str(p) for p in self.filename] if self.filename else '?'
+        return f'ls(depth={depth}, include={include}, filename={filenames})'
 
     # BaseOp
 
@@ -129,7 +127,7 @@ class Ls(marcel.core.Op):
                 for file in sorted(root.iterdir()):
                     self.visit(file, level + 1, base)
             except PermissionError:
-                self.send(marcel.object.error.Error('Cannot explore {}: permission denied'.format(root)))
+                self.send(marcel.object.error.Error(f'Cannot explore {root}: permission denied'))
 
     def send_path(self, path, base):
         if path.is_file() and self.file or path.is_dir() and self.dir or path.is_symlink() and self.symlink:

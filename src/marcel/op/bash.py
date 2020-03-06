@@ -39,7 +39,7 @@ class Bash(marcel.core.Op):
         self.input = []
 
     def __repr__(self):
-        return 'bash(args={})'.format(self.args)
+        return f'bash(args={self.args})'
 
     # BaseOp
 
@@ -117,5 +117,6 @@ class Interactive:
                                    universal_newlines=True)
         process.wait()
         if process.returncode != 0:
-            print('Escaped command failed with exit code {}: {}'.format(process.returncode, ' '.join(self.op.args)))
+            print(f'Escaped command failed with exit code {process.returncode}: {" ".join(self.op.args)}')
             print(process.stderr, file=sys.stderr)
+1

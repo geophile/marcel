@@ -67,7 +67,7 @@ def clone(x):
         copy = unpickler.load()
         return copy
     except Exception as e:
-        print('Cloning error: ({}) {}'.format(type(e), e), file=sys.__stderr__)
+        print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__)
         print_stack()
 
 
@@ -75,7 +75,7 @@ def print_stack(file=None):
     if file is None:
         file = sys.__stderr__
     exception_type, exception, trace = sys.exc_info()
-    print('Caught {}: {}'.format(exception_type, exception), file=file)
+    print(f'Caught {exception_type}: {exception}', file=file)
     traceback.print_tb(trace, file=file)
 
 
@@ -119,7 +119,7 @@ class Trace:
         self.file = self.path.open(mode='w')
 
     def write(self, line):
-        print('{}: {}'.format(time.time(), line), file=self.file, flush=True)
+        print(f'{time.time()}: {line}', file=self.file, flush=True)
 
     def close(self):
         self.file.close()

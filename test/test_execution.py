@@ -52,22 +52,22 @@ class Test:
         else:
             ok = False
         if not ok:
-            print('{} failed:'.format(command))
-            print('    expected:\n<<<{}>>>'.format(expected))
-            print('    actual:\n<<<{}>>>'.format(actual))
+            print(f'{command} failed:')
+            print(f'    expected:\n<<<{expected}>>>')
+            print(f'    actual:\n<<<{actual}>>>')
             Test.failures += 1
 
     @staticmethod
     def check_substring(command, expected, actual):
         if expected not in actual:
-            print('{} failed. Expected substring not found in actual:'.format(command))
-            print('    expected:\n<<<{}>>>'.format(expected))
-            print('    actual:\n<<<{}>>>'.format(actual))
+            print(f'{command} failed. Expected substring not found in actual:')
+            print(f'    expected:\n<<<{expected}>>>')
+            print(f'    actual:\n<<<{actual}>>>')
             Test.failures += 1
 
     @staticmethod
     def fail(command, message):
-        print('{} failed: {}'.format(command, message))
+        print(f'{command} failed: {message}')
         Test.failures += 1
 
     @staticmethod
@@ -89,7 +89,7 @@ class Test:
         if verification is None and expected_out is None and expected_err is None and file is None:
             MAIN.run_command(test)
         else:
-            print('TESTING: {}'.format(test))
+            print(f'TESTING: {test}')
             try:
                 if verification is None:
                     actual_out, actual_err = Test.run_and_capture_output(test)
@@ -103,13 +103,13 @@ class Test:
                 if expected_err:
                     Test.check_substring(test, expected_err, actual_err)
                 elif actual_err:
-                    Test.fail(test, 'Unexpected error: {}'.format(actual_err))
+                    Test.fail(test, f'Unexpected error: {actual_err}')
             except Exception as e:
-                print('{}: Terminated by uncaught exception: {}'.format(test, e))
+                print(f'{test}: Terminated by uncaught exception: {e}')
                 print_stack()
                 Test.failures += 1
             except marcel.exception.KillCommandException as e:
-                print('{}: Terminated by KillCommandException: {}'.format(test, e))
+                print(f'{test}: Terminated by KillCommandException: {e}')
 
     @staticmethod
     def file_contents(filename):
@@ -188,18 +188,18 @@ def test_out():
              expected_out=[0, 1, 2])
     Test.run('gen 3 | out -c {}',
              expected_err='-c/--csv and FORMAT specifications are incompatible')
-    Test.run('gen 3 | out -f {}'.format(output_filename),
+    Test.run(f'gen 3 | out -f {output_filename}',
              expected_out=[0, 1, 2], file=output_filename)
-    Test.run('gen 3 | out --file {}'.format(output_filename),
+    Test.run(f'gen 3 | out --file {output_filename}',
              expected_out=[0, 1, 2], file=output_filename)
     Test.delete_file(output_filename)
-    Test.run('gen 3 | out -a {}'.format(output_filename),
+    Test.run(f'gen 3 | out -a {output_filename}',
              expected_out=[0, 1, 2],
              file=output_filename)
-    Test.run('gen 3 | out --append {}'.format(output_filename),
+    Test.run(f'gen 3 | out --append {output_filename}',
              expected_out=[0, 1, 2, 0, 1, 2],
              file=output_filename)
-    Test.run('gen 3 | out -a {} -f {}'.format(output_filename, output_filename),
+    Test.run(f'gen 3 | out -a {output_filename} -f {output_filename}',
              expected_err='argument -f/--file: not allowed with argument -a/--append')
     Test.delete_file(output_filename)
 
@@ -912,7 +912,7 @@ def main():
     reset_environment()
     main_stable()
     main_dev()
-    print('Test failures: {}'.format(Test.failures))
+    print(f'Test failures: {Test.failures}')
 
 
 main()

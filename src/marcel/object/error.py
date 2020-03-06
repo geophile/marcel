@@ -14,9 +14,9 @@ class Error(marcel.object.renderable.Renderable):
     # Renderable
 
     def render_compact(self):
-        return ('Error({})'.format(self.message)
-                if self.host is None else
-                'Error({}, {})'.format(self.host, self.message))
+        return (f'Error({self.message}: {self.message})'
+                if self.host else
+                f'Error({self.host})')
 
     def render_full(self, color_scheme):
         out = self.render_compact()

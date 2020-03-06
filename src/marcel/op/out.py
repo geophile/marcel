@@ -51,11 +51,7 @@ class Out(marcel.core.Op):
         self.output = None
 
     def __repr__(self):
-        return ('out(append={}, file={}, csv={}, format={})'.format(
-            self.append,
-            self.file,
-            self.csv,
-            Out.ensure_quoted(self.format)))
+        return f'out(append={self.append}, file={self.file}, csv={self.csv}, format={Out.ensure_quoted(self.format)})'
 
     # BaseOp
 

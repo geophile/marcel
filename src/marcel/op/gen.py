@@ -46,7 +46,7 @@ class Gen(marcel.core.Op):
         self.format = None
 
     def __repr__(self):
-        return 'gen(count={}, start={}, pad={})'.format(self.count, self.start, self.pad)
+        return f'gen(count={self.count}, start={self.start}, pad={self.pad})'
 
     # BaseOp
 

@@ -35,7 +35,7 @@ class TabCompleter:
 
     def complete(self, text, state):
         line = readline.get_line_buffer()
-        debug('complete: line={}, text={}'.format(line, text))
+        debug(f'complete: line={line}, text={text}')
         if len(line.strip()) == 0:
             candidates = TabCompleter.OPS
         else:
@@ -50,10 +50,10 @@ class TabCompleter:
                 debug('premature end')
                 pass
             except Exception as e:
-                debug('caught ({}) {}'.format(type(e), e))
+                debug(f'caught ({type(e)}) {e}')
                 # Don't do tab completion
                 return None
-            debug('parser.op: {}'.format(parser.op))
+            debug(f'parser.op: {parser.op}')
             if parser.op is None:
                 candidates = self.complete_op(text)
             else:
@@ -67,7 +67,7 @@ class TabCompleter:
         return candidates[state]
 
     def complete_op(self, text):
-        debug('complete_op, text = <{}>'.format(text))
+        debug(f'complete_op, text = <{text}>')
         candidates = []
         if len(text) > 0:
             # Display marcel ops.
@@ -82,7 +82,7 @@ class TabCompleter:
                     ex_with_space = ex + ' '
                     if ex_with_space.startswith(text):
                         candidates.append(ex_with_space)
-            debug('complete_op candidates for {}: {}'.format(text, candidates))
+            debug(f'complete_op candidates for {text}: {candidates}')
         else:
             candidates = TabCompleter.OPS
         return candidates

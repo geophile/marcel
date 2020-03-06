@@ -38,7 +38,7 @@ class Squish(marcel.core.Op):
         self.function = None
 
     def __repr__(self):
-        return 'squish({})'.format(str(self.function)) if self.function else 'squish()'
+        return f'squish({self.function})' if self.function else 'squish()'
 
     # BaseOp interface
     

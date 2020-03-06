@@ -30,7 +30,7 @@ class Head(marcel.core.Op):
         self.received = 0
 
     def __repr__(self):
-        return 'head({})'.format(self.n)
+        return f'head({self.n})'
 
     # BaseOp interface
     

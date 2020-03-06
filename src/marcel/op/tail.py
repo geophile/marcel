@@ -31,7 +31,7 @@ class Tail(marcel.core.Op):
         self.end = 0  # End of the queue
 
     def __repr__(self):
-        return 'tail({})'.format(self.n)
+        return f'tail({self.n})'
 
     # BaseOp interface
     

@@ -44,7 +44,7 @@ class Mv(marcel.core.Op):
         self.target_posix = None
 
     def __repr__(self):
-        return 'mv({})'.format(self.filename)
+        return f'mv({self.filename})'
 
     # BaseOp
 
@@ -59,7 +59,7 @@ class Mv(marcel.core.Op):
         target_path = pathlib.Path(self.target).resolve()  # Follows symlink
         if len(self.source) == 0:
             if not target_path.is_dir():
-                raise marcel.exception.KillCommandException('{} is not a directory'.format(self.target))
+                raise marcel.exception.KillCommandException(f'{self.target} is not a directory')
             self.source = None
         else:
             if target_path.exists():
@@ -82,7 +82,7 @@ class Mv(marcel.core.Op):
                 roots = marcel.op.filenames.roots(self.current_dir, paths)
                 for root in roots:
                     if root.is_dir() and root.samefile(self.target):
-                        self.send(marcel.object.error.Error('Cannot move directory over self: {}'.format(root)))
+                        self.send(marcel.object.error.Error(f'Cannot move directory over self: {root}'))
                     else:
                         self.move(root)
         except shutil.Error as e:

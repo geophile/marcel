@@ -185,7 +185,7 @@ class Pipeline(BaseOp):
         while op:
             buffer.append(str(op))
             op = op.next_op
-        return 'pipeline({})'.format(' | '.join(buffer))
+        return f'pipeline({" | ".join(buffer)})'
 
     def set_global_state(self, global_state):
         self.global_state = global_state

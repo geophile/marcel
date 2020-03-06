@@ -19,7 +19,7 @@ class Host:
                 self.name = host
             except socket.gaierror:
                 raise marcel.exception.KillCommandException(
-                    'Cannot understand {} as a host name or as an IP address.'.format(host))
+                    f'Cannot understand {host} as a host name or as an IP address.')
 
     def __repr__(self):
         return self.host

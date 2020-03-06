@@ -41,7 +41,7 @@ class KillAndResumeException(BaseException):
         self.message = message
 
     def __str__(self):
-        return '{} failed on {}: {}'.format(self.op, self.input, self.message)
+        return f'{self.op} failed on {self.input}: {self.message}'
 
 
 def _format_input_for_reporting(command_input, buffer):

@@ -29,7 +29,7 @@ class Map(marcel.core.Op):
         self.function = None
 
     def __repr__(self):
-        return 'map({})'.format(self.function.source)
+        return f'map({self.function.source})'
 
     # BaseOp
     

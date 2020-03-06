@@ -14,7 +14,7 @@ class Remote(marcel.core.Op):
         self.process = None
 
     def __repr__(self):
-        return 'remote({})'.format(self.host)
+        return f'remote({self.host})'
 
     # BaseOp
 

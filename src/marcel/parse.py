@@ -176,7 +176,7 @@ class PythonExpression(Token):
                 self.end = PythonString(self.text, self.end - 1).end
         if self.text[self.end - 1] != Token.CLOSE:
             raise marcel.exception.KillCommandException(
-                'Malformed Python expression {}'.format(self.text[self.start:self.end]))
+                f'Malformed Python expression {self.text[self.start:self.end]}')
 
 
 class ShellString(Token):
@@ -231,7 +231,7 @@ class ShellString(Token):
                         chars.append(c)
                 else:
                     raise marcel.exception.KillCommandException(
-                        'Malformed string: {}'.format(self.text[self.start:self.end]))
+                        f'Malformed string: {self.text[self.start:self.end]}')
             else:
                 chars.append(c)
         self.string = ''.join(chars)
@@ -302,7 +302,7 @@ class UnexpectedTokenError(Exception):
         self.message = message
 
     def __str__(self):
-        return 'Parsing error at position {} of "{}": {}'.format(self.position, self.text, self.message)
+        return f'Parsing error at position {self.position} of "{self.text}": {self.message}'
 
 
 class PrematureEndError(UnexpectedTokenError):
@@ -311,7 +311,7 @@ class PrematureEndError(UnexpectedTokenError):
         super().__init__(text, None, None)
 
     def __str__(self):
-        return 'Command ended prematurely: {}'.format(self.text)
+        return f'Command ended prematurely: {self.text}'
 
 
 class UnknownOpError(UnexpectedTokenError):
@@ -321,7 +321,7 @@ class UnknownOpError(UnexpectedTokenError):
         self.op_name = op_name
 
     def __str__(self):
-        return 'Unknown op {} in {}'.format(self.op_name, self.text)
+        return f'Unknown op {self.op_name} in {self.text}'
 
 
 class Parser(Token):
@@ -336,7 +336,7 @@ class Parser(Token):
         self.args = []
 
     def __repr__(self):
-        return 'parser({})'.format(self.text)
+        return f'parser({self.text})'
 
     def start_action(self, token):
         self.op = None

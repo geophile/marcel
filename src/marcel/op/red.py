@@ -99,9 +99,7 @@ class Red(marcel.core.Op):
         self.reducer = None
 
     def __repr__(self):
-        return ('red(incremental={}, function={})'.format(
-            self.incremental,
-            [(f.source if f else None) for f in self.function]))
+        return f'red(incremental={self.incremental}, function={[(f.source if f else None) for f in self.function]})'
 
     # BaseOp
 
