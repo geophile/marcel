@@ -61,10 +61,8 @@ class Edit(marcel.core.Op):
                                    universal_newlines=True)
         process.wait()
         with open(self.tmp_file, 'r') as input:
-            command = input.readline()
-        if command.endswith('\n'):
-            command = command[:-1]
-        self.global_state().edited_command = command
+            command_lines = input.readlines()
+        self.global_state().edited_command = ''.join(command_lines)
         os.remove(self.tmp_file)
 
     # Op

@@ -36,5 +36,6 @@ E.g., tab completion for a\ b doesn't work.
 
 ----------------------------------------------------------------------
 
-20.
+20. edit op isn't working
 
+Wasn't quite finished.

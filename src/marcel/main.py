@@ -46,9 +46,6 @@ class Reader(marcel.multilinereader.MultiLineReader):
         super().__init__(history_file=history_file)
         self.global_state = global_state
 
-    def set_edited_command(self, edited_command):
-        self.global_state.edited_command = edited_command
-
     def take_edited_command(self):
         edited_command = self.global_state.edited_command
         self.global_state.edited_command = None
@@ -62,8 +59,8 @@ class Main:
         self.env = marcel.env.Environment(config_path)
         self.tab_completer = marcel.tabcompleter.TabCompleter()
         self.reader = None
-        self.initialize_input()
         self.global_state = marcel.globalstate.GlobalState(self.env)
+        self.initialize_input()
         atexit.register(self.shutdown)
 
     def run(self):
@@ -88,12 +85,12 @@ class Main:
                 print(e, file=sys.stderr)
 
     def initialize_input(self):
-        readline.set_pre_input_hook(Main.insert_edited_command)
         readline.set_history_length(HISTORY_LENGTH)
         readline.parse_and_bind('tab: complete')
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
-        self.reader = Reader(self.env.globals(), self.history_file())
+        readline.set_pre_input_hook(hook)
+        self.reader = Reader(self.global_state, self.history_file())
 
     def history_file(self):
         home = self.env.getenv('HOME')
@@ -113,6 +110,13 @@ class Main:
             readline.insert_text(command)
             readline.redisplay()
 
+MAIN = None
+
+def hook():
+    global MAIN
+    readline.insert_text(MAIN.reader.take_edited_command())
+    readline.redisplay()
 
 if __name__ == '__main__':
-    Main().run()
+    MAIN = Main()
+    MAIN.run()
