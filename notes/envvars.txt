@@ -30,9 +30,9 @@ Reconsidering these pieces:
   definitions, functions.
 
 - .marcel.py is also a convenient place to specify prompts, and the
-  colors they use. But if these activities define symbols, those
-  symbols are available in the namespace used for functions. So
-  something like this:
+  colors they use. But if these specifications define symbols, those
+  symbols are available in the namespace used for functions. So maybe
+  do something like this to avoid introducing symbols:
 
   CLUSTERS.define(name='jao',
                   hosts=['jao1', 'jao2'],
@@ -40,7 +40,7 @@ Reconsidering these pieces:
                   identity='/home/jao/.ssh/id_rsa')
 
   Is CLUSTERS and environment var? Does it come from marcel.config?
-
+  Could be a class, and "define" a static method.
 
 
 
@@ -54,3 +54,68 @@ Environment variables:
 - PROMPT
 - CONTINUATION_PROMPT
 - VERSION
+
+----------------------------------------------------------------------
+
+Bash vars:
+
+- Setting all vars seems to be possible. Setting USER doesn't seem to
+  affect anything, e.g. the prompt. Setting PWD changes the directory
+  that shows up in the prompmt, but doesn't change the actual current
+  directory.
+
+- Is there a pythonic way of creating read-only vars? There doesn't
+  appear to be.
+
+----------------------------------------------------------------------
+
+Some env vars are predefined. OK for marcel.config to bring them
+in. Either use "from marcel.config import *" or implementation has to
+do manipulation of namespaces to get them to be effectively global in
+the .marcel.py namespace.
+
+Clusters.define (above) is OK for defining clusters.
+
+Colors, color schemes and prompts:
+
+- PROMPT and CONTINUATION_PROMPT are predefined env vars. They are of
+  type Prompt.
+
+- Build up to specifying a prompt colorscheme:
+
+ColorSchemes.define('jao_term')
+Colors.define('jao_term', 'user_highlight', 0, 2, 1, bold=True)
+Colors.define('jao_term', 'dir_highlight', 0, 3, 3, bold=True)
+PROMPT.set_colorscheme('jao_term')
+
+It would be nice to do this with symbols (jao_term) instead of strings
+('jao_term') but then those symbols are in the global namespace.
+
+----------------------------------------------------------------------
+
+Environment.__init__:
+
+- sets USER, HOME, HOST, PWD env vars.
+
+- execs config file
+
+----------------------------------------------------------------------
+
+Design:
+
+.marcel.py DOES NOT NEED "from marcel.config import *".
+
+Call exec of .marcel.py with:
+
+  - globals: the define_ functions to be used inside exec
+  - locals: empty
+
+After the exec call:
+
+- globals will have __builtins__. Keep that.  
+
+- locals will have all the symbols in the exec'd codes
+  namespace. I.e., anything that was imported or defined.
+
+For function calls, construct globals out of locals and the rescued
+__builtins__.

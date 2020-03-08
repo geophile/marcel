@@ -1,6 +1,4 @@
-from marcel.config import *
-
-jao = Cluster('jao')
-jao.hosts = ['localhost']
-jao.user = 'jao'
-jao.identity = '/home/.ssh/id_rsa'
+define_cluster(name='jao',
+               hosts=['localhost'],
+               user='jao',
+               identity='/home/jao/.ssh/id_rsa')
