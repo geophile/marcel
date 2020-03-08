@@ -35,8 +35,7 @@ class Select(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
-        self.function = marcel.function.Function(self.function, self.global_state().env.globals())
-        self.function.set_op(self)
+        self.function = super().create_function(self.function)
 
     def receive(self, x):
         if self.function(*x):

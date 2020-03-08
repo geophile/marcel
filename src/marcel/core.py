@@ -170,6 +170,13 @@ class Op(BaseOp):
     def op_name(cls):
         return cls.__name__.lower()
 
+    # For use by subclasses
+
+    def create_function(self, source):
+        function = marcel.function.Function(source, self.global_state().env.config().globals_for_op_functions)
+        function.set_op(self)
+        return function
+
 
 class Pipeline(BaseOp):
 

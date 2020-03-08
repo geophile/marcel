@@ -115,7 +115,7 @@ class Window(marcel.core.Op):
 
     def setup_1(self):
         if self.predicate:
-            self.predicate = marcel.function.Function(self.predicate, self.global_state().env.globals())
+            self.predicate = super().create_function(self.predicate)
         # Exactly one of predicate, overlap, disjoint should be set. Not sure that argparse is up to that.
         count = 1 if self.predicate is not None else 0
         count += 1 if self.overlap is not None else 0

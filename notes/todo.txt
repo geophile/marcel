@@ -77,5 +77,4 @@ parse.
 
 ----------------------------------------------------------------------
 
-Change string formatting from '...'.format(...) to f'...' where possible.
-
+Get rid of "from ... import ..."

@@ -40,9 +40,8 @@ class Sort(marcel.core.Op):
 
     def setup_1(self):
         if self.key:
-            self.key = marcel.function.Function(self.key, self.global_state().env.globals())
-            self.key.set_op(self)
-    
+            self.key = super().create_function(self.key)
+
     def receive(self, x):
         self.contents.append(x)
     

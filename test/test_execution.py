@@ -687,11 +687,11 @@ def test_fork():
 def test_namespace():
     config_file = '/tmp/.marcel.py'
     config_path = pathlib.Path(config_file)
-    # Default namespace has just __builtins__
+    # Default namespace has just __builtins__ and initial set of env vars.
     config_path.touch()
     config_path.unlink()
     config_path.touch()
-    reset_environment()
+    reset_environment(config_file)
     Test.run('map (globals().keys())',
              expected_out=["dict_keys(['USER', 'HOME', 'HOST', 'PWD', '__builtins__'])"])
     # Try to use an undefined symbol
@@ -701,7 +701,7 @@ def test_namespace():
     config_path.unlink()
     with open(config_file, 'w') as file:
         file.writelines('from math import *')
-    reset_environment()
+    reset_environment(config_file)
     Test.run('map (pi)',
              expected_out=['3.141592653589793'])
     # Reset environment
@@ -871,8 +871,8 @@ def test_mv():
              expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
 
 
-def reset_environment():
-    MAIN.global_state.env = marcel.env.Environment('./.marcel.py')
+def reset_environment(config_file='./.marcel.py'):
+    MAIN.global_state.env = marcel.env.Environment(config_file)
     os.chdir(start_dir)
 
 

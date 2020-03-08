@@ -15,6 +15,7 @@ class Configuration:
         self.clusters = {}
         self.prompt = Configuration.DEFAULT_PROMPT
         self.continuation_prompt = Configuration.DEFAULT_PROMPT
+        self.globals_for_op_functions = None
 
     def read_config(self, config_path):
         config_path = (pathlib.Path(config_path)
@@ -33,6 +34,11 @@ class Configuration:
             globals['Color'] = marcel.object.colorscheme.Color
             locals = {}
             exec(config_source, globals, locals)
+            # Prepare environment for function evaluation:
+            # - locals has symbols defined by, and imported by, config file.
+            # - env vars
+            self.globals_for_op_functions = locals
+            self.globals_for_op_functions.update(self.env_vars)
 
     def define_colors(self, **kwargs):
         self.colors = kwargs
