@@ -47,17 +47,6 @@ namespace, but values cannot.
 
 ----------------------------------------------------------------------
 
-22. Error output should be more informative
-
-M jao@cheese:~$ gen 3 -1 | map (x: 1/x)
--1.0
-Error(None)
-1.0
-
-Error(None): should identify input and op
-
-----------------------------------------------------------------------
-
 23. Space after tab completion is off
 
 Want a space when the choice is unambiguous. Don't want it otherwide,

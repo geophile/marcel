@@ -255,6 +255,22 @@ FIXED
 
 ----------------------------------------------------------------------
 
+FIXED
+
 20. edit op isn't working
 
 Wasn't quite finished.
+
+----------------------------------------------------------------------
+
+FIXED
+
+22. Error output should be more informative
+
+M jao@cheese:~$ gen 3 -1 | map (x: 1/x)
+-1.0
+Error(None)
+1.0
+
+Error(None): should identify input and op
+

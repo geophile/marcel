@@ -47,6 +47,7 @@ class Function:
 
     def __getstate__(self):
         self.function = None
+        self.globals = None
         return self.__dict__
 
     def __setstate__(self, state):
