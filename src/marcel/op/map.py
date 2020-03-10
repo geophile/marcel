@@ -14,11 +14,9 @@ class MapArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('map')
-        self.add_argument('function')
+        self.add_argument('function',
+                          type=super().constrained_type(self.check_function, 'not a valid function'))
 
-
-# map can be used as a generator (function with no args) or
-# downstream. That's why receive and execute are both defined.
 
 class Map(marcel.core.Op):
 
@@ -29,7 +27,7 @@ class Map(marcel.core.Op):
         self.function = None
 
     def __repr__(self):
-        return f'map({self.function.source})'
+        return f'map({marcel.core.Op.function_source(self.function)})'
 
     # BaseOp
     
@@ -37,7 +35,7 @@ class Map(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
-        self.function = super().create_function(self.function)
+        pass
 
     def receive(self, x):
         output = self.function() if x is None else self.function(*x)

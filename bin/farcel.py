@@ -5,6 +5,8 @@ import threading
 import signal
 
 import marcel.core
+import marcel.env
+import marcel.globalstate
 import marcel.object.process
 from marcel.util import *
 
@@ -83,10 +85,12 @@ def kill_self_and_descendents(signal_id):
 
 
 def main():
-    marcel.env.Environment.initialize(None)
+    env = marcel.env.Environment(None)
+    global_state = marcel.globalstate.GlobalState(env)
     # Use sys.stdin.buffer because we want binary data, not the text version
     input = pickle.Unpickler(sys.stdin.buffer)
     pipeline = input.load()
+    pipeline.set_global_state(global_state)
     TRACE.write(f'pipeline: {pipeline}')
     pipeline_runner = PipelineRunner(pipeline)
     pipeline_runner.start()

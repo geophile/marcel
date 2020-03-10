@@ -1,8 +1,11 @@
+import marcel.object.host
+
+
 class Cluster:
 
     def __init__(self, name, hosts, user, identity):
         self.name = name
-        self.hosts = hosts
+        self.hosts = [marcel.object.host.Host(host, self) for host in hosts]
         self.user = user
         self.identity = identity
 

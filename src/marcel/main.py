@@ -63,6 +63,12 @@ class Main:
         self.initialize_input()
         atexit.register(self.shutdown)
 
+    def __getstate__(self):
+        assert False
+
+    def __setstate__(self, state):
+        assert False
+
     def run(self):
         try:
             while True:
@@ -77,7 +83,7 @@ class Main:
     def run_command(self, line):
         if line:
             try:
-                parser = marcel.parse.Parser(line)
+                parser = marcel.parse.Parser(line, self.global_state)
                 pipeline = parser.parse()
                 pipeline.set_global_state(self.global_state)
                 Command(pipeline).execute()

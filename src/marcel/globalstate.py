@@ -10,3 +10,12 @@ class GlobalState:
 
     def __str__(self):
         return 'GlobalState'
+
+    def __getstate__(self):
+        return {}
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
+    def function_namespace(self):
+        return self.env.config().function_namespace

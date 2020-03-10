@@ -11,11 +11,15 @@ Error = marcel.object.error.Error
 
 class ArgParser(argparse.ArgumentParser):
 
-    op_flags = {'gen': ['-p', '--pad']}  # op name -> [flags], for use in tab completion
+    op_flags = {}  # op name -> [flags], for use in tab completion
 
     def __init__(self, op_name, flags=None):
         super().__init__(prog=op_name)
         ArgParser.op_flags[op_name] = flags
+        self.global_state = None
+
+    def set_global_state(self, global_state):
+        self.global_state = global_state
 
     def exit(self, status=0, message=None):
         raise marcel.exception.KillCommandException(message)
@@ -38,6 +42,9 @@ class ArgParser(argparse.ArgumentParser):
         if n < 0:
             raise ValueError()
         return n
+
+    def check_function(self, s):
+        return marcel.function.Function(s, self.global_state.function_namespace())
 
 
 class BaseOp(object):
@@ -173,9 +180,12 @@ class Op(BaseOp):
     # For use by subclasses
 
     def create_function(self, source):
-        function = marcel.function.Function(source, self.global_state().env.config().globals_for_op_functions)
+        function = marcel.function.Function(source, self.global_state().function_namespace())
         function.set_op(self)
-        return function
+
+    @staticmethod
+    def function_source(function):
+        return function.source if callable(function) else function
 
 
 class Pipeline(BaseOp):

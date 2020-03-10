@@ -326,8 +326,9 @@ class UnknownOpError(UnexpectedTokenError):
 
 class Parser(Token):
 
-    def __init__(self, text):
+    def __init__(self, text, global_state):
         super().__init__(text, 0)
+        self.global_state = global_state
         self.state = ParseState.START
         self.pipelines = Stack()
         self.pipelines.push(marcel.core.Pipeline())
@@ -492,7 +493,9 @@ class Parser(Token):
                 raise UnknownOpError(self.text, op_name)
 
     def finish_op(self):
-        self.op.arg_parser().parse_args(self.args, namespace=self.op)
+        arg_parser = self.op.arg_parser()
+        arg_parser.set_global_state(self.global_state)
+        arg_parser.parse_args(self.args, namespace=self.op)
         self.pipeline().append(self.op)
         self.args = []
 

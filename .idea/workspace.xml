@@ -2,17 +2,25 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/experiments/extendstr.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/boundmethod.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/farcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/bin/farcel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/core.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/globalstate.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/globalstate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/object/cluster.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/object/cluster.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/op/map.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/map.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/op/red.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/red.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/remote.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/remote.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/op/select.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/select.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/op/sort.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/sort.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/squish.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/squish.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/window.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/parse.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/parse.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/test_execution.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_execution.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -79,6 +87,28 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.test_execution">
+    <configuration name="boundmethod" type="PythonConfigurationType" factoryName="Python">
+      <module name="marcel" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/usr/bin/python3.7" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/experiments" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/boundmethod.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="config" type="PythonConfigurationType" factoryName="Python">
       <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -236,6 +266,7 @@
     <list>
       <item itemvalue="Python.test_execution" />
       <item itemvalue="Python.pipes" />
+      <item itemvalue="Python.boundmethod" />
       <item itemvalue="Python.extendstr" />
       <item itemvalue="Python.config" />
       <item itemvalue="Python.multiline" />
@@ -299,7 +330,9 @@
       <workItem from="1583418953746" duration="28323000" />
       <workItem from="1583511378231" duration="12031000" />
       <workItem from="1583608984022" duration="17268000" />
-      <workItem from="1583694808600" duration="5022000" />
+      <workItem from="1583694808600" duration="12034000" />
+      <workItem from="1583708420757" duration="23000" />
+      <workItem from="1583720360497" duration="8949000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -363,9 +396,9 @@
           <option name="timeStamp" value="183" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/marcel/parse.py</url>
-          <line>220</line>
-          <option name="timeStamp" value="200" />
+          <url>file://$PROJECT_DIR$/src/marcel/op/fork.py</url>
+          <line>24</line>
+          <option name="timeStamp" value="221" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -379,6 +412,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/osh2$ssh.coverage" NAME="ssh Coverage Results" MODIFIED="1580142771947" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/osh" />
+    <SUITE FILE_PATH="coverage/marcel$boundmethod.coverage" NAME="boundmethod Coverage Results" MODIFIED="1583724247113" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$findexec.coverage" NAME="findexec Coverage Results" MODIFIED="1582948321982" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$multiline.coverage" NAME="multiline Coverage Results" MODIFIED="1583338699803" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$pipes.coverage" NAME="pipes Coverage Results" MODIFIED="1582841261682" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
@@ -402,7 +436,7 @@
     <SUITE FILE_PATH="coverage/osh2$eval.coverage" NAME="eval Coverage Results" MODIFIED="1580913511419" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/osh2$test_parsing.coverage" NAME="test_parsing Coverage Results" MODIFIED="1578772660138" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$test_execution.coverage" NAME="test_execution Coverage Results" MODIFIED="1582067328390" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
-    <SUITE FILE_PATH="coverage/marcel$test_execution.coverage" NAME="test_execution Coverage Results" MODIFIED="1583700976526" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/marcel$test_execution.coverage" NAME="test_execution Coverage Results" MODIFIED="1583800644807" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$trypopen.coverage" NAME="trypopen Coverage Results" MODIFIED="1581515992735" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/osh2$test_shell_string.coverage" NAME="test_shell_string Coverage Results" MODIFIED="1578065283531" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
   </component>

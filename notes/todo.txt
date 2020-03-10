@@ -78,3 +78,21 @@ parse.
 ----------------------------------------------------------------------
 
 Get rid of "from ... import ..."
+
+----------------------------------------------------------------------
+
+.marcel.py has to use env vars as VAR.value. Any way to get rid of
+.value? Or at least import it syntactically? E.g. $(VAR) wouldn't be
+bad, but $ is not legal in an identifier.
+
+EASY: Just update the namespace directly, when env vars are updated!
+Also need to clear all Function.functions, so that they get
+regenerated with the updated namespace. (Is this right? Need to
+experiment.)
+
+----------------------------------------------------------------------
+
+Provide a way to specify farcel config path. Maybe as a property of
+the cluster.
+
+

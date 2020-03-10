@@ -15,7 +15,8 @@ class SelectArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('select')
-        self.add_argument('function')
+        self.add_argument('function',
+                          type=super().constrained_type(self.check_function, 'not a valid function'))
 
 
 class Select(marcel.core.Op):
@@ -27,7 +28,7 @@ class Select(marcel.core.Op):
         self.function = None
 
     def __repr__(self):
-        return f'select({self.function})'
+        return f'select({marcel.core.Op.function_source(self.function)})'
 
     # BaseOp
     
@@ -35,7 +36,7 @@ class Select(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
-        self.function = super().create_function(self.function)
+        pass
 
     def receive(self, x):
         if self.function(*x):

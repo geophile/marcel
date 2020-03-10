@@ -26,7 +26,9 @@ class SquishArgParser(marcel.core.ArgParser):
 
     def __init__(self):
         super().__init__('squish')
-        self.add_argument('function', nargs='?')
+        self.add_argument('function',
+                          nargs='?',
+                          type=super().constrained_type(self.check_function, 'not a valid function'))
 
 
 class Squish(marcel.core.Op):
@@ -47,8 +49,7 @@ class Squish(marcel.core.Op):
 
     def setup_1(self):
         if self.function is None:
-            self.function = '+'
-        self.function = super().create_function(self.function)
+            self.function = marcel.function.Function('+', self.global_state())
         self.function.set_op(self)
 
     def receive(self, x):

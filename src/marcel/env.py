@@ -3,6 +3,7 @@ import os
 import pathlib
 import socket
 
+import marcel.config
 import marcel.exception
 import marcel.object.cluster
 import marcel.object.colorscheme
@@ -10,25 +11,17 @@ import marcel.object.colorscheme
 from marcel.util import *
 
 
-marker = 0
-
 class EnvVar(str):
 
     def __init__(self, value):
         super().__init__()
         self.value = value
-        global marker
-        self.marker = marker
-        marker += 1
 
     def __str__(self):
-        return f'{self.value}({self.marker})'
+        return str(self.value)
 
     def set(self, value):
         self.value = value
-        global marker
-        self.marker = marker
-        marker += 1
 
 
 class Environment:
@@ -48,6 +41,12 @@ class Environment:
         self._config.read_config(config_file)
         self._colors = self._config.colors
         self._color_scheme = self._config.color_scheme
+
+    def __getstate__(self):
+        assert False
+
+    def __setstate__(self, state):
+        assert False
 
     def prompts(self):
         return (self._prompt_string(self._config.prompt),
@@ -72,10 +71,7 @@ class Environment:
         return self._vars
 
     def cluster(self, name):
-        symbol = self._vars.get(name, None)
-        return (symbol.value
-                if symbol and isinstance(symbol.value, marcel.object.cluster.Cluster) else
-                None)
+        return self.config().clusters.get(name, None)
 
     def config(self):
         return self._config
@@ -98,14 +94,13 @@ class Environment:
                 color = x
                 x = None
             elif isinstance(x, str):
-                if isinstance(x, EnvVar):
-                    print(f'_prompt_string: {x}')
                 c = self._colors.get(x, None)
                 if c:
                     color = c
                     x = None
             elif callable(x):
-                x.__globals__.update(self._config.globals_for_op_functions)
+                # Set up the namespace for calling the function
+                x.__globals__.update(self._config.function_namespace)
                 x = x()
             else:
                 raise marcel.exception.KillShellException(f'Invalid prompt component: {x}')

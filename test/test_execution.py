@@ -710,8 +710,8 @@ def test_namespace():
 
 def test_remote():
     localhost = marcel.object.host.Host('localhost', None)
-    Test.run('@jao [ gen 3 ]',
-             expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
+    # Test.run('@jao [ gen 3 ]',
+    #          expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
     # Handling of remote errors
     Test.run('@jao [ gen 3 -1 | map (x: 5 / x) ]',
              expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
@@ -893,7 +893,7 @@ def main_stable():
     test_window()
     test_bash()
     test_fork()
-    # test_namespace()
+    test_namespace()
     # test_remote()
     test_rm()
     test_mv()
@@ -902,8 +902,6 @@ def main_stable():
 
 def main_dev():
     pass
-    # Test.run('@jao [ gen 3 ]')
-    # test_remote()
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
 
