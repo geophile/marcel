@@ -894,7 +894,7 @@ def main_stable():
     test_bash()
     test_fork()
     test_namespace()
-    # test_remote()
+    test_remote()
     test_rm()
     test_mv()
     test_no_such_op()
