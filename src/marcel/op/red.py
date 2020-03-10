@@ -115,6 +115,7 @@ class Red(marcel.core.Op):
         data_positions = []
         for i in range(len(self.function)):
             function = self.function[i]
+            function.set_op(self)
             if Red.is_grouping(function.source):
                 grouping_positions.append(i)
                 self.function[i] = None

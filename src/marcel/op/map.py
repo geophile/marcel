@@ -35,7 +35,7 @@ class Map(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
-        pass
+        self.function.set_op(self)
 
     def receive(self, x):
         output = self.function() if x is None else self.function(*x)

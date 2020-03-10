@@ -185,7 +185,7 @@ class Op(BaseOp):
 
     @staticmethod
     def function_source(function):
-        return function.source if callable(function) else function
+        return function.source if isinstance(function, marcel.function.Function) else function
 
 
 class Pipeline(BaseOp):

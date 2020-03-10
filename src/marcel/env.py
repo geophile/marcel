@@ -64,7 +64,6 @@ class Environment:
         return self._config
 
     def color_scheme(self):
-        assert isinstance(self._color_scheme, marcel.object.colorscheme.ColorScheme), self._color_scheme
         return self._color_scheme
 
     def getenv(self, var):

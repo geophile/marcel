@@ -42,7 +42,8 @@ class Sort(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
-        pass
+        if self.key:
+            self.key.set_op(self)
 
     def receive(self, x):
         self.contents.append(x)
