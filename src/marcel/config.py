@@ -89,6 +89,13 @@ class Configuration:
         self.function_namespace[var] = value
 
     def color(self, x):
-        return (self.colors.get(x, None)
-                if isinstance(x, str) else
-                x)
+        out = None
+        if isinstance(x, str):
+            out = self.colors.get(x, None)
+        elif isinstance(x, dict):
+            out = {}
+            for key, color in x.items():
+                out[key] = self.color(color)
+        else:
+            out = x
+        return out

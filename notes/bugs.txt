@@ -51,3 +51,36 @@ namespace, but values cannot.
 
 Want a space when the choice is unambiguous. Don't want it otherwide,
 e.g. complete xy with strings xya xyb.
+
+----------------------------------------------------------------------
+
+24. cat problem causes marcel to crash
+
+M jao@cheese:/tmp$ cat /tmp/nsm*
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/src/marcel/main.py", line 122, in <module>
+    MAIN.run()
+  File "/home/jao/git/marcel/src/marcel/main.py", line 77, in run
+    self.run_command(line)
+  File "/home/jao/git/marcel/src/marcel/main.py", line 89, in run_command
+    Command(pipeline).execute()
+  File "/home/jao/git/marcel/src/marcel/main.py", line 40, in execute
+    self.pipeline.receive_complete()
+  File "/home/jao/git/marcel/src/marcel/core.py", line 240, in receive_complete
+    self.first_op.receive_complete()
+  File "/home/jao/git/marcel/src/marcel/op/bash.py", line 61, in receive_complete
+    self.runner.run()
+  File "/home/jao/git/marcel/src/marcel/op/bash.py", line 85, in run
+    stdout, stderr = process.communicate(input=input)
+  File "/usr/lib/python3.7/subprocess.py", line 964, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.7/subprocess.py", line 1755, in _communicate
+    self.stdout.errors)
+  File "/usr/lib/python3.7/subprocess.py", line 841, in _translate_newlines
+    data = data.decode(encoding, errors)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa0 in position 1247: invalid start byte
+
+----------------------------------------------------------------------
+
+26.
+
