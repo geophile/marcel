@@ -55,3 +55,10 @@ Error(None)
 1.0
 
 Error(None): should identify input and op
+
+----------------------------------------------------------------------
+
+23. Space after tab completion is off
+
+Want a space when the choice is unambiguous. Don't want it otherwide,
+e.g. complete xy with strings xya xyb.

@@ -7,7 +7,7 @@ import marcel.op
 from marcel.util import *
 
 
-DEBUG = True
+DEBUG = False
 
 
 def debug(message):

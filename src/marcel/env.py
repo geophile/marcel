@@ -11,19 +11,6 @@ import marcel.object.colorscheme
 from marcel.util import *
 
 
-class EnvVar(str):
-
-    def __init__(self, value):
-        super().__init__()
-        self.value = value
-
-    def __str__(self):
-        return str(self.value)
-
-    def set(self, value):
-        self.value = value
-
-
 class Environment:
 
     def __init__(self, config_file):
@@ -32,10 +19,10 @@ class Environment:
         self._current_dir = pathlib.Path.cwd().resolve()
         self._host = socket.gethostname()
         self._vars = {  # Environment variables
-            'USER': EnvVar(self._user),
-            'HOME': EnvVar(self._homedir.as_posix()),
-            'HOST': EnvVar(self._host),
-            'PWD': EnvVar(self._current_dir.as_posix())
+            'USER': self._user,
+            'HOME': self._homedir.as_posix(),
+            'HOST': self._host,
+            'PWD': self._current_dir.as_posix()
         }
         self._config = marcel.config.Configuration(self._vars)
         self._config.read_config(config_file)
@@ -60,7 +47,7 @@ class Environment:
         new_dir = self._current_dir / directory
         try:
             self._current_dir = new_dir.resolve(strict=True)
-            self._vars['PWD'].set(self._current_dir.as_posix())
+            self.setenv('PWD', self._current_dir.as_posix())
             # So that executables have the same view of the current directory.
             os.chdir(self._current_dir)
         except FileNotFoundError:
@@ -81,8 +68,11 @@ class Environment:
         return self._color_scheme
 
     def getenv(self, var):
-        var = self._vars.get(var, None)
-        return var.value if var else None
+        return self._vars.get(var, None)
+
+    def setenv(self, var, value):
+        self._vars[var] = value
+        self._config.set_var_in_function_namespace(var, value)
 
     def _prompt_string(self, prompt_pieces):
         buffer = []

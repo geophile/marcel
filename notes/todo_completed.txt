@@ -102,3 +102,15 @@ Symlink: Include referenced file
   being completed is first in the pipline, or downstream. E.g., don't
   show select as a first op.
 
+
+----------------------------------------------------------------------
+
+.marcel.py has to use env vars as VAR.value. Any way to get rid of
+.value? Or at least import it syntactically? E.g. $(VAR) wouldn't be
+bad, but $ is not legal in an identifier.
+
+EASY: Just update the namespace directly, when env vars are updated!
+Also need to clear all Function.functions, so that they get
+regenerated with the updated namespace. (Is this right? Need to
+experiment.)
+

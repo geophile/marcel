@@ -85,6 +85,9 @@ class Configuration:
     def define_cluster(self, name, hosts, user, identity):
         self.clusters[name] = marcel.object.cluster.Cluster(name, hosts, user, identity)
 
+    def set_var_in_function_namespace(self, var, value):
+        self.function_namespace[var] = value
+
     def color(self, x):
         return (self.colors.get(x, None)
                 if isinstance(x, str) else
