@@ -1,8 +1,6 @@
 from enum import Enum, auto
 
 import marcel.core
-import marcel.core
-import marcel.exception
 import marcel.exception
 import marcel.op.fork
 import marcel.opmodules

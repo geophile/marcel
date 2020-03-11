@@ -67,8 +67,7 @@ class Rm(marcel.core.Op):
             self.remove(x[0].path)
         else:
             # Remove specified files
-            paths = marcel.op.filenames.normalize_paths(self.filename)
-            roots = marcel.op.filenames.roots(self.current_dir, paths)
+            roots = marcel.op.filenames.roots(self.current_dir, self.filename)
             for root in roots:
                 self.remove(root)
 

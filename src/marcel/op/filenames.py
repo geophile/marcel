@@ -4,7 +4,7 @@ import os
 import pathlib
 
 
-def normalize_paths(filenames):
+def _normalize_paths(filenames):
     # Resolve ~
     # Resolve . and ..
     # Convert to Path
@@ -25,7 +25,8 @@ def normalize_paths(filenames):
     return paths
 
 
-def roots(current_dir, paths):
+def roots(current_dir, filenames):
+    paths = _normalize_paths(filenames)
     roots = []
     roots_set = set()
     for path in paths:

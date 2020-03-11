@@ -54,9 +54,6 @@ class Environment:
             raise marcel.exception.KillCommandException(
                 'Cannot cd into {} from {}. Directory does not exist.'.format(directory, self._current_dir))
 
-    def globals(self):
-        return self._vars
-
     def cluster(self, name):
         return self.config().clusters.get(name, None)
 

@@ -103,8 +103,7 @@ class Ls(marcel.core.Op):
             self.filename = [self.current_dir.as_posix()]
 
     def receive(self, _):
-        paths = marcel.op.filenames.normalize_paths(self.filename)
-        roots = marcel.op.filenames.roots(self.current_dir, paths)
+        roots = marcel.op.filenames.roots(self.current_dir, self.filename)
         # Paths will be displayed relative to a root if there is one root and it is a directory.
         base = roots[0] if len(roots) == 1 and roots[0].is_dir() else None
         for root in sorted(roots):

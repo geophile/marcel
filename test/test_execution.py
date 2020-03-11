@@ -822,15 +822,28 @@ def test_mv():
     d1_in_d2 = 'd2/d1'
     f11_in_d2 = 'd2/d1/f11'
     f12_in_d2 = 'd2/d1/f12'
+    f1_in_d2 = 'd2/f1'
+    f2_in_d2 = 'd2/f2'
     t = 't'
+    t_star = 't*'
     # Move one file to missing target
     setup(base)
     Test.run(test='mv f1 t',
              verification='ls -r | map (f: f.render_compact())',
              expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2, t]))
+    # Move one file to missing target identified by glob
+    setup(base)
+    Test.run(test='mv f1 t*',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2, t_star]))
     # Move one file to existing file
     setup(base)
     Test.run(test='mv f1 f2',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
+    # Move one file to existing file identified by glob
+    setup(base)
+    Test.run(test='mv f1 f2*',
              verification='ls -r | map (f: f.render_compact())',
              expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
     # Move one file to existing directory
@@ -838,28 +851,45 @@ def test_mv():
     Test.run(test='mv f1 d1',
              verification='ls -r | map (f: f.render_compact())',
              expected_out=sorted([dot, d1, f11, f12, f1_in_d1, d2, f21, f22, f2]))
+    # Move one file to existing directory identified by glob
+    setup(base)
+    Test.run(test='mv f1 d1*',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted([dot, d1, f11, f12, f1_in_d1, d2, f21, f22, f2]))
     # Move multiple files to missing target
     setup(base)
-    Test.run(test='mv ?1 f? t',
+    Test.run(test='mv * t',
+             expected_err='Cannot move multiple sources to a non-existent target')
+    # Move multiple files to missing target identified by glob
+    setup(base)
+    Test.run(test='mv * t*',
              expected_err='Cannot move multiple sources to a non-existent target')
     # Move multiple files to existing file
     setup(base)
     Test.run(test='mv ?1 f? f1',
+             expected_err='Cannot move multiple sources to a file target')
+    # Move multiple files to existing file identified by glob
+    setup(base)
+    Test.run(test='mv ?1 f? f1*',
              expected_err='Cannot move multiple sources to a file target')
     # Move multiple files to existing directory
     setup(base)
     Test.run(test='mv ?2 f? d1',
              verification='ls -r | map (f: f.render_compact())',
              expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
-    # Move file over self
+    # Move multiple files to existing directory identified by glob
     setup(base)
-    Test.run(test='mv ?2 f? d1',
+    Test.run(test='mv ?2 f? d1*',
              verification='ls -r | map (f: f.render_compact())',
              expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
+    # Move file to itself
+    setup(base)
+    Test.run(test='mv f1 f1',
+             expected_out=[Error('Cannot move file over self')])
     # Move directory into self. First check the error, then the result
     setup(base)
     Test.run(test='mv d1 d2 d2',
-             expected_out=[Error('Cannot move directory over self')])
+             expected_out=[Error('Cannot move directory into self')])
     setup(base)
     Test.run(test='mv d1 d2 d2',
              verification='ls -r | map (f: f.render_compact())',

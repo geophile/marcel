@@ -36,17 +36,6 @@ E.g., tab completion for a\ b doesn't work.
 
 ----------------------------------------------------------------------
 
-21. Prompt directory stuck at ~
-
-The problem is that the value of PWD is copied into the .marcel.py
-global namespace. Need to implement a Variable class, and put it in
-that namespace. The Variable can then be updated by Environment.cd.
-
-I.e., the Variable can be shared between Environment and the config
-namespace, but values cannot.
-
-----------------------------------------------------------------------
-
 23. Space after tab completion is off
 
 Want a space when the choice is unambiguous. Don't want it otherwide,

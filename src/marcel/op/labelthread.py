@@ -35,7 +35,7 @@ class LabelThread(marcel.core.Op):
         pass
 
     def receive_error(self, error):
-        error.set_host(self.label[0])
+        error.set_label(self.label[0])
         self.send(error)
 
     # LabelThread

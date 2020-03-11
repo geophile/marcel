@@ -51,3 +51,26 @@ Initially, do:
 
 cp can create hard links and symbolic links. This overlaps with the ln
 command. (ln does hard link, or symbolic if -s specified.)
+
+----------------------------------------------------------------------
+
+cp -P: preserves links. "never follow" means the link is kept as is.
+cp -H: Top-level link is followed. Below top-level, link is kept as is.
+cp -L: All symlinks followed.
+
+----------------------------------------------------------------------
+
+Design:
+
+        cp [OPTIONS] FILENAME ... 
+
+If, following expansion of globs, the last FILENAME is a file or symlink to a file:
+
+- There must be exactly one source.
+
+If, following expansion of globs, the last FILENAME is a dir or symlink to a dir:
+
+- If there are multiple sources, they are all copied to the dir.
+
+- If there are no sources, the input stream is expected to comprise
+  1-tuples containing files. Those files are copied to the dir.

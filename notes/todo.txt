@@ -85,3 +85,29 @@ Provide a way to specify farcel config path. Maybe as a property of
 the cluster.
 
 
+----------------------------------------------------------------------
+
+Can squish be eliminated in favor of some variation of red? 
+
+Could at least generalize similar to expand. E.g. squish 1 would take
+a sequence in position 1 and squish just that. So
+
+(1, [[1]])
+(2, [[2], [2]])
+(3, [[3], [3], [3]])
+
+ ->
+
+(1, [1])
+(2, [2, 2])
+(3, [3, 3, 3])
+
+----------------------------------------------------------------------
+
+Need a flag for cp, mv, to prevent clobbering existing files. (Check
+before doing anything, even though that isn't foolproof.)
+
+----------------------------------------------------------------------
+
+mv looks buggy. Setup considers last filename as target. This is
+BEFORE glob expansion, which is wrong. Write more tests, fix code.
