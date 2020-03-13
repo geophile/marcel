@@ -794,7 +794,7 @@ def test_rm():
     # Erroneous
     setup(base)
     Test.run('ls /tmp/base/*2 | rm f1',
-             expected_err='rm cannot receive input from a pipe')
+             expected_err='cannot receive input from a pipe')
 
 
 def test_mv():
@@ -1052,8 +1052,8 @@ def main_stable():
 
 
 def main_dev():
-    test_mv()
-    test_cp()
+    test_rm()
+    # test_cp()
     pass
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist

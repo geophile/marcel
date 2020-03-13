@@ -42,7 +42,7 @@ class Cp(marcel.op.filenames.FilenamesOp):
     argparser = CpArgParser()
 
     def __init__(self):
-        super().__init__()
+        super().__init__(op_has_target=True)
         self.recursive = False
         self.preserve_all_symlinks = False
         self.preserve_non_top_symlinks = False

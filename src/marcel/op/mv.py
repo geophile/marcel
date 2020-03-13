@@ -14,12 +14,8 @@ If a SOURCE_FILENAME is provided, then source files are not taken from the input
 fails to identify any files.)
 """
 
-import pathlib
 import shutil
 
-import marcel.core
-import marcel.object.error
-import marcel.object.file
 import marcel.op.filenames
 
 
@@ -39,7 +35,7 @@ class Mv(marcel.op.filenames.FilenamesOp):
     argparser = MvArgParser()
 
     def __init__(self):
-        super().__init__()
+        super().__init__(op_has_target=True)
 
     def __repr__(self):
         return f'mv({self.filename})'

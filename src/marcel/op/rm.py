@@ -37,14 +37,12 @@ class RmArgParser(marcel.core.ArgParser):
         self.add_argument('filename', nargs='*')
 
 
-class Rm(marcel.core.Op):
+class Rm(marcel.op.filenames.FilenamesOp):
 
     argparser = RmArgParser()
 
     def __init__(self):
-        super().__init__()
-        self.filename = None
-        self.current_dir = None
+        super().__init__(op_has_target=False)
 
     def __repr__(self):
         return f'rm({self.filename})'
@@ -54,40 +52,19 @@ class Rm(marcel.core.Op):
     def doc(self):
         return __doc__
 
-    def setup_1(self):
-        if len(self.filename) == 0:
-            self.filename = None
-        self.current_dir = self.global_state().env.pwd()
-
-    def receive(self, x):
-        if self.filename is None:
-            # Remove files passed in.
-            if len(x) != 1 or not isinstance(x[0], marcel.object.file.File):
-                raise marcel.exception.KillAndResumeException('rm input must be a 1-tuple containing a File')
-            self.remove(x[0].path)
-        else:
-            # Remove specified files
-            roots = marcel.op.filenames.FilenamesOp.deglob(self.current_dir, self.filename)
-            for root in roots:
-                self.remove(root)
-
     # Op
 
     def arg_parser(self):
         return Rm.argparser
 
-    def must_be_first_in_pipeline(self):
-        # This is checked before setup_1 converts empty filename  list to None.
-        return len(self.filename) > 0
+    # FilenameOp
 
-    # For use by this class
-
-    def remove(self, root):
+    def action(self, source):
         try:
-            if root.is_dir():
-                shutil.rmtree(root)
+            if source.is_dir():
+                shutil.rmtree(source)
             else:  # This works for files and symlinks
-                root.unlink()
+                source.unlink()
         except PermissionError as e:
             self.send(marcel.object.error.Error(e))
         except FileNotFoundError:
