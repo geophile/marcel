@@ -241,3 +241,8 @@ quoting, escaping, spaces in filenames, etc. These problems go away if
 they work on Files. So ls finds the files by name, but then we have a
 stream of Files, not filenames separated by spaces that may contain
 spaces.
+
+----------------------------------------------------------------------
+
+Allow files to be piped into ls?
+

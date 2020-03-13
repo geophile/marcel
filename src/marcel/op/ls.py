@@ -26,8 +26,6 @@ and symlinks are all listed.
 """
 
 import argparse
-import os.path
-import pathlib
 
 import marcel.core
 import marcel.object.error
@@ -67,7 +65,6 @@ class Ls(marcel.core.Op):
         self.symlink = False
         self.filename = None
         self.current_dir = None
-        self.emitted = set()  # Contains (device, inode)
 
     def __repr__(self):
         if self.d0:
@@ -132,26 +129,3 @@ class Ls(marcel.core.Op):
         if path.is_file() and self.file or path.is_dir() and self.dir or path.is_symlink() and self.symlink:
             file = marcel.object.file.File(path, base)
             self.send(file)
-
-    @staticmethod
-    def find_base(roots):
-        base = None
-        if len(roots) > 0:
-            base_parts = roots[0].parts
-            for root in roots:
-                common = 0
-                root_parts = root.parts
-                for i in range(min(len(base_parts), len(root_parts))):
-                    if base_parts[common] == root_parts[common]:
-                        common += 1
-                    else:
-                        break
-                base_parts = base_parts[:common]
-            if len(base_parts) > 0:
-                base = pathlib.Path().joinpath(*base_parts)
-        return base
-
-    @staticmethod
-    def fileid(path):
-        stat = os.lstat(path)
-        return stat.st_dev, stat.st_ino

@@ -1021,6 +1021,13 @@ def test_cp():
     #          expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
 
 
+def test_filename_ops():
+    test_ls()
+    test_rm()
+    test_mv()
+    # test_cp()
+
+
 def reset_environment(config_file='./.marcel.py'):
     os.chdir(start_dir)
     MAIN.global_state.env = marcel.env.Environment(config_file)
@@ -1028,10 +1035,10 @@ def reset_environment(config_file='./.marcel.py'):
 
 def main_stable():
     test_gen()
+    test_filename_ops()
     test_out()
     test_sort()
     test_map()
-    test_ls()
     test_select()
     test_red()
     test_expand()
@@ -1045,9 +1052,6 @@ def main_stable():
     test_fork()
     test_namespace()
     test_remote()
-    test_rm()
-    test_mv()
-    # test_cp()
     test_no_such_op()
 
 
