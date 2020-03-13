@@ -835,6 +835,7 @@ def test_mv():
     f2_in_d2 = 'd2/f2'
     t = 't'
     t_star = 't*'
+    # TESTS
     # Move one file to missing target
     setup(base)
     Test.run(test='mv f1 t',
@@ -868,19 +869,19 @@ def test_mv():
     # Move multiple files to missing target
     setup(base)
     Test.run(test='mv * t',
-             expected_err='Cannot move multiple sources to a non-existent target')
+             expected_err='Cannot use multiple sources with a non-existent target')
     # Move multiple files to missing target identified by glob
     setup(base)
     Test.run(test='mv * t*',
-             expected_err='Cannot move multiple sources to a non-existent target')
+             expected_err='Cannot use multiple sources with a non-existent target')
     # Move multiple files to existing file
     setup(base)
     Test.run(test='mv ?1 f? f1',
-             expected_err='Cannot move multiple sources to a file target')
+             expected_err='Cannot use multiple sources with a file target')
     # Move multiple files to existing file identified by glob
     setup(base)
     Test.run(test='mv ?1 f? f1*',
-             expected_err='Cannot move multiple sources to a file target')
+             expected_err='Cannot use multiple sources with a file target')
     # Move multiple files to existing directory
     setup(base)
     Test.run(test='mv ?2 f? d1',
@@ -894,11 +895,11 @@ def test_mv():
     # Move file to itself
     setup(base)
     Test.run(test='mv f1 f1',
-             expected_out=[Error('Cannot move file over self')])
+             expected_out=[Error('Source and target must be different files')])
     # Move directory into self. First check the error, then the result
     setup(base)
     Test.run(test='mv d1 d2 d2',
-             expected_out=[Error('Cannot move directory into self')])
+             expected_out=[Error('Source and target must be different directories')])
     setup(base)
     Test.run(test='mv d1 d2 d2',
              verification='ls -r | map (f: f.render_compact())',
@@ -1051,6 +1052,7 @@ def main_stable():
 
 
 def main_dev():
+    test_mv()
     test_cp()
     pass
     # TODO: test_ps()  How?
@@ -1060,7 +1062,7 @@ def main_dev():
 def main():
     reset_environment()
     main_stable()
-    main_dev()
+    # main_dev()
     print(f'Test failures: {Test.failures}')
 
 

@@ -14,12 +14,8 @@ If a SOURCE_FILENAME is provided, then source files are not taken from the input
 fails to identify any files.)
 """
 
-import pathlib
 import shutil
 
-import marcel.core
-import marcel.object.error
-import marcel.object.file
 import marcel.op.filenames
 
 
@@ -41,7 +37,7 @@ class CpArgParser(marcel.core.ArgParser):
         self.add_argument('filename', nargs='+')
 
 
-class Cp(marcel.core.Op):
+class Cp(marcel.op.filenames.FilenamesOp):
 
     argparser = CpArgParser()
 
@@ -53,11 +49,6 @@ class Cp(marcel.core.Op):
         self.preserve_no_symlinks = False
         self.hard_link_to_source = False
         self.symlink_to_source = False
-        self.current_dir = None
-        self.filename = None
-        self.roots = []
-        self.target = None
-        self.target_posix = None
 
     def __repr__(self):
         return f'cp({self.filename})'
@@ -67,41 +58,12 @@ class Cp(marcel.core.Op):
     def doc(self):
         return __doc__
 
-    def setup_1(self):
-        self.current_dir = self.global_state().env.pwd()
-        self.roots, self.target = marcel.op.filenames.sources_and_target(self.current_dir, self.filename)
-        self.target_posix = self.target.as_posix()
-
-    def receive(self, x):
-        try:
-            if self.roots is None:
-                if len(x) != 1 and not isinstance(x[0], marcel.object.file.File):
-                    raise marcel.exception.KillAndResumeException(self, x, 'Input to cp is not a File')
-                self.copy(x[0].path)
-            else:
-                for root in self.roots:
-                    samefile = self.target.exists() and root.samefile(self.target)
-                    if root.is_dir() and samefile:
-                        raise marcel.exception.KillAndResumeException(
-                            self, root, f'Cannot move directory into self: {root}')
-                    elif root.is_file() and samefile:
-                        raise marcel.exception.KillAndResumeException(
-                            self, root, f'Cannot move file over self: {root}')
-                    else:
-                        self.copy(root)
-        except shutil.Error as e:
-            raise marcel.exception.KillAndResumeException(self, x, str(e))
-
     # Op
 
     def arg_parser(self):
         return Cp.argparser
 
-    def must_be_first_in_pipeline(self):
-        # This is checked before setup_1 converts empty source to None.
-        return len(self.roots) > 0
+    # FilenamesOp
 
-    # For use by this class
-
-    def copy(self, path):
-        shutil.copy(path.as_posix(), self.target_posix)
+    def action(self, source):
+        shutil.copy(source.as_posix(), self.target_posix)

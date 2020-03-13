@@ -34,17 +34,12 @@ class MvArgParser(marcel.core.ArgParser):
         self.add_argument('filename', nargs='+')
 
 
-class Mv(marcel.core.Op):
+class Mv(marcel.op.filenames.FilenamesOp):
 
     argparser = MvArgParser()
 
     def __init__(self):
         super().__init__()
-        self.current_dir = None
-        self.filename = None
-        self.roots = []
-        self.target = None
-        self.target_posix = None
 
     def __repr__(self):
         return f'mv({self.filename})'
@@ -54,41 +49,12 @@ class Mv(marcel.core.Op):
     def doc(self):
         return __doc__
 
-    def setup_1(self):
-        self.current_dir = self.global_state().env.pwd()
-        self.roots, self.target = marcel.op.filenames.sources_and_target(self.current_dir, self.filename)
-        self.target_posix = self.target.as_posix()
-
-    def receive(self, x):
-        try:
-            if self.roots is None:
-                if len(x) != 1 and not isinstance(x[0], marcel.object.file.File):
-                    raise marcel.exception.KillAndResumeException(self, x, 'Input to mv is not a File')
-                self.move(x[0].path)
-            else:
-                for root in self.roots:
-                    samefile = self.target.exists() and root.samefile(self.target)
-                    if root.is_dir() and samefile:
-                        raise marcel.exception.KillAndResumeException(
-                            self, root, f'Cannot move directory into self: {root}')
-                    elif root.is_file() and samefile:
-                        raise marcel.exception.KillAndResumeException(
-                            self, root, f'Cannot move file over self: {root}')
-                    else:
-                        self.move(root)
-        except shutil.Error as e:
-            raise marcel.exception.KillAndResumeException(self, x, str(e))
-
     # Op
 
     def arg_parser(self):
         return Mv.argparser
 
-    def must_be_first_in_pipeline(self):
-        # This is checked before setup_1 converts empty source to None.
-        return len(self.roots) > 0
+    # FilenamesOp
 
-    # For use by this class
-
-    def move(self, path):
+    def action(self, path):
         shutil.move(path.as_posix(), self.target_posix)
