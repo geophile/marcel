@@ -51,20 +51,19 @@ class LsArgParser(marcel.core.ArgParser):
         self.add_argument('filename', nargs=argparse.REMAINDER)
 
 
-class Ls(marcel.core.Op):
+class Ls(marcel.op.filenames.FilenamesOp):
 
     argparser = LsArgParser()
 
     def __init__(self):
-        super().__init__()
+        super().__init__(op_has_target=False)
         self.d0 = False
         self.d1 = False
         self.dr = False
         self.file = False
         self.dir = False
         self.symlink = False
-        self.filename = None
-        self.current_dir = None
+        self.base = None
 
     def __repr__(self):
         if self.d0:
@@ -89,22 +88,17 @@ class Ls(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
-        self.current_dir = self.global_state().env.pwd()
+        super().setup_1()
+        if self.roots is None:
+            self.roots = [self.current_dir]
         if not (self.d0 or self.d1 or self.dr):
             self.d1 = True
         if not (self.file or self.dir or self.symlink):
             self.file = True
             self.dir = True
             self.symlink = True
-        if len(self.filename) == 0:
-            self.filename = [self.current_dir.as_posix()]
-
-    def receive(self, _):
-        roots = marcel.op.filenames.FilenamesOp.deglob(self.current_dir, self.filename)
-        # Paths will be displayed relative to a root if there is one root and it is a directory.
-        base = roots[0] if len(roots) == 1 and roots[0].is_dir() else None
-        for root in sorted(roots):
-            self.visit(root, 0, base)
+        self.base = self.roots[0] if len(self.roots) == 1 and self.roots[0].is_dir() else None
+        self.roots = sorted(self.roots)
 
     # Op
 
@@ -114,18 +108,23 @@ class Ls(marcel.core.Op):
     def must_be_first_in_pipeline(self):
         return True
 
+    # FilenamesOp
+
+    def action(self, source):
+        self.visit(source, 0)
+
     # For use by this class
 
-    def visit(self, root, level, base):
-        self.send_path(root, base)
+    def visit(self, root, level):
+        self.send_path(root)
         if root.is_dir() and ((level == 0 and (self.d1 or self.dr)) or self.dr):
-            try:
-                for file in sorted(root.iterdir()):
-                    self.visit(file, level + 1, base)
-            except PermissionError:
-                self.send(marcel.object.error.Error(f'Cannot explore {root}: permission denied'))
+            for file in sorted(root.iterdir()):
+                try:
+                    self.visit(file, level + 1)
+                except PermissionError:
+                    self.send(marcel.object.error.Error(f'Cannot explore {root}: permission denied'))
 
-    def send_path(self, path, base):
+    def send_path(self, path):
         if path.is_file() and self.file or path.is_dir() and self.dir or path.is_symlink() and self.symlink:
-            file = marcel.object.file.File(path, base)
+            file = marcel.object.file.File(path, self.base)
             self.send(file)

@@ -1023,8 +1023,8 @@ def test_cp():
 
 def test_filename_ops():
     test_ls()
-    test_rm()
-    test_mv()
+    # test_rm()
+    # test_mv()
     # test_cp()
 
 
@@ -1056,7 +1056,7 @@ def main_stable():
 
 
 def main_dev():
-    test_rm()
+    test_filename_ops()
     # test_cp()
     pass
     # TODO: test_ps()  How?
@@ -1065,8 +1065,8 @@ def main_dev():
 
 def main():
     reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {Test.failures}')
 
 

@@ -1,7 +1,9 @@
-"""File-handling ops: mv, cp, ln, rm have similar filename arguments:
+"""File-handling ops: ls, mv, cp, ln, rm have similar filename arguments:
 - Zero or more SOURCE_FILENAMEs, where each SOURCE_FILENAME is a filename or glob.
-- Exactly one TARGET_FILENAME (also a filename or glob), (except for rm which has no target).
+- Zero or one TARGET_FILENAME (also a filename or glob).
 - If there are zero SOURCE_FILENAMEs, then input files arrive as input from upstream.
+
+ls and rm have just SOURCE_FILENAMEs.
 
 This base class centralizes a lot of logic for these ops
 """
