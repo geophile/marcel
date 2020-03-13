@@ -71,5 +71,20 @@ UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa0 in position 1247: inval
 
 ----------------------------------------------------------------------
 
-26.
+26. Symlink target always displayed as absolute
 
+It should be displayed however it is stored. 
+
+marcel:
+
+    M jao@cheese:/usr/bin$ ls xzcat
+    lrwxrwxrwx   root     root                2   2019 Jan 27 20:09:34   /usr/bin/xzcat -> /usr/bin/xz
+
+bash:
+
+    jao@cheese:/usr/bin$ ls -l xzcat
+    lrwxrwxrwx 1 root root 2 Jan 27  2019 xzcat -> xz
+
+----------------------------------------------------------------------
+
+27.

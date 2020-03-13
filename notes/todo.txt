@@ -111,3 +111,32 @@ before doing anything, even though that isn't foolproof.)
 
 mv looks buggy. Setup considers last filename as target. This is
 BEFORE glob expansion, which is wrong. Write more tests, fix code.
+
+bash: mv glob ... 
+
+- Takes the last identified file as the target. So mv * is fine.
+
+- EXCEPT if the last item on the command line is a glob, which
+  describes no files, then the item itself is interpreted as a
+  filename. And if THAT doesn't exist, then mv complains about there
+  being no target. So mv a* b* moves everything into the last thing
+  identified by b*. If b* doesn't identify anything, then "b*" is
+  assumed to be the file. 
+
+- But it ALSO depends on how many things are being moved. If nothing
+  is identifed by b*, then mv a* b* will work as follows:
+
+  - a* identifies > 1 file: Complain that directory b* does not exist.
+  - a* identifies 1 file: Move the matched file to "b*".
+  - a* identifies 0 files: Complain that "a*" does not exist.
+
+mv a* b* (a* > 1 file, b* does not exist) protects against
+accidentally using the last a* file/dir as a target. Which is good.
+
+Have marcel be more explicit:
+
+- Last FILENAME is the target.
+
+- Take files being moved from upstream if one FILENAME is specified
+  (the target). I.e., base it on the number of FILENAMEs, not the
+  number of qualifying things after glob expansion.

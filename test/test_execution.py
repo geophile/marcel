@@ -216,12 +216,13 @@ def test_ls():
         base_path = pathlib.Path(base)
         display_path = x_path.relative_to(base_path)
         return display_path
-
     # testls/
     #     a1
     #     a2
     #     b1
     #     b2
+    #     la1 (link to a1)
+    #     la2 (link to a2)
     #     d1/
     #         f11
     #         f12
@@ -240,6 +241,8 @@ def test_ls():
     a2 = '/tmp/testls/a2'  # a2
     b1 = '/tmp/testls/b1'  # b1
     b2 = '/tmp/testls/b2'  # b2
+    la1 = '/tmp/testls/la1'  #la1
+    la2 = '/tmp/testls/la2'  #la2
     d1 = '/tmp/testls/d1'  # d1/
     f11 = '/tmp/testls/d1/f11'  # f11
     f12 = '/tmp/testls/d1/f12'  # f12
@@ -270,21 +273,24 @@ def test_ls():
     pathlib.Path(f23).touch()
     pathlib.Path(f211).touch()
     pathlib.Path(f212).touch()
+    Test.run("ln /tmp/testls/a1 /tmp/testls/la1")
+    Test.run("ln /tmp/testls/a2 /tmp/testls/la2")
     # Tests
     # No files specified
     Test.cd(testls)
     Test.run('ls | map (f: f.render_compact())',
              expected_out=sorted(relative(testls, x) for x in
-                                 [testls, a1, a2, b1, b2, d1, d2]))
+                                 [testls, a1, a2, la1, la2, b1, b2, d1, d2]))
     Test.run('ls -0 | map (f: f.render_compact())',
              expected_out=sorted(relative(testls, x) for x in
                                  [testls]))
     Test.run('ls -1 | map (f: f.render_compact())',
              expected_out=sorted(relative(testls, x) for x in
-                                 [testls, a1, a2, b1, b2, d1, d2]))
+                                 [testls, a1, a2, la1, la2, b1, b2, d1, d2]))
     Test.run('ls -r | map (f: f.render_compact())',
              expected_out=sorted(relative(testls, x) for x in
-                                 [testls, a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
+                                 [testls, a1, a2, la1, la2, b1, b2, d1,
+                                  f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
     # 0/1/r flags with file
     Test.run('ls /tmp/testls/a1 | map (f: f.render_compact())',
              expected_out=sorted([a1]))
@@ -297,16 +303,17 @@ def test_ls():
     # 0/1/r flags with directory
     Test.run('ls /tmp/testls | map (f: f.render_compact())',
              expected_out=sorted([relative('/tmp/testls', x) for x in
-                                  [testls, a1, a2, b1, b2, d1, d2]]))
+                                  [testls, a1, a2, la1, la2, b1, b2, d1, d2]]))
     Test.run('ls -0 /tmp/testls | map (f: f.render_compact())',
              expected_out=sorted([relative('/tmp/testls', x) for x in
                                   [testls]]))
     Test.run('ls -1 /tmp/testls | map (f: f.render_compact())',
              expected_out=sorted([relative('/tmp/testls', x) for x in
-                                  [testls, a1, a2, b1, b2, d1, d2]]))
+                                  [testls, a1, a2, la1, la2, b1, b2, d1, d2]]))
     Test.run('ls -r /tmp/testls | map (f: f.render_compact())',
              expected_out=sorted([relative('/tmp/testls', x) for x in
-                                  [testls, a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]]))
+                                  [testls, a1, a2, la1, la2, b1, b2, d1,
+                                   f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]]))
     # 0/1/r flags with pattern matching files
     Test.run('ls /tmp/testls/a? | map (f: f.render_compact())',
              expected_out=sorted([a1, a2]))
@@ -339,47 +346,49 @@ def test_ls():
     Test.cd(tmp)
     Test.run('ls testls | map (f: f.render_compact())',
              expected_out=sorted([relative(testls, x) for x in
-                                  [testls, a1, a2, b1, b2, d1, d2]]))
+                                  [testls, a1, a2, la1, la2, b1, b2, d1, d2]]))
     Test.run('ls -0 testls | map (f: f.render_compact())',
              expected_out=sorted([relative(testls, testls)]))
     Test.run('ls -1 testls | map (f: f.render_compact())',
              expected_out=sorted([relative(testls, x) for x in
-                                  [testls, a1, a2, b1, b2, d1, d2]]))
+                                  [testls, a1, a2, la1, la2, b1, b2, d1, d2]]))
     Test.run('ls -r testls | map (f: f.render_compact())',
              expected_out=sorted([relative(testls, x) for x in
-                                  [testls, a1, a2, b1, b2, d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]]))
+                                  [testls, a1, a2, la1, la2, b1, b2, d1,
+                                   f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]]))
     # In current directory, test 0/1/r flags with pattern matching directories
     Test.cd(tmp)
     Test.run('ls testls/*2 | map (f: f.render_compact())',
-             expected_out=sorted([a2, b2, d2, f21, f22, f23, d21]))
+             expected_out=sorted([a2, la2, b2, d2, f21, f22, f23, d21]))
     Test.run('ls -0 testls/*2 | map (f: f.render_compact())',
-             expected_out=sorted([a2, b2, d2]))
+             expected_out=sorted([a2, la2, b2, d2]))
     Test.run('ls -1 testls/*2 | map (f: f.render_compact())',
-             expected_out=sorted([a2, b2, d2, f21, f22, f23, d21]))
+             expected_out=sorted([a2, la2, b2, d2, f21, f22, f23, d21]))
     Test.run('ls -r testls/*2 | map (f: f.render_compact())',
-             expected_out=sorted([a2, b2, d2, f21, f22, f23, d21, f211, f212]))
+             expected_out=sorted([a2, la2, b2, d2, f21, f22, f23, d21, f211, f212]))
     # Test f/d/s flags
     Test.cd(tmp)
     Test.run('ls -fr /tmp/testls | map (f: f.render_compact())',
              expected_out=sorted([relative(testls, x) for x in
-                                  [a1, a2, b1, b2, f11, f12, f13, f21, f22, f23, f211, f212]]))
+                                  [a1, a2, la1, la2, b1, b2, f11, f12, f13, f21, f22, f23, f211, f212]]))
     Test.run('ls -dr /tmp/testls | map (f: f.render_compact())',
              expected_out=sorted([relative(testls, x) for x in
                                   [testls, d1, d2, d21]]))
     Test.run('ls -fdr /tmp/testls | map (f: f.render_compact())',
              expected_out=sorted([relative(testls, x) for x in
-                                  [testls, a1, a2, b1, b2, d1, d2, f11, f12, f13, f21, f22, f23, d21, f211, f212]]))
+                                  [testls, a1, a2, la1, la2, b1, b2, d1, d2,
+                                   f11, f12, f13, f21, f22, f23, d21, f211, f212]]))
     # Test multiple filenames/globs
     Test.cd(testls)
     Test.run('ls -0 a1 b* | map (f: f.render_compact())',
              expected_out=sorted([a1, b1, b2]))
     Test.run('ls -0 *2 d1/f* | map (f: f.render_compact())',
-             expected_out=sorted([a2, b2, f11, f12, f13, d2]))
+             expected_out=sorted([a2, la2, b2, f11, f12, f13, d2]))
     # Test multiple globs, with files qualifying multiple times. Should be reported once.
     # (Linux ls gets this wrong IMHO.)
     Test.cd(testls)
     Test.run('ls -0 a* *1 | map (f: f.render_compact())',
-             expected_out=sorted([a1, a2, b1, d1]))
+             expected_out=sorted([a1, la1, a2, b1, d1]))
     # TODO: symlinks
     reset_environment()
 
@@ -901,9 +910,119 @@ def test_mv():
              expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
 
 
+def test_cp():
+    def setup(dir):
+        Test.cd(tmp)
+        Test.run('bash rm -rf base')
+        Test.run('mkdir base')
+        Test.cd(base)
+        Test.run('mkdir d')
+        Test.run('echo ddf > d/df')
+        Test.run('echo f > f')
+        Test.run('bash ln f hf')
+        Test.run('bash ln -s f sf')
+        Test.run('bash ln -s d sd')
+        Test.run('bash ln d/df d/hdf')
+        Test.run('bash ln -s df d/sdf')
+        Test.cd(dir)
+    dot = '.'
+    tmp = '/tmp'
+    base = '/tmp/base'
+    d = 'd'
+    f = 'f'
+    hf = 'hf'
+    sf = 'sf'
+    sd = 'sd'
+    df = 'd/df'
+    hdf = 'd/hdf'
+    sdf = 'd/sdf'
+    sddf = 'sd/df'
+    sdhdf = 'sd/hdf'
+    sdsdf = 'sd/sdf'
+    t = 't'
+    t_star = 't*'
+    # TESTS
+    # setup(base)
+    # Test.run(test='ls -r | map (f: f.render_compact())',
+    #          expected_out=sorted([dot, d, f, hf, sf, sd, df, hdf, sdf, sddf, sdhdf, sdsdf]))
+    # # Copy one file to missing target
+    # setup(base)
+    # Test.run(test='cp f t',
+    #          verification='ls -r | map (f: f.render_compact())',
+    #          expected_out=sorted([dot, d, f, t, hf, sf, sd, df, hdf, sdf, sddf, sdhdf, sdsdf]))
+    # Move one file to missing target identified by glob
+    setup(base)
+    Test.run(test='cp f t*',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted([dot, d, f, t_star, hf, sf, sd, df, hdf, sdf, sddf, sdhdf, sdsdf]))
+    # # Move one file to existing file
+    # setup(base)
+    # Test.run(test='mv f1 f2',
+    #          verification='ls -r | map (f: f.render_compact())',
+    #          expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
+    # # Move one file to existing file identified by glob
+    # setup(base)
+    # Test.run(test='mv f1 f2*',
+    #          verification='ls -r | map (f: f.render_compact())',
+    #          expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
+    # # Move one file to existing directory
+    # setup(base)
+    # Test.run(test='mv f1 d1',
+    #          verification='ls -r | map (f: f.render_compact())',
+    #          expected_out=sorted([dot, d1, f11, f12, f1_in_d1, d2, f21, f22, f2]))
+    # # Move one file to existing directory identified by glob
+    # setup(base)
+    # Test.run(test='mv f1 d1*',
+    #          verification='ls -r | map (f: f.render_compact())',
+    #          expected_out=sorted([dot, d1, f11, f12, f1_in_d1, d2, f21, f22, f2]))
+    # # Move multiple files to missing target
+    # setup(base)
+    # Test.run(test='mv * t',
+    #          expected_err='Cannot move multiple sources to a non-existent target')
+    # # Move multiple files to missing target identified by glob
+    # setup(base)
+    # Test.run(test='mv * t*',
+    #          expected_err='Cannot move multiple sources to a non-existent target')
+    # # Move multiple files to existing file
+    # setup(base)
+    # Test.run(test='mv ?1 f? f1',
+    #          expected_err='Cannot move multiple sources to a file target')
+    # # Move multiple files to existing file identified by glob
+    # setup(base)
+    # Test.run(test='mv ?1 f? f1*',
+    #          expected_err='Cannot move multiple sources to a file target')
+    # # Move multiple files to existing directory
+    # setup(base)
+    # Test.run(test='mv ?2 f? d1',
+    #          verification='ls -r | map (f: f.render_compact())',
+    #          expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
+    # # Move multiple files to existing directory identified by glob
+    # setup(base)
+    # Test.run(test='mv ?2 f? d1*',
+    #          verification='ls -r | map (f: f.render_compact())',
+    #          expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
+    # # Move file to itself
+    # setup(base)
+    # Test.run(test='mv f1 f1',
+    #          expected_out=[Error('Cannot move file over self')])
+    # # Move directory into self. First check the error, then the result
+    # setup(base)
+    # Test.run(test='mv d1 d2 d2',
+    #          expected_out=[Error('Cannot move directory into self')])
+    # setup(base)
+    # Test.run(test='mv d1 d2 d2',
+    #          verification='ls -r | map (f: f.render_compact())',
+    #          expected_out=sorted([dot, d2, f21, f22, d1_in_d2, f11_in_d2, f12_in_d2, f1, f2]))
+    # # Pipe in files to be moved
+    # setup(base)
+    # Test.run(test='ls ?2 f? | mv d1',
+    #          verification='ls -r | map (f: f.render_compact())',
+    #          expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
+
+
 def reset_environment(config_file='./.marcel.py'):
-    MAIN.global_state.env = marcel.env.Environment(config_file)
     os.chdir(start_dir)
+    MAIN.global_state.env = marcel.env.Environment(config_file)
 
 
 def main_stable():
@@ -927,10 +1046,12 @@ def main_stable():
     test_remote()
     test_rm()
     test_mv()
+    # test_cp()
     test_no_such_op()
 
 
 def main_dev():
+    test_cp()
     pass
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist

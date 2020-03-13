@@ -3,6 +3,8 @@
 import os
 import pathlib
 
+import marcel.exception
+
 
 def _normalize_paths(filenames):
     # Resolve ~
@@ -25,7 +27,7 @@ def _normalize_paths(filenames):
     return paths
 
 
-def roots(current_dir, filenames):
+def deglob(current_dir, filenames):
     paths = _normalize_paths(filenames)
     roots = []
     roots_set = set()
@@ -42,3 +44,29 @@ def roots(current_dir, filenames):
                     roots_set.add(root)
                     roots.append(root)
     return roots
+
+
+# mv and cp have similar argument structure, in which the last syntactic element describes a target,
+# and preceding ones describe sources.
+def sources_and_target(current_dir, filenames):
+    targets = deglob(current_dir, filenames[-1:])
+    if len(targets) > 1:
+        raise marcel.exception.KillCommandException(f'Cannot specify multiple targets: {filenames[-1]}')
+    target = (targets[0] if len(targets) == 1 else pathlib.Path(filenames[-1])).resolve()
+    target_path = pathlib.Path(target).resolve()  # Follows symlink if possible
+    sources = filenames[:-1]
+    if len(sources) == 0:
+        if not target_path.is_dir():
+            raise marcel.exception.KillCommandException(
+                f'{target} must be a directory if files to be moved are provided via input pipe')
+        roots = None
+    else:
+        roots = deglob(current_dir, sources)
+        if target_path.exists():
+            if target_path.is_file():
+                if len(roots) > 1:
+                    raise marcel.exception.KillCommandException('Cannot move multiple sources to a file target')
+        else:
+            if len(roots) > 1:
+                raise marcel.exception.KillCommandException('Cannot move multiple sources to a non-existent target')
+    return roots, target

@@ -62,15 +62,91 @@ cp -L: All symlinks followed.
 
 Design:
 
-        cp [OPTIONS] FILENAME ... 
+        cp [SOURCE_FILENAME ...] TARGET_FILENAME
 
-If, following expansion of globs, the last FILENAME is a file or symlink to a file:
+SOURCE_FILENAME            Filename or glob pattern of a file to be moved.
+TARGET_FILENAME            Filename or glob pattern of the destination.
 
-- There must be exactly one source.
+The source files are copied to the target. Even if TARGET_FILENAME is
+a glob pattern, a single target must be identified.  If there is one
+source file, then the target may be an existing file, an existing
+directory, or a path to a non-existent file. If there are multiple
+source files, then the target must be an existing directory.
 
-If, following expansion of globs, the last FILENAME is a dir or symlink to a dir:
+If no SOURCE_FILENAMEs are specified, then the source files are taken
+from the input stream. In this case, each input object must be a
+1-tuple containing a File, and TARGET_FILENAME must identify a
+directory that already exists. (Note that the behavior is based on
+syntax -- whether SOURCE_FILENAMEs are provided.  If a SOURCE_FILENAME
+is provided, then source files are not taken from the input stream,
+even if SOURCE_FILENAME fails to identify any files.)
 
-- If there are multiple sources, they are all copied to the dir.
+Flags (from linux cp):
 
-- If there are no sources, the input stream is expected to comprise
-  1-tuples containing files. Those files are copied to the dir.
+-r | --recursive
+
+-P | --preserve-all-symlinks      keep all symlinks (don't follow them)
+
+-H | --preserve-non-top-symlinks                       follow top-level symlinks only
+
+-L | --preserve-no-symlinks                       follow all symlinks
+
+-l | --hard-link-to-source                      create hard links?
+
+-s | --symlink-to-source                       create symlinks?
+
+-p | --preserve                                preserve metadata
+
+----------------------------------------------------------------------
+
+Details of copying
+
+- File to non-existent path
+
+  - target gets name of source
+
+- File to file
+
+  - target keeps name
+
+- File to symlink
+
+  - Copy to target
+
+- File to directory
+
+  - File goes inside dir. 
+  - Presumably file to file rules then apply
+
+- Symlink to non-existent path
+
+  - Like copying file, but PHL flags apply
+
+- Symlink to file
+
+  - Like copying file
+
+- Symlink to symlink
+
+  - Like copying file, but PHL flags apply. E.g., with -P, target of
+    target symlink is modified.
+
+- Symlink to directory
+
+  - Like copying file, but PHL flags apply
+
+- Directory to non-existent path
+
+  - new dir created, contents copied.
+
+- Directory to file
+
+  - disallowed
+
+- Directory to symlink
+
+  - copy to target
+
+- Directory to directory
+
+  - copy to inside dir

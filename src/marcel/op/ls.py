@@ -103,7 +103,7 @@ class Ls(marcel.core.Op):
             self.filename = [self.current_dir.as_posix()]
 
     def receive(self, _):
-        roots = marcel.op.filenames.roots(self.current_dir, self.filename)
+        roots = marcel.op.filenames.deglob(self.current_dir, self.filename)
         # Paths will be displayed relative to a root if there is one root and it is a directory.
         base = roots[0] if len(roots) == 1 and roots[0].is_dir() else None
         for root in sorted(roots):
@@ -130,11 +130,8 @@ class Ls(marcel.core.Op):
 
     def send_path(self, path, base):
         if path.is_file() and self.file or path.is_dir() and self.dir or path.is_symlink() and self.symlink:
-            file_id = Ls.fileid(path)
             file = marcel.object.file.File(path, base)
-            if file_id not in self.emitted:
-                self.emitted.add(file_id)
-                self.send(file)
+            self.send(file)
 
     @staticmethod
     def find_base(roots):
