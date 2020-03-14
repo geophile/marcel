@@ -233,4 +233,5 @@ Apparent rules:
 marcel rules:
 
 - If there is one root, and it's a directory, list files relative to it.
+- If there is one root, and it's a file, list the file relative to it's dir.
 - Otherwise: absolute.

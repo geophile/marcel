@@ -61,7 +61,7 @@ class Rm(marcel.op.filenames.FilenamesOp):
 
     def action(self, source):
         try:
-            if source.is_dir():
+            if marcel.op.filenames.FilenamesOp.is_path_dir(source):
                 shutil.rmtree(source)
             else:  # This works for files and symlinks
                 source.unlink()

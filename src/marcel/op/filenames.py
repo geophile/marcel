@@ -48,10 +48,10 @@ class FilenamesOp(marcel.core.Op):
                 if self.op_has_target:
                     for root in self.roots:
                         samefile = self.target.exists() and root.samefile(self.target)
-                        if root.is_dir() and samefile:
+                        if FilenamesOp.is_path_dir(root) and samefile:
                             raise marcel.exception.KillAndResumeException(
                                 self, root, f'Source and target must be different directories: {root}')
-                        elif root.is_file() and samefile:
+                        elif FilenamesOp.is_path_file(root) and samefile:
                             raise marcel.exception.KillAndResumeException(
                                 self, root, f'Source and target must be different files: {root}')
                         else:
@@ -85,14 +85,14 @@ class FilenamesOp(marcel.core.Op):
             target_path = pathlib.Path(self.target).resolve()  # Follows symlink if possible
             sources = self.filename[:-1]
             if len(sources) == 0:
-                if not target_path.is_dir():
+                if not FilenamesOp.is_path_dir(target_path):
                     raise marcel.exception.KillCommandException(
                         f'{self.target} must be a directory if no SOURCE_FILENAMEs are specified.')
                 self.roots = None
             else:
                 self.roots = self.deglob(self.current_dir, sources)
                 if target_path.exists():
-                    if target_path.is_file():
+                    if FilenamesOp.is_path_file(target_path):
                         if len(self.roots) > 1:
                             raise marcel.exception.KillCommandException(
                                 'Cannot use multiple sources with a file target')
@@ -143,3 +143,19 @@ class FilenamesOp(marcel.core.Op):
                 paths.append(path)
                 path_set.add(path)
         return paths
+
+        # pathlib.is_file() and is_dir() return true for symlinks also. Which is usually misleading
+        # for filename ops. So use these instead.
+
+    @staticmethod
+    def is_path_file(path):
+        return path.is_file() and not path.is_symlink()
+
+    @staticmethod
+    def is_path_dir(path):
+        return path.is_dir() and not path.is_symlink()
+
+    @staticmethod
+    def is_path_symlink(path):
+        return path.is_symlink()
+

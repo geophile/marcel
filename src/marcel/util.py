@@ -56,7 +56,6 @@ def normalize_path(x):
     return x
 
 
-
 def clone(x):
     try:
         buffer = io.BytesIO()

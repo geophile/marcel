@@ -16,7 +16,6 @@ MAIN = marcel.main.Main()
 
 
 class Test:
-
     failures = 0
 
     @staticmethod
@@ -208,189 +207,6 @@ def test_sort():
     Test.run('gen 5 | sort', expected_out=[0, 1, 2, 3, 4])
     Test.run('gen 5 | sort (lambda x: -x)', expected_out=[4, 3, 2, 1, 0])
     Test.run('gen 5 | map (x: (-x, x)) | sort', expected_out=[(-4, 4), (-3, 3), (-2, 2), (-1, 1), (0, 0)])
-
-
-def test_ls():
-    def relative(base, x):
-        x_path = pathlib.Path(x)
-        base_path = pathlib.Path(base)
-        display_path = x_path.relative_to(base_path)
-        return display_path
-    # testls/
-    #     a1
-    #     a2
-    #     b1
-    #     b2
-    #     la1 (link to a1)
-    #     la2 (link to a2)
-    #     d1/
-    #         f11
-    #         f12
-    #         f13
-    #     d2/
-    #         f21
-    #         f22
-    #         f23
-    #         d21/
-    #             f211
-    #             f212
-    dot = pathlib.Path('.')
-    tmp = '/tmp'  # tmp/
-    testls = '/tmp/testls'  # testls/
-    a1 = '/tmp/testls/a1'  # a1
-    a2 = '/tmp/testls/a2'  # a2
-    b1 = '/tmp/testls/b1'  # b1
-    b2 = '/tmp/testls/b2'  # b2
-    la1 = '/tmp/testls/la1'  #la1
-    la2 = '/tmp/testls/la2'  #la2
-    d1 = '/tmp/testls/d1'  # d1/
-    f11 = '/tmp/testls/d1/f11'  # f11
-    f12 = '/tmp/testls/d1/f12'  # f12
-    f13 = '/tmp/testls/d1/f13'  # f13
-    d2 = '/tmp/testls/d2'  # d2/
-    f21 = '/tmp/testls/d2/f21'  # f21
-    f22 = '/tmp/testls/d2/f22'  # f22
-    f23 = '/tmp/testls/d2/f23'  # f23
-    d21 = '/tmp/testls/d2/d21'  # d21/
-    f211 = '/tmp/testls/d2/d21/f211'  # f211
-    f212 = '/tmp/testls/d2/d21/f212'  # f212
-    # Start clean
-    shutil.rmtree(testls, ignore_errors=True)
-    # Create test data
-    os.mkdir(testls)
-    os.mkdir(d1)
-    os.mkdir(d2)
-    os.mkdir(d21)
-    pathlib.Path(a1).touch()
-    pathlib.Path(a2).touch()
-    pathlib.Path(b1).touch()
-    pathlib.Path(b2).touch()
-    pathlib.Path(f11).touch()
-    pathlib.Path(f12).touch()
-    pathlib.Path(f13).touch()
-    pathlib.Path(f21).touch()
-    pathlib.Path(f22).touch()
-    pathlib.Path(f23).touch()
-    pathlib.Path(f211).touch()
-    pathlib.Path(f212).touch()
-    Test.run("ln /tmp/testls/a1 /tmp/testls/la1")
-    Test.run("ln /tmp/testls/a2 /tmp/testls/la2")
-    # Tests
-    # No files specified
-    Test.cd(testls)
-    Test.run('ls | map (f: f.render_compact())',
-             expected_out=sorted(relative(testls, x) for x in
-                                 [testls, a1, a2, la1, la2, b1, b2, d1, d2]))
-    Test.run('ls -0 | map (f: f.render_compact())',
-             expected_out=sorted(relative(testls, x) for x in
-                                 [testls]))
-    Test.run('ls -1 | map (f: f.render_compact())',
-             expected_out=sorted(relative(testls, x) for x in
-                                 [testls, a1, a2, la1, la2, b1, b2, d1, d2]))
-    Test.run('ls -r | map (f: f.render_compact())',
-             expected_out=sorted(relative(testls, x) for x in
-                                 [testls, a1, a2, la1, la2, b1, b2, d1,
-                                  f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
-    # 0/1/r flags with file
-    Test.run('ls /tmp/testls/a1 | map (f: f.render_compact())',
-             expected_out=sorted([a1]))
-    Test.run('ls -0 /tmp/testls/a1 | map (f: f.render_compact())',
-             expected_out=sorted([a1]))
-    Test.run('ls -1 /tmp/testls/a1 | map (f: f.render_compact())',
-             expected_out=sorted([a1]))
-    Test.run('ls -r /tmp/testls/a1 | map (f: f.render_compact())',
-             expected_out=sorted([a1]))
-    # 0/1/r flags with directory
-    Test.run('ls /tmp/testls | map (f: f.render_compact())',
-             expected_out=sorted([relative('/tmp/testls', x) for x in
-                                  [testls, a1, a2, la1, la2, b1, b2, d1, d2]]))
-    Test.run('ls -0 /tmp/testls | map (f: f.render_compact())',
-             expected_out=sorted([relative('/tmp/testls', x) for x in
-                                  [testls]]))
-    Test.run('ls -1 /tmp/testls | map (f: f.render_compact())',
-             expected_out=sorted([relative('/tmp/testls', x) for x in
-                                  [testls, a1, a2, la1, la2, b1, b2, d1, d2]]))
-    Test.run('ls -r /tmp/testls | map (f: f.render_compact())',
-             expected_out=sorted([relative('/tmp/testls', x) for x in
-                                  [testls, a1, a2, la1, la2, b1, b2, d1,
-                                   f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]]))
-    # 0/1/r flags with pattern matching files
-    Test.run('ls /tmp/testls/a? | map (f: f.render_compact())',
-             expected_out=sorted([a1, a2]))
-    Test.run('ls -0 /tmp/testls/a? | map (f: f.render_compact())',
-             expected_out=sorted([a1, a2]))
-    Test.run('ls -1 /tmp/testls/a? | map (f: f.render_compact())',
-             expected_out=sorted([a1, a2]))
-    Test.run('ls -r /tmp/testls/a? | map (f: f.render_compact())',
-             expected_out=sorted([a1, a2]))
-    # 0/1/r flags with pattern matching directories
-    Test.run('ls /tmp/testls/d? | map (f: f.render_compact())',
-             expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21]))
-    Test.run('ls -0 /tmp/testls/d? | map (f: f.render_compact())',
-             expected_out=sorted([d1, d2]))
-    Test.run('ls -1 /tmp/testls/d? | map (f: f.render_compact())',
-             expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21]))
-    Test.run('ls -r /tmp/testls/d? | map (f: f.render_compact())',
-             expected_out=sorted([d1, f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]))
-    # In current directory, test 0/1/r flags with file
-    Test.cd(tmp)
-    Test.run('ls testls/b1 | map (f: f.render_compact())',
-             expected_out=sorted([b1]))
-    Test.run('ls -0 testls/b1 | map (f: f.render_compact())',
-             expected_out=sorted([b1]))
-    Test.run('ls -1 testls/b1 | map (f: f.render_compact())',
-             expected_out=sorted([b1]))
-    Test.run('ls -r testls/b1 | map (f: f.render_compact())',
-             expected_out=sorted([b1]))
-    # In current directory, test 0/1/r flags with directory
-    Test.cd(tmp)
-    Test.run('ls testls | map (f: f.render_compact())',
-             expected_out=sorted([relative(testls, x) for x in
-                                  [testls, a1, a2, la1, la2, b1, b2, d1, d2]]))
-    Test.run('ls -0 testls | map (f: f.render_compact())',
-             expected_out=sorted([relative(testls, testls)]))
-    Test.run('ls -1 testls | map (f: f.render_compact())',
-             expected_out=sorted([relative(testls, x) for x in
-                                  [testls, a1, a2, la1, la2, b1, b2, d1, d2]]))
-    Test.run('ls -r testls | map (f: f.render_compact())',
-             expected_out=sorted([relative(testls, x) for x in
-                                  [testls, a1, a2, la1, la2, b1, b2, d1,
-                                   f11, f12, f13, d2, f21, f22, f23, d21, f211, f212]]))
-    # In current directory, test 0/1/r flags with pattern matching directories
-    Test.cd(tmp)
-    Test.run('ls testls/*2 | map (f: f.render_compact())',
-             expected_out=sorted([a2, la2, b2, d2, f21, f22, f23, d21]))
-    Test.run('ls -0 testls/*2 | map (f: f.render_compact())',
-             expected_out=sorted([a2, la2, b2, d2]))
-    Test.run('ls -1 testls/*2 | map (f: f.render_compact())',
-             expected_out=sorted([a2, la2, b2, d2, f21, f22, f23, d21]))
-    Test.run('ls -r testls/*2 | map (f: f.render_compact())',
-             expected_out=sorted([a2, la2, b2, d2, f21, f22, f23, d21, f211, f212]))
-    # Test f/d/s flags
-    Test.cd(tmp)
-    Test.run('ls -fr /tmp/testls | map (f: f.render_compact())',
-             expected_out=sorted([relative(testls, x) for x in
-                                  [a1, a2, la1, la2, b1, b2, f11, f12, f13, f21, f22, f23, f211, f212]]))
-    Test.run('ls -dr /tmp/testls | map (f: f.render_compact())',
-             expected_out=sorted([relative(testls, x) for x in
-                                  [testls, d1, d2, d21]]))
-    Test.run('ls -fdr /tmp/testls | map (f: f.render_compact())',
-             expected_out=sorted([relative(testls, x) for x in
-                                  [testls, a1, a2, la1, la2, b1, b2, d1, d2,
-                                   f11, f12, f13, f21, f22, f23, d21, f211, f212]]))
-    # Test multiple filenames/globs
-    Test.cd(testls)
-    Test.run('ls -0 a1 b* | map (f: f.render_compact())',
-             expected_out=sorted([a1, b1, b2]))
-    Test.run('ls -0 *2 d1/f* | map (f: f.render_compact())',
-             expected_out=sorted([a2, la2, b2, f11, f12, f13, d2]))
-    # Test multiple globs, with files qualifying multiple times. Should be reported once.
-    # (Linux ls gets this wrong IMHO.)
-    Test.cd(testls)
-    Test.run('ls -0 a* *1 | map (f: f.render_compact())',
-             expected_out=sorted([a1, la1, a2, b1, d1]))
-    # TODO: symlinks
-    reset_environment()
 
 
 def test_map():
@@ -731,69 +547,232 @@ def test_remote():
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
 
 
-def test_rm():
-    def setup(dir):
-        Test.cd(tmp)
-        Test.run('bash rm -rf base')
-        Test.run('mkdir base')
-        Test.cd(base)
-        Test.run('mkdir d1')
-        Test.run('mkdir d2')
-        Test.run('touch d1/f11')
-        Test.run('touch d1/f12')
-        Test.run('touch d2/f21')
-        Test.run('touch d2/f22')
-        Test.run('touch f1')
-        Test.run('touch f2')
-        Test.cd(dir)
+def relative(base, x):
+    x_path = pathlib.Path(x)
+    base_path = pathlib.Path(base)
+    display_path = x_path.relative_to(base_path)
+    return display_path
 
-    dot = '.'
-    tmp = '/tmp'
-    base = '/tmp/base'
-    d1 = 'd1'
-    d2 = 'd2'
-    f1 = 'f1'
-    f2 = 'f2'
-    f11 = 'd1/f11'
-    f12 = 'd1/f12'
-    f21 = 'd2/f21'
-    f22 = 'd2/f22'
-    # Remove a file
-    setup(base)
-    Test.run('ls -r /tmp/base | map (f: f.render_compact())',
-             expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f1, f2]))
-    Test.run(test='rm f1',
-             verification='ls -r /tmp/base | map (f: f.render_compact())',
-             expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
-    Test.run(test='rm d1/f11 d1/f12',
-             verification='ls -r /tmp/base | map (f: f.render_compact())',
-             expected_out=sorted([dot, d1, d2, f21, f22, f2]))
-    # Remove a file via absolute path
-    setup('/home/jao')
-    Test.run(test='rm /tmp/base/f1',
-             verification='ls -r /tmp/base | map (f: f.render_compact())',
-             expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
-    Test.run(test='rm /tmp/base/d1/f11 /tmp/base/d1/f12',
-             verification='ls -r /tmp/base | map (f: f.render_compact())',
-             expected_out=sorted([dot, d1, d2, f21, f22, f2]))
-    # Remove a directory
-    setup(base)
-    Test.run(test='rm /tmp/base/d1',
-             verification='ls -r /tmp/base | map (f: f.render_compact())',
-             expected_out=sorted([dot, d2, f21, f22, f1, f2]))
-    # Remove via glob
-    setup(base)
-    Test.run(test='rm /tmp/base/*2',
-             verification='ls -r /tmp/base | map (f: f.render_compact())',
-             expected_out=sorted([dot, d1, f11, f12, f1]))
+
+def absolute(base, x):
+    return pathlib.Path(base) / x
+
+
+def filename_op_setup(dir):
+    # test/
+    #     f (file)
+    #     sf (symlink to f)
+    #     lf (hard link to f)
+    #     d/ (dir)
+    #     sd (symlink to d)
+    #         df (file)
+    #         sdf (symlink to df)
+    #         ldf (hard link to df)
+    #         dd/ (dir)
+    #         sdd (symlink to dd)
+    #             ddf (file)
+    setup_script = [
+        'mkdir /tmp/test',
+        'mkdir /tmp/test/d',
+        'echo f > /tmp/test/f',
+        'ln -s /tmp/test/f /tmp/test/sf',
+        'ln /tmp/test/f /tmp/test/lf',
+        'ln -s /tmp/test/d /tmp/test/sd',
+        'echo df > /tmp/test/d/df',
+        'ln -s /tmp/test/d/df /tmp/test/d/sdf',
+        'ln /tmp/test/d/df /tmp/test/d/ldf',
+        'mkdir /tmp/test/d/dd',
+        'ln -s /tmp/test/d/dd /tmp/test/d/sdd',
+        'echo ddf > /tmp/test/d/dd/ddf']
+    # Start clean
+    Test.cd('/tmp')
+    shutil.rmtree('/tmp/test', ignore_errors=True)
+    # Create test data
+    for x in setup_script:
+        os.system(x)
+    Test.cd(dir)
+
+
+def test_source_filenames():
+    filename_op_setup('/tmp/test')
+    # Relative path
+    Test.run('ls . | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'sf', 'lf', 'd', 'sd']))
+    Test.run('ls d | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
+    # Absolute path
+    Test.run('ls /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'sf', 'lf', 'd', 'sd']))
+    Test.run('ls /tmp/test/d | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
+    # Glob
+    Test.run('ls -0 s? | map (f: f.render_compact())',
+             expected_out=sorted([absolute('/tmp/test', x) for x in ['sf', 'sd']]))
+    Test.run('ls -0 *f | map (f: f.render_compact())',
+             expected_out=sorted([absolute('/tmp/test', x) for x in ['f', 'sf', 'lf']]))
+    # Glob in last part of path
+    Test.run('ls -0 /tmp/test/s? | map (f: f.render_compact())',
+             expected_out=sorted([absolute('/tmp/test', x) for x in ['sf', 'sd']]))
+    Test.run('ls -0 /tmp/test/*f | map (f: f.render_compact())',
+             expected_out=sorted([absolute('/tmp/test', x) for x in ['f', 'sf', 'lf']]))
+    # Glob in intermediate part of path
+    Test.run('ls -0 /tmp/test/*d/*dd | map (f: f.render_compact())',
+             expected_out=sorted([absolute('/tmp/test', x) for x in [
+                 '/tmp/test/d/dd', '/tmp/test/d/sdd', '/tmp/test/sd/dd', '/tmp/test/sd/sdd',
+             ]]))
+    Test.run('ls -0 /tmp/test/*f | map (f: f.render_compact())',
+             expected_out=sorted([absolute('/tmp/test', x) for x in ['f', 'sf', 'lf']]))
+    # Glob identifying duplicates
+    Test.run('ls -0 *f s* | map (f: f.render_compact())',
+             expected_out=sorted([absolute('/tmp/test', x) for x in ['f', 'sd', 'sf', 'lf']]))
+    # No such file
+    Test.run('ls -0 x | map (f: f.render_compact())',
+             expected_out=sorted([]))
+    # No such file via glob
+    Test.run('ls -0 x* | map (f: f.render_compact())',
+             expected_out=sorted([]))
+    # ~ expansion
+    Test.run('ls -0 ~root | map (f: f.path)',
+             expected_out=['/root'])
+
+
+def test_source_and_target_filenames():
+    filename_op_setup('/tmp/test')
+    # Target must exist
+    Test.run('mv f d x',
+             expected_err='Cannot use multiple sources with a non-existent target')
+    # Glob target must exist
+    Test.run('mv f d x*',
+             expected_err='Cannot use multiple sources with a non-existent target')
+    # Multiple targets not allowed
+    Test.run('mv *f *d',
+             expected_err='Cannot specify multiple targets')
+    # One target works
+    Test.run(test='mv *f d',
+             verification='ls -r | map (f: f.render_compact())',
+             expected_out=sorted(['.',
+                                  'sd', 'd',  # remaining in top-level dir
+                                  'd/sf', 'd/f', 'd/lf',  # moved to d
+                                  'sd/sf', 'sd/f', 'sd/lf',  # contents of d also visible in sd
+                                  'd/sdf', 'd/df', 'd/ldf', 'd/sdd', 'd/dd',  # originally in d
+                                  'sd/sdf', 'sd/df', 'sd/ldf', 'sd/sdd', 'sd/dd',  # via sd also
+                                  'd/dd/ddf',  # originally in d/dd
+                                  'sd/dd/ddf',  # via sd also
+                                  'd/sdd/ddf',  # sdd is a link to dd
+                                  'sd/sdd/ddf']))
+
+
+def test_ls():
+    filename_op_setup('/tmp/test')
+    # 0/1/r flags with no files specified.
+    Test.run('ls -0 | map (f: f.render_compact())',
+             expected_out=sorted(['.'
+                                  ]))
+    Test.run('ls -1 | map (f: f.render_compact())',
+             expected_out=sorted(['.',
+                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                  ]))
+    Test.run('ls -r | map (f: f.render_compact())',
+             expected_out=sorted(['.',
+                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                  'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
+                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
+                                  ]))
+    Test.run('ls | map (f: f.render_compact())',
+             expected_out=sorted(['.',
+                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                  ]))
+    # 0/1/r flags with file
+    Test.run('ls -0 f | map (f: f.render_compact())',
+             expected_out=sorted(['f'
+                                  ]))
+    Test.run('ls -1 f | map (f: f.render_compact())',
+             expected_out=sorted(['f'
+                                  ]))
+    Test.run('ls -r f | map (f: f.render_compact())',
+             expected_out=sorted(['f'
+                                  ]))
+    # 0/1/r flags with directory
+    Test.run('ls -0 /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.'
+                                  ]))
+    Test.run('ls -1 /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.',
+                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                  ]))
+    Test.run('ls -r /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.',
+                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                  'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
+                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
+                                  ]))
+    # Test f/d/s flags
+    Test.run('ls -fr | map (f: f.render_compact())',
+             expected_out=sorted(['f', 'lf',  # Top-level
+                                  'd/df', 'd/ldf',  # Contents of d
+                                  'sd/df', 'sd/ldf',  # Also reachable via sd
+                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
+                                  ]))
+    Test.run('ls -dr | map (f: f.render_compact())',
+             expected_out=sorted(['.',
+                                  'd',  # Top-level
+                                  'd/dd',  # Contents of d
+                                  'sd/dd'  # Also reachable via sd
+                                  ]))
+    Test.run('ls -sr | map (f: f.render_compact())',
+             expected_out=sorted(['sf', 'sd',  # Top-level
+                                  'd/sdf', 'd/sdd',  # Contents of d
+                                  'sd/sdf', 'sd/sdd'  # Also reachable via sd
+                                  ]))
+
+
+def test_rm():
+    filename_op_setup('/tmp/test')
+    Test.run('ls /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'sf', 'lf', 'd', 'sd']))
+    # Remove one thing (file, link, directory)
+    filename_op_setup('/tmp/test')
+    Test.run(test='rm f',
+             verification='ls /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'sf', 'lf', 'd', 'sd']))
+    filename_op_setup('/tmp/test')
+    Test.run(test='rm lf',
+             verification='ls /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'sf', 'd', 'sd']))
+    filename_op_setup('/tmp/test')
+    Test.run(test='rm d',
+             verification='ls /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'sf', 'lf', 'sd']))
+    # Remove symlink to file
+    filename_op_setup('/tmp/test')
+    Test.run(test='rm sf',
+             verification='ls /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'lf', 'd', 'sd']))
+    # Remove symlink to directory
+    filename_op_setup('/tmp/test')
+    Test.run(test='rm sd',
+             verification='ls /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'sf', 'lf', 'd']))
+    # Remove multiple roots
+    filename_op_setup('/tmp/test')
+    Test.run(test='rm s* *d',
+             verification='ls /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'lf']))
     # Remove via piping
-    setup(base)
-    Test.run(test='ls /tmp/base/*2 | rm',
-             verification='ls -r /tmp/base | map (f: f.render_compact())',
-             expected_out=sorted([dot, d1, f11, f12, f1]))
+    filename_op_setup('/tmp/test')
+    Test.run(test='ls /tmp/test/*f | rm',
+             verification='ls /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'sd', 'd']))
+    # Remove non-existent
+    filename_op_setup('/tmp/test')
+    Test.run(test='rm x',
+             verification='ls /tmp/test | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'sf', 'lf', 'd', 'sd']))
     # Erroneous
-    setup(base)
-    Test.run('ls /tmp/base/*2 | rm f1',
+    filename_op_setup('/tmp/test')
+    Test.run('ls /tmp/test/*f | rm f',
              expected_err='cannot receive input from a pipe')
 
 
@@ -812,6 +791,7 @@ def test_mv():
         Test.run('touch f1')
         Test.run('touch f2')
         Test.cd(dir)
+
     dot = '.'
     tmp = '/tmp'
     base = '/tmp/base'
@@ -926,6 +906,7 @@ def test_cp():
         Test.run('bash ln d/df d/hdf')
         Test.run('bash ln -s df d/sdf')
         Test.cd(dir)
+
     dot = '.'
     tmp = '/tmp'
     base = '/tmp/base'
@@ -1022,8 +1003,21 @@ def test_cp():
 
 
 def test_filename_ops():
-    test_ls()
-    # test_rm()
+    # ls, rm, mv, and cp all extend FilenamesOp, which implements the processing of FILENAME arguments. A FILENAME
+    # may be relative or absolute, and it may be a glob pattern. To avoid having to test the intersection of op features
+    # with the various possibilities of filename args, testing is organized as follows:
+    #    - test_source_filenames(): Test source filename handling using test cases based on ls.
+    #    - test_source_and_target_filenames(): Use mv for these tests
+    #    - Test op-specific behavior using:
+    #         - test_ls
+    #         - test_rm
+    #         - test_mv
+    #         - test_cp
+    # # All these tests use a common setup, done by filename_op_setup.
+    # test_source_filenames()
+    # test_source_and_target_filenames()
+    # test_ls()
+    test_rm()
     # test_mv()
     # test_cp()
 
@@ -1065,7 +1059,7 @@ def main_dev():
 
 def main():
     reset_environment()
-    # main_stable()
+    main_stable()
     main_dev()
     print(f'Test failures: {Test.failures}')
 

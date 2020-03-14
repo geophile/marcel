@@ -2,6 +2,7 @@ import pathlib
 import time
 
 import marcel.object.renderable
+import marcel.op.filenames
 from marcel.util import *
 
 DIR_MASK = 0o040000
@@ -112,11 +113,13 @@ class File(marcel.object.renderable.Renderable):
         highlight = color_scheme.file_extension.get(extension)
         if highlight is None:
             highlight = (
-                # which must check path.resolve(), not path. If the path is relative, and the name
+                # is_executable must check path.resolve(), not path. If the path is relative, and the name
                 # is also an executable on PATH, then highlighting will be incorrect. See bug 8.
-                color_scheme.file_link if path.is_symlink() else
+                # Check symlink first, because is_executable (at least) follows symlinks. FilenamesOp.is_path_xxx
+                # rules out symlinks, but checking symlinks first seems safest.
+                color_scheme.file_link if marcel.op.filenames.FilenamesOp.is_path_symlink(path) else
                 color_scheme.file_executable if is_executable(path.resolve().as_posix()) else
-                color_scheme.file_dir if path.is_dir() else
+                color_scheme.file_dir if marcel.op.filenames.FilenamesOp.is_path_dir(path) else
                 color_scheme.file_file)
         return highlight
 
