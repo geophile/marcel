@@ -1,0 +1,23 @@
+Symlinks make file ops complicated. There are various flags for
+following links, e.g. -H, -P, -L for cp; similar but different flags
+for other ops. These behaviors have to be implemented.
+
+The pathlib rules for when symlinks are followed are complicated and
+sometimes not helpful. E.g. resolve() always follows symlinks.
+
+There are lots of cases to consider: non-existent, file, dir, symlink
+to file, symlink to dir, broken symlink, symlink to another symlink,
+to ... file or dir or nothing.  Symlinks of files listed on the
+command-line can differ from those found during recursive exploration
+of directories (the cp flags). And the cartesian product of these for
+each op, e.g. move a file to a symlink to a directory.
+
+Idea:
+
+Encapsulate this logic in an abstract base class. It is basically a 2d
+grid of functions, e.g. a function for handling (FROM symlink-to-file,
+TO dir). An implementation of this class gives the set of functions
+for a given op.
+
+Also need a 1d version for operations like rm and ls. (So the 2nd
+dimension would be N/A).

@@ -148,3 +148,8 @@ Distinct color for broken symlink.
 ----------------------------------------------------------------------
 
 "rm dir" just works. Should a flag be required to minimize accidents?
+
+----------------------------------------------------------------------
+
+symlinks need a LOT of work. pathlib.samefile follows symlinks, for
+example.
