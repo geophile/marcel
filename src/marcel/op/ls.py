@@ -26,6 +26,7 @@ and symlinks are all listed.
 """
 
 import argparse
+import sys
 
 import marcel.core
 import marcel.object.error
@@ -64,6 +65,7 @@ class Ls(marcel.op.filenames.FilenamesOp):
         self.dir = False
         self.symlink = False
         self.base = None
+        self.emitted = set()
 
     def __repr__(self):
         if self.d0:
@@ -135,6 +137,7 @@ class Ls(marcel.op.filenames.FilenamesOp):
         s = marcel.op.filenames.FilenamesOp.is_path_symlink(path)
         f = marcel.op.filenames.FilenamesOp.is_path_file(path)
         d = marcel.op.filenames.FilenamesOp.is_path_dir(path)
-        if (self.file and f) or (self.dir and d) or (self.symlink and s):
+        if ((self.file and f) or (self.dir and d) or (self.symlink and s)) and path not in self.emitted:
             file = marcel.object.file.File(path, self.base)
             self.send(file)
+            self.emitted.add(path)

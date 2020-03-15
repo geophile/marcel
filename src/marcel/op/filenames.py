@@ -19,9 +19,10 @@ import marcel.object.file
 
 class FilenamesOp(marcel.core.Op):
 
-    def __init__(self, op_has_target):
+    def __init__(self, op_has_target, actions=None):
         super().__init__()
         self.op_has_target = op_has_target
+        self.actions = actions
         self.filename = None
         self.current_dir = None
         self.roots = []
@@ -159,3 +160,58 @@ class FilenamesOp(marcel.core.Op):
     def is_path_symlink(path):
         return path.is_symlink()
 
+
+class PathType:
+
+    # A path description is expressed in four bits:
+    # 0, 1: type of resolved path (i.e., after following links) -- does not exist, file, or dir.
+    # 2:    path is a link
+    # 3:    path is topmost (i.e., a root of a filenames op, such as cp or ls).
+    NOTHING              = 0x1      # Resolved path does not exist.
+    FILE                 = 0x2      # Resolved path is a file.
+    DIR                  = 0x3      # Resolved path is a dir.
+    LINK                 = 0x4      # Unresolved path is a link.
+    TOP                  = 0x8      # Unresolve path is topmost (i.e. a root for a filename op)
+    TOP_LINK             = TOP | LINK
+    LINK_TO_NOTHING      = LINK | NOTHING
+    LINK_TO_FILE         = LINK | FILE
+    LINK_TO_DIR          = LINK | DIR
+    TOP_LINK_TO_NOTHING  = TOP_LINK | NOTHING
+    TOP_LINK_TO_FILE     = TOP_LINK | FILE
+    TOP_LINK_TO_DIR      = TOP_LINK | DIR
+    DEFAULT              = 0xf
+    OPTION_BITS          = 4
+    DISPATCH_TABLE_SIZE = 1 << OPTION_BITS
+
+
+class FilenamesOpActions:
+
+    def __init__(self, op_name, default_action, action_map):
+        self.op_name = op_name
+        self.actions = [default_action] * PathType.DISPATCH_TABLE_SIZE
+        if action_map:
+            for types, action in action_map.items():
+                self.actions[types] = action
+
+    def action(self, source, source_is_top):
+        source_type = self.classify(source, source_is_top)
+        self.actions[source_type](source)
+
+    def classify(self, path, is_top):
+        if path.exists():
+            resolved = path.resolve()
+            if resolved.is_file():
+                type = PathType.FILE
+            elif resolved.is_dir():
+                type = PathType.DIR
+            elif resolved.is_link():
+                assert False
+            else:
+                raise marcel.exception.KillAndResumeException(self.op_name, path, 'Unrecognized file type')
+        else:
+            type = PathType.NOTHING
+        if path.is_link():
+            type |= PathType.LINK
+        if is_top:
+            type |= PathType.TOP
+        return type

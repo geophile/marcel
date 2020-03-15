@@ -52,5 +52,8 @@ class Mv(marcel.op.filenames.FilenamesOp):
 
     # FilenamesOp
 
-    def action(self, path):
-        shutil.move(path.as_posix(), self.target_posix)
+    def action(self, source):
+        try:
+            shutil.move(source.as_posix(), self.target_posix)
+        except FileExistsError as e:
+            raise marcel.exception.KillAndResumeException(self, source, str(e))

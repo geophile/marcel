@@ -193,6 +193,14 @@ def test_ls():
                                   'd/sdf', 'd/sdd',  # Contents of d
                                   'sd/sdf', 'sd/sdd'  # Also reachable via sd
                                   ]))
+    # Duplicates
+    TEST.run('ls -0 *d ? | map (f: f.render_compact())',
+             expected_out=sorted([absolute('/tmp/test', x) for x in ['d', 'sd', 'f']]))
+    # This should find d twice
+    expected = sorted([absolute('/tmp/test', x) for x in ['.', 'f', 'sf', 'lf', 'd', 'sd']])
+    expected.extend(sorted([absolute('/tmp/test', x) for x in ['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    TEST.run('ls -1 . d | map (f: f.render_compact())',
+             expected_out=expected)
 
 
 def test_rm():
@@ -244,30 +252,50 @@ def test_rm():
 
 
 def test_mv():
-    pass
-    # # Move one file to missing target
-    # filename_op_setup('/tmp/test')
-    # TEST.run(test='mv f t',
-    #          verification='ls | map (f: f.render_compact())',
-    #          expected_out=sorted(['.', 'sf', 'lf', 'sd', 'd', 't']))
-    # # Move one file to file
-    # filename_op_setup('/tmp/test')
-    # TEST.run(test='echo asdf > g',
-    #          verification='ls f g | map (f: (f.name, f.size))',
-    #          expected_out=[('f', 2), ('g', 5)])
-    # TEST.run(test='mv f g',
-    #          verification='ls f g | map (f: (f.name, f.size))',
-    #          expected_out=[('g', 2)])
-    # # Move one file to dir
-    # filename_op_setup('/tmp/test')
-    # TEST.run(test='mv f d',
-    #          verification='ls d | map (f: f.render_compact())',
-    #          expected_out=sorted(['.', 'f', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
-    # # Move one file to symlink -- FAILS
-    # filename_op_setup('/tmp/test')
-    # TEST.run(test='mv f sf',
-    #          verification='ls -f | map (f: f.render_compact())',
-    #          expected_out=sorted(['sf', 'lf']))
+    # Move one file to missing target
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv f t',
+             verification='ls | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'sf', 'lf', 'sd', 'd', 't']))
+    # Move one file to file
+    filename_op_setup('/tmp/test')
+    TEST.run(test='echo asdf > g',
+             verification='ls f g | map (f: (f.name, f.size))',
+             expected_out=[('f', 2), ('g', 5)])
+    TEST.run(test='mv f g',
+             verification='ls f g | map (f: (f.name, f.size))',
+             expected_out=[('g', 2)])
+    # Move one file to dir
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv f d',
+             verification='ls d | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
+    # Move one file to symlink
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv f sf',
+             verification='ls -f | map (f: f.render_compact())',
+             expected_out=sorted(['f', 'lf']))
+    # Move one dir to missing target
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv d t',
+             verification='ls | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'sf', 'lf', 'sd', 't']))
+    # Move one dir to file
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv d f',
+             expected_out=[Error('File exists')])
+    # Move one dir to dir
+    filename_op_setup('/tmp/test')
+    TEST.run('mkdir t')
+    TEST.run(test='mv d t',
+             verification='ls -1 . d t | map (f: f.render_compact())',
+             expected_out=sorted([absolute('/tmp/test', x) for x in ['.', 'f', 'sf', 'lf', 'sd', 't', 't/d']]))
+    # Move one dir to symlink
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv f sf',
+             verification='ls -f | map (f: f.render_compact())',
+             expected_out=sorted(['f', 'lf']))
+
     # # Move one file to missing target identified by glob
     # setup(base)
     # TEST.run(test='mv f1 t*',
