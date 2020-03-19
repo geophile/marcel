@@ -66,4 +66,25 @@ class Cp(marcel.op.filenames.FilenamesOp):
     # FilenamesOp
 
     def action(self, source):
-        shutil.copy(source.as_posix(), self.target_posix)
+        if marcel.op.filenames.FilenamesOp.is_path_dir(source):
+            if self.target.exists():
+                if marcel.op.filenames.FilenamesOp.is_path_file(source):
+                    raise marcel.exception.KillAndResumeException(
+                        self, source, f'Cannot copy a directory to a file: {self.target}')
+                elif marcel.op.filenames.FilenamesOp.is_path_dir(source):
+                    # The source directory is copied into the target directory.
+                    # Cases:
+                    # - Target directory has no path with the source's name (i.e., the last segment of the path):
+                    #      - Copy recursively into the target.
+                    # - Target directory has a file matching the source's name:
+                    #      - Error: can't copy directory over file.
+                    # - Target directory has a directory matching the source's name:
+                    #      - Recursively copy source contents into the target/sourcename directory.
+                    pass
+            else:
+                try:
+                    shutil.copytree(source, self.target_posix)
+                except shutil.Error as e:
+                    raise marcel.exception.KillAndResumeException(self, source, e)
+        else:
+            shutil.copy(source.as_posix(), self.target_posix)

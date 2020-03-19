@@ -87,4 +87,64 @@ bash:
 
 ----------------------------------------------------------------------
 
-27.
+27. Shell crashes on some pathlib operations if current dir does not exist
+
+cd from current dir:
+
+Original exception was:
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/src/marcel/main.py", line 122, in <module>
+    MAIN.run()
+  File "/home/jao/git/marcel/src/marcel/main.py", line 77, in run
+    self.run_command(line)
+  File "/home/jao/git/marcel/src/marcel/main.py", line 89, in run_command
+    Command(pipeline).execute()
+  File "/home/jao/git/marcel/src/marcel/main.py", line 39, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/marcel/src/marcel/core.py", line 233, in receive
+    self.first_op.receive(x)
+  File "/home/jao/git/marcel/src/marcel/op/cd.py", line 45, in receive
+    dir = self.directory.expanduser().resolve()
+  File "/usr/lib/python3.7/pathlib.py", line 1151, in resolve
+    s = self._flavour.resolve(self, strict=strict)
+  File "/usr/lib/python3.7/pathlib.py", line 354, in resolve
+    base = '' if path.is_absolute() else os.getcwd()
+FileNotFoundError: [Errno 2] No such file or directory
+
+
+Start marcel from dir that was deleted:
+
+Original exception was:
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/src/marcel/main.py", line 121, in <module>
+    MAIN = Main()
+  File "/home/jao/git/marcel/src/marcel/main.py", line 59, in __init__
+    self.env = marcel.env.Environment(config_path)
+  File "/home/jao/git/marcel/src/marcel/env.py", line 19, in __init__
+    self._current_dir = pathlib.Path.cwd().resolve()
+  File "/usr/lib/python3.7/pathlib.py", line 1064, in cwd
+    return cls(os.getcwd())
+FileNotFoundError: [Errno 2] No such file or directory
+
+----------------------------------------------------------------------
+
+28. Hang on command with extra )
+
+The last command hangs when an extra ) is added to the end.
+
+M jao@cheese:/tmp/test$ ls
+drwxr-xr-x   jao      jao              4096   2020 Mar 17 12:50:51   .
+drwxr-xr-x   jao      jao              4096   2020 Mar 17 12:50:30   d
+-rw-r--r--   jao      jao                 2   2020 Mar 17 12:50:30   f
+-rw-r--r--   jao      jao                 5   2020 Mar 17 12:50:51   g
+-rw-r--r--   jao      jao                 2   2020 Mar 17 12:50:30   lf
+lrwxrwxrwx   jao      jao                11   2020 Mar 17 12:50:30   sd -> /tmp/test/d
+lrwxrwxrwx   jao      jao                11   2020 Mar 17 12:50:30   sf -> /tmp/test/f
+M jao@cheese:/tmp/test$ ls f g
+-rw-r--r--   jao      jao                 2   2020 Mar 17 12:50:30   /tmp/test/f
+-rw-r--r--   jao      jao                 5   2020 Mar 17 12:50:51   /tmp/test/g
+M jao@cheese:/tmp/test$ ls f g | map (f: (f.name, f.size))
+('f', 2)
+('g', 5)
+M jao@cheese:/tmp/test$ ls f g | map (f: (f.name, f.size)))
+^C

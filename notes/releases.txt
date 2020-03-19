@@ -45,6 +45,9 @@
   + 16
   + 19
   + 20
+  - 26
+  - 27
+  - 28
 
 + Line continuation
 

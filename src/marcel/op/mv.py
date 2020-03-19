@@ -54,6 +54,14 @@ class Mv(marcel.op.filenames.FilenamesOp):
 
     def action(self, source):
         try:
-            shutil.move(source.as_posix(), self.target_posix)
+            # shutil.move will move a symlink over a file it points to, resulting in a circular link.
+            # Linux blocks such a move, e.g. "mv: 'sf' and 'f' are the same file". source.exists() is checked
+            # because: source could be a symlink to a file that was previously moved. source.resolve() would then
+            # raise FileNotFoundError.
+            if self.target.exists() and source.exists() and source.resolve().samefile(self.target.resolve()):
+                raise marcel.exception.KillAndResumeException(
+                    self, source, f'Source and target must be different files: {source}')
+            else:
+                shutil.move(source.as_posix(), self.target_posix)
         except FileExistsError as e:
             raise marcel.exception.KillAndResumeException(self, source, str(e))

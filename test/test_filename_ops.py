@@ -295,186 +295,258 @@ def test_mv():
     TEST.run(test='mv f sf',
              verification='ls -f | map (f: f.render_compact())',
              expected_out=sorted(['f', 'lf']))
-
-    # # Move one file to missing target identified by glob
-    # setup(base)
-    # TEST.run(test='mv f1 t*',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2, t_star]))
-    # # Move one file to existing file
-    # setup(base)
-    # TEST.run(test='mv f1 f2',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
-    # # Move one file to existing file identified by glob
-    # setup(base)
-    # TEST.run(test='mv f1 f2*',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
-    # # Move one file to existing directory
-    # setup(base)
-    # TEST.run(test='mv f1 d1',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, f1_in_d1, d2, f21, f22, f2]))
-    # # Move one file to existing directory identified by glob
-    # setup(base)
-    # TEST.run(test='mv f1 d1*',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, f1_in_d1, d2, f21, f22, f2]))
-    # # Move multiple files to missing target
-    # setup(base)
-    # TEST.run(test='mv * t',
-    #          expected_err='Cannot use multiple sources with a non-existent target')
-    # # Move multiple files to missing target identified by glob
-    # setup(base)
-    # TEST.run(test='mv * t*',
-    #          expected_err='Cannot use multiple sources with a non-existent target')
-    # # Move multiple files to existing file
-    # setup(base)
-    # TEST.run(test='mv ?1 f? f1',
-    #          expected_err='Cannot use multiple sources with a file target')
-    # # Move multiple files to existing file identified by glob
-    # setup(base)
-    # TEST.run(test='mv ?1 f? f1*',
-    #          expected_err='Cannot use multiple sources with a file target')
-    # # Move multiple files to existing directory
-    # setup(base)
-    # TEST.run(test='mv ?2 f? d1',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
-    # # Move multiple files to existing directory identified by glob
-    # setup(base)
-    # TEST.run(test='mv ?2 f? d1*',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
-    # # Move file to itself
-    # setup(base)
-    # TEST.run(test='mv f1 f1',
-    #          expected_out=[Error('Source and target must be different files')])
-    # # Move directory into self. First check the error, then the result
-    # setup(base)
-    # TEST.run(test='mv d1 d2 d2',
-    #          expected_out=[Error('Source and target must be different directories')])
-    # setup(base)
-    # TEST.run(test='mv d1 d2 d2',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d2, f21, f22, d1_in_d2, f11_in_d2, f12_in_d2, f1, f2]))
-    # # Pipe in files to be moved
-    # setup(base)
-    # TEST.run(test='ls ?2 f? | mv d1',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
+    # Move one symlink to missing target
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv sf st',
+             verification='ls | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'st', 'lf', 'd', 'sd']))
+    # Move one symlink to file
+    filename_op_setup('/tmp/test')
+    TEST.run('echo asdf > g')
+    TEST.run(test='mv sf g',
+             verification='ls -f | map (f: f.render_compact())',
+             expected_out=['f', 'lf'])
+    TEST.run(test='ls -s | map (f: f.render_compact())',
+             expected_out=sorted(x for x in ['sd', 'g']))
+    # Move one symlink to dir
+    filename_op_setup('/tmp/test')
+    expected = sorted([absolute('/tmp/test', x) for x in ['.', 'f', 'lf', 'd', 'sd']])
+    expected.extend(sorted([absolute('/tmp/test', x) for x in ['d/sf', 'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    TEST.run(test='mv sf d',
+             verification='ls -1 . d | map (f: f.render_compact())',
+             expected_out=expected)
+    # Move one symlink to symlink-to-file: Replace target but keep its name.
+    filename_op_setup('/tmp/test')
+    expected = sorted([absolute('/tmp/test', x) for x in ['.', 'f', 'sf', 'lf', 'd']])
+    expected.extend(sorted([absolute('/tmp/test', x) for x in ['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    expected.extend(sorted([absolute('/tmp/test', x) for x in ['sf/df', 'sf/sdf', 'sf/ldf', 'sf/dd', 'sf/sdd']]))
+    TEST.run(test='mv sd sf',
+             verification='ls -1 . d sf | map (f: f.render_compact())',
+             expected_out=expected)
+    # Move one symlink to symlink-to-dir: The source goes into the target dir.
+    filename_op_setup('/tmp/test')
+    expected = sorted([absolute('/tmp/test', x) for x in ['.', 'f', 'lf', 'd', 'sd']])
+    expected.extend(sorted([absolute('/tmp/test', x) for x in ['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd', 'd/sf']]))
+    expected.extend(sorted([absolute('/tmp/test', x) for x in ['sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd', 'sd/sf']]))
+    TEST.run(test='mv sf sd',
+             verification='ls -1 . d sd | map (f: f.render_compact())',
+             expected_out=expected)
+    # Move multiple things to non-existent path
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv * x',
+             expected_err='Cannot use multiple sources with a non-existent target')
+    # Move multiple things to file
+    filename_op_setup('/tmp/test')
+    TEST.run('echo asdf > t')
+    TEST.run(test='mv f lf t',
+             expected_err='Cannot use multiple sources with a file target')
+    # Move multiple things to dir
+    filename_op_setup('/tmp/test')
+    expected = sorted([absolute('/tmp/test', x) for x in
+                       ['.', 'sf', 'd', 'sd']])
+    expected.extend(sorted([absolute('/tmp/test', x) for x in
+                            ['d/f', 'd/lf', 'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    TEST.run(test='mv f lf d',
+             verification='ls -1 . d | map (f: f.render_compact())',
+             expected_out=expected)
+    # Move multiple things to symlink-to-file
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv f lf sf',
+             expected_err='Cannot use multiple sources with a file target')
+    # Move multiple things to symlink-to-dir
+    filename_op_setup('/tmp/test')
+    expected = sorted([absolute('/tmp/test', x) for x in
+                       ['.', 'sf', 'd', 'sd']])
+    expected.extend(sorted([absolute('/tmp/test', x) for x in
+                            ['d/f', 'd/lf', 'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    TEST.run(test='mv f lf sd',
+             verification='ls -1 . d | map (f: f.render_compact())',
+             expected_out=expected)
+    # Move file to self
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv f f',
+             expected_out=[Error('Source and target must be different files')])
+    # Move dir to self
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv d d',
+             expected_out=[Error('Source and target must be different directories')])
+    # Move symlink to self
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv sf sf',
+             expected_out=[Error('Source and target must be different files')])
+    # Move file to symlink pointing to same file
+    filename_op_setup('/tmp/test')
+    TEST.run(test='mv f sf',
+             expected_out=[Error('Source and target must be different files')])
+    # Pipe in no files to move
+    filename_op_setup('/tmp/test')
+    expected = sorted([absolute('/tmp/test', x) for x in
+                       ['.', 'f', 'sf', 'lf', 'd', 'sd']])
+    expected.extend(sorted([absolute('/tmp/test', x) for x in
+                            ['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    TEST.run(test='ls x | mv d',
+             verification='ls -1 . d | map (f: f.render_compact())',
+             expected_out=expected)
+    # Pipe in some files to move
+    filename_op_setup('/tmp/test')
+    expected = sorted([absolute('/tmp/test', x) for x in
+                       ['.', 'd', 'sd']])
+    expected.extend(sorted([absolute('/tmp/test', x) for x in
+                            ['d/f', 'd/sf', 'd/lf', 'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    TEST.run(test='ls *f | mv d',
+             verification='ls -1 . d | map (f: f.render_compact())',
+             expected_out=expected)
 
 
 def test_cp():
-    def setup(dir):
-        TEST.cd(tmp)
-        TEST.run('bash rm -rf base')
-        TEST.run('mkdir base')
-        TEST.cd(base)
-        TEST.run('mkdir d')
-        TEST.run('echo ddf > d/df')
-        TEST.run('echo f > f')
-        TEST.run('bash ln f hf')
-        TEST.run('bash ln -s f sf')
-        TEST.run('bash ln -s d sd')
-        TEST.run('bash ln d/df d/hdf')
-        TEST.run('bash ln -s df d/sdf')
-        TEST.cd(dir)
+    # Copy one file to missing target
+    filename_op_setup('/tmp/test')
+    TEST.run(test='cp f t',
+             verification='ls | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'sf', 'lf', 'sd', 'd', 't']))
+    # Copy one file to file
+    filename_op_setup('/tmp/test')
+    TEST.run(test='echo asdf > g',
+             verification='ls f g | map (f: (f.name, f.size))',
+             expected_out=[('f', 2), ('g', 5)])
+    TEST.run(test='cp f g',
+             verification='ls f g | map (f: (f.name, f.size))',
+             expected_out=[('f', 2), ('g', 2)])
+    # Copy one file to dir
+    filename_op_setup('/tmp/test')
+    TEST.run(test='cp f d',
+             verification='ls d | map (f: f.render_compact())',
+             expected_out=sorted(['.', 'f', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
+    # Copy one file to symlink-to-file (copies to target)
+    filename_op_setup('/tmp/test')
+    TEST.run('echo asdf > g')
+    TEST.run(test='cp g sf',
+             verification='ls f g | map (f: (f.name, f.size))',
+             expected_out=[('f', 5), ('g', 5)])
+    # Copy one dir to missing target
+    filename_op_setup('/tmp/test')
+    expected = sorted([absolute('/tmp/test', x) for x in ['d', 'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']])
+    expected.extend(sorted([absolute('/tmp/test', x) for x in ['t', 't/df', 't/sdf', 't/ldf', 't/dd', 't/sdd']]))
+    TEST.run(test='cp d t',
+             verification='ls -1 d t | map (f: f.render_compact())',
+             expected_out=expected)
+    # Copy one dir to file
+    filename_op_setup('/tmp/test')
+    TEST.run(test='cp d f',
+             expected_out=[Error('File exists')])
+    # # Move one dir to dir
+    # filename_op_setup('/tmp/test')
+    # TEST.run('mkdir t')
+    # TEST.run(test='cp d t',
+    #          verification='ls -1 . d t | map (f: f.render_compact())',
+    #          expected_out=sorted([absolute('/tmp/test', x) for x in ['.', 'f', 'sf', 'lf', 'sd', 't', 't/d']]))
+    # # Move one dir to symlink
+    # filename_op_setup('/tmp/test')
+    # TEST.run(test='cp f sf',
+    #          verification='ls -f | map (f: f.render_compact())',
+    #          expected_out=sorted(['f', 'lf']))
+    # # Move one symlink to missing target
+    # filename_op_setup('/tmp/test')
+    # TEST.run(test='cp sf st',
+    #          verification='ls | map (f: f.render_compact())',
+    #          expected_out=sorted(['.', 'f', 'st', 'lf', 'd', 'sd']))
+    # # Move one symlink to file
+    # filename_op_setup('/tmp/test')
+    # TEST.run('echo asdf > g')
+    # TEST.run(test='cp sf g',
+    #          verification='ls -f | map (f: f.render_compact())',
+    #          expected_out=['f', 'lf'])
+    # TEST.run(test='ls -s | map (f: f.render_compact())',
+    #          expected_out=sorted(x for x in ['sd', 'g']))
+    # # Move one symlink to dir
+    # filename_op_setup('/tmp/test')
+    # expected = sorted([absolute('/tmp/test', x) for x in ['.', 'f', 'lf', 'd', 'sd']])
+    # expected.extend(sorted([absolute('/tmp/test', x) for x in ['d/sf', 'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    # TEST.run(test='cp sf d',
+    #          verification='ls -1 . d | map (f: f.render_compact())',
+    #          expected_out=expected)
+    # # Move one symlink to symlink-to-file: Replace target but keep its name.
+    # filename_op_setup('/tmp/test')
+    # expected = sorted([absolute('/tmp/test', x) for x in ['.', 'f', 'sf', 'lf', 'd']])
+    # expected.extend(sorted([absolute('/tmp/test', x) for x in ['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    # expected.extend(sorted([absolute('/tmp/test', x) for x in ['sf/df', 'sf/sdf', 'sf/ldf', 'sf/dd', 'sf/sdd']]))
+    # TEST.run(test='cp sd sf',
+    #          verification='ls -1 . d sf | map (f: f.render_compact())',
+    #          expected_out=expected)
+    # # Move one symlink to symlink-to-dir: The source goes into the target dir.
+    # filename_op_setup('/tmp/test')
+    # expected = sorted([absolute('/tmp/test', x) for x in ['.', 'f', 'lf', 'd', 'sd']])
+    # expected.extend(sorted([absolute('/tmp/test', x) for x in ['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd', 'd/sf']]))
+    # expected.extend(sorted([absolute('/tmp/test', x) for x in ['sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd', 'sd/sf']]))
+    # TEST.run(test='cp sf sd',
+    #          verification='ls -1 . d sd | map (f: f.render_compact())',
+    #          expected_out=expected)
+    # # Move multiple things to non-existent path
+    # filename_op_setup('/tmp/test')
+    # TEST.run(test='cp * x',
+    #          expected_err='Cannot use multiple sources with a non-existent target')
+    # # Move multiple things to file
+    # filename_op_setup('/tmp/test')
+    # TEST.run('echo asdf > t')
+    # TEST.run(test='cp f lf t',
+    #          expected_err='Cannot use multiple sources with a file target')
+    # # Move multiple things to dir
+    # filename_op_setup('/tmp/test')
+    # expected = sorted([absolute('/tmp/test', x) for x in
+    #                    ['.', 'sf', 'd', 'sd']])
+    # expected.extend(sorted([absolute('/tmp/test', x) for x in
+    #                         ['d/f', 'd/lf', 'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    # TEST.run(test='cp f lf d',
+    #          verification='ls -1 . d | map (f: f.render_compact())',
+    #          expected_out=expected)
+    # # Move multiple things to symlink-to-file
+    # filename_op_setup('/tmp/test')
+    # TEST.run(test='cp f lf sf',
+    #          expected_err='Cannot use multiple sources with a file target')
+    # # Move multiple things to symlink-to-dir
+    # filename_op_setup('/tmp/test')
+    # expected = sorted([absolute('/tmp/test', x) for x in
+    #                    ['.', 'sf', 'd', 'sd']])
+    # expected.extend(sorted([absolute('/tmp/test', x) for x in
+    #                         ['d/f', 'd/lf', 'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    # TEST.run(test='cp f lf sd',
+    #          verification='ls -1 . d | map (f: f.render_compact())',
+    #          expected_out=expected)
+    # # Move file to self
+    # filename_op_setup('/tmp/test')
+    # TEST.run(test='cp f f',
+    #          expected_out=[Error('Source and target must be different files')])
+    # # Move dir to self
+    # filename_op_setup('/tmp/test')
+    # TEST.run(test='cp d d',
+    #          expected_out=[Error('Source and target must be different directories')])
+    # # Move symlink to self
+    # filename_op_setup('/tmp/test')
+    # TEST.run(test='cp sf sf',
+    #          expected_out=[Error('Source and target must be different files')])
+    # # Move file to symlink pointing to same file
+    # filename_op_setup('/tmp/test')
+    # TEST.run(test='cp f sf',
+    #          expected_out=[Error('Source and target must be different files')])
+    # # Pipe in no files to move
+    # filename_op_setup('/tmp/test')
+    # expected = sorted([absolute('/tmp/test', x) for x in
+    #                    ['.', 'f', 'sf', 'lf', 'd', 'sd']])
+    # expected.extend(sorted([absolute('/tmp/test', x) for x in
+    #                         ['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    # TEST.run(test='ls x | cp d',
+    #          verification='ls -1 . d | map (f: f.render_compact())',
+    #          expected_out=expected)
+    # # Pipe in some files to move
+    # filename_op_setup('/tmp/test')
+    # expected = sorted([absolute('/tmp/test', x) for x in
+    #                    ['.', 'd', 'sd']])
+    # expected.extend(sorted([absolute('/tmp/test', x) for x in
+    #                         ['d/f', 'd/sf', 'd/lf', 'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    # TEST.run(test='ls *f | cp d',
+    #          verification='ls -1 . d | map (f: f.render_compact())',
+    #          expected_out=expected)
 
-    dot = '.'
-    tmp = '/tmp'
-    base = '/tmp/base'
-    d = 'd'
-    f = 'f'
-    hf = 'hf'
-    sf = 'sf'
-    sd = 'sd'
-    df = 'd/df'
-    hdf = 'd/hdf'
-    sdf = 'd/sdf'
-    sddf = 'sd/df'
-    sdhdf = 'sd/hdf'
-    sdsdf = 'sd/sdf'
-    t = 't'
-    t_star = 't*'
-    # TESTS
-    # setup(base)
-    # TEST.run(test='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d, f, hf, sf, sd, df, hdf, sdf, sddf, sdhdf, sdsdf]))
-    # # Copy one file to missing target
-    # setup(base)
-    # TEST.run(test='cp f t',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d, f, t, hf, sf, sd, df, hdf, sdf, sddf, sdhdf, sdsdf]))
-    # Move one file to missing target identified by glob
-    setup(base)
-    TEST.run(test='cp f t*',
-             verification='ls -r | map (f: f.render_compact())',
-             expected_out=sorted([dot, d, f, t_star, hf, sf, sd, df, hdf, sdf, sddf, sdhdf, sdsdf]))
-    # # Move one file to existing file
-    # setup(base)
-    # TEST.run(test='mv f1 f2',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
-    # # Move one file to existing file identified by glob
-    # setup(base)
-    # TEST.run(test='mv f1 f2*',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, d2, f21, f22, f2]))
-    # # Move one file to existing directory
-    # setup(base)
-    # TEST.run(test='mv f1 d1',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, f1_in_d1, d2, f21, f22, f2]))
-    # # Move one file to existing directory identified by glob
-    # setup(base)
-    # TEST.run(test='mv f1 d1*',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, f1_in_d1, d2, f21, f22, f2]))
-    # # Move multiple files to missing target
-    # setup(base)
-    # TEST.run(test='mv * t',
-    #          expected_err='Cannot move multiple sources to a non-existent target')
-    # # Move multiple files to missing target identified by glob
-    # setup(base)
-    # TEST.run(test='mv * t*',
-    #          expected_err='Cannot move multiple sources to a non-existent target')
-    # # Move multiple files to existing file
-    # setup(base)
-    # TEST.run(test='mv ?1 f? f1',
-    #          expected_err='Cannot move multiple sources to a file target')
-    # # Move multiple files to existing file identified by glob
-    # setup(base)
-    # TEST.run(test='mv ?1 f? f1*',
-    #          expected_err='Cannot move multiple sources to a file target')
-    # # Move multiple files to existing directory
-    # setup(base)
-    # TEST.run(test='mv ?2 f? d1',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
-    # # Move multiple files to existing directory identified by glob
-    # setup(base)
-    # TEST.run(test='mv ?2 f? d1*',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
-    # # Move file to itself
-    # setup(base)
-    # TEST.run(test='mv f1 f1',
-    #          expected_out=[Error('Cannot move file over self')])
-    # # Move directory into self. First check the error, then the result
-    # setup(base)
-    # TEST.run(test='mv d1 d2 d2',
-    #          expected_out=[Error('Cannot move directory into self')])
-    # setup(base)
-    # TEST.run(test='mv d1 d2 d2',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d2, f21, f22, d1_in_d2, f11_in_d2, f12_in_d2, f1, f2]))
-    # # Pipe in files to be moved
-    # setup(base)
-    # TEST.run(test='ls ?2 f? | mv d1',
-    #          verification='ls -r | map (f: f.render_compact())',
-    #          expected_out=sorted([dot, d1, f11, f12, d2_in_d1, f21_in_d1, f22_in_d1, f1_in_d1, f2_in_d1]))
 
 
 def reset_environment(config_file='./.marcel.py'):
@@ -498,8 +570,8 @@ def main_stable():
     # test_source_and_target_filenames()
     # test_ls()
     # test_rm()
-    test_mv()
-    # test_cp()
+    # test_mv()
+    test_cp()
 
 
 def main_dev():
