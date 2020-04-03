@@ -22,6 +22,18 @@ as Marcel does. Marcel improves on osh in a number of ways:
 * Marcel started with the osh code base (for commands and pipelines), but cleaned up a number of ugly hacks and non-pythonic constructs.
 * Osh requires Python 2.x. Marcel requires Python 3.x. (Whether you regard that as an improvement is obviously subjective.)
 
+Shell Features
+--------------
+
+Marcel provides:
+
+* Command history and recall (including correct handling of multi-line commands).
+* Searching of command history (e.g. ctrl-R).
+* Editing of last command in the editor of your choice.
+* Context-sensitive tab completion.
+* Prompt customization.
+* Customizable highlighted output of file and process listings.
+
 Example
 -------
 Print all processes running Python:
@@ -34,7 +46,7 @@ Print all processes running Python:
 a Unix pipe. The entire command runs in a single Python process.)
 
 * `select (p: ...)`: Selects processes, `p`, for which the
-condition is true: `p`s commandline starts with
+condition is true: The commandline of `p` starts with
 `'/usr/bin/python'`. The code inside the parens is a Python function, (marcel permits
 the `lambda` keyword to be omitted).
 
@@ -85,7 +97,9 @@ an executable pipes into an operator as a string. Output from an operator is tur
 when it is piped into an executable.
 
 For example, this command scans `/etc/passwd` and lists the usernames of 
-users whose shell is `/bin/bash`. The output is condensed into one line through
+users whose shell is `/bin/bash`. 
+`cat`, `xargs`, and `echo` are Linux commands. `map` and `select` are marcel operators.
+The output is condensed into one line through
 the use of `xargs` and `echo`. 
 
     cat /etc/passwd | \
@@ -105,9 +119,6 @@ the use of `xargs` and `echo`.
 * `map (*line: line[0]) |`: Keep the username field of each input tuple.
 
 * `xargs echo`: Combine the incoming usernames into a single line, which is printed to `stdout`.
-
-Note that the first and last parts of the pipeline are Linux executables, while the other steps
-rely on marcel operators.
 
 
 
@@ -148,7 +159,7 @@ Then, to get a list of files in `/usr/local/bin` in each node of the cluster:
 
 Errors
 ======
-The POSIX model of `stdout` and `stderr` streams is necessary to distinguish normal output from errors.
+The POSIX model of `stdout` and `stderr` streams distinguishes normal output from errors.
 An unfortunate aspect of this approach is that the interleaving of normal output and errors is lost.
 A marcel pipeline generates a stream of values, and each value has a type. This allows for normal
 and error output to be combined in one stream, since error values can be identified by type.
