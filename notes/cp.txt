@@ -101,52 +101,43 @@ Flags (from linux cp):
 
 Details of copying
 
-- File to non-existent path
+See cp_behavior.ods, which has results from cp_behavior.py.
 
-  - target gets name of source
+Rules:
 
-- File to file
+- If source doesn't exist (including via link), then cp fails: "No
+  such file or directory"
 
-  - target keeps name
+- Copy file: Always copy file preserving name. Fails if target is
+  dangling link: "not writing through dangling symlink").
 
-- File to symlink
+- Copy link to file: Same as copying file, except that -P copies the
+  link, replacing the target. In other words, default and -HL is like
+  copying a file.
 
-  - Copy to target
+- Copy dir: Always copy except:
 
-- File to directory
+  - target is file (or link to file)
+  - target is dangling link
 
-  - File goes inside dir. 
-  - Presumably file to file rules then apply
+  In these cases: cannot overwrite non-directory
 
-- Symlink to non-existent path
+- Copy link to dir: 
 
-  - Like copying file, but PHL flags apply
+  - default, -P: Like copying file-link with -P: the link is copied
+    over the target or into it.
 
-- Symlink to file
+  - -HL: Like copying dir
 
-  - Like copying file
 
-- Symlink to symlink
+Tools, from shutil:
 
-  - Like copying file, but PHL flags apply. E.g., with -P, target of
-    target symlink is modified.
+- Copy file: copy(source, target, follow_symlinks)
 
-- Symlink to directory
+  - Works for file or dir target
+  - follow_symlinks controls source symlink
 
-  - Like copying file, but PHL flags apply
+- Copy dir: copytree(source, target, symlinks)
 
-- Directory to non-existent path
-
-  - new dir created, contents copied.
-
-- Directory to file
-
-  - disallowed
-
-- Directory to symlink
-
-  - copy to target
-
-- Directory to directory
-
-  - copy to inside dir
+  - target directory is created.
+  - symlinks = true preserves symlinks

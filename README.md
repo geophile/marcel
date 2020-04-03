@@ -30,7 +30,8 @@ Print all processes running Python:
 
 * `ps`: Generates a stream of `Process` objects.
 
-* `|`: Pipes the processes to the next command.
+* `|`: Pipes the processes to the next command. (Note that `|` is not
+a Unix pipe. The entire command runs in a single Python process.)
 
 * `select (p: ...)`: Selects processes, `p`, for which the
 condition is true: `p`s commandline starts with

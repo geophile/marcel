@@ -21,3 +21,48 @@ for a given op.
 
 Also need a 1d version for operations like rm and ls. (So the 2nd
 dimension would be N/A).
+
+
+- NOTHING (does not exist)
+- FILE
+- DIR
+- LINK_TO_NOTHING
+- LINK_TO_FILE
+- LINK_TO_DIR
+- TOP_LINK_TO_NOTHING
+- TOP_LINK_TO_FILE
+- TOP_LINK_TO_DIR
+
+Can link to link to ... X be treated as LINK_TO_X?
+
+
+
+
+NOTHING              = 0x1
+FILE                 = 0x2
+DIR                  = 0x3
+LINK                 = 0x4
+TOP                  = 0x8
+TOP_LINK             = TOP | LINK
+LINK_TO_NOTHING      = LINK | NOTHING
+LINK_TO_FILE         = LINK | FILE
+LINK_TO_DIR          = LINK | DIR
+TOP_LINK_TO_NOTHING  = TOP_LINK | NOTHING
+TOP_LINK_TO_FILE     = TOP_LINK | FILE
+TOP_LINK_TO_DIR      = TOP_LINK | DIR
+
+----------------------------------------------------------------------
+
+Can't separate the action from the op. op carries lots of state
+relevant for execution. I.e., can't have a standalone mapping from
+(source path type, target path type) to action.
+
+Also: 2d dispatch is overkill. A single op execution could have many
+sources, but there is only one target. 
+
+Putting this together:
+
+- op setup knows the target. Pick a dispatch table for the target's
+  type.
+
+- Use the dispatch inside op.action(self, source).

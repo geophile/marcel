@@ -36,7 +36,7 @@ class KillAndResumeException(BaseException):
 
     def __init__(self, op, input, message):
         super().__init__()
-        self.op = str(op)
+        self.op = op
         self.input = input
         self.message = message
 

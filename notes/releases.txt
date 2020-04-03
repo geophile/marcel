@@ -28,6 +28,7 @@
     + rm
     + mv
     - cp & ln
+    - mkdir
 
 + Make the File object more useful by adding more methods. Maybe
   extend Path?
@@ -50,6 +51,8 @@
   - 28
 
 + Line continuation
+
+- Highlight color for broken link
 
 ----------------------------------------------------------------------
 

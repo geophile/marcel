@@ -101,9 +101,9 @@ class Ls(marcel.op.filenames.FilenamesOp):
             self.symlink = True
         if len(self.roots) == 1:
             root = self.roots[0]
-            if marcel.op.filenames.FilenamesOp.is_path_dir(root):
+            if root.is_dir():
                 self.base = root
-            else:  # file, symlink
+            else:
                 self.base = root.parent
         else:
             self.base = None

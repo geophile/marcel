@@ -47,6 +47,9 @@ class FilenamesOp(marcel.core.Op):
                     raise marcel.exception.KillCommandException(
                         f'{self.op_name()} has sources, so it cannot receive input from a pipe')
                 if self.op_has_target:
+                    if len(self.roots) == 0:
+                        filenames = ', '.join(self.filename)
+                        raise marcel.exception.KillCommandException(f'No such file or directory: {filenames}')
                     for root in self.roots:
                         samefile = self.target.exists() and root.samefile(self.target)
                         if FilenamesOp.is_path_dir(root) and samefile:
@@ -78,11 +81,15 @@ class FilenamesOp(marcel.core.Op):
 
     def find_roots_and_target(self):
         if self.op_has_target:
+            if len(self.filename) == 0:
+                raise marcel.exception.KillCommandException('No target specified')
             targets = FilenamesOp.deglob(self.current_dir, self.filename[-1:])
+            last_filename = self.filename[-1]
             if len(targets) > 1:
-                raise marcel.exception.KillCommandException(f'Cannot specify multiple targets: {self.filename[-1]}')
-            self.target = (targets[0] if len(targets) == 1 else pathlib.Path(self.filename[-1])).resolve()
-            # TODO: Symlink handling is more complicated: HPL flags on cp.
+                raise marcel.exception.KillCommandException(f'Cannot specify multiple targets: {last_filename}')
+            # If targets is empty, it's because last_filename did not identify any existing paths. So treat
+            # last_filename as a non-existent target.
+            self.target = targets[0] if len(targets) == 1 else pathlib.Path(last_filename)
             target_path = pathlib.Path(self.target).resolve()  # Follows symlink if possible
             sources = self.filename[:-1]
             if len(sources) == 0:
@@ -106,47 +113,56 @@ class FilenamesOp(marcel.core.Op):
             self.roots = None if len(self.filename) == 0 else FilenamesOp.deglob(self.current_dir, self.filename)
 
     @staticmethod
-    def deglob(current_dir, filenames):
-        paths = FilenamesOp.normalize_paths(filenames)
-        roots = []
-        roots_set = set()
-        for path in paths:
-            if path.exists():
-                roots.append(path)
-            else:
-                path_str = path.as_posix()
-                glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
-                                           if path.is_absolute() else
-                                           (current_dir, path_str))
-                for root in glob_base.glob(glob_pattern):
-                    if root not in roots_set:
-                        roots_set.add(root)
-                        roots.append(root)
-        return roots
-
-    @staticmethod
     def normalize_paths(filenames):
         # Resolve ~
         # Resolve . and ..
         # Convert to Path
-        # Eliminate duplicates
         paths = []
-        path_set = set()  # For avoiding duplicates
-        for i in range(len(filenames)):
+        for filename in filenames:
             # Resolve . and ..
-            filename = os.path.normpath(filenames[i])
+            filename = os.path.normpath(filename)
             # Convert to Path and resolve ~
             path = pathlib.Path(filename).expanduser()
-            # Make absolute. Don't use Path.resolve(), which follows symlinks.
+            # If path is relative, specify what it is relative to.
             if not path.is_absolute():
                 path = pathlib.Path.cwd() / path
-            if path not in path_set:
-                paths.append(path)
-                path_set.add(path)
+            paths.append(path)
         return paths
 
-        # pathlib.is_file() and is_dir() return true for symlinks also. Which is usually misleading
-        # for filename ops. So use these instead.
+    @staticmethod
+    def deglob(current_dir, filenames):
+        # Expand globs and eliminate duplicates
+        paths = FilenamesOp.normalize_paths(filenames)
+        roots = []
+        roots_set = set()
+        for path in paths:
+            # Proceed as if path is a glob pattern, but this should work for non-globs too. I haven't
+            # measured the impact on performance.
+            path_str = path.as_posix()
+            glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
+                                       if path.is_absolute() else
+                                       (current_dir, path_str))
+            for root in glob_base.glob(glob_pattern):
+                if root not in roots_set:
+                    roots_set.add(root)
+                    roots.append(root)
+            # if path.exists() or os.path.lexists(path):
+            #     # path.exists(): True for files, directories, and symlinks to files and directories.
+            #     # But it's false for a dangling symlink. os.path.lexists(path) is True for a dangling symlink.
+            #     roots.append(path)
+            # else:
+            #     path_str = path.as_posix()
+            #     glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
+            #                                if path.is_absolute() else
+            #                                (current_dir, path_str))
+            #     for root in glob_base.glob(glob_pattern):
+            #         if root not in roots_set:
+            #             roots_set.add(root)
+            #             roots.append(root)
+        return roots
+
+    # pathlib.is_file() and is_dir() return True for symlinks also, which is usually misleading
+    # for filename ops. So use these instead.
 
     @staticmethod
     def is_path_file(path):
@@ -167,51 +183,117 @@ class PathType:
     # 0, 1: type of resolved path (i.e., after following links) -- does not exist, file, or dir.
     # 2:    path is a link
     # 3:    path is topmost (i.e., a root of a filenames op, such as cp or ls).
+    UNDETERMINED         = 0x0      # Path type not determined
     NOTHING              = 0x1      # Resolved path does not exist.
     FILE                 = 0x2      # Resolved path is a file.
     DIR                  = 0x3      # Resolved path is a dir.
     LINK                 = 0x4      # Unresolved path is a link.
-    TOP                  = 0x8      # Unresolve path is topmost (i.e. a root for a filename op)
-    TOP_LINK             = TOP | LINK
+    TOP                  = 0x8      # Unresolved path is topmost (i.e. a root for a filename op)
     LINK_TO_NOTHING      = LINK | NOTHING
     LINK_TO_FILE         = LINK | FILE
     LINK_TO_DIR          = LINK | DIR
-    TOP_LINK_TO_NOTHING  = TOP_LINK | NOTHING
-    TOP_LINK_TO_FILE     = TOP_LINK | FILE
-    TOP_LINK_TO_DIR      = TOP_LINK | DIR
-    DEFAULT              = 0xf
+    TOP_LINK_TO_NOTHING  = TOP | LINK | NOTHING
+    TOP_LINK_TO_FILE     = TOP | LINK | FILE
+    TOP_LINK_TO_DIR      = TOP | LINK | DIR
+    FILE_TYPE_MASK       = 0x3
     OPTION_BITS          = 4
     DISPATCH_TABLE_SIZE = 1 << OPTION_BITS
+
+    @staticmethod
+    def is_nothing(classification):
+        return classification & PathType.FILE_TYPE_MASK == PathType.NOTHING
+
+    @staticmethod
+    def is_file(classification):
+        return classification & PathType.FILE_TYPE_MASK == PathType.FILE
+
+    @staticmethod
+    def is_dir(classification):
+        return classification & PathType.FILE_TYPE_MASK == PathType.DIR
+
+    @staticmethod
+    def is_link(classification):
+        return classification & PathType.LINK != 0
+
+    @staticmethod
+    def is_top_link(classification):
+        mask = PathType.LINK | PathType.TOP
+        return classification & mask == mask
+
+
+class LinkFollow:
+
+    ALWAYS = 1
+    NEVER = 2
+    TOP_ONLY = 3
+
+
+class CircularLinkException(Exception): pass
+
+
+def not_implemented(source, target):
+    raise NotImplementedError()
+
+
+def _classify(path, is_top):
+    try:
+        resolved = path.resolve(strict=True)
+        if resolved.is_file():
+            classification = PathType.FILE
+        elif resolved.is_dir():
+            classification = PathType.DIR
+        elif resolved.is_link():
+            assert False
+        else:
+            raise marcel.exception.KillAndResumeException(None, path, 'Unrecognized file type')
+    except FileNotFoundError:
+        classification = PathType.NOTHING
+    except RuntimeError:
+        raise CircularLinkException(path)
+    if path.is_symlink():
+        classification |= PathType.LINK
+    if is_top:
+        classification |= PathType.TOP
+    return classification
+
+
+def classify_source(path, is_top):
+    return _classify(path, is_top)
+
+
+def classify_target(path):
+    return _classify(path, False)
 
 
 class FilenamesOpActions:
 
-    def __init__(self, op_name, default_action, action_map):
+    def __init__(self, op_name, action_map, default_action=not_implemented):
         self.op_name = op_name
         self.actions = [default_action] * PathType.DISPATCH_TABLE_SIZE
-        if action_map:
-            for types, action in action_map.items():
-                self.actions[types] = action
+        for classification, action in action_map.items():
+            self.actions[classification] = action
 
-    def action(self, source, source_is_top):
-        source_type = self.classify(source, source_is_top)
-        self.actions[source_type](source)
+    def action(self, path, path_is_top):
+        classification = self.classify(path, path_is_top)
+        self.actions[classification](path)
 
     def classify(self, path, is_top):
-        if path.exists():
-            resolved = path.resolve()
+        try:
+            resolved = path.resolve(strict=True)
             if resolved.is_file():
-                type = PathType.FILE
+                classification = PathType.FILE
             elif resolved.is_dir():
-                type = PathType.DIR
+                classification = PathType.DIR
             elif resolved.is_link():
                 assert False
             else:
                 raise marcel.exception.KillAndResumeException(self.op_name, path, 'Unrecognized file type')
-        else:
-            type = PathType.NOTHING
-        if path.is_link():
-            type |= PathType.LINK
+        except FileNotFoundError:
+            classification = PathType.NOTHING
+        except RuntimeError:
+            raise CircularLinkException(path)
+        if path.is_symlink():
+            classification |= PathType.LINK
         if is_top:
-            type |= PathType.TOP
-        return type
+            classification |= PathType.TOP
+        return classification
