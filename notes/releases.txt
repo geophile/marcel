@@ -31,7 +31,7 @@
     + mv
     + cp
     - ln
-    - mkdir
+    + mkdir
 
 + Make the File object more useful by adding more methods. Maybe
   extend Path?
