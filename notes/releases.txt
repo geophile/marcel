@@ -27,7 +27,8 @@
 
     + rm
     + mv
-    - cp & ln
+    + cp
+    - ln
     - mkdir
 
 + Make the File object more useful by adding more methods. Maybe

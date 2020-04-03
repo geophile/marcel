@@ -146,19 +146,6 @@ class FilenamesOp(marcel.core.Op):
                 if root not in roots_set:
                     roots_set.add(root)
                     roots.append(root)
-            # if path.exists() or os.path.lexists(path):
-            #     # path.exists(): True for files, directories, and symlinks to files and directories.
-            #     # But it's false for a dangling symlink. os.path.lexists(path) is True for a dangling symlink.
-            #     roots.append(path)
-            # else:
-            #     path_str = path.as_posix()
-            #     glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
-            #                                if path.is_absolute() else
-            #                                (current_dir, path_str))
-            #     for root in glob_base.glob(glob_pattern):
-            #         if root not in roots_set:
-            #             roots_set.add(root)
-            #             roots.append(root)
         return roots
 
     # pathlib.is_file() and is_dir() return True for symlinks also, which is usually misleading

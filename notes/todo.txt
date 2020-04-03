@@ -147,13 +147,16 @@ Distinct color for broken symlink.
 
 ----------------------------------------------------------------------
 
-"rm dir" just works. Should a flag be required to minimize accidents?
+File ops:
 
-----------------------------------------------------------------------
+- "rm dir" just works. Should a flag be required to minimize accidents?
 
-symlinks need a LOT of work. pathlib.samefile follows symlinks, for
-example.
+- ls needs (bash) -HL flags.
 
-----------------------------------------------------------------------
+- Need detailed testing of cp -T and -A flags. In tests so far, their
+  behavior is indistinguishable.
 
-ls needs (bash) -HL flags.
+- Computing ls.base (used to compute file.display_path) isn't quite
+  right, for symlink to directory. Need to survey what bash does,
+  decide on correct behavior, implement and test. Related to handling
+  of -HL flags for ls.
