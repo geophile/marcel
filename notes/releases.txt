@@ -3,6 +3,8 @@
 - sudo support: Need to do a bash su, but then somehow land in marcel
   again. Similar for su.
 
+- Highlight color for broken link
+
 ----------------------------------------------------------------------
 
 0.2
@@ -52,8 +54,6 @@
   - 28
 
 + Line continuation
-
-- Highlight color for broken link
 
 ----------------------------------------------------------------------
 

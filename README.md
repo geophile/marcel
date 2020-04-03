@@ -18,20 +18,32 @@ and passes Python objects,
 as Marcel does. Marcel improves on osh in a number of ways:
 
 * Marcel is a full-fledged shell.
-* A planned abstraction mechanism is to offer pipelines as first-class constructs. This will allow for more complex commands (which combine multiple pipelines), and the composition of pipelines.
-* Marcel started with the osh code base (for commands and pipelines), but cleaned up a number of ugly hacks and non-pythonic constructs.
-* Osh requires Python 2.x. Marcel requires Python 3.x. (Whether you regard that as an improvement is obviously subjective.)
+
+* A planned abstraction mechanism is to offer pipelines as first-class constructs. 
+This will allow for more complex commands (which combine multiple pipelines), and the composition of pipelines.
+
+* Marcel started with the osh code base (for commands and pipelines), but cleaned up a number of ugly hacks and 
+non-pythonic constructs.
+
+* Osh requires Python 2.x. Marcel requires Python 3.x. (Whether you regard that as an improvement is 
+obviously subjective.)
 
 Shell Features
 --------------
 
 Marcel provides:
 
-* Command history and recall (including correct handling of multi-line commands).
+* Command history and recall, including correct handling of multi-line commands. (Muti-line support
+is implemented using [multilinereader](https://github.com/geophile/multilinereader).)
+
 * Searching of command history (e.g. ctrl-R).
+
 * Editing of last command in the editor of your choice.
+
 * Context-sensitive tab completion.
+
 * Prompt customization.
+
 * Customizable highlighted output of file and process listings.
 
 Example
@@ -84,12 +96,13 @@ grouped by extension:
 * `map(f: (f.path.suffix, 1, f.size))`: Map each file, `f`, to a tuple containing the file's 
 extension, the integer 1, and the file size.
 
-* `red . + +`: Reduce the incoming stream, grouping by the file extensions (in the tuple position identified by
+* `red . + +`: Reduce the incoming stream, grouping by the file extensions (in the tuple position 
+identified by
 the `.`), and summing up the `1`s (to obtain the count for that extension), 
 and the sizes.
 
 Executables
-===========
+-----------
 
 In addition to using built-in operators, you can, of course, call any executable provided by
 the operating system. Pipelines may contain a mixture of operators and executables. The stdout of
@@ -123,7 +136,7 @@ the use of `xargs` and `echo`.
 
 
 Remote access
-=============
+-------------
 
 Marcel can submit commands to all of the nodes in a cluster, and then combine the results.
 For example, a cluster named `qa` can be configured in `~/.marcel.py`:
@@ -158,7 +171,8 @@ Then, to get a list of files in `/usr/local/bin` in each node of the cluster:
 
 
 Errors
-======
+------
+
 The POSIX model of `stdout` and `stderr` streams distinguishes normal output from errors.
 An unfortunate aspect of this approach is that the interleaving of normal output and errors is lost.
 A marcel pipeline generates a stream of values, and each value has a type. This allows for normal
@@ -193,21 +207,23 @@ to go inside of it. The error indicates when the attempt was made -- between lis
 the `hi` and `welcome` directories.
 
 Normal output from this command comprises tuples of size 1, each containing a `File` object. The error
-is carried by an `Error` object. Filtering can be performed to separate out normal and error output when desired.
+is carried by an `Error` object. Filtering can be performed to separate out normal and error 
+output when desired.
 
 Licensing
-=========
+---------
 
 The predecessor project ([osh](https://github.com/geophile.osh)) was
 GPL. I've removed those headers, and will revisit the license issue,
 but there will be no restrictions on the use of this software.
 
 Status
-======
+------
 
 This is pretty rudimentary so far. There is no installation script, no documentation (other than this
 README, and comments in the code), and lots of features and commands are missing.
-Marcel is obviously not ready to be the shell I would use routinely. If you want to try it out, use a script
+Marcel is obviously not ready to be the shell I would use routinely. If you want to try it out, 
+use a script
 like this:
 
 ```

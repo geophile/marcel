@@ -286,7 +286,7 @@ def test_mv():
              expected_out=[Error('File exists')])
     # Move one dir to dir
     filename_op_setup('/tmp/test')
-    TEST.run('mkdir t')
+    os.system('mkdir t')
     TEST.run(test='mv d t',
              verification='ls -1 . d t | map (f: f.render_compact())',
              expected_out=sorted([absolute('/tmp/test', x) for x in ['.', 'f', 'sf', 'lf', 'sd', 't', 't/d']]))
@@ -441,7 +441,7 @@ def test_cp():
                        for x in ['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']])
     expected.extend(sorted([absolute('/tmp/test', x)
                             for x in ['t/d/df', 't/d/sdf', 't/d/ldf', 't/d/dd', 't/d/sdd']]))
-    TEST.run('mkdir t')
+    os.system('mkdir t')
     TEST.run(test='cp d t',
              verification='ls -0 d/* t/d/* | map (f: f.render_compact())',
              expected_out=expected)
@@ -488,7 +488,7 @@ def test_cp():
              expected_out=['.'])
     # Copy one symlink-to-dir to dir (OK)
     filename_op_setup('/tmp/test')
-    TEST.run('mkdir e')
+    os.system('mkdir e')
     TEST.run(test='cp sd e',
              verification='ls -1 e/sd | map (f: f.render_compact())',
              expected_out=sorted(['.', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
@@ -714,6 +714,10 @@ def test_cp_bash_behavior():
                  expected_out=[Error('Cannot overwrite non-directory')])
     # TODO: Copy dir to existing dir, with some filenames in common between source and target
 
+def test_mkdir():
+    filename_op_setup('/tmp/test')
+    TEST.run('mkdir a b')
+
 
 def reset_environment(config_file='./.marcel.py'):
     os.chdir(start_dir)
@@ -751,7 +755,7 @@ def main_dev():
 def main():
     reset_environment()
     main_stable()
-    main_dev()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

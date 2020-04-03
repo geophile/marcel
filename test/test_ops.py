@@ -419,6 +419,17 @@ def test_remote():
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
 
 
+def test_mkdir():
+    reset_environment()
+    os.system('rm -rf /tmp/test')
+    os.system('mkdir /tmp/test')
+    TEST.run('cd /tmp/test')
+    TEST.run('mkdir a b | map (f: f.render_compact())',
+             expected_out=['/tmp/test/a', '/tmp/test/b'])
+    TEST.run('mkdir x a y | map (f: f.render_compact())',
+             expected_out=['/tmp/test/x', Error('File exists'), '/tmp/test/y'])
+
+
 def reset_environment(config_file='./.marcel.py'):
     os.chdir(start_dir)
     MAIN.global_state.env = marcel.env.Environment(config_file)
@@ -442,10 +453,12 @@ def main_stable():
     test_fork()
     test_namespace()
     test_remote()
+    test_mkdir()
     test_no_such_op()
 
 
 def main_dev():
+    test_mkdir()
     pass
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
@@ -454,7 +467,7 @@ def main_dev():
 def main():
     reset_environment()
     main_stable()
-    main_dev()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

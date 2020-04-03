@@ -22,7 +22,6 @@ import sys
 import marcel.op.filenames
 
 FilenamesOp = marcel.op.filenames.FilenamesOp
-FilenamesOpActions = marcel.op.filenames.FilenamesOpActions
 PathType = marcel.op.filenames.PathType
 LinkFollow = marcel.op.filenames.LinkFollow
 classify_source = marcel.op.filenames.classify_source
@@ -51,12 +50,6 @@ class CpArgParser(marcel.core.ArgParser):
 
 class Cp(marcel.op.filenames.FilenamesOp):
     argparser = CpArgParser()
-
-    source_to_file_actions = FilenamesOpActions(
-        'cp',
-        action_map={
-
-        })
 
     def __init__(self):
         super().__init__(op_has_target=True)
@@ -155,7 +148,7 @@ class Cp(marcel.op.filenames.FilenamesOp):
                 self.follow_symlink_top and PathType.is_top_link(source_classification) or
                 self.follow_symlink_unspecified
                 and PathType.is_link(source_classification)
-                and PathType.is_file(source_classification))
+                and PathType.is_file(source_classification))  # TODO: Why limited to files?
 
     @staticmethod
     def related(p, q):

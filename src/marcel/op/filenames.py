@@ -19,10 +19,9 @@ import marcel.object.file
 
 class FilenamesOp(marcel.core.Op):
 
-    def __init__(self, op_has_target, actions=None):
+    def __init__(self, op_has_target):
         super().__init__()
         self.op_has_target = op_has_target
-        self.actions = actions
         self.filename = None
         self.current_dir = None
         self.roots = []
@@ -250,37 +249,3 @@ def classify_source(path, is_top):
 
 def classify_target(path):
     return _classify(path, False)
-
-
-class FilenamesOpActions:
-
-    def __init__(self, op_name, action_map, default_action=not_implemented):
-        self.op_name = op_name
-        self.actions = [default_action] * PathType.DISPATCH_TABLE_SIZE
-        for classification, action in action_map.items():
-            self.actions[classification] = action
-
-    def action(self, path, path_is_top):
-        classification = self.classify(path, path_is_top)
-        self.actions[classification](path)
-
-    def classify(self, path, is_top):
-        try:
-            resolved = path.resolve(strict=True)
-            if resolved.is_file():
-                classification = PathType.FILE
-            elif resolved.is_dir():
-                classification = PathType.DIR
-            elif resolved.is_link():
-                assert False
-            else:
-                raise marcel.exception.KillAndResumeException(self.op_name, path, 'Unrecognized file type')
-        except FileNotFoundError:
-            classification = PathType.NOTHING
-        except RuntimeError:
-            raise CircularLinkException(path)
-        if path.is_symlink():
-            classification |= PathType.LINK
-        if is_top:
-            classification |= PathType.TOP
-        return classification

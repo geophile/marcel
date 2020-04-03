@@ -8,6 +8,7 @@ public = [
     'head',
     'ls',
     'map',
+    'mkdir',
     'mv',
     'out',
     'ps',
