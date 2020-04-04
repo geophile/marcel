@@ -50,7 +50,7 @@ class Fork(marcel.core.Op):
 
     def setup_1(self):
         self.generate_thread_labels()
-        # The fork_pipeline is not a top-level pipeline (executed from main), so it's global state isn't
+        # The fork_pipeline is not a top-level pipeline (executed from main), so its global state isn't
         # set yet. This op's owning pipeline has its global state by now. So set the fork_pipeline's global state.
         self.fork_pipeline.set_global_state(self.global_state())
         # If the fork pipeline executes locally, then it can be used as is.

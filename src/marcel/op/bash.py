@@ -1,4 +1,5 @@
 import argparse
+import shlex
 import subprocess
 import sys
 
@@ -67,14 +68,25 @@ class Bash(marcel.core.Op):
         return Bash.argparser
 
 
-class NonInteractive:
+class Escape:
 
     def __init__(self, op):
         self.op = op
 
     def run(self):
-        command = ' '.join(self.op.args)
-        process = subprocess.Popen(command,
+        assert False
+
+    def command(self):
+        return ' '.join([shlex.quote(a) for a in self.op.args])
+
+
+class NonInteractive(Escape):
+
+    def __init__(self, op):
+        super().__init__(op)
+
+    def run(self):
+        process = subprocess.Popen(self.command(),
                                    shell=True,
                                    executable='/bin/bash',
                                    stdin=subprocess.PIPE,
@@ -104,14 +116,13 @@ class NonInteractive:
         return '\n'.join(input)
 
 
-class Interactive:
+class Interactive(Escape):
 
     def __init__(self, op):
-        self.op = op
+        super().__init__(op)
 
     def run(self):
-        command = ' '.join(self.op.args)
-        process = subprocess.Popen(command,
+        process = subprocess.Popen(self.command(),
                                    shell=True,
                                    executable='/bin/bash',
                                    universal_newlines=True)

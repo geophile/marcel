@@ -748,8 +748,6 @@ def main_stable():
 
 def main_dev():
     pass
-    # TODO: test_ps()  How?
-    # TODO: test cd: absolute, relative, target does not exist
 
 
 def main():

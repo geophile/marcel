@@ -182,8 +182,6 @@ class PathType:
     TOP_LINK_TO_FILE     = TOP | LINK | FILE
     TOP_LINK_TO_DIR      = TOP | LINK | DIR
     FILE_TYPE_MASK       = 0x3
-    OPTION_BITS          = 4
-    DISPATCH_TABLE_SIZE = 1 << OPTION_BITS
 
     @staticmethod
     def is_nothing(classification):

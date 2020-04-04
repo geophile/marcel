@@ -152,6 +152,10 @@ class Cp(marcel.op.filenames.FilenamesOp):
 
     @staticmethod
     def related(p, q):
-        p = p.resolve().as_posix()
-        q = q.resolve().as_posix()
-        return p.startswith(q) or q.startswith(p)
+        p_parts = p.resolve().parts
+        q_parts = q.resolve().parts
+        n = min(len(p_parts), len(q_parts))
+        for i in range(n):
+            if p_parts[i] != q_parts[i]:
+                return False
+        return True
