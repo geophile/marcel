@@ -37,7 +37,7 @@ def is_generator(x):
 
 
 def is_file(x):
-    # Why not isinstance: Importing osh.file results in circular imports
+    # Why not isinstance: Importing marcel.object.file.File results in circular imports
     return x.__class__.__name__ == 'File'
 
 

@@ -91,7 +91,7 @@ class Ls(marcel.op.filenames.FilenamesOp):
 
     def setup_1(self):
         super().setup_1()
-        if self.roots is None:
+        if len(self.roots) == 0:
             self.roots = [self.current_dir]
         if not (self.d0 or self.d1 or self.dr):
             self.d1 = True
@@ -101,13 +101,10 @@ class Ls(marcel.op.filenames.FilenamesOp):
             self.symlink = True
         if len(self.roots) == 1:
             root = self.roots[0]
-            if root.is_dir():
-                self.base = root
-            else:
-                self.base = root.parent
+            self.base = root if root.is_dir() else root.parent
         else:
             self.base = None
-        self.roots = sorted(self.roots)
+            self.roots = sorted(self.roots)
 
     # Op
 
@@ -134,9 +131,9 @@ class Ls(marcel.op.filenames.FilenamesOp):
                     self.send(marcel.object.error.Error(f'Cannot explore {root}: permission denied'))
 
     def send_path(self, path):
-        s = marcel.op.filenames.FilenamesOp.is_path_symlink(path)
-        f = marcel.op.filenames.FilenamesOp.is_path_file(path)
-        d = marcel.op.filenames.FilenamesOp.is_path_dir(path)
+        s = path.is_symlink()
+        f = path.is_file() and not s
+        d = path.is_dir() and not s
         if ((self.file and f) or (self.dir and d) or (self.symlink and s)) and path not in self.emitted:
             file = marcel.object.file.File(path, self.base)
             self.send(file)

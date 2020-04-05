@@ -1,0 +1,23 @@
+Filename ops
+
+- cp
+- mv
+- ln
+- rm
+
+The design of these is muddled. The names match those of the
+corresponding linux commands. They strive to provide compatible
+behavior, e.g. for symlinks. But the options are differently named (cp
+-P vs. cp -N) or different -- marcel has fewer options; -r is
+omitted from cp because it is always implied.
+
+They don't really benefit from a re-implementation, e.g. being in the
+middle of a pipeline. And when necessary, fitting into a pipeline is
+doable.
+
+What are the benefits of re-implementing?
+
+- More consistent (with marcel) error handling.
+
+- Built-in xargs capability, (piping in files to be acted upon).
+

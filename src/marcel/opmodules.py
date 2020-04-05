@@ -12,10 +12,6 @@ class OpModules:
             self.modules[op_name] = op_module
 
     def named(self, name):
-        # TODO: Experiment
-        if name in ('cp', 'mv', 'rm'):
-            return None
-        # TODO: End of experiment
         return self.modules.get(name, None)
 
 
