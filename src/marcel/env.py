@@ -16,7 +16,11 @@ class Environment:
     def __init__(self, config_file):
         self._user = getpass.getuser()
         self._homedir = pathlib.Path.home().resolve()
-        self._current_dir = pathlib.Path.cwd().resolve()
+        try:
+            self._current_dir = pathlib.Path.cwd().resolve()
+        except FileNotFoundError:
+            raise marcel.exception.KillShellException(
+                'Current directory does not exist! cd somewhere else and try again.')
         self._host = socket.gethostname()
         self._vars = {  # Environment variables
             'USER': self._user,
@@ -46,13 +50,15 @@ class Environment:
         assert isinstance(directory, pathlib.Path), directory
         new_dir = self._current_dir / directory
         try:
-            self._current_dir = new_dir.resolve(strict=True)
+            if not new_dir.exists():
+                raise marcel.exception.KillCommandException(f'Cannot cd into {new_dir}. Directory does not exist.')
+            self._current_dir = new_dir.resolve(strict=False)  # False: due to bug 27
             self.setenv('PWD', self._current_dir.as_posix())
             # So that executables have the same view of the current directory.
             os.chdir(self._current_dir)
         except FileNotFoundError:
-            raise marcel.exception.KillCommandException(
-                'Cannot cd into {} from {}. Directory does not exist.'.format(directory, self._current_dir))
+            # Fix for bug 27
+            pass
 
     def cluster(self, name):
         return self.config().clusters.get(name, None)

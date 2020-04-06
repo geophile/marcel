@@ -56,7 +56,11 @@ class Main:
 
     def __init__(self):
         config_path = Main.args()
-        self.env = marcel.env.Environment(config_path)
+        try:
+            self.env = marcel.env.Environment(config_path)
+        except marcel.exception.KillShellException as e:
+            print(f'Cannot start marcel: {e}', file=sys.stderr)
+            sys.exit(1)
         self.global_state = marcel.globalstate.GlobalState(self.env)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self.global_state)
         self.reader = None
