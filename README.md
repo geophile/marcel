@@ -9,6 +9,13 @@ next, marcel passes Python objects: builtin types such as lists,
 tuples, strings, and numbers; but also objects representing files and
 processes.
 
+Linux has extremely powerful commands such as `awk` and `find`.
+Most people know how to do a few simple operations using these commands,
+but cannot fully exploit them due to their reliance on extensive "sublanguages".  By 
+contrast, if you know Python, then you already know the language used by marcel.
+Python expressions, combined with marcel operators, allow you to do much of what can
+be done relying on the more obscure corners of `awk` and `find`.
+
 Marcel is the successor to [osh](http://github.com/geophile/osh) 
 (Object SHell). Osh
 is based on the same ideas, but it is not a full-fledged shell;
@@ -76,30 +83,48 @@ the `Process` object.
 
 Another Example
 ---------------
-Find all files recursively, and then find the sum of file sizes,
-grouped by extension:
+Find all files recursively, summing the file count and file size for each file extension,
+and then sort by decreasing size and report the top 10.
+```
+ls -fr |\
+select (f: f.path.suffix != '') |\
+map (f: (f.path.suffix.lower(), 1, f.size)) |\
+red . + + |\
+sort (ext, count, size: -size) |\
+head 10
 
+('.jpg', 82477, 63041371455)
+('.mp3', 3492, 25752416039)
+('.avi', 225, 19301810684)
+('.m4a', 1251, 9798087657)
+('.log', 630, 9425357624)
+('.jar', 5202, 7111116450)
+('.m4v', 5, 4462527594)
+('.csv', 1418, 4094816065)
+('.mkv', 1, 3195052033)
+('.pack', 179, 2969390041)
 ```
-    M jao@cheese:~/git/marcel$ ls -fr | map (f: (f.path.suffix, 1, f.size)) | red . + +
-    ('.xml', 5, 28176)
-    ('.iml', 1, 819)
-    ('.py', 59, 146934)
-    ('.txt', 12, 20814)
-    ('', 646, 596689)
-    ('.sample', 11, 18844)
-    ('.pyc', 43, 129403)
-    ('.md', 1, 1378)
-```
+
+* The command is broken up across a few lines using a \ at the end of each non-terminal line.
 
 * `ls -fr`: List just files (`-f`) recursively (`-r`).
 
-* `map(f: (f.path.suffix, 1, f.size))`: Map each file, `f`, to a tuple containing the file's 
-extension, the integer 1, and the file size.
+* `select (f: f.path.suffix != '')`: For each file, `f`, keep those for which the file's
+extension (`f.path.suffix`) is not the empty string. The syntax inside the parentheses
+is a Python function, (marcel permits omission of the `lambda` keyword).
+
+* `map(f: (f.path.suffix.lower(), 1, f.size))`: Map each file, `f`, to a tuple containing 
+the file's extension (folded to lower case), the integer 1, and the file size.
 
 * `red . + +`: Reduce the incoming stream, grouping by the file extensions (in the tuple position 
 identified by
 the `.`), and summing up the `1`s (to obtain the count for that extension), 
 and the sizes.
+
+* `sort (ext, count, size: -size)`: Sort the incoming (extension, count, size) tuples
+by decreasing size. 
+
+* `head 10`: Keep the first 10 input tuples and discard the rest.
 
 Executables
 -----------
@@ -115,13 +140,13 @@ users whose shell is `/bin/bash`.
 The output is condensed into one line through
 the use of `xargs` and `echo`. 
 
-    cat /etc/passwd | \
-    map (line: line.split(':')) | \
-    select (*line: line[-1] == '/bin/bash') | \
-    map (*line: line[0]) | \
-    xargs echo
-
-* The command is broken up across a few lines using a \ at the end of each non-terminal line.
+```
+cat /etc/passwd | \
+map (line: line.split(':')) | \
+select (*line: line[-1] == '/bin/bash') | \
+map (*line: line[0]) | \
+xargs echo
+```
 
 * `cat /etc/passwd`: Obtain the contents of the file. Lines are piped to subsequent commands.
 
