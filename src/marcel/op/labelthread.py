@@ -1,16 +1,22 @@
 import marcel.core
 
+# TODO: DEBUGGING
+ID_COUNTER = 0
+
 
 class LabelThread(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
         self.label = None
+        global ID_COUNTER
+        self.id = ID_COUNTER
+        ID_COUNTER += 1
 
     def __repr__(self):
-        return (f'labelthread({self.label})'
-                if self.label
-                else 'labelthread()')
+        return (f'labelthread(#{self.id}: {self.label})'
+                if self.label is not None
+                else f'labelthread(#{self.id})')
 
     # BaseOp
 

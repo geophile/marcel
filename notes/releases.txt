@@ -25,18 +25,10 @@
 
 - pushd/popd/dirs
 
-- File commands:
-
-    + rm
-    + mv
-    + cp
-    - ln
-    + mkdir
-
 + Make the File object more useful by adding more methods. Maybe
   extend Path?
 
-+ tab completion
+- tab completion for mv, cp, ln, mkdir, rmdir, rm.
 
 - Bugs:
 
@@ -52,7 +44,7 @@
   - 26
   - 27
   - 28
-  - 29
+  + 29
 
 + Line continuation
 

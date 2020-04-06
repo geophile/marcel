@@ -22,12 +22,34 @@ class File(marcel.object.renderable.Renderable):
         self.path = path
         self.display_path = path.relative_to(base) if base else path
         self.lstat = None
+        # Used only to survive pickling
+        self.path_str = None
+        self.display_path_str = None
 
     def __repr__(self):
         return self.render_compact()
 
     def __getattr__(self, attr):
         return getattr(self.path, attr)
+
+    def __getstate__(self):
+        if self.path is not None:
+            self.path_str = str(self.path)
+            self.path = None
+        if self.display_path is not None:
+            self.display_path_str = str(self.display_path)
+            self.display_path = None
+        self.lstat = None
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        if self.path_str:
+            self.path = pathlib.Path(self.path_str)
+            self.path_str = None
+        if self.display_path_str:
+            self.display_path = pathlib.Path(self.display_path_str)
+            self.display_path_str = None
 
     stat = property(lambda self: self._lstat(),
                      doc="""lstat of this file""")
@@ -117,9 +139,9 @@ class File(marcel.object.renderable.Renderable):
                 # is also an executable on PATH, then highlighting will be incorrect. See bug 8.
                 # Check symlink first, because is_executable (at least) follows symlinks. FilenamesOp.is_path_xxx
                 # rules out symlinks, but checking symlinks first seems safest.
-                color_scheme.file_link if marcel.op.filenames.FilenamesOp.is_path_symlink(path) else
+                color_scheme.file_link if path.is_symlink() else
                 color_scheme.file_executable if is_executable(path.resolve().as_posix()) else
-                color_scheme.file_dir if marcel.op.filenames.FilenamesOp.is_path_dir(path) else
+                color_scheme.file_dir if path.is_dir() else
                 color_scheme.file_file)
         return highlight
 

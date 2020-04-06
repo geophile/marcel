@@ -336,3 +336,41 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/src/marcel/util.py", line 88, in colorize
     1 if color.bold else 0,
 AttributeError: 'str' object has no attribute 'bold'
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+29. Fork execution of ls is broken
+
+Remote:
+
+    M jao@cheese:~$ @jao [ ls /home/jao ]
+    M jao@cheese:~$ 
+
+No output at all.
+
+Local:
+
+    M jao@cheese:~$ @1 [ ls /home/jao ]
+    Traceback (most recent call last):
+      File "/home/jao/git/marcel/src/marcel/main.py", line 122, in <module>
+        MAIN.run()
+      File "/home/jao/git/marcel/src/marcel/main.py", line 77, in run
+        self.run_command(line)
+      File "/home/jao/git/marcel/src/marcel/main.py", line 89, in run_command
+        Command(pipeline).execute()
+      File "/home/jao/git/marcel/src/marcel/main.py", line 38, in execute
+        self.pipeline.setup_2()
+      File "/home/jao/git/marcel/src/marcel/core.py", line 228, in setup_2
+        op.setup_2()
+      File "/home/jao/git/marcel/src/marcel/op/fork.py", line 76, in setup_2
+        pipeline_copy.setup_1()
+      File "/home/jao/git/marcel/src/marcel/core.py", line 217, in setup_1
+        op.setup_1()
+      File "/home/jao/git/marcel/src/marcel/op/ls.py", line 93, in setup_1
+        super().setup_1()
+      File "/home/jao/git/marcel/src/marcel/op/filenames.py", line 35, in setup_1
+        self.current_dir = self.global_state().env.pwd()
+    AttributeError: 'GlobalState' object has no attribute 'env'

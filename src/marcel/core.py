@@ -159,7 +159,7 @@ class Op(BaseOp):
     """
 
     def __init__(self):
-        BaseOp.__init__(self)
+        super().__init__()
 
     def __repr__(self):
         # TODO: Render args

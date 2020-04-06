@@ -500,7 +500,8 @@ class Parser(Token):
     def finish_pipeline(self):
         fork_pipeline = self.pipelines.pop()
         main_pipeline = self.pipelines.top()
-        main_pipeline.append(marcel.op.fork.Fork(self.fork_spec, fork_pipeline))
+        fork = marcel.op.fork.Fork.create_fork(self.global_state, self.fork_spec, fork_pipeline)
+        main_pipeline.append(fork)
         self.fork_spec = None
 
     def pipeline(self):
