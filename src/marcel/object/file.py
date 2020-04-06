@@ -1,3 +1,4 @@
+import os
 import pathlib
 import time
 
@@ -85,7 +86,7 @@ class File(marcel.object.renderable.Renderable):
             line[-1] = colorize(line[-1], self._highlight_color(self, color_scheme))
         if self.is_symlink():
             line.append('->')
-            link_target = self.resolve()
+            link_target = pathlib.Path(os.readlink(self.path))
             if color_scheme:
                 link_target = colorize(link_target, self._highlight_color(link_target, color_scheme))
             if isinstance(link_target, pathlib.Path):
