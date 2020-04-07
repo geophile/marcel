@@ -16,17 +16,19 @@ class Environment:
     def __init__(self, config_file):
         self._user = getpass.getuser()
         self._homedir = pathlib.Path.home().resolve()
+        self._dir_stack = []
         try:
-            self._current_dir = pathlib.Path.cwd().resolve()
+            current_dir = pathlib.Path.cwd().resolve()
         except FileNotFoundError:
             raise marcel.exception.KillShellException(
                 'Current directory does not exist! cd somewhere else and try again.')
+        self.pushd(current_dir)
         self._host = socket.gethostname()
         self._vars = {  # Environment variables
             'USER': self._user,
             'HOME': self._homedir.as_posix(),
             'HOST': self._host,
-            'PWD': self._current_dir.as_posix()
+            'PWD': self.pwd().as_posix()
         }
         self._config = marcel.config.Configuration(self._vars)
         self._config.read_config(config_file)
@@ -44,21 +46,38 @@ class Environment:
                 self._prompt_string(self._config.continuation_prompt))
 
     def pwd(self):
-        return self._current_dir
+        return self._dir_stack[-1]
 
     def cd(self, directory):
         assert isinstance(directory, pathlib.Path), directory
-        new_dir = (self._current_dir / directory.expanduser()).resolve(False)  # False: due to bug 27
+        new_dir = (self.pwd() / directory.expanduser()).resolve(False)  # False: due to bug 27
         try:
             if not new_dir.exists():
                 raise marcel.exception.KillCommandException(f'Cannot cd into {new_dir}. Directory does not exist.')
-            self._current_dir = new_dir
-            self.setenv('PWD', self._current_dir.as_posix())
+            self._dir_stack[-1] = new_dir
+            self.setenv('PWD', self.pwd().as_posix())
             # So that executables have the same view of the current directory.
-            os.chdir(self._current_dir)
+            os.chdir(self.pwd())
         except FileNotFoundError:
             # Fix for bug 27
             pass
+
+    def pushd(self, directory):
+        if directory is None:
+            if len(self._dir_stack) > 1:
+                self._dir_stack[-2:] = [self._dir_stack[-1], self._dir_stack[-2]]
+        else:
+            assert isinstance(directory, pathlib.Path)
+            self._dir_stack.append(directory)
+
+    def popd(self):
+        if len(self._dir_stack) > 1:
+            self._dir_stack.pop()
+
+    def dirs(self):
+        dirs = list(self._dir_stack)
+        dirs.reverse()
+        return dirs
 
     def cluster(self, name):
         return self.config().clusters.get(name, None)

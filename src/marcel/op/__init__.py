@@ -9,6 +9,7 @@ public = [
     'map',
     'out',
     'ps',
+    'pushd',
     'pwd',
     'red',
     'reverse',

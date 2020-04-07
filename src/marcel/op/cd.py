@@ -42,8 +42,6 @@ class Cd(marcel.core.Op):
         self.directory = pathlib.Path(self.directory)
 
     def receive(self, _):
-        # dir = self.directory.expanduser().resolve()
-        # self.global_state().env.cd(dir)
         self.global_state().env.cd(self.directory)
 
     # Op
