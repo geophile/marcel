@@ -22,9 +22,11 @@ class TabCompleter:
                     'cp',
                     'ln',
                     'ls',
+                    'mkdir',
                     'mv',
                     'out',
-                    'rm']
+                    'rm',
+                    'rmdir']
 
     def __init__(self, global_state):
         self.global_state = global_state
