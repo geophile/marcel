@@ -177,7 +177,7 @@ def test_ls():
 
 
 # pushd, popd, dirs
-def test_dirstack():
+def test_dir_stack():
     filename_op_setup('/tmp/test')
     TEST.run('mkdir a b c')
     TEST.run(test='pwd',
@@ -211,17 +211,16 @@ def test_dirstack():
 def main_stable():
     test_source_filenames()
     test_ls()
-    test_dirstack()
+    test_dir_stack()
 
 
 def main_dev():
-    test_dirstack()
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
+    main_stable()
     main_dev()
     print(f'Test failures: {TEST.failures}')
 
