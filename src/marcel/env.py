@@ -16,14 +16,13 @@ class Environment:
     def __init__(self, config_file):
         self._user = getpass.getuser()
         self._homedir = pathlib.Path.home().resolve()
-        self._dir_stack = []
+        self._host = socket.gethostname()
         try:
             current_dir = pathlib.Path.cwd().resolve()
         except FileNotFoundError:
             raise marcel.exception.KillShellException(
                 'Current directory does not exist! cd somewhere else and try again.')
-        self.pushd(current_dir)
-        self._host = socket.gethostname()
+        self._dir_stack = [current_dir]
         self._vars = {  # Environment variables
             'USER': self._user,
             'HOME': self._homedir.as_posix(),
@@ -68,11 +67,17 @@ class Environment:
                 self._dir_stack[-2:] = [self._dir_stack[-1], self._dir_stack[-2]]
         else:
             assert isinstance(directory, pathlib.Path)
+            directory = directory.resolve()
             self._dir_stack.append(directory)
+        self.cd(self._dir_stack[-1])
 
     def popd(self):
         if len(self._dir_stack) > 1:
             self._dir_stack.pop()
+            self.cd(self._dir_stack[-1])
+
+    def reset_dir_stack(self):
+        self._dir_stack = [self._dir_stack[-1]]
 
     def dirs(self):
         dirs = list(self._dir_stack)

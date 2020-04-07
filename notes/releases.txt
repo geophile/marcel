@@ -23,7 +23,7 @@
 
 + bash commands that do pagination don't work, e.g. more, man.
 
-- pushd/popd/dirs
++ pushd/popd/dirs
 
 + Make the File object more useful by adding more methods. Maybe
   extend Path?

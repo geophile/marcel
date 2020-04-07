@@ -44,6 +44,8 @@ class Pushd(marcel.core.Op):
 
     def receive(self, _):
         self.global_state().env.pushd(self.directory)
+        for dir in self.global_state().env.dirs():
+            self.send(dir)
 
     # Op
 

@@ -1,6 +1,7 @@
 public = [
     'bash',
     'cd',
+    'dirs',
     'edit',
     'expand',
     'gen',
@@ -8,6 +9,7 @@ public = [
     'ls',
     'map',
     'out',
+    'popd',
     'ps',
     'pushd',
     'pwd',

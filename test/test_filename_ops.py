@@ -176,18 +176,52 @@ def test_ls():
              expected_out=expected)
 
 
+# pushd, popd, dirs
+def test_dirstack():
+    filename_op_setup('/tmp/test')
+    TEST.run('mkdir a b c')
+    TEST.run(test='pwd',
+             expected_out=['/tmp/test'])
+    TEST.run(test='dirs',
+             expected_out=['/tmp/test'])
+    TEST.run(test='pushd a',
+             expected_out=['/tmp/test/a', '/tmp/test'])
+    TEST.run(test='dirs',
+             expected_out=['/tmp/test/a', '/tmp/test'])
+    TEST.run(test='pushd ../b',
+             expected_out=['/tmp/test/b', '/tmp/test/a', '/tmp/test'])
+    TEST.run(test='dirs',
+             expected_out=['/tmp/test/b', '/tmp/test/a', '/tmp/test'])
+    TEST.run(test='pushd',
+             expected_out=['/tmp/test/a', '/tmp/test/b', '/tmp/test'])
+    TEST.run(test='dirs',
+             expected_out=['/tmp/test/a', '/tmp/test/b', '/tmp/test'])
+    TEST.run(test='popd',
+             expected_out=['/tmp/test/b', '/tmp/test'])
+    TEST.run(test='pwd',
+             expected_out=['/tmp/test/b'])
+    TEST.run(test='dirs',
+             expected_out=['/tmp/test/b', '/tmp/test'])
+    TEST.run(test='dirs -c',
+             expected_out=['/tmp/test/b'])
+    TEST.run(test='pushd',
+             expected_out=['/tmp/test/b'])
+
+
 def main_stable():
     test_source_filenames()
     test_ls()
+    test_dirstack()
 
 
 def main_dev():
+    test_dirstack()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
+    # main_stable()
     main_dev()
     print(f'Test failures: {TEST.failures}')
 
