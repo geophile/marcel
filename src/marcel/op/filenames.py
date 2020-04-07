@@ -20,6 +20,8 @@ class FilenamesOp(marcel.core.Op):
     def setup_1(self):
         self.current_dir = self.global_state().env.pwd()
         self.roots = FilenamesOp.deglob(self.current_dir, self.filename)
+        if len(self.filename) > 0 and len(self.roots) == 0:
+            raise marcel.exception.KillCommandException(f'No qualifying paths: {self.filename}')
 
     def receive(self, _):
         for root in self.roots:

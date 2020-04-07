@@ -28,7 +28,7 @@
 + Make the File object more useful by adding more methods. Maybe
   extend Path?
 
-- tab completion for mv, cp, ln, mkdir, rmdir, rm.
++ tab completion for mv, cp, ln, mkdir, rmdir, rm.
 
 - Bugs:
 
@@ -46,6 +46,7 @@
   + 28
   + 29
   + 30
+  - 31
 
 + Line continuation
 

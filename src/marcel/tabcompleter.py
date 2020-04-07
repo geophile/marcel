@@ -19,6 +19,8 @@ class TabCompleter:
 
     OPS = marcel.op.public
     FILENAME_OPS = ['cd',
+                    'cp',
+                    'ln',
                     'ls',
                     'mv',
                     'out',
@@ -58,9 +60,10 @@ class TabCompleter:
                 candidates = self.complete_op(text)
             else:
                 self.op_name = parser.op.op_name()
+                debug(f'op_name: {self.op_name}, text: {text}')
                 if text.startswith('-'):
                     candidates = TabCompleter.complete_flag(text, self.op_name)
-                elif self.op_name in TabCompleter.FILENAME_OPS:
+                elif self.is_filename_arg(parser):
                     candidates = self.complete_filename(text)
                 else:
                     return None
@@ -86,6 +89,10 @@ class TabCompleter:
         else:
             candidates = TabCompleter.OPS
         return candidates
+
+    def is_filename_arg(self, parser):
+        return (self.op_name in TabCompleter.FILENAME_OPS or
+                self.op_name == 'bash' and parser.op.args[0] in TabCompleter.FILENAME_OPS)
 
     @staticmethod
     def complete_flag(text, op_name):
