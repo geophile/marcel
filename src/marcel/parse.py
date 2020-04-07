@@ -451,8 +451,6 @@ class Parser(Token):
             if not partial_text:
                 raise marcel.exception.KillCommandException(e)
         except Exception as e:
-            print(f'{type(e)}: {e}')
-            print_stack()
             raise marcel.exception.KillCommandException(e)
 
     def next_token(self):
@@ -462,6 +460,8 @@ class Parser(Token):
         if c is not None:
             if c == Token.OPEN:
                 token = PythonExpression(self.text, self.end)
+            elif c == Token.CLOSE:
+                raise UnexpectedTokenError(self.text, self.end, 'Unmatched )')
             elif c == Token.PIPE:
                 token = Pipe(self.text, self.end)
             elif c == Token.BEGIN:

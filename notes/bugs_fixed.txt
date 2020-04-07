@@ -399,6 +399,32 @@ Traceback (most recent call last):
     return cls(os.getcwd())
 FileNotFoundError: [Errno 2] No such file or directory
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+28. Hang on command with extra )
+
+The last command hangs when an extra ) is added to the end.
+
+M jao@cheese:/tmp/test$ ls
+drwxr-xr-x   jao      jao              4096   2020 Mar 17 12:50:51   .
+drwxr-xr-x   jao      jao              4096   2020 Mar 17 12:50:30   d
+-rw-r--r--   jao      jao                 2   2020 Mar 17 12:50:30   f
+-rw-r--r--   jao      jao                 5   2020 Mar 17 12:50:51   g
+-rw-r--r--   jao      jao                 2   2020 Mar 17 12:50:30   lf
+lrwxrwxrwx   jao      jao                11   2020 Mar 17 12:50:30   sd -> /tmp/test/d
+lrwxrwxrwx   jao      jao                11   2020 Mar 17 12:50:30   sf -> /tmp/test/f
+M jao@cheese:/tmp/test$ ls f g
+-rw-r--r--   jao      jao                 2   2020 Mar 17 12:50:30   /tmp/test/f
+-rw-r--r--   jao      jao                 5   2020 Mar 17 12:50:51   /tmp/test/g
+M jao@cheese:/tmp/test$ ls f g | map (f: (f.name, f.size))
+('f', 2)
+('g', 5)
+M jao@cheese:/tmp/test$ ls f g | map (f: (f.name, f.size)))
+^C
+
 ----------------------------------------------------------------------
 
 FIXED
@@ -435,3 +461,13 @@ Local:
       File "/home/jao/git/marcel/src/marcel/op/filenames.py", line 35, in setup_1
         self.current_dir = self.global_state().env.pwd()
     AttributeError: 'GlobalState' object has no attribute 'env'
+
+----------------------------------------------------------------------
+
+FIXED
+
+30. cd broken
+
+M jao@cheese:~/git/marcel$ cd
+Cannot cd into /home/jao/git/marcel/~. Directory does not exist.
+

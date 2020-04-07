@@ -160,3 +160,9 @@ cp, mv, ln, rm.
 - Allow piping files in.
 
 - Tab completion
+
+----------------------------------------------------------------------
+
+Tab completion for command should distinguish between first op of
+pipeline and subsequent ones. I.e., only show those ops that can be
+used in the current position within the pipeline.

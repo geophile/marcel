@@ -246,3 +246,33 @@ spaces.
 
 Allow files to be piped into ls?
 
+----------------------------------------------------------------------
+
+Pipelines with arguments:
+
+E.g.
+
+        x = [ls -fr /some/dir]
+
+To use it:
+
+        x
+
+Add an argument:
+
+        x = [xyz: ls -fr xyz]
+
+But how to distinguish the xyz argument from an actual path xyz?
+
+As a function!
+
+        x = [xyz: ls -fr (xyz)]
+
+- [xyz: ...] adds xyz to the local namespace (for the pipeline).
+
+- (xyz) is an ordinary function invocation. Need to generalize ls arg
+  processing to allow for it.
+
+- Use:
+
+        x /some/dir
