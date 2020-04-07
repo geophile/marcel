@@ -8,21 +8,10 @@ import test_base
 MAIN = marcel.main.Main()
 
 
-class BugBase(test_base.Test):
-
-    def __init__(self, config_file='./.marcel.py'):
-        super().__init__(MAIN)
-        BugBase.reset_environment(config_file)
-
-    @staticmethod
-    def reset_environment(config_file):
-        MAIN.global_state.env = marcel.env.Environment(config_file)
-
-
-class Bug29(BugBase):
+class Bug29(test_base.Test):
 
     def __init__(self):
-        super().__init__('./.marcel_bug29.py')
+        super().__init__(MAIN, './.marcel_bug29.py')
 
     def setup(self):
         self.cd('/tmp')
@@ -53,6 +42,7 @@ def main():
             expected_out=[(localhost, '.'), (localhost, 'd'), (localhost, 'f')])
     bug.run(test='@jao [ ls /tmp/test ] | map (host, f: (host, f.render_compact()))',
             expected_out=[(localhost, '.'), (localhost, 'd'), (localhost, 'f')])
+    print(f'Test failures: {bug.failures}')
 
 
 main()

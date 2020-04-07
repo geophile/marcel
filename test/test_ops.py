@@ -388,7 +388,7 @@ def test_namespace():
     config_path.touch()
     config_path.unlink()
     config_path.touch()
-    reset_environment(config_file)
+    TEST.reset_environment(config_file)
     TEST.run('map (globals().keys())',
              expected_out=["dict_keys(['USER', 'HOME', 'HOST', 'PWD', '__builtins__'])"])
     # Try to use an undefined symbol
@@ -398,11 +398,11 @@ def test_namespace():
     config_path.unlink()
     with open(config_file, 'w') as file:
         file.writelines('from math import *')
-    reset_environment(config_file)
+    TEST.reset_environment(config_file)
     TEST.run('map (pi)',
              expected_out=['3.141592653589793'])
     # Reset environment
-    reset_environment()
+    TEST.reset_environment()
 
 
 def test_remote():
@@ -417,11 +417,6 @@ def test_remote():
              expected_out=[(localhost, 3)])
     TEST.run('@jao [ gen 10 | map (x: (x%2, x)) | red . + ]',
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
-
-
-def reset_environment(config_file='./.marcel.py'):
-    os.chdir(start_dir)
-    MAIN.global_state.env = marcel.env.Environment(config_file)
 
 
 def main_stable():
@@ -452,7 +447,7 @@ def main_dev():
 
 
 def main():
-    reset_environment()
+    TEST.reset_environment()
     main_stable()
     main_dev()
     print(f'Test failures: {TEST.failures}')

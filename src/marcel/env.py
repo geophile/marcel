@@ -48,11 +48,11 @@ class Environment:
 
     def cd(self, directory):
         assert isinstance(directory, pathlib.Path), directory
-        new_dir = self._current_dir / directory
+        new_dir = (self._current_dir / directory.expanduser()).resolve(False)  # False: due to bug 27
         try:
             if not new_dir.exists():
                 raise marcel.exception.KillCommandException(f'Cannot cd into {new_dir}. Directory does not exist.')
-            self._current_dir = new_dir.resolve(strict=False)  # False: due to bug 27
+            self._current_dir = new_dir
             self.setenv('PWD', self._current_dir.as_posix())
             # So that executables have the same view of the current directory.
             os.chdir(self._current_dir)

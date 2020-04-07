@@ -33,11 +33,6 @@ def test_setup():
     TEST.cd(test_dir)
 
 
-def reset_environment(config_file='./.marcel.py'):
-    os.chdir(start_dir)
-    MAIN.global_state.env = marcel.env.Environment(config_file)
-
-
 def test_mv():
     # Move file
     test_setup()
@@ -90,7 +85,7 @@ def test_cp():
 
 
 def main():
-    reset_environment()
+    TEST.reset_environment()
     test_mv()
     print(f'Test failures: {TEST.failures}')
 

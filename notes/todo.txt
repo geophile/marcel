@@ -147,16 +147,16 @@ Distinct color for broken symlink.
 
 ----------------------------------------------------------------------
 
-File ops:
+Computing ls.base (used to compute file.display_path) isn't quite
+right, for symlink to directory. Need to survey what bash does,
+decide on correct behavior, implement and test. Related to handling
+of -HL flags for ls.
 
-- "rm dir" just works. Should a flag be required to minimize accidents?
 
-- ls needs (bash) -HL flags.
+----------------------------------------------------------------------
 
-- Need detailed testing of cp -T and -A flags. In tests so far, their
-  behavior is indistinguishable.
+cp, mv, ln, rm.
 
-- Computing ls.base (used to compute file.display_path) isn't quite
-  right, for symlink to directory. Need to survey what bash does,
-  decide on correct behavior, implement and test. Related to handling
-  of -HL flags for ls.
+- Allow piping files in.
+
+- Tab completion

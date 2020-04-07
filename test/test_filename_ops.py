@@ -176,11 +176,6 @@ def test_ls():
              expected_out=expected)
 
 
-def reset_environment(config_file='./.marcel.py'):
-    os.chdir(start_dir)
-    MAIN.global_state.env = marcel.env.Environment(config_file)
-
-
 def main_stable():
     test_source_filenames()
     test_ls()
@@ -191,7 +186,7 @@ def main_dev():
 
 
 def main():
-    reset_environment()
+    TEST.reset_environment()
     main_stable()
     main_dev()
     print(f'Test failures: {TEST.failures}')

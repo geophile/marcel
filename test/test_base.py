@@ -8,10 +8,17 @@ from marcel.util import *
 
 
 class Test:
-    
-    def __init__(self, main):
+
+    start_dir = os.getcwd()
+
+    def __init__(self, main, config_file='./.marcel.py'):
         self.main = main
         self.failures = 0
+        self.reset_environment(config_file)
+
+    def reset_environment(self, config_file='./.marcel.py'):
+        os.chdir(Test.start_dir)
+        self.main.global_state.env = marcel.env.Environment(config_file)
 
     def new_file(self, filename):
         path = pathlib.Path(filename)

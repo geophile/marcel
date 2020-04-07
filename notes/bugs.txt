@@ -92,3 +92,10 @@ M jao@cheese:/tmp/test$ ls f g | map (f: (f.name, f.size))
 ('g', 5)
 M jao@cheese:/tmp/test$ ls f g | map (f: (f.name, f.size)))
 ^C
+
+----------------------------------------------------------------------
+
+30. cd broken
+
+M jao@cheese:~/git/marcel$ cd
+Cannot cd into /home/jao/git/marcel/~. Directory does not exist.
