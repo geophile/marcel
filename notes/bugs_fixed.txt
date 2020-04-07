@@ -471,3 +471,11 @@ FIXED
 M jao@cheese:~/git/marcel$ cd
 Cannot cd into /home/jao/git/marcel/~. Directory does not exist.
 
+----------------------------------------------------------------------
+
+FIXED
+
+31. ls /no/such/path appears to work
+
+/no/such/path evaluates to an empty root, so the command is basically
+"ls" and we get the files in the current directory.

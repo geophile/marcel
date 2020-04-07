@@ -71,7 +71,4 @@ UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa0 in position 1247: inval
 
 ----------------------------------------------------------------------
 
-31. ls /no/such/path appears to work
-
-/no/such/path evaluates to an empty root, so the command is basically
-"ls" and we get the files in the current directory.
+32. 
