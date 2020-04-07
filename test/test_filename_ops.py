@@ -94,10 +94,10 @@ def test_source_filenames():
              expected_out=sorted([absolute('/tmp/test', x) for x in ['f', 'sd', 'sf', 'lf']]))
     # No such file
     TEST.run('ls -0 x | map (f: f.render_compact())',
-             expected_out=sorted([]))
+             expected_err='No qualifying paths')
     # No such file via glob
     TEST.run('ls -0 x* | map (f: f.render_compact())',
-             expected_out=sorted([]))
+             expected_err='No qualifying paths')
     # ~ expansion
     TEST.run('ls -0 ~root | map (f: f.path)',
              expected_out=['/root'])

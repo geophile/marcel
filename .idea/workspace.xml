@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/marcel/tabcompleter.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/tabcompleter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_filename_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_filename_ops.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -67,7 +68,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.bug_31">
+  <component name="RunManager" selected="Python.test_ops">
     <configuration name="boundmethod" type="PythonConfigurationType" factoryName="Python">
       <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -421,13 +422,13 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.test_filename_ops" />
+      <item itemvalue="Python.test_native_filename_ops" />
       <item itemvalue="Python.test_ops" />
       <item itemvalue="Python.bug_29" />
       <item itemvalue="Python.bug_28" />
       <item itemvalue="Python.bug_30" />
       <item itemvalue="Python.bug_31" />
-      <item itemvalue="Python.test_filename_ops" />
-      <item itemvalue="Python.test_native_filename_ops" />
       <item itemvalue="Python.pipes" />
       <item itemvalue="Python.cpbehavior" />
       <item itemvalue="Python.modify_function_namespace" />
@@ -507,7 +508,7 @@
       <workItem from="1585664914314" duration="19687000" />
       <workItem from="1585833090334" duration="51619000" />
       <workItem from="1586180496480" duration="13940000" />
-      <workItem from="1586228918829" duration="14602000" />
+      <workItem from="1586228918829" duration="15338000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -605,7 +606,7 @@
     <SUITE FILE_PATH="coverage/marcel$cpbehavior.coverage" NAME="cpbehavior Coverage Results" MODIFIED="1585344774680" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/osh2$captureoutput.coverage" NAME="captureoutput Coverage Results" MODIFIED="1581312368185" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$kv.coverage" NAME="config Coverage Results" MODIFIED="1583620587085" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
-    <SUITE FILE_PATH="coverage/marcel$test_native_filename_ops.coverage" NAME="test_native_filename_ops Coverage Results" MODIFIED="1586263097625" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/marcel$test_native_filename_ops.coverage" NAME="test_native_filename_ops Coverage Results" MODIFIED="1586282179207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$osh2.coverage" NAME="marcel Coverage Results" MODIFIED="1582301531570" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$" />
     <SUITE FILE_PATH="coverage/osh2$test_extract_python.coverage" NAME="test_embedded_python Coverage Results" MODIFIED="1578065607672" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$extendstr.coverage" NAME="extendstr Coverage Results" MODIFIED="1583695709066" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
@@ -619,10 +620,10 @@
     <SUITE FILE_PATH="coverage/osh2$parseusingpyparsing.coverage" NAME="parseusingpyparsing Coverage Results" MODIFIED="1577902706592" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/osh" />
     <SUITE FILE_PATH="coverage/osh2$stdin.coverage" NAME="stdin Coverage Results" MODIFIED="1581348934605" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$escapechars.coverage" NAME="escapechars Coverage Results" MODIFIED="1582300778715" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
-    <SUITE FILE_PATH="coverage/marcel$test_filename_ops.coverage" NAME="test_filename_ops Coverage Results" MODIFIED="1586277816875" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/marcel$test_filename_ops.coverage" NAME="test_filename_ops Coverage Results" MODIFIED="1586282174296" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$osh.coverage" NAME="osh Coverage Results" MODIFIED="1579620370940" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$test_extract_string.coverage" NAME="test_tokenizing Coverage Results" MODIFIED="1578087938886" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
-    <SUITE FILE_PATH="coverage/marcel$test_ops.coverage" NAME="test_ops Coverage Results" MODIFIED="1586269061828" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/marcel$test_ops.coverage" NAME="test_ops Coverage Results" MODIFIED="1586282190759" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$call.coverage" NAME="call Coverage Results" MODIFIED="1580657904823" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$modify_function_namespace.coverage" NAME="modify_function_namespace Coverage Results" MODIFIED="1583805209482" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/osh2$experiment.coverage" NAME="teststring Coverage Results" MODIFIED="1577843220460" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
