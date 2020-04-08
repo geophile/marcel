@@ -1,0 +1,32 @@
+Executing marcel ops and Linux command as sudo
+
+Explanation of how sudo works: https://unix.stackexchange.com/questions/126914/how-does-sudo-really-work
+
+This isn't available to marcel. E.g., bash doesn't have the setuid bit set.
+
+So there doesn't seem to be any alternative to using a subprocess
+prefixed with sudo.
+
+Implementation alternatives:
+
+- Use farcel.py, sending pipeline in and getting results.
+
+- Enable marcel to be invoked with command line (e.g. piped in, via
+  Linux pipe). Capture output.
+
+
+----------------------------------------------------------------------
+
+sudo ls  # I.e., marcel ls
+
+- Run farcel.py LOCALLY (as a subprocess) under sudo.
+
+- Pipe the ls command to it.
+
+
+sudo [ ... ]
+
+
+Need to allow for tab-completion of sudo commands?
+
+Allow sudo mid-pipeline

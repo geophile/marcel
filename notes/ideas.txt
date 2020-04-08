@@ -229,13 +229,6 @@ line. E.g., select files not modified in the past year.
 
 ----------------------------------------------------------------------
 
-File commands: rm, cp, mv, ln
-
-Why not just use the existing Linux commands? Could still do tab
-completion.
-
-----------------------------------------------------------------------
-
 A problem with filename based commands is that things get messy due to
 quoting, escaping, spaces in filenames, etc. These problems go away if
 they work on Files. So ls finds the files by name, but then we have a

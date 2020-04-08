@@ -101,12 +101,13 @@ class Stack:
         return self.contents[-1]
 
     def pop(self):
-        top = self.top()
-        self.contents = self.contents[:-1]
-        return top
+        return self.contents.pop()
 
     def is_empty(self):
         return len(self.contents) == 0
+
+    def size(self):
+        return len(self.contents)
 
 
 class Trace:

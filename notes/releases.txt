@@ -5,6 +5,16 @@
 
 - Highlight color for broken link
 
+- bg, fg, jobs, ctrl-z, etc.
+
+- DB access
+
+- Get rid of util.Stack.
+
+- Bugs
+
+  - 32
+
 ----------------------------------------------------------------------
 
 0.2

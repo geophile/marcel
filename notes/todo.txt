@@ -166,3 +166,7 @@ cp, mv, ln, rm.
 Tab completion for command should distinguish between first op of
 pipeline and subsequent ones. I.e., only show those ops that can be
 used in the current position within the pipeline.
+
+----------------------------------------------------------------------
+
+Tab completion for flags of executables.

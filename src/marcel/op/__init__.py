@@ -18,6 +18,7 @@ public = [
     'select',
     'sort',
     'squish',
+    'sudo',
     'tail',
     'timer',
     'unique',

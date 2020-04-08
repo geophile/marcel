@@ -479,3 +479,32 @@ FIXED
 
 /no/such/path evaluates to an empty root, so the command is basically
 "ls" and we get the files in the current directory.
+
+----------------------------------------------------------------------
+
+FIXED
+
+32. ls crashes shell on PermissionError
+
+M jao@cheese:~/git/marcel$ ls ~/.dbus/session-bus 
+drwx------   root     root             4096   2019 Mar 28 23:45:10   .
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/src/marcel/main.py", line 126, in <module>
+    MAIN.run()
+  File "/home/jao/git/marcel/src/marcel/main.py", line 81, in run
+    self.run_command(line)
+  File "/home/jao/git/marcel/src/marcel/main.py", line 93, in run_command
+    Command(pipeline).execute()
+  File "/home/jao/git/marcel/src/marcel/main.py", line 39, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/marcel/src/marcel/core.py", line 233, in receive
+    self.first_op.receive(x)
+  File "/home/jao/git/marcel/src/marcel/op/filenames.py", line 28, in receive
+    self.action(root)
+  File "/home/jao/git/marcel/src/marcel/op/ls.py", line 120, in action
+    self.visit(source, 0)
+  File "/home/jao/git/marcel/src/marcel/op/ls.py", line 127, in visit
+    for file in sorted(root.iterdir()):
+  File "/usr/lib/python3.7/pathlib.py", line 1090, in iterdir
+    for name in self._accessor.listdir(self):
+PermissionError: [Errno 13] Permission denied: '/home/jao/.dbus/session-bus'

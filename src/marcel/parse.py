@@ -322,23 +322,32 @@ class UnknownOpError(UnexpectedTokenError):
         return f'Unknown op {self.op_name} in {self.text}'
 
 
+class InProgress:
+
+    def __init__(self):
+        self.pipeline = marcel.core.Pipeline()
+        self.fork_spec = None
+        self.op = None
+        self.args = []
+
+
 class Parser(Token):
 
     def __init__(self, text, global_state):
         super().__init__(text, 0)
         self.global_state = global_state
         self.state = ParseState.START
-        self.pipelines = Stack()
-        self.pipelines.push(marcel.core.Pipeline())
-        self.fork_spec = None
-        self.op = None
-        self.args = []
+        self.stack = Stack()
+        self.stack.push(InProgress())
 
     def __repr__(self):
         return f'parser({self.text})'
 
+    def current(self):
+        return self.stack.top()
+
     def start_action(self, token):
-        self.op = None
+        self.current().op = None
         if token.is_fork():
             self.state = ParseState.FORK_START
         elif token.is_string():
@@ -355,7 +364,7 @@ class Parser(Token):
     def fork_start_action(self, token):
         if token.is_string():
             x = token.value()
-            self.fork_spec = int(x) if x.isdigit() else x
+            self.current().fork_spec = int(x) if x.isdigit() else x
             self.state = ParseState.FORK_SPEC
         elif token is None:
             raise PrematureEndError(self.text)
@@ -367,14 +376,15 @@ class Parser(Token):
             self.state = ParseState.END
         elif token.is_pipe():
             self.state = ParseState.START
+        elif token.is_string() or token.is_expr():
+            self.current().args.append(token.value())
+            self.state = ParseState.ARGS
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected pipe or end of input')
 
     def fork_spec_action(self, token):
         if token.is_begin():
-            fork_pipeline = marcel.core.Pipeline()
-            self.pipelines.push(fork_pipeline)
-            self.op = fork_pipeline
+            self.stack.push(InProgress())
             self.state = ParseState.START
         elif token is None:
             raise PrematureEndError(self.text)
@@ -385,14 +395,13 @@ class Parser(Token):
         if token is None:
             self.finish_op()
             self.state = ParseState.END
-        elif token.is_string():
-            self.args.append(token.value())
-            self.state = ParseState.ARGS
-        elif token.is_expr():
-            self.args.append(token.value())
+        elif token.is_string() or token.is_expr():
+            self.current().args.append(token.value())
             self.state = ParseState.ARGS
         elif token.is_pipe():
             self.finish_op()
+            self.state = ParseState.START
+        elif token.is_begin():
             self.state = ParseState.START
         elif token.is_end():
             self.finish_op()
@@ -405,12 +414,12 @@ class Parser(Token):
         if token is None:
             self.finish_op()
             self.state = ParseState.END
-        elif token.is_string():
-            self.args.append(token.value())
-        elif token.is_expr():
-            self.args.append(token.value())
+        elif token.is_string() or token.is_expr():
+            self.current().args.append(token.value())
         elif token.is_pipe():
             self.finish_op()
+            self.state = ParseState.START
+        elif token.is_begin():
             self.state = ParseState.START
         elif token.is_end():
             self.finish_op()
@@ -440,8 +449,8 @@ class Parser(Token):
                     assert False
                 token = self.next_token()
             self.end_action(token)
-            pipeline = self.pipelines.pop()
-            assert self.pipelines.is_empty()
+            pipeline = self.stack.pop().pipeline
+            assert self.stack.is_empty()
             return pipeline
         except UnknownOpError as e:
             # An unknown op could occur because someone got an op wrong. I.e., we are parsing complete text
@@ -476,36 +485,35 @@ class Parser(Token):
         return token
 
     def create_op(self, token):
+        current = self.current()
         op_name = token.value()
         op_module = marcel.opmodules.OP_MODULES.named(op_name)
         if op_module:
-            self.op = getattr(op_module, op_name)()
+            current.op = getattr(op_module, op_name)()
         else:
             # op_name might be an executable
             if is_executable(op_name):
                 # Execute via the bash op, in which case op_name becomes the first argument.
                 bash_module = marcel.opmodules.OP_MODULES.named('bash')
-                self.op = getattr(bash_module, 'bash')()
-                self.args.append(op_name)
+                current.op = getattr(bash_module, 'bash')()
+                current.args.append(op_name)
             else:
                 raise UnknownOpError(self.text, op_name)
 
     def finish_op(self):
-        arg_parser = self.op.arg_parser()
+        current = self.current()
+        arg_parser = current.op.arg_parser()
         arg_parser.set_global_state(self.global_state)
-        arg_parser.parse_args(self.args, namespace=self.op)
-        self.pipeline().append(self.op)
-        self.args = []
+        arg_parser.parse_args(current.args, namespace=current.op)
+        current.pipeline.append(current.op)
+        current.args = []
 
     def finish_pipeline(self):
-        fork_pipeline = self.pipelines.pop()
-        main_pipeline = self.pipelines.top()
-        fork = marcel.op.fork.Fork.create_fork(self.global_state, self.fork_spec, fork_pipeline)
+        fork_pipeline = self.stack.pop().pipeline
+        main_pipeline = self.stack.top().pipeline
+        fork = marcel.op.fork.Fork.create_fork(self.global_state, self.current().fork_spec, fork_pipeline)
         main_pipeline.append(fork)
-        self.fork_spec = None
-
-    def pipeline(self):
-        return self.pipelines.top()
+        self.current().fork_spec = None
 
     def skip_whitespace(self):
         c = self.peek_char()

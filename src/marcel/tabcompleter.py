@@ -20,9 +20,11 @@ class TabCompleter:
     OPS = marcel.op.public
     FILENAME_OPS = ['cd',
                     'cp',
+                    'less',
                     'ln',
                     'ls',
                     'mkdir',
+                    'more',
                     'mv',
                     'out',
                     'rm',
