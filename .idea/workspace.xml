@@ -2,23 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/experiments/sudo.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notes/grammar.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notes/grammar.odg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notes/sudo.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/marcel/op/sudo.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs_fixed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs_fixed.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/ideas.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/ideas.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/grammar.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/notes/grammar.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/grammar.odg" beforeDir="false" afterPath="$PROJECT_DIR$/notes/grammar.odg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/ls.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/ls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/parse.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/parse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/tabcompleter.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/tabcompleter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/util.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_ops.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/sudo.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/sudo.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -546,7 +535,9 @@
       <workItem from="1585664914314" duration="19687000" />
       <workItem from="1585833090334" duration="51619000" />
       <workItem from="1586180496480" duration="13940000" />
-      <workItem from="1586228918829" duration="29593000" />
+      <workItem from="1586228918829" duration="32606000" />
+      <workItem from="1586527869983" duration="29000" />
+      <workItem from="1586527918286" duration="832000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

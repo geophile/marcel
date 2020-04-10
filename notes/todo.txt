@@ -170,3 +170,44 @@ used in the current position within the pipeline.
 ----------------------------------------------------------------------
 
 Tab completion for flags of executables.
+
+----------------------------------------------------------------------
+
+File object uses os.stat/lstat. When a file is transmitted, stat
+result should be cached in the file, and then not overridden on the
+receving side. So the File needs to have a field indicating if it has
+been transmitted/reconstructed.
+
+----------------------------------------------------------------------
+
+Clean up parser to prepare for more general handling of pipelines:
+
+- @fork [ ... ] currently:
+
+    - fork_start and fork_spec grammar states and actions.
+    
+    - InProgress has fork_spec field.
+
+    - finish_pipeline assumes that a fork op is being completed.
+
+- Generalize:
+
+    - Treat fork like any other op. START action creates an op just
+      like for a string. Don't need START_FORK and FORK_SPEC states.
+
+    - Choice between LocalFork and RemoteFork can't be done by
+      create_fork.  Keep choice inside Fork op, delegate instead of
+      inherit.
+
+    - create_op also has some op-specific logic, distinguishing op
+      from executable, and using the bash operator in the latter case.
+
+    - InProgress: 
+
+        - Introduce new field, flags, for just flags.
+        
+        - All other command-line items go to args, including
+          pipelines.
+
+    - finish_pipeline: Remove special handling of fork op. The
+      pipeline just goes into op.args.
