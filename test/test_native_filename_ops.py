@@ -83,7 +83,6 @@ def test_cp():
              expected_out=[('a b', 5), ('c d', 5)])
 
 
-
 def main():
     TEST.reset_environment()
     test_mv()

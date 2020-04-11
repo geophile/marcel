@@ -221,7 +221,7 @@ def main_dev():
 def main():
     TEST.reset_environment()
     main_stable()
-    main_dev()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

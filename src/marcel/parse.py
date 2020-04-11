@@ -284,10 +284,8 @@ class End(OneCharSymbol):
 
 class ParseState(Enum):
     START = auto()
+    DONE = auto()
     END = auto()
-    FORK_START = auto()
-    FORK_SPEC = auto()
-    FORK_END = auto()
     OP = auto()
     ARGS = auto()
 
@@ -326,9 +324,12 @@ class InProgress:
 
     def __init__(self):
         self.pipeline = marcel.core.Pipeline()
-        self.fork_spec = None
-        self.op = None
+        self.op_name = None
         self.args = []
+
+    def reset_op(self):
+        self.op_name = None
+        self.args.clear()
 
 
 class Parser(Token):
@@ -347,11 +348,11 @@ class Parser(Token):
         return self.stack.top()
 
     def start_action(self, token):
-        self.current().op = None
         if token.is_fork():
-            self.state = ParseState.FORK_START
-        elif token.is_string():
-            self.create_op(token)
+            self.current().op_name = 'fork'
+            self.state = ParseState.OP
+        elif token.is_string() or token.is_fork():
+            self.current().op_name = token.value()
             self.state = ParseState.OP
         elif token is None:
             raise PrematureEndError(self.text)
@@ -359,22 +360,11 @@ class Parser(Token):
             raise UnexpectedTokenError(self.text, self.end, 'Expected string')
 
     def end_action(self, token):
-        assert token is None
-
-    def fork_start_action(self, token):
-        if token.is_string():
-            x = token.value()
-            self.current().fork_spec = int(x) if x.isdigit() else x
-            self.state = ParseState.FORK_SPEC
-        elif token is None:
-            raise PrematureEndError(self.text)
-        else:
-            raise UnexpectedTokenError(self.text, self.end, 'Expected fork specification')
-
-    def fork_end_action(self, token):
         if token is None:
-            self.state = ParseState.END
+            self.finish_command()
+            self.state = ParseState.DONE
         elif token.is_pipe():
+            self.finish_op()
             self.state = ParseState.START
         elif token.is_string() or token.is_expr():
             self.current().args.append(token.value())
@@ -382,49 +372,44 @@ class Parser(Token):
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected pipe or end of input')
 
-    def fork_spec_action(self, token):
-        if token.is_begin():
-            self.stack.push(InProgress())
-            self.state = ParseState.START
-        elif token is None:
-            raise PrematureEndError(self.text)
-        else:
-            raise UnexpectedTokenError(self.text, self.end, 'Expected pipeline begin')
-
     def op_action(self, token):
         if token is None:
             self.finish_op()
-            self.state = ParseState.END
+            self.state = ParseState.DONE
         elif token.is_string() or token.is_expr():
-            self.current().args.append(token.value())
+            arg = token.value()
+            self.current().args.append(arg)
             self.state = ParseState.ARGS
         elif token.is_pipe():
             self.finish_op()
             self.state = ParseState.START
         elif token.is_begin():
+            self.stack.push(InProgress())
             self.state = ParseState.START
         elif token.is_end():
             self.finish_op()
             self.finish_pipeline()
-            self.state = ParseState.FORK_END
+            self.state = ParseState.END
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected string or pipe')
 
     def args_action(self, token):
         if token is None:
             self.finish_op()
-            self.state = ParseState.END
+            self.state = ParseState.DONE
         elif token.is_string() or token.is_expr():
-            self.current().args.append(token.value())
+            arg = token.value()
+            self.current().args.append(arg)
         elif token.is_pipe():
             self.finish_op()
             self.state = ParseState.START
         elif token.is_begin():
+            self.stack.push(InProgress())
             self.state = ParseState.START
         elif token.is_end():
             self.finish_op()
             self.finish_pipeline()
-            self.state = ParseState.FORK_END
+            self.state = ParseState.END
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected string or pipe')
 
@@ -432,23 +417,18 @@ class Parser(Token):
     def parse(self, partial_text=False):
         try:
             token = self.next_token()
-            while self.state != ParseState.END:
-                if self.state == ParseState.START:
-                    self.start_action(token)
-                elif self.state == ParseState.FORK_START:
-                    self.fork_start_action(token)
-                elif self.state == ParseState.FORK_END:
-                    self.fork_end_action(token)
-                elif self.state == ParseState.FORK_SPEC:
-                    self.fork_spec_action(token)
-                elif self.state == ParseState.OP:
+            while self.state != ParseState.DONE:
+                if self.state == ParseState.OP:
                     self.op_action(token)
                 elif self.state == ParseState.ARGS:
                     self.args_action(token)
+                elif self.state == ParseState.START:
+                    self.start_action(token)
+                elif self.state == ParseState.END:
+                    self.end_action(token)
                 else:
                     assert False
                 token = self.next_token()
-            self.end_action(token)
             pipeline = self.stack.pop().pipeline
             assert self.stack.is_empty()
             return pipeline
@@ -460,6 +440,7 @@ class Parser(Token):
             if not partial_text:
                 raise marcel.exception.KillCommandException(e)
         except Exception as e:
+            # print_stack()
             raise marcel.exception.KillCommandException(e)
 
     def next_token(self):
@@ -484,39 +465,43 @@ class Parser(Token):
             self.end = token.end
         return token
 
-    def create_op(self, token):
-        current = self.current()
-        op_name = token.value()
-        op_module = marcel.opmodules.OP_MODULES.named(op_name)
-        if op_module:
-            current.op = getattr(op_module, op_name)()
-        else:
-            # op_name might be an executable
-            if is_executable(op_name):
-                # Execute via the bash op, in which case op_name becomes the first argument.
-                bash_module = marcel.opmodules.OP_MODULES.named('bash')
-                current.op = getattr(bash_module, 'bash')()
-                current.args.append(op_name)
-            else:
-                raise UnknownOpError(self.text, op_name)
-
-    def finish_op(self):
-        current = self.current()
-        arg_parser = current.op.arg_parser()
-        arg_parser.set_global_state(self.global_state)
-        arg_parser.parse_args(current.args, namespace=current.op)
-        current.pipeline.append(current.op)
-        current.args = []
-
-    def finish_pipeline(self):
-        fork_pipeline = self.stack.pop().pipeline
-        main_pipeline = self.stack.top().pipeline
-        fork = marcel.op.fork.Fork.create_fork(self.global_state, self.current().fork_spec, fork_pipeline)
-        main_pipeline.append(fork)
-        self.current().fork_spec = None
-
     def skip_whitespace(self):
         c = self.peek_char()
         while c is not None and c.isspace():
             self.next_char()
             c = self.peek_char()
+
+    def create_op(self):
+        current = self.current()
+        op_name = current.op_name
+        op_module = marcel.opmodules.OP_MODULES.named(op_name)
+        if op_module:
+            pass
+        elif is_executable(op_name):
+            current.args = [op_name] + current.args
+            op_name = 'bash'
+            op_module = marcel.opmodules.OP_MODULES.named(op_name)
+        else:
+            raise UnknownOpError(self.text, op_name)
+        return getattr(op_module, op_name)()
+
+    def finish_op(self):
+        # Create the op
+        op = self.create_op()
+        # Parse its args
+        arg_parser = op.arg_parser()
+        arg_parser.set_global_state(self.global_state)
+        current = self.current()
+        arg_parser.parse_args(current.args, namespace=op)
+        # Append the op to the pipeline
+        current.pipeline.append(op)
+        # Clear op state
+        current.reset_op()
+
+    def finish_pipeline(self):
+        fork_pipeline = self.stack.pop().pipeline
+        current = self.current()
+        current.args.append(fork_pipeline)
+
+    def finish_command(self):
+        self.finish_op()

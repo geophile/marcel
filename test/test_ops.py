@@ -442,8 +442,6 @@ def main_stable():
 
 def main_dev():
     pass
-    TEST.run('ls /home/jao/.dbus/session-bus')
-    TEST.run('sudo ls /home/jao/.dbus/session-bus')
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
 

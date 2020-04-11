@@ -192,22 +192,46 @@ Clean up parser to prepare for more general handling of pipelines:
 
 - Generalize:
 
-    - Treat fork like any other op. START action creates an op just
+    + Treat fork like any other op. START action creates an op just
       like for a string. Don't need START_FORK and FORK_SPEC states.
 
     - Choice between LocalFork and RemoteFork can't be done by
       create_fork.  Keep choice inside Fork op, delegate instead of
       inherit.
 
+    - Fork has to be a more standard op. The only thing special about it
+      is the syntax used to invoke it, @.
+
     - create_op also has some op-specific logic, distinguishing op
       from executable, and using the bash operator in the latter case.
 
+    - Op creation function gets args argument, passes to Op.__init__
+
     - InProgress: 
 
-        - Introduce new field, flags, for just flags.
+        + Introduce new field, flags, for just flags.
         
-        - All other command-line items go to args, including
+        + All other command-line items go to args, including
           pipelines.
 
     - finish_pipeline: Remove special handling of fork op. The
       pipeline just goes into op.args.
+
+    - Rename arg_parser to flag_parser, ArgParser, etc.
+
+----------------------------------------------------------------------
+
+create op:
+
+        op_module = marcel.opmodules.OP_MODULES.named(op_name)
+        if op_module:
+            current.op = getattr(op_module, op_name)()
+        else:
+            # op_name might be an executable
+            if is_executable(op_name):
+                # Execute via the bash op, in which case op_name becomes the first argument.
+                bash_module = marcel.opmodules.OP_MODULES.named('bash')
+                current.op = getattr(bash_module, 'bash')()
+                current.args.append(op_name)
+            else:
+                raise UnknownOpError(self.text, op_name)

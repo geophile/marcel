@@ -17,15 +17,40 @@ class ArgParser(argparse.ArgumentParser):
         super().__init__(prog=op_name)
         ArgParser.op_flags[op_name] = flags
         self.global_state = None
+        self.pipelines = []
 
-    def set_global_state(self, global_state):
-        self.global_state = global_state
+    # ArgumentParser (argparse)
+
+    def parse_args(self, args=None, namespace=None):
+        if args is not None:
+            # Replace pipelines by string-valued pipeline references, since argparse operates on strings.
+            # Arg processing by each op will convert the pipeline reference back to a pipeline.
+            assert is_sequence_except_string(args)
+            args_without_pipelines = []
+            for arg in args:
+                if isinstance(arg, Pipeline):
+                    pipeline_ref = self.pipeline_reference(len(self.pipelines))
+                    self.pipelines.append(arg)
+                    arg = pipeline_ref
+                args_without_pipelines.append(arg)
+            args = args_without_pipelines
+        return super().parse_args(args, namespace)
 
     def exit(self, status=0, message=None):
         raise marcel.exception.KillCommandException(message)
 
+    # ArgParser (marcel)
+
+    def set_global_state(self, global_state):
+        self.global_state = global_state
+
     def print_usage(self, _=None):
         pass
+
+    # For use by subclasses
+
+    def pipeline_reference(self, pipeline_id):
+        return f'pipeline:{pipeline_id}'
 
     @staticmethod
     def constrained_type(check_and_convert, message):
@@ -45,6 +70,15 @@ class ArgParser(argparse.ArgumentParser):
 
     def check_function(self, s):
         return marcel.function.Function(s, self.global_state.function_namespace())
+
+    def check_pipeline(self, pipeline_ref):
+        if not pipeline_ref.startswith('pipeline:'):
+            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {pipeline_ref}')
+        try:
+            pipeline_id = int(pipeline_ref[len('pipeline:'):])
+            return self.pipelines[pipeline_id]
+        except ValueError:
+            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {pipeline_ref}')
 
 
 class BaseOp(object):
@@ -155,7 +189,7 @@ class BaseOp(object):
 
 
 class Op(BaseOp):
-    """Base class for all osh ops, (excluding pipelines).
+    """Base class for all ops, (excluding pipelines).
     """
 
     def __init__(self):
@@ -178,10 +212,6 @@ class Op(BaseOp):
         return cls.__name__.lower()
 
     # For use by subclasses
-
-    def create_function(self, source):
-        function = marcel.function.Function(source, self.global_state().function_namespace())
-        function.set_op(self)
 
     @staticmethod
     def function_source(function):

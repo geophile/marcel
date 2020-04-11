@@ -7,6 +7,7 @@ import marcel.core
 
 
 class Remote(marcel.core.Op):
+
     def __init__(self, pipeline):
         super().__init__()
         self.host = None

@@ -4,6 +4,7 @@ public = [
     'dirs',
     'edit',
     'expand',
+    'fork',
     'gen',
     'head',
     'ls',
@@ -27,7 +28,6 @@ public = [
 ]
 
 private = [
-    'fork',
     'labelthread',
     'remote',
 ]

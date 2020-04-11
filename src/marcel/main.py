@@ -92,6 +92,7 @@ class Main:
                 pipeline.set_global_state(self.global_state)
                 Command(pipeline).execute()
             except marcel.exception.KillCommandException as e:
+                # print_stack()
                 print(e, file=sys.stderr)
 
     def initialize_input(self):
