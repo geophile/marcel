@@ -59,11 +59,14 @@ class TabCompleter:
                 debug(f'caught ({type(e)}) {e}')
                 # Don't do tab completion
                 return None
-            debug(f'parser.op: {parser.op}')
-            if parser.op is None:
+            except BaseException as e:
+                print_stack()
+                print(e)
+            debug(f'parser.op_name: {parser.op_name}')
+            if parser.op_name is None:
                 candidates = self.complete_op(text)
             else:
-                self.op_name = parser.op.op_name()
+                self.op_name = parser.op_name
                 debug(f'op_name: {self.op_name}, text: {text}')
                 if text.startswith('-'):
                     candidates = TabCompleter.complete_flag(text, self.op_name)

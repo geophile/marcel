@@ -340,19 +340,24 @@ class Parser(Token):
         self.state = ParseState.START
         self.stack = Stack()
         self.stack.push(InProgress())
+        self.op_name = None  # For use by tabcompleter
 
     def __repr__(self):
         return f'parser({self.text})'
+
+    def set_op_name(self, op_name):
+        self.current().op_name = op_name
+        self.op_name = op_name if self.is_op() else None
 
     def current(self):
         return self.stack.top()
 
     def start_action(self, token):
         if token.is_fork():
-            self.current().op_name = 'fork'
+            self.set_op_name('fork')
             self.state = ParseState.OP
         elif token.is_string() or token.is_fork():
-            self.current().op_name = token.value()
+            self.set_op_name(token.value())
             self.state = ParseState.OP
         elif token is None:
             raise PrematureEndError(self.text)
@@ -440,7 +445,6 @@ class Parser(Token):
             if not partial_text:
                 raise marcel.exception.KillCommandException(e)
         except Exception as e:
-            # print_stack()
             raise marcel.exception.KillCommandException(e)
 
     def next_token(self):
@@ -484,6 +488,10 @@ class Parser(Token):
         else:
             raise UnknownOpError(self.text, op_name)
         return getattr(op_module, op_name)()
+
+    def is_op(self):
+        op_name = self.current().op_name
+        return marcel.opmodules.OP_MODULES.named(op_name) is not None or is_executable(op_name)
 
     def finish_op(self):
         # Create the op
