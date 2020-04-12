@@ -160,6 +160,7 @@ class BaseOp(object):
             try:
                 self.receive(normalize_output(x))
             except Exception as e:
+                print_stack()
                 self.receive_error(Error(e))
 
     def receive(self, x):

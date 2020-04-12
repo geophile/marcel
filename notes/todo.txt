@@ -173,13 +173,6 @@ Tab completion for flags of executables.
 
 ----------------------------------------------------------------------
 
-File object uses os.stat/lstat. When a file is transmitted, stat
-result should be cached in the file, and then not overridden on the
-receving side. So the File needs to have a field indicating if it has
-been transmitted/reconstructed.
-
-----------------------------------------------------------------------
-
 Clean up parser to prepare for more general handling of pipelines:
 
 - @fork [ ... ] currently:

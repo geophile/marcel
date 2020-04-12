@@ -1,5 +1,6 @@
 import os
 import pathlib
+import stat
 import time
 
 import marcel.object.renderable
@@ -23,6 +24,7 @@ class File(marcel.object.renderable.Renderable):
         self.path = path
         self.display_path = path.relative_to(base) if base else path
         self.lstat = None
+        self.executable = None
         # Used only to survive pickling
         self.path_str = None
         self.display_path_str = None
@@ -34,13 +36,16 @@ class File(marcel.object.renderable.Renderable):
         return getattr(self.path, attr)
 
     def __getstate__(self):
+        # Ensure metadata is present before transmission
+        self._is_executable()
+        self._lstat()
+        # Send strings, not paths
         if self.path is not None:
             self.path_str = str(self.path)
             self.path = None
         if self.display_path is not None:
             self.display_path_str = str(self.display_path)
             self.display_path = None
-        self.lstat = None
         return self.__dict__
 
     def __setstate__(self, state):
@@ -84,7 +89,7 @@ class File(marcel.object.renderable.Renderable):
         line = self._formatted_metadata()
         if color_scheme:
             line[-1] = colorize(line[-1], self._highlight_color(self, color_scheme))
-        if self.is_symlink():
+        if self._is_symlink():
             line.append('->')
             link_target = pathlib.Path(os.readlink(self.path))
             if color_scheme:
@@ -95,6 +100,13 @@ class File(marcel.object.renderable.Renderable):
         return ' '.join(line)
 
     # For use by this class
+
+    def _is_executable(self):
+        # is_executable must check path.resolve(), not path. If the path is relative, and the name
+        # is also an executable on PATH, then highlighting will be incorrect. See bug 8.
+        if self.executable is None:
+            self.executable = is_executable(self.path.resolve().as_posix())
+        return self.executable
 
     def _formatted_metadata(self):
         lstat = self._lstat()  # Not stat. Don't want to follow symlinks here.
@@ -130,21 +142,27 @@ class File(marcel.object.renderable.Renderable):
     def _formatted_mtime(mtime):
         return time.strftime('%Y %b %d %H:%M:%S', time.localtime(mtime))
 
-    @staticmethod
-    def _highlight_color(path, color_scheme):
+    def _highlight_color(self, path, color_scheme):
         extension = path.suffix.lower()
         highlight = color_scheme.file_extension.get(extension)
         if highlight is None:
             highlight = (
-                # is_executable must check path.resolve(), not path. If the path is relative, and the name
-                # is also an executable on PATH, then highlighting will be incorrect. See bug 8.
-                # Check symlink first, because is_executable (at least) follows symlinks. FilenamesOp.is_path_xxx
-                # rules out symlinks, but checking symlinks first seems safest.
-                color_scheme.file_link if path.is_symlink() else
-                color_scheme.file_executable if is_executable(path.resolve().as_posix()) else
-                color_scheme.file_dir if path.is_dir() else
+                # Check symlink first, because is_executable (at least) follows symlinks.
+                color_scheme.file_link if self._is_symlink() else
+                color_scheme.file_executable if self._is_executable() else
+                color_scheme.file_dir if self._is_dir() else
                 color_scheme.file_file)
         return highlight
+
+    # Use stat.S_... methods instead of methods relying on pathlib. First, pathlib
+    # doesn't cache lstat results. Second, if the file has been transmitted as part
+    # of a sudo command, then the recipient can't necessarily run lstat.
+
+    def _is_symlink(self):
+        return stat.S_ISLNK(self._lstat().st_mode)
+
+    def _is_dir(self):
+        return stat.S_ISDIR(self._lstat().st_mode)
 
     @staticmethod
     def _rwx(m):
