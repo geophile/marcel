@@ -71,12 +71,5 @@ UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa0 in position 1247: inval
 
 ----------------------------------------------------------------------
 
-33. > in command line doesn't work
-
-M jao@cheese:~/git/marcel$ git diff > /tmp/m.diff
-Error(error: Could not access '>')
-
-----------------------------------------------------------------------
-
 34.
 

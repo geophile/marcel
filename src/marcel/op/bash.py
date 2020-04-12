@@ -70,6 +70,8 @@ class Bash(marcel.core.Op):
 
 class Escape:
 
+    BASH_CONTROL = ['>', '<', '>>', '&']
+
     def __init__(self, op):
         self.op = op
 
@@ -77,7 +79,12 @@ class Escape:
         assert False
 
     def command(self):
-        return ' '.join([shlex.quote(a) for a in self.op.args])
+        return ' '.join([Escape.quote(a) for a in self.op.args])
+
+    @staticmethod
+    def quote(x):
+        return x if x in Escape.BASH_CONTROL else shlex.quote(x)
+
 
 
 class NonInteractive(Escape):

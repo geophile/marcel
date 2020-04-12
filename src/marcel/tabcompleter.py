@@ -12,7 +12,7 @@ DEBUG = False
 
 def debug(message):
     if DEBUG:
-        print(message)
+        print(message, flush=True)
 
 
 class TabCompleter:
@@ -20,6 +20,7 @@ class TabCompleter:
     OPS = marcel.op.public
     FILENAME_OPS = ['cd',
                     'cp',
+                    'emacs',
                     'less',
                     'ln',
                     'ls',
@@ -28,7 +29,8 @@ class TabCompleter:
                     'mv',
                     'out',
                     'rm',
-                    'rmdir']
+                    'rmdir',
+                    'vi']
 
     def __init__(self, global_state):
         self.global_state = global_state

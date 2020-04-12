@@ -508,3 +508,13 @@ Traceback (most recent call last):
   File "/usr/lib/python3.7/pathlib.py", line 1090, in iterdir
     for name in self._accessor.listdir(self):
 PermissionError: [Errno 13] Permission denied: '/home/jao/.dbus/session-bus'
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+33. > in command line doesn't work
+
+M jao@cheese:~/git/marcel$ git diff > /tmp/m.diff
+Error(error: Could not access '>')
