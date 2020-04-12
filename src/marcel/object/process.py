@@ -97,7 +97,7 @@ class Process(marcel.object.renderable.Renderable):
 
     descendents = property(lambda self: self._find_descendents())
 
-    def kill(self, signal=None):
+    def kill(self, signal):
         """Send the indicated C{signal} to this process.
         """
         os.kill(self._pid, signal)

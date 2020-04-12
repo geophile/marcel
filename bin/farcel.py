@@ -64,7 +64,7 @@ class PipelineRunner(threading.Thread):
         TRACE.write('PipelineRunner: Execution complete.')
 
 
-def kill_self_and_descendents(signal_id):
+def kill_descendents(signal_id):
     TRACE.write('In kill_self_and_descendents')
     try:
         pid = os.getpid()
@@ -73,9 +73,9 @@ def kill_self_and_descendents(signal_id):
             for p in process.descendents:
                 TRACE.write(f'Killing descendent pid {p.pid}')
                 p.kill(signal_id)
-            # Suicide
-            TRACE.write(f'Killing self, pid = {pid}')
-            process.kill(signal_id)
+            # # Suicide
+            # TRACE.write(f'Killing self, pid = {pid}')
+            # process.kill(signal_id)
         except Exception as e:
             TRACE.write(f'Caught exception while killing process {pid} and descendents: {e}')
             print_stack(TRACE.file)
@@ -97,14 +97,14 @@ def main():
     try:
         signal_id = input.load()
         TRACE.write(f'Received signal {signal_id}')
-        kill_self_and_descendents(signal_id)
+        kill_descendents(signal_id)
     except EOFError:
         TRACE.write('Received EOF')
         while pipeline_runner.is_alive():
             TRACE.write(f'PipelineRunner alive: {pipeline_runner.is_alive()}')
             pipeline_runner.join(0.1)
         TRACE.write(f'PipelineRunner alive: {pipeline_runner.is_alive()}')
-        kill_self_and_descendents(signal.SIGKILL)
+        kill_descendents(signal.SIGKILL)
     finally:
         TRACE.write('Exiting')
         TRACE.close()

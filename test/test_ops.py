@@ -419,6 +419,23 @@ def test_remote():
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
 
 
+def test_sudo():
+    TEST.run(test='gen 3',
+             expected_out=[0, 1, 2])
+    TEST.run(test='sudo -i [ gen 3 ]',
+             expected_out=[0, 1, 2])
+    os.system('sudo rm -rf /tmp/sudotest')
+    os.system('sudo mkdir /tmp/sudotest')
+    os.system('sudo touch /tmp/sudotest/f')
+    os.system('sudo chmod 400 /tmp/sudotest')
+    TEST.run(test='ls -f /tmp/sudotest',
+             expected_out=[Error('permission denied')])
+    TEST.run(test='sudo -i [ ls -f /tmp/sudotest | map (f: f.render_compact()) ]',
+             expected_out=['f'])
+    # TEST.run(test='sudo -i [ ls -f /tmp/sudotest ]',
+    #          expected_out=['f'])
+
+
 def main_stable():
     test_gen()
     test_out()
@@ -437,10 +454,12 @@ def main_stable():
     test_fork()
     test_namespace()
     test_remote()
+    test_sudo()
     test_no_such_op()
 
 
 def main_dev():
+    test_sudo()
     pass
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
@@ -448,8 +467,8 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

@@ -157,7 +157,10 @@ class BaseOp(object):
         if isinstance(x, Error):
             self.receive_error(x)
         else:
-            self.receive(normalize_output(x))
+            try:
+                self.receive(normalize_output(x))
+            except Exception as e:
+                self.receive_error(Error(e))
 
     def receive(self, x):
         """Implemented by a op class to process an input object.

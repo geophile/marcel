@@ -10,6 +10,12 @@ import marcel.core
 def sudo():
     return Sudo()
 
+# The sudo command has 0 or more flags and arguments for the native sudo command, followed by a pipeline.
+# There are a lot of flags, and it might not be a great idea to model them all. How much do those flags
+# differ across distros? And since the flags aren't being modeled by the arg parser, we can't say that the
+# last arg is, specifically, a pipeline. So just get all the args, and assume the last one is a pipeline.
+# This means that setup_1 has to convert the pipeline ref to a pipeline.
+
 
 class SudoArgParser(marcel.core.ArgParser):
 
@@ -17,13 +23,21 @@ class SudoArgParser(marcel.core.ArgParser):
         super().__init__('sudo')
         self.add_argument('args', nargs=argparse.REMAINDER)
 
+    # Insert -- as first arg to cause parse_args to treat all sudo args as positional.
+    def parse_args(self, args=None, namespace=None):
+        if args is not None:
+            args = ['--'] + args
+        super().parse_args(args, namespace)
+
 
 class Sudo(marcel.core.Op):
 
-    def __init__(self, pipeline):
+    argparser = SudoArgParser()
+
+    def __init__(self):
         super().__init__()
-        self.pipeline = pipeline
         self.args = None
+        self.pipeline = None
 
     def __repr__(self):
         return f'sudo({self.pipeline})'
@@ -31,10 +45,19 @@ class Sudo(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
-        pass
+        # Now the -- arg has to be removed
+        assert self.args[0] == '--'
+        self.args = self.args[1:]
+        if len(self.args) == 0:
+            raise marcel.exception.KillCommandException('Missing pipeline')
+        pipeline_ref = self.args.pop()
+        self.pipeline = Sudo.argparser.check_pipeline(pipeline_ref)
+        if not isinstance(self.pipeline, marcel.core.Pipeline):
+            raise marcel.exception.KillCommandException('Last argument to sudo must be a pipeline')
 
     def receive(self, _):
         # Start the remote process
+        # TODO: shlex.quote args, as in bash.Escape
         command = ' '.join(['sudo'] + self.args + ['farcel.py'])
         self.process = subprocess.Popen(command,
                                         stdin=subprocess.PIPE,
@@ -64,6 +87,9 @@ class Sudo(marcel.core.Op):
             self.send_complete()
 
     # Op
+
+    def arg_parser(self):
+        return Sudo.argparser
 
     def must_be_first_in_pipeline(self):
         return True
