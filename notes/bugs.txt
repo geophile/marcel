@@ -71,5 +71,14 @@ UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa0 in position 1247: inval
 
 ----------------------------------------------------------------------
 
-34.
+34. Tab completion vs. sudo -- shell crash
 
+If we enter this much of a command:
+
+    sudo -i [ ls /home/jao/.dbus/ses
+
+tab-completion runs into permission problems trying to do its work.
+
+----------------------------------------------------------------------
+
+35.

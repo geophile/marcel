@@ -114,3 +114,12 @@ Also need to clear all Function.functions, so that they get
 regenerated with the updated namespace. (Is this right? Need to
 experiment.)
 
+----------------------------------------------------------------------
+
+File object uses os.stat/lstat. When a file is transmitted, stat
+result should be cached in the file, and then not overridden on the
+receving side. So the File needs to have a field indicating if it has
+been transmitted/reconstructed.
+
+----------------------------------------------------------------------
+

@@ -1,0 +1,34 @@
+Jobs
+
+Bash supports foreground and background jobs. The foreground job is
+the command you just ran, and the console blocks until the job is
+complete.
+
+A background job continues to run while the console is unblocked. A
+job is started in the background by appending on the command line.
+
+Ctrl-Z stops the foreground job, and it can then be placed in the
+background by the bg command.
+
+fg brings a background job into the foreground.
+
+jobs list the current jobs, showing status (Stopped or Running).
+
+----------------------------------------------------------------------
+
+Jobs in marcel
+
+- Change Main to always run a command on a thread.
+
+- Normal behavior (foreground job) is to block until the thread
+  completes.
+
+- For background, simply don't block.
+
+? Signal handling is only on the main thread, I think. So how does
+ctrl-c handling control the thread?
+
+- Ctrl-z generates SIGTSTP. Unblock the main (console-servicing)
+  thread.
+
+- Maintain an array of threads to implement job control.

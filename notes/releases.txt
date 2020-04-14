@@ -1,13 +1,17 @@
+0.4 
+
+- DB access
+
+----------------------------------------------------------------------
+
 0.3
 
-- sudo support: Need to do a bash su, but then somehow land in marcel
++ sudo support: Need to do a bash su, but then somehow land in marcel
   again. Similar for su.
 
 - Highlight color for broken link
 
 - bg, fg, jobs, ctrl-z, etc.
-
-- DB access
 
 - Bugs
 

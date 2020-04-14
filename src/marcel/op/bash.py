@@ -86,7 +86,6 @@ class Escape:
         return x if x in Escape.BASH_CONTROL else shlex.quote(x)
 
 
-
 class NonInteractive(Escape):
 
     def __init__(self, op):
@@ -110,6 +109,7 @@ class NonInteractive(Escape):
         # stderr
         for line in NonInteractive.normalize_output(stderr):
             op.send(marcel.object.error.Error(line))
+        op.send_complete()
 
     @staticmethod
     def normalize_output(x):
