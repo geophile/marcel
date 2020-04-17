@@ -225,4 +225,13 @@ string looking exactly like a pipeline ref?
 
 ----------------------------------------------------------------------
 
-Tab completion is broken again.
+cd doesn't work because it's running in a Process. Doesn't affect the
+env visible to the main process.
+
+----------------------------------------------------------------------
+
+Job should be in marcel.object.
+
+----------------------------------------------------------------------
+
+Add notion of current job, and then allow bg/fg ops to omit args.

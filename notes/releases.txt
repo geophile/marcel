@@ -11,12 +11,13 @@
 
 - Highlight color for broken link
 
-- bg, fg, jobs, ctrl-z, etc.
++ bg, fg, jobs, ctrl-z, etc.
 
 - Bugs
 
   + 32
   + 33
+  - 35
 
 ----------------------------------------------------------------------
 

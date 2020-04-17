@@ -1,12 +1,12 @@
 import atexit
 import pathlib
 import readline
-import sys
 
 import marcel.core
 import marcel.env
 import marcel.exception
 import marcel.globalstate
+import marcel.job
 import marcel.multilinereader
 import marcel.op.out
 import marcel.parse
@@ -20,7 +20,8 @@ HISTORY_LENGTH = 100
 
 class Command:
 
-    def __init__(self, pipeline):
+    def __init__(self, source, pipeline):
+        self.source = source
         self.pipeline = pipeline
         # Append an out op at the end of pipeline, if there is no output op there already.
         if not isinstance(pipeline.last_op, marcel.op.out.Out):
@@ -38,6 +39,9 @@ class Command:
         self.pipeline.setup_2()
         self.pipeline.receive(None)
         self.pipeline.receive_complete()
+        # A Command is executed by a multiprocessing.Process. Need to transmit the Environment's vars
+        # to the parent process, because they may have changed.
+        return self.pipeline.global_state.env.vars()
 
 
 class Reader(marcel.multilinereader.MultiLineReader):
@@ -54,6 +58,8 @@ class Reader(marcel.multilinereader.MultiLineReader):
 
 class Main:
 
+    MAIN_SLEEP_SEC = 0.1
+
     def __init__(self):
         config_path = Main.args()
         try:
@@ -65,6 +71,7 @@ class Main:
         self.tab_completer = marcel.tabcompleter.TabCompleter(self.global_state)
         self.reader = None
         self.initialize_input()
+        self.job_control = marcel.job.JobControl.start(self.update_env_vars)
         atexit.register(self.shutdown)
 
     def __getstate__(self):
@@ -79,6 +86,8 @@ class Main:
                 try:
                     line = self.reader.input(*self.env.prompts())
                     self.run_command(line)
+                    while self.job_control.foreground_is_alive():
+                        time.sleep(Main.MAIN_SLEEP_SEC)
                 except KeyboardInterrupt:  # ctrl-C
                     print()
         except EOFError:  # ctrl-D
@@ -90,7 +99,11 @@ class Main:
                 parser = marcel.parse.Parser(line, self.global_state)
                 pipeline = parser.parse()
                 pipeline.set_global_state(self.global_state)
-                Command(pipeline).execute()
+                command = Command(line, pipeline)
+                if Main.is_job_control(line):
+                    command.execute()
+                else:
+                    self.job_control.create_job(command)
             except marcel.exception.KillCommandException as e:
                 # print_stack()
                 print(e, file=sys.stderr)
@@ -104,22 +117,35 @@ class Main:
         self.reader = Reader(self.global_state, self.history_file())
 
     def history_file(self):
-        home = self.env.getenv('HOME')
+        home = self.env.getvar('HOME')
         return pathlib.Path(home) / HISTORY_FILE
 
     def shutdown(self):
+        self.job_control.shutdown()
         self.reader.close()
-
-    @staticmethod
-    def args():
-        config_path = sys.argv[1] if len(sys.argv) > 1 else None
-        return config_path
 
     def insert_edited_command(self):
         command = self.reader.take_edited_command()
         if command:
             readline.insert_text(command)
             readline.redisplay()
+
+    def update_env_vars(self, env_vars_from_child):
+        pwd = env_vars_from_child.get('PWD', None)
+        assert pwd is not None
+        self.env.setvar('PWD', pwd)
+        dirs = env_vars_from_child.get('DIRS', None)
+        assert dirs is not None
+        self.env.setvar('DIRS', dirs)
+
+    @staticmethod
+    def is_job_control(line):
+        return line.split()[0] in ('bg', 'fg', 'jobs')
+
+    @staticmethod
+    def args():
+        config_path = sys.argv[1] if len(sys.argv) > 1 else None
+        return config_path
 
 
 if __name__ == '__main__':

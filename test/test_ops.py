@@ -459,7 +459,8 @@ def main_stable():
 
 
 def main_dev():
-    test_sudo()
+    TEST.cd('/home/jao/git/marcel/src/marcel/op')
+    TEST.run('cp head.py jobs.py')
     pass
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist

@@ -38,7 +38,7 @@ class Pushd(marcel.core.Op):
 
     def setup_1(self):
         if self.directory is not None:
-            self.directory = pathlib.Path(self.directory)
+            self.directory = pathlib.Path(self.directory).expanduser()
             if not self.directory.is_dir():
                 raise marcel.exception.KillCommandException(f'{self.directory} is not a directory')
 

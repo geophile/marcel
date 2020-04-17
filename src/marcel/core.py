@@ -81,7 +81,7 @@ class ArgParser(argparse.ArgumentParser):
             raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {pipeline_ref}')
 
 
-class BaseOp(object):
+class BaseOp:
     """Base class for all osh ops, and for pipelines (sequences of
     ops). Methods of this class implement the op execution and
     inter-op communication. The send* commands are used by subclasses to

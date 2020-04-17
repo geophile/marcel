@@ -133,11 +133,16 @@ class TabCompleter:
                 for username in self.homedirs.keys():
                     if username.startswith(find_user):
                         filenames.append('~' + username + ' ')
+            elif text.startswith('/'):
+                base = '/'
+                pattern_prefix = text[1:]
+                filenames = [p.as_posix()
+                             for p in pathlib.Path(base).glob(pattern_prefix + '*')]
             else:
-                base, pattern_prefix = (('/', text[1:])
-                                        if text.startswith('/') else
-                                        ('.', text))
-                filenames = [p.as_posix() + ' ' for p in pathlib.Path(base).glob(pattern_prefix + '*')]
+                base = current_dir
+                pattern_prefix = text
+                filenames = [p.relative_to(base).as_posix()
+                             for p in pathlib.Path(base).glob(pattern_prefix + '*')]
         else:
             filenames = ['/'] + [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
         debug('complete_filename candidates for {}: {}'.format(text, filenames))

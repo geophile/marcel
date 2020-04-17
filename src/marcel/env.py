@@ -22,12 +22,12 @@ class Environment:
         except FileNotFoundError:
             raise marcel.exception.KillShellException(
                 'Current directory does not exist! cd somewhere else and try again.')
-        self._dir_stack = [current_dir]
         self._vars = {  # Environment variables
             'USER': self._user,
             'HOME': self._homedir.as_posix(),
             'HOST': self._host,
-            'PWD': self.pwd().as_posix()
+            'PWD': current_dir.as_posix(),
+            'DIRS': [current_dir.as_posix()]
         }
         self._config = marcel.config.Configuration(self._vars)
         self._config.read_config(config_file)
@@ -45,7 +45,7 @@ class Environment:
                 self._prompt_string(self._config.continuation_prompt))
 
     def pwd(self):
-        return self._dir_stack[-1]
+        return pathlib.Path(self.getvar('PWD'))
 
     def cd(self, directory):
         assert isinstance(directory, pathlib.Path), directory
@@ -53,34 +53,38 @@ class Environment:
         try:
             if not new_dir.exists():
                 raise marcel.exception.KillCommandException(f'Cannot cd into {new_dir}. Directory does not exist.')
-            self._dir_stack[-1] = new_dir
-            self.setenv('PWD', self.pwd().as_posix())
+            new_dir = new_dir.as_posix()
+            self._dir_stack()[-1] = new_dir
+            self.setvar('PWD', new_dir)
             # So that executables have the same view of the current directory.
-            os.chdir(self.pwd())
+            os.chdir(new_dir)
         except FileNotFoundError:
             # Fix for bug 27
             pass
 
     def pushd(self, directory):
+        dir_stack = self._dir_stack()
         if directory is None:
-            if len(self._dir_stack) > 1:
-                self._dir_stack[-2:] = [self._dir_stack[-1], self._dir_stack[-2]]
+            if len(dir_stack) > 1:
+                dir_stack[-2:] = [dir_stack[-1], dir_stack[-2]]
         else:
             assert isinstance(directory, pathlib.Path)
-            directory = directory.resolve()
-            self._dir_stack.append(directory)
-        self.cd(self._dir_stack[-1])
+            dir_stack.append(directory.resolve().as_posix())
+        self.cd(pathlib.Path(dir_stack[-1]))
 
     def popd(self):
-        if len(self._dir_stack) > 1:
-            self._dir_stack.pop()
-            self.cd(self._dir_stack[-1])
+        dir_stack = self._dir_stack()
+        if len(dir_stack) > 1:
+            dir_stack.pop()
+            self.cd(pathlib.Path(dir_stack[-1]))
 
     def reset_dir_stack(self):
-        self._dir_stack = [self._dir_stack[-1]]
+        dir_stack = self._dir_stack()
+        dir_stack.clear()
+        dir_stack.append(self.pwd())
 
     def dirs(self):
-        dirs = list(self._dir_stack)
+        dirs = list(self._dir_stack())
         dirs.reverse()
         return dirs
 
@@ -93,12 +97,20 @@ class Environment:
     def color_scheme(self):
         return self._color_scheme
 
-    def getenv(self, var):
+    def getvar(self, var):
         return self._vars.get(var, None)
 
-    def setenv(self, var, value):
+    def setvar(self, var, value):
         self._vars[var] = value
         self._config.set_var_in_function_namespace(var, value)
+
+    def vars(self):
+        return self._vars
+
+    def _dir_stack(self):
+        dirs = self.getvar('DIRS')
+        assert dirs is not None
+        return dirs
 
     def _prompt_string(self, prompt_pieces):
         buffer = []
