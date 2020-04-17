@@ -17,6 +17,8 @@ class Test:
         self.reset_environment(config_file)
 
     def reset_environment(self, config_file='./.marcel.py'):
+        os.system('sudo touch /tmp/farcel.log')
+        os.system('sudo rm /tmp/farcel.log')
         os.chdir(Test.start_dir)
         self.main.global_state.env = marcel.env.Environment(config_file)
 

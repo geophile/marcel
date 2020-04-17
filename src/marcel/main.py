@@ -60,7 +60,8 @@ class Main:
 
     MAIN_SLEEP_SEC = 0.1
 
-    def __init__(self):
+    def __init__(self, op_testing=False):
+        self.op_testing = op_testing
         config_path = Main.args()
         try:
             self.env = marcel.env.Environment(config_path)
@@ -100,7 +101,7 @@ class Main:
                 pipeline = parser.parse()
                 pipeline.set_global_state(self.global_state)
                 command = Command(line, pipeline)
-                if Main.is_job_control(line):
+                if self.run_immediate(line):
                     command.execute()
                 else:
                     self.job_control.create_job(command)
@@ -138,9 +139,10 @@ class Main:
         assert dirs is not None
         self.env.setvar('DIRS', dirs)
 
-    @staticmethod
-    def is_job_control(line):
-        return line.split()[0] in ('bg', 'fg', 'jobs')
+    def run_immediate(self, line):
+        # Job control commands should be run in this process, not a spawned process.
+        # Also, if we're testing operator behavior, run in immediate mode.
+        return self.op_testing or line.split()[0] in ('bg', 'fg', 'jobs')
 
     @staticmethod
     def args():

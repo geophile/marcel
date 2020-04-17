@@ -11,7 +11,7 @@ import test_base
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
 test_dir = '/tmp/test'
-MAIN = marcel.main.Main()
+MAIN = marcel.main.Main(op_testing=True)
 TEST = test_base.Test(MAIN)
 
 

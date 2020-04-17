@@ -9,7 +9,7 @@ import test_base
 
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
-MAIN = marcel.main.Main()
+MAIN = marcel.main.Main(op_testing=True)
 TEST = test_base.Test(MAIN)
 
 
@@ -390,7 +390,7 @@ def test_namespace():
     config_path.touch()
     TEST.reset_environment(config_file)
     TEST.run('map (globals().keys())',
-             expected_out=["dict_keys(['USER', 'HOME', 'HOST', 'PWD', '__builtins__'])"])
+             expected_out=["dict_keys(['USER', 'HOME', 'HOST', 'PWD', 'DIRS', '__builtins__'])"])
     # Try to use an undefined symbol
     TEST.run('map (pi)',
              expected_out=[Error("name 'pi' is not defined")])
@@ -459,8 +459,6 @@ def main_stable():
 
 
 def main_dev():
-    TEST.cd('/home/jao/git/marcel/src/marcel/op')
-    TEST.run('cp head.py jobs.py')
     pass
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
@@ -468,8 +466,8 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
 
 
