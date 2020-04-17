@@ -82,7 +82,7 @@ class Job:
     def run_in_foreground(self):
         debug(f'run_in_foreground {self}')
         if self.state == Job.DEAD:
-            raise Exception('Cannot foreground killed job')
+            raise marcel.exception.KillCommandException('Cannot foreground killed job')
         if self.state != Job.RUNNING_FOREGROUND:
             os.kill(self.process.pid, signal.SIGCONT)
             self.state = Job.RUNNING_FOREGROUND
