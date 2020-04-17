@@ -459,6 +459,7 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('echo hello | grep hello')
     pass
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
@@ -466,8 +467,8 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

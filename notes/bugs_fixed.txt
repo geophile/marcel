@@ -518,3 +518,18 @@ FIXED
 
 M jao@cheese:~/git/marcel$ git diff > /tmp/m.diff
 Error(error: Could not access '>')
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+36. Duplicated output when grep is invoked
+
+This is odd:
+
+    M jao@cheese:~/git/marcel/test$ echo hello
+    hello
+    M jao@cheese:~/git/marcel/test$ echo hello | grep hello
+    hello
+    hello
