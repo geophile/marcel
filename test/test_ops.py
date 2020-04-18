@@ -436,6 +436,11 @@ def test_sudo():
     #          expected_out=['f'])
 
 
+def test_version():
+    TEST.run(test='version',
+             expected_out=[marcel.config.VERSION])
+
+
 def main_stable():
     test_gen()
     test_out()
@@ -455,6 +460,7 @@ def main_stable():
     test_namespace()
     test_remote()
     test_sudo()
+    test_version()
     test_no_such_op()
 
 
