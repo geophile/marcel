@@ -34,7 +34,7 @@ from marcel.util import *
 #   - Main process SIGTSTP handler reawakens children that are supposed to be running by sending SIGCONT.
 
 
-DEBUG = True
+DEBUG = False
 
 
 def debug(message):
