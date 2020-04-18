@@ -520,6 +520,16 @@ M jao@cheese:~/git/marcel$ git diff > /tmp/m.diff
 Error(error: Could not access '>')
 
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+35. Completed jobs accumulate in jobs output
+
+JobControl.jobs shouldn't be exposed directly. Go through a method
+that calls remove_completed.
+
 ----------------------------------------------------------------------
 
 FIXED

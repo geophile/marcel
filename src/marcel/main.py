@@ -101,6 +101,7 @@ class Main:
                 pipeline = parser.parse()
                 pipeline.set_global_state(self.global_state)
                 command = Command(line, pipeline)
+                import os
                 if self.run_immediate(line):
                     command.execute()
                 else:
@@ -134,7 +135,7 @@ class Main:
     def update_env_vars(self, env_vars_from_child):
         pwd = env_vars_from_child.get('PWD', None)
         assert pwd is not None
-        self.env.setvar('PWD', pwd)
+        self.env.cd(pathlib.Path(pwd))
         dirs = env_vars_from_child.get('DIRS', None)
         assert dirs is not None
         self.env.setvar('DIRS', dirs)

@@ -2,6 +2,8 @@
 
 - DB access
 
+- Syntax for starting job in background (like bash &)
+
 ----------------------------------------------------------------------
 
 0.3
@@ -13,13 +15,11 @@
 
 + bg, fg, jobs, ctrl-z, etc.
 
-- Syntax for starting job in background (like bash &)
-
 - Bugs
 
   + 32
   + 33
-  - 35
+  + 35
   + 36
   + 37
 
