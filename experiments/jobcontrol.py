@@ -48,7 +48,7 @@ class Job:
         debug(f'kill {self}')
         self.state = Job.KILLED
         try:
-            os.kill(self.process.pid, signal.SIGKILL)
+            os.kill(self.process.pid, signal.SIGTERM)
             self.process.join(JOIN_DELAY_SEC)
             if self.process.is_alive():
                 os.kill(self.process.pid, signal.SIGKILL)

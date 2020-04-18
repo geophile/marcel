@@ -533,3 +533,17 @@ This is odd:
     M jao@cheese:~/git/marcel/test$ echo hello | grep hello
     hello
     hello
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+37. kill op only kills
+
+It ignores the signal, and just kills the command. What is the correct
+behavior? kill is implemented by SIGTERM, not SIGTERM, as usual. Maybe
+SIGTERM would work? Haven't tried it. If SIGTERM works instead of
+SIGKILL, then switch to it, and have the kill op work consistently
+with bash.
+

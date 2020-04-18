@@ -104,7 +104,7 @@ def main():
             TRACE.write(f'PipelineRunner alive: {pipeline_runner.is_alive()}')
             pipeline_runner.join(0.1)
         TRACE.write(f'PipelineRunner alive: {pipeline_runner.is_alive()}')
-        kill_descendents(signal.SIGKILL)
+        kill_descendents(signal.SIGTERM)
     finally:
         TRACE.write('Exiting')
         TRACE.close()

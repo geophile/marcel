@@ -25,7 +25,7 @@ from marcel.util import *
 #   then they are unkillable, by SIGINT anyway. So do the following:
 #   - Main process handles SIGINT.
 #   - Child processes ignore it.
-#   - Main process SIGINT handler sends SIGKILL to the child implementing the foreground process.
+#   - Main process SIGINT handler sends SIGTERM to the child implementing the foreground process.
 #
 # - Ctrl-Z: When typed on the console, this generates SIGTSTP. We want to move the foregroung process, if there is
 #   one, to the background and pause it. This can be done as follows:
@@ -71,7 +71,7 @@ class Job:
             debug(f'kill {self}')
             self.state = Job.DEAD
             try:
-                os.kill(self.process.pid, signal.SIGKILL)
+                os.kill(self.process.pid, signal.SIGTERM)
                 self.process.join(Job.JOIN_DELAY_SEC)
                 if self.process.is_alive():
                     os.kill(self.process.pid, signal.SIGKILL)
@@ -82,6 +82,13 @@ class Job:
                         self.process = None
             except ProcessLookupError:
                 pass
+
+    def signal(self, signal):
+        debug(f'signal {self} {signal}')
+        try:
+            os.kill(self.process.pid, signal)
+        except ProcessLookupError:
+            pass
 
     # ctrl-z
     def pause(self):

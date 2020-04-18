@@ -14,6 +14,7 @@ class KillArgParser(marcel.op.jobop.JobOpArgParser):
     def __init__(self):
         super().__init__('kill')
         self.add_argument('-s', '--signal',
+                          nargs='?',
                           type=super().constrained_type(marcel.core.ArgParser.check_signal_number,
                                                         'must be a signal number (between 1 and 30)'))
         self.add_argument('signum',
@@ -45,7 +46,7 @@ class Kill(marcel.op.jobop.JobOp):
     def setup_1(self):
         super().setup_1()
         if self.signal is None and self.signum is None:
-            self.signal = signal.SIGKILL
+            self.signal = signal.SIGTERM
         elif self.signal is None and self.signum is not None:
             self.signal = self.signum
         elif self.signal is not None and self.signum is not None:
@@ -59,4 +60,4 @@ class Kill(marcel.op.jobop.JobOp):
     # JobOp
 
     def action(self):
-        self.job.kill()
+        self.job.signal(self.signal)
