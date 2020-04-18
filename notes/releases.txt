@@ -15,8 +15,6 @@
 
 - Syntax for starting job in background (like bash &)
 
-- Allow signal names as well as numbers.
-
 - Bugs
 
   + 32
