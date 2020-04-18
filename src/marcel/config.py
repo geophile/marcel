@@ -4,6 +4,9 @@ import marcel.object.cluster
 import marcel.object.colorscheme
 
 
+VERSION = '0.3'
+
+
 class Configuration:
     CONFIG_FILENAME = '.marcel.py'
     DEFAULT_PROMPT = ['$ ']

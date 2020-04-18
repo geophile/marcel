@@ -4,14 +4,17 @@
 
 - Syntax for starting job in background (like bash &)
 
+- Highlight color for broken link. Not trivial, because File needs to
+  survive pickling. Can't assume that file can be examined when
+  colorization is needed. And stat (computed before pickling) doesn't
+  indicate whether the file exists. Could check and record this.
+
 ----------------------------------------------------------------------
 
 0.3
 
 + sudo support: Need to do a bash su, but then somehow land in marcel
   again. Similar for su.
-
-- Highlight color for broken link
 
 + bg, fg, jobs, ctrl-z, etc.
 
