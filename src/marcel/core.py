@@ -22,7 +22,6 @@ class ArgParser(argparse.ArgumentParser):
     # ArgumentParser (argparse)
 
     def parse_args(self, args=None, namespace=None):
-        print(args)
         if args is not None:
             # Replace pipelines by string-valued pipeline references, since argparse operates on strings.
             # Arg processing by each op will convert the pipeline reference back to a pipeline.
