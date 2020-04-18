@@ -88,4 +88,11 @@ that calls remove_completed.
 
 ----------------------------------------------------------------------
 
-37.
+37. kill op only kills
+
+It ignores the signal, and just kills the command. What is the correct
+behavior? kill is implemented by SIGKILL, not SIGTERM, as usual. Maybe
+SIGTERM would work? Haven't tried it. If SIGTERM works instead of
+SIGKILL, then switch to it, and have the kill op work consistently
+with bash.
+

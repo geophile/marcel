@@ -101,11 +101,15 @@ class Job:
     # fg
     def run_in_foreground(self):
         debug(f'run_in_foreground {self}')
-        if self.state == Job.DEAD:
-            raise marcel.exception.KillCommandException('Cannot foreground killed job')
-        if self.state != Job.RUNNING_FOREGROUND:
-            os.kill(self.process.pid, signal.SIGCONT)
+        if self.state == Job.RUNNING_FOREGROUND:
+            pass
+        elif self.state == Job.RUNNING_BACKGROUND:
             self.state = Job.RUNNING_FOREGROUND
+        elif self.state == Job.RUNNING_PAUSED:
+            self.state = Job.RUNNING_FOREGROUND
+            os.kill(self.process.pid, signal.SIGCONT)
+        elif self.state == Job.DEAD:
+            raise marcel.exception.KillCommandException('Cannot foreground killed job')
 
     def state_symbol(self):
         return Job.JOB_STATE_SYMBOLS[self.state]
@@ -238,7 +242,6 @@ class JobControl:
         foreground = self.foreground()
         if foreground:
             foreground.kill()
-            print()
 
     def ctrl_z_handler(self, signum, frame):
         debug(f'ctrl z handler')
@@ -258,7 +261,6 @@ class JobControl:
         for job in self._jobs:
             if job.process is not None and job.process.is_alive():
                 new_jobs.append(job)
-        print(f'remove completed. {self._jobs} -> {new_jobs}')
         self._jobs = new_jobs
 
     @staticmethod
