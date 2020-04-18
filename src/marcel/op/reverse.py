@@ -24,7 +24,7 @@ class Reverse(marcel.core.Op):
         super().__init__()
         self.contents = []
 
-    # BaseOp interface
+    # BaseOp
     
     def doc(self):
         return __doc__

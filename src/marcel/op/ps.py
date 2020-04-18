@@ -31,7 +31,7 @@ class Ps(marcel.core.Op):
         super().__init__()
         self.omit_self = False
 
-    # BaseOp interface
+    # BaseOp
     
     def doc(self):
         return __doc__

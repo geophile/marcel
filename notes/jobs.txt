@@ -32,3 +32,14 @@ ctrl-c handling control the thread?
   thread.
 
 - Maintain an array of threads to implement job control.
+
+----------------------------------------------------------------------
+
+Op design:
+
+- Operate on job id (-j|--job) or pid (-p|--process). Flags are
+  optional, assume job id if not specified.
+
+- Kill: Take signal with -s|--signal flag, or as negative number.
+
+- Job output: Exclude pid for dead process.

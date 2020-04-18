@@ -62,7 +62,7 @@ class Timer(marcel.core.Op):
         self.done = False
         self.now = None
 
-    # BaseOp interface
+    # BaseOp
     
     def doc(self):
         return __doc__

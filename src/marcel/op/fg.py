@@ -1,49 +1,39 @@
 import marcel.core
 import marcel.job
+import marcel.op.jobop
 
 
 def fg():
     return Fg()
 
 
-class FgArgParser(marcel.core.ArgParser):
+class FgArgParser(marcel.op.jobop.JobOpArgParser):
 
     def __init__(self):
         super().__init__('fg')
-        self.add_argument('job_id',
-                          type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                        'must be non-negative'))
 
 
-class Fg(marcel.core.Op):
+class Fg(marcel.op.jobop.JobOp):
 
     argparser = FgArgParser()
 
     def __init__(self):
         super().__init__()
-        self.job_id = None
 
     def __repr__(self):
-        return f'fg({self.job_id})'
+        return f'fg(job={self.jid})' if self.jid is not None else f'fg(pid={self.pid})'
 
-    # BaseOp interface
+    # BaseOp
     
     def doc(self):
         return __doc__
 
-    def setup_1(self):
-        if self.job_id >= len(marcel.job.JobControl.only.jobs):
-            raise marcel.exception.KillCommandException(f'There is no job {self.job_id}')
-
-    def receive(self, x):
-        job = marcel.job.JobControl.only.jobs[self.job_id]
-        job.run_in_foreground()
-
-    # Op interface
+    # Op
 
     def arg_parser(self):
         return Fg.argparser
 
-    def must_be_first_in_pipeline(self):
-        return True
+    # JobOp
 
+    def action(self):
+        self.job.run_in_foreground()

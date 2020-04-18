@@ -33,7 +33,7 @@ class Tail(marcel.core.Op):
     def __repr__(self):
         return f'tail({self.n})'
 
-    # BaseOp interface
+    # BaseOp
     
     def doc(self):
         return __doc__
@@ -57,7 +57,7 @@ class Tail(marcel.core.Op):
                 p = self.next_position(p)
                 count += 1
 
-    # Op interface
+    # Op
 
     def arg_parser(self):
         return Tail.argparser

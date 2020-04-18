@@ -10,6 +10,7 @@ public = [
     'gen',
     'head',
     'jobs',
+    'kill',
     'ls',
     'map',
     'out',

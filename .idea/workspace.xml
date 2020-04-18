@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="" />
+    <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/marcel/op/jobop.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/marcel/op/kill.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/jobcontrol.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/jobcontrol.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/jobs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/jobs.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/core.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/job.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/job.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/bg.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/bg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/expand.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/expand.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/fg.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/fg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/head.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/head.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/jobs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/ps.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/ps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/reverse.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/reverse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/squish.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/squish.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/tail.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/tail.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/timer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/timer.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -626,7 +646,7 @@
       <workItem from="1586623045159" duration="49000" />
       <workItem from="1586634298193" duration="61404000" />
       <workItem from="1586919494324" duration="11058000" />
-      <workItem from="1586967723772" duration="44779000" />
+      <workItem from="1586967723772" duration="68154000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -715,7 +735,7 @@
     <SUITE FILE_PATH="coverage/marcel$bug_33.coverage" NAME="bug_33 Coverage Results" MODIFIED="1586651211781" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$mp.coverage" NAME="mp Coverage Results" MODIFIED="1586803803940" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/osh2$test_extract_string.coverage" NAME="test_tokenizing Coverage Results" MODIFIED="1578087938886" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
-    <SUITE FILE_PATH="coverage/marcel$test_ops.coverage" NAME="test_ops Coverage Results" MODIFIED="1587139007439" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/marcel$test_ops.coverage" NAME="test_ops Coverage Results" MODIFIED="1587221570755" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$call.coverage" NAME="call Coverage Results" MODIFIED="1580657904823" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$.coverage" NAME=" Coverage Results" MODIFIED="1587131046368" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/marcel$modify_function_namespace.coverage" NAME="modify_function_namespace Coverage Results" MODIFIED="1583805209482" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />

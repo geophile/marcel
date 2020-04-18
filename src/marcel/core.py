@@ -68,6 +68,13 @@ class ArgParser(argparse.ArgumentParser):
             raise ValueError()
         return n
 
+    @staticmethod
+    def check_signal_number(s):
+        n = int(s)
+        if n < 1 or n > 30:
+            raise ValueError()
+        return n
+
     def check_function(self, s):
         return marcel.function.Function(s, self.global_state.function_namespace())
 

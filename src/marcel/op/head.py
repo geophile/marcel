@@ -32,7 +32,7 @@ class Head(marcel.core.Op):
     def __repr__(self):
         return f'head({self.n})'
 
-    # BaseOp interface
+    # BaseOp
     
     def doc(self):
         return __doc__
@@ -45,7 +45,7 @@ class Head(marcel.core.Op):
         if self.n >= self.received:
             self.send(x)
 
-    # Op interface
+    # Op
 
     def arg_parser(self):
         return Head.argparser

@@ -22,7 +22,7 @@ class Jobs(marcel.core.Op):
     def __repr__(self):
         return f'jobs'
 
-    # BaseOp interface
+    # BaseOp
     
     def doc(self):
         return __doc__
@@ -32,13 +32,13 @@ class Jobs(marcel.core.Op):
 
     def receive(self, x):
         job_id = 0
-        for job in marcel.job.JobControl.only.jobs:
+        for job in marcel.job.JobControl.only.jobs():
             # TODO: If job were a marcel.object, then it would have render_compact/full methods.
             description = f'{job_id}({job.state_symbol()}): {job.process.pid}  {job.command.source}'
             self.send(description)
             job_id += 1
 
-    # Op interface
+    # Op
 
     def arg_parser(self):
         return Jobs.argparser

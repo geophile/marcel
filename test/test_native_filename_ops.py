@@ -86,7 +86,6 @@ def test_cp():
 def main():
     TEST.reset_environment()
     test_mv()
-    # test_cp()
     print(f'Test failures: {TEST.failures}')
 
 
