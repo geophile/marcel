@@ -240,3 +240,8 @@ Add notion of current job, and then allow bg/fg ops to omit args.
 
 Would multiprocessing.Process provide better streaming than
 subprocess.Popen? I.e., not waiting for op to complete.
+
+----------------------------------------------------------------------
+
+Can GlobalState.only obviate pipeline.global_state? And other places
+where GlobalState is cached?

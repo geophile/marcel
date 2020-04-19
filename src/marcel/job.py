@@ -26,7 +26,7 @@ import marcel.exception
 #   - Child processes ignore it.
 #   - Main process SIGINT handler sends SIGTERM to the child implementing the foreground process.
 #
-# - Ctrl-Z: When typed on the console, this generates SIGTSTP. We want to move the foregroung process, if there is
+# - Ctrl-Z: When typed on the console, this generates SIGTSTP. We want to move the foreground process, if there is
 #   one, to the background and pause it. This can be done as follows:
 #   - Main process handles SIGTSTP.
 #   - Child processes do the default (suspend).

@@ -27,3 +27,4 @@ class ColorScheme:
         self.process_pid = None
         self.process_commandline = None
         self.error = None
+        self.help_flag = None

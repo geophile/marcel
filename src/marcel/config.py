@@ -64,7 +64,8 @@ class Configuration:
                            file_extension=None,
                            process_pid=None,
                            process_commandline=None,
-                           error=None):
+                           error=None,
+                           help_flag=None):
         self.color_scheme = marcel.object.colorscheme.ColorScheme()
         self.color_scheme.prompt_shell_indicator = self.color(prompt_shell_indicator)
         self.color_scheme.prompt_who = self.color(prompt_who)
@@ -78,6 +79,7 @@ class Configuration:
         self.color_scheme.process_pid = self.color(process_pid)
         self.color_scheme.process_commandline = self.color(process_commandline)
         self.color_scheme.error = self.color(error)
+        self.color_scheme.help_flag = self.color(help_flag)
 
     def define_prompt(self, prompt):
         self.prompt = prompt
