@@ -5,7 +5,7 @@ import time
 
 import marcel.object.renderable
 import marcel.op.filenames
-from marcel.util import *
+import marcel.util
 
 DIR_MASK = 0o040000
 FILE_MASK = 0o100000
@@ -88,12 +88,13 @@ class File(marcel.object.renderable.Renderable):
     def render_full(self, color_scheme):
         line = self._formatted_metadata()
         if color_scheme:
-            line[-1] = colorize(line[-1], self._highlight_color(self, color_scheme))
+            line[-1] = marcel.util.colorize(line[-1], self._highlight_color(self, color_scheme))
         if self._is_symlink():
             line.append('->')
             link_target = pathlib.Path(os.readlink(self.path))
             if color_scheme:
-                link_target = colorize(link_target, self._highlight_color(link_target, color_scheme))
+                link_target = marcel.util.colorize(link_target,
+                                                   self._highlight_color(link_target, color_scheme))
             if isinstance(link_target, pathlib.Path):
                 link_target = link_target.as_posix()
             line.append(link_target)
@@ -105,7 +106,7 @@ class File(marcel.object.renderable.Renderable):
         # is_executable must check path.resolve(), not path. If the path is relative, and the name
         # is also an executable on PATH, then highlighting will be incorrect. See bug 8.
         if self.executable is None:
-            self.executable = is_executable(self.path.resolve().as_posix())
+            self.executable = marcel.util.is_executable(self.path.resolve().as_posix())
         return self.executable
 
     def _formatted_metadata(self):
@@ -113,8 +114,8 @@ class File(marcel.object.renderable.Renderable):
         return [
             self._mode_string(lstat.st_mode),
             ' ',
-            '{:8s}'.format(username(lstat.st_uid)),
-            '{:8s}'.format(groupname(lstat.st_gid)),
+            '{:8s}'.format(marcel.util.username(lstat.st_uid)),
+            '{:8s}'.format(marcel.util.groupname(lstat.st_gid)),
             '{:12}'.format(lstat.st_size),
             ' ',
             self._formatted_mtime(lstat.st_mtime),

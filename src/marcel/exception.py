@@ -14,7 +14,9 @@ An C{error_handler} is a function with these arguments:
     - C{thread}: The thread on which the stderr output occurred,
 """
 
-from marcel.util import *
+import sys
+
+import marcel.util
 
 
 # Exception for terminating command. By extending BaseException, this exception
@@ -74,7 +76,7 @@ def _default_exception_handler(exception, op, command_input, thread=None):
     buffer.append(': ')
     buffer.append(str(exception))
     print(''.join(buffer), file=sys.stderr)
-    print_stack()
+    marcel.util.print_stack()
 
 
 def set_exception_handler(handler):

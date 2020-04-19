@@ -3,7 +3,6 @@ import pathlib
 
 import marcel.main
 import marcel.object.host
-from marcel.util import *
 
 import test_base
 

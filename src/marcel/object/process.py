@@ -9,7 +9,6 @@ import os.path
 import pathlib
 
 import marcel.object.renderable
-from marcel.util import *
 
 
 def processes(*dummy):
@@ -111,8 +110,8 @@ class Process(marcel.object.renderable.Renderable):
         pid = '{:6n}'.format(self.pid)
         commandline = self.commandline
         if color_scheme:
-            pid = colorize(pid, color_scheme.process_pid)
-            commandline = colorize(commandline, color_scheme.process_commandline)
+            pid = marcel.util.colorize(pid, color_scheme.process_pid)
+            commandline = marcel.util.colorize(commandline, color_scheme.process_commandline)
         buffer = [
             '--' if self._status is None else '  ',
             pid,

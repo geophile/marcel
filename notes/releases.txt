@@ -1,5 +1,9 @@
 0.4 
 
+- Documentation
+
+- Pipelines
+
 - DB access
 
 - Syntax for starting job in background (like bash &)

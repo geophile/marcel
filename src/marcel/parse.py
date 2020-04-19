@@ -4,7 +4,7 @@ import marcel.core
 import marcel.exception
 import marcel.op.fork
 import marcel.opmodules
-from marcel.util import *
+import marcel.util
 
 
 class MalformedStringError(Exception):
@@ -338,7 +338,7 @@ class Parser(Token):
         super().__init__(text, 0)
         self.global_state = global_state
         self.state = ParseState.START
-        self.stack = Stack()
+        self.stack = marcel.util.Stack()
         self.stack.push(InProgress())
         self.op_name = None  # For use by tabcompleter
 
@@ -481,7 +481,7 @@ class Parser(Token):
         op_module = marcel.opmodules.OP_MODULES.named(op_name)
         if op_module:
             pass
-        elif is_executable(op_name):
+        elif marcel.util.is_executable(op_name):
             current.args = [op_name] + current.args
             op_name = 'bash'
             op_module = marcel.opmodules.OP_MODULES.named(op_name)
@@ -491,7 +491,7 @@ class Parser(Token):
 
     def is_op(self):
         op_name = self.current().op_name
-        return marcel.opmodules.OP_MODULES.named(op_name) is not None or is_executable(op_name)
+        return marcel.opmodules.OP_MODULES.named(op_name) is not None or marcel.util.is_executable(op_name)
 
     def finish_op(self):
         # Create the op

@@ -1,5 +1,4 @@
 import marcel.object.renderable
-from marcel.util import *
 
 
 class Error(marcel.object.renderable.Renderable):
@@ -21,7 +20,7 @@ class Error(marcel.object.renderable.Renderable):
     def render_full(self, color_scheme):
         out = self.render_compact()
         if color_scheme:
-            out = colorize(out, color_scheme.error)
+            out = marcel.util.colorize(out, color_scheme.error)
         return out
 
     # Error

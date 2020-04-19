@@ -4,7 +4,7 @@ import readline
 
 import marcel.core
 import marcel.op
-from marcel.util import *
+import marcel.util
 
 
 DEBUG = False
@@ -62,7 +62,7 @@ class TabCompleter:
                 # Don't do tab completion
                 return None
             except BaseException as e:
-                print_stack()
+                marcel.util.print_stack()
                 print(e)
             debug(f'parser.op_name: {parser.op_name}')
             if parser.op_name is None:
@@ -159,7 +159,7 @@ class TabCompleter:
             path = os.environ['PATH'].split(':')
             for p in path:
                 for f in os.listdir(p):
-                    if is_executable(f):
+                    if marcel.util.is_executable(f):
                         self.executables.append(f)
 
     def ensure_homedirs(self):

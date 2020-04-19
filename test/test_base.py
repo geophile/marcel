@@ -4,7 +4,7 @@ import os
 import pathlib
 
 import marcel.exception
-from marcel.util import *
+import marcel.util
 
 
 class Test:
@@ -104,7 +104,7 @@ class Test:
                     self.fail(test, f'Unexpected error: {actual_err}')
             except Exception as e:
                 print(f'{test}: Terminated by uncaught exception: {e}')
-                print_stack()
+                marcel.util.print_stack()
                 self.failures += 1
             except marcel.exception.KillCommandException as e:
                 print(f'{test}: Terminated by KillCommandException: {e}')

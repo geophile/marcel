@@ -5,7 +5,6 @@ import sys
 
 import marcel.core
 import marcel.object.error
-from marcel.util import *
 
 
 def bash():

@@ -9,7 +9,7 @@ is specified.
 """
 
 import marcel.core
-from marcel.util import *
+import marcel.util
 
 
 def unique():
@@ -62,7 +62,7 @@ class GeneralUniquer(Uniquer):
         self.unique = set()
 
     def receive(self, x):
-        x = normalize_output(x)  # convert list to tuple
+        x = marcel.util.normalize_output(x)  # convert list to tuple
         if x not in self.unique:
             self.unique.add(x)
             self.op.send(x)

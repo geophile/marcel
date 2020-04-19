@@ -1,6 +1,8 @@
 import atexit
 import pathlib
 import readline
+import sys
+import time
 
 import marcel.core
 import marcel.env
@@ -11,7 +13,6 @@ import marcel.multilinereader
 import marcel.op.out
 import marcel.parse
 import marcel.tabcompleter
-from marcel.util import *
 
 
 HISTORY_FILE = '.marcel_history'

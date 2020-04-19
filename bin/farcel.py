@@ -1,14 +1,16 @@
 #!/usr/bin/python3
 
 import os
+import pickle
 import threading
 import signal
+import sys
 
 import marcel.core
 import marcel.env
 import marcel.globalstate
 import marcel.object.process
-from marcel.util import *
+import marcel.util
 
 # stdin carries the following from the client process:
 #   - The pipeline to be executed
@@ -17,7 +19,7 @@ from marcel.util import *
 # on a thread so that stdin can be monitored for the kill signal and then acted upon.
 
 
-TRACE = Trace('/tmp/farcel.log')
+TRACE = marcel.util.Trace('/tmp/farcel.log')
 
 
 class PickleOutput(marcel.core.Op):
@@ -58,7 +60,7 @@ class PipelineRunner(threading.Thread):
             self.pipeline.receive(None)
         except BaseException as e:
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')
-            print_stack(file=TRACE.file)
+            marcel.util.print_stack(file=TRACE.file)
             raise
         self.pipeline.receive_complete()
         TRACE.write('PipelineRunner: Execution complete.')
@@ -78,10 +80,10 @@ def kill_descendents(signal_id):
             # process.kill(signal_id)
         except Exception as e:
             TRACE.write(f'Caught exception while killing process {pid} and descendents: {e}')
-            print_stack(TRACE.file)
+            marcel.util.print_stack(TRACE.file)
     except BaseException as e:
         TRACE.write(f'Caught {type(e)} in kill_self_and_descendents: {e}')
-        print_stack(TRACE.file)
+        marcel.util.print_stack(TRACE.file)
 
 
 def main():

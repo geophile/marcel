@@ -43,7 +43,7 @@ C{('c', [], 'z')}.)
 """
 
 import marcel.core
-from marcel.util import *
+import marcel.util
 
 
 def expand():
@@ -98,14 +98,14 @@ class Expander:
 
     @staticmethod
     def expand(x):
-        if is_sequence(x):
+        if marcel.util.is_sequence(x):
             if len(x) != 1:
                 return x
             only = x[0]
             # TODO: Generators
-            if is_sequence(only):
+            if marcel.util.is_sequence(only):
                 return only
-            elif is_file(only):
+            elif marcel.util.is_file(only):
                 lines = []
                 with open(only.path, 'r') as file:
                     for line in file.readlines():

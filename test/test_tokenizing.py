@@ -1,5 +1,4 @@
-from marcel.parse import *
-
+import marcel.parse
 
 def parse_test_line(line):
     try:
@@ -46,9 +45,9 @@ def test_all(input_filename, tokenizer):
 
 
 def main():
-    test_all('test_python_string.txt', lambda text: PythonString(text, 0))
-    test_all('test_shell_string.txt', lambda text: ShellString(text, 0))
-    test_all('test_embedded_python.txt', lambda text: PythonExpression(text, 0))
+    test_all('test_python_string.txt', lambda text: marcel.parse.PythonString(text, 0))
+    test_all('test_shell_string.txt', lambda text: marcel.parse.ShellString(text, 0))
+    test_all('test_embedded_python.txt', lambda text: marcel.parse.PythonExpression(text, 0))
 
 
 main()

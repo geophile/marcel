@@ -8,7 +8,6 @@ import marcel.exception
 import marcel.object.cluster
 import marcel.object.colorscheme
 import marcel.object.colorscheme
-from marcel.util import *
 
 
 class Environment:
@@ -134,5 +133,5 @@ class Environment:
                 raise marcel.exception.KillShellException(f'Invalid prompt component: {x}')
             if x:
                 x = str(x)
-                buffer.append(colorize(x, color) if color else x)
+                buffer.append(marcel.util.colorize(x, color) if color else x)
         return ''.join(buffer)

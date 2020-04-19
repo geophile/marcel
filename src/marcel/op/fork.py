@@ -6,7 +6,7 @@ import marcel.op.labelthread
 import marcel.op.labelthread
 import marcel.op.remote
 import marcel.op.remote
-from marcel.util import *
+import marcel.util
 
 
 def fork():
@@ -147,7 +147,7 @@ class Remote(ForkImplementation):
         op = self.op
         for thread_label in op.thread_labels:
             # Copy the pipeline
-            pipeline_copy = clone(op.fork_pipeline)
+            pipeline_copy = marcel.util.clone(op.fork_pipeline)
             # Attach thread label to Remote op.
             remote_op = pipeline_copy.first_op
             assert isinstance(remote_op, marcel.op.remote.Remote)
@@ -193,7 +193,7 @@ class Local(ForkImplementation):
         op = self.op
         for thread_label in op.thread_labels:
             # Copy the pipeline
-            pipeline_copy = clone(op.fork_pipeline)
+            pipeline_copy = marcel.util.clone(op.fork_pipeline)
             pipeline_copy.set_global_state(op.global_state())
             # Attach thread label to LabelThread op.
             label_thread_op = pipeline_copy.last_op

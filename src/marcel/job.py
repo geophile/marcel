@@ -7,7 +7,6 @@ import threading
 
 import marcel.object.error
 import marcel.exception
-from marcel.util import *
 
 # The code for processing child input from multiple processes is adapted from here:
 # https://docs.python.org/3/library/multiprocessing.html#multiprocessing.connection.wait

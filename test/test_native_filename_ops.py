@@ -4,7 +4,6 @@ import shutil
 
 import marcel.main
 import marcel.object.error
-from marcel.util import *
 
 import test_base
 

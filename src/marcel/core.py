@@ -1,10 +1,10 @@
 import argparse
+import sys
 
 import marcel.exception
 import marcel.exception
 import marcel.function
 import marcel.object.error
-from marcel.util import *
 
 Error = marcel.object.error.Error
 
@@ -25,7 +25,7 @@ class ArgParser(argparse.ArgumentParser):
         if args is not None:
             # Replace pipelines by string-valued pipeline references, since argparse operates on strings.
             # Arg processing by each op will convert the pipeline reference back to a pipeline.
-            assert is_sequence_except_string(args)
+            assert marcel.util.is_sequence_except_string(args)
             args_without_pipelines = []
             for arg in args:
                 if isinstance(arg, Pipeline):
@@ -165,9 +165,9 @@ class BaseOp:
             self.receive_error(x)
         else:
             try:
-                self.receive(normalize_output(x))
+                self.receive(marcel.util.normalize_output(x))
             except Exception as e:
-                print_stack()
+                marcel.util.print_stack()
                 self.receive_error(Error(e))
 
     def receive(self, x):
