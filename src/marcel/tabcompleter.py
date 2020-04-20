@@ -50,7 +50,7 @@ class TabCompleter:
             # Parse the text so far, to get information needed for tab completion. It is expected that
             # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
             # which can be ignored. The important point is that the parse will set Parser.op.
-            parser = marcel.parse.Parser(line, self.global_state)
+            parser = marcel.parse.Parser(line, self.global_state.op_modules)
             try:
                 parser.parse(partial_text=True)
                 debug('parse succeeded')

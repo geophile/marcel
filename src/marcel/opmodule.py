@@ -8,7 +8,6 @@ class OpModule:
 
     def __init__(self, op_name, global_state):
         self.op_name = op_name
-        self.global_state = global_state
         self._create_op = None
         self._arg_parser = None
         op_module = importlib.import_module(f'marcel.op.{op_name}')
@@ -34,4 +33,5 @@ def import_op_modules(global_state):
     op_modules = {}
     for op_name in marcel.op.public:
         op_modules[op_name] = OpModule(op_name, global_state)
+    global_state.op_modules = op_modules
     return op_modules

@@ -24,10 +24,10 @@ help messages can be colorized.
 
 - Ops
 
-  - Get rid of argparser class field.
-  - Get rid of arg_parser() function from ops and core.Op.
+  + Get rid of argparser class field.
+  + Get rid of arg_parser() function from ops and core.Op.
 
-- Cleanup
+- Other cleanup
 
   - Eliminate dependencies of marcel modules on marcel.op
     modules. E.g. out, used by Command.
