@@ -12,15 +12,13 @@ def map():
 
 class MapArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('map')
+    def __init__(self, global_state):
+        super().__init__('map', global_state)
         self.add_argument('function',
                           type=super().constrained_type(self.check_function, 'not a valid function'))
 
 
 class Map(marcel.core.Op):
-
-    argparser = MapArgParser()
 
     def __init__(self):
         super().__init__()
@@ -40,8 +38,3 @@ class Map(marcel.core.Op):
     def receive(self, x):
         output = self.function() if x is None else self.function(*x)
         self.send(output)
-
-    # Op
-
-    def arg_parser(self):
-        return Map.argparser

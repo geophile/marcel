@@ -4,7 +4,7 @@ __all__ = [
     'env',
     'exception',
     'function',
-    'opmodules',
+    'opmodule',
     'parse',
     'util'
 ]

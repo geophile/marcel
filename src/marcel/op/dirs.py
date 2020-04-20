@@ -16,14 +16,12 @@ def dirs():
 
 class DirsArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('pushd')
+    def __init__(self, global_state):
+        super().__init__('pushd', global_state)
         self.add_argument('-c', '--clear', action='store_true')
 
 
 class Dirs(marcel.core.Op):
-
-    argparser = DirsArgParser()
 
     def __init__(self):
         super().__init__()
@@ -47,9 +45,6 @@ class Dirs(marcel.core.Op):
             self.send(dir)
 
     # Op
-
-    def arg_parser(self):
-        return Dirs.argparser
 
     def must_be_first_in_pipeline(self):
         return True

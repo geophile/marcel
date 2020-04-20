@@ -13,8 +13,8 @@ def bash():
 
 class BashArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('bash')
+    def __init__(self, global_state):
+        super().__init__('bash', global_state)
         self.add_argument('-i', '--interactive', action='store_true')
         self.add_argument('args', nargs=argparse.REMAINDER)
 
@@ -29,7 +29,6 @@ class Bash(marcel.core.Op):
         'psql',
         'vi'
     }
-    argparser = BashArgParser()
 
     def __init__(self):
         super().__init__()
@@ -60,11 +59,6 @@ class Bash(marcel.core.Op):
     def receive_complete(self):
         self.runner.run()
         self.send_complete()
-
-    # Op
-
-    def arg_parser(self):
-        return Bash.argparser
 
 
 class Escape:

@@ -8,13 +8,11 @@ def jobs():
 
 class JobsArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('jobs')
+    def __init__(self, global_state):
+        super().__init__('jobs', global_state)
 
 
 class Jobs(marcel.core.Op):
-
-    argparser = JobsArgParser()
 
     def __init__(self):
         super().__init__()
@@ -37,12 +35,4 @@ class Jobs(marcel.core.Op):
             description = f'{job_id}({job.state_symbol()}): {job.process.pid}  {job.command.source}'
             self.send(description)
             job_id += 1
-
-    # Op
-
-    def arg_parser(self):
-        return Jobs.argparser
-
-    def must_be_first_in_pipeline(self):
-        return True
 

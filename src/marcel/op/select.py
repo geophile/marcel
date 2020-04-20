@@ -13,15 +13,13 @@ def select():
 
 class SelectArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('select')
+    def __init__(self, global_state):
+        super().__init__('select', global_state)
         self.add_argument('function',
                           type=super().constrained_type(self.check_function, 'not a valid function'))
 
 
 class Select(marcel.core.Op):
-
-    argparser = SelectArgParser()
 
     def __init__(self):
         super().__init__()
@@ -41,8 +39,3 @@ class Select(marcel.core.Op):
     def receive(self, x):
         if self.function(*x):
             self.send(x)
-
-    # Op
-
-    def arg_parser(self):
-        return Select.argparser

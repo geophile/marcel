@@ -18,14 +18,12 @@ def unique():
 
 class UniqueArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('unique', ['-c', '--consecutive'])
+    def __init__(self, global_state):
+        super().__init__('unique', global_state, ['-c', '--consecutive'])
         self.add_argument('-c', '--consecutive', action='store_true')
 
 
 class Unique(marcel.core.Op):
-
-    argparser = UniqueArgParser()
 
     def __init__(self):
         super().__init__()
@@ -42,11 +40,6 @@ class Unique(marcel.core.Op):
 
     def receive(self, x):
         self.uniquer.receive(x)
-
-    # Op
-
-    def arg_parser(self):
-        return Unique.argparser
 
 
 class Uniquer:

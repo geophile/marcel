@@ -13,36 +13,35 @@ class ArgParser(argparse.ArgumentParser):
 
     op_flags = {}  # op name -> [flags], for use in tab completion
 
-    def __init__(self, op_name, flags=None):
+    def __init__(self, op_name, global_state, flags=None):
         super().__init__(prog=op_name)
         ArgParser.op_flags[op_name] = flags
-        self.global_state = None
-        self.pipelines = []
+        self.global_state = global_state
 
     # ArgumentParser (argparse)
 
     def parse_args(self, args=None, namespace=None):
+        assert isinstance(namespace, Op)
         if args is not None:
             # Replace pipelines by string-valued pipeline references, since argparse operates on strings.
             # Arg processing by each op will convert the pipeline reference back to a pipeline.
             assert marcel.util.is_sequence_except_string(args)
             args_without_pipelines = []
+            pipelines = []
             for arg in args:
                 if isinstance(arg, Pipeline):
-                    pipeline_ref = self.pipeline_reference(len(self.pipelines))
-                    self.pipelines.append(arg)
+                    pipeline_ref = self.pipeline_reference(len(pipelines))
+                    pipelines.append(arg)
                     arg = pipeline_ref
                 args_without_pipelines.append(arg)
             args = args_without_pipelines
+            namespace.set_pipeline_args(pipelines)
         return super().parse_args(args, namespace)
 
     def exit(self, status=0, message=None):
         raise marcel.exception.KillCommandException(message)
 
     # ArgParser (marcel)
-
-    def set_global_state(self, global_state):
-        self.global_state = global_state
 
     def print_usage(self, _=None):
         pass
@@ -77,15 +76,6 @@ class ArgParser(argparse.ArgumentParser):
 
     def check_function(self, s):
         return marcel.function.Function(s, self.global_state.function_namespace())
-
-    def check_pipeline(self, pipeline_ref):
-        if not pipeline_ref.startswith('pipeline:'):
-            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {pipeline_ref}')
-        try:
-            pipeline_id = int(pipeline_ref[len('pipeline:'):])
-            return self.pipelines[pipeline_id]
-        except ValueError:
-            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {pipeline_ref}')
 
 
 class BaseOp:
@@ -205,15 +195,15 @@ class Op(BaseOp):
 
     def __init__(self):
         super().__init__()
+        # pipelines is for pipeline args. The actual pipelines are stored here, while a
+        # reference to it is substituted into the command's args, for purposes of parsing.
+        self.pipelines = None
 
     def __repr__(self):
         # TODO: Render args
         return self.op_name()
 
     # Op
-
-    def arg_parser(self):
-        assert False
 
     def must_be_first_in_pipeline(self):
         return False
@@ -222,7 +212,23 @@ class Op(BaseOp):
     def op_name(cls):
         return cls.__name__.lower()
 
+    # For use by this module
+
+    def set_pipeline_args(self, pipelines):
+        self.pipelines = pipelines
+
     # For use by subclasses
+
+    def referenced_pipeline(self, pipeline_ref):
+        if not pipeline_ref.startswith('pipeline:'):
+            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {pipeline_ref}')
+        try:
+            pipeline_id = int(pipeline_ref[len('pipeline:'):])
+            return self.pipelines[pipeline_id]
+        except ValueError:
+            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {pipeline_ref}')
+
+
 
     @staticmethod
     def function_source(function):

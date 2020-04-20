@@ -70,8 +70,10 @@ def window():
 
 class WindowArgsParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('window', ['-o', '--overlap', '-d', '--disjoint'])
+    def __init__(self, global_state):
+        super().__init__('window', 
+                         global_state,
+                         ['-o', '--overlap', '-d', '--disjoint'])
         self.add_argument('predicate',
                           nargs='?',
                           type=super().constrained_type(self.check_function, 'not a valid function'))
@@ -85,8 +87,6 @@ class WindowArgsParser(marcel.core.ArgParser):
 
 
 class Window(marcel.core.Op):
-
-    argparser = WindowArgsParser()
 
     def __init__(self):
         super().__init__()
@@ -138,11 +138,6 @@ class Window(marcel.core.Op):
     def receive_complete(self):
         self.window_generator.receive_complete()
         self.send_complete()
-
-    # Op
-
-    def arg_parser(self):
-        return Window.argparser
 
 
 class WindowBase:

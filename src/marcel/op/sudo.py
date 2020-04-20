@@ -19,8 +19,8 @@ def sudo():
 
 class SudoArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('sudo')
+    def __init__(self, global_state):
+        super().__init__('sudo', global_state)
         self.add_argument('args', nargs=argparse.REMAINDER)
 
     # Insert -- as first arg to cause parse_args to treat all sudo args as positional.
@@ -31,8 +31,6 @@ class SudoArgParser(marcel.core.ArgParser):
 
 
 class Sudo(marcel.core.Op):
-
-    argparser = SudoArgParser()
 
     def __init__(self):
         super().__init__()
@@ -51,7 +49,7 @@ class Sudo(marcel.core.Op):
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('Missing pipeline')
         pipeline_ref = self.args.pop()
-        self.pipeline = Sudo.argparser.check_pipeline(pipeline_ref)
+        self.pipeline = self.referenced_pipeline(pipeline_ref)
         if not isinstance(self.pipeline, marcel.core.Pipeline):
             raise marcel.exception.KillCommandException('Last argument to sudo must be a pipeline')
 
@@ -87,9 +85,6 @@ class Sudo(marcel.core.Op):
             self.send_complete()
 
     # Op
-
-    def arg_parser(self):
-        return Sudo.argparser
 
     def must_be_first_in_pipeline(self):
         return True

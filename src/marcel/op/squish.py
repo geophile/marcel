@@ -24,16 +24,14 @@ def squish():
 
 class SquishArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('squish')
+    def __init__(self, global_state):
+        super().__init__('squish', global_state)
         self.add_argument('function',
                           nargs='?',
                           type=super().constrained_type(self.check_function, 'not a valid function'))
 
 
 class Squish(marcel.core.Op):
-
-    argparser = SquishArgParser()
 
     def __init__(self):
         super().__init__()
@@ -54,8 +52,3 @@ class Squish(marcel.core.Op):
 
     def receive(self, x):
         self.send(functools.reduce(self.function, x))
-
-    # Op
-
-    def arg_parser(self):
-        return Squish.argparser

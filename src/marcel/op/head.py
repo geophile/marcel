@@ -13,16 +13,14 @@ def head():
 
 class HeadArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('head')
+    def __init__(self, global_state):
+        super().__init__('head', global_state)
         self.add_argument('n',
                           type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
                                                         'must be non-negative'))
 
 
 class Head(marcel.core.Op):
-
-    argparser = HeadArgParser()
 
     def __init__(self):
         super().__init__()
@@ -44,8 +42,3 @@ class Head(marcel.core.Op):
         self.received += 1
         if self.n >= self.received:
             self.send(x)
-
-    # Op
-
-    def arg_parser(self):
-        return Head.argparser

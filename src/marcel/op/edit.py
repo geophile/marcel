@@ -20,13 +20,11 @@ def edit():
 
 class EditArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('edit')
+    def __init__(self, global_state):
+        super().__init__('edit', global_state)
 
 
 class Edit(marcel.core.Op):
-
-    argparser = EditArgParser()
 
     def __init__(self):
         super().__init__()
@@ -44,7 +42,8 @@ class Edit(marcel.core.Op):
     def setup_1(self):
         self.editor = os.getenv('EDITOR')
         if self.editor is None:
-            raise marcel.exception.KillCommandException('Specify editor in the EDITOR environment variable')
+            raise marcel.exception.KillCommandException(
+                'Specify editor in the EDITOR environment variable')
         _, self.tmp_file = tempfile.mkstemp(text=True)
 
     def receive(self, _):
@@ -66,9 +65,6 @@ class Edit(marcel.core.Op):
         os.remove(self.tmp_file)
 
     # Op
-
-    def arg_parser(self):
-        return Edit.argparser
 
     def must_be_first_in_pipeline(self):
         return True

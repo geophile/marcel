@@ -15,16 +15,14 @@ def cd():
 
 class CdArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('cd')
+    def __init__(self, global_state):
+        super().__init__('cd', global_state)
         self.add_argument('directory',
                           nargs='?',
                           default='~')
 
 
 class Cd(marcel.core.Op):
-
-    argparser = CdArgParser()
 
     def __init__(self):
         super().__init__()
@@ -45,9 +43,6 @@ class Cd(marcel.core.Op):
         self.global_state().env.cd(self.directory)
 
     # Op
-
-    def arg_parser(self):
-        return Cd.argparser
 
     def must_be_first_in_pipeline(self):
         return True

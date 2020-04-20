@@ -15,16 +15,13 @@ def fork():
 
 class ForkArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('fork')
+    def __init__(self, global_state):
+        super().__init__('fork', global_state)
         self.add_argument('fork_spec')
-        self.add_argument('fork_pipeline',
-                          type=super().constrained_type(self.check_pipeline, 'not a valid pipeline'))
+        self.add_argument('fork_pipeline'),
 
 
 class Fork(marcel.core.Op):
-
-    argparser = ForkArgParser()
 
     def __init__(self):
         super().__init__()
@@ -43,6 +40,7 @@ class Fork(marcel.core.Op):
         assert False
 
     def setup_1(self):
+        self.fork_pipeline = self.referenced_pipeline(self.fork_pipeline)
         cluster = self.global_state().env.config().clusters.get(self.fork_spec, None)
         self.impl = Remote(self) if cluster else Local(self)
         self.impl.setup_1()
@@ -83,9 +81,6 @@ class Fork(marcel.core.Op):
             raise marcel.exception.KillAndResumeException(self, None, str(kill_and_resume))
 
     # Op
-
-    def arg_parser(self):
-        return Fork.argparser
 
     def must_be_first_in_pipeline(self):
         return True

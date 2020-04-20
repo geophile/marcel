@@ -15,14 +15,12 @@ def pushd():
 
 class PushdArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('pushd')
+    def __init__(self, global_state):
+        super().__init__('pushd', global_state)
         self.add_argument('directory', nargs='?')
 
 
 class Pushd(marcel.core.Op):
-
-    argparser = PushdArgParser()
 
     def __init__(self):
         super().__init__()
@@ -48,9 +46,6 @@ class Pushd(marcel.core.Op):
             self.send(dir)
 
     # Op
-
-    def arg_parser(self):
-        return Pushd.argparser
 
     def must_be_first_in_pipeline(self):
         return True

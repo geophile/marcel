@@ -14,13 +14,11 @@ def popd():
 
 class PopdArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('popd')
+    def __init__(self, global_state):
+        super().__init__('popd', global_state)
 
 
 class Popd(marcel.core.Op):
-
-    argparser = PopdArgParser()
 
     def __init__(self):
         super().__init__()
@@ -42,9 +40,6 @@ class Popd(marcel.core.Op):
             self.send(dir)
 
     # Op
-
-    def arg_parser(self):
-        return Popd.argparser
 
     def must_be_first_in_pipeline(self):
         return True

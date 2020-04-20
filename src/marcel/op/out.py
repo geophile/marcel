@@ -30,8 +30,10 @@ def out():
 
 class OutArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('out', ['-a', '--append', '-f', '--file', '-c', '--csv'])
+    def __init__(self, global_state):
+        super().__init__('out',
+                         global_state,
+                         ['-a', '--append', '-f', '--file', '-c', '--csv'])
         file_group = self.add_mutually_exclusive_group()
         file_group.add_argument('-a', '--append', required=False)
         file_group.add_argument('-f', '--file', required=False)
@@ -40,7 +42,6 @@ class OutArgParser(marcel.core.ArgParser):
 
 
 class Out(marcel.core.Op):
-    argparser = OutArgParser()
 
     def __init__(self):
         super().__init__()
@@ -60,7 +61,7 @@ class Out(marcel.core.Op):
 
     def setup_1(self):
         if self.csv and self.format:
-            Out.argparser.error('-c/--csv and FORMAT specifications are incompatible')
+            raise marcel.exception.KillCommandException('-c/--csv and FORMAT specifications are incompatible')
 
     def receive(self, x):
         self.ensure_output_initialized()
@@ -103,11 +104,6 @@ class Out(marcel.core.Op):
         if self.output != sys.stdout and self.output is not None:
             self.output.close()
         self.send_complete()
-
-    # Op
-
-    def arg_parser(self):
-        return Out.argparser
 
     # For use by this class
 

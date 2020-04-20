@@ -12,13 +12,11 @@ def pwd():
 
 class PwdArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('pwd')
+    def __init__(self, global_state):
+        super().__init__('pwd', global_state)
 
 
 class Pwd(marcel.core.Op):
-
-    argparser = PwdArgParser()
 
     def __init__(self):
         super().__init__()
@@ -38,9 +36,6 @@ class Pwd(marcel.core.Op):
         self.send(self.global_state().env.pwd())
 
     # Op
-
-    def arg_parser(self):
-        return Pwd.argparser
 
     def must_be_first_in_pipeline(self):
         return True

@@ -16,8 +16,8 @@ def sort():
 
 class SortArgParser(marcel.core.ArgParser):
     
-    def __init__(self):
-        super().__init__('sort')
+    def __init__(self, global_state):
+        super().__init__('sort', global_state)
         self.add_argument('key',
                           nargs='?',
                           default=None,
@@ -25,8 +25,6 @@ class SortArgParser(marcel.core.ArgParser):
 
 
 class Sort(marcel.core.Op):
-
-    argparser = SortArgParser()
 
     def __init__(self):
         super().__init__()
@@ -56,8 +54,3 @@ class Sort(marcel.core.Op):
         for x in self.contents:
             self.send(x)
         self.send_complete()
-
-    # Op
-
-    def arg_parser(self):
-        return Sort.argparser

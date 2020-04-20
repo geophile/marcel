@@ -19,8 +19,8 @@ def gen():
 
 class GenArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('gen', ['-p', '--pad'])
+    def __init__(self, global_state):
+        super().__init__('gen', global_state, ['-p', '--pad'])
         self.add_argument('-p', '--pad',
                           type=int)
         self.add_argument('count',
@@ -35,8 +35,6 @@ class GenArgParser(marcel.core.ArgParser):
 
 
 class Gen(marcel.core.Op):
-
-    argparser = GenArgParser()
 
     def __init__(self):
         super().__init__()
@@ -56,13 +54,13 @@ class Gen(marcel.core.Op):
     def setup_1(self):
         if self.pad is not None:
             if self.count == 0:
-                Gen.argparser.error('Padding incompatible with unbounded output')
+                raise marcel.exception.KillCommandException('Padding incompatible with unbounded output')
             elif self.start < 0:
-                Gen.argparser.error('Padding incompatible with START < 0')
+                raise marcel.exception.KillCommandException('Padding incompatible with START < 0')
             else:
                 max_length = len(str(self.start + self.count - 1))
                 if max_length > self.pad:
-                    Gen.argparser.error('Padding too small.')
+                    raise marcel.exception.KillCommandException('Padding too small.')
                 else:
                     self.format = '{:>0' + str(self.pad) + '}'
 
@@ -77,9 +75,6 @@ class Gen(marcel.core.Op):
                 self.send(self.apply_padding(x))
 
     # Op
-
-    def arg_parser(self):
-        return Gen.argparser
 
     def must_be_first_in_pipeline(self):
         return True

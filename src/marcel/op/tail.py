@@ -13,16 +13,14 @@ def tail():
 
 class TailArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('tail')
+    def __init__(self, global_state):
+        super().__init__('tail', global_state)
         self.add_argument('n',
                           type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
                                                         'must be non-negative'))
 
 
 class Tail(marcel.core.Op):
-
-    argparser = TailArgParser()
 
     def __init__(self):
         super().__init__()
@@ -56,11 +54,6 @@ class Tail(marcel.core.Op):
                     self.send(x)
                 p = self.next_position(p)
                 count += 1
-
-    # Op
-
-    def arg_parser(self):
-        return Tail.argparser
 
     # For use by this class
 

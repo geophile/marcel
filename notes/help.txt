@@ -1,0 +1,33 @@
+ArgParser cleanup
+
+Cleanup ArgParser so that a ColorScheme can be supplied to it, so that
+help messages can be colorized.
+
+- parse: 
+
+  + Pass in op_modules from Main.
+  + Use it instead of OP_MODULES.
+  + Parser no longer needs global_state (it was just attached to the
+    arg parser)
+
+- ArgParsers
+
+  + Take global_state as input, save on marcel.core.ArgParser.
+  - Get help strings: description, epilog, from the module,
+    and pass the to the ArgParser constructor, or otherwise attach
+    them to the ArgParser.
+
+- core ArgParser
+
+  - Colorize the description and epilog using colorscheme obtained from
+    global_state.
+
+- Ops
+
+  - Get rid of argparser class field.
+  - Get rid of arg_parser() function from ops and core.Op.
+
+- Cleanup
+
+  - Eliminate dependencies of marcel modules on marcel.op
+    modules. E.g. out, used by Command.

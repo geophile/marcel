@@ -10,6 +10,7 @@ import marcel.exception
 import marcel.globalstate
 import marcel.job
 import marcel.multilinereader
+import marcel.opmodule
 import marcel.op.out
 import marcel.parse
 import marcel.tabcompleter
@@ -71,6 +72,7 @@ class Main:
             sys.exit(1)
         self.global_state = marcel.globalstate.GlobalState(self.env)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self.global_state)
+        self.op_modules = marcel.opmodule.import_op_modules(self.global_state)
         self.reader = None
         self.initialize_input()
         self.job_control = marcel.job.JobControl.start(self.update_env_vars)
@@ -98,7 +100,7 @@ class Main:
     def run_command(self, line):
         if line:
             try:
-                parser = marcel.parse.Parser(line, self.global_state)
+                parser = marcel.parse.Parser(line, self.op_modules)
                 pipeline = parser.parse()
                 pipeline.set_global_state(self.global_state)
                 command = Command(line, pipeline)

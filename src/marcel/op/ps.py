@@ -17,15 +17,13 @@ def ps():
 
 class PsArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('ps', ['-o', '--omit-self'])
+    def __init__(self, global_state):
+        super().__init__('ps', global_state, ['-o', '--omit-self'])
         self.add_argument('-o', '--omit-self',
                           action='store_true')
 
 
 class Ps(marcel.core.Op):
-
-    argparser = PsArgParser()
 
     def __init__(self):
         super().__init__()
@@ -46,9 +44,6 @@ class Ps(marcel.core.Op):
                 self.send(process)
 
     # Op
-
-    def arg_parser(self):
-        return Ps.argparser
 
     def must_be_first_in_pipeline(self):
         return True

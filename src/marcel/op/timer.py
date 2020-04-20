@@ -43,15 +43,13 @@ def timer():
 
 class TimerArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('timer', ['-c', '--components'])
+    def __init__(self, global_state):
+        super().__init__('timer', global_state, ['-c', '--components'])
         self.add_argument('-c', '--components', action='store_true')
         self.add_argument('interval')
 
 
 class Timer(marcel.core.Op):
-
-    argparser = TimerArgParser()
 
     def __init__(self):
         super().__init__()
@@ -96,9 +94,6 @@ class Timer(marcel.core.Op):
             self.send(now)
 
     # Op
-
-    def arg_parser(self):
-        return Timer.argparser
 
     def must_be_first_in_pipeline(self):
         return True

@@ -4,8 +4,8 @@ import marcel.job
 
 class JobOpArgParser(marcel.core.ArgParser):
 
-    def __init__(self, op_name):
-        super().__init__(op_name)
+    def __init__(self, op_name, global_state):
+        super().__init__(op_name, global_state)
         id_group = self.add_mutually_exclusive_group()
         id_group.add_argument('-j', '--job',
                               type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
@@ -50,9 +50,6 @@ class JobOp(marcel.core.Op):
         self.action()
 
     # Op
-
-    def arg_parser(self):
-        assert False
 
     def must_be_first_in_pipeline(self):
         return True

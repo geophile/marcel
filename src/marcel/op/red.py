@@ -82,8 +82,8 @@ def red():
 
 class RedArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('red', ['-i', '--incremental'])
+    def __init__(self, global_state):
+        super().__init__('red', global_state, ['-i', '--incremental'])
         self.add_argument('-i', '--incremental',
                           action='store_true')
         self.add_argument('function',
@@ -92,8 +92,6 @@ class RedArgParser(marcel.core.ArgParser):
 
 
 class Red(marcel.core.Op):
-
-    argparser = RedArgParser()
 
     def __init__(self):
         super().__init__()
@@ -132,11 +130,6 @@ class Red(marcel.core.Op):
 
     def receive_complete(self):
         self.reducer.receive_complete()
-
-    # Op
-
-    def arg_parser(self):
-        return Red.argparser
 
     # For use by this class
 

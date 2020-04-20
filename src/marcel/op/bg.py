@@ -1,4 +1,3 @@
-import marcel.core
 import marcel.job
 import marcel.op.jobop
 
@@ -11,13 +10,11 @@ def bg():
 
 class BgArgParser(marcel.op.jobop.JobOpArgParser):
 
-    def __init__(self):
-        super().__init__('bg')
+    def __init__(self, global_state):
+        super().__init__('bg', global_state)
 
 
 class Bg(marcel.op.jobop.JobOp):
-
-    argparser = BgArgParser()
 
     def __init__(self):
         super().__init__()
@@ -29,11 +26,6 @@ class Bg(marcel.op.jobop.JobOp):
 
     def doc(self):
         return __doc__
-
-    # Op
-
-    def arg_parser(self):
-        return Bg.argparser
 
     # JobOp
 

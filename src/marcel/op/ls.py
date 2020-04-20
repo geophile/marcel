@@ -40,8 +40,8 @@ def ls():
 
 class LsArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('ls', ['-0', '-1', '-r', '-f', '--file', '-d', '--dir', '-s', '--symlink'])
+    def __init__(self, global_state):
+        super().__init__('ls', global_state, ['-0', '-1', '-r', '-f', '--file', '-d', '--dir', '-s', '--symlink'])
         depth_group = self.add_mutually_exclusive_group()
         depth_group.add_argument('-0', action='store_true', dest='d0')
         depth_group.add_argument('-1', action='store_true', dest='d1')
@@ -53,8 +53,6 @@ class LsArgParser(marcel.core.ArgParser):
 
 
 class Ls(marcel.op.filenames.FilenamesOp):
-
-    argparser = LsArgParser()
 
     def __init__(self):
         super().__init__(op_has_target=False)
@@ -107,9 +105,6 @@ class Ls(marcel.op.filenames.FilenamesOp):
             self.roots = sorted(self.roots)
 
     # Op
-
-    def arg_parser(self):
-        return Ls.argparser
 
     def must_be_first_in_pipeline(self):
         return True

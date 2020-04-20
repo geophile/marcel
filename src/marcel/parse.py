@@ -2,8 +2,7 @@ from enum import Enum, auto
 
 import marcel.core
 import marcel.exception
-import marcel.op.fork
-import marcel.opmodules
+import marcel.opmodule
 import marcel.util
 
 
@@ -334,9 +333,9 @@ class InProgress:
 
 class Parser(Token):
 
-    def __init__(self, text, global_state):
+    def __init__(self, text, op_modules):
         super().__init__(text, 0)
-        self.global_state = global_state
+        self.op_modules = op_modules
         self.state = ParseState.START
         self.stack = marcel.util.Stack()
         self.stack.push(InProgress())
@@ -475,30 +474,26 @@ class Parser(Token):
             self.next_char()
             c = self.peek_char()
 
-    def create_op(self):
-        current = self.current()
-        op_name = current.op_name
-        op_module = marcel.opmodules.OP_MODULES.named(op_name)
-        if op_module:
-            pass
-        elif marcel.util.is_executable(op_name):
-            current.args = [op_name] + current.args
-            op_name = 'bash'
-            op_module = marcel.opmodules.OP_MODULES.named(op_name)
-        else:
-            raise UnknownOpError(self.text, op_name)
-        return getattr(op_module, op_name)()
-
     def is_op(self):
         op_name = self.current().op_name
-        return marcel.opmodules.OP_MODULES.named(op_name) is not None or marcel.util.is_executable(op_name)
+        return self.op_modules.get(op_name, None) is not None or marcel.util.is_executable(op_name)
 
     def finish_op(self):
+        # Get the op module, bash in case of an executable.
+        current = self.current()
+        op_name = current.op_name
+        try:
+            op_module = self.op_modules[op_name]
+        except KeyError:
+            if marcel.util.is_executable(op_name):
+                op_module = self.op_modules['bash']
+                current.args = [op_name] + current.args
+            else:
+                raise UnknownOpError(self.text, op_name)
         # Create the op
-        op = self.create_op()
+        op = op_module.create_op()
         # Parse its args
-        arg_parser = op.arg_parser()
-        arg_parser.set_global_state(self.global_state)
+        arg_parser = op_module.arg_parser()
         current = self.current()
         arg_parser.parse_args(current.args, namespace=op)
         # Append the op to the pipeline

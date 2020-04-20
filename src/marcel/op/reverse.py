@@ -12,13 +12,11 @@ def reverse():
 
 class ReverseArgParser(marcel.core.ArgParser):
 
-    def __init__(self):
-        super().__init__('reverse')
+    def __init__(self, global_state):
+        super().__init__('reverse', global_state)
 
 
 class Reverse(marcel.core.Op):
-
-    argparser = ReverseArgParser()
 
     def __init__(self):
         super().__init__()
@@ -40,8 +38,3 @@ class Reverse(marcel.core.Op):
         for x in self.contents:
             self.send(x)
         self.send_complete()
-
-    # Op
-
-    def arg_parser(self):
-        return Reverse.argparser
