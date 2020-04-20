@@ -1,16 +1,17 @@
-"""C{gen [-p|--pad PAD] [COUNT [START]]}
-
-Generate a sequence of C{COUNT} integers, starting at C{START}. C{COUNT} must be non-negative.
-If C{START} is not specified, then the sequence starts at 0. If C{COUNT} is 0 or is not specified,
-then the sequence does not terminate.
-
--p | --pad PAD             The generated integers are converted to strings and left-padded with zeros
-                           so that each string contains C{PAD} characters. The number of digits in each
-                           member of the generated sequence must not exceed C{PAD}. This option queries
-                           C{START} >= 0.
-"""
-
 import marcel.core
+
+
+SUMMARY = '''
+Generates a stream of {count} integers, starting at {start}.
+'''
+
+
+DETAILS = '''
+The first integer in the stream is {start}. The number of integers in the stream is {count},
+although if {count} is 0, then the stream does not terminate. If {pad} is specified, 
+then each integer is converted to a string and left-padded with zeros. Padding is not 
+permitted if the stream does not terminate, or if {start} is negative.
+'''
 
 
 def gen():
@@ -19,19 +20,24 @@ def gen():
 
 class GenArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('gen', global_state, ['-p', '--pad'])
+    def __init__(self, global_state, summary, details):
+        super().__init__('gen', global_state, ['-p', '--pad'], summary, details)
         self.add_argument('-p', '--pad',
-                          type=int)
+                          type=int,
+                          help='Left-pad with zeros to PAD characters')
         self.add_argument('count',
                           nargs='?',
                           default='0',
                           type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                        'must be non-negative'))
+                                                        'must be non-negative'),
+                          help='''The number of integers to generate. Must be non-negative.
+                          Default value is 0. 
+                          If 0, then the sequence does not terminate''')
         self.add_argument('start',
                           nargs='?',
                           default='0',
-                          type=int)
+                          type=int,
+                          help='The first integer in the stream. Default value is 0.')
 
 
 class Gen(marcel.core.Op):

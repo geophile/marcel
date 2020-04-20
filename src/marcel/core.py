@@ -13,8 +13,10 @@ class ArgParser(argparse.ArgumentParser):
 
     op_flags = {}  # op name -> [flags], for use in tab completion
 
-    def __init__(self, op_name, global_state, flags=None):
-        super().__init__(prog=op_name)
+    def __init__(self, op_name, global_state, flags=None, summary=None, details=None):
+        super().__init__(prog=op_name,
+                         description=ArgParser.colorize(summary, global_state),
+                         epilog=ArgParser.colorize(details, global_state))
         ArgParser.op_flags[op_name] = flags
         self.global_state = global_state
 
@@ -39,12 +41,13 @@ class ArgParser(argparse.ArgumentParser):
         return super().parse_args(args, namespace)
 
     def exit(self, status=0, message=None):
-        raise marcel.exception.KillCommandException(message)
-
-    # ArgParser (marcel)
-
-    def print_usage(self, _=None):
-        pass
+        if message:
+            raise marcel.exception.KillCommandException(message)
+        else:
+            # Parser is exiting help. We don't want to actually run a command. Proceeding as
+            # if the command were killed by Ctrl-C escapes correctly. If message is None and we
+            # raise KillCommandException then "None" is printed when the exception is caught.
+            raise KeyboardInterrupt()
 
     # For use by subclasses
 
@@ -76,6 +79,27 @@ class ArgParser(argparse.ArgumentParser):
 
     def check_function(self, s):
         return marcel.function.Function(s, self.global_state.function_namespace())
+
+    # For use by this class
+
+    @staticmethod
+    def colorize(text, global_state):
+        if text is None:
+            return None
+        flag_color = global_state.env.color_scheme().help_flag
+        buffer = []
+        p = 0
+        while True:
+            start = text.find('{', p)
+            if start == -1:
+                break
+            end = text.find('}', start)
+            assert end != -1
+            buffer.append(text[p:start])
+            buffer.append(marcel.util.colorize(text[start + 1:end], flag_color))
+            p = end + 1
+        buffer.append(text[p:])
+        return ''.join(buffer)
 
 
 class BaseOp:

@@ -12,13 +12,25 @@ class OpModule:
         self._arg_parser = None
         op_module = importlib.import_module(f'marcel.op.{op_name}')
         # Locate items in module needed during the lifecycle of an op.
+        arg_parser_function = None
+        help_summary = None
+        help_details = None
         for k, v in op_module.__dict__.items():
             if k == op_name:
-                # The function allocating an instance of the op, e.g. ls()
+                # The function creating an instance of the op, e.g. ls()
                 self._create_op = v
             elif inspect.isclass(v) and marcel.core.ArgParser in inspect.getmro(v):
                 # The arg parser class, e.g. LsArgParser
-                self._arg_parser = v(global_state)
+                arg_parser_function = v
+            elif k == 'SUMMARY':
+                help_summary = v
+            elif k == 'DETAILS':
+                help_details = v
+        assert arg_parser_function is not None
+        if op_name == 'gen':
+            self._arg_parser = arg_parser_function(global_state, help_summary, help_details)
+        else:
+            self._arg_parser = arg_parser_function(global_state)
         assert self._create_op is not None, op_name
         assert self._arg_parser is not None, op_name
 
