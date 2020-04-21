@@ -1,36 +1,46 @@
-"""C{expand [POSITION]}
+import marcel.core
+import marcel.util
 
-If C{POSITION} is omitted, then each element of an input sequence is generated as a separate
+
+SUMMARY = '''
+Flatten input tuples (or parts of them) and write the flattened result to the output stream.
+'''
+
+
+DETAILS = '''
+If {position} is omitted, then each element of an input tuple is generated as a separate
 1-tuple in the output stream. (If the input has one element, then the output matches the input.)
-If C{POSITION} is provided, it must be non-negative. If C{POSITION} exceeds the length of an
+If {position} is provided, it must be non-negative. If {position} exceeds the length of an
 input sequence, then nothing is expanded (the input sequence is sent as output).
 
-B{Example}: If the input contains these sequences::
+b{Example}: If the input contains these sequences::
 
     (100, 101)
     (200, 201)
 
-then C{expand} generates this output::
+then {expand} generates this output::
 
-    (100,)
-    (101,)
-    (200,)
-    (201,)
+    100
+    101
+    200
+    201
 
-If C{POSITION} is specified, then presumably each input element has a sequence at the indicated position.
-An output element is generated for each element of that embedded sequence, replacing the embedded
-sequence by one of its contained elements.
+If {position} is specified, then presumably each input tuple has a sequence (or iterator) 
+at the indicated position.
+An output tuple is generated for each item in that embedded sequence, replacing the embedded
+sequence by one of its contained items.
 
-The types that can be expanded are sequences (C{list}, C{tuple}, C{str}), C{generator}, and C{osh.file.File}.
-Expansion of a C{osh.file.File} yields each line of the named file.
+The types that can be expanded are sequences ({list}, {tuple}, {str}), {generator}s, 
+{iterator}s and Files.
+Expansion of a {File} yields each line of the named file.
 
-B{Example}: If the input contains these sequences::
+b{Example}: If the input contains these sequences:
 
     ('a', [1, 2, 3], 'x')
     ('b', [4, 5], 'y')
     ('c', [], 'z')
 
-then C{expand 1} generates this output::
+then C{expand 1} generates this output:
 
     ('a', 1, 'x')
     ('a', 2, 'x')
@@ -38,12 +48,8 @@ then C{expand 1} generates this output::
     ('b', 4, 'y')
     ('b', 5, 'y')
 
-Note that an empty nested sequence results in no output, (as for
-C{('c', [], 'z')}.)
-"""
-
-import marcel.core
-import marcel.util
+Note that an empty nested sequence (as in the last input tuple) results in no output.
+'''
 
 
 def expand():
@@ -53,11 +59,12 @@ def expand():
 class ExpandArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('expand', global_state)
+        super().__init__('expand', global_state, None, SUMMARY, DETAILS)
         self.add_argument('position',
                           nargs='?',
                           type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                        'must be non-negative'))
+                                                        'must be non-negative'),
+                          help='Position of the tuple to be expanded')
 
 
 class Expand(marcel.core.Op):

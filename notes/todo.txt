@@ -240,3 +240,31 @@ Add notion of current job, and then allow bg/fg ops to omit args.
 
 Would multiprocessing.Process provide better streaming than
 subprocess.Popen? I.e., not waiting for op to complete.
+
+----------------------------------------------------------------------
+
+Make Bash.INTERACTIVE_EXECUTABLES an environment variable, so that it
+can be customized by the user.
+
+----------------------------------------------------------------------
+
+ps flags. E.g., -a
+
+-o doesn't really work right, due to the use of
+ multiprocessing. Probably get rid of it.
+
+----------------------------------------------------------------------
+
+How is info on these topics obtained:
+
+- env vars
+- File
+- Process
+- ColorScheme
+- Color
+- History
+
+----------------------------------------------------------------------
+
+Should expand operate on filenames? Might be better to have a separate
+command for that, e.g. cat.

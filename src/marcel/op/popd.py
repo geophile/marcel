@@ -1,11 +1,14 @@
-"""C{popd}
-
-Pop the directory stack (obtainable by the dirs operator), and cd to the new top directory.
-"""
-
 import pathlib
 
 import marcel.core
+
+
+SUMMARY = '''
+Pop the directory stack, and cd to the new top directory.
+'''
+
+
+DETAILS = None
 
 
 def popd():
@@ -15,7 +18,7 @@ def popd():
 class PopdArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('popd', global_state)
+        super().__init__('popd', global_state, None, SUMMARY, DETAILS)
 
 
 class Popd(marcel.core.Op):

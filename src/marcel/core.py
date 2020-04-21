@@ -40,13 +40,16 @@ class ArgParser(argparse.ArgumentParser):
             namespace.set_pipeline_args(pipelines)
         return super().parse_args(args, namespace)
 
+    def print_help(self, file=None):
+        super().print_help(file)
+
     def exit(self, status=0, message=None):
-        if message:
+        if status:
             raise marcel.exception.KillCommandException(message)
         else:
-            # Parser is exiting help. We don't want to actually run a command. Proceeding as
-            # if the command were killed by Ctrl-C escapes correctly. If message is None and we
-            # raise KillCommandException then "None" is printed when the exception is caught.
+            # Parser is exiting normally, probably because it was run to obtain a help message.
+            # We don't want to actually run a command. Proceeding asthe
+            # if the command were killed by Ctrl-C escapes correctly.
             raise KeyboardInterrupt()
 
     # For use by subclasses

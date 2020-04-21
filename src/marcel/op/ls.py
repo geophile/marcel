@@ -1,30 +1,3 @@
-"""C{ls [-01rfds] [FILENAME ...]}
-
-Generates a stream of C{osh.file.File}s.
-
--0                         Do not include the contents of topmost directories.
-
--1                         Include the contents of only the topmost directories.
-
--r | --recursive           Include the contents of directories, recursively.
-
--f                         List files.
-
--d                         List directories.
-
--s                         List symlinks.
-
-FILENAME                   Filename or glob pattern.
-
-- Flags 0, 1, r are mutually exclusive. -1 is the default, if none of these flags are specified.
-The contents of symlinked directories are never listed.
-
-- Flags f, d, and s may be combined. If none of these flags are specified, then files, directories
-and symlinks are all listed.
-
-- If no FILENAMEs are provided, then . is assumed.
-"""
-
 import argparse
 import sys
 
@@ -34,6 +7,23 @@ import marcel.object.file
 import marcel.op.filenames
 
 
+SUMMARY = '''
+The specified files, directories, and symlinks are written to the output stream.
+'''
+
+
+DETAILS = '''
+Generates a stream of Files, representing files, directories and symlinks.
+
+The flags {-0}, {-1}, and {-r} are mutually exclusive. {-1} is the default.
+
+Flags {-f}, {-d}, and {-s} may be combined. If none of these flags are specified, then files, directories
+and symlinks are all listed.
+
+- If no {filename}s are provided, then the currentn directory is listed.
+'''
+
+
 def ls():
     return Ls()
 
@@ -41,15 +31,34 @@ def ls():
 class LsArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('ls', global_state, ['-0', '-1', '-r', '-f', '--file', '-d', '--dir', '-s', '--symlink'])
+        super().__init__('ls', global_state, ['-0', '-1', '-r', '-f', '--file', '-d', '--dir', '-s', '--symlink'],
+                         SUMMARY, DETAILS)
         depth_group = self.add_mutually_exclusive_group()
-        depth_group.add_argument('-0', action='store_true', dest='d0')
-        depth_group.add_argument('-1', action='store_true', dest='d1')
-        depth_group.add_argument('-r', '--recursive', action='store_true', dest='dr')
-        self.add_argument('-f', '--file', action='store_true')
-        self.add_argument('-d', '--dir', action='store_true')
-        self.add_argument('-s', '--symlink', action='store_true')
-        self.add_argument('filename', nargs=argparse.REMAINDER)
+        depth_group.add_argument('-0',
+                                 action='store_true',
+                                 dest='d0',
+                                 help='Do not descend into directories, (i.e., expore to depth 0)')
+        depth_group.add_argument('-1',
+                                 action='store_true',
+                                 dest='d1',
+                                 help='''Descend into directories listed on the command line,
+                                  (i.e., explore to depth 1)''')
+        depth_group.add_argument('-r', '--recursive',
+                                 action='store_true',
+                                 dest='dr',
+                                 help='Descend into all directories, recursively')
+        self.add_argument('-f', '--file',
+                          action='store_true',
+                          help='Include files in output')
+        self.add_argument('-d', '--dir',
+                          action='store_true',
+                          help='Include directories in output')
+        self.add_argument('-s', '--symlink',
+                          action='store_true',
+                          help='Include symbolic links in output')
+        self.add_argument('filename',
+                          nargs=argparse.REMAINDER,
+                          help='A filename or glob pattern')
 
 
 class Ls(marcel.op.filenames.FilenamesOp):

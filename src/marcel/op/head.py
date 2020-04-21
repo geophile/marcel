@@ -1,10 +1,15 @@
-"""C{head N}
-
-The first N items of the input sequence are passed on as output. All other input
-is ignored. N must be an integer.
-"""
-
 import marcel.core
+
+
+SUMMARY = '''
+Output the leading items of the input stream, and discard the others.  
+'''
+
+
+DETAILS = '''
+The first {n} items received from the input stream will be written to the
+output stream. All other input items will be discarded. 
+'''
 
 
 def head():
@@ -14,10 +19,11 @@ def head():
 class HeadArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('head', global_state)
+        super().__init__('head', global_state, None, SUMMARY, DETAILS)
         self.add_argument('n',
                           type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                        'must be non-negative'))
+                                                        'must be non-negative'),
+                          help='The number of input items to keep.')
 
 
 class Head(marcel.core.Op):

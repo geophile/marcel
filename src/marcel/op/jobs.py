@@ -2,6 +2,21 @@ import marcel.core
 import marcel.job
 
 
+SUMMARY = '''
+List the currently running jobs. This includes jobs that are currently paused.
+'''
+
+
+DETAILS = '''
+The jobs listed may be running, denoted as {(+)}; or paused, denoted as {(-)}.
+While it is extremely unlikely, a job that is no longer running may be displayed
+also, denoted as {(x)}. 
+    
+Every job includes a job number and a process id. Note that job numbers may change over time,
+as a job number simply reflects the job's position in the list of jobs. Process ids never change.
+'''
+
+
 def jobs():
     return Jobs()
 
@@ -9,7 +24,7 @@ def jobs():
 class JobsArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('jobs', global_state)
+        super().__init__('jobs', global_state, SUMMARY, DETAILS)
 
 
 class Jobs(marcel.core.Op):

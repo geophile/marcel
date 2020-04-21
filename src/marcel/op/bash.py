@@ -7,6 +7,17 @@ import marcel.core
 import marcel.object.error
 
 
+SUMMARY = '''
+Run an executable (as opposed to a marcel command). 
+'''
+
+
+DETAILS = '''
+It is usually possible to run an executable directly, without using the bash command.
+Use this command if  the interactive flag is needed.
+'''
+
+
 def bash():
     return Bash()
 
@@ -14,9 +25,14 @@ def bash():
 class BashArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('bash', global_state)
-        self.add_argument('-i', '--interactive', action='store_true')
-        self.add_argument('args', nargs=argparse.REMAINDER)
+        super().__init__('bash', global_state, None, SUMMARY, DETAILS)
+        self.add_argument('-i', '--interactive',
+                          action='store_true',
+                          help='The command is run interactively. stdin, stdout, and stderr are ignored.')
+        self.add_argument('args',
+                          nargs=argparse.REMAINDER,
+                          help='''These arguments comprise a command that can be executed by a Linux
+                          bash shell.''')
 
 
 class Bash(marcel.core.Op):
@@ -46,6 +62,8 @@ class Bash(marcel.core.Op):
         return self.__doc__
 
     def setup_1(self):
+        if len(self.args) == 0:
+            raise marcel.exception.KillCommandException('No command provided.')
         if self.args[0] in Bash.INTERACTIVE_EXECUTABLES:
             self.interactive = True
         self.runner = Interactive(self) if self.interactive else NonInteractive(self)

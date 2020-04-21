@@ -1,10 +1,15 @@
-"""C{select FUNCTION}
-
-C{FUNCTION} is applied to input elements. Elements for which C{FUNCTION}
-evaluates to true are emitted as output..
-"""
-
 import marcel.core
+
+
+SUMMARY = '''
+Tuples in the input stream are filtered using a predicate.
+'''
+
+
+DETAILS = '''
+The {function} is applied to each input tuple. Tuples for which the {function} evalutes to
+True are written to the output stream.
+'''
 
 
 def select():
@@ -14,9 +19,10 @@ def select():
 class SelectArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('select', global_state)
+        super().__init__('select', global_state, None, SUMMARY, DETAILS)
         self.add_argument('function',
-                          type=super().constrained_type(self.check_function, 'not a valid function'))
+                          type=super().constrained_type(self.check_function, 'not a valid function'),
+                          help='Used to filter input.')
 
 
 class Select(marcel.core.Op):

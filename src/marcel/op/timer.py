@@ -1,17 +1,22 @@
-"""C{timer [-c|--components] INTERVAL}
+import marcel.core
+import marcel.exception
 
--c|--components            Output time as a tuple of components:
-                           (year, month, day of month, hour, minute, second, day of week, day of year, dst)
-    
-Generates a sequence of timestamps, separated in time by the specified C{INTERVAL}
-(approximately). The C{INTERVAL} format is::
-    
+import threading
+import time
+
+
+SUMMARY = 'Generate a sequence of timestamps, separated in time by a specified interval'
+
+
+DETAILS = '''
+The {interval} format is:
+
     HH:MM:SS
 
-where C{HH} is hours, C{MM} is minutes, C{SS} is seconds.  C{HH:} and
-C{HH:MM:} may be omitted.
+where {HH} is hours, {MM} is minutes, {SS} is seconds. {HH:} and
+{HH:MM:} may be omitted.
 
-B{Examples}::
+b{Examples}:
 
     INTERVAL        meaning
     -----------------------------
@@ -19,7 +24,9 @@ B{Examples}::
     1:30            1 minute, 30 seconds
     1:00:00         1 hour
 
-The output timestamp is time in seconds since 1/1/1970.
+By default, the output timestamp is time in seconds since 1/1/1970.
+If {-c} is specified, then the timestamp is rendered as a Python {time.struct_time}
+tuple: (year, month, day, hour, minute, second, weekday, day of year, daylight savings time flag).
 
 Notes:
     - month is 1-based (January = 1, February = 2, ...)
@@ -28,13 +35,7 @@ Notes:
     - day of week is 0-based, Monday = 0.
     - day of year is 1-based.
     - dst is 1 if Daylight Savings Time is in effect, 0 otherwise.
-"""
-
-import marcel.core
-import marcel.exception
-
-import threading
-import time
+'''
 
 
 def timer():
@@ -44,9 +45,12 @@ def timer():
 class TimerArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('timer', global_state, ['-c', '--components'])
-        self.add_argument('-c', '--components', action='store_true')
-        self.add_argument('interval')
+        super().__init__('timer', global_state, ['-c', '--components'], SUMMARY, DETAILS)
+        self.add_argument('-c', '--components',
+                          action='store_true',
+                          help='Print time components instead of seconds since epoch.')
+        self.add_argument('interval',
+                          help='Time between timestamps.')
 
 
 class Timer(marcel.core.Op):

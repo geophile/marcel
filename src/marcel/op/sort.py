@@ -1,13 +1,15 @@
-"""C{sort [KEY]}
-
-Input objects are sorted before being written to output. Ordering is based on the use of comparison operators
-for type input objects, except if KEY (a function) is provided. In that case, the comparison operators are applied
-to the values obtained by applying the KEY function to the input objects.
-
-KEY                        Obtains the sort key. If omitted, the object itself is used as the sort key.
-"""
-
 import marcel.core
+
+
+SUMMARY = '''
+The input stream is sorted and written to the output stream.
+'''
+
+
+DETAILS = '''
+If {key} is not specified, then input tuples are ordered according to Python rules.
+Otherwise, ordering is based on the values computed by applying {key} to each input tuple.
+'''
 
 
 def sort():
@@ -17,11 +19,12 @@ def sort():
 class SortArgParser(marcel.core.ArgParser):
     
     def __init__(self, global_state):
-        super().__init__('sort', global_state)
+        super().__init__('sort', global_state, None, SUMMARY, DETAILS)
         self.add_argument('key',
                           nargs='?',
                           default=None,
-                          type=super().constrained_type(self.check_function, 'not a valid function'))
+                          type=super().constrained_type(self.check_function, 'not a valid function'),
+                          help='Function to obtain the value used for ordering.')
 
 
 class Sort(marcel.core.Op):

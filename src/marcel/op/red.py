@@ -1,31 +1,33 @@
-"""C{red [-i|--incremental] [FUNCTION ...]}
+import argparse
 
-Reduces input elements by repeatedly applying binary functions such as +, min, max.
+import marcel.core
 
--i|--incremental           Instead of producing one row of output for each reduction, write partial
-                           results to output for each input row.
 
-FUNCTION                   A binary function used to combine values from rows.
+SUMMARY = '''
+Reduces tuples from the input stream by repeatedly applying binary functions, such as {+}, {min}, {max}.
+'''
 
-Each C{FUNCTION} takes two inputs and produces one output.
 
-B{Basic usage:}
+DETAILS = '''
+Each {function} takes two inputs and produces one output.
 
-For example, given a sequence of inputs such as C{(1,), (2,), (3,)}, C{red} can be used to find the sum::
+b{Basic usage}
+
+Given a sequence of inputs such as {(1,), (2,), (3,)}, {red} can be used to find the sum:
 
     ... | red +
 
-yields C{(6,)}. For input elements with more than a single value, multiple functions can be provided.
-For example, to find the sum of 0 ... 9, the sum of their squares, and the sum of their cubes::
+yields {(6,)}. For input elements with more than a single value, multiple functions can be provided.
+For example, to find the sum of 0 ... 9, the sum of their squares, and the sum of their cubes:
 
-    osh gen 10 | map (x: (x, x**2, x**3)) ^ red + + +
+    gen 10 | map (x: (x, x**2, x**3)) | red + + +
 
-which yields the output C{(45, 285, 2025)}.
+which yields the output {(45, 285, 2025)}.
 
-B{Grouping:}
+b{Grouping}
 
-Functions can be computed within groups of input rows, identifying the group-defining
-values using C{.} instead of a function. For example, suppose the input sequence is::
+Reduction can be applied to groups of input rows, identifying the group-defining
+values using {.} instead of a function. For example, suppose the input sequence is:
 
     (1, 5, 10, 100)
     (1, 6, 10, 200)
@@ -36,44 +38,39 @@ values using C{.} instead of a function. For example, suppose the input sequence
     (2, 10, 20, 300)
     (3, 5, 30, 100)
 
-If this sequence is piped to this invocation of C{red}::
+If this sequence is piped to this invocation of {red}:
 
     red . + . +
 
-then groups are defined using the first and third values, C{(1, 10), (1, 11), (2, 20), (3, 30)}.
-The output would be::
+then groups are defined using the first and third values, {(1, 10), (1, 11), (2, 20), (3, 30)}.
+The output would be:
 
     (1, 11, 10, 300)
     (1, 7, 11, 300)
     (2, 17, 20, 300)
     (3, 5, 30, 100)
 
-B{Incremental mode:}
+b{Incremental mode:}
 
-If the C{-i} flag is specified, then one output element is generated for each input element;
+If the {-i} flag is specified, then one output tuple is generated for each input tuple;
 an output element contains the current accumulated values. The accumulator appears
-in the output element after the inputs. For example, if the input stream contains C{(1,), (2,), (3,)},
-then the running total can be computed as follows::
+in the output element after the inputs. For example, if the input stream contains {(1,), (2,), (3,)},
+then the running total can be computed as follows:
 
     ... | red -i + | ...
 
-The output stream would be C{(1, 1), (2, 3), (3, 6)}. In the last output object, C{6} is the sum
-of the current input (C{3}) and all preceding inputs (C{1, 2}).
+The output stream would be {(1, 1), (2, 3), (3, 6)}. In the last output object, {6} is the sum
+of the current input ({3}) and all preceding inputs ({1, 2}).
 
-The C{-i} flag can also be used with grouping. For example, if the input el
-ements are
-C{('a', 1), ('a', 2), ('b', 3), ('b', 4)}, then the running totals, grouped by the string values would
-be computed as follows::
+The C{-i} flag can also be used with grouping. For example, if the input 
+tuples are
+{('a', 1), ('a', 2), ('b', 3), ('b', 4)}, then the running totals, grouped by the string values would
+be computed as follows:
 
     ... | red -i . +
 
-The output stream would be C{('a', 1, 1), ('a', 2, 3), ('b', 3, 3), ('b', 4, 7)}.
-
-"""
-
-import argparse
-
-import marcel.core
+The output stream would be {('a', 1, 1), ('a', 2, 3), ('b', 3, 3), ('b', 4, 7)}.
+'''
 
 
 def red():
@@ -83,12 +80,16 @@ def red():
 class RedArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('red', global_state, ['-i', '--incremental'])
+        super().__init__('red', global_state, ['-i', '--incremental'], SUMMARY, DETAILS)
         self.add_argument('-i', '--incremental',
-                          action='store_true')
+                          action='store_true',
+                          help='Output a tuple containing the partially reduced values for each input tuple.')
         self.add_argument('function',
                           nargs=argparse.REMAINDER,
-                          type=super().constrained_type(self.check_function, 'not a valid function'))
+                          type=super().constrained_type(self.check_function, 'not a valid function'),
+                          help='''A reduction function, which takes two inputs: the partially reduced
+                          value, and a value from an input tuple. The output is another partially reduced
+                          value.''')
 
 
 class Red(marcel.core.Op):

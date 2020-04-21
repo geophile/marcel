@@ -8,7 +8,7 @@ def fg():
 class FgArgParser(marcel.op.jobop.JobOpArgParser):
 
     def __init__(self, global_state):
-        super().__init__('fg', global_state)
+        super().__init__('fg', global_state, None, None)
 
 
 class Fg(marcel.op.jobop.JobOp):

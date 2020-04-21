@@ -1,9 +1,12 @@
-"""C{pwd}
-
-Output the current directory.
-"""
-
 import marcel.core
+
+
+SUMMARY = '''
+Write the current directory to the output stream.
+'''
+
+
+DETAILS = None
 
 
 def pwd():
@@ -13,7 +16,7 @@ def pwd():
 class PwdArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('pwd', global_state)
+        super().__init__('pwd', global_state, None, SUMMARY, DETAILS)
 
 
 class Pwd(marcel.core.Op):

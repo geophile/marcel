@@ -4,6 +4,16 @@ import marcel.op.jobop
 job_control = marcel.job.JobControl.only
 
 
+SUMMARY = '''
+Resume background execution of a suspended job. 
+'''
+
+
+DETAILS = '''
+Resume execution of the selected job, and leave it running in the background.
+'''
+
+
 def bg():
     return Bg()
 
@@ -11,7 +21,7 @@ def bg():
 class BgArgParser(marcel.op.jobop.JobOpArgParser):
 
     def __init__(self, global_state):
-        super().__init__('bg', global_state)
+        super().__init__('bg', global_state, SUMMARY, DETAILS)
 
 
 class Bg(marcel.op.jobop.JobOp):

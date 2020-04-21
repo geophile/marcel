@@ -1,9 +1,3 @@
-"""C{edit}
-
-Open the most recently entered command in the text editor specified by the EDITOR environment variable.
-On exiting the editor, the command will be executed.
-"""
-
 import os
 import readline
 import subprocess
@@ -14,6 +8,17 @@ import marcel.exception
 import marcel.main
 
 
+SUMMARY = '''
+Open an editor to edit the previous command.
+'''
+
+
+DETAILS = '''
+The editor is specified by the {EDITOR} environment variable. On exiting the editor, the edited command
+will be on the command line. (Hit enter to run the command, as usual.)
+'''
+
+
 def edit():
     return Edit()
 
@@ -21,7 +26,7 @@ def edit():
 class EditArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('edit', global_state)
+        super().__init__('edit', global_state, None, SUMMARY, DETAILS)
 
 
 class Edit(marcel.core.Op):

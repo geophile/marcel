@@ -1,9 +1,12 @@
-"""C{reverse}
-
-Input objects are sent to the output stream in the opposite order, (last-in first-out).
-"""
-
 import marcel.core
+
+
+SUMMARY = '''
+The input stream is output in reverse order.
+'''
+
+
+DETAILS = None
 
 
 def reverse():
@@ -13,7 +16,7 @@ def reverse():
 class ReverseArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('reverse', global_state)
+        super().__init__('reverse', global_state, None, SUMMARY, DETAILS)
 
 
 class Reverse(marcel.core.Op):

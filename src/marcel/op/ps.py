@@ -1,14 +1,15 @@
-"""C{ps [-o|--omit-self]}
-
-Generates a stream of objects of type C{osh.process.Process}.
-
-C{-o} omits the osh process itself from the process list.
-"""
-
 import os
 
 import marcel.core
 import marcel.object.process
+
+
+SUMMARY = '''
+Generate a stream of Process objects, representing running processes.
+'''
+
+
+DETAILS = None
 
 
 def ps():
@@ -18,9 +19,10 @@ def ps():
 class PsArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('ps', global_state, ['-o', '--omit-self'])
+        super().__init__('ps', global_state, ['-o', '--omit-self'], SUMMARY, DETAILS)
         self.add_argument('-o', '--omit-self',
-                          action='store_true')
+                          action='store_true',
+                          help='OBSOLETE')
 
 
 class Ps(marcel.core.Op):

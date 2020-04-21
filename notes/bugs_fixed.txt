@@ -557,3 +557,4 @@ SIGTERM would work? Haven't tried it. If SIGTERM works instead of
 SIGKILL, then switch to it, and have the kill op work consistently
 with bash.
 
+----------------------------------------------------------------------

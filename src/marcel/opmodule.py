@@ -22,15 +22,8 @@ class OpModule:
             elif inspect.isclass(v) and marcel.core.ArgParser in inspect.getmro(v):
                 # The arg parser class, e.g. LsArgParser
                 arg_parser_function = v
-            elif k == 'SUMMARY':
-                help_summary = v
-            elif k == 'DETAILS':
-                help_details = v
         assert arg_parser_function is not None
-        if op_name == 'gen':
-            self._arg_parser = arg_parser_function(global_state, help_summary, help_details)
-        else:
-            self._arg_parser = arg_parser_function(global_state)
+        self._arg_parser = arg_parser_function(global_state)
         assert self._create_op is not None, op_name
         assert self._arg_parser is not None, op_name
 

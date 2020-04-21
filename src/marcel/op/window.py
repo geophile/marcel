@@ -1,18 +1,23 @@
-"""C{window PREDICATE
-C{window -o|--overlap N}
-C{window -d|--disjoint N}
+import marcel.core
+import marcel.exception
 
-PREDICATE                  Start a new group when PREDICATE, applied to the current input, evaluates to True
--o N                       Start a new group of size N on each input. Groups overlap.
--d N                       Start a new group of size N after every N inputs. Groups are disjoint.
 
-Groups of consecutive input elements are formed into tuples which are
-passed to the output stream. The objects are grouped using one of two
+SUMMARY = '''
+Groups of consecutive input tuples are combined into a single tuple, which is written to
+the output stream. 
+'''
+
+
+DETAILS = '''
+Groups of consecutive input tuples are combined and written
+to the output stream. The objects are grouped using one of two
 mechanisms.
 
-1) A new group is started on the first input object, and for any
-subsequent object for which C{PREDICATE} returns true. For example, if
-the input stream contains the integers C{1, 2, 3, ...}, then::
+b{Predicate-based:}
+
+A new group is started on the first input object, and for any
+subsequent object for which {predicate} returns true. For example, if
+the input stream contains the integers {1, 2, 3, ...}, then::
 
     window (x: x % 3 == 2)
 
@@ -26,15 +31,19 @@ yields as output::
 
 I.e., a new tuple is started for each integer n, (after the first integer) such that n % 3 = 2.
 
-2) Groups have a fixed number of objects. The C{-o} and C{-d} flags
-specify C{N}, the number of objects in the groups.  C{-o}
-specifies I{overlapping} windows, in which each input object begins a
-new list containing C{N} items. Groups may be padded with
-C{None} values to ensure that the group's size is C{N}.
-    
-B{Example}: For input C{0, 1, ..., 9}, C{window -o 3} yields these
+b{Fixed-size}:
+
+Groups have a fixed number of objects. The {-o} and {-d} flags
+specify {N}, the number of objects in the groups.  {-o}
+specifies i{overlapping} windows, in which each input object begins a
+new list containing {N} items. Groups may be padded with
+{None} values to ensure that the group's size is {N}.
+
+b{Example:}
+ 
+For input {0, 1, ..., 9}, {window -o 3} yields these
 tuples::
-    
+
     ((0,), (1,), (2,))
     ((1,), (2,), (3,))
     ((2,), (3,), (4,))
@@ -46,23 +55,30 @@ tuples::
     ((8,), (9,), (None,))
     ((9,), (None,), (None,))
 
-C{-d} specifies I{disjoint} windows, in which each input object
-appears in only one group. A new group is started every C{N}
+{-d} specifies I{disjoint} windows, in which each input object
+appears in only one group. A new group is started every {N}
 objects. The last window may be padded with (None,) to ensure that it
-has C{N} elements.
-    
-B{Example}: For input C{0, 1, ..., 9}, C{window -d 3} yields these
+has {N} elements.
+
+b{Example:}
+
+For input {0, 1, ..., 9}, {window -d 3} yields these
 tuples::
-    
+
     ((0,), (1,), (2,))
     ((3,), (4,), (5,))
     ((6,), (7,), (8,))
     ((9,), (None,), (None,))
+'''
+
+"""C{window PREDICATE
+C{window -o|--overlap N}
+C{window -d|--disjoint N}
+
+PREDICATE                  Start a new group when PREDICATE, applied to the current input, evaluates to True
+-o N                       Start a new group of size N on each input. Groups overlap.
+-d N                       Start a new group of size N after every N inputs. Groups are disjoint.
 """
-
-import marcel.core
-import marcel.exception
-
 
 def window():
     return Window()
@@ -73,17 +89,22 @@ class WindowArgsParser(marcel.core.ArgParser):
     def __init__(self, global_state):
         super().__init__('window', 
                          global_state,
-                         ['-o', '--overlap', '-d', '--disjoint'])
+                         ['-o', '--overlap', '-d', '--disjoint'],
+                         SUMMARY,
+                         DETAILS)
         self.add_argument('predicate',
                           nargs='?',
-                          type=super().constrained_type(self.check_function, 'not a valid function'))
+                          type=super().constrained_type(self.check_function, 'not a valid function'),
+                          help='Start a new window on tuples for which predicate evaultes to True')
         fixed_size = self.add_mutually_exclusive_group()
         fixed_size.add_argument('-o', '--overlap',
                                 type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                              'must be non-negative'))
+                                                              'must be non-negative'),
+                                help='Specifies the size of overlapping windows.')
         fixed_size.add_argument('-d', '--disjoint',
                                 type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                              'must be non-negative'))
+                                                              'must be non-negative'),
+                                help='Specifies the size of disjoint windows.')
 
 
 class Window(marcel.core.Op):

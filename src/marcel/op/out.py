@@ -1,27 +1,22 @@
-"""C{out [-a|--append FILENAME] [-f|--file FILENAME] [-c | --csv | FORMAT]}
-
-Input objects are passed on as output. As a side-effect, input objects are
-printed to stdout or to a file. The output is rendered using the default
-converstion to string unless specified otherwise.
-
--a | --append FILENAME     Append to the named file.
-
--f | --file FILENAME       Write to the named file, overwriting an existing
-                           file if it exists.
-
--c | --csv                 Format output separating components by commas.
-                           Each component is rendered using the default conversion
-                           to string.
-
-FORMAT                     A Python formatter specifying how an object should be
-                           rendered.
-"""
-
 import sys
 
 import marcel.core
 import marcel.object.error
 import marcel.object.renderable
+
+SUMMARY = '''
+Prints items received on the input stream.
+'''
+
+DETAILS = '''
+Itens received on the input stream are passed to the output stream. As a side-effect, input
+items are printed to stdout or to the file specified by {file} or {append}.
+
+If no formatting options are specified, then the default rendering is used, except
+that 1-tuples are unwrapped.
+
+Error objects are not subject to formatting specifications, and are not passed on as output.
+'''
 
 
 def out():
@@ -33,12 +28,22 @@ class OutArgParser(marcel.core.ArgParser):
     def __init__(self, global_state):
         super().__init__('out',
                          global_state,
-                         ['-a', '--append', '-f', '--file', '-c', '--csv'])
+                         ['-a', '--append', '-f', '--file', '-c', '--csv'],
+                         SUMMARY,
+                         DETAILS)
         file_group = self.add_mutually_exclusive_group()
-        file_group.add_argument('-a', '--append', required=False)
-        file_group.add_argument('-f', '--file', required=False)
-        self.add_argument('-c', '--csv', action='store_true')
-        self.add_argument('format', nargs='?')
+        file_group.add_argument('-a', '--append',
+                                required=False,
+                                help='Append output to the specified file.')
+        file_group.add_argument('-f', '--file',
+                                required=False,
+                                help='Write output to the specified file, replacing current contents.')
+        self.add_argument('-c', '--csv',
+                          action='store_true',
+                          help='Generate output in comma-separated value format.')
+        self.add_argument('format',
+                          nargs='?',
+                          help='Python formatting string')
 
 
 class Out(marcel.core.Op):

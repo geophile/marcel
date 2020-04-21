@@ -1,13 +1,14 @@
-"""C{dirs [-c]}
-
--c|--clear              Clear the directory stack, and place the current directory in it.
-
-The directory stack is output (with or without the C{-c} flag).
-"""
-
 import pathlib
 
 import marcel.core
+
+
+SUMMARY = '''
+Write the entries in the directory stack to the output stream, top first.
+'''
+
+
+DETAILS = None
 
 
 def dirs():
@@ -17,8 +18,10 @@ def dirs():
 class DirsArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('pushd', global_state)
-        self.add_argument('-c', '--clear', action='store_true')
+        super().__init__('pushd', global_state, ['-c'], SUMMARY, DETAILS)
+        self.add_argument('-c', '--clear',
+                          action='store_true',
+                          help='Clear the directory stack and place the current directory in it.')
 
 
 class Dirs(marcel.core.Op):

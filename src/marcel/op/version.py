@@ -1,10 +1,13 @@
-"""version
-
-Generates the version number of this software.
-"""
-
 import marcel.core
 import marcel.config
+
+
+SUMMARY = '''
+Write the marcel version number to the output stream.
+'''
+
+
+DETAILS = None
 
 
 def version():
@@ -14,7 +17,7 @@ def version():
 class VersionArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('version', global_state)
+        super().__init__('version', global_state, None, SUMMARY, DETAILS)
 
 
 class Version(marcel.core.Op):

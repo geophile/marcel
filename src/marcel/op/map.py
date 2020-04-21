@@ -1,9 +1,15 @@
-"""C{map FUNCTION}
-
-Each value from the input sequence is mapped to an output value by FUNCTION.
-"""
-
 import marcel.core
+
+
+SUMMARY = '''
+For each item in the input stream, apply a given function and write the result to the output stream.
+'''
+
+
+DETAILS = '''
+The {function} is applied to each input tuple in the input stream. The components of a tuple
+are bound to the {function}'s parameters. The output from the function is written to the output stream.
+'''
 
 
 def map():
@@ -13,9 +19,10 @@ def map():
 class MapArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('map', global_state)
+        super().__init__('map', global_state, None, SUMMARY, DETAILS)
         self.add_argument('function',
-                          type=super().constrained_type(self.check_function, 'not a valid function'))
+                          type=super().constrained_type(self.check_function, 'not a valid function'),
+                          help='Function to be applied to input items')
 
 
 class Map(marcel.core.Op):

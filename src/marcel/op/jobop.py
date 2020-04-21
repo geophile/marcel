@@ -4,21 +4,24 @@ import marcel.job
 
 class JobOpArgParser(marcel.core.ArgParser):
 
-    def __init__(self, op_name, global_state):
-        super().__init__(op_name, global_state)
+    def __init__(self, op_name, global_state, summary, details):
+        super().__init__(op_name, global_state, None, summary, details)
         id_group = self.add_mutually_exclusive_group()
         id_group.add_argument('-j', '--job',
                               type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
                                                             'must be non-negative'),
-                              dest='jid')
+                              dest='jid',
+                              help='A job number, (not a process id)')
         id_group.add_argument('-p', '--process',
                               type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
                                                             'must be non-negative'),
-                              dest='pid')
+                              dest='pid',
+                              help='A process id')
         self.add_argument('job_id',
                           nargs='?',
                           type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                        'must be non-negative'))
+                                                        'must be non-negative'),
+                          help='A job number, (not a process id)')
 
 
 class JobOp(marcel.core.Op):

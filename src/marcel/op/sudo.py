@@ -44,6 +44,7 @@ class Sudo(marcel.core.Op):
 
     def setup_1(self):
         # Now the -- arg has to be removed
+        # TODO: ArgumentParser.parse_known_args might be a better way to go.
         assert self.args[0] == '--'
         self.args = self.args[1:]
         if len(self.args) == 0:

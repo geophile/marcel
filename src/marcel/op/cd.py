@@ -1,12 +1,16 @@
-"""C{cd [DIRECTORY]}
-
-Change the current directory to the given directory. If the DIRECTORY argument is omitted, change the
-current directory to the home directory.
-"""
-
 import pathlib
 
 import marcel.core
+
+
+SUMMARY = '''
+Change the current directory to the given directory.
+'''
+
+
+DETAILS = '''
+If {directory} is omitted, then change the current directory to the home directory.
+'''
 
 
 def cd():
@@ -16,10 +20,11 @@ def cd():
 class CdArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('cd', global_state)
+        super().__init__('cd', global_state, None, SUMMARY, DETAILS)
         self.add_argument('directory',
                           nargs='?',
-                          default='~')
+                          default='~',
+                          help='New current directory')
 
 
 class Cd(marcel.core.Op):

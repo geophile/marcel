@@ -1,12 +1,17 @@
-"""C{pushd [DIRECTORY]}
-
-cd to the given DIRECTORY, and push it onto the stack of directory (obtainable by the dirs operator).
-If no DIRECTORY is supplied, then swap the top two items on the stack and cd to the new topmost directory.
-"""
-
 import pathlib
 
 import marcel.core
+
+
+SUMMARY = '''
+Push a given directory onto the directory stack, and cd to that directory.
+'''
+
+
+DETAILS = '''
+If no {directory} is supplied, then the top two items on the directory stack are swapped,
+and the current directory is changed to the new top directory on the stack.
+'''
 
 
 def pushd():
@@ -16,8 +21,8 @@ def pushd():
 class PushdArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('pushd', global_state)
-        self.add_argument('directory', nargs='?')
+        super().__init__('pushd', global_state, None, SUMMARY, DETAILS)
+        self.add_argument('directory', nargs='?', help='New current directory')
 
 
 class Pushd(marcel.core.Op):

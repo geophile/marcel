@@ -1,10 +1,15 @@
-"""C{tail N}
-
-The last N items of the input sequence are passed on as output. All other input
-is ignored. N must be an integer.
-"""
-
 import marcel.core
+
+
+SUMMARY = '''
+Output the trailing items of the input stream, and discard the others.  
+'''
+
+
+DETAILS = '''
+The last {n} items received from the input stream will be written to the
+output stream. All other input items will be discarded. 
+'''
 
 
 def tail():
@@ -14,10 +19,11 @@ def tail():
 class TailArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('tail', global_state)
+        super().__init__('tail', global_state, None, SUMMARY, DETAILS)
         self.add_argument('n',
                           type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                        'must be non-negative'))
+                                                        'must be non-negative'),
+                          help='The number of input items to keep.')
 
 
 class Tail(marcel.core.Op):

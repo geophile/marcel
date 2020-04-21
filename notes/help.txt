@@ -31,3 +31,41 @@ help messages can be colorized.
 
   - Eliminate dependencies of marcel modules on marcel.op
     modules. E.g. out, used by Command.
+
+----------------------------------------------------------------------
+
+Formatting:
+
+Colorizing throws off text-wrapping because the escape characters are
+not zero-width. There is a colorizing text wrapper for argparse, but
+it is 3rd party.
+
+ALSO: paragraphs not preserved. Maybe use RawDescriptionTextHandler
+and take over formatting completely? There will still be a problem in
+wrapping text with escape codes.
+
+
+
+Alternative:
+
+- Have arg parser use RawDescriptionTextHandler
+
+- Start with the marked-up text, e.g. '''This is a {flag} blah blah blah'''. 
+
+- Note the indexes of words in the markup: markup_positions
+
+- Remove the markup (plaintext) and wrap text (wrapped).
+
+- Use markup_positions to re-insert markup in the wrapped text
+  (allowing for words split by hyphenation).
+
+- Colorize.
+
+
+
+{} isn't enough. Need more markup, e.g. for headings:
+
+- {}: highlight
+- b{}: bold
+- f{}: highlighting meant to indicate fixed-width
+- indented text: don't wrap

@@ -1,21 +1,26 @@
-"""C{squish [FUNCTION]}
-
-Each input sequence is reduced to a single value, using C{FUNCTION} to combine the values.
-C{FUNCTION} is a binary function that can be used for reduction, e.g. C{+}, C{*}, C{max}, C{min}.
-
-B{Example}: If one of the inputs is the list C{[1, 2, 3, 4]}, then::
-
-    squish +
-
-will generate C{10} (= C{1 + 2 + 3 + 4}).
-
-If no C{FUNCTION} is provided, then C{+} is assumed.
-"""
-
 import functools
 
 import marcel.core
 import marcel.function
+
+
+SUMMARY = '''
+The components of each input tuple are reduced using a given function.
+'''
+
+
+DETAILS = '''
+Each input sequence is reduced to a single value, using {function} to combine the values.
+{function} is a binary function that can be used for reduction, e.g. {+}, {*}, {max}, {min}.
+
+b{Example:} If one of the inputs is the list {[1, 2, 3, 4]}, then:
+
+    squish +
+
+will generate {10}.
+
+If no {function} is provided, then {+} is assumed.
+'''
 
 
 def squish():
@@ -25,10 +30,11 @@ def squish():
 class SquishArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('squish', global_state)
+        super().__init__('squish', global_state, None, SUMMARY, DETAILS)
         self.add_argument('function',
                           nargs='?',
-                          type=super().constrained_type(self.check_function, 'not a valid function'))
+                          type=super().constrained_type(self.check_function, 'not a valid function'),
+                          help='Reduction function, applied to the components of an input tuple.')
 
 
 class Squish(marcel.core.Op):

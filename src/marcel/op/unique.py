@@ -1,15 +1,19 @@
-"""C{unique [-c|--consecutive]}
-
-Input elements are passed to output, removing duplicates. No output is
-generated until the end of the input stream occurs. However, if the
-duplicates are known to be consecutive, then specifying C{-c} allows
-output to be generated sooner. Input order is preserved only if C{-c}
-is specified.
-
-"""
-
 import marcel.core
 import marcel.util
+
+
+SUMMARY = '''
+Write to the output stream all input tuples, but without duplicates.
+'''
+
+
+DETAILS = '''
+Input tuples are passed to output, removing duplicates. No output is
+generated until the end of the input stream occurs. However, if the
+duplicates are known to be consecutive, then {-c} allows
+output to be generated sooner. Input order is preserved only if {-c}
+is specified.
+'''
 
 
 def unique():
@@ -19,8 +23,10 @@ def unique():
 class UniqueArgParser(marcel.core.ArgParser):
 
     def __init__(self, global_state):
-        super().__init__('unique', global_state, ['-c', '--consecutive'])
-        self.add_argument('-c', '--consecutive', action='store_true')
+        super().__init__('unique', global_state, ['-c', '--consecutive'], SUMMARY, DETAILS)
+        self.add_argument('-c', '--consecutive',
+                          action='store_true',
+                          help='Remove duplicates only when consecutive.')
 
 
 class Unique(marcel.core.Op):
