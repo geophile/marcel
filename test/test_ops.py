@@ -303,6 +303,8 @@ def test_squish():
              expected_out=[0, -1, -2, -3, -4])
     TEST.run('gen 5 | map (x: (x, -x)) | squish max',
              expected_out=[0, 1, 2, 3, 4])
+    TEST.run('gen 5 | map (x: (x, -x)) | squish count',
+             expected_out=[2, 2, 2, 2, 2])
     TEST.run('gen 5 | map (x: ([-x, x], [-x, x])) | squish +',
              expected_out=[(0, 0, 0, 0),
                            (-1, 1, -1, 1),

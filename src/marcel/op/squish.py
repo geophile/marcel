@@ -57,4 +57,4 @@ class Squish(marcel.core.Op):
         self.function.set_op(self)
 
     def receive(self, x):
-        self.send(functools.reduce(self.function, x))
+        self.send(functools.reduce(self.function, x, None))
