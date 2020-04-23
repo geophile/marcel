@@ -28,16 +28,16 @@ class Markup:
         self.preceding_non_ws_count = preceding_non_ws_count
         if self.end == -1:
             raise Exception()
+        self.start_size = Markup.markup_start_size(text, start)
         # Compute non-ws count for bracketed text
         self.non_ws_count = 0
-        p = start + Markup.start_size(text, start)
+        p = start + self.start_size
         while p < self.end - 1:
             if not text[p].isspace():
                 self.non_ws_count += 1
             p += 1
-        start_size = self.start_size(text, start)
-        self.content = text[self.start + start_size:self.end - 1]
-        self.color = (color_scheme.help_highlight if start_size == 1 else
+        self.content = text[self.start + self.start_size:self.end - 1]
+        self.color = (color_scheme.help_highlight if self.start_size == 1 else
                       color_scheme.help_bold if text[start] == 'b' else
                       color_scheme.help_italic if text[start] == 'i' else
                       color_scheme.help_name)
@@ -49,14 +49,14 @@ class Markup:
         return self.end - self.start
 
     @staticmethod
-    def start_size(text, p):
+    def markup_start_size(text, p):
         return (1 if text[p] == '{' else
                 2 if text[p] in Markup.MARKUP_PREFIX and len(text) > p + 1 and text[p + 1] == '{' else
                 0)
 
     @staticmethod
     def starts_here(text, p):
-        return Markup.start_size(text, p) > 0
+        return Markup.markup_start_size(text, p) > 0
 
 
 class Block:
@@ -88,8 +88,8 @@ class EmptyLine(Block):
 
 class Paragraph(Block):
 
-    def __init__(self, help_text):
-        self.help_text = help_text
+    def __init__(self, help_formatter):
+        self.help_formatter = help_formatter
         self.lines = []
         self.markup = None
         self.plaintext = None
@@ -111,7 +111,7 @@ class Paragraph(Block):
         p = 0
         while p < n:
             if Markup.starts_here(text, p):
-                markup = Markup(text, p, non_ws_count, self.help_text.color_scheme)
+                markup = Markup(text, p, non_ws_count, self.help_formatter.color_scheme)
                 self.markup.append(markup)
                 non_ws_count += markup.non_ws_count
                 self.plaintext += markup.content
@@ -130,7 +130,7 @@ class Paragraph(Block):
         text = self.wrapped
         n = len(text)
         p = 0  # position in text
-        format_function = self.help_text.format_function
+        format_function = self.help_formatter.format_function
         m = 0  # markup index
         non_ws_count = 0
         while p < n and m < len(self.markup):
@@ -145,10 +145,17 @@ class Paragraph(Block):
             while text[p].isspace():
                 formatted += text[p]
                 p += 1
-            # Process markup
-            formatted += format_function(markup.content, markup.color)
-            p += len(markup.content)
-            non_ws_count += markup.non_ws_count
+            # Process markup. Don't use markup.context, as formatting may have modified it (bug 39).
+            markup_text = ''
+            markup_non_ws_count = 0
+            while markup_non_ws_count < markup.non_ws_count:
+                c = text[p]
+                p += 1
+                markup_text += c
+                if not c.isspace():
+                    markup_non_ws_count += 1
+            formatted += format_function(markup_text, markup.color)
+            non_ws_count += markup_non_ws_count
             m += 1
         formatted += text[p:]
         return formatted
@@ -156,8 +163,8 @@ class Paragraph(Block):
 
 class IndentedLine(Paragraph):
 
-    def __init__(self, line, help_text):
-        super().__init__(help_text)
+    def __init__(self, line, help_formatter):
+        super().__init__(help_formatter)
         super().append(line)
 
     def __repr__(self):
@@ -169,8 +176,9 @@ class IndentedLine(Paragraph):
 
 class HelpFormatter:
 
-    def __init__(self, colorscheme, format_function):
-        self.color_scheme = colorscheme
+    def __init__(self, color_scheme, format_function):
+        assert color_scheme is not None
+        self.color_scheme = color_scheme
         self.format_function = format_function
         self.original = None
         self.blocks = None
@@ -190,7 +198,8 @@ class HelpFormatter:
     def find_blocks(self):
         self.blocks = []
         paragraph = None
-        for line in self.original.split('\n'):
+        lines = self.original.split('\n')
+        for line in lines:
             if len(line) == 0:
                 self.blocks.append(EmptyLine())
                 paragraph = None

@@ -5,13 +5,7 @@
 
 - Licensing header
 
-util.py:
-
-- quote
-
 - Debugging & verbosity level
-
-- Make File comparisons work -- based on absolute path.
 
 - Should the name of map be changed? f as in osh? apply? map doesn't
   really make sense when used as a generator. Could have gen handle
@@ -26,44 +20,37 @@ util.py:
 - ps: If commandline blank, take contents of status file? That's what
   ps appears to do.
 
-- more/less commands
+----------------------------------------------------------------------
 
-- File navigation (parent, children, ...)
+File objects
 
-- ^emacs works -- a new window running GUI emacs is created. So does
-  ^emacs -nw, doing exactly the right thing (non-graphical, in current
-  terminal). But ^vi does not. Nothing appears to happen. But vi is
-  listening for input, so :q exits. stderr complains about not being a
-  terminal, but this isn't visible. Vi DOES work if subprocess.run
-  omits stdout=PIPE and stderr=PIPE.
-
-- redirection
-
-- Organize internal ops -- Fork, LabelThread
-
-- osh1 fork has to be first in top-level pipeline. Relax this?
-
-- LOOK AT SHLEX MODULE -- COMMAND-LINE PARSING AND QUOTING
-
-- .marcel.py might want a cluster named jao and a terminal profile
-  named jao. Need separate namespaces for these things.
-
-- out.receive does a lot of work. Precompute whatever can be.
-
-- pushd/popd
-
-- How do exit codes fit in?
-
-- Redirection: < > >>. > and >> are taken care of by out -f and out -a,
-  aren't they?
+- File navigation (parent, children, ...). Sort of works. Should
+  _getattr() wrap a path (if delegation returns one) into a File?
 
 ----------------------------------------------------------------------
 
-Executables (without the bash op)
+- Organize internal ops -- Fork, LabelThread
 
-- How to invoke the bash --interactive flag?
+- out.receive does a lot of work. Precompute whatever can be.
+
+- How do exit codes fit in?
+
+----------------------------------------------------------------------
+
+Bash:
 
 - What if there is an arg that is significant to marcel parsing, e.g. [, (.
+
+- shlex.quote() usage, and wildcards need to be
+  reconsidered. Automatically quoting everything is wrong, (bug 38). So
+  maybe the problem is that bash is wrong. Need to preserve the bash
+  args exactly as written, quotes included, and pass it all to Popen. As
+  things stand, we lose the quotes during parsing, and then add them
+  back unconditionally.
+  
+  Globbing is tricky because it then requires great care to quote and
+  escape properly, e.g. a\ b*, 'a b'*, 'a b*', (the first two are the
+  same, the last has no wildcard).
 
 ----------------------------------------------------------------------
 
@@ -75,15 +62,12 @@ Glob patterns and marcel syntax both use [].
 Could handle the situation by being context-sensitive during the
 parse.
 
-----------------------------------------------------------------------
-
-Get rid of "from ... import ..."
+This is going to be a problem now that pipelines can be args.
 
 ----------------------------------------------------------------------
 
 Provide a way to specify farcel config path. Maybe as a property of
 the cluster.
-
 
 ----------------------------------------------------------------------
 
@@ -104,62 +88,7 @@ a sequence in position 1 and squish just that. So
 
 ----------------------------------------------------------------------
 
-Need a flag for cp, mv, to prevent clobbering existing files. (Check
-before doing anything, even though that isn't foolproof.)
-
-----------------------------------------------------------------------
-
-mv looks buggy. Setup considers last filename as target. This is
-BEFORE glob expansion, which is wrong. Write more tests, fix code.
-
-bash: mv glob ... 
-
-- Takes the last identified file as the target. So mv * is fine.
-
-- EXCEPT if the last item on the command line is a glob, which
-  describes no files, then the item itself is interpreted as a
-  filename. And if THAT doesn't exist, then mv complains about there
-  being no target. So mv a* b* moves everything into the last thing
-  identified by b*. If b* doesn't identify anything, then "b*" is
-  assumed to be the file. 
-
-- But it ALSO depends on how many things are being moved. If nothing
-  is identifed by b*, then mv a* b* will work as follows:
-
-  - a* identifies > 1 file: Complain that directory b* does not exist.
-  - a* identifies 1 file: Move the matched file to "b*".
-  - a* identifies 0 files: Complain that "a*" does not exist.
-
-mv a* b* (a* > 1 file, b* does not exist) protects against
-accidentally using the last a* file/dir as a target. Which is good.
-
-Have marcel be more explicit:
-
-- Last FILENAME is the target.
-
-- Take files being moved from upstream if one FILENAME is specified
-  (the target). I.e., base it on the number of FILENAMEs, not the
-  number of qualifying things after glob expansion.
-
-----------------------------------------------------------------------
-
 Distinct color for broken symlink.
-
-----------------------------------------------------------------------
-
-Computing ls.base (used to compute file.display_path) isn't quite
-right, for symlink to directory. Need to survey what bash does,
-decide on correct behavior, implement and test. Related to handling
-of -HL flags for ls.
-
-
-----------------------------------------------------------------------
-
-cp, mv, ln, rm.
-
-- Allow piping files in.
-
-- Tab completion
 
 ----------------------------------------------------------------------
 
@@ -169,68 +98,12 @@ used in the current position within the pipeline.
 
 ----------------------------------------------------------------------
 
-Tab completion for flags of executables.
-
-----------------------------------------------------------------------
-
-Clean up parser to prepare for more general handling of pipelines:
-
-- @fork [ ... ] currently:
-
-    - fork_start and fork_spec grammar states and actions.
-    
-    - InProgress has fork_spec field.
-
-    - finish_pipeline assumes that a fork op is being completed.
-
-- Generalize:
-
-    + Treat fork like any other op. START action creates an op just
-      like for a string. Don't need START_FORK and FORK_SPEC states.
-
-    + Choice between LocalFork and RemoteFork can't be done by
-      create_fork.  Keep choice inside Fork op, delegate instead of
-      inherit.
-
-    + Fork has to be a more standard op. The only thing special about it
-      is the syntax used to invoke it, @.
-
-    + create_op also has some op-specific logic, distinguishing op
-      from executable, and using the bash operator in the latter case.
-
-    + finish_pipeline: Remove special handling of fork op. The
-      pipeline just goes into op.args.
-
-----------------------------------------------------------------------
-
-create op:
-
-        op_module = marcel.opmodules.OP_MODULES.named(op_name)
-        if op_module:
-            current.op = getattr(op_module, op_name)()
-        else:
-            # op_name might be an executable
-            if is_executable(op_name):
-                # Execute via the bash op, in which case op_name becomes the first argument.
-                bash_module = marcel.opmodules.OP_MODULES.named('bash')
-                current.op = getattr(bash_module, 'bash')()
-                current.args.append(op_name)
-            else:
-                raise UnknownOpError(self.text, op_name)
-
-----------------------------------------------------------------------
-
 What happens if an arg that is supposed to be a pipeline is actually a
 string looking exactly like a pipeline ref?
 
 ----------------------------------------------------------------------
 
-cd doesn't work because it's running in a Process. Doesn't affect the
-env visible to the main process.
-
-----------------------------------------------------------------------
-
-Job should be in marcel.object.
+Job should be in marcel.object. Maybe.
 
 ----------------------------------------------------------------------
 
@@ -282,3 +155,5 @@ is too verbose and arcane for something so common. Something like:
 Except that # is typically a shell comment marker.
 
 Define a "count" function?
+
+----------------------------------------------------------------------

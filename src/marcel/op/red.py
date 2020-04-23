@@ -59,7 +59,7 @@ then the running total can be computed as follows:
 
     ... | red -i + | ...
 
-The output stream would be {(1, 1), (2, 3), (3, 6)}. In the last output object, {6} is the sum
+The output stream would be {(1, 1), (2, 3), (3, 6)}. In the last output tuple, {6} is the sum
 of the current input ({3}) and all preceding inputs ({1, 2}).
 
 The C{-i} flag can also be used with grouping. For example, if the input 

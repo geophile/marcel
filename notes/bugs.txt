@@ -69,6 +69,35 @@ Traceback (most recent call last):
     data = data.decode(encoding, errors)
 UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa0 in position 1247: invalid start byte
 
+
+Also:
+
+M jao@cheese:~$ find teaching
+Process Process-3:
+Traceback (most recent call last):
+  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/src/marcel/job.py", line 130, in run_command
+    env_vars = command.execute()
+  File "/home/jao/git/marcel/src/marcel/main.py", line 43, in execute
+    self.pipeline.receive_complete()
+  File "/home/jao/git/marcel/src/marcel/core.py", line 300, in receive_complete
+    self.first_op.receive_complete()
+  File "/home/jao/git/marcel/src/marcel/op/bash.py", line 79, in receive_complete
+    self.runner.run()
+  File "/home/jao/git/marcel/src/marcel/op/bash.py", line 124, in run
+    stdout, stderr = process.communicate(input=input)
+  File "/usr/lib/python3.7/subprocess.py", line 964, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.7/subprocess.py", line 1755, in _communicate
+    self.stdout.errors)
+  File "/usr/lib/python3.7/subprocess.py", line 841, in _translate_newlines
+    data = data.decode(encoding, errors)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x87 in position 1113486: invalid start byte
+
+
 ----------------------------------------------------------------------
 
 34. Tab completion vs. sudo -- shell crash
