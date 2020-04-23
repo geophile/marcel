@@ -4,7 +4,7 @@ import sys
 import marcel.exception
 import marcel.exception
 import marcel.function
-import marcel.help
+import marcel.helpformatter
 import marcel.object.error
 import marcel.util
 
@@ -18,8 +18,8 @@ class ArgParser(argparse.ArgumentParser):
 
     def __init__(self, op_name, global_state, flags=None, summary=None, details=None):
         if ArgParser.help_formatter is None:
-            ArgParser.help_formatter = marcel.help.HelpFormatter(global_state.env.color_scheme(),
-                                                                 marcel.util.colorize)
+            ArgParser.help_formatter = marcel.helpformatter.HelpFormatter(global_state.env.color_scheme(),
+                                                                          marcel.util.colorize)
         super().__init__(prog=op_name,
                          formatter_class=argparse.RawDescriptionHelpFormatter,
                          description=ArgParser.help_formatter.format(summary),

@@ -1,4 +1,4 @@
-import marcel.help
+import marcel.helpformatter
 import marcel.object.colorscheme
 
 text = '''
@@ -26,7 +26,7 @@ def format(text, color):
 def dump(help):
     for block in help.blocks:
         print(block)
-        if isinstance(block, marcel.help.Paragraph) and block.markup and len(block.markup) > 0:
+        if isinstance(block, marcel.helpformatter.Paragraph) and block.markup and len(block.markup) > 0:
             print('        MARKUP {')
             for markup in block.markup:
                 print(f'        {markup}')
@@ -41,7 +41,7 @@ def dump(help):
                 print('        }')
 
 
-help = marcel.help.HelpFormatter(color_scheme, format)
+help = marcel.helpformatter.HelpFormatter(color_scheme, format)
 formatted = help.format(text)
 # dump(help)
 print(formatted)

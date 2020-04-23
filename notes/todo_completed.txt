@@ -123,3 +123,78 @@ been transmitted/reconstructed.
 
 ----------------------------------------------------------------------
 
+- ^emacs works -- a new window running GUI emacs is created. So does
+  ^emacs -nw, doing exactly the right thing (non-graphical, in current
+  terminal). But ^vi does not. Nothing appears to happen. But vi is
+  listening for input, so :q exits. stderr complains about not being a
+  terminal, but this isn't visible. Vi DOES work if subprocess.run
+  omits stdout=PIPE and stderr=PIPE.
+
+----------------------------------------------------------------------
+
+- .marcel.py might want a cluster named jao and a terminal profile
+  named jao. Need separate namespaces for these things.
+
+----------------------------------------------------------------------
+
+- pushd/popd
+
+----------------------------------------------------------------------
+
+Get rid of "from ... import ..."
+
+----------------------------------------------------------------------
+
+Tab completion for flags of executables.
+
+----------------------------------------------------------------------
+
+Clean up parser to prepare for more general handling of pipelines:
+
+- @fork [ ... ] currently:
+
+    - fork_start and fork_spec grammar states and actions.
+    
+    - InProgress has fork_spec field.
+
+    - finish_pipeline assumes that a fork op is being completed.
+
+- Generalize:
+
+    + Treat fork like any other op. START action creates an op just
+      like for a string. Don't need START_FORK and FORK_SPEC states.
+
+    + Choice between LocalFork and RemoteFork can't be done by
+      create_fork.  Keep choice inside Fork op, delegate instead of
+      inherit.
+
+    + Fork has to be a more standard op. The only thing special about it
+      is the syntax used to invoke it, @.
+
+    + create_op also has some op-specific logic, distinguishing op
+      from executable, and using the bash operator in the latter case.
+
+    + finish_pipeline: Remove special handling of fork op. The
+      pipeline just goes into op.args.
+
+
+----------------------------------------------------------------------
+
+cd doesn't work because it's running in a Process. Doesn't affect the
+env visible to the main process.
+
+----------------------------------------------------------------------
+
+red needs a counting primitive.
+
+    ... | f (x: 1) | red +
+
+is too verbose and arcane for something so common. Something like:
+
+   ... | red #
+
+Except that # is typically a shell comment marker.
+
+Define a "count" function?
+
+----------------------------------------------------------------------

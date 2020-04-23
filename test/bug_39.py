@@ -1,4 +1,4 @@
-import marcel.help
+import marcel.helpformatter
 import marcel.main
 import marcel.object.host
 import marcel.util
@@ -38,8 +38,8 @@ class Bug39(test_base.Test):
 
 def main():
     bug = Bug39()
-    formatter = marcel.help.HelpFormatter(MAIN.env.color_scheme(),
-                                          marcel.util.colorize)
+    formatter = marcel.helpformatter.HelpFormatter(MAIN.env.color_scheme(),
+                                                   marcel.util.colorize)
     formatted = formatter.format(TEXT)
     print(formatted)
 

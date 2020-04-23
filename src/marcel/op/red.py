@@ -24,6 +24,12 @@ For example, to find the sum of 0 ... 9, the sum of their squares, and the sum o
 
 which yields the output {(45, 285, 2025)}.
 
+The {count} function can be used to count the number of input tuples, e.g.
+
+    gen 10 | red count
+    
+yields the output {10}.
+
 b{Grouping}
 
 Reduction can be applied to groups of input rows, identifying the group-defining

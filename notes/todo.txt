@@ -143,17 +143,3 @@ Should expand operate on filenames? Might be better to have a separate
 command for that, e.g. cat.
 
 ----------------------------------------------------------------------
-
-red needs a counting primitive.
-
-    ... | f (x: 1) | red +
-
-is too verbose and arcane for something so common. Something like:
-
-   ... | red #
-
-Except that # is typically a shell comment marker.
-
-Define a "count" function?
-
-----------------------------------------------------------------------
