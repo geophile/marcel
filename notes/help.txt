@@ -61,11 +61,60 @@ Alternative:
 
 - Colorize.
 
+----------------------------------------------------------------------
 
+Markup:
 
 {} isn't enough. Need more markup, e.g. for headings:
 
-- {}: highlight
+- {}: highlight term being defined
+
 - b{}: bold
-- f{}: highlighting meant to indicate fixed-width
+
+- i{}: italic
+
+- f{}: highlighting meant to indicate fixed-width. E.g., an object
+  type.
+
 - indented text: don't wrap
+
+----------------------------------------------------------------------
+
+Implementation (after a couple of failed attempts):
+
+- Structure text as a list of Blocks, where a Block is one of:
+
+  - EMPTY: A line of length 0.
+
+  - INDENTED: A line beginning with whitespace
+
+  - PARAGRAPH: A sequence of lines beginning with non-whitespace.
+
+- PARAGRAPH is a sequence of Tokens, where a Token is one of:
+
+  - WHITESPACE: A maximal sequence of whitespace.
+
+  - TEXT: A maximal sequence of non-whitespace excluding markup.
+
+  - MARKUP: x{...}
+
+  So "abc n{this is marked up}, def" ->
+
+  TEXT: "abc"
+  WHITESPACE: " "
+  MARKUP: n{this is marked up}
+  TEXT: ","
+  WHITESPACE: " "
+  TEXT: "def"
+
+The idea is to be able to easily identify where the markup is located
+within a PARAGRAPH that has been transformed by removing markup and
+then wrapping. This can be done by recording, for a MARKUP:
+
+- Number of TEXT characters preceding the MARKUP (including the text
+  inside preceding MARKUPs.
+
+- Length
+
+INDENTED line is like a paragraph. Might have markup. Handle it like a
+paragraph, but don't wrap it.

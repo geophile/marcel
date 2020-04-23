@@ -4,7 +4,9 @@ import sys
 import marcel.exception
 import marcel.exception
 import marcel.function
+import marcel.help
 import marcel.object.error
+import marcel.util
 
 Error = marcel.object.error.Error
 
@@ -12,11 +14,16 @@ Error = marcel.object.error.Error
 class ArgParser(argparse.ArgumentParser):
 
     op_flags = {}  # op name -> [flags], for use in tab completion
+    help_formatter = None
 
     def __init__(self, op_name, global_state, flags=None, summary=None, details=None):
+        if ArgParser.help_formatter is None:
+            ArgParser.help_formatter = marcel.help.HelpFormatter(global_state.env.color_scheme(),
+                                                                 marcel.util.colorize)
         super().__init__(prog=op_name,
-                         description=ArgParser.colorize(summary, global_state),
-                         epilog=ArgParser.colorize(details, global_state))
+                         formatter_class=argparse.RawDescriptionHelpFormatter,
+                         description=ArgParser.help_formatter.format(summary),
+                         epilog=ArgParser.help_formatter.format(details))
         ArgParser.op_flags[op_name] = flags
         self.global_state = global_state
 
@@ -82,27 +89,6 @@ class ArgParser(argparse.ArgumentParser):
 
     def check_function(self, s):
         return marcel.function.Function(s, self.global_state.function_namespace())
-
-    # For use by this class
-
-    @staticmethod
-    def colorize(text, global_state):
-        if text is None:
-            return None
-        flag_color = global_state.env.color_scheme().help_flag
-        buffer = []
-        p = 0
-        while True:
-            start = text.find('{', p)
-            if start == -1:
-                break
-            end = text.find('}', start)
-            assert end != -1
-            buffer.append(text[p:start])
-            buffer.append(marcel.util.colorize(text[start + 1:end], flag_color))
-            p = end + 1
-        buffer.append(text[p:])
-        return ''.join(buffer)
 
 
 class BaseOp:

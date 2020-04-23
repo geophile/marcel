@@ -558,3 +558,10 @@ SIGKILL, then switch to it, and have the kill op work consistently
 with bash.
 
 ----------------------------------------------------------------------
+
+FIXED
+
+38. Wildcard not working
+
+M jao@cheese:~$ grep MiniMachete /var/log/syslog*
+Error(grep: /var/log/syslog*: No such file or directory)

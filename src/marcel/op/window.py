@@ -17,11 +17,11 @@ b{Predicate-based:}
 
 A new group is started on the first input object, and for any
 subsequent object for which {predicate} returns true. For example, if
-the input stream contains the integers {1, 2, 3, ...}, then::
+the input stream contains the integers {1, 2, 3, ...}, then:
 
     window (x: x % 3 == 2)
 
-yields as output::
+yields as output:
 
     ((1,),)
     ((2,), (3,), (4,))
@@ -42,7 +42,7 @@ new list containing {N} items. Groups may be padded with
 b{Example:}
  
 For input {0, 1, ..., 9}, {window -o 3} yields these
-tuples::
+tuples:
 
     ((0,), (1,), (2,))
     ((1,), (2,), (3,))
@@ -55,7 +55,7 @@ tuples::
     ((8,), (9,), (None,))
     ((9,), (None,), (None,))
 
-{-d} specifies I{disjoint} windows, in which each input object
+{-d} specifies i{disjoint} windows, in which each input object
 appears in only one group. A new group is started every {N}
 objects. The last window may be padded with (None,) to ensure that it
 has {N} elements.
@@ -63,7 +63,7 @@ has {N} elements.
 b{Example:}
 
 For input {0, 1, ..., 9}, {window -d 3} yields these
-tuples::
+tuples:
 
     ((0,), (1,), (2,))
     ((3,), (4,), (5,))
@@ -71,14 +71,6 @@ tuples::
     ((9,), (None,), (None,))
 '''
 
-"""C{window PREDICATE
-C{window -o|--overlap N}
-C{window -d|--disjoint N}
-
-PREDICATE                  Start a new group when PREDICATE, applied to the current input, evaluates to True
--o N                       Start a new group of size N on each input. Groups overlap.
--d N                       Start a new group of size N after every N inputs. Groups are disjoint.
-"""
 
 def window():
     return Window()

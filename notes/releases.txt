@@ -1,3 +1,13 @@
+0.5
+
+- Pipelines
+
+- DB access
+
+- Syntax for starting job in background (like bash &)
+
+----------------------------------------------------------------------
+
 0.4 
 
 - Documentation
@@ -8,16 +18,14 @@
     But "man ls" would hit the Linus man page, wouldn't it? Is there
     a PATH mechanism?
 
-- Pipelines
-
-- DB access
-
-- Syntax for starting job in background (like bash &)
-
 - Highlight color for broken link. Not trivial, because File needs to
   survive pickling. Can't assume that file can be examined when
   colorization is needed. And stat (computed before pickling) doesn't
   indicate whether the file exists. Could check and record this.
+
+- Bugs
+
+  + 38
 
 ----------------------------------------------------------------------
 

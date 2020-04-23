@@ -43,6 +43,7 @@ class Bash(marcel.core.Op):
         'man',
         'more',
         'psql',
+        'top',
         'vi'
     }
 
@@ -92,9 +93,18 @@ class Escape:
     def command(self):
         return ' '.join([Escape.quote(a) for a in self.op.args])
 
+    # The use of looks_globby is a hack due to bug 38. Quoting of a glob prevents glob
+    # expansion. So this is definitely wrong sometimes, but I'm not sure what else to do.
+    # This is trading a pretty blatant bug for a much more obscure one.
+    # TODO: It looks like quoting everything except the glob characters might work.e g.
+    # TODO: "/var/log/syslog"*. Haven't played with this enough to conclude it is a complete fix.
     @staticmethod
     def quote(x):
-        return x if x in Escape.BASH_CONTROL else shlex.quote(x)
+        return x if x in Escape.BASH_CONTROL or Escape.looks_globby(x) else shlex.quote(x)
+
+    @staticmethod
+    def looks_globby(x):
+        return '*' in x or '?' in x or '[' in x
 
 
 class NonInteractive(Escape):

@@ -13,12 +13,12 @@ If {position} is omitted, then each element of an input tuple is generated as a 
 If {position} is provided, it must be non-negative. If {position} exceeds the length of an
 input sequence, then nothing is expanded (the input sequence is sent as output).
 
-b{Example}: If the input contains these sequences::
+b{Example}: If the input contains these sequences:
 
     (100, 101)
     (200, 201)
 
-then {expand} generates this output::
+then {expand} generates this output:
 
     100
     101
