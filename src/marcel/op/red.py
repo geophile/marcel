@@ -157,17 +157,13 @@ class NonGroupingReducer(Reducer):
 
     def __init__(self, op):
         super().__init__(op)
-        self.accumulator = None
+        self.accumulator = [None] * self.n
 
     def receive(self, x):
         accumulator = self.accumulator
-        if accumulator is None:
-            accumulator = list(x)
-            self.accumulator = accumulator
-        else:
-            function = self.function
-            for i in range(self.n):
-                accumulator[i] = function[i](accumulator[i], x[i])
+        function = self.function
+        for i in range(self.n):
+            accumulator[i] = function[i](accumulator[i], x[i])
         if self.op.incremental:
             self.op.send(x + tuple(accumulator))
 
@@ -190,14 +186,11 @@ class GroupingReducer(Reducer):
         group = tuple(self.group(x))
         accumulator = self.accumulators.get(group, None)
         if accumulator is None:
-            accumulator = list(x)
+            accumulator = [None] * self.n
             self.accumulators[group] = accumulator
-        else:
-            for i in range(self.n):
-                reducer = self.function[i]
-                if reducer:
-                    accumulator[i] = reducer(accumulator[i], x[i])
-                # else: x[i] is part of the group
+        for i in range(self.n):
+            reducer = self.function[i]
+            accumulator[i] = reducer(accumulator[i], x[i]) if reducer else x[i]
         if self.op.incremental:
             self.op.send(x + tuple(self.data(accumulator)))
 

@@ -122,14 +122,15 @@ def test_red():
              expected_out=[4])
     TEST.run('gen 5 | red min',
              expected_out=[0])
+    TEST.run('gen 5 | red count',
+             expected_out=[5])
     # Test incremental reduction
     TEST.run('gen 5 1 | red -i +',
              expected_out=[(1, 1), (2, 3), (3, 6), (4, 10), (5, 15)])
-    # Test incremental reduction
     TEST.run('gen 5 1 | red --incremental +',
              expected_out=[(1, 1), (2, 3), (3, 6), (4, 10), (5, 15)])
     # Test lambdas
-    TEST.run('gen 5 1 | map (x: (x, x)) | red (x, y: x + y) (x, y: x * y)',
+    TEST.run('gen 5 1 | map (x: (x, x)) | red (x, y: y if x is None else x + y) (x, y: y if x is None else x * y)',
              expected_out=[(15, 120)])
     # Test multiple reduction
     TEST.run('gen 5 1 | map (x: (x, x)) | red + *',
@@ -464,7 +465,6 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('echo hello | grep hello')
     pass
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist

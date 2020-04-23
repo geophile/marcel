@@ -565,3 +565,37 @@ FIXED
 
 M jao@cheese:~$ grep MiniMachete /var/log/syslog*
 Error(grep: /var/log/syslog*: No such file or directory)
+
+----------------------------------------------------------------------
+
+FIXED
+
+39. Incorrect wrapping of help text
+
+From red.DETAILS:
+
+'''
+...
+If this sequence is piped to this invocation of {red}:
+
+    red . + . +
+
+then groups are defined using the first and third values, {(1, 10), (1, 11), (2, 20), (3, 30)}.
+The output would be:
+
+    (1, 11, 10, 300)
+...
+'''
+
+Formatted:
+
+If this sequence is piped to this invocation of red:
+
+    red . + . +
+
+then groups are defined using the first and third values, (1, 10), (1, 11), (2, 20), (3, 30). The output would be:
+
+    (1, 11, 10, 300)
+
+
+Why isn't the "then groups ..." text wrapped?

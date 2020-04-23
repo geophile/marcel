@@ -170,7 +170,6 @@ class BaseOp:
             try:
                 self.receive(marcel.util.normalize_output(x))
             except Exception as e:
-                marcel.util.print_stack()
                 self.receive_error(Error(e))
 
     def receive(self, x):

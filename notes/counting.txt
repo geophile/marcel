@@ -1,0 +1,51 @@
+Adding a count function to red is complicated
+
+A typical red function is addition. If we are reducing (5, 6, 7), then
+the accumulator is initialized to 5, and we do two additions: 5 + 6 ->
+11, 11 + 7 -> 18.
+
+This works for multiplication too: Initialize to 5, 5 * 6 -> 30, 30 *
+7 -> 210.
+
+If counting is done this way, then the function is lambda acc, x: acc
++ 1. But initializing the accumulator to the first item of the
+sequence is wrong, it should be initialized to 1, not 5.
+
+Ways to generalize, fixing count:
+
+1) Specify an initial value. Process the first item of the sequence by
+applying the reduction to the initial value and the first item. If we
+set the initial values to 0 for +, 1 for *, and 0 for count (using the
+reduction function above), everything works out.
+
+BUT: Now function specification is more complicated, and we can't just
+accomodate arbitrary functions on the command line. The initial value
+would have to be specified somehow.
+
+2) Somehow arrange for a "preprocessing" function to be applied to
+sequence items. This function is p(x) = x for pretty much everything,
+EXCEPT for count, in which case it would be p(x) = 1. I.e., the
+reduction function, r, does r(accumulator, p(x)). So now:
+
+    +: reduce = lambda x, y: x + y, preprocess = lambda x: x
+    *: reduce = lambda x, y: x * y, preprocess = lambda x: x
+    count: reduce = lambda x, y: x + y, preprocess = lambda x: 1
+
+I.e., count is + with a different preprocessing function.
+
+3) Define the initial accumulator value to always be None, and then
+have the reduction function deal with it. 
+
+    +: lambda acc, x: x if acc is None else acc + x
+    *: lambda acc, x: x if acc is None else acc * x
+    count: lambda acc, x: 1 + (0 if acc is None else acc)
+
+I think #3 is cleanest. It is best for customization (function on
+command line) since it avoids the need to specify a new thing -- an
+initial value or a preprocessing function.
+
+
+
+
+The same issue comes up with squish, which uses itertools.reduce. It
+could be changed to use the same technique as red.

@@ -4,17 +4,18 @@ import marcel.exception
 class Function:
 
     symbols = {
-        '+': lambda x, y: x + y,
-        '*': lambda x, y: x * y,
-        '^': lambda x, y: x ^ y,
-        '&': lambda x, y: x & y,
-        '|': lambda x, y: x | y,
-        'and': lambda x, y: x and y,
-        'or': lambda x, y: x or y,
-        'max': lambda x, y: max(x, y),
-        'min': lambda x, y: min(x, y),
+        '+': lambda acc, x: x if acc is None else acc + x,
+        '*': lambda acc, x: x if acc is None else acc * x,
+        '^': lambda acc, x: x if acc is None else acc ^ x,
+        '&': lambda acc, x: x if acc is None else acc & x,
+        '|': lambda acc, x: x if acc is None else acc | x,
+        'and': lambda acc, x: x if acc is None else acc and x,
+        'or': lambda acc, x: x if acc is None else acc or x,
+        'max': lambda acc, x: x if acc is None else max(acc, x),
+        'min': lambda acc, x: x if acc is None else min(acc, x),
+        'count': lambda acc, x: 1 if acc is None else acc + 1,
         # Needed to support '.' notation for the red op. Function shouldn't be called.
-        '.': lambda x, y: None
+        '.': lambda acc, x: None
     }
 
     def __init__(self, source, globals):
