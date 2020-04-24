@@ -1,5 +1,7 @@
 import textwrap
 
+import marcel.util
+
 # Markup:
 #
 # - {}: highlight term being defined, e.g. a flag.
@@ -176,7 +178,7 @@ class IndentedLine(Paragraph):
 
 class HelpFormatter:
 
-    def __init__(self, color_scheme, format_function):
+    def __init__(self, color_scheme, format_function=marcel.util.colorize):
         assert color_scheme is not None
         self.color_scheme = color_scheme
         self.format_function = format_function

@@ -44,13 +44,12 @@ class Help(marcel.core.Op):
 
     def setup_1(self):
         try:
-            self.module = importlib.import_module(f'marcel.doc.help_{self.topic}')
+            self.module = importlib.import_module(f'marcel.doc.help_{self.topic.lower()}')
         except ModuleNotFoundError:
             raise marcel.exception.KillCommandException(f'Help not available for {self.topic}')
 
     def receive(self, _):
-        formatter = marcel.helpformatter.HelpFormatter(self.global_state().env.color_scheme(),
-                                                       marcel.util.colorize)
+        formatter = marcel.helpformatter.HelpFormatter(self.global_state().env.color_scheme())
         help_text = getattr(self.module, 'HELP')
         formatted = formatter.format(help_text)
         self.send(formatted)

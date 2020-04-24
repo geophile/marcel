@@ -1,39 +1,35 @@
 HELP = '''
 Marcel is a shell. Like any Linux shell, there are commands which
-can be executed.  In fact, you can run a Linux shell command or
-executable from marcel. Also, as in other shells, you can pipe the
-output from one command into the input of another.  For example, you
-can list .mp3 files anywhere inside your home directory, and sum their
-sizes, as follows:
+can be executed. These commands include both Linux executables (e.g. grep),
+and marcel operators. In some cases, the marcel operator has the same name
+as a Linux executable with similar capabilities, e.g. n{ls}. This is intentional,
+as the Linux executable operates in ways incompatible with marcel. (The Linux
+executable can still be executed by using the n{bash} command, e.g. {bash ls}.)
 
-    ls -fr ~ | select (f: f.suffix.lower() == '.mp3') | map (f: f.size) | red +
+In marcel, as in other Linux shells, the output from one command can
+be piped to another.  The conventional syntax is used, {|}. Linux
+pipes stream unstructured text between commands. In marcel, streams
+carry arbitrary Python objects.
 
-This works as follows:
+Marcel is implemented in, and based on the Python language. Whereas
+other shells invent new languages for control constructs, expressions,
+and so on, marcel simply relies on Python. So the {map} operator takes
+a stream of Python objects as input, and generates a stream of Python
+objects as output. Each output object is computed by applying a Python
+function to each input object. For example, this marcel code generates
+a sequence of 100 integers, 0 through 99, and, outputs the each number
+along with its square root:
 
-    - {ls -fr ~}: List files only ({-f}), recursively ({-r}), in the home directory ({~}).
+    gen 100 | map (lambda x: (x, x**0.5))
 
-    - {|}: Pipe the n{File} objects resulting from {ls} to the next command.
- 
-    - {select (...)}: {select} is the marcel operator for filtering items in a stream.
-      The selection predicate, inside the parentheses, is a Python expression, (although
-      you can omit the n{lambda} keyword). The parameter {f} is bound to a n{File}
-      piped in from the {ls} command. The predicate extracts the extension of the n{File}
-      (using the n{pathlib.Path.suffix} method), converts to lower case, and then compares
-      to n{.mp3}.
+Note that the Python function, mapping {x} to the tuple {(x, x**0.5)}
+is enclosed in parentheses, as is the case whenever a function is
+required. Marcel permits the n{lambda} keyword to be omitted.
 
-    - {map (...)}: The qualifying n{File}s are piped to the {map} command, which applies
-      a function to each incoming item. In this case, the function extracts the size
-      of the file.
+The following topics will explain these concepts in more detail:
 
-    - {red +}: The file sizes are piped to the reduction command, {red}. The reduction
-      is done by applying {+} repeatedly, to the incoming sizes.
-
-Use n{help} to get more information on:
-
-    - n{concepts}: The major concepts you need to understand to use marcel.
-
-    - n{commands}: To get a list of marcel commands.
-
-    - n{objects}: To get a list of builtin objects.
-
+    - n{operator}
+    - n{executable}
+    - n{function}
+    - n{pipeline}
 '''

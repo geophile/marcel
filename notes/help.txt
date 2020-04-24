@@ -137,6 +137,7 @@ to provide a help command:
 Help structure:
 
      help
+         overview
          configuration
          environment
          concepts

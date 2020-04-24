@@ -599,3 +599,26 @@ then groups are defined using the first and third values, (1, 10), (1, 11), (2, 
 
 
 Why isn't the "then groups ..." text wrapped?
+
+----------------------------------------------------------------------
+
+40. Unknown cluster name is assumed to be an int
+
+M jao@cheese:~/git/marcel/test$ @local [ ps | select (p: 'python' in p.commandline) ]
+Process Process-3:
+Traceback (most recent call last):
+  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/src/marcel/job.py", line 130, in run_command
+    env_vars = command.execute()
+  File "/home/jao/git/marcel/src/marcel/main.py", line 40, in execute
+    self.pipeline.setup_1()
+  File "/home/jao/git/marcel/src/marcel/core.py", line 276, in setup_1
+    op.setup_1()
+  File "/home/jao/git/marcel/src/marcel/op/fork.py", line 45, in setup_1
+    self.impl = Remote(self) if cluster else Local(self)
+  File "/home/jao/git/marcel/src/marcel/op/fork.py", line 176, in __init__
+    op.fork_spec = int(op.fork_spec)
+ValueError: invalid literal for int() with base 10: 'local'

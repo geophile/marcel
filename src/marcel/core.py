@@ -18,8 +18,7 @@ class ArgParser(argparse.ArgumentParser):
 
     def __init__(self, op_name, global_state, flags=None, summary=None, details=None):
         if ArgParser.help_formatter is None:
-            ArgParser.help_formatter = marcel.helpformatter.HelpFormatter(global_state.env.color_scheme(),
-                                                                          marcel.util.colorize)
+            ArgParser.help_formatter = marcel.helpformatter.HelpFormatter(global_state.env.color_scheme())
         super().__init__(prog=op_name,
                          formatter_class=argparse.RawDescriptionHelpFormatter,
                          description=ArgParser.help_formatter.format(summary),
