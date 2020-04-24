@@ -2,18 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/marcel/doc/__Init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/marcel/doc/help_concepts.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/marcel/doc/help_marcel.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/marcel/doc/help_overview.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/marcel/op/help.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/experiments/kwargs_and_self_dict.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/help.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/help.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/helpformatter.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/helpformatter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/ps.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/ps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/object/colorscheme.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/object/colorscheme.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/util.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -49,7 +41,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/test/bug_39.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/experiments/kwargs_and_self_dict.py" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="Errors" />
@@ -78,7 +70,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.test_ops">
+  <component name="RunManager" selected="Python.kwargs_and_self_dict">
     <configuration name="boundmethod" type="PythonConfigurationType" factoryName="Python">
       <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -409,6 +401,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="kwargs_and_self_dict" type="PythonConfigurationType" factoryName="Python">
+      <module name="marcel" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/usr/bin/python3.7" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/experiments" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/kwargs_and_self_dict.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="marcel" type="PythonConfigurationType" factoryName="Python">
       <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -643,6 +657,7 @@
       <item itemvalue="Python.bug_38" />
       <item itemvalue="Python.bug_39" />
       <item itemvalue="Python.pipes" />
+      <item itemvalue="Python.kwargs_and_self_dict" />
       <item itemvalue="Python.chdir" />
       <item itemvalue="Python.jobcontrol" />
       <item itemvalue="Python.mp" />
@@ -735,7 +750,7 @@
       <workItem from="1587237062058" duration="26082000" />
       <workItem from="1587344431204" duration="10282000" />
       <workItem from="1587355715766" duration="14535000" />
-      <workItem from="1587425832047" duration="61731000" />
+      <workItem from="1587425832047" duration="64008000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -848,6 +863,7 @@
     <SUITE FILE_PATH="coverage/marcel$modify_function_namespace.coverage" NAME="modify_function_namespace Coverage Results" MODIFIED="1583805209482" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/osh2$experiment.coverage" NAME="teststring Coverage Results" MODIFIED="1577843220460" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$bug_29.coverage" NAME="bug_29 Coverage Results" MODIFIED="1586369127945" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/marcel$kwargs_and_self_dict.coverage" NAME="kwargs_and_self_dict Coverage Results" MODIFIED="1587742357048" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/osh2$eval.coverage" NAME="eval Coverage Results" MODIFIED="1580913511419" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$chdir.coverage" NAME="chdir Coverage Results" MODIFIED="1587244829612" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/osh2$test_parsing.coverage" NAME="test_parsing Coverage Results" MODIFIED="1578772660138" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />

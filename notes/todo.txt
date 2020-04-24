@@ -71,23 +71,6 @@ the cluster.
 
 ----------------------------------------------------------------------
 
-Can squish be eliminated in favor of some variation of red? 
-
-Could at least generalize similar to expand. E.g. squish 1 would take
-a sequence in position 1 and squish just that. So
-
-(1, [[1]])
-(2, [[2], [2]])
-(3, [[3], [3], [3]])
-
- ->
-
-(1, [1])
-(2, [2, 2])
-(3, [3, 3, 3])
-
-----------------------------------------------------------------------
-
 Distinct color for broken symlink.
 
 ----------------------------------------------------------------------
@@ -123,20 +106,6 @@ can be customized by the user.
 
 ps flags. E.g., -a
 
--o doesn't really work right, due to the use of
- multiprocessing. Probably get rid of it.
-
-----------------------------------------------------------------------
-
-How is info on these topics obtained:
-
-- env vars
-- File
-- Process
-- ColorScheme
-- Color
-- History
-
 ----------------------------------------------------------------------
 
 Should expand operate on filenames? Might be better to have a separate
@@ -154,9 +123,26 @@ Help:
   probably a bad idea. Maybe find a Python markdown implementation?
   Still need colorizing.
 
-Colorization:
-
-italic: \e[3m...\e[0m
-bold: \e1m
-
 Use these for help.
+
+----------------------------------------------------------------------
+
+Red:
+
+- Need a red function for creating a list. + isn't a good choice, since it
+  already does expected things for numbers and strings. 
+
+- Can squish be eliminated in favor of some variation of red? 
+
+Could at least generalize similar to expand. E.g. squish 1 would take
+a sequence in position 1 and squish just that. So
+
+(1, [[1]])
+(2, [[2], [2]])
+(3, [[3], [3], [3]])
+
+ ->
+
+(1, [1])
+(2, [2, 2])
+(3, [3, 3, 3])

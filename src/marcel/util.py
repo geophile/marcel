@@ -81,10 +81,14 @@ def print_stack(file=None):
 def colorize(s, color):
     # Those /001 and /002 codes seem to fix bug 2.
     # https://stackoverflow.com/questions/9468435/how-to-fix-column-calculation-in-python-readline-if-using-color-prompt
+    style = ('\033[1m\033[3m' if color.bold and color.italic else
+             '\033[1m' if color.bold else
+             '\033[3m' if color.italic else
+             '\033[0m')
     return (s
             if color is None else
-            '\001\033[{}m\002\001\033[38;5;{}m\002{}\001\033[0m\002'.format(
-                1 if color.bold else 0,
+            '\001{}\002\001\033[38;5;{}m\002{}\001\033[0m\002'.format(
+                style,
                 color.code,
                 s))
 

@@ -1,15 +1,21 @@
 class Color:
 
-    def __init__(self, r, g, b, bold=False):
+    def __init__(self, r, g, b, bold=False, italic=False):
         self.r = r
         self.g = g
         self.b = b
         self.bold = bold
+        self.italic = italic
         # See https://unix.stackexchange.com/questions/124407/what-color-codes-can-i-use-in-my-ps1-prompt
         self.code = 16 + r * 36 + g * 6 + b
 
     def __str__(self):
-        return f'Color({self.r}, {self.g}, {self.b}){"*" if self.bold else ""}'
+        style = ''
+        if self.bold:
+            style += 'b'
+        if self.italic:
+            style += 'i'
+        return f'Color({self.r}, {self.g}, {self.b}){style}'
 
 
 class ColorScheme:
