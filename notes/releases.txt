@@ -6,22 +6,24 @@
 
 - Syntax for starting job in background (like bash &)
 
-----------------------------------------------------------------------
-
-0.4 
-
-- Documentation
-
-  - argparse help
-
-  - Need something more informative, along the lines of a man page.
-    But "man ls" would hit the Linus man page, wouldn't it? Is there
-    a PATH mechanism?
-
 - Highlight color for broken link. Not trivial, because File needs to
   survive pickling. Can't assume that file can be examined when
   colorization is needed. And stat (computed before pickling) doesn't
   indicate whether the file exists. Could check and record this.
+
+----------------------------------------------------------------------
+
+0.4 -- Documentation
+
+- Documentation
+
+  + argparse help
+
+  + Need something more informative, along the lines of a man page.
+    But "man ls" would hit the Linus man page, wouldn't it? Is there
+    a PATH mechanism?
+
+  - The actual content
 
 - Bugs
 

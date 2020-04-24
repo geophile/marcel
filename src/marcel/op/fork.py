@@ -42,6 +42,12 @@ class Fork(marcel.core.Op):
     def setup_1(self):
         self.fork_pipeline = self.referenced_pipeline(self.fork_pipeline)
         cluster = self.global_state().env.config().clusters.get(self.fork_spec, None)
+        if cluster:
+            self.impl = Remote(self)
+        elif self.fork_spec.isdigit():
+            self.impl = Local(self)
+        else:
+            raise marcel.exception.KillCommandException(f'Invalid fork specification: {self.fork_spec}')
         self.impl = Remote(self) if cluster else Local(self)
         self.impl.setup_1()
 

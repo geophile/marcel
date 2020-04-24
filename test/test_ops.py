@@ -381,6 +381,9 @@ def test_fork():
              expected_out=[(0, 100), (0, 101), (0, 102),
                            (1, 100), (1, 101), (1, 102),
                            (2, 100), (2, 101), (2, 102)])
+    # Bug 40
+    TEST.run(test='@notacluster [ gen 5 ]',
+             expected_err='Invalid fork specification')
 
 
 def test_namespace():
@@ -392,7 +395,7 @@ def test_namespace():
     config_path.touch()
     TEST.reset_environment(config_file)
     TEST.run('map (globals().keys())',
-             expected_out=["dict_keys(['USER', 'HOME', 'HOST', 'PWD', 'DIRS', '__builtins__'])"])
+             expected_out=["dict_keys(['USER', 'HOME', 'HOST', 'PWD', 'DIRS', 'MARCEL_HOME', '__builtins__'])"])
     # Try to use an undefined symbol
     TEST.run('map (pi)',
              expected_out=[Error("name 'pi' is not defined")])
