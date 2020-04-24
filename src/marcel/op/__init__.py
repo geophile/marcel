@@ -9,6 +9,7 @@ public = [
     'fg',
     'gen',
     'head',
+    'help',
     'jobs',
     'ls',
     'map',

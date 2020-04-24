@@ -118,3 +118,48 @@ then wrapping. This can be done by recording, for a MARKUP:
 
 INDENTED line is like a paragraph. Might have markup. Handle it like a
 paragraph, but don't wrap it.
+
+----------------------------------------------------------------------
+
+Everything above is for the output from argparse's -h flag. Still need
+to provide a help command:
+
+- To provide for top-down help, e.g. "help" will tell you how to get
+  started (ops, executables, objects).
+
+- To provide help for non-command things:
+
+  - Concepts
+  - Pipelines
+  - Remote execution
+  - Objects
+
+Help structure:
+
+     help
+         configuration
+         environment
+         concepts
+             pipeline
+             fork
+         operators
+         objects
+             file
+             process
+             color_scheme
+
+- help command is: help [topic]. 
+
+- topic names are globally unique.
+
+- "help OP" should produce the same output as "OP -h". How does this
+  work? Does "help OP" run "OP -h"? Or are help files generated?
+
+- In marcel/doc, put doc for topic T in help_T.py. Then, put doc in
+  strings, e.g. HELP = '''...'''. By using .py, it is easy to extend
+  help docs in the future, with vars, lists, etc.
+
+- BUT: this means that we import a module for doc. Does that module
+  stay in memory? Probably not a lot of bloat. Removing module from
+  the containing namespace probably does adequate cleanup. Try modules
+  to start.

@@ -29,7 +29,6 @@ class Ps(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.omit_self = False
 
     # BaseOp
     
@@ -40,10 +39,8 @@ class Ps(marcel.core.Op):
         pass
 
     def receive(self, _):
-        this_pid = os.getpid()
         for process in marcel.object.process.processes():
-            if process.pid != this_pid or not self.omit_self:
-                self.send(process)
+            self.send(process)
 
     # Op
 

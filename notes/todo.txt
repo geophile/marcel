@@ -29,14 +29,6 @@ File objects
 
 ----------------------------------------------------------------------
 
-- Organize internal ops -- Fork, LabelThread
-
-- out.receive does a lot of work. Precompute whatever can be.
-
-- How do exit codes fit in?
-
-----------------------------------------------------------------------
-
 Bash:
 
 - What if there is an arg that is significant to marcel parsing, e.g. [, (.
@@ -51,6 +43,14 @@ Bash:
   Globbing is tricky because it then requires great care to quote and
   escape properly, e.g. a\ b*, 'a b'*, 'a b*', (the first two are the
   same, the last has no wildcard).
+
+----------------------------------------------------------------------
+
+- Organize internal ops -- Fork, LabelThread
+
+- out.receive does a lot of work. Precompute whatever can be.
+
+- How do exit codes fit in?
 
 ----------------------------------------------------------------------
 
@@ -143,3 +143,20 @@ Should expand operate on filenames? Might be better to have a separate
 command for that, e.g. cat.
 
 ----------------------------------------------------------------------
+
+Import bash env?
+
+----------------------------------------------------------------------
+
+Help:
+
+- Allow for indented paragraphs. Equating indent and non-wrapping is
+  probably a bad idea. Maybe find a Python markdown implementation?
+  Still need colorizing.
+
+Colorization:
+
+italic: \e[3m...\e[0m
+bold: \e1m
+
+Use these for help.

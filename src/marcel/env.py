@@ -26,7 +26,8 @@ class Environment:
             'HOME': self._homedir.as_posix(),
             'HOST': self._host,
             'PWD': current_dir.as_posix(),
-            'DIRS': [current_dir.as_posix()]
+            'DIRS': [current_dir.as_posix()],
+            'MARCEL_HOME': '/home/jao/git/marcel/src'  # TODO: Don't hardwire this
         }
         self._config = marcel.config.Configuration(self._vars)
         self._config.read_config(config_file)

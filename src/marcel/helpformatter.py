@@ -15,7 +15,7 @@ import textwrap
 # - Blank lines are preserved
 #
 # Markup may include any text other than { and }, including whitespace. Markup must be adjacent to whitespace
-# on the left, and anything on the right.
+# on the left.
 
 
 class Markup:
