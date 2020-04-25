@@ -73,6 +73,7 @@ class Main:
         self.global_state = marcel.globalstate.GlobalState(self.env)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self.global_state)
         self.op_modules = marcel.opmodule.import_op_modules(self.global_state)
+        self.global_state.op_modules = self.op_modules
         self.reader = None
         self.initialize_input()
         self.job_control = marcel.job.JobControl.start(self.update_env_vars)

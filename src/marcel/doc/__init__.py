@@ -1,8 +1,10 @@
 topics = [
-    'concepts',
-    'functions',
+    'command',
+    'function',
     'marcel',
+    'operator',
     'overview',
+    'pipeline',
     'topics'
 ]
 

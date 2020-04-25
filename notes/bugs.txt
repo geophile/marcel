@@ -110,4 +110,19 @@ tab-completion runs into permission problems trying to do its work.
 
 ----------------------------------------------------------------------
 
-41.
+41. Blank line should not be ignored on continuation line
+
+Blank lines are ignored, which is fine. But if the blank line is a
+continuation line, then the current command should be ended and executed.
+
+----------------------------------------------------------------------
+
+42. Errors piped to executables are broken
+
+Odd results:
+
+M jao@cheese:/etc/sysctl.d$ gen 3 | map (x: 1/(1-x)) | xargs echo
+Error(map(x: 1/(1-x)) failed on (1,): division by zero)
+1.0 -1.0
+M jao@cheese:/etc/sysctl.d$ gen 3 | map (x: 1/(1-x)) | echo
+Error(map(x: 1/(1-x)) failed on (1,): division by zero)

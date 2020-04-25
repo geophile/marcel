@@ -146,3 +146,9 @@ a sequence in position 1 and squish just that. So
 (1, [1])
 (2, [2, 2])
 (3, [3, 3, 3])
+
+----------------------------------------------------------------------
+
+Need to handle {} chars in markup. See help_operator.py.
+
+Should help output go through more?
