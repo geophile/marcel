@@ -112,9 +112,9 @@ the n{define_color_scheme} function, e.g.
 Notes:
 
     - The {file_...} entries control how n{File} objects are displayed in a
-      detailed listing (e.g., obtained by the n{ls} command. Run n{help
-      object} for more information on how builtin objects are displayed and
-      colorized).
+      detailed listing (e.g., obtained by the n{ls} command. Run 
+      n{help object} for more information on how builtin objects are 
+      displayed and colorized).
 
     - {error} is the color used for printing n{Error} objects by the n{out} command.
 

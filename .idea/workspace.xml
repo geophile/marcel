@@ -2,15 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/marcel/doc/help_configuration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/help.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/help.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/doc/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_marcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/doc/help_marcel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/unused.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/doc/unused.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/timer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/timer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/test_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_ops.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -757,7 +750,7 @@
       <workItem from="1587344431204" duration="10282000" />
       <workItem from="1587355715766" duration="14535000" />
       <workItem from="1587425832047" duration="78164000" />
-      <workItem from="1587866382107" duration="281000" />
+      <workItem from="1587866382107" duration="1023000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

@@ -167,14 +167,12 @@ Help structure:
 
 ----------------------------------------------------------------------
 
-marcel
-    overview
-        command
-            operator
-        function
-        pipeline
-    command
-    object
-        <all objects>
-    topics
-        <all topics>
+Markup needs more work
+
+- Need to wrap indented paragraphs.
+
+- Need unindented sections, for code.
+
+- Need to specify arbitrary colors.
+
+- Need tags to span lines within a paragraph.

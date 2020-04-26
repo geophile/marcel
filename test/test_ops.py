@@ -470,7 +470,6 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('help configuration')
     pass
     # TODO: test_ps()  How?
     # TODO: test cd: absolute, relative, target does not exist
