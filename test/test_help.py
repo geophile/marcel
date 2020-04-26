@@ -1,5 +1,5 @@
 import marcel.helpformatter
-import marcel.object.colorscheme
+import marcel.object.color
 
 text = '''
 This is a line.
@@ -12,7 +12,7 @@ Here is i{italic} and b{bold} text, and a n{name}.
     so is this, witn a n{name}
 '''
 
-color_scheme = marcel.object.colorscheme.ColorScheme()
+color_scheme = marcel.object.color.ColorScheme()
 color_scheme.help_highlight = 'H'
 color_scheme.help_bold = 'B'
 color_scheme.help_italic = 'I'

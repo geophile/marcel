@@ -43,8 +43,8 @@ class Dirs(marcel.core.Op):
 
     def receive(self, _):
         if self.clear:
-            self.global_state().env.reset_dir_stack()
-        for dir in self.global_state().env.dirs():
+            self.global_state().env.dir_state().reset_dir_stack()
+        for dir in self.global_state().env.dir_state().dirs():
             self.send(dir)
 
     # Op

@@ -443,7 +443,7 @@ def test_sudo():
 
 def test_version():
     TEST.run(test='version',
-             expected_out=[marcel.config.VERSION])
+             expected_out=[marcel.env.VERSION])
 
 
 def main_stable():

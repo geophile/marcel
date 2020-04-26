@@ -2,49 +2,36 @@ import getpass
 import os
 import pathlib
 import socket
+import sys
 
-import marcel.config
 import marcel.exception
 import marcel.object.cluster
-import marcel.object.colorscheme
-import marcel.object.colorscheme
+import marcel.object.color
+import marcel.object.color
+
+VERSION = '0.3'
 
 
-class Environment:
+class DirectoryState:
+    VARS = ('DIRS', 'PWD')
 
-    def __init__(self, config_file):
-        self._user = getpass.getuser()
-        self._homedir = pathlib.Path.home().resolve()
-        self._host = socket.gethostname()
-        try:
-            current_dir = pathlib.Path.cwd().resolve()
-        except FileNotFoundError:
-            raise marcel.exception.KillShellException(
-                'Current directory does not exist! cd somewhere else and try again.')
-        self._vars = {  # Environment variables
-            'USER': self._user,
-            'HOME': self._homedir.as_posix(),
-            'HOST': self._host,
-            'PWD': current_dir.as_posix(),
-            'DIRS': [current_dir.as_posix()],
-            'MARCEL_HOME': '/home/jao/git/marcel/src'  # TODO: Don't hardwire this
-        }
-        self._config = marcel.config.Configuration(self._vars)
-        self._config.read_config(config_file)
-        self._color_scheme = self._config.get_var_in_function_namespace('COLOR_SCHEME')
+    def __init__(self, namespace):
+        self.namespace = namespace
+
+    def __repr__(self):
+        buffer = []
+        for name in DirectoryState.VARS:
+            buffer.append(f'{name}: {self.namespace[name]}')
+        return f'DirectoryState({", ".join(buffer)})'
 
     def __getstate__(self):
-        assert False
+        return self.directory_vars()
 
     def __setstate__(self, state):
-        assert False
-
-    def prompts(self):
-        return (self._prompt_string(self._config.prompt),
-                self._prompt_string(self._config.continuation_prompt))
+        self.__dict__.update(state)
 
     def pwd(self):
-        return pathlib.Path(self.getvar('PWD'))
+        return pathlib.Path(self.namespace['PWD'])
 
     def cd(self, directory):
         assert isinstance(directory, pathlib.Path), directory
@@ -53,8 +40,8 @@ class Environment:
             if not new_dir.exists():
                 raise marcel.exception.KillCommandException(f'Cannot cd into {new_dir}. Directory does not exist.')
             new_dir = new_dir.as_posix()
-            self._dir_stack()[-1] = new_dir
-            self.setvar('PWD', new_dir)
+            self.dir_stack()[-1] = new_dir
+            self.namespace['PWD'] = new_dir
             # So that executables have the same view of the current directory.
             os.chdir(new_dir)
         except FileNotFoundError:
@@ -62,7 +49,7 @@ class Environment:
             pass
 
     def pushd(self, directory):
-        dir_stack = self._dir_stack()
+        dir_stack = self.dir_stack()
         if directory is None:
             if len(dir_stack) > 1:
                 dir_stack[-2:] = [dir_stack[-1], dir_stack[-2]]
@@ -72,63 +59,133 @@ class Environment:
         self.cd(pathlib.Path(dir_stack[-1]))
 
     def popd(self):
-        dir_stack = self._dir_stack()
+        dir_stack = self.dir_stack()
         if len(dir_stack) > 1:
             dir_stack.pop()
             self.cd(pathlib.Path(dir_stack[-1]))
 
     def reset_dir_stack(self):
-        dir_stack = self._dir_stack()
+        dir_stack = self.dir_stack()
         dir_stack.clear()
         dir_stack.append(self.pwd())
 
     def dirs(self):
-        dirs = list(self._dir_stack())
+        dirs = list(self.dir_stack())
         dirs.reverse()
         return dirs
 
-    def cluster(self, name):
-        return self.config().clusters.get(name, None)
+    def directory_vars(self):
+        vars = {}
+        for name in DirectoryState.VARS:
+            vars[name] = self.namespace[name]
+        return vars
 
-    def config(self):
-        return self._config
+    def dir_stack(self):
+        return self.namespace['DIRS']
 
-    def color_scheme(self):
-        return self._color_scheme
+
+class Environment:
+
+    CONFIG_FILENAME = '.marcel.py'
+    DEFAULT_PROMPT = '$ '
+    DEFAULT_PROMPT_CONTINUATION = '+ '
+
+    def __init__(self, config_file):
+        user = getpass.getuser()
+        homedir = pathlib.Path.home().resolve()
+        host = socket.gethostname()
+        try:
+            current_dir = pathlib.Path.cwd().resolve()
+        except FileNotFoundError:
+            raise marcel.exception.KillShellException(
+                'Current directory does not exist! cd somewhere else and try again.')
+        initial_env = {
+            'USER': user,
+            'HOME': homedir.as_posix(),
+            'HOST': host,
+            'MARCEL_HOME': '/home/jao/git/marcel/src',  # TODO: Don't hardwire this
+            'MARCEL_VERSION': VERSION,
+            'PWD': current_dir.as_posix(),
+            'DIRS': [current_dir.as_posix()],
+            'PROMPT': [Environment.DEFAULT_PROMPT],
+            'PROMPT_CONTINUATION': [Environment.DEFAULT_PROMPT_CONTINUATION],
+            'Color': marcel.object.color.Color,
+            'BOLD': marcel.object.color.Color.BOLD,
+            'ITALIC': marcel.object.color.Color.ITALIC,
+            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
+            'define_cluster': self.define_cluster
+        }
+        self.clusters = {}
+        self.namespace = None
+        self.read_config(config_file, initial_env)
+        self.directory_state = DirectoryState(self.namespace)
+
+    def __getstate__(self):
+        assert False
+
+    def __setstate__(self, state):
+        assert False
 
     def getvar(self, var):
-        return self._vars.get(var, None)
+        return self.namespace.get(var, None)
 
     def setvar(self, var, value):
-        self._vars[var] = value
-        self._config.set_var_in_function_namespace(var, value)
+        self.namespace[var] = value
 
     def vars(self):
-        return self._vars
+        return self.namespace
 
-    def _dir_stack(self):
-        dirs = self.getvar('DIRS')
-        assert dirs is not None
-        return dirs
+    def prompts(self):
+        return (self.prompt_string(self.getvar('PROMPT')),
+                self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
 
-    def _prompt_string(self, prompt_pieces):
-        buffer = []
-        color = None
-        for x in prompt_pieces:
-            # In each iteration, we either have a color, or a prompt component. In the latter case,
-            # append it to the buffer, colorizing if color is defined.
-            if isinstance(x, marcel.object.colorscheme.Color):
-                color = x
-                x = None
-            elif isinstance(x, str):
-                pass
-            elif callable(x):
-                # Set up the namespace for calling the function
-                x.__globals__.update(self._config.function_namespace)
-                x = x()
-            else:
-                raise marcel.exception.KillShellException(f'Invalid prompt component: {x}')
-            if x:
-                x = str(x)
-                buffer.append(marcel.util.colorize(x, color) if color else x)
-        return ''.join(buffer)
+    def cluster(self, name):
+        return self.clusters.get(name, None)
+
+    def define_cluster(self, name, hosts, user, identity):
+        self.clusters[name] = marcel.object.cluster.Cluster(name, hosts, user, identity)
+
+    def dir_state(self):
+        return self.directory_state
+
+    def color_scheme(self):
+        return self.getvar('COLOR_SCHEME')
+
+    def read_config(self, config_path, initial_env):
+        config_path = (pathlib.Path(config_path)
+                       if config_path else
+                       pathlib.Path.home() / Environment.CONFIG_FILENAME)
+        if config_path.exists():
+            with open(config_path.as_posix()) as config_file:
+                config_source = config_file.read()
+            # globals needs env vars, and the functions handling definitions of colors, colorschemes, clusters.
+            locals = {}
+            exec(config_source, initial_env, locals)
+            self.namespace = initial_env
+            self.namespace.update(locals)
+
+    def prompt_string(self, prompt_pieces):
+        try:
+            buffer = []
+            color = None
+            for x in prompt_pieces:
+                # In each iteration, we either have a color, or a prompt component. In the latter case,
+                # append it to the buffer, colorizing if color is defined.
+                if isinstance(x, marcel.object.color.Color):
+                    color = x
+                    x = None
+                elif isinstance(x, str):
+                    pass
+                elif callable(x):
+                    # Set up the namespace for calling the function
+                    x.__globals__.update(self.namespace)
+                    x = x()
+                else:
+                    raise marcel.exception.KillShellException(f'Invalid prompt component: {x}')
+                if x:
+                    x = str(x)
+                    buffer.append(marcel.util.colorize(x, color) if color else x)
+            return ''.join(buffer)
+        except Exception as e:
+            print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)
+            return Environment.DEFAULT_PROMPT

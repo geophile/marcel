@@ -46,8 +46,8 @@ class Pushd(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'{self.directory} is not a directory')
 
     def receive(self, _):
-        self.global_state().env.pushd(self.directory)
-        for dir in self.global_state().env.dirs():
+        self.global_state().env.dir_state().pushd(self.directory)
+        for dir in self.global_state().env.dir_state().dirs():
             self.send(dir)
 
     # Op

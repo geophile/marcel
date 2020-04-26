@@ -38,8 +38,8 @@ class Popd(marcel.core.Op):
         pass
 
     def receive(self, _):
-        self.global_state().env.popd()
-        for dir in self.global_state().env.dirs():
+        self.global_state().env.dir_state().popd()
+        for dir in self.global_state().env.dir_state().dirs():
             self.send(dir)
 
     # Op

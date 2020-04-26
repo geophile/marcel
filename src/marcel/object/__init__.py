@@ -1,6 +1,6 @@
 __all__ = [
     'cluster',
-    'colorscheme',
+    'color',
     'error',
     'file',
     'host',

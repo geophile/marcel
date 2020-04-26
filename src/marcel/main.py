@@ -42,8 +42,8 @@ class Command:
         self.pipeline.receive(None)
         self.pipeline.receive_complete()
         # A Command is executed by a multiprocessing.Process. Need to transmit the Environment's vars
-        # to the parent process, because they may have changed.
-        return self.pipeline.global_state.env.vars()
+        # relating to the directory, to the parent process, because they may have changed.
+        return self.pipeline.global_state.env.dir_state().directory_vars()
 
 
 class Reader(marcel.multilinereader.MultiLineReader):
@@ -123,7 +123,8 @@ class Main:
         self.reader = Reader(self.global_state, self.history_file())
 
     def history_file(self):
-        home = self.env.getvar('HOME')
+        environment = self.env
+        home = environment.getvar('HOME')
         return pathlib.Path(home) / HISTORY_FILE
 
     def shutdown(self):
@@ -139,10 +140,11 @@ class Main:
     def update_env_vars(self, env_vars_from_child):
         pwd = env_vars_from_child.get('PWD', None)
         assert pwd is not None
-        self.env.cd(pathlib.Path(pwd))
+        self.env.dir_state().cd(pathlib.Path(pwd))
         dirs = env_vars_from_child.get('DIRS', None)
         assert dirs is not None
-        self.env.setvar('DIRS', dirs)
+        environment = self.env
+        environment.setvar('DIRS', dirs)
 
     def run_immediate(self, line):
         # Job control commands should be run in this process, not a spawned process.

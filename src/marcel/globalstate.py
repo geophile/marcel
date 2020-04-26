@@ -15,4 +15,4 @@ class GlobalState:
         self.__dict__.update(state)
 
     def function_namespace(self):
-        return self.env.config().function_namespace
+        return self.env.vars()

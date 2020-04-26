@@ -127,9 +127,9 @@ class Job:
         def run_command(command, writer):
             debug(f'running: {command.source}')
             try:
-                env_vars = command.execute()
-                debug(f'completed: {command.source}')
-                writer.send(env_vars)
+                dir_vars = command.execute()
+                debug(f'completed: {command.source} {dir_vars}')
+                writer.send(dir_vars)
             except marcel.exception.KillCommandException as e:
                 print(e, file=sys.stderr)
             writer.close()

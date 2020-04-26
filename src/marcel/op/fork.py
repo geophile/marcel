@@ -41,7 +41,7 @@ class Fork(marcel.core.Op):
 
     def setup_1(self):
         self.fork_pipeline = self.referenced_pipeline(self.fork_pipeline)
-        cluster = self.global_state().env.config().clusters.get(self.fork_spec, None)
+        cluster = self.global_state().env.cluster(self.fork_spec)
         if cluster:
             self.impl = Remote(self)
         elif self.fork_spec.isdigit():

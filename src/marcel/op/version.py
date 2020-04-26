@@ -1,5 +1,5 @@
 import marcel.core
-import marcel.config
+import marcel.env
 
 
 SUMMARY = '''
@@ -37,7 +37,7 @@ class Version(marcel.core.Op):
         pass
 
     def receive(self, _):
-        self.send(marcel.config.VERSION)
+        self.send(marcel.env.VERSION)
 
     # Op
 
