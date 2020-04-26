@@ -1,11 +1,11 @@
 topics = [
     'command',
+    'configuration',
     'function',
     'marcel',
     'operator',
     'overview',
-    'pipeline',
-    'topics'
+    'pipeline'
 ]
 
 __all__ = ['help_' + topic for topic in topics]

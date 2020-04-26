@@ -18,14 +18,14 @@ where {HH} is hours, {MM} is minutes, {SS} is seconds. {HH:} and
 
 b{Examples}:
 
-    INTERVAL        meaning
-    -----------------------------
+    {interval}        meaning
+    ------------------------------------
     5               5 seconds
     1:30            1 minute, 30 seconds
     1:00:00         1 hour
 
 By default, the output timestamp is time in seconds since 1/1/1970.
-If {-c} is specified, then the timestamp is rendered as a Python {time.struct_time}
+If {-c} is specified, then the timestamp is rendered as a Python n{time.struct_time}
 tuple: (year, month, day, hour, minute, second, weekday, day of year, daylight savings time flag).
 
 Notes:

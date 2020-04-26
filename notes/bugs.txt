@@ -126,3 +126,5 @@ Error(map(x: 1/(1-x)) failed on (1,): division by zero)
 1.0 -1.0
 M jao@cheese:/etc/sysctl.d$ gen 3 | map (x: 1/(1-x)) | echo
 Error(map(x: 1/(1-x)) failed on (1,): division by zero)
+
+----------------------------------------------------------------------

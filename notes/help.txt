@@ -164,3 +164,17 @@ Help structure:
   stay in memory? Probably not a lot of bloat. Removing module from
   the containing namespace probably does adequate cleanup. Try modules
   to start.
+
+----------------------------------------------------------------------
+
+marcel
+    overview
+        command
+            operator
+        function
+        pipeline
+    command
+    object
+        <all objects>
+    topics
+        <all topics>

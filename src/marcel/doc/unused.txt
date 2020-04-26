@@ -1,5 +1,2 @@
 These commands include both Linux executables (e.g. grep),
-and marcel operators. In some cases, the marcel operator has the same name
-as a Linux executable with similar capabilities, e.g. n{ls}. This is intentional,
-as the Linux executable operates in ways incompatible with marcel. (The Linux
-executable can still be executed by using the n{bash} command, e.g. {bash ls}.)
+and marcel operators. 
