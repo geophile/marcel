@@ -174,3 +174,16 @@ described.
 
 
 use bold = True, or BOLD | ITALIC?
+
+----------------------------------------------------------------------
+
+Cleanup:
+
+- Markup 2.0.
+
+- Modify docs to use the markup 2.0.
+
+- Get rid of define_color, define_prompt, define_continuation_prompt.
+
+- Merge env and config. Env vars are just top-level symbols in the
+  namespace.

@@ -31,8 +31,7 @@ class Environment:
         }
         self._config = marcel.config.Configuration(self._vars)
         self._config.read_config(config_file)
-        self._colors = self._config.colors
-        self._color_scheme = self._config.color_scheme
+        self._color_scheme = self._config.get_var_in_function_namespace('COLOR_SCHEME')
 
     def __getstate__(self):
         assert False
@@ -122,10 +121,7 @@ class Environment:
                 color = x
                 x = None
             elif isinstance(x, str):
-                c = self._colors.get(x, None)
-                if c:
-                    color = c
-                    x = None
+                pass
             elif callable(x):
                 # Set up the namespace for calling the function
                 x.__globals__.update(self._config.function_namespace)

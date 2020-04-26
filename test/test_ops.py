@@ -394,8 +394,8 @@ def test_namespace():
     config_path.unlink()
     config_path.touch()
     TEST.reset_environment(config_file)
-    TEST.run('map (globals().keys())',
-             expected_out=["dict_keys(['USER', 'HOME', 'HOST', 'PWD', 'DIRS', 'MARCEL_HOME', '__builtins__'])"])
+    TEST.run('map (list(globals().keys())) | expand | select (x: x == "USER")',
+             expected_out=['USER'])
     # Try to use an undefined symbol
     TEST.run('map (pi)',
              expected_out=[Error("name 'pi' is not defined")])

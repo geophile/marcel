@@ -29,7 +29,7 @@ class ColorScheme:
         self.file_dir = None
         self.file_link = None
         self.file_executable = None
-        self.file_extension = {}
+        self.file_extension = None
         self.process_pid = None
         self.process_commandline = None
         self.error = None
