@@ -15,8 +15,8 @@ def pwd():
 
 class PwdArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('pwd', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('pwd', env, None, SUMMARY, DETAILS)
 
 
 class Pwd(marcel.core.Op):
@@ -36,7 +36,7 @@ class Pwd(marcel.core.Op):
         pass
 
     def receive(self, _):
-        self.send(self.global_state().env.dir_state().pwd())
+        self.send(self.env().dir_state().pwd())
 
     # Op
 

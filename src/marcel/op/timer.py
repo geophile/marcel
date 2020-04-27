@@ -44,8 +44,8 @@ def timer():
 
 class TimerArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('timer', global_state, ['-c', '--components'], SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('timer', env, ['-c', '--components'], SUMMARY, DETAILS)
         self.add_argument('-c', '--components',
                           action='store_true',
                           help='Print time components instead of seconds since epoch.')

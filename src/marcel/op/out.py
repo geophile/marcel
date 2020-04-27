@@ -25,9 +25,9 @@ def out():
 
 class OutArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
+    def __init__(self, env):
         super().__init__('out',
-                         global_state,
+                         env,
                          ['-a', '--append', '-f', '--file', '-c', '--csv'],
                          SUMMARY,
                          DETAILS)
@@ -132,7 +132,7 @@ class Out(marcel.core.Op):
             return str(x)
 
     def color_scheme(self):
-        return (self.global_state().env.color_scheme()
+        return (self.env().color_scheme()
                 if self.output == sys.__stdout__ else
                 None)
 

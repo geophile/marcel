@@ -32,8 +32,8 @@ class TabCompleter:
                     'rmdir',
                     'vi']
 
-    def __init__(self, global_state):
-        self.global_state = global_state
+    def __init__(self, env):
+        self.env = env
         self.op_name = None
         self.executables = None
         self.homedirs = None
@@ -50,7 +50,7 @@ class TabCompleter:
             # Parse the text so far, to get information needed for tab completion. It is expected that
             # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
             # which can be ignored. The important point is that the parse will set Parser.op.
-            parser = marcel.parse.Parser(line, self.global_state.op_modules)
+            parser = marcel.parse.Parser(line, self.env.op_modules)
             try:
                 parser.parse(partial_text=True)
                 debug('parse succeeded')
@@ -115,7 +115,7 @@ class TabCompleter:
 
     def complete_filename(self, text):
         debug('complete_filenames, text = <{}>'.format(text))
-        current_dir = self.global_state.env.pwd()
+        current_dir = self.env.dir_state().pwd()
         if text:
             if text == '~/':
                 home = pathlib.Path(text).expanduser()

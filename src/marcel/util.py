@@ -79,6 +79,8 @@ def print_stack(file=None):
 
 
 def colorize(s, color):
+    if color is None:
+        return s
     # Those /001 and /002 codes seem to fix bug 2.
     # https://stackoverflow.com/questions/9468435/how-to-fix-column-calculation-in-python-readline-if-using-color-prompt
     bold = color.bold()

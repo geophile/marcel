@@ -18,8 +18,8 @@ def ps():
 
 class PsArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('ps', global_state, ['-o', '--omit-self'], SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('ps', env, ['-o', '--omit-self'], SUMMARY, DETAILS)
         self.add_argument('-o', '--omit-self',
                           action='store_true',
                           help='OBSOLETE')

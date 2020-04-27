@@ -18,8 +18,8 @@ def map():
 
 class MapArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('map', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('map', env, None, SUMMARY, DETAILS)
         self.add_argument('function',
                           type=super().constrained_type(self.check_function, 'not a valid function'),
                           help='Function to be applied to input items')

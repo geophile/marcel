@@ -7,7 +7,6 @@ import time
 import marcel.core
 import marcel.env
 import marcel.exception
-import marcel.globalstate
 import marcel.job
 import marcel.multilinereader
 import marcel.opmodule
@@ -43,18 +42,18 @@ class Command:
         self.pipeline.receive_complete()
         # A Command is executed by a multiprocessing.Process. Need to transmit the Environment's vars
         # relating to the directory, to the parent process, because they may have changed.
-        return self.pipeline.global_state.env.dir_state().directory_vars()
+        return self.pipeline.env.dir_state().directory_vars()
 
 
 class Reader(marcel.multilinereader.MultiLineReader):
 
-    def __init__(self, global_state, history_file):
+    def __init__(self, env, history_file):
         super().__init__(history_file=history_file)
-        self.global_state = global_state
+        self.env = env
 
     def take_edited_command(self):
-        edited_command = self.global_state.edited_command
-        self.global_state.edited_command = None
+        edited_command = self.env.edited_command
+        self.env.edited_command = None
         return edited_command
 
 
@@ -70,10 +69,8 @@ class Main:
         except marcel.exception.KillShellException as e:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)
-        self.global_state = marcel.globalstate.GlobalState(self.env)
-        self.tab_completer = marcel.tabcompleter.TabCompleter(self.global_state)
-        self.op_modules = marcel.opmodule.import_op_modules(self.global_state)
-        self.global_state.op_modules = self.op_modules
+        self.tab_completer = marcel.tabcompleter.TabCompleter(self.env)
+        self.op_modules = marcel.opmodule.import_op_modules(self.env)
         self.reader = None
         self.initialize_input()
         self.job_control = marcel.job.JobControl.start(self.update_env_vars)
@@ -103,7 +100,7 @@ class Main:
             try:
                 parser = marcel.parse.Parser(line, self.op_modules)
                 pipeline = parser.parse()
-                pipeline.set_global_state(self.global_state)
+                pipeline.set_env(self.env)
                 command = Command(line, pipeline)
                 import os
                 if self.run_immediate(line):
@@ -120,7 +117,7 @@ class Main:
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
         readline.set_pre_input_hook(self.insert_edited_command)
-        self.reader = Reader(self.global_state, self.history_file())
+        self.reader = Reader(self.env, self.history_file())
 
     def history_file(self):
         environment = self.env

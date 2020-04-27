@@ -17,8 +17,8 @@ def dirs():
 
 class DirsArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('pushd', global_state, ['-c'], SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('pushd', env, ['-c'], SUMMARY, DETAILS)
         self.add_argument('-c', '--clear',
                           action='store_true',
                           help='Clear the directory stack and place the current directory in it.')
@@ -43,8 +43,8 @@ class Dirs(marcel.core.Op):
 
     def receive(self, _):
         if self.clear:
-            self.global_state().env.dir_state().reset_dir_stack()
-        for dir in self.global_state().env.dir_state().dirs():
+            self.env().dir_state().reset_dir_stack()
+        for dir in self.env().dir_state().dirs():
             self.send(dir)
 
     # Op

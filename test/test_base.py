@@ -2,8 +2,10 @@ import contextlib
 import io
 import os
 import pathlib
+import sys
 
 import marcel.exception
+import marcel.main
 import marcel.util
 
 
@@ -11,16 +13,17 @@ class Test:
 
     start_dir = os.getcwd()
 
-    def __init__(self, main, config_file='./.marcel.py'):
-        self.main = main
+    def __init__(self, config_file='./.marcel.py'):
+        self.main = None
         self.failures = 0
         self.reset_environment(config_file)
 
     def reset_environment(self, config_file='./.marcel.py'):
+        sys.argv = [None, config_file]
+        self.main = marcel.main.Main(op_testing=True)
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')
         os.chdir(Test.start_dir)
-        self.main.global_state.env = marcel.env.Environment(config_file)
 
     def new_file(self, filename):
         path = pathlib.Path(filename)

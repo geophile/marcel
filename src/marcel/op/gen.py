@@ -20,8 +20,8 @@ def gen():
 
 class GenArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('gen', global_state, ['-p', '--pad'], SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('gen', env, ['-p', '--pad'], SUMMARY, DETAILS)
         self.add_argument('-p', '--pad',
                           type=int,
                           help='Left-pad with zeros to PAD characters')

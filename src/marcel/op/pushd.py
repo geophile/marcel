@@ -20,8 +20,8 @@ def pushd():
 
 class PushdArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('pushd', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('pushd', env, None, SUMMARY, DETAILS)
         self.add_argument('directory', nargs='?', help='New current directory')
 
 
@@ -46,8 +46,8 @@ class Pushd(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'{self.directory} is not a directory')
 
     def receive(self, _):
-        self.global_state().env.dir_state().pushd(self.directory)
-        for dir in self.global_state().env.dir_state().dirs():
+        self.env().dir_state().pushd(self.directory)
+        for dir in self.env().dir_state().dirs():
             self.send(dir)
 
     # Op

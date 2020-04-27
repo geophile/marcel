@@ -18,8 +18,8 @@ def sort():
 
 class SortArgParser(marcel.core.ArgParser):
     
-    def __init__(self, global_state):
-        super().__init__('sort', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('sort', env, None, SUMMARY, DETAILS)
         self.add_argument('key',
                           nargs='?',
                           default=None,

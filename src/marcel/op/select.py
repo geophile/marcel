@@ -18,8 +18,8 @@ def select():
 
 class SelectArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('select', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('select', env, None, SUMMARY, DETAILS)
         self.add_argument('function',
                           type=super().constrained_type(self.check_function, 'not a valid function'),
                           help='Used to filter input.')

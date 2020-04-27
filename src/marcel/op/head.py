@@ -18,8 +18,8 @@ def head():
 
 class HeadArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('head', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('head', env, None, SUMMARY, DETAILS)
         self.add_argument('n',
                           type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
                                                         'must be non-negative'),

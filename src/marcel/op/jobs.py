@@ -23,8 +23,8 @@ def jobs():
 
 class JobsArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('jobs', global_state, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('jobs', env, SUMMARY, DETAILS)
 
 
 class Jobs(marcel.core.Op):

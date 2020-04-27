@@ -4,8 +4,8 @@ import marcel.job
 
 class JobOpArgParser(marcel.core.ArgParser):
 
-    def __init__(self, op_name, global_state, summary, details):
-        super().__init__(op_name, global_state, None, summary, details)
+    def __init__(self, op_name, env, summary, details):
+        super().__init__(op_name, env, None, summary, details)
         id_group = self.add_mutually_exclusive_group()
         id_group.add_argument('-j', '--job',
                               type=super().constrained_type(marcel.core.ArgParser.check_non_negative,

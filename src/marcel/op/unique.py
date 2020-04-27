@@ -22,8 +22,8 @@ def unique():
 
 class UniqueArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('unique', global_state, ['-c', '--consecutive'], SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('unique', env, ['-c', '--consecutive'], SUMMARY, DETAILS)
         self.add_argument('-c', '--consecutive',
                           action='store_true',
                           help='Remove duplicates only when consecutive.')

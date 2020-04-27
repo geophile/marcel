@@ -20,8 +20,8 @@ def bg():
 
 class BgArgParser(marcel.op.jobop.JobOpArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('bg', global_state, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('bg', env, SUMMARY, DETAILS)
 
 
 class Bg(marcel.op.jobop.JobOp):

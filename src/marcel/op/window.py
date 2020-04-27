@@ -78,9 +78,9 @@ def window():
 
 class WindowArgsParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
+    def __init__(self, env):
         super().__init__('window', 
-                         global_state,
+                         env,
                          ['-o', '--overlap', '-d', '--disjoint'],
                          SUMMARY,
                          DETAILS)

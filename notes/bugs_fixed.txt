@@ -459,7 +459,7 @@ Local:
       File "/home/jao/git/marcel/src/marcel/op/ls.py", line 93, in setup_1
         super().setup_1()
       File "/home/jao/git/marcel/src/marcel/op/filenames.py", line 35, in setup_1
-        self.current_dir = self.global_state().env.pwd()
+        self.current_dir = self.env().pwd()
     AttributeError: 'GlobalState' object has no attribute 'env'
 
 ----------------------------------------------------------------------
@@ -622,3 +622,94 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/src/marcel/op/fork.py", line 176, in __init__
     op.fork_spec = int(op.fork_spec)
 ValueError: invalid literal for int() with base 10: 'local'
+
+
+----------------------------------------------------------------------
+
+Cleanup:
+
+- Markup 2.0.
+
+- Modify docs to use the markup 2.0.
+
+- Get rid of define_color, define_prompt, define_continuation_prompt.
+
+- Merge env and config. Env vars are just top-level symbols in the
+  namespace.
+
+
+
+Env, config, global_state:
+
+main: 
+
+    - self.env = Environment(config_path)
+
+    - self.global_state = GlobalState(env)
+
+    - Main loop calls self.env.prompts() which mostly delegates to config.
+
+    - Execution passes self.global_state to parser.
+
+    - Main defines update_env_vars, which is used by JobControl to update
+      vars modified by Job running in another process. These call env.setvar
+      which then ends up in config.
+
+env:
+
+    - Reads parts of environment (user, host, homedir, current dir)
+
+    - __init__ gets config_path from caller (main)
+
+    - Sets env vars, self._vars
+
+    - Create config and store in self._config.
+
+    - self._color_scheme = color scheme from config.
+
+    - Implements current dir operations: cd, pushd, popd, dirs,
+      pwd. Dir stack is maintained in config, as a var. Problem with
+      this approach: User can modify it directly, unless setvar() 
+      checks for it. Same with PWD, which works in bash, but leads to
+      weird results, e.g.
+
+            jao@cheese:~$ PWD=/tmp
+            jao@cheese:/tmp$ pwd
+            /home/jao
+
+    - Access to cluster, config, color_scheme, all of which reside in config.
+
+config:
+
+    - Has self._env_vars, prompt, continuation prompt.
+
+    - self.function_namesspace is the namespace in which commands run. Defined by
+      executing .marcel.py, in read_config. 
+
+    - read_config puts Color, PROMPT, PROMPT_CONTINUATION, COLOR_SCHEME, define_cluster
+      in globals(), passes to exec(.marcel.py). Then, COLOR_SCHEMA is put in function namespace.
+      Should probably put everything there.
+
+GlobalState:
+
+    - Attached to parser, pipelines, available everywhere as a result.
+
+    - Has env, edited_command, op_modules.
+
+    - Provides function_namespace via delegation.
+
+
+Cleanup:
+
++ Merge Environment and Configuration. Get rid of Configuration.
+
++ Put directory logic into its own class.
+
++ Replace GlobalState by Environment. Move GlobalState fields into
+  Environment.
+
++ After execing .marcel.py, copy locals into globals. globals replaces
+  function_namespace.
+
++ Move VERSION from env to an environment variable, MARCEL_VERSION.
+

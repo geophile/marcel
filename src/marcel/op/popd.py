@@ -17,8 +17,8 @@ def popd():
 
 class PopdArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('popd', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('popd', env, None, SUMMARY, DETAILS)
 
 
 class Popd(marcel.core.Op):
@@ -38,8 +38,8 @@ class Popd(marcel.core.Op):
         pass
 
     def receive(self, _):
-        self.global_state().env.dir_state().popd()
-        for dir in self.global_state().env.dir_state().dirs():
+        self.env().dir_state().popd()
+        for dir in self.env().dir_state().dirs():
             self.send(dir)
 
     # Op

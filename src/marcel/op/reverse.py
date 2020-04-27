@@ -15,8 +15,8 @@ def reverse():
 
 class ReverseArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('reverse', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('reverse', env, None, SUMMARY, DETAILS)
 
 
 class Reverse(marcel.core.Op):

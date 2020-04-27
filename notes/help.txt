@@ -176,3 +176,37 @@ Markup needs more work
 - Need to specify arbitrary colors.
 
 - Need tags to span lines within a paragraph.
+
+Markup, attempt 2:
+
+- Markup format is {{spec:}text}. spec:
+
+    - Not specified: highlight
+    - b: bold
+    - i: italic
+    - n: name (referenced, possibly discussed elsewhere)
+    - cRGB[bi]: color
+        - RGB values are 0..5
+        - bi are flags for bold, italic
+
+- Paragraph boundary is empty line
+
+- Paragraph boundary also indicated by {p}. Default behavior is to
+  wrap the following paragraph.
+
+- {p:spec}, spec:
+
+    - Not specified
+    - i=n: Indent by n
+    - wrap, wrap=t: wrap the text
+    - wrap=f: don't wrap the text
+
+- Brace to be rendered is escaped: \{, \}. Counts as 1 non-whitespace
+  char.
+
+Implementation:
+
+- IndentedLine goes away.
+
+- EmptyLine goes away. A sequence of EmptyLines counts as a paragraph,
+  and preserves vertical spacing.

@@ -24,8 +24,8 @@ def bash():
 
 class BashArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('bash', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('bash', env, None, SUMMARY, DETAILS)
         self.add_argument('-i', '--interactive',
                           action='store_true',
                           help='The command is run interactively. stdin, stdout, and stderr are ignored.')

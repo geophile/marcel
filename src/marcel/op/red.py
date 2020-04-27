@@ -85,8 +85,8 @@ def red():
 
 class RedArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('red', global_state, ['-i', '--incremental'], SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('red', env, ['-i', '--incremental'], SUMMARY, DETAILS)
         self.add_argument('-i', '--incremental',
                           action='store_true',
                           help='Output a tuple containing the partially reduced values for each input tuple.')

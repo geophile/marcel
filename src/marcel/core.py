@@ -16,15 +16,15 @@ class ArgParser(argparse.ArgumentParser):
     op_flags = {}  # op name -> [flags], for use in tab completion
     help_formatter = None
 
-    def __init__(self, op_name, global_state, flags=None, summary=None, details=None):
+    def __init__(self, op_name, env, flags=None, summary=None, details=None):
         if ArgParser.help_formatter is None:
-            ArgParser.help_formatter = marcel.helpformatter.HelpFormatter(global_state.env.color_scheme())
+            ArgParser.help_formatter = marcel.helpformatter.HelpFormatter(env.color_scheme())
         super().__init__(prog=op_name,
                          formatter_class=argparse.RawDescriptionHelpFormatter,
                          description=ArgParser.help_formatter.format(summary),
                          epilog=ArgParser.help_formatter.format(details))
         ArgParser.op_flags[op_name] = flags
-        self.global_state = global_state
+        self.env = env
 
     # ArgumentParser (argparse)
 
@@ -68,7 +68,7 @@ class ArgParser(argparse.ArgumentParser):
         def arg_checker(s):
             try:
                 return check_and_convert(s)
-            except Exception:
+            except Exception as e:
                 raise argparse.ArgumentTypeError(message)
         return arg_checker
 
@@ -87,7 +87,7 @@ class ArgParser(argparse.ArgumentParser):
         return n
 
     def check_function(self, s):
-        return marcel.function.Function(s, self.global_state.function_namespace())
+        return marcel.function.Function(s, self.env.vars())
 
 
 class BaseOp:
@@ -189,8 +189,8 @@ class BaseOp:
     def run_local(self):
         return False
 
-    def global_state(self):
-        return self.owner.global_state
+    def env(self):
+        return self.owner.env
 
     # BaseOp compile-time
 
@@ -251,7 +251,7 @@ class Pipeline(BaseOp):
 
     def __init__(self):
         BaseOp.__init__(self)
-        self.global_state = None
+        self.env = None
         self.first_op = None
         self.last_op = None
 
@@ -263,8 +263,8 @@ class Pipeline(BaseOp):
             op = op.next_op
         return f'pipeline({" | ".join(buffer)})'
 
-    def set_global_state(self, global_state):
-        self.global_state = global_state
+    def set_env(self, env):
+        self.env = env
 
     # BaseOp
 

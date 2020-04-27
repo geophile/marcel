@@ -19,8 +19,8 @@ def cd():
 
 class CdArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('cd', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('cd', env, None, SUMMARY, DETAILS)
         self.add_argument('directory',
                           nargs='?',
                           default='~',
@@ -45,7 +45,7 @@ class Cd(marcel.core.Op):
         self.directory = pathlib.Path(self.directory)
 
     def receive(self, _):
-        self.global_state().env.dir_state().cd(self.directory)
+        self.env().dir_state().cd(self.directory)
 
     # Op
 

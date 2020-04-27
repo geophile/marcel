@@ -30,8 +30,8 @@ def ls():
 
 class LsArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('ls', global_state, ['-0', '-1', '-r', '-f', '--file', '-d', '--dir', '-s', '--symlink'],
+    def __init__(self, env):
+        super().__init__('ls', env, ['-0', '-1', '-r', '-f', '--file', '-d', '--dir', '-s', '--symlink'],
                          SUMMARY, DETAILS)
         depth_group = self.add_mutually_exclusive_group()
         depth_group.add_argument('-0',

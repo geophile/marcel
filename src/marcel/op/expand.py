@@ -58,8 +58,8 @@ def expand():
 
 class ExpandArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('expand', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('expand', env, None, SUMMARY, DETAILS)
         self.add_argument('position',
                           nargs='?',
                           type=super().constrained_type(marcel.core.ArgParser.check_non_negative,

@@ -16,8 +16,8 @@ def version():
 
 class VersionArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('version', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('version', env, None, SUMMARY, DETAILS)
 
 
 class Version(marcel.core.Op):

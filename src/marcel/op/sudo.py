@@ -19,8 +19,8 @@ def sudo():
 
 class SudoArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('sudo', global_state)
+    def __init__(self, env):
+        super().__init__('sudo', env)
         self.add_argument('args', nargs=argparse.REMAINDER)
 
     # Insert -- as first arg to cause parse_args to treat all sudo args as positional.

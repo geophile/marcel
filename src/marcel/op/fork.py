@@ -15,8 +15,8 @@ def fork():
 
 class ForkArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('fork', global_state)
+    def __init__(self, env):
+        super().__init__('fork', env)
         self.add_argument('fork_spec')
         self.add_argument('fork_pipeline'),
 
@@ -41,7 +41,7 @@ class Fork(marcel.core.Op):
 
     def setup_1(self):
         self.fork_pipeline = self.referenced_pipeline(self.fork_pipeline)
-        cluster = self.global_state().env.cluster(self.fork_spec)
+        cluster = self.env().cluster(self.fork_spec)
         if cluster:
             self.impl = Remote(self)
         elif self.fork_spec.isdigit():
@@ -116,7 +116,7 @@ class ForkImplementation:
         # The fork_pipeline is not a top-level pipeline (executed from main), so its global state isn't
         # set yet. This op's owning pipeline has its global state by now. So set the fork_pipeline's global state.
         op = self.op
-        op.fork_pipeline.set_global_state(op.global_state())
+        op.fork_pipeline.set_env(op.env())
         
     def setup_2(self):
         assert False
@@ -136,7 +136,7 @@ class Remote(ForkImplementation):
         super().setup_1()
         op = self.op
         remote_pipeline = marcel.core.Pipeline()
-        remote_pipeline.set_global_state(op.global_state())
+        remote_pipeline.set_env(op.env())
         remote_op = marcel.op.remote.Remote(op.fork_pipeline)
         remote_pipeline.append(remote_op)
         op.fork_pipeline = remote_pipeline
@@ -168,7 +168,7 @@ class Remote(ForkImplementation):
 
     def generate_thread_labels(self):
         op = self.op
-        cluster = op.global_state().env.cluster(op.fork_spec)
+        cluster = op.env().cluster(op.fork_spec)
         if cluster:
             op.thread_labels = [host for host in cluster.hosts]
         else:
@@ -195,7 +195,7 @@ class Local(ForkImplementation):
         for thread_label in op.thread_labels:
             # Copy the pipeline
             pipeline_copy = marcel.util.clone(op.fork_pipeline)
-            pipeline_copy.set_global_state(op.global_state())
+            pipeline_copy.set_env(op.env())
             # Attach thread label to LabelThread op.
             label_thread_op = pipeline_copy.last_op
             assert isinstance(label_thread_op, marcel.op.labelthread.LabelThread)

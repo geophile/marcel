@@ -25,8 +25,8 @@ def edit():
 
 class EditArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('edit', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('edit', env, None, SUMMARY, DETAILS)
 
 
 class Edit(marcel.core.Op):
@@ -66,7 +66,7 @@ class Edit(marcel.core.Op):
         process.wait()
         with open(self.tmp_file, 'r') as input:
             command_lines = input.readlines()
-        self.global_state().edited_command = ''.join(command_lines)
+        self.env().edited_command = ''.join(command_lines)
         os.remove(self.tmp_file)
 
     # Op

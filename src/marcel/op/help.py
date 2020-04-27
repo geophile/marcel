@@ -21,8 +21,8 @@ def help():
 
 class HelpArgParser(marcel.core.ArgParser):
 
-    def __init__(self, global_state):
-        super().__init__('help', global_state, None, SUMMARY, DETAILS)
+    def __init__(self, env):
+        super().__init__('help', env, None, SUMMARY, DETAILS)
         self.add_argument('topic',
                           default='marcel',
                           nargs='?',
@@ -48,7 +48,7 @@ class Help(marcel.core.Op):
         self.topic = self.topic.lower()
 
     def receive(self, _):
-        op_module = self.global_state().op_modules.get(self.topic, None)
+        op_module = self.env().op_modules.get(self.topic, None)
         help_text = Help.op_help(op_module) if op_module else self.topic_help()
         self.send(help_text)
 
@@ -76,6 +76,6 @@ class Help(marcel.core.Op):
             self.module = importlib.import_module(f'marcel.doc.help_{self.topic}')
         except ModuleNotFoundError:
             raise marcel.exception.KillCommandException(f'Help not available for {self.topic}')
-        formatter = marcel.helpformatter.HelpFormatter(self.global_state().env.color_scheme())
+        formatter = marcel.helpformatter.HelpFormatter(self.env().color_scheme())
         help_text = getattr(self.module, 'HELP')
         return formatter.format(help_text)

@@ -99,7 +99,7 @@ class Environment:
         except FileNotFoundError:
             raise marcel.exception.KillShellException(
                 'Current directory does not exist! cd somewhere else and try again.')
-        initial_env = {
+        self.namespace = {
             'USER': user,
             'HOME': homedir.as_posix(),
             'HOST': host,
@@ -116,15 +116,16 @@ class Environment:
             'define_cluster': self.define_cluster
         }
         self.clusters = {}
-        self.namespace = None
-        self.read_config(config_file, initial_env)
+        self.read_config(config_file)
         self.directory_state = DirectoryState(self.namespace)
+        # TODO: This is a hack. Clean it up once the env handles command history
+        self.edited_command = None
 
     def __getstate__(self):
-        assert False
+        return {}
 
     def __setstate__(self, state):
-        assert False
+        self.__dict__.update(state)
 
     def getvar(self, var):
         return self.namespace.get(var, None)
@@ -151,17 +152,17 @@ class Environment:
     def color_scheme(self):
         return self.getvar('COLOR_SCHEME')
 
-    def read_config(self, config_path, initial_env):
+    def read_config(self, config_path):
         config_path = (pathlib.Path(config_path)
                        if config_path else
                        pathlib.Path.home() / Environment.CONFIG_FILENAME)
         if config_path.exists():
             with open(config_path.as_posix()) as config_file:
                 config_source = config_file.read()
-            # globals needs env vars, and the functions handling definitions of colors, colorschemes, clusters.
             locals = {}
-            exec(config_source, initial_env, locals)
-            self.namespace = initial_env
+            # Execute the config file. Imported and newly-defined symbols go into locals, which
+            # will then be added to self.namespace, for use in the execution of op functions.
+            exec(config_source, self.namespace, locals)
             self.namespace.update(locals)
 
     def prompt_string(self, prompt_pieces):
