@@ -9,23 +9,23 @@ SUMMARY = 'Generate a sequence of timestamps, separated in time by a specified i
 
 
 DETAILS = '''
-The {interval} format is:
+The {r:interval} format is:
 
     HH:MM:SS
 
-where {HH} is hours, {MM} is minutes, {SS} is seconds. {HH:} and
-{HH:MM:} may be omitted.
+where {r:HH} is hours, {r:MM} is minutes, {r:SS} is seconds. {r:HH:} and
+{r:HH:MM:} may be omitted.
 
-b{Examples}:
+{b:Examples}:
 
-    {interval}        meaning
+    {r:interval}        meaning
     ------------------------------------
     5               5 seconds
     1:30            1 minute, 30 seconds
     1:00:00         1 hour
 
 By default, the output timestamp is time in seconds since 1/1/1970.
-If {-c} is specified, then the timestamp is rendered as a Python n{time.struct_time}
+If {r:-c} is specified, then the timestamp is rendered as a Python {n:time.struct_time}
 tuple: (year, month, day, hour, minute, second, weekday, day of year, daylight savings time flag).
 
 Notes:

@@ -15,12 +15,12 @@ The specified files, directories, and symlinks are written to the output stream.
 DETAILS = '''
 Generates a stream of Files, representing files, directories and symlinks.
 
-The flags {-0}, {-1}, and {-r} are mutually exclusive. {-1} is the default.
+The flags {r:-0}, {r:-1}, and {r:-r} are mutually exclusive. {r:-1} is the default.
 
-Flags {-f}, {-d}, and {-s} may be combined. If none of these flags are specified, then files, directories
+Flags {r:-f}, {r:-d}, and {r:-s} may be combined. If none of these flags are specified, then files, directories
 and symlinks are all listed.
 
-If no {filename}s are provided, then the currentn directory is listed.
+If no {r:filename}s are provided, then the currentn directory is listed.
 '''
 
 

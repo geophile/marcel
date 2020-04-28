@@ -9,7 +9,7 @@ Change the current directory to the given directory.
 
 
 DETAILS = '''
-If {directory} is omitted, then change the current directory to the home directory.
+If {r:directory} is omitted, then change the current directory to the home directory.
 '''
 
 

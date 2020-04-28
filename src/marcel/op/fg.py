@@ -1,6 +1,16 @@
 import marcel.op.jobop
 
 
+SUMMARY = '''
+Make a specified background job run in the foreground. 
+'''
+
+
+DETAILS = '''
+The new foreground job is resumed if necessary.
+'''
+
+
 def fg():
     return Fg()
 

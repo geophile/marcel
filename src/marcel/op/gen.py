@@ -2,15 +2,15 @@ import marcel.core
 
 
 SUMMARY = '''
-Generates a stream of {count} integers, starting at {start}.
+Generates a stream of {r:count} integers, starting at {r:start}.
 '''
 
 
 DETAILS = '''
-The first integer in the stream is {start}. The number of integers in the stream is {count},
-although if {count} is 0, then the stream does not terminate. If {pad} is specified, 
+The first integer in the stream is {r:start}. The number of integers in the stream is {r:count},
+although if {r:count} is 0, then the stream does not terminate. If {r:pad} is specified, 
 then each integer is converted to a string and left-padded with zeros. Padding is not 
-permitted if the stream does not terminate, or if {start} is negative.
+permitted if the stream does not terminate, or if {r:start} is negative.
 '''
 
 

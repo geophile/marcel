@@ -8,9 +8,9 @@ List the currently running jobs. This includes jobs that are currently paused.
 
 
 DETAILS = '''
-The jobs listed may be running, denoted as {(+)}; or paused, denoted as {(-)}.
+The jobs listed may be running, denoted as {n:(+)}; or paused, denoted as {n:(-)}.
 While it is extremely unlikely, a job that is no longer running may be displayed
-also, denoted as {(x)}. 
+also, denoted as {n:(x)}. 
     
 Every job includes a job number and a process id. Note that job numbers may change over time,
 as a job number simply reflects the job's position in the list of jobs. Process ids never change.

@@ -7,8 +7,8 @@ The input stream is sorted and written to the output stream.
 
 
 DETAILS = '''
-If {key} is not specified, then input tuples are ordered according to Python rules.
-Otherwise, ordering is based on the values computed by applying {key} to each input tuple.
+If {r:key} is not specified, then input tuples are ordered according to Python rules.
+Otherwise, ordering is based on the values computed by applying {r:key} to each input tuple.
 '''
 
 

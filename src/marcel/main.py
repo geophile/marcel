@@ -146,7 +146,7 @@ class Main:
     def run_immediate(self, line):
         # Job control commands should be run in this process, not a spawned process.
         # Also, if we're testing operator behavior, run in immediate mode.
-        return self.op_testing or line.split()[0] in ('bg', 'edit', 'fg', 'jobs', 'kill')
+        return self.op_testing or line.split()[0] in ('bg', 'edit', 'fg', 'help', 'jobs', 'kill')
 
     @staticmethod
     def args():

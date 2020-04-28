@@ -1,7 +1,7 @@
 HELP = '''
 Marcel is a shell. As in any Linux shell, there are commands which
 can be executed, and the output from one command
-can be piped to another.  The conventional piping syntax is used, {|}. Linux
+can be piped to another.  The conventional piping syntax is used, {n:|}. Linux
 pipes stream unstructured text between commands. In marcel, streams
 carry arbitrary Python objects.
 
@@ -16,13 +16,13 @@ along with its square root:
 
     gen 100 | map (lambda x: (x, x**0.5))
 
-Note that the Python function, mapping {x} to the tuple {(x, x**0.5)}
+Note that the Python function, mapping {r:x} to the tuple {r:(x, x**0.5)}
 is enclosed in parentheses, as is the case whenever a function is
-required. Marcel permits the n{lambda} keyword to be omitted.
+required. Marcel permits the {n:lambda} keyword to be omitted.
 
 The following topics will explain these concepts in more detail:
 
-    - n{command}
-    - n{function}
-    - n{pipeline}
+    - {n:command}
+    - {n:function}
+    - {n:pipeline}
 '''

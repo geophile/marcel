@@ -14,7 +14,7 @@ Open an editor to edit the previous command.
 
 
 DETAILS = '''
-The editor is specified by the {EDITOR} environment variable. On exiting the editor, the edited command
+The editor is specified by the {n:EDITOR} environment variable. On exiting the editor, the edited command
 will be on the command line. (Hit enter to run the command, as usual.)
 '''
 

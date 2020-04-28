@@ -7,7 +7,7 @@ Output the trailing items of the input stream, and discard the others.
 
 
 DETAILS = '''
-The last {n} items received from the input stream will be written to the
+The last {r:n} items received from the input stream will be written to the
 output stream. All other input items will be discarded. 
 '''
 

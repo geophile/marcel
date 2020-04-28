@@ -9,7 +9,7 @@ Push a given directory onto the directory stack, and cd to that directory.
 
 
 DETAILS = '''
-If no {directory} is supplied, then the top two items on the directory stack are swapped,
+If no {r:directory} is supplied, then the top two items on the directory stack are swapped,
 and the current directory is changed to the new top directory on the stack.
 '''
 

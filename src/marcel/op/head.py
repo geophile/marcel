@@ -7,7 +7,7 @@ Output the leading items of the input stream, and discard the others.
 
 
 DETAILS = '''
-The first {n} items received from the input stream will be written to the
+The first {r:n} items received from the input stream will be written to the
 output stream. All other input items will be discarded. 
 '''
 

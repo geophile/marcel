@@ -8,39 +8,39 @@ Flatten input tuples (or parts of them) and write the flattened result to the ou
 
 
 DETAILS = '''
-If {position} is omitted, then each element of an input tuple is generated as a separate
+If {r:position} is omitted, then each element of an input tuple is generated as a separate
 1-tuple in the output stream. (If the input has one element, then the output matches the input.)
-If {position} is provided, it must be non-negative. If {position} exceeds the length of an
+If {r:position} is provided, it must be non-negative. If {r:position} exceeds the length of an
 input sequence, then nothing is expanded (the input sequence is sent as output).
 
-b{Example}: If the input contains these sequences:
+{b:Example}: If the input contains these sequences:
 
     (100, 101)
     (200, 201)
 
-then {expand} generates this output:
+then {r:expand} generates this output:
 
     100
     101
     200
     201
 
-If {position} is specified, then presumably each input tuple has a sequence (or iterator) 
+If {r:position} is specified, then presumably each input tuple has a sequence (or iterator) 
 at the indicated position.
 An output tuple is generated for each item in that embedded sequence, replacing the embedded
 sequence by one of its contained items.
 
-The types that can be expanded are sequences ({list}, {tuple}, {str}), {generator}s, 
-{iterator}s and Files.
-Expansion of a {File} yields each line of the named file.
+The types that can be expanded are sequences ({r:list}, {r:tuple}, {r:str}), {r:generator}s, 
+{r:iterator}s and Files.
+Expansion of a {r:File} yields each line of the named file.
 
-b{Example}: If the input contains these sequences:
+{b:Example}: If the input contains these sequences:
 
     ('a', [1, 2, 3], 'x')
     ('b', [4, 5], 'y')
     ('c', [], 'z')
 
-then C{expand 1} generates this output:
+then {r:expand 1} generates this output:
 
     ('a', 1, 'x')
     ('a', 2, 'x')

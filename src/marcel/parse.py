@@ -316,7 +316,7 @@ class UnknownOpError(UnexpectedTokenError):
         self.op_name = op_name
 
     def __str__(self):
-        return f'Unknown op {self.op_name} in {self.text}'
+        return f'Unknown command: {self.op_name}'
 
 
 class InProgress:

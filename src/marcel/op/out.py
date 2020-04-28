@@ -10,7 +10,7 @@ Prints items received on the input stream.
 
 DETAILS = '''
 Itens received on the input stream are passed to the output stream. As a side-effect, input
-items are printed to stdout or to the file specified by {file} or {append}.
+items are printed to stdout or to the file specified by {r:file} or {r:append}.
 
 If no formatting options are specified, then the default rendering is used, except
 that 1-tuples are unwrapped.

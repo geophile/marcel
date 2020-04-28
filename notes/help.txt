@@ -177,36 +177,71 @@ Markup needs more work
 
 - Need tags to span lines within a paragraph.
 
+- Need to do lists items as wrapped paragraphs, e.g.
+
+       - This is an item in a list. It is indented,
+         but the subsequent lines are indented
+         a little more.
+
+----------------------------------------------------------------------
+
 Markup, attempt 2:
 
-- Markup format is {{spec:}text}. spec:
+Text to be formatted consists of lines, grouped into
+paragraphs. Paragraphs boundaries are implicit, or explicit, using
+markup. In either case, a paragraph has attributes controlling its
+wrapping and indenting. Within a paragraph, markup can be used to
+format text.
 
-    - Not specified: highlight
-    - b: bold
-    - i: italic
-    - n: name (referenced, possibly discussed elsewhere)
-    - cRGB[bi]: color
-        - RGB values are 0..5
-        - bi are flags for bold, italic
+Markup syntax is {FORMAT[:TEXT]}. The optional :TEXT is present within
+a paragraph only. Without :TEXT, the markup is specifying paragraph
+formatting. FORMAT strings are case-insensitive.
 
-- Paragraph boundary is empty line
+Text formatting:
 
-- Paragraph boundary also indicated by {p}. Default behavior is to
-  wrap the following paragraph.
+The opening and closing braces must occur in the same paragraph.
+FORMAT is one of:
 
-- {p:spec}, spec:
+    - r: Indicates a reference to an item being described, e.g a flag
+      in an op's help.
 
-    - Not specified
-    - i=n: Indent by n
-    - wrap, wrap=t: wrap the text
-    - wrap=f: don't wrap the text
+    - b: bold. Useful for section titles.
 
-- Brace to be rendered is escaped: \{, \}. Counts as 1 non-whitespace
-  char.
+    - i: italic. Useful for introducing terminology.
 
-Implementation:
+    - n: name. Highlighting a name defined in some other document,
+      e.g. an object or op that is relevant to the topic at hand, but
+      discussed in detail elsewhere.
 
-- IndentedLine goes away.
+    - cRGB[bi]: color, where RGB values are 0..5, and bi are flags for
+      bold, italic
 
-- EmptyLine goes away. A sequence of EmptyLines counts as a paragraph,
-  and preserves vertical spacing.
+Paragraph formatting:
+
+FORMAT is one of:
+
+    - p[,indent=int][,wrap[=bool]]: Indicates a text paragraph. The
+      default value of indent is 0. The default value of wrap is
+      True.
+
+    - L[,indent=int][,mark=char][,wrap[=bool]]
+  
+      - Multi-line list item. The default indent is 4. The default
+        list marker is '-'. The default value of wrap is True.  The
+        first line will be indented by the indicated amount. Following
+        the indent is the mark character, a space, and then the text
+        enclosed in the markup braces.  Subsequent lines will be
+        indented by two additional characters, so that the text lines
+        up with the beginning of text on the first line of the
+        paragraph.
+
+Paragraph boundaries:
+
+A paragraph is a sequence of lines, delimited by paragraph
+boundaries. {p} can be used to introduce paragraph
+boundaries. However, a paragraph boundary is inferred where an empty
+line is adjacent to a non-empty line. An inferred paragraph boundary
+has default properties (indent = 0, wrap = True).
+
+A line with paragraph markup only is ignored -- it is not a line in
+the paragraph on either side.

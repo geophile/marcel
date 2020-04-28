@@ -181,3 +181,7 @@ History commands
 
 - If history were in the namespace, then edited_command wouldn't need
   special handling.
+
+----------------------------------------------------------------------
+
+help_configuration: (((...))) -> \{...\}

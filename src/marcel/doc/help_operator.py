@@ -1,34 +1,34 @@
 HELP = ''' 
-Marcel i{operators} are built in commands, able to pass Python objects
+Marcel {i:operators} are built in commands, able to pass Python objects
 to one another via pipes.
 
-b{Command-line arguments:}
+{b:Command-line arguments:}
 
 In general, an operator has a number of command-line arguments,
 comprising optional and positional arguments.
 
-For example, the n{timer} command has two optional arguments:
+For example, the {n:timer} command has two optional arguments:
 
-    1) {-c} or equivalently {--components}, for controlling the behavior
+    1) {r:-c} or equivalently {r:--components}, for controlling the behavior
     of the operator.
 
-    2) {-h} or equivalently {--help} for obtaining documentation on the
+    2) {r:-h} or equivalently {r:--help} for obtaining documentation on the
     operator.
 
-n{timer} also has one positional argument, {interval}. You can see
+{n:timer} also has one positional argument, {r:interval}. You can see
 these described by running c{timer -h}.
 
-b{Input and output streams:}
+{b:Input and output streams:}
 
 An operator may receive input from a preceding command through a pipe, and
-send output to a succeeding operator through a pipe. The n{timer} command
+send output to a succeeding operator through a pipe. The {n:timer} command
 does not require an input stream, but it does generate output. For example,
-{timer 1} generates a timestamp (seconds since the epoch), once every second.
+{n:timer 1} generates a timestamp (seconds since the epoch), once every second.
 
 Streams always carry tuples between commands. Often, these are
-1-tuples.  For example, the {ls} operator generates a stream
-containing n{File} objects, each wrapped in a 1-tuple. When a Linux
-executable is run, its n{stdout} is conveyed to the next command by
+1-tuples.  For example, the {n:ls} operator generates a stream
+containing {n:File} objects, each wrapped in a 1-tuple. When a Linux
+executable is run, its {n:stdout} is conveyed to the next command by
 wrapping strings (separated by \n characters) in 1-tuples. Marcel
 operators can generate n-tuples, with n > 1. For example, this command
 sequence lists files (only, no directories or symlinks) in the current
@@ -37,12 +37,12 @@ filename and file size values:
 
     ls -f | map (f: (f.name, f.size))
 
-b{Obtaining output}
+{b:Obtaining output}
 
 The only marcel operator that writes output is {out}. Every command sequence
-has an {out} at the end, implicitly if necessary. By default, {out} simply uses
-the Python n{str} method to generate its output. For example, the above command 
-sequence generates output that looks like this (for n{/etc/sysctl.d}):
+has an {n:out} at the end, implicitly if necessary. By default, {n:out} simply uses
+the Python {n:str} method to generate its output. For example, the above command 
+sequence generates output that looks like this (for {n:/etc/sysctl.d}):
 
     ('10-console-messages.conf', 77)
     ('10-ipv6-privacy.conf', 490)
@@ -57,12 +57,12 @@ sequence generates output that looks like this (for n{/etc/sysctl.d}):
     ('README.sysctl', 792)
     ('protect-links.conf', 324)
 
-The {out} command can be made explicit to add formatting and redirection options.
+The {n:out} command can be made explicit to add formatting and redirection options.
 For example, to format the above output differently:
 
     ls -f | map (f: (f.name, f.size)) | out '{}: {}'
 
-A standard Python formatting string, n{{}: {}}' produces this output:
+A standard Python formatting string, '{}: {}' produces this output:
 
     10-console-messages.conf: 77
     10-ipv6-privacy.conf: 490
@@ -77,25 +77,25 @@ A standard Python formatting string, n{{}: {}}' produces this output:
     README.sysctl: 792
     protect-links.conf: 324
 
-Run n{help out} for more information on the {out} command.
+Run {n:help out} for more information on the {n:out} command.
 
-b{Error handling}
+{b:Error handling}
 
 In a major departure from other shells, marcel does not support the
-concept of {stdout} and {stderr}. Instead, errors are written to the
+concept of {n:stdout} and {n:stderr}. Instead, errors are written to the
 operator's output stream as an object of type
-n{marcel.object.Error}. n{Error}s are not passed through operators. Instead
-they are forwarded from one stream to the next, until an {out} operator is encountered.
-At that point, the n{Error} is printed and then not passed further downstream.
+{n:marcel.object.Error}. {n:Error}s are not passed through operators. Instead
+they are forwarded from one stream to the next, until an {n:out} operator is encountered.
+At that point, the {n:Error} is printed and then not passed further downstream.
 
-For example, suppose directory {/tmp/d} contains three directories:
+For example, suppose directory {n:/tmp/d} contains three directories:
 
    M jao@cheese:/tmp/d$ ls
    drwxr-xr-x jao      jao              4096 /tmp/d/hi
    dr-------- root     root             4096 /tmp/d/nope
    drwxr-xr-x jao      jao              4096 /tmp/d/welcome
 
-The n{nope} directory cannot be visited, due to permissions. If we try
+The {r:nope} directory cannot be visited, due to permissions. If we try
 to list all files and directories recursively:
 
     M jao@cheese:/tmp/d$ ls -r
@@ -108,11 +108,11 @@ to list all files and directories recursively:
     -rw-r--r-- jao      jao                 0 /tmp/d/welcome/c.txt
     -rw-r--r-- jao      jao                 0 /tmp/d/welcome/d.txt
 
-Notice that the n{nope} directory is listed as before, but we get an
+Notice that the {r:nope} directory is listed as before, but we get an
 error on the attempt to go inside of it. The position of
-the n{Error} in the output indicates when the
-attempt was made -- between listing the {hi} and {welcome} directories.
+the {r:Error} in the output indicates when the
+attempt was made -- between listing the {r:hi} and {r:welcome} directories.
 
-For Linux executables, each line of {stderr} is turned into an n{Error}
-and written to the same stream receiving {stdout}.
+For Linux executables, each line of {n:stderr} is turned into an {n:Error}
+and written to the same stream receiving {n:stdout}.
 '''

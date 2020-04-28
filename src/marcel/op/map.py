@@ -7,8 +7,8 @@ For each item in the input stream, apply a given function and write the result t
 
 
 DETAILS = '''
-The {function} is applied to each input tuple in the input stream. The components of a tuple
-are bound to the {function}'s parameters. The output from the function is written to the output stream.
+The {r:function} is applied to each input tuple in the input stream. The components of a tuple
+are bound to the {r:function}'s parameters. The output from the function is written to the output stream.
 '''
 
 

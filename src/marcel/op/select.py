@@ -7,7 +7,7 @@ Tuples in the input stream are filtered using a predicate.
 
 
 DETAILS = '''
-The {function} is applied to each input tuple. Tuples for which the {function} evalutes to
+The {r:function} is applied to each input tuple. Tuples for which the {r:function} evalutes to
 True are written to the output stream.
 '''
 

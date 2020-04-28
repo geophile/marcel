@@ -1,47 +1,89 @@
 import marcel.helpformatter
-import marcel.object.color
+
+
+class TestColorScheme:
+
+    def __init__(self):
+        self.help_reference = 'R'
+        self.help_bold = 'B'
+        self.help_italic = 'I'
+        self.help_name = 'N'
+        self.help_color = 'C'
+
+    def bold(self):
+        return 1
+
+    def italic(self):
+        return 2
+
+    def color(self, r, g, b, style):
+        return f'C{r}{g}{b}{"" if style == 0 else "b" if style == 1 else "i" if style == 2 else "bi"}'
+
+
+def colorize(text, color):
+    return f'({color}:{text})'
+
+
+color_scheme = TestColorScheme()
+formatter = marcel.helpformatter.HelpFormatter(color_scheme, colorize)
 
 text = '''
-This is a line.
-This is another line.
-This line contains a {flag}.
-Here is i{italic} and b{bold} text, and a n{name}.
-
-
-    this is code
-    so is this, witn a n{name}
+{p}This text
+should be wrapped.
+{p,wrap=T}This text should
+also be wrapped.
+{p,wrap=F}This
+    text
+    should
+    not 
+    be 
+    wrapped
 '''
 
-color_scheme = marcel.object.color.ColorScheme()
-color_scheme.help_highlight = 'H'
-color_scheme.help_bold = 'B'
-color_scheme.help_italic = 'I'
-color_scheme.help_name = 'N'
+HELP = '''
+To learn more about a topic, run the command:
 
+    help TOPIC
 
-def format(text, color):
-    return f'{color}({text})'
+Available topics:
 
+{b:Top-level help:}
+{p,wrap=F}
+    - {n:marcel}
 
-def dump(help):
-    for block in help.blocks:
-        print(block)
-        if isinstance(block, marcel.helpformatter.Paragraph) and block.markup and len(block.markup) > 0:
-            print('        MARKUP {')
-            for markup in block.markup:
-                print(f'        {markup}')
-            print('        }')
-            if block.plaintext:
-                print('        PLAINTEXT {')
-                print(block.plaintext)
-                print('        }')
-            if block.wrapped:
-                print('        WRAPPED {')
-                print(block.wrapped)
-                print('        }')
+(Or just run {n:help} with no topic.)
 
+{b:Overview:}
+{p,wrap=F}
+    - {n:configuration}: How to configure the prompt, color scheme, remote access.
+    - {n:overview}: The main concepts of marcel. How it differs from other shells.
+    - {n:interaction}: Interacting with marcel.
+    - {n:command}: Marcel operators, Linux executables.
+    - {n:function}: Several operators rely on Python functions.
+    - {n:pipeline}: Structuring commands into sequences, using pipes.
+    - {n:object}: The objects you work with. 
 
-help = marcel.helpformatter.HelpFormatter(color_scheme, format)
-formatted = help.format(text)
-# dump(help)
-print(formatted)
+{b:Objects}:
+{p,wrap=F}
+    - {n:file}
+    - {n:process}
+
+{b:Operators:}
+{p,wrap=F}
+    - {n:bash}        - {n:bg}          - {n:cd}
+    - {n:dirs}        - {n:edit}        - {n:expand}
+    - {n:fg}          - {n:gen}         - {n:head}
+    - {n:help}        - {n:jobs}        - {n:ls}
+    - {n:map}         - {n:out}         - {n:popd}
+    - {n:ps}          - {n:pushd}       - {n:pwd}
+    - {n:red}         - {n:reverse}     - {n:select}
+    - {n:sort}        - {n:squish}      - {n:sudo}
+    - {n:tail}        - {n:timer}       - {n:unique}
+    - {n:version}     - {n:window}
+'''
+
+text = HELP
+
+print(f'ORIGINAL: {text}')
+formatted = formatter.format(text)
+print(f'FORMATTED: {formatted}')

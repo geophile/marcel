@@ -47,7 +47,16 @@ class ColorScheme:
         self.process_pid = None
         self.process_commandline = None
         self.error = None
-        self.help_highlight = None
+        self.help_reference = None
         self.help_bold = None
         self.help_italic = None
         self.help_name = None
+
+    def color(self, r, g, b, style):
+        return Color(r, g, b, style)
+
+    def bold(self):
+        return Color.BOLD
+
+    def italic(self):
+        return Color.ITALIC

@@ -10,16 +10,16 @@ The components of each input tuple are reduced using a given function.
 
 
 DETAILS = '''
-Each input sequence is reduced to a single value, using {function} to combine the values.
-{function} is a binary function that can be used for reduction, e.g. {+}, {*}, {max}, {min}.
+Each input sequence is reduced to a single value, using {r:function} to combine the values.
+{r:function} is a binary function that can be used for reduction, e.g. {n:+}, {n:*}, {n:max}, {n:min}.
 
-b{Example:} If one of the inputs is the list {[1, 2, 3, 4]}, then:
+{b:Example:} If one of the inputs is the list {n:[1, 2, 3, 4]}, then:
 
     squish +
 
-will generate {10}.
+will generate {n:10}.
 
-If no {function} is provided, then {+} is assumed.
+If no {r:function} is provided, then {n:+} is assumed.
 '''
 
 

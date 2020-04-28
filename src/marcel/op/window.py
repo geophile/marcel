@@ -13,11 +13,11 @@ Groups of consecutive input tuples are combined and written
 to the output stream. The objects are grouped using one of two
 mechanisms.
 
-b{Predicate-based:}
+{b:Predicate-based:}
 
 A new group is started on the first input object, and for any
-subsequent object for which {predicate} returns true. For example, if
-the input stream contains the integers {1, 2, 3, ...}, then:
+subsequent object for which {r:predicate} returns true. For example, if
+the input stream contains the integers {n:1, 2, 3, ...}, then:
 
     window (x: x % 3 == 2)
 
@@ -31,17 +31,17 @@ yields as output:
 
 I.e., a new tuple is started for each integer n, (after the first integer) such that n % 3 = 2.
 
-b{Fixed-size}:
+{b:Fixed-size}:
 
-Groups have a fixed number of objects. The {-o} and {-d} flags
-specify {N}, the number of objects in the groups.  {-o}
-specifies i{overlapping} windows, in which each input object begins a
-new list containing {N} items. Groups may be padded with
-{None} values to ensure that the group's size is {N}.
+Groups have a fixed number of objects. The {r:-o} and {r:-d} flags
+specify {r:N}, the number of objects in the groups.  {r:-o}
+specifies {i:overlapping} windows, in which each input object begins a
+new list containing {r:N} items. Groups may be padded with
+{r:None} values to ensure that the group's size is {r:N}.
 
-b{Example:}
+{b:Example:}
  
-For input {0, 1, ..., 9}, {window -o 3} yields these
+For input {n:0, 1, ..., 9}, {r:window -o 3} yields these
 tuples:
 
     ((0,), (1,), (2,))
@@ -55,14 +55,14 @@ tuples:
     ((8,), (9,), (None,))
     ((9,), (None,), (None,))
 
-{-d} specifies i{disjoint} windows, in which each input object
-appears in only one group. A new group is started every {N}
+{r:-d} specifies {i:disjoint} windows, in which each input object
+appears in only one group. A new group is started every {r:N}
 objects. The last window may be padded with (None,) to ensure that it
-has {N} elements.
+has {r:N} elements.
 
-b{Example:}
+{b:Example:}
 
-For input {0, 1, ..., 9}, {window -d 3} yields these
+For input {n:0, 1, ..., 9}, {r:window -d 3} yields these
 tuples:
 
     ((0,), (1,), (2,))

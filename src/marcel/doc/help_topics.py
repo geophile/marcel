@@ -1,33 +1,33 @@
 HELP = '''
 Here is the complete list of help topics. Topic names are case-insensitive.
 
-b{Top-level help:}
+{b:Top-level help:}
 
-    - {marcel} (or just run {help} with no topic)
+    - {n:marcel} (or just run {help} with no topic)
 
-b{Overview:}
+{b:Overview:}
    
-    - {overview}
-    - {objects}
-    - {command}
-    - {function}
-    - {pipeline}
+    - {n:overview}
+    - {n:objects}
+    - {n:command}
+    - {n:function}
+    - {n:pipeline}
 
-b{Objects}:
+{b:Objects}:
 
-    - {file}
-    - {process}
+    - {n:file}
+    - {n:process}
 
-b{Operators:}
+{b:Operators:}
 
-    - {bash}        - {bg}          - {cd}
-    - {dirs}        - {edit}        - {expand}
-    - {fg}          - {gen}         - {head}
-    - {help}        - {jobs}        - {ls}
-    - {map}         - {out}         - {popd}
-    - {ps}          - {pushd}       - {pwd}
-    - {red}         - {reverse}     - {select}
-    - {sort}        - {squish}      - {sudo}
-    - {tail}        - {timer}       - {unique}
-    - {version}     - {window}
+    - {n:bash}        - {n:bg}          - {n:cd}
+    - {n:dirs}        - {n:edit}        - {n:expand}
+    - {n:fg}          - {n:gen}         - {n:head}
+    - {n:help}        - {n:jobs}        - {n:ls}
+    - {n:map}         - {n:out}         - {n:popd}
+    - {n:ps}          - {n:pushd}       - {n:pwd}
+    - {n:red}         - {n:reverse}     - {n:select}
+    - {n:sort}        - {n:squish}      - {n:sudo}
+    - {n:tail}        - {n:timer}       - {n:unique}
+    - {n:version}     - {n:window}
 '''
