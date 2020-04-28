@@ -56,20 +56,20 @@ class Test:
         else:
             ok = False
         if not ok:
-            print(f'{command} failed:')
-            print(f'    expected:\n<<<{expected}>>>')
-            print(f'    actual:\n<<<{actual}>>>')
+            print(f'{command} failed:', file=sys.__stderr__)
+            print(f'    expected:\n<<<{expected}>>>', file=sys.__stderr__)
+            print(f'    actual:\n<<<{actual}>>>', file=sys.__stderr__)
             self.failures += 1
 
     def check_substring(self, command, expected, actual):
         if expected not in actual:
-            print(f'{command} failed. Expected substring not found in actual:')
-            print(f'    expected:\n<<<{expected}>>>')
-            print(f'    actual:\n<<<{actual}>>>')
+            print(f'{command} failed. Expected substring not found in actual:', file=sys.__stderr__)
+            print(f'    expected:\n<<<{expected}>>>', file=sys.__stderr__)
+            print(f'    actual:\n<<<{actual}>>>', file=sys.__stderr__)
             self.failures += 1
 
     def fail(self, command, message):
-        print(f'{command} failed: {message}')
+        print(f'{command} failed: {message}', file=sys.__stderr__)
         self.failures += 1
 
     def run_and_capture_output(self, command):
@@ -106,11 +106,11 @@ class Test:
                 elif actual_err:
                     self.fail(test, f'Unexpected error: {actual_err}')
             except Exception as e:
-                print(f'{test}: Terminated by uncaught exception: {e}')
+                print(f'{test}: Terminated by uncaught exception: {e}', file=sys.__stderr__)
                 marcel.util.print_stack()
                 self.failures += 1
             except marcel.exception.KillCommandException as e:
-                print(f'{test}: Terminated by KillCommandException: {e}')
+                print(f'{test}: Terminated by KillCommandException: {e}', file=sys.__stderr__)
 
     def file_contents(self, filename):
         file = open(filename, 'r')

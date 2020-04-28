@@ -12,7 +12,7 @@ TEST = test_base.Test()
 
 
 def test_no_such_op():
-    TEST.run('gen 5 | abc', expected_err='Unknown op abc')
+    TEST.run('gen 5 | abc', expected_err='Unknown command')
 
 
 def test_gen():

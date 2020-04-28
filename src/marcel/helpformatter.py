@@ -190,7 +190,6 @@ class TextMarkup(Markup):
                 self.raise_invalid_formatting_exception()
         else:
             self.raise_invalid_formatting_exception()
-        assert color is not None
         return color
 
     @staticmethod
