@@ -314,7 +314,8 @@ class Paragraph:
 
 
 class HelpFormatter:
-    RIGHT_MARGIN = 0.20
+
+    RIGHT_MARGIN = 0.10
 
     def __init__(self, color_scheme, format_function=marcel.util.colorize):
         self.color_scheme = color_scheme

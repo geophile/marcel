@@ -191,3 +191,7 @@ See also help_operator, '{}: {}'
 \\ in help_command.py: Need space between \\ and } or crash.
 
 tab completion for help
+
+op help doesn't adjust to change in console width. Help is created
+once and for all on startup, with the arg parser. Maybe take over
+ArgParser.print_help completely?

@@ -29,6 +29,7 @@ formatter = marcel.helpformatter.HelpFormatter(color_scheme, colorize)
 
 text = '''
 Comments:
+
 {L}- {r:cat /etc/passwd}: Write each line of {r:/etc/passwd} to the output stream.
 {L}- {r:map (line: line.split(':'))}: Split the lines at the {n:} separators, yielding 7-tuples.
 {L}- {r:select (*line: line[-1] == '/bin/bash')}: Select those lines in which the last field is 
