@@ -28,17 +28,8 @@ color_scheme = TestColorScheme()
 formatter = marcel.helpformatter.HelpFormatter(color_scheme, colorize)
 
 text = '''
-Comments:
-
-{L}- {r:cat /etc/passwd}: Write each line of {r:/etc/passwd} to the output stream.
-{L}- {r:map (line: line.split(':'))}: Split the lines at the {n:} separators, yielding 7-tuples.
-{L}- {r:select (*line: line[-1] == '/bin/bash')}: Select those lines in which the last field is 
-{r:/bin/bash}.
-{L}- {r:map (*line: line[0])}: Keep the username field of each input tuple.
-{L}- {r:xargs echo}: Combine the incoming usernames into a single line, which is printed to {n:stdout}.
-{L}- {r:\\ }: A line terminating in {r:\\ }indicates that the command continues on the next line.
+\{braces \{braces {n:\{everywhere\}}\}\}
 '''
-
 
 print(f'ORIGINAL: {text}')
 formatted = formatter.format(text)

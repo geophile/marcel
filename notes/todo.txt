@@ -184,6 +184,10 @@ History commands
 
 ----------------------------------------------------------------------
 
+Cluster: Allow config of a single host
+
+----------------------------------------------------------------------
+
 help_configuration: (((...))) -> \{...\}
 
 See also help_operator, '{}: {}'
@@ -196,4 +200,11 @@ op help doesn't adjust to change in console width. Help is created
 once and for all on startup, with the arg parser. Maybe take over
 ArgParser.print_help completely?
 
-"cluster" -> "remote"?
+
+
+ORIGINAL: 
+\{braces \{braces {n:\{everywhere\}}\}\}
+
+-----------------------------------------------------------------------------
+FORMATTED: 
+\{braces \{braces (N:\{everywhere\})\}\}

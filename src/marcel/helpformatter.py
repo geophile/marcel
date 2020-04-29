@@ -66,6 +66,83 @@ import marcel.util
 # need to be adjusted.
 
 
+class TextPointer:
+
+    MARKUP_OPEN = -1
+    MARKUP_CLOSE = -2
+    END = -3
+
+    def __init__(self, text):
+        self.text = text
+        self.n = len(text)  # Includes escape chars
+        self.p = 0
+        self.ws = 0  # whitespace count up to and not including p
+
+    def __eq__(self, other):
+        return self.p == other.p
+
+    def __ne__(self, other):
+        return self.p != other.p
+
+    def __lt__(self, other):
+        return self.p < other.p
+
+    def __le__(self, other):
+        return self.p <= other.p
+
+    def __gt__(self, other):
+        return self.p > other.p
+
+    def __ge__(self, other):
+        return self.p >= other.p
+
+    def peek(self):
+        try:
+            c = self.text[self.p]
+            if c == '{':
+                return TextPointer.MARKUP_OPEN
+            elif c == '}':
+                return TextPointer.MARKUP_CLOSE
+            elif c == '\\':
+                c = self.text[self.p + 1]
+            return c
+        except IndexError:
+            return TextPointer.END
+
+    def next(self):
+        try:
+            c = self.text[self.p]
+            self.p += 1
+            if c == '{':
+                return TextPointer.MARKUP_OPEN
+            elif c == '}':
+                return TextPointer.MARKUP_CLOSE
+            elif c == '\\':
+                c = self.text[self.p]
+                self.p += 1
+            if not c.isspace():
+                self.ws += 1
+            return c
+        except IndexError:
+            return TextPointer.END
+
+    def at_end(self):
+        return self.p >= self.n
+
+    def whitespace_count(self):
+        return self.ws
+
+    def advance_past(self, c):
+        assert TextPointer.is_markup_boundary(c) or (type(c) is str and len(c) == 1), c
+        next = self.next()
+        while next != c and next != TextPointer.END:
+            next = self.next()
+
+    @staticmethod
+    def is_markup_boundary(x):
+        return x == TextPointer.MARKUP_OPEN or x == TextPointer.MARKUP_CLOSE
+
+
 class Markup:
 
     def __init__(self, text):
@@ -128,67 +205,74 @@ class ParagraphMarkup(Markup):
 class TextMarkup(Markup):
 
     def __init__(self, text, open, preceding_non_ws_count, color_scheme):
+        self.preceding_non_ws_count = preceding_non_ws_count
+        # Parse the formatting, and get past the colon
+        self.color, text_start = self.formatting(text, open + 1, color_scheme)
+        # Find the closing } of the markup, and count non-whitespace characters
+        self.non_ws_count = 0
         close = None
-        p = open + 1
         n = len(text)
+        p = text_start
         while p < n and close is None:
-            if text[p] == '}' and text[p - 1] != '\\':
+            c = text[p]
+            if c == '}' and text[p - 1] != '\\':
                 close = p
             else:
+                if not c.isspace():
+                    self.non_ws_count += 1
                 p += 1
         if close is None:
             self.text = text[open:min(open + 10, n)]  # For exception message
             self.raise_invalid_formatting_exception()
         close += 1
         super().__init__(text[open:close])
-        self.size = close - open
-        colon = text.find(':', open)
-        if colon == -1:
-            self.raise_invalid_formatting_exception()
-        self.preceding_non_ws_count = preceding_non_ws_count
-        self.color_scheme = color_scheme
-        # Compute non-ws count for bracketed text.
-        # TODO: Escaped chars
-        self.non_ws_count = 0
-        p = colon + 1
-        while p < close - 1:
-            if not text[p].isspace():
-                self.non_ws_count += 1
-            p += 1
-        self.content = text[colon + 1:close - 1]
-        self.color = self.find_color(text[open + 1:colon])
+        self.content = text[text_start:close-1]
+        self.size = close - open  #  { ... }
 
     def __repr__(self):
         return f'({self.preceding_non_ws_count} : {self.content} : {self.non_ws_count})'
 
-    def find_color(self, format):
-        code = format[0]
+    def formatting(self, text, p, color_scheme):
         color = None
-        if code == 'r':
-            color = self.color_scheme.help_reference
-        elif code == 'b':
-            color = self.color_scheme.help_bold
-        elif code == 'i':
-            color = self.color_scheme.help_italic
-        elif code == 'n':
-            color = self.color_scheme.help_name
-        elif code == 'c':
-            try:
-                r, g, b = (int(x) for x in format[1:4])
+        try:
+            c = text[p]
+            p += 1
+            if c in 'rbin':
+                if text[p] != ':':
+                    self.raise_invalid_formatting_exception()
+                p += 1
+                if c == 'r':
+                    color = color_scheme.help_reference
+                elif c == 'b':
+                    color = color_scheme.help_bold
+                elif c == 'i':
+                    color = color_scheme.help_italic
+                elif c == 'n':
+                    color = color_scheme.help_name
+            elif c == 'c':
+                r, g, b = int(text[p]), int(text[p+1]), int(text[p+2])
+                p += 3
+                colon = text.find(':', p)
+                if colon == -1 or colon > p + 2:
+                    self.raise_invalid_formatting_exception()
                 style = 0
-                for x in format[4:].lower():
+                for x in text(p, colon):
                     if x == 'b':
-                        style = style | self.color_scheme.bold()
+                        style = style | color_scheme.bold()
                     elif x == 'i':
-                        style = style | self.color_scheme.italic()
+                        style = style | color_scheme.italic()
                     else:
                         self.raise_invalid_formatting_exception()
-                color = self.color_scheme.color(r, g, b, style)
-            except ValueError:
+                p = colon + 1
+                color = color_scheme.color(r, g, b, style)
+            else:
                 self.raise_invalid_formatting_exception()
-        else:
+            assert color is not None
+            return color, p
+        except ValueError:
             self.raise_invalid_formatting_exception()
-        return color
+        except IndexError:
+            self.raise_invalid_formatting_exception()
 
     @staticmethod
     def starts_here(text, p):
@@ -425,8 +509,7 @@ class HelpFormatter:
         assert text[p] == '{'
         if p > 0 and text[p - 1] == '\\':
             return False
-        if p + 1 < len(text) and text[p + 1] in 'pPlL':
-            return True
+        return p + 1 < len(text) and text[p + 1] in 'pPlL'
 
     @staticmethod
     def is_paragraph_markup_close(text, p):

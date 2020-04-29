@@ -4,7 +4,7 @@ on the console.
 
 {b:Color:}
 
-A {r:Color} is an object type built in to marcel. A {r:Color} is
+{r:Color} is an object type built in to marcel. A {r:Color} is
 created by providing RGB values, and style specifications {n:BOLD}
 and/or {n:ITALIC}. Colors are typically assigned to variables
 in your configuration script, (run

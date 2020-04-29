@@ -4,7 +4,7 @@ is the namespace used by marcel to execute user-supplied code. During startup,
 the configuration script {n:~/.marcel.py} is executed. At this point, the 
 marcel namespace contains a few variables (such as {n:USER}, {n:HOME},
 and {n:PROMPT}), and functions for configuring access to various
-resources (e.g. {n:define_cluster}).
+resources (e.g. {n:define_remote}).
 
 The configuration script is ordinary Python code, so you can use
 {n:import} statements to add symbols from modules, and define your own
