@@ -2,7 +2,7 @@ HELP = '''
 A marcel {i:command} is a single action entered on the command line. There are
 two types of commands:
 
-{L,indent=4:4}{i:Marcel operator:} A marcel operator is built into marcel. In its most 
+{L,indent=4:4}{i:Marcel operator:} A command that is built into marcel. In its most 
       general form, an operator receives an input stream containing Python tuples,
       and writes an output stream containing Python tuples. Every marcel operator
       provides documentation via the help flags ({r:-h}, {r:--help}), or the {r:help}
