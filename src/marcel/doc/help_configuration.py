@@ -15,61 +15,61 @@ to the namespace for future use.
 The default marcel prompt is {n:$}. 
 You can customize the prompt by calling {n:define_prompt} function 
 in the configuration script. For example:
-{p,wrap=F}
-    define_prompt([
-        RED_BOLD,
-        'M ',
-        Color(0, 2, 1, bold=True),
-        USER,
-        '@',
-        HOST,
-        WHITE,
-        ':',
-        Color(0, 3, 3, BOLD),
-        lambda: ('~' + PWD[len(HOME):]) if PWD.startswith(HOME) else PWD,
-        '$ '])
+{p,wrap=F,indent=4}
+define_prompt([
+    RED_BOLD,
+    'M ',
+    Color(0, 2, 1, bold=True),
+    USER,
+    '@',
+    HOST,
+    WHITE,
+    ':',
+    Color(0, 3, 3, BOLD),
+    lambda: ('~' + PWD[len(HOME):]) if PWD.startswith(HOME) else PWD,
+    '$ '])
 
 This produces the following prompt:
-{p,wrap=F}
-    {c500b:M} jao@cheese:~$
+
+{p,indent=4}{c500b:M} jao@cheese:~$
 
 (The {c500b:M} is there to remind me, while developing marcel, that I am
 running marcel, not bash.)
 
 The list passed to {n:define_prompt} contains a number of elements that
 are evaluated each time a prompt is displayed:
-{p,wrap=F}
-    - {r:RED_BOLD}: An environment variable bound to a {n:Color} object.
-      This color will be used for displaying subsequent text.
-{p,wrap=F}
-    - {r:'M '}: Display the indicated string, colored {r:RED_BOLD}, as just noted.
-{p,wrap=F}
-    - {r:Color(0, 2, 1, bold=True)}: The following text is displayed in
-      the indicated color, (and made bold).
-{p,wrap=F}
-    - {r:USER}: An environment variable, representing the currently logged in user.
-      Evalutes to the variable's value.
-{p,wrap=F}
-    - {r:'@'}: The string {r:@}.
-{p,wrap=F}
-    - {r:HOST}: Another environment variable, the hostname of the host.
-{p,wrap=F}
-    - {r:WHITE}: Evaluates to a {n:Color}, to control subsequent text.
-{p,wrap=F}
-    - {r:':'}: The string {r::}.
-{p,wrap=F}
-    - {r:Color(0, 3, 3, BOLD)}: A {n:Color}.
-{p,wrap=F}
-    - {r:lambda: ('~' + PWD[len(HOME):]) if PWD.startswith(HOME) else PWD}: 
-      A function computing the rendering of the current directory. If the
-      current directory, stored in the environment variable {r:PWD}, is under
-      the {r:HOME} directory, then display a path starting with {r:~}. Otherwise
-      print {r:PWD} as is. Because {r:PWD} changes over time, (as the user executes
-      {n:cd}, {n:pushd}, and {n:popd} operations), the function is left unevaluated
-      (hence the {n:lambda}). Marcel evalutes functions included in a prompt
-      specification whenever the prompt needs to be displayed.
-{p,wrap=F}
-    - {r:'$ '}: The string {r:$}.
+
+{L}- {r:RED_BOLD}: An environment variable bound to a {n:Color} object.
+This color will be used for displaying subsequent text.
+
+{L}- {r:'M '}: Display the indicated string, colored {r:RED_BOLD}, as just noted.
+
+{L}- {r:Color(0, 2, 1, bold=True)}: The following text is displayed in
+the indicated color, (and made bold).
+
+{L}- {r:USER}: An environment variable, representing the currently logged in user.
+Evalutes to the variable's value.
+
+{L}- {r:'@'}: The string {r:@}.
+
+{L}- {r:HOST}: Another environment variable, the hostname of the host.
+
+{L}- {r:WHITE}: Evaluates to a {n:Color}, to control subsequent text.
+
+{L}- {r:':'}: The string {r::}.
+
+{L}- {r:Color(0, 3, 3, BOLD)}: A {n:Color}.
+
+{L}- {r:lambda: ('~' + PWD[len(HOME):]) if PWD.startswith(HOME) else PWD}: 
+function computing the rendering of the current directory. If the
+directory, stored in the environment variable {r:PWD}, is under
+{r:HOME} directory, then display a path starting with {r:~}. Otherwise
+print {r:PWD} as is. Because {r:PWD} changes over time, (as the user executes
+{n:cd}, {n:pushd}, and {n:popd} operations), the function is left unevaluated
+(hence the {n:lambda}). Marcel evalutes functions included in a prompt
+specification whenever the prompt needs to be displayed.
+
+{L}- {r:'$ '}: The string {r:$}.
 
 For multi-line commands, a second prompt can be defined by calling the
 function {n:define_continuation_prompt}.

@@ -1,3 +1,4 @@
+import subprocess
 import textwrap
 
 import marcel.util
@@ -31,14 +32,10 @@ import marcel.util
 #       default value of indent is 0. The default value of wrap is
 #       T, (boolean values are indicated by T for true, and F for false).
 #
-#     - L[,indent=int][,mark=char][,wrap[=bool]]: Indicates a multi-line
-#       list item. The default indent is 4. The default list marker is '-'.
-#       The default value of wrap is True. The first line of the paragraph
-#       will be indented by the indicated amount. Following the indent is
-#       the mark character, a space, and then the first line of text appears.
-#       Subsequent lines will be indented by two additional characters, so that
-#       the text lines up with the beginning of text on the first line of the
-#       paragraph.
+#     - L[,indent=int[:int]][,wrap[=bool]]: Indicates a multi-line
+#       list item. The default indent is 2:4. If two indents are specified,
+#       the first int is for the first line of the paragraph, and the
+#       second int is for subsequent lines. The default value of wrap is True.
 #
 # Text formatting:
 #
@@ -79,18 +76,17 @@ class ParagraphMarkup(Markup):
     def __init__(self, text):
         super().__init__(text)
         self.code = None
-        self.indent = None
-        self.mark = None
+        self.indent1 = None
+        self.indent2 = None
         self.wrap = None
         self.parse_paragraph_formatting()
 
     def parse_paragraph_formatting(self):
         parts = self.text[1:-1].split(',')
-        code = parts[0].lower()
-        if len(code) > 1:
-            print(code)
+        self.code = parts[0].lower()
+        if len(self.code) > 1:
             self.raise_invalid_formatting_exception()
-        assert code in 'pl', code
+        assert self.code in 'pl', self.code
         for part in parts[1:]:
             tokens = part.split('=')
             if len(tokens) == 1:
@@ -103,28 +99,21 @@ class ParagraphMarkup(Markup):
                 key = key.lower()
                 if key == 'indent':
                     try:
-                        self.indent = int(value)
+                        indents = [int(x) for x in value.split(':')]
+                        if len(indents) < 1 or len(indents) > 2:
+                            self.raise_invalid_formatting_exception()
+                        self.indent1 = indents[0]
+                        self.indent2 = indents[1] if len(indents) > 1 else self.indent1
                     except ValueError:
                         self.raise_invalid_formatting_exception()
                 elif key == 'wrap':
                     self.wrap = value == 'T'
-                elif key == 'mark':
-                    if len(value) == 1:
-                        self.mark = value
-                    else:
-                        self.raise_invalid_formatting_exception()
             else:
                 self.raise_invalid_formatting_exception()
-        if self.indent is None:
-            self.indent = 0
+        if self.indent1 is None:
+            self.indent1, self.indent2 = (0, 0) if self.code == 'p' else (2, 4)
         if self.wrap is None:
             self.wrap = True
-        if self.code == 'p':
-            if self.mark is not None:
-                self.raise_invalid_formatting_exception()
-        else:
-            if self.mark is None:
-                self.mark = '-'
 
 
 class TextMarkup(Markup):
@@ -198,7 +187,6 @@ class TextMarkup(Markup):
 
 
 class Paragraph:
-
     BLANK_LINE = ''
     DEFAULT_MARKUP = '{p}'
 
@@ -209,7 +197,7 @@ class Paragraph:
         self.text_markup = None
         self.plaintext = None
         self.wrapped = None
-        self.wrapper = textwrap.TextWrapper(break_long_words=False)
+        self.indented = None
 
     def __repr__(self):
         text = '\n'.join(self.lines)
@@ -244,11 +232,32 @@ class Paragraph:
                 p += 1
 
     def wrap(self):
-        self.wrapped = self.wrapper.fill(self.plaintext) if self.paragraph_markup.wrap else self.plaintext
+        if self.paragraph_markup.wrap:
+            indent = self.paragraph_markup.indent1
+            columns = self.help_formatter.help_columns - indent
+            self.wrapped = textwrap.wrap(self.plaintext,
+                                         width=columns,
+                                         break_long_words=False)
+        else:
+            self.wrapped = self.plaintext.split('\n')
+
+    def indent(self):
+        indent = self.paragraph_markup.indent1
+        if indent == 0:
+            indented_lines = self.wrapped
+        else:
+            indented_lines = []
+            padding1 = ' ' * indent
+            padding2 = ' ' * self.paragraph_markup.indent2
+            padding = padding1
+            for line in self.wrapped:
+                indented_lines.append(padding + line)
+                padding = padding2
+        self.indented = '\n'.join(indented_lines)
 
     def format(self):
         formatted = ''
-        text = self.wrapped
+        text = self.indented
         n = len(text)
         p = 0  # position in text
         format_function = self.help_formatter.format_function
@@ -287,12 +296,15 @@ class Paragraph:
 
 
 class HelpFormatter:
+    RIGHT_MARGIN = 0.20
 
     def __init__(self, color_scheme, format_function=marcel.util.colorize):
         self.color_scheme = color_scheme
         self.format_function = format_function
+        self.help_columns = None
 
     def format(self, text):
+        self.find_console_width()
         if text is None:
             return None
         blocks = self.find_explicit_paragraph_boundaries(text)
@@ -301,6 +313,7 @@ class HelpFormatter:
         for paragraph in paragraphs:
             paragraph.remove_markup()
             paragraph.wrap()
+            paragraph.indent()
             buffer.append(paragraph.format())
         return '\n'.join(buffer)
 
@@ -358,6 +371,21 @@ class HelpFormatter:
                         appended = paragraph.append(line)
                         assert appended
         return paragraphs
+
+    def find_console_width(self):
+        process = subprocess.Popen('stty size',
+                                   shell=True,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.DEVNULL,
+                                   universal_newlines=True)
+        process.wait()
+        stdout, _ = process.communicate()
+        try:
+            console_columns = int(stdout.split()[1])
+        except Exception:
+            # Not running in a console.
+            console_columns = 70  # Default for textwrap module
+        self.help_columns = int((1 - HelpFormatter.RIGHT_MARGIN) * console_columns)
 
     @staticmethod
     def find_paragraph_markup(text, p):

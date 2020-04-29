@@ -185,3 +185,9 @@ History commands
 ----------------------------------------------------------------------
 
 help_configuration: (((...))) -> \{...\}
+
+See also help_operator, '{}: {}'
+
+\\ in help_command.py: Need space between \\ and } or crash.
+
+tab completion for help

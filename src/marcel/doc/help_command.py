@@ -2,13 +2,13 @@ HELP = '''
 A marcel {i:command} is a single action entered on the command line. There are
 two types of commands:
 
-    - {b:Marcel operator:} A marcel operator is built into marcel. In its most 
+{L,indent=4:4}{b:Marcel operator:} A marcel operator is built into marcel. In its most 
       general form, an operator receives an input stream containing Python tuples,
       and writes an output stream containing Python tuples. Every marcel operator
       provides documentation via the help flags ({r:-h}, {r:--help}), or the {r:help}
       command. For more information on operators, run {n:help operator}.
 
-    - {b:Linux executable:} Linux executables can be executed, as with any other
+{L,indent=4:4}{b:Linux executable:} Linux executables can be executed, as with any other
       shell. Many such executables can read and write streams of strings.
 
 In some cases, the marcel operator has the same name as a Linux
@@ -47,5 +47,5 @@ Comments:
 
     - {r:xargs echo}: Combine the incoming usernames into a single line, which is printed to {n:stdout}.
 
-    - {r:\\}: A line terminating in {r:\\} indicates that the command continues on the next line.
+    - {r:\\ }: A line terminating in {r:\\ }indicates that the command continues on the next line.
 '''
