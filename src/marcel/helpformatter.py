@@ -55,6 +55,15 @@ import marcel.util
 #
 #     - cRGB[bi]: color, where RGB values are 0..5, and bi are flags for
 #       bold, italic
+#
+# The implementation treats paragraph and text markup separately. Paragraph markup
+# is noted and used to define and format paragraphs. Text markup positions are noted
+# and removed. After wrapping and indenting, colorization is performed using the positions
+# recorded previously. Position is identified by the number of non-whitespace characters preceding
+# the markup. THIS MEANS THAT MARKUP MUST NOT INTRODUCE NON-WHITESPACE TEXT. This constrains the
+# design of the markup language. E.g., there can't be a list formatting markup item that introduces
+# list markup text (bullets or numbers). This is fixable, but then the non-whitespace counters would
+# need to be adjusted.
 
 
 class Markup:
@@ -233,6 +242,9 @@ class Paragraph:
 
     def wrap(self):
         if self.paragraph_markup.wrap:
+            # Trim lines. textwrap.wrap should do this (based on my understanding of the docs)
+            # but doesn't seem to.
+            self.trim_lines_to_be_wrapped()
             indent = self.paragraph_markup.indent1
             columns = self.help_formatter.help_columns - indent
             self.wrapped = textwrap.wrap(self.plaintext,
@@ -240,6 +252,12 @@ class Paragraph:
                                          break_long_words=False)
         else:
             self.wrapped = self.plaintext.split('\n')
+
+    def trim_lines_to_be_wrapped(self):
+        trimmed = []
+        for line in self.plaintext.split('\n'):
+            trimmed.append(line.strip())
+        self.plaintext = ' '.join(trimmed)
 
     def indent(self):
         indent = self.paragraph_markup.indent1

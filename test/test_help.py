@@ -28,61 +28,18 @@ color_scheme = TestColorScheme()
 formatter = marcel.helpformatter.HelpFormatter(color_scheme, colorize)
 
 text = '''
-{p}This text
-should be wrapped.
-{p,wrap=T}This text should
-also be wrapped.
-{p,wrap=F}This
-    text
-    should
-    not 
-    be 
-    wrapped
+Comments:
+{L}- {r:cat /etc/passwd}: Write each line of {r:/etc/passwd} to the output stream.
+{L}- {r:map (line: line.split(':'))}: Split the lines at the {n:} separators, yielding 7-tuples.
+{L}- {r:select (*line: line[-1] == '/bin/bash')}: Select those lines in which the last field is 
+{r:/bin/bash}.
+{L}- {r:map (*line: line[0])}: Keep the username field of each input tuple.
+{L}- {r:xargs echo}: Combine the incoming usernames into a single line, which is printed to {n:stdout}.
+{L}- {r:\\ }: A line terminating in {r:\\ }indicates that the command continues on the next line.
 '''
 
-HELP = '''
-To learn more about a topic, run the command:
-
-    help TOPIC
-
-Available topics:
-
-{b:Top-level help:}
-{L}{n:marcel}
-
-(Or just run {n:help} with no topic.)
-
-{b:Overview:}
-{p,wrap=F}
-    - {n:configuration}: How to configure the prompt, color scheme, remote access.
-    - {n:overview}: The main concepts of marcel. How it differs from other shells.
-    - {n:interaction}: Interacting with marcel.
-    - {n:command}: Marcel operators, Linux executables.
-    - {n:function}: Several operators rely on Python functions.
-    - {n:pipeline}: Structuring commands into sequences, using pipes.
-    - {n:object}: The objects you work with. 
-
-{b:Objects}:
-{p,wrap=F}
-    - {n:file}
-    - {n:process}
-
-{b:Operators:}
-{p,wrap=F}
-    - {n:bash}        - {n:bg}          - {n:cd}
-    - {n:dirs}        - {n:edit}        - {n:expand}
-    - {n:fg}          - {n:gen}         - {n:head}
-    - {n:help}        - {n:jobs}        - {n:ls}
-    - {n:map}         - {n:out}         - {n:popd}
-    - {n:ps}          - {n:pushd}       - {n:pwd}
-    - {n:red}         - {n:reverse}     - {n:select}
-    - {n:sort}        - {n:squish}      - {n:sudo}
-    - {n:tail}        - {n:timer}       - {n:unique}
-    - {n:version}     - {n:window}
-'''
-
-text = HELP
 
 print(f'ORIGINAL: {text}')
 formatted = formatter.format(text)
+print('-----------------------------------------------------------------------------')
 print(f'FORMATTED: {formatted}')

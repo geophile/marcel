@@ -3,9 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/doc/help_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/doc/help_configuration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/marcel/helpformatter.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/helpformatter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/test_help.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_help.py" afterDir="false" />
     </list>
@@ -777,7 +775,7 @@
       <workItem from="1587425832047" duration="78164000" />
       <workItem from="1587866382107" duration="21861000" />
       <workItem from="1587934791935" duration="19172000" />
-      <workItem from="1588036126634" duration="36781000" />
+      <workItem from="1588036126634" duration="39766000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -824,6 +822,11 @@
           </properties>
           <option name="timeStamp" value="86" />
         </breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/marcel/helpformatter.py</url>
+          <line>327</line>
+          <option name="timeStamp" value="193" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -881,7 +884,7 @@
     <SUITE FILE_PATH="coverage/marcel$.coverage" NAME=" Coverage Results" MODIFIED="1587246338172" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/marcel$bug_29.coverage" NAME="bug_29 Coverage Results" MODIFIED="1586369127945" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$kwargs_and_self_dict.coverage" NAME="kwargs_and_self_dict Coverage Results" MODIFIED="1587742357048" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
-    <SUITE FILE_PATH="coverage/marcel$test_help2.coverage" NAME="test_help Coverage Results" MODIFIED="1588116459464" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/marcel$test_help2.coverage" NAME="test_help Coverage Results" MODIFIED="1588128975314" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$test_execution.coverage" NAME="test_ops Coverage Results" MODIFIED="1584201985961" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/osh2$test_shell_string.coverage" NAME="test_shell_string Coverage Results" MODIFIED="1578065283531" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
   </component>
