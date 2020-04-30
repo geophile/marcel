@@ -26,6 +26,11 @@ as Marcel does. Marcel improves on osh in a number of ways:
 
 * Marcel is a full-fledged shell.
 
+* If you know Python you know marcel. There are no obscure sublanguages
+(e.g. for awk, find, PS1). Commands are customized by writing Python
+lambda expressions on the command line. Configuration is done
+by assigning Python variables.
+
 * A planned abstraction mechanism is to offer pipelines as first-class constructs. 
 This will allow for more complex commands (which combine multiple pipelines), and the composition of pipelines.
 
@@ -47,11 +52,13 @@ is implemented using [multilinereader](https://github.com/geophile/multilineread
 
 * Editing of last command in the editor of your choice.
 
-* Context-sensitive tab completion.
-
-* Prompt customization.
+* Extensive help facility, providing information on concepts, objects,
+and commands.
 
 * Customizable highlighted output of file and process listings.
+
+* Context-sensitive tab completion (for commands, their flags, 
+filenames, help topics).
 
 Example
 -------
@@ -245,11 +252,9 @@ but there will be no restrictions on the use of this software.
 Status
 ------
 
-This is pretty rudimentary so far. There is no installation script, no documentation (other than this
-README, and comments in the code), and lots of features and commands are missing.
-Marcel is obviously not ready to be the shell I would use routinely. If you want to try it out, 
-use a script
-like this:
+Marcel is not yet a "daily driver". There is no installation script. However,
+it is getting to be pretty usable. If you want to try it out, 
+use a script like this:
 
 ```
     #!/bin/bash
@@ -262,4 +267,4 @@ like this:
     python3 $MARCEL_MAIN
 ```
 
-If you want examples of marcel usage, take a look at `test/test_execution.py`.
+If you want examples of marcel commands, take a look at `test/test_ops.py`.
