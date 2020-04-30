@@ -14,7 +14,7 @@ Each input sequence is reduced to a single value, using {r:function} to combine 
 {r:function} is a binary function that can be used for reduction, e.g. {n:+}, {n:*}, {n:max}, {n:min}.
 
 {b:Example:} If one of the inputs is the list {n:[1, 2, 3, 4]}, then:
-
+{p,wrap=F}
     squish +
 
 will generate {n:10}.

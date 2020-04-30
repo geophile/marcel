@@ -14,12 +14,12 @@ If {r:position} is provided, it must be non-negative. If {r:position} exceeds th
 input sequence, then nothing is expanded (the input sequence is sent as output).
 
 {b:Example}: If the input contains these sequences:
-
+{p,wrap=F}
     (100, 101)
     (200, 201)
 
 then {r:expand} generates this output:
-
+{p,wrap=F}
     100
     101
     200
@@ -35,13 +35,13 @@ The types that can be expanded are sequences ({r:list}, {r:tuple}, {r:str}), {r:
 Expansion of a {r:File} yields each line of the named file.
 
 {b:Example}: If the input contains these sequences:
-
+{p,wrap=F}
     ('a', [1, 2, 3], 'x')
     ('b', [4, 5], 'y')
     ('c', [], 'z')
 
 then {r:expand 1} generates this output:
-
+{p,wrap=F}
     ('a', 1, 'x')
     ('a', 2, 'x')
     ('a', 3, 'x')

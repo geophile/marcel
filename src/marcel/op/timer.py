@@ -10,14 +10,14 @@ SUMMARY = 'Generate a sequence of timestamps, separated in time by a specified i
 
 DETAILS = '''
 The {r:interval} format is:
-
+{p,wrap=F}
     HH:MM:SS
 
 where {r:HH} is hours, {r:MM} is minutes, {r:SS} is seconds. {r:HH:} and
 {r:HH:MM:} may be omitted.
 
 {b:Examples}:
-
+{p,wrap=F}
     {r:interval}        meaning
     ------------------------------------
     5               5 seconds
@@ -29,12 +29,12 @@ If {r:-c} is specified, then the timestamp is rendered as a Python {n:time.struc
 tuple: (year, month, day, hour, minute, second, weekday, day of year, daylight savings time flag).
 
 Notes:
-    - month is 1-based (January = 1, February = 2, ...)
-    - day of month is 1-based.
-    - second can go as high as 61 due to leap-seconds.
-    - day of week is 0-based, Monday = 0.
-    - day of year is 1-based.
-    - dst is 1 if Daylight Savings Time is in effect, 0 otherwise.
+{L}- month is 1-based (January = 1, February = 2, ...)
+{L}- day of month is 1-based.
+{L}- second can go as high as 61 due to leap-seconds.
+{L}- day of week is 0-based, Monday = 0.
+{L}- day of year is 1-based.
+{L}- dst is 1 if Daylight Savings Time is in effect, 0 otherwise.
 '''
 
 

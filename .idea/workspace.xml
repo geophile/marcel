@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_operator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/doc/help_operator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/helpformatter.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/helpformatter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/opmodule.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/opmodule.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/util.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/expand.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/expand.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -778,7 +773,7 @@
       <workItem from="1587866382107" duration="21861000" />
       <workItem from="1587934791935" duration="19172000" />
       <workItem from="1588036126634" duration="60424000" />
-      <workItem from="1588197907127" duration="10295000" />
+      <workItem from="1588197907127" duration="10559000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -829,11 +824,6 @@
           <url>file://$PROJECT_DIR$/src/marcel/helpformatter.py</url>
           <line>206</line>
           <option name="timeStamp" value="88" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/marcel/main.py</url>
-          <line>85</line>
-          <option name="timeStamp" value="94" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

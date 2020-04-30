@@ -18,11 +18,11 @@ mechanisms.
 A new group is started on the first input object, and for any
 subsequent object for which {r:predicate} returns true. For example, if
 the input stream contains the integers {n:1, 2, 3, ...}, then:
-
+{p,wrap=F}
     window (x: x % 3 == 2)
 
 yields as output:
-
+{p,wrap=F}
     ((1,),)
     ((2,), (3,), (4,))
     ((5,), (6,), (7,))
@@ -43,7 +43,7 @@ new list containing {r:N} items. Groups may be padded with
  
 For input {n:0, 1, ..., 9}, {r:window -o 3} yields these
 tuples:
-
+{p,wrap=F}
     ((0,), (1,), (2,))
     ((1,), (2,), (3,))
     ((2,), (3,), (4,))
@@ -64,7 +64,7 @@ has {r:N} elements.
 
 For input {n:0, 1, ..., 9}, {r:window -d 3} yields these
 tuples:
-
+{p,wrap=F}
     ((0,), (1,), (2,))
     ((3,), (4,), (5,))
     ((6,), (7,), (8,))

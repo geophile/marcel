@@ -14,18 +14,18 @@ Each {r:function} takes two inputs and produces one output.
 {b:Basic usage}
 
 Given a sequence of inputs such as {n:(1,), (2,), (3,)}, {r:red} can be used to find the sum:
-
+{p,wrap=F}
     ... | red +
 
 yields {r:(6,)}. For input elements with more than a single value, multiple functions can be provided.
 For example, to find the sum of 0 ... 9, the sum of their squares, and the sum of their cubes:
-
+{p,wrap=F}
     gen 10 | map (x: (x, x**2, x**3)) | red + + +
 
 which yields the output {n:(45, 285, 2025)}.
 
 The {r:count} function can be used to count the number of input tuples, e.g.
-
+{p,wrap=F}
     gen 10 | red count
     
 yields the output {n:10}.
@@ -34,7 +34,7 @@ yields the output {n:10}.
 
 Reduction can be applied to groups of input rows, identifying the group-defining
 values using {r:.} instead of a function. For example, suppose the input sequence is:
-
+{p,wrap=F}
     (1, 5, 10, 100)
     (1, 6, 10, 200)
     (1, 4, 11, 100)
@@ -45,12 +45,12 @@ values using {r:.} instead of a function. For example, suppose the input sequenc
     (3, 5, 30, 100)
 
 If this sequence is piped to this invocation of {r:red}:
-
+{p,wrap=F}
     red . + . +
 
 then groups are defined using the first and third values, {n:(1, 10), (1, 11), (2, 20), (3, 30)}.
 The output would be:
-
+{p,wrap=F}
     (1, 11, 10, 300)
     (1, 7, 11, 300)
     (2, 17, 20, 300)
@@ -62,7 +62,7 @@ If the {r:-i} flag is specified, then one output tuple is generated for each inp
 an output element contains the current accumulated values. The accumulator appears
 in the output element after the inputs. For example, if the input stream contains {n:(1,), (2,), (3,)},
 then the running total can be computed as follows:
-
+{p,wrap=F}
     ... | red -i + | ...
 
 The output stream would be {n:(1, 1), (2, 3), (3, 6)}. In the last output tuple, {n:6} is the sum
@@ -72,7 +72,7 @@ The {r:-i} flag can also be used with grouping. For example, if the input
 tuples are
 {n:('a', 1), ('a', 2), ('b', 3), ('b', 4)}, then the running totals, grouped by the string values would
 be computed as follows:
-
+{p,wrap=F}
     ... | red -i . +
 
 The output stream would be {n:('a', 1, 1), ('a', 2, 3), ('b', 3, 3), ('b', 4, 7)}.
