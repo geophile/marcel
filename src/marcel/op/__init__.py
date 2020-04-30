@@ -1,11 +1,10 @@
-public = [
+documented = [
     'bash',
     'bg',
     'cd',
     'dirs',
     'edit',
     'expand',
-    'fork',
     'fg',
     'gen',
     'head',
@@ -30,6 +29,8 @@ public = [
     'version',
     'window'
 ]
+
+public = documented + ['fork']
 
 private = [
     'labelthread',

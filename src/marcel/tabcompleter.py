@@ -3,6 +3,7 @@ import pathlib
 import readline
 
 import marcel.core
+import marcel.doc
 import marcel.op
 import marcel.util
 
@@ -17,7 +18,8 @@ def debug(message):
 
 class TabCompleter:
 
-    OPS = marcel.op.public
+    OPS = marcel.op.documented
+    HELP_TOPICS = list(marcel.doc.topics) + OPS
     FILENAME_OPS = ['cd',
                     'cp',
                     'emacs',
@@ -67,6 +69,8 @@ class TabCompleter:
             debug(f'parser.op_name: {parser.op_name}')
             if parser.op_name is None:
                 candidates = self.complete_op(text)
+            elif parser.op_name == 'help':
+                candidates = self.complete_help(text)
             else:
                 self.op_name = parser.op_name
                 debug(f'op_name: {self.op_name}, text: {text}')
@@ -97,6 +101,16 @@ class TabCompleter:
             debug(f'complete_op candidates for {text}: {candidates}')
         else:
             candidates = TabCompleter.OPS
+        return candidates
+
+    @staticmethod
+    def complete_help(text):
+        debug(f'complete_help, text = <{text}>')
+        candidates = []
+        for topic in TabCompleter.HELP_TOPICS:
+            if topic.startswith(text):
+                candidates.append(topic)
+        debug('complete_help candidates for <{}>: {}'.format(text, candidates))
         return candidates
 
     def is_filename_arg(self, parser):

@@ -8,7 +8,7 @@ in your configuration script, (run
 PROMPT = [
     COLOR_RED_BOLD,
     'M ',
-    Color(0, 2, 1, BOLD),
+    Color(1, 2, 4, BOLD),
     USER,
     '@',
     HOST,
@@ -21,7 +21,7 @@ PROMPT = [
 
 This produces the following prompt (for me):
 
-{p,indent=4}{c500b:M} {c021b:jao@cheese}:{c033b:~$}
+{p,indent=4}{c500b:M} {c124b:jao@cheese}:{c033b:~$}
 
 (The {c500b:M} is there to remind me, while developing marcel, that I am
 running marcel, not bash.)

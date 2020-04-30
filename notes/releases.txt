@@ -25,17 +25,17 @@
 
   + The actual content
 
-  - tab completion for help
+  + tab completion for help
 
 - Bugs
 
   + 38
   + 39
   + 40
-  - 41
-  - 42
-  - 43
-  - 44
+  + 41
+  + 42
+  + 43
+  + 44
 
 ----------------------------------------------------------------------
 

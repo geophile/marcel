@@ -3,8 +3,14 @@
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/bugs_fixed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs_fixed.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/multilinereader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/multilinereader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/doc/help_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_operator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/doc/help_operator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/marcel/tabcompleter.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/tabcompleter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_help.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_help.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -69,7 +75,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.marcel">
+  <component name="RunManager" selected="Python.test_help">
     <configuration name="boundmethod" type="PythonConfigurationType" factoryName="Python">
       <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -775,7 +781,7 @@
       <workItem from="1587866382107" duration="21861000" />
       <workItem from="1587934791935" duration="19172000" />
       <workItem from="1588036126634" duration="60424000" />
-      <workItem from="1588197907127" duration="14482000" />
+      <workItem from="1588197907127" duration="16355000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -827,6 +833,16 @@
           <line>79</line>
           <option name="timeStamp" value="103" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/marcel/helpformatter.py</url>
+          <line>123</line>
+          <option name="timeStamp" value="105" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/marcel/helpformatter.py</url>
+          <line>137</line>
+          <option name="timeStamp" value="106" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -869,7 +885,7 @@
     <SUITE FILE_PATH="coverage/osh2$captureoutput.coverage" NAME="captureoutput Coverage Results" MODIFIED="1581312368185" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$kv.coverage" NAME="config Coverage Results" MODIFIED="1583620587085" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$test_tabcompleter.coverage" NAME="test_tabcompleter Coverage Results" MODIFIED="1586640685622" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
-    <SUITE FILE_PATH="coverage/marcel$test_help.coverage" NAME="test_help Coverage Results" MODIFIED="1588255354571" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/marcel$test_help.coverage" NAME="test_help Coverage Results" MODIFIED="1588260771905" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$extendstr.coverage" NAME="extendstr Coverage Results" MODIFIED="1583695709066" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$sudo.coverage" NAME="sudo Coverage Results" MODIFIED="1586301808961" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$bug_39.coverage" NAME="bug_39 Coverage Results" MODIFIED="1587654693193" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />

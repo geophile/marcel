@@ -21,10 +21,10 @@ Operators and executables can be mixed freely. For example, here is a
 command sequence that lists the names of users whose shell is
 {n:/bin/bash}. 
 {p,wrap=F}
-    cat /etc/passwd | \\
-    map (line: line.split(':')) | \\
-    select (*line: line[-1] == '/bin/bash') | \\
-    map (*line: line[0]) | \\
+    cat /etc/passwd | \\\\
+    map (line: line.split(':')) | \\\\
+    select (*line: line[-1] == '/bin/bash') | \\\\
+    map (*line: line[0]) | \\\\
     xargs echo
 
 The file {n:/etc/passwd} contains usernames and shell
@@ -47,5 +47,5 @@ Comments:
 
 {L}- {r:xargs echo}: Combine the incoming usernames into a single line, which is printed to {n:stdout}.
 
-{L}- {r:\\ }: A line terminating in {r:\\ }indicates that the command continues on the next line.
+{L}- {r:\\\\}: A line terminating in {r:\\\\} indicates that the command continues on the next line.
 '''

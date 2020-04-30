@@ -29,7 +29,7 @@ Streams always carry tuples between commands. Often, these are
 1-tuples.  For example, the {n:ls} operator generates a stream
 containing {n:File} objects, each wrapped in a 1-tuple. When a Linux
 executable is run, its {n:stdout} is conveyed to the next command by
-wrapping strings (separated by \n characters) in 1-tuples. Marcel
+wrapping strings (separated by \\\\n characters) in 1-tuples. Marcel
 operators can generate n-tuples, with n > 1. For example, this command
 sequence lists files (only, no directories or symlinks) in the current
 directory, and uses the {r:map} operator to generate a stream of
