@@ -23,7 +23,9 @@
     But "man ls" would hit the Linus man page, wouldn't it? Is there
     a PATH mechanism?
 
-  - The actual content
+  + The actual content
+
+  - tab completion for help
 
 - Bugs
 
@@ -31,6 +33,8 @@
   + 39
   + 40
   - 41
+  - 42
+  - 43
 
 ----------------------------------------------------------------------
 

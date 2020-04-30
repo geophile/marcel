@@ -162,3 +162,10 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/src/marcel/helpformatter.py", line 74, in raise_invalid_formatting_exception
     raise Exception(f'Invalid formatting specification: {self.text}')
 Exception: Invalid formatting specification: {process_...}
+
+----------------------------------------------------------------------
+
+44. \ in help text doesn't work.
+
+\\ in help_command.py: Need space between \\ and } or crash. Also, not
+even \\ is showing up.
