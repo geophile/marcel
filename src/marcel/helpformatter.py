@@ -56,27 +56,38 @@ import marcel.util
 #     - cRGB[bi]: color, where RGB values are 0..5, and bi are flags for
 #       bold, italic
 #
-# The implementation treats paragraph and text markup separately. Paragraph markup
-# is noted and used to define and format paragraphs. Text markup positions are noted
-# and removed. After wrapping and indenting, colorization is performed using the positions
-# recorded previously. Position is identified by the number of non-whitespace characters preceding
-# the markup. THIS MEANS THAT MARKUP MUST NOT INTRODUCE NON-WHITESPACE TEXT. This constrains the
-# design of the markup language. E.g., there can't be a list formatting markup item that introduces
-# list markup text (bullets or numbers). This is fixable, but then the non-whitespace counters would
-# need to be adjusted.
+# The implementation treats paragraph and text markup separately. Paragraph markup is noted and used to define and
+# format paragraphs. Text markup positions are noted and removed. After wrapping and indenting, colorization is
+# performed using the positions recorded previously. Position is identified by the number of non-whitespace characters
+# preceding the markup. THIS MEANS THAT MARKUP MUST NOT INTRODUCE NON-WHITESPACE TEXT. This constrains the design of
+# the markup language. E.g., there can't be a list formatting markup item that introduces list markup text (bullets or
+# numbers). This is fixable, but then the non-whitespace counters would need to be adjusted.
+
+
+MARKUP_OPEN = -1
+MARKUP_CLOSE = -2
+TEXTP_END = -3
+
+
+# Don't want this caught. This exception should not occur during runtime, since the erroneous
+# text is basically buggy source code.
+class InvalidMarkupException(BaseException):
+
+    def __init__(self, text=None):
+        super().__init__(text)
 
 
 class TextPointer:
-
-    MARKUP_OPEN = -1
-    MARKUP_CLOSE = -2
-    END = -3
 
     def __init__(self, text):
         self.text = text
         self.n = len(text)  # Includes escape chars
         self.p = 0
-        self.ws = 0  # whitespace count up to and not including p
+        self.nonws = 0  # non-whitespace count up to and not including p
+
+    def __repr__(self):
+        sample = self.text[self.p:min(self.p + 10, self.n)]
+        return f'TextPointer(@{self.p}: {sample}...)'
 
     def __eq__(self, other):
         return self.p == other.p
@@ -96,65 +107,107 @@ class TextPointer:
     def __ge__(self, other):
         return self.p >= other.p
 
+    def copy(self):
+        copy = TextPointer(self.text)
+        copy.p = self.p
+        copy.nonws = self.nonws
+        return copy
+
     def peek(self):
         try:
             c = self.text[self.p]
             if c == '{':
-                return TextPointer.MARKUP_OPEN
+                return MARKUP_OPEN
             elif c == '}':
-                return TextPointer.MARKUP_CLOSE
+                return MARKUP_CLOSE
             elif c == '\\':
                 c = self.text[self.p + 1]
             return c
         except IndexError:
-            return TextPointer.END
+            return TEXTP_END
 
     def next(self):
         try:
             c = self.text[self.p]
             self.p += 1
             if c == '{':
-                return TextPointer.MARKUP_OPEN
+                return MARKUP_OPEN
             elif c == '}':
-                return TextPointer.MARKUP_CLOSE
+                return MARKUP_CLOSE
             elif c == '\\':
                 c = self.text[self.p]
                 self.p += 1
             if not c.isspace():
-                self.ws += 1
+                self.nonws += 1
             return c
         except IndexError:
-            return TextPointer.END
+            return TEXTP_END
 
     def at_end(self):
         return self.p >= self.n
 
-    def whitespace_count(self):
-        return self.ws
+    def non_whitespace_count(self):
+        return self.nonws
 
     def advance_past(self, c):
         assert TextPointer.is_markup_boundary(c) or (type(c) is str and len(c) == 1), c
         next = self.next()
-        while next != c and next != TextPointer.END:
+        while next != c and next != TEXTP_END:
             next = self.next()
+
+    def advance_to(self, c):
+        self.advance_past(c)
+        self.backup()
+
+    def set(self, other):
+        self.text = other.text
+        self.n = other.n
+        self.p = other.p
+        self.nonws = other.nonws
+
+    def contents(self):
+        return self.text[self.p:]
+
+    def contents_to(self, end):
+        assert self.text is end.text
+        return self.text[self.p:end.p]
+
+    def snippet(self, n):
+        return self.text[self.p:min(self.p + n, len(self.text))]
+
+    def backup(self):
+        if self.p == 0:
+            raise Exception(f'Cannot backup {self}, at the beginning.')
+        if self.p >= self.n:
+            self.p = self.n
+        self.p -= 1
+        if not self.text[self.p].isspace():
+            self.nonws -= 1
+        if self.p > 0 and self.text[self.p-1] == '\\':
+            self.p -= 1
+        return self
 
     @staticmethod
     def is_markup_boundary(x):
-        return x == TextPointer.MARKUP_OPEN or x == TextPointer.MARKUP_CLOSE
+        return x == MARKUP_OPEN or x == MARKUP_CLOSE
 
 
 class Markup:
 
     def __init__(self, text):
-        if not (text[0] == '{' and text[-1] == '}'):
-            self.raise_invalid_formatting_exception()
         self.text = text
+        if not (text[0] == '{' and text[-1] == '}'):
+            self.raise_invalid_markup()
 
     def __repr__(self):
         return self.text
 
-    def raise_invalid_formatting_exception(self):
-        raise Exception(f'Invalid formatting specification: {self.text}')
+    def raise_invalid_markup(self):
+        try:
+            raise InvalidMarkupException(self.text)
+        except AttributeError:
+            # Subclass ran into trouble before Markup.__init__ could supply text.
+            raise InvalidMarkupException()
 
 
 class ParagraphMarkup(Markup):
@@ -171,7 +224,7 @@ class ParagraphMarkup(Markup):
         parts = self.text[1:-1].split(',')
         self.code = parts[0].lower()
         if len(self.code) > 1:
-            self.raise_invalid_formatting_exception()
+            self.raise_invalid_markup()
         assert self.code in 'pl', self.code
         for part in parts[1:]:
             tokens = part.split('=')
@@ -179,7 +232,7 @@ class ParagraphMarkup(Markup):
                 if tokens[0].lower() == 'wrap':
                     self.wrap = True
                 else:
-                    self.raise_invalid_formatting_exception()
+                    self.raise_invalid_markup()
             elif len(tokens) == 2:
                 key, value = tokens
                 key = key.lower()
@@ -187,15 +240,15 @@ class ParagraphMarkup(Markup):
                     try:
                         indents = [int(x) for x in value.split(':')]
                         if len(indents) < 1 or len(indents) > 2:
-                            self.raise_invalid_formatting_exception()
+                            self.raise_invalid_markup()
                         self.indent1 = indents[0]
                         self.indent2 = indents[1] if len(indents) > 1 else self.indent1
                     except ValueError:
-                        self.raise_invalid_formatting_exception()
+                        self.raise_invalid_markup()
                 elif key == 'wrap':
                     self.wrap = value == 'T'
             else:
-                self.raise_invalid_formatting_exception()
+                self.raise_invalid_markup()
         if self.indent1 is None:
             self.indent1, self.indent2 = (0, 0) if self.code == 'p' else (2, 4)
         if self.wrap is None:
@@ -204,43 +257,49 @@ class ParagraphMarkup(Markup):
 
 class TextMarkup(Markup):
 
-    def __init__(self, text, open, preceding_non_ws_count, color_scheme):
-        self.preceding_non_ws_count = preceding_non_ws_count
-        # Parse the formatting, and get past the colon
-        self.color, text_start = self.formatting(text, open + 1, color_scheme)
-        # Find the closing } of the markup, and count non-whitespace characters
-        self.non_ws_count = 0
-        close = None
-        n = len(text)
-        p = text_start
-        while p < n and close is None:
-            c = text[p]
-            if c == '}' and text[p - 1] != '\\':
-                close = p
-            else:
-                if not c.isspace():
-                    self.non_ws_count += 1
-                p += 1
-        if close is None:
-            self.text = text[open:min(open + 10, n)]  # For exception message
-            self.raise_invalid_formatting_exception()
-        close += 1
-        super().__init__(text[open:close])
-        self.content = text[text_start:close-1]
-        self.size = close - open  #  { ... }
+    def __init__(self, textp, preceding_non_ws_count, color_scheme):
+        try:
+            self.markup_start = textp.copy()
+            assert self.markup_start.peek() == MARKUP_OPEN
+            self.preceding_non_ws_count = preceding_non_ws_count
+            # Parse the formatting, and get past the colon
+            self.color, text_start = self.formatting(textp, color_scheme)
+            # Find the closing } of the markup, and count non-whitespace characters
+            textp = text_start.copy()
+            self.non_ws_count = 0
+            close = None
+            self.content = ''
+            while not textp.at_end() and close is None:
+                c = textp.next()
+                if c == MARKUP_CLOSE:
+                    close = textp.copy()
+                elif c == MARKUP_OPEN or c == TEXTP_END:
+                    self.raise_invalid_markup()
+                else:
+                    assert type(c) is str, c
+                    self.content += c
+                    if not c.isspace():
+                        self.non_ws_count += 1
+            if close is None:
+                self.text = text_start.snippet(10)  # For exception message
+                self.raise_invalid_markup()
+            self.markup_end = close.copy()
+        except InvalidMarkupException:
+            # super hasn't been initialized, so super's raise_invalid_markup can't describe what the problem is.
+            raise InvalidMarkupException(self.markup_start.snippet(10))
+        super().__init__(self.markup_start.contents_to(self.markup_end))
 
     def __repr__(self):
-        return f'({self.preceding_non_ws_count} : {self.content} : {self.non_ws_count})'
+        return f'({self.preceding_non_ws_count} : {self.text} : {self.non_ws_count})'
 
-    def formatting(self, text, p, color_scheme):
+    def formatting(self, textp, color_scheme):
+        assert textp.next() == MARKUP_OPEN
         color = None
         try:
-            c = text[p]
-            p += 1
-            if c in 'rbin':
-                if text[p] != ':':
-                    self.raise_invalid_formatting_exception()
-                p += 1
+            c = textp.next()
+            if c in ('b', 'i', 'n', 'r'):
+                if textp.next() != ':':
+                    self.raise_invalid_markup()
                 if c == 'r':
                     color = color_scheme.help_reference
                 elif c == 'b':
@@ -250,29 +309,34 @@ class TextMarkup(Markup):
                 elif c == 'n':
                     color = color_scheme.help_name
             elif c == 'c':
-                r, g, b = int(text[p]), int(text[p+1]), int(text[p+2])
-                p += 3
-                colon = text.find(':', p)
-                if colon == -1 or colon > p + 2:
-                    self.raise_invalid_formatting_exception()
+                r = int(textp.next())
+                g = int(textp.next())
+                b = int(textp.next())
+                # Look for the colon, make sure it is at a plausible distance.
+                colon = textp.copy()
+                colon.advance_to(':')
+                style_spec = textp.contents_to(colon)
+                if len(style_spec) > 2:
+                    self.raise_invalid_markup()
                 style = 0
-                for x in text(p, colon):
+                for x in style_spec:
                     if x == 'b':
                         style = style | color_scheme.bold()
                     elif x == 'i':
                         style = style | color_scheme.italic()
                     else:
-                        self.raise_invalid_formatting_exception()
-                p = colon + 1
+                        self.raise_invalid_markup()
                 color = color_scheme.color(r, g, b, style)
+                textp = colon
+                textp.next()  # Get past the colon
             else:
-                self.raise_invalid_formatting_exception()
+                self.raise_invalid_markup()
             assert color is not None
-            return color, p
+            return color, textp.copy()
         except ValueError:
-            self.raise_invalid_formatting_exception()
+            self.raise_invalid_markup()
         except IndexError:
-            self.raise_invalid_formatting_exception()
+            self.raise_invalid_markup()
 
     @staticmethod
     def starts_here(text, p):
@@ -280,6 +344,7 @@ class TextMarkup(Markup):
 
 
 class Paragraph:
+
     BLANK_LINE = ''
     DEFAULT_MARKUP = '{p}'
 
@@ -308,21 +373,24 @@ class Paragraph:
         self.text_markup = []
         self.plaintext = ''
         text = '\n'.join(self.lines)
-        n = len(text)
+        textp = TextPointer(text)
         non_ws_count = 0
-        p = 0
-        while p < n:
-            if TextMarkup.starts_here(text, p):
-                markup = TextMarkup(text, p, non_ws_count, self.help_formatter.color_scheme)
+        while not textp.at_end():
+            c = textp.peek()
+            if c == MARKUP_OPEN:
+                markup = TextMarkup(textp, non_ws_count, self.help_formatter.color_scheme)
                 self.text_markup.append(markup)
                 non_ws_count += markup.non_ws_count
                 self.plaintext += markup.content
-                p += markup.size  # includes the markup notation itself
+                textp = markup.markup_end.copy()
+            elif c == MARKUP_CLOSE or c == TEXTP_END:
+                pass
             else:
-                if not text[p].isspace():
+                assert type(c) is str
+                if not c.isspace():
                     non_ws_count += 1
-                self.plaintext += text[p]
-                p += 1
+                self.plaintext += c
+                textp.next()
 
     def wrap(self):
         if self.paragraph_markup.wrap:
@@ -424,23 +492,23 @@ class HelpFormatter:
     # Output: List of text blocks interspersed with Paragraphs from paragraph markup ({p}, {L}).
     def find_explicit_paragraph_boundaries(self, text):
         blocks = []
-        p = 0
-        n = len(text)
-        while p < n:
-            open, close = HelpFormatter.find_paragraph_markup(text, p)
-            if open == -1:
-                blocks.append(text[p:])
-                p = n
+        textp = TextPointer(text)
+        while not textp.at_end():
+            open, close = HelpFormatter.find_paragraph_markup(textp)
+            if open.at_end():
+                blocks.append(textp.contents())
+                textp = open
             else:
-                if p < open:
-                    blocks.append(text[p:open])
-                blocks.append(Paragraph(self, text[open:close]))
+                if textp < open:
+                    blocks.append(textp.contents_to(open))
+                blocks.append(Paragraph(self, open.contents_to(close)))
                 # Skip whitespace after close, up to and including the first \n
-                p = close
-                while p < n and text[p].isspace() and text[p] != '\n':
-                    p += 1
-                if p < n and text[p] == '\n':
-                    p += 1
+                textp = close
+                c = textp.next()
+                while type(c) is str and c.isspace() and c != '\n':
+                    c = textp.next()
+                if c != '\n':
+                    textp.backup()
         return blocks
 
     # Input: Array of text blocks and Paragraphs.
@@ -491,31 +559,18 @@ class HelpFormatter:
         self.help_columns = int((1 - HelpFormatter.RIGHT_MARGIN) * console_columns)
 
     @staticmethod
-    def find_paragraph_markup(text, p):
-        open = text.find('{', p)
-        while open != -1 and not HelpFormatter.is_paragraph_markup_open(text, open):
-            open = text.find('{', open + 1)
-        if open == -1:
-            return -1, None
-        close = text.find('}', open)
-        while not HelpFormatter.is_paragraph_markup_close(text, close):
-            close = text.find('}', close)
-        if close == -1:
-            raise Exception(f'Unterminated markup at position {p}')
-        return open, close + 1
-
-    @staticmethod
-    def is_paragraph_markup_open(text, p):
-        assert text[p] == '{'
-        if p > 0 and text[p - 1] == '\\':
-            return False
-        return p + 1 < len(text) and text[p + 1] in 'pPlL'
-
-    @staticmethod
-    def is_paragraph_markup_close(text, p):
-        assert p > 0
-        assert text[p] == '}'
-        return text[p - 1] != '\\'
+    def find_paragraph_markup(textp):
+        open = textp.copy()
+        open.advance_past(MARKUP_OPEN)
+        while not open.at_end() and not open.peek() in ('p', 'P', 'l', 'L'):
+            open.advance_past(MARKUP_OPEN)
+        if open.at_end():
+            return open, None
+        close = open.copy()
+        close.advance_past(MARKUP_CLOSE)
+        if close.at_end():
+            raise Exception(f'Unterminated markup starting at {open}')
+        return open.backup(), close
 
     # ignore if all whitespace without \n
     @staticmethod

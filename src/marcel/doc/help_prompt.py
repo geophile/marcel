@@ -27,11 +27,11 @@ This produces the following prompt (for me):
 running marcel, not bash.)
 
 Notes:
-{L}- The values assigned to {r:PROMPT} is a list containing colors, strings, and functions
+{L}- The value assigned to {r:PROMPT} is a list containing colors, strings, and functions
    evaluating to colors or strings. A color is in effect for all following strings, until
    a different color is specified. (Run {n:help color} for more information on colors.)
 {L}- {r:COLOR_RED_BOLD} has been defined previously, and is used to establish a color.
-{L}- {r:'M '}: This string is displayed using the current color, {n:COLOR_RED_BOLD}.
+{L}- {r:'M '}: This string is displayed using the current color, {r:COLOR_RED_BOLD}.
 {L}- {r:Color(0, 2, 1, BOLD)}: Establishes a new color.
 {L}- {r:USER}, {r:HOST}, {r:HOME}, {r:PWD} are variables initialized by marcel representing,
    respectively, the current username, the current hostname, the user's home directory,

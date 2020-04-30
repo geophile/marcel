@@ -188,11 +188,9 @@ Cluster: Allow config of a single host
 
 ----------------------------------------------------------------------
 
-help_configuration: (((...))) -> \{...\}
 
-See also help_operator, '{}: {}'
-
-\\ in help_command.py: Need space between \\ and } or crash.
+\\ in help_command.py: Need space between \\ and } or crash. Also, not
+even \\ is showing up.
 
 tab completion for help
 
@@ -201,10 +199,7 @@ once and for all on startup, with the arg parser. Maybe take over
 ArgParser.print_help completely?
 
 
+Colorize help
 
-ORIGINAL: 
-\{braces \{braces {n:\{everywhere\}}\}\}
 
------------------------------------------------------------------------------
-FORMATTED: 
-\{braces \{braces (N:\{everywhere\})\}\}
+markup format codes should be case insensitive. (pP, lL, already are. Others are not)
