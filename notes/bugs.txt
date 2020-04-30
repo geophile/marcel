@@ -110,13 +110,6 @@ tab-completion runs into permission problems trying to do its work.
 
 ----------------------------------------------------------------------
 
-41. Blank line should not be ignored on continuation line
-
-Blank lines are ignored, which is fine. But if the blank line is a
-continuation line, then the current command should be ended and executed.
-
-----------------------------------------------------------------------
-
 42. Errors piped to executables are broken
 
 Odd results:

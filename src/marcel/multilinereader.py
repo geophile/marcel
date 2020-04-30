@@ -1,5 +1,5 @@
 """input() and the readline module support single-line input. I.e., each time the dude typing on the
-keyboard resses Enter, that ends the line of input, which is then added to the history maintained by
+keyboard presses Enter, that ends the line of input, which is then added to the history maintained by
 readline. It would be nice to type a \\ at the end of the line, and continue typing a command on the next line
 (as happens on bash), but that doesn't work.
 
@@ -36,7 +36,8 @@ class MultiLineReader:
         lines = []
         while True:
             line = input(prompt if len(lines) == 0 else continuation_prompt)
-            if len(line) > 0:
+            # The len(lines) > 0 check is needed to fix bug 41.
+            if len(line) > 0 or len(lines) > 0:
                 readline.remove_history_item(readline.get_current_history_length() - 1)
                 # If line was recalled from history, then convert to its original multiline form.
                 from_history = self._multiline(line)
