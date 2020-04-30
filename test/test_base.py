@@ -99,12 +99,12 @@ class Test:
                     actual_out, actual_err = self.run_and_capture_output(verification)
                 if file:
                     actual_out = self.file_contents(file)
+                if actual_err is not None and len(actual_err) > 0 and expected_err is None:
+                    self.fail(test, f'Unexpected error: {actual_err}')
                 if expected_out:
                     self.check_ok(test, self.to_string(expected_out), actual_out)
                 if expected_err:
                     self.check_substring(test, expected_err, actual_err)
-                elif actual_err:
-                    self.fail(test, f'Unexpected error: {actual_err}')
             except Exception as e:
                 print(f'{test}: Terminated by uncaught exception: {e}', file=sys.__stderr__)
                 marcel.util.print_stack()

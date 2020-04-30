@@ -246,7 +246,7 @@ class ParagraphMarkup(Markup):
                     except ValueError:
                         self.raise_invalid_markup()
                 elif key == 'wrap':
-                    self.wrap = value == 'T'
+                    self.wrap = value.lower() == 't'
             else:
                 self.raise_invalid_markup()
         if self.indent1 is None:
@@ -297,7 +297,8 @@ class TextMarkup(Markup):
         color = None
         try:
             c = textp.next()
-            if c in ('b', 'i', 'n', 'r'):
+            if c in ('b', 'B', 'i', 'I', 'n', 'N', 'r', 'R'):
+                c = c.lower()
                 if textp.next() != ':':
                     self.raise_invalid_markup()
                 if c == 'r':
@@ -308,7 +309,7 @@ class TextMarkup(Markup):
                     color = color_scheme.help_italic
                 elif c == 'n':
                     color = color_scheme.help_name
-            elif c == 'c':
+            elif c in ('c', 'C'):
                 r = int(textp.next())
                 g = int(textp.next())
                 b = int(textp.next())
@@ -320,6 +321,7 @@ class TextMarkup(Markup):
                     self.raise_invalid_markup()
                 style = 0
                 for x in style_spec:
+                    x = x.lower()
                     if x == 'b':
                         style = style | color_scheme.bold()
                     elif x == 'i':
@@ -331,7 +333,6 @@ class TextMarkup(Markup):
                 textp.next()  # Get past the colon
             else:
                 self.raise_invalid_markup()
-            assert color is not None
             return color, textp.copy()
         except ValueError:
             self.raise_invalid_markup()
