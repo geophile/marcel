@@ -194,11 +194,6 @@ even \\ is showing up.
 
 tab completion for help
 
-op help doesn't adjust to change in console width. Help is created
-once and for all on startup, with the arg parser. Maybe take over
-ArgParser.print_help completely?
-
-
 Colorize help
 
 

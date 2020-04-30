@@ -19,6 +19,19 @@ HISTORY_FILE = '.marcel_history'
 HISTORY_LENGTH = 100
 
 
+class Console:
+
+    def __init__(self, handle_console_changes):
+        self.width = marcel.util.console_width()
+        self.handle_console_changes = handle_console_changes
+
+    def check_for_console_changes(self):
+        current_width = marcel.util.console_width()
+        if self.width != current_width:
+            self.width = current_width
+            self.handle_console_changes()
+
+
 class Command:
 
     def __init__(self, source, pipeline):
@@ -74,6 +87,7 @@ class Main:
         self.reader = None
         self.initialize_input()
         self.job_control = marcel.job.JobControl.start(self.update_env_vars)
+        self.console = Console(self.handle_console_changes)
         atexit.register(self.shutdown)
 
     def __getstate__(self):
@@ -87,6 +101,7 @@ class Main:
             while True:
                 try:
                     line = self.reader.input(*self.env.prompts())
+                    self.console.check_for_console_changes()
                     self.run_command(line)
                     while self.job_control.foreground_is_alive():
                         time.sleep(Main.MAIN_SLEEP_SEC)
@@ -147,6 +162,10 @@ class Main:
         # Job control commands should be run in this process, not a spawned process.
         # Also, if we're testing operator behavior, run in immediate mode.
         return self.op_testing or line.split()[0] in ('bg', 'edit', 'fg', 'help', 'jobs', 'kill')
+
+    def handle_console_changes(self):
+        for module in self.op_modules.values():
+            module.reformat_help()
 
     @staticmethod
     def args():

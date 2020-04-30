@@ -544,17 +544,8 @@ class HelpFormatter:
         return paragraphs
 
     def find_console_width(self):
-        process = subprocess.Popen('stty size',
-                                   shell=True,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.DEVNULL,
-                                   universal_newlines=True)
-        process.wait()
-        stdout, _ = process.communicate()
-        try:
-            console_columns = int(stdout.split()[1])
-        except Exception:
-            # Not running in a console.
+        console_columns = marcel.util.console_width()
+        if console_columns is None:
             console_columns = 70  # Default for textwrap module
         self.help_columns = int((1 - HelpFormatter.RIGHT_MARGIN) * console_columns)
 

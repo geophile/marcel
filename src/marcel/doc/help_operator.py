@@ -13,7 +13,7 @@ For example, the {n:timer} command has two optional arguments:
 of the operator.
 
 {p,indent=4}2) {r:-h} or equivalently {r:--help} for obtaining documentation on the
-operator.
+operator. (All operators have these flags.)
 
 {n:timer} also has one positional argument, {r:interval}. You can see
 these described by running {n:timer -h}.

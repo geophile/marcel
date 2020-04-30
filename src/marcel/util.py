@@ -5,6 +5,7 @@ import pathlib
 import pickle
 import pwd
 import shutil
+import subprocess
 import sys
 import time
 import traceback
@@ -95,6 +96,22 @@ def colorize(s, color):
                 style,
                 color.code,
                 s))
+
+
+def console_width():
+    process = subprocess.Popen('stty size',
+                               shell=True,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.DEVNULL,
+                               universal_newlines=True)
+    process.wait()
+    stdout, _ = process.communicate()
+    try:
+        console_columns = int(stdout.split()[1])
+    except Exception:
+        # Not running in a console.
+        console_columns = None
+    return console_columns
 
 
 class Stack:
