@@ -24,7 +24,7 @@ import marcel.util
 class KillCommandException(BaseException):
 
     def __init__(self, cause):
-        super().__init__()
+        super().__init__(cause)
         self.cause = cause
         # print_stack()
 

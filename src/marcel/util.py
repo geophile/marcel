@@ -2,7 +2,7 @@ import collections.abc
 import grp
 import io
 import pathlib
-import pickle
+import dill
 import pwd
 import shutil
 import subprocess
@@ -60,10 +60,10 @@ def normalize_path(x):
 def clone(x):
     try:
         buffer = io.BytesIO()
-        pickler = pickle.Pickler(buffer)
+        pickler = dill.Pickler(buffer)
         pickler.dump(x)
         buffer.seek(0)
-        unpickler = pickle.Unpickler(buffer)
+        unpickler = dill.Unpickler(buffer)
         copy = unpickler.load()
         return copy
     except Exception as e:

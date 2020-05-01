@@ -231,5 +231,5 @@ class PipelineThread(threading.Thread):
         try:
             self.pipeline.receive(None)
             self.pipeline.receive_complete()
-        except Exception as e:
+        except BaseException as e:
             self.terminating_exception = e

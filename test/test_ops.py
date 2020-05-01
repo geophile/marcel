@@ -413,9 +413,12 @@ def test_remote():
     localhost = marcel.object.host.Host('localhost', None)
     # TEST.run('@jao [ gen 3 ]',
     #          expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
-    # Handling of remote errors
+    # Handling of remote error in execution
     TEST.run('@jao [ gen 3 -1 | map (x: 5 / x) ]',
              expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
+    # Handling of remote error in setup
+    TEST.run('@jao [ ls /nosuchfile ]',
+             expected_err='No qualifying paths')
     # Bug 4
     TEST.run('@jao [ gen 3 ] | red . +',
              expected_out=[(localhost, 3)])

@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 
 import os
-import pickle
+import dill
 import threading
 import signal
 import sys
 
 import marcel.core
 import marcel.env
+import marcel.object.error
 import marcel.object.process
 import marcel.util
 
@@ -25,12 +26,13 @@ class PickleOutput(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.pickler = pickle.Pickler(sys.stdout.buffer)
+        self.pickler = dill.Pickler(sys.stdout.buffer)
 
     def setup_1(self):
         pass
 
     def receive(self, x):
+        TRACE.write(f'Pickling: ({type(x)}) {x}')
         self.pickler.dump(x)
 
     def receive_error(self, error):
@@ -47,20 +49,22 @@ class PipelineRunner(threading.Thread):
 
     def __init__(self, pipeline):
         super().__init__()
-        pipeline.append(PickleOutput())
+        self.pickler = PickleOutput()
+        pipeline.append(self.pickler)
         self.pipeline = pipeline
 
     def run(self):
-        self.pipeline.setup_1()
-        # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
-        # supporting more than one level of nesting.
-        TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
         try:
+            TRACE.write(f'PipelineRunner: About to setup1 {self.pipeline}')
+            self.pipeline.setup_1()
+            # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
+            # supporting more than one level of nesting.
+            TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
             self.pipeline.receive(None)
         except BaseException as e:
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')
             marcel.util.print_stack(file=TRACE.file)
-            raise
+            self.pickler.receive_error(e)
         self.pipeline.receive_complete()
         TRACE.write('PipelineRunner: Execution complete.')
 
@@ -88,7 +92,7 @@ def kill_descendents(signal_id):
 def main():
     env = marcel.env.Environment(None)
     # Use sys.stdin.buffer because we want binary data, not the text version
-    input = pickle.Unpickler(sys.stdin.buffer)
+    input = dill.Unpickler(sys.stdin.buffer)
     pipeline = input.load()
     pipeline.set_env(env)
     TRACE.write(f'pipeline: {pipeline}')
