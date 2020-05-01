@@ -27,7 +27,16 @@ def colorize(text, color):
 color_scheme = TestColorScheme()
 formatter = marcel.helpformatter.HelpFormatter(color_scheme, colorize)
 
-text = 'Hello \\\\backslash\\\\ inside {n:formatting\\\\too}'
+text = '''
+Use the {n:help} command to get more information on the following kinds of objects:
+
+{L}- {n:color}
+{L}- {n:error}
+{L}- {n:file}
+{L}- {n:host}
+{L}- {n:process}
+'''
+
 
 print(f'ORIGINAL: {text}')
 formatted = formatter.format(text)

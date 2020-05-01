@@ -1,0 +1,73 @@
+- marcel has no control constructs: loops, functions, if/else, etc.
+
+- It's dumb to invent a new language.
+
+- marcel already relied on Python.
+
+So there are a few options:
+
+1) Allow Python code, beyond lambdas, inside marcel code. 
+
+2) Provide a Python API for executing marcel code.
+
+3) Python API for marcel, similar to osh API.
+
+----------------------------------------------------------------------
+
+1) Allow Python code, beyond lambdas, inside marcel code. 
+
+#1 is kind of clumsy. There would have to be some bracketing syntax to
+delimit Python code (as is currently the case for functions). E.g.
+
+[[
+def some_function(...):
+   ...
+
+for foo in bar:
+    function(foo)
+]]
+
+- Syntax highlighting wouldn't work.
+
+- This actually isn't bad. Functions defined this way could be
+  invoked.
+
+- But when is that code run? (for foo ...)
+
+- Output and errors could be streamed in the usual way.
+
+- What is the control flow among these blocks of code?
+
+----------------------------------------------------------------------
+
+2) Provide a Python API for executing marcel code.
+
+E.g.
+
+    marcel('''ls -fr | \
+              map (f: (f.suffix.lower, 1)) | \
+              red . +''')
+
+which could yield a list or iterator.
+
+- Not quite as clean as a shell combining shell features and control
+  in the same context. The quoting is ugly.
+
+- The mapping function is a Python function, embedded in a string,
+  embedded in Python. Weird and ugly.
+
+----------------------------------------------------------------------
+
+3) Python API for marcel, similar to osh API.
+
+marcel(ls('-fr', 'abc*') | 
+       map(lambda f: (f.suffix.lower, 1)) |
+       red(None, '+'))
+
+- Cleaner combination of shell and language.
+
+- But quoting of flags is ugly.
+
+- + has to be quoted. Maybe function('+')
+
+- Should args to ls be a single string? Or broken into separate args?

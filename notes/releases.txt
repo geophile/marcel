@@ -1,15 +1,45 @@
-0.5
-
-- Pipelines
+0.6
 
 - DB access
 
-- Syntax for starting job in background (like bash &)
+----------------------------------------------------------------------
+
+0.5
+
+- ps
+
+- help object
+
+- process object
+  - interface
+  - doc
+
+- file object
+  - interface
+  - doc
+
+- Pipelines
+
 
 - Highlight color for broken link. Not trivial, because File needs to
   survive pickling. Can't assume that file can be examined when
   colorization is needed. And stat (computed before pickling) doesn't
   indicate whether the file exists. Could check and record this.
+
+- "(...)" as shorthand for "map (...)"? (If no parameters)
+
+- More work on jobs:
+
+  - history
+
+  - Run previous command
+
+  - fg/bg without specifying job#
+
+  - Syntax for starting job in background (like bash &). Maybe 
+    bg [ ... ]?
+
+- Host commands
 
 ----------------------------------------------------------------------
 

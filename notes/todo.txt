@@ -189,3 +189,5 @@ Cluster: Allow config of a single host
 ----------------------------------------------------------------------
 
 Colorize help
+
+Change "object" to "type"? People hate objects.

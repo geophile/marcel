@@ -5,6 +5,7 @@ topics = [
     'function',
     'marcel',
     'namespace',
+    'object',
     'operator',
     'overview',
     'pipeline',

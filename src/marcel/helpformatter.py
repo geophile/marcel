@@ -1,4 +1,3 @@
-import subprocess
 import textwrap
 
 import marcel.util
@@ -33,7 +32,7 @@ import marcel.util
 #       T, (boolean values are indicated by T for true, and F for false).
 #
 #     - L[,indent=int[:int]][,wrap[=bool]]: Indicates a multi-line
-#       list item. The default indent is 2:4. If two indents are specified,
+#       list item. The default indent is 4:6. If two indents are specified,
 #       the first int is for the first line of the paragraph, and the
 #       second int is for subsequent lines. The default value of wrap is True.
 #
@@ -250,7 +249,7 @@ class ParagraphMarkup(Markup):
             else:
                 self.raise_invalid_markup()
         if self.indent1 is None:
-            self.indent1, self.indent2 = (0, 0) if self.code == 'p' else (2, 4)
+            self.indent1, self.indent2 = (0, 0) if self.code == 'p' else (4, 6)
         if self.wrap is None:
             self.wrap = True
 
@@ -567,4 +566,4 @@ class HelpFormatter:
     # ignore if all whitespace without \n
     @staticmethod
     def ignore(s):
-        return s.isspace() and s.count('\n') == 0
+        return len(s) == 0 or s.isspace() and s.count('\n') == 0

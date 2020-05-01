@@ -240,6 +240,15 @@ PermissionError: [Errno 1] Operation not permitted: '/tmp/rd'
 
 ----------------------------------------------------------------------
 
+FIXED (accidentally)
+
+17. Tab completion for filenames with spaces and escapes
+
+E.g., tab completion for a\ b doesn't work.
+
+
+----------------------------------------------------------------------
+
 FIXED
 
 18. Following restart, multilines history is wrong
