@@ -18,20 +18,19 @@ class Function:
         '.': lambda acc, x: None
     }
 
-    def __init__(self, source, globals):
-        self.source = source.strip()
+    def __init__(self, globals, source=None, function=None):
+        assert (source is None) != (function is None)
         self.globals = globals
-        self.function = None
+        self.source = None if source is None else source.strip()
+        self.function = function
         self.op = None
         # create_function makes sure that the function source is correct, throwing an exception if not.
         self.create_function()
 
     def __repr__(self):
-        return self.source
+        return self.function if self.source is None else self.source
 
     def __call__(self, *args, **kwargs):
-        # Unpickling preserves source but not function, (and doesn't call __init__),
-        # so make sure we actually have a function.
         if self.function is None:
             self.create_function()
         assert self.function is not None
@@ -47,7 +46,6 @@ class Function:
             raise marcel.exception.KillAndResumeException(self.op, function_input_string, str(e))
 
     def __getstate__(self):
-        self.function = None
         self.globals = None
         return self.__dict__
 
@@ -58,16 +56,17 @@ class Function:
         self.op = op
 
     def create_function(self):
-        self.function = Function.symbols.get(self.source, None)
         if self.function is None:
-            if self.source.split()[0] in ('lambda', 'lambda:'):
-                self.function = eval(self.source, self.globals)
-            else:
-                try:
-                    self.function = eval('lambda ' + self.source, self.globals)
-                except Exception:
+            self.function = Function.symbols.get(self.source, None)
+            if self.function is None:
+                if self.source.split()[0] in ('lambda', 'lambda:'):
+                    self.function = eval(self.source, self.globals)
+                else:
                     try:
-                        self.function = eval('lambda: ' + self.source, self.globals)
+                        self.function = eval('lambda ' + self.source, self.globals)
                     except Exception:
-                        raise marcel.exception.KillCommandException(
-                            f'Invalid function syntax: {self.source}')
+                        try:
+                            self.function = eval('lambda: ' + self.source, self.globals)
+                        except Exception:
+                            raise marcel.exception.KillCommandException(
+                                f'Invalid function syntax: {self.source}')

@@ -53,7 +53,7 @@ class Squish(marcel.core.Op):
 
     def setup_1(self):
         if self.function is None:
-            self.function = marcel.function.Function('+', self.env().vars())
+            self.function = marcel.function.Function(self.env().vars(), '+')
         self.function.set_op(self)
 
     def receive(self, x):

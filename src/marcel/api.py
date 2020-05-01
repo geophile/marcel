@@ -41,7 +41,7 @@ def ls(*paths, depth=1, recursive=False, file=False, dir=False, symlink=False):
 
 def map(function):
     op = marcel.op.map.Map()
-    op.function = marcel.function.Function('', MAIN.env.namespace, f=function)
+    op.function = marcel.function.Function(MAIN.env.namespace, '')
     return op
 
 

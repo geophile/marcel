@@ -32,7 +32,7 @@ class PickleOutput(marcel.core.Op):
         pass
 
     def receive(self, x):
-        TRACE.write(f'Pickling: ({type(x)}) {x}')
+        # TRACE.write(f'Pickling: ({type(x)}) {x}')
         self.pickler.dump(x)
 
     def receive_error(self, error):

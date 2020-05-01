@@ -180,3 +180,6 @@ Change "object" to "type"? People hate objects.
 
 Use dill. Can serialize functions, exceptions. Can extract source of
 function?!
+
+Revert to pickling if dill not present. And in that case, require
+function source for remote execution.

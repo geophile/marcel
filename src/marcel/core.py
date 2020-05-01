@@ -87,7 +87,7 @@ class ArgParser(argparse.ArgumentParser):
         return n
 
     def check_function(self, s):
-        return marcel.function.Function(s, self.env.vars())
+        return marcel.function.Function(self.env.vars(), s)
 
 
 class BaseOp:
