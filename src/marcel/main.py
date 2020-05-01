@@ -117,7 +117,6 @@ class Main:
                 pipeline = parser.parse()
                 pipeline.set_env(self.env)
                 command = Command(line, pipeline)
-                import os
                 if self.run_immediate(line):
                     command.execute()
                 else:
@@ -125,6 +124,11 @@ class Main:
             except marcel.exception.KillCommandException as e:
                 # print_stack()
                 print(e, file=sys.stderr)
+
+    def run_api(self, pipeline):
+        pipeline.set_env(self.env)
+        command = Command(None, pipeline)
+        command.execute()
 
     def initialize_input(self):
         readline.set_history_length(HISTORY_LENGTH)

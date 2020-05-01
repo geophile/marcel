@@ -284,3 +284,21 @@ Cleanup:
 
 + Move VERSION from env to an environment variable, MARCEL_VERSION.
 
+-----------------------------------------------------------------------
+
+
+Why is define_colors necessary? Just assign Colors to variables, which 
+can then be referenced in define_color_schema, and define_prompt?
+
+similarly, get rid of define_prompt, define_continuation_prompt.
+
+Unify environment and config: Make the namespace the repository of env vars.
+
+
+Need arbitrary colors in markup, e.g. so that colorized prompt can be
+described.
+
+----------------------------------------------------------------------
+
+Need to handle {} chars in markup. See help_operator.py.
+

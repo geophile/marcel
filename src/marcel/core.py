@@ -91,7 +91,7 @@ class ArgParser(argparse.ArgumentParser):
 
 
 class BaseOp:
-    """Base class for all osh ops, and for pipelines (sequences of
+    """Base class for all ops, and for pipelines (sequences of
     ops). Methods of this class implement the op execution and
     inter-op communication. The send* commands are used by subclasses to
     send output to downstream commands. The receive* commands are implemented
@@ -224,6 +224,14 @@ class Op(BaseOp):
     def op_name(cls):
         return cls.__name__.lower()
 
+    # API
+
+    def __or__(self, other):
+        pipeline = Pipeline()
+        pipeline.append(self)
+        pipeline.append(other)
+        return pipeline
+
     # For use by this module
 
     def set_pipeline_args(self, pipelines):
@@ -239,8 +247,6 @@ class Op(BaseOp):
             return self.pipelines[pipeline_id]
         except ValueError:
             raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {pipeline_ref}')
-
-
 
     @staticmethod
     def function_source(function):
@@ -308,3 +314,10 @@ class Pipeline(BaseOp):
         else:
             self.first_op = op
         self.last_op = op
+
+    # API
+
+    def __or__(self, op):
+        self.append(op)
+        return self
+

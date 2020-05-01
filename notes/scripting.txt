@@ -60,7 +60,7 @@ which could yield a list or iterator.
 
 3) Python API for marcel, similar to osh API.
 
-marcel(ls('-fr', 'abc*') | 
+marcel(ls('abc*', recursive=True, file=True) | 
        map(lambda f: (f.suffix.lower, 1)) |
        red(None, '+'))
 
@@ -71,3 +71,11 @@ marcel(ls('-fr', 'abc*') |
 - + has to be quoted. Maybe function('+')
 
 - Should args to ls be a single string? Or broken into separate args?
+
+----------------------------------------------------------------------
+
+- setup1() has to do thorough checking of args, of the sort that
+  argparse does now.
+
+- CLI should invoke op class constructor directly, e.g. Ls(). Reserve function
+  for API, e.g. ls()

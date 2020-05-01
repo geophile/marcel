@@ -6,12 +6,14 @@ To learn more about a topic, run the command:
 Available topics:
 
 {b:Top-level help:}
+
 {p,wrap=F}
     - {n:marcel}
 
 (Or just run {n:help} with no topic.)
 
 {b:Overview:}
+
 {p,wrap=F}
     - {n:configuration}: How to configure the prompt, color scheme, remote access.
     - {n:overview}: The main concepts of marcel. How it differs from other shells.
@@ -22,11 +24,13 @@ Available topics:
     - {n:object}: The objects you work with. 
 
 {b:Objects:}
+
 {p,wrap=F}
     - {n:file}
     - {n:process}
 
 {b:Operators:}
+
 {p,wrap=F}
     - {n:bash}        - {n:bg}          - {n:cd}
     - {n:dirs}        - {n:edit}        - {n:expand}
