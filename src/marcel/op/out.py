@@ -19,8 +19,13 @@ Error objects are not subject to formatting specifications, and are not passed o
 '''
 
 
-def out():
-    return Out()
+def out(append=None, file=None, csv=False, format=None):
+    op = Out()
+    op.append = append
+    op.file = file
+    op.csv = csv
+    op.format = format
+    return op
 
 
 class OutArgParser(marcel.core.ArgParser):

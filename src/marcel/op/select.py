@@ -1,4 +1,5 @@
 import marcel.core
+import marcel.functionwrapper
 
 
 SUMMARY = '''
@@ -12,8 +13,10 @@ True are written to the output stream.
 '''
 
 
-def select():
-    return Select()
+def select(function):
+    op = Select()
+    op.function = marcel.functionwrapper.FunctionWrapper(function=function)
+    return op
 
 
 class SelectArgParser(marcel.core.ArgParser):
@@ -22,7 +25,7 @@ class SelectArgParser(marcel.core.ArgParser):
         super().__init__('select', env, None, SUMMARY, DETAILS)
         self.add_argument('function',
                           type=super().constrained_type(self.check_function, 'not a valid function'),
-                          help='Used to filter input.')
+                          help='Predicate for filtering input tuples')
 
 
 class Select(marcel.core.Op):
@@ -32,7 +35,7 @@ class Select(marcel.core.Op):
         self.function = None
 
     def __repr__(self):
-        return f'select({marcel.core.Op.function_source(self.function)})'
+        return f'select({self.function.source()})'
 
     # BaseOp
     

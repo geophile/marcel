@@ -1,4 +1,5 @@
 import marcel.core
+import marcel.functionwrapper
 
 
 SUMMARY = '''
@@ -12,8 +13,10 @@ are bound to the {r:function}'s parameters. The output from the function is writ
 '''
 
 
-def map():
-    return Map()
+def map(function):
+    op = Map()
+    op.function = marcel.functionwrapper.FunctionWrapper(function=function)
+    return op
 
 
 class MapArgParser(marcel.core.ArgParser):
@@ -32,7 +35,7 @@ class Map(marcel.core.Op):
         self.function = None
 
     def __repr__(self):
-        return f'map({marcel.core.Op.function_source(self.function)})'
+        return f'map({self.function.source()})'
 
     # BaseOp
     

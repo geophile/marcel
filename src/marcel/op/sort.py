@@ -1,4 +1,5 @@
 import marcel.core
+import marcel.functionwrapper
 
 
 SUMMARY = '''
@@ -12,8 +13,10 @@ Otherwise, ordering is based on the values computed by applying {r:key} to each 
 '''
 
 
-def sort():
-    return Sort()
+def sort(key=None):
+    op = Sort()
+    op.key = marcel.functionwrapper.FunctionWrapper(function=key)
+    return op
 
 
 class SortArgParser(marcel.core.ArgParser):

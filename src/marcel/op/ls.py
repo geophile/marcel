@@ -24,8 +24,16 @@ If no {r:filename}s are provided, then the currentn directory is listed.
 '''
 
 
-def ls():
-    return Ls()
+def ls(*paths, depth=1, recursive=False, file=False, dir=False, symlink=False):
+    op = Ls()
+    op.d0 = depth == 0
+    op.d1 = depth == 1
+    op.recursive = recursive
+    op.file = file
+    op.dir = dir
+    op.symlink = symlink
+    op.filename = paths
+    return op
 
 
 class LsArgParser(marcel.core.ArgParser):

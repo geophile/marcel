@@ -7,29 +7,42 @@ import marcel.op
 class OpModule:
 
     def __init__(self, op_name, env):
-        self.op_name = op_name
-        self.env = env
-        self._create_op = None
+        self._op_name = op_name
+        self._env = env
+        self._api = None  # For creating op instances from the api
+        self._constructor = None
         self._arg_parser = None
         self._arg_parser_function = None
         op_module = importlib.import_module(f'marcel.op.{op_name}')
         # Locate items in module needed during the lifecycle of an op.
         for k, v in op_module.__dict__.items():
             if k == op_name:
-                # The function creating an instance of the op, e.g. ls()
-                self._create_op = v
-            elif inspect.isclass(v) and marcel.core.ArgParser in inspect.getmro(v):
-                # The arg parser class, e.g. LsArgParser
-                self._arg_parser_function = v
+                self._api = v
+            else:
+                isclass = inspect.isclass(v)
+                if isclass:
+                    parents = inspect.getmro(v)
+                    if isclass and marcel.core.Op in parents:
+                        # The op class, e.g. Ls
+                        self._constructor = v
+                    elif isclass and marcel.core.ArgParser in parents:
+                        # The arg parser class, e.g. LsArgParser
+                        self._arg_parser_function = v
         assert self._arg_parser_function is not None
-        assert self._create_op is not None, op_name
+        assert self._constructor is not None, op_name
+
+    def op_name(self):
+        return self._op_name
+
+    def api_function(self):
+        return self._api
 
     def create_op(self):
-        return self._create_op()
+        return self._constructor()
 
     def arg_parser(self):
         if self._arg_parser is None:
-            self._arg_parser = self._arg_parser_function(self.env)
+            self._arg_parser = self._arg_parser_function(self._env)
         return self._arg_parser
 
     # The operator's help info is formatted when the arg parser is created. When the screen

@@ -183,3 +183,5 @@ function?!
 
 Revert to pickling if dill not present. And in that case, require
 function source for remote execution.
+
+Get rid of core.function_source

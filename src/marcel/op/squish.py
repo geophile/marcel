@@ -1,7 +1,7 @@
 import functools
 
 import marcel.core
-import marcel.function
+import marcel.functionwrapper
 
 
 SUMMARY = '''
@@ -23,8 +23,10 @@ If no {r:function} is provided, then {n:+} is assumed.
 '''
 
 
-def squish():
-    return Squish()
+def squish(function=None):
+    op = Squish()
+    op.function = marcel.functionwrapper.FunctionWrapper(function=function)
+    return op
 
 
 class SquishArgParser(marcel.core.ArgParser):
@@ -44,7 +46,7 @@ class Squish(marcel.core.Op):
         self.function = None
 
     def __repr__(self):
-        return f'squish({self.function})' if self.function else 'squish()'
+        return f'squish({self.function.source()})' if self.function else 'squish()'
 
     # BaseOp
     
@@ -53,7 +55,7 @@ class Squish(marcel.core.Op):
 
     def setup_1(self):
         if self.function is None:
-            self.function = marcel.function.Function(self.env().vars(), '+')
+            self.function = marcel.functionwrapper.FunctionWrapper(source='+', globals=self.env().vars())
         self.function.set_op(self)
 
     def receive(self, x):

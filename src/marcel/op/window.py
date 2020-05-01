@@ -1,5 +1,6 @@
 import marcel.core
 import marcel.exception
+import marcel.functionwrapper
 
 
 SUMMARY = '''
@@ -72,8 +73,12 @@ tuples:
 '''
 
 
-def window():
-    return Window()
+def window(overlap=False, disjoint=0, predicate=None):
+    op = Window()
+    op.overlap = overlap
+    op.disjoint = disjoint
+    op.predicate = marcel.functionwrapper.FunctionWrapper(function=predicate)
+    return op
 
 
 class WindowArgsParser(marcel.core.ArgParser):
@@ -119,7 +124,7 @@ class Window(marcel.core.Op):
             buffer.append(self.disjoint)
         if self.predicate:
             buffer.append('predicate=')
-            buffer.append(self.predicate.source)
+            buffer.append(self.predicate.source())
         buffer.append(')')
         return ''.join(buffer)
 
@@ -129,7 +134,7 @@ class Window(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
-        # Exactly one of predicate, overlap, disjoint should be set. Not sure that argparse is up to that.
+        # Exactly one of predicate, overlap, disjoint must be set.
         count = 1 if self.predicate is not None else 0
         count += 1 if self.overlap is not None else 0
         count += 1 if self.disjoint is not None else 0

@@ -1,6 +1,7 @@
 import argparse
 
 import marcel.core
+import marcel.functionwrapper
 
 
 SUMMARY = '''
@@ -79,8 +80,13 @@ The output stream would be {n:('a', 1, 1), ('a', 2, 3), ('b', 3, 3), ('b', 4, 7)
 '''
 
 
-def red():
-    return Red()
+def red(*functions, incremental=False):
+    op = Red()
+    op.function = []
+    for function in functions:
+        op.function.append(marcel.functionwrapper.FunctionWrapper(function=function))
+    op.incremental = incremental
+    return op
 
 
 class RedArgParser(marcel.core.ArgParser):
@@ -107,7 +113,7 @@ class Red(marcel.core.Op):
         self.reducer = None
 
     def __repr__(self):
-        sources = [(marcel.core.Op.function_source(f)) for f in self.function]
+        sources = [None if f is None else f.source() for f in self.function]
         return f'red(incremental={self.incremental}, function={sources})'
 
     # BaseOp
@@ -121,12 +127,11 @@ class Red(marcel.core.Op):
         for i in range(len(self.function)):
             function = self.function[i]
             function.set_op(self)
-            if Red.is_grouping(function.source):
+            if Red.is_grouping(function.source()):
                 grouping_positions.append(i)
                 self.function[i] = None
             else:
                 data_positions.append(i)
-                self.function[i] = function
         if len(grouping_positions) == 0:
             self.reducer = NonGroupingReducer(self)
         else:

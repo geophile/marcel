@@ -3,7 +3,7 @@ import sys
 
 import marcel.exception
 import marcel.exception
-import marcel.function
+import marcel.functionwrapper
 import marcel.helpformatter
 import marcel.object.error
 import marcel.util
@@ -87,7 +87,7 @@ class ArgParser(argparse.ArgumentParser):
         return n
 
     def check_function(self, s):
-        return marcel.function.Function(self.env.vars(), s)
+        return marcel.functionwrapper.FunctionWrapper(source=s, globals=self.env.vars())
 
 
 class BaseOp:
@@ -249,7 +249,8 @@ class Op(BaseOp):
 
     @staticmethod
     def function_source(function):
-        return function.source if isinstance(function, marcel.function.Function) else function
+        assert isinstance(function, marcel.functionwrapper.FunctionWrapper)
+        return function.source()
 
 
 class Pipeline(BaseOp):

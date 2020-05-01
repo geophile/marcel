@@ -1,4 +1,5 @@
 from marcel.api import *
 
-for x in loop(gen(5)):
-    print(x)
+execute(gen(5) | map(lambda x: -x))
+
+execute(ls('/home/jao/bin') | map(lambda f: (f.size, f.name)))

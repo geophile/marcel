@@ -14,8 +14,12 @@ permitted if the stream does not terminate, or if {r:start} is negative.
 '''
 
 
-def gen():
-    return Gen()
+def gen(count=0, start=0, pad=None):
+    op = Gen()
+    op.count = count
+    op.start = start
+    op.pad = pad
+    return op
 
 
 class GenArgParser(marcel.core.ArgParser):
