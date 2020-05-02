@@ -12,8 +12,10 @@ output stream. All other input items will be discarded.
 '''
 
 
-def tail():
-    return Tail()
+def tail(n):
+    op = Tail()
+    op.n = n
+    return op
 
 
 class TailArgParser(marcel.core.ArgParser):

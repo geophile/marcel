@@ -7,8 +7,12 @@ import sys
 import marcel.core
 
 
-def sudo():
-    return Sudo()
+def sudo(pipeline, *args):
+    op = Sudo()
+    op.args = args
+    op.pipeline = pipeline
+    return op
+
 
 # The sudo command has 0 or more flags and arguments for the native sudo command, followed by a pipeline.
 # There are a lot of flags, and it might not be a great idea to model them all. How much do those flags

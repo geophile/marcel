@@ -185,3 +185,7 @@ Revert to pickling if dill not present. And in that case, require
 function source for remote execution.
 
 Get rid of core.function_source
+
+Not all ops can be used in API, e.g. edit, help. What about fork? remote?
+
+timer: allow interval to be an int or real (#sec)

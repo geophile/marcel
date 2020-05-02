@@ -1,3 +1,4 @@
+import argparse
 import atexit
 import pathlib
 import readline
@@ -37,13 +38,6 @@ class Command:
     def __init__(self, source, pipeline):
         self.source = source
         self.pipeline = pipeline
-        # Append an out op at the end of pipeline, if there is no output op there already.
-        if not isinstance(pipeline.last_op, marcel.op.out.Out):
-            out = marcel.op.out.Out()
-            out.append = False
-            out.file = False
-            out.csv = False
-            pipeline.append(out)
 
     def __repr__(self):
         return str(self.pipeline)
@@ -74,11 +68,15 @@ class Main:
 
     MAIN_SLEEP_SEC = 0.1
 
-    def __init__(self, op_testing=False):
-        self.op_testing = op_testing
-        config_path = Main.args()
+    def __init__(self, same_process=False):
+        # sys.argv sets config_path, dill
+        self.config = None
+        self.dill = None
+        self.parse_args()
+        #
+        self.same_process = same_process
         try:
-            self.env = marcel.env.Environment(config_path)
+            self.env = marcel.env.Environment(self.config)
         except marcel.exception.KillShellException as e:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)
@@ -116,6 +114,13 @@ class Main:
                 parser = marcel.parse.Parser(line, self.op_modules)
                 pipeline = parser.parse()
                 pipeline.set_env(self.env)
+                # Append an out op at the end of pipeline, if there is no output op there already.
+                if not isinstance(pipeline.last_op, marcel.op.out.Out):
+                    out = marcel.op.out.Out()
+                    out.append = False
+                    out.file = False
+                    out.csv = False
+                    pipeline.append(out)
                 command = Command(line, pipeline)
                 if self.run_immediate(line):
                     command.execute()
@@ -165,16 +170,21 @@ class Main:
     def run_immediate(self, line):
         # Job control commands should be run in this process, not a spawned process.
         # Also, if we're testing operator behavior, run in immediate mode.
-        return self.op_testing or line.split()[0] in ('bg', 'edit', 'fg', 'help', 'jobs', 'kill')
+        return self.same_process or line.split()[0] in ('bg', 'edit', 'fg', 'help', 'jobs', 'kill')
 
     def handle_console_changes(self):
         for module in self.op_modules.values():
             module.reformat_help()
 
-    @staticmethod
-    def args():
-        config_path = sys.argv[1] if len(sys.argv) > 1 else None
-        return config_path
+    def parse_args(self):
+        parser = argparse.ArgumentParser(prog='marcel')
+        parser.add_argument('config',
+                            nargs='?',
+                            help='The location of the marcel configuration file, (typically named .marcel.py)')
+        parser.add_argument('--dill',
+                            nargs='?')
+        parser.parse_args(args=sys.argv[1:], namespace=self)
+        self.dill = self.dill is None or self.dill not in ('F', 'f', 'False', 'false')
 
 
 if __name__ == '__main__':

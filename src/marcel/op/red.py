@@ -84,7 +84,9 @@ def red(*functions, incremental=False):
     op = Red()
     op.function = []
     for function in functions:
-        op.function.append(marcel.functionwrapper.FunctionWrapper(function=function))
+        op.function.append(marcel.functionwrapper.FunctionWrapper(source='.', globals={})
+                           if function is None else
+                           marcel.functionwrapper.FunctionWrapper(function=function))
     op.incremental = incremental
     return op
 

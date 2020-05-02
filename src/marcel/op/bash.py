@@ -18,8 +18,11 @@ Use this command if  the interactive flag is needed.
 '''
 
 
-def bash():
-    return Bash()
+def bash(*args, interactive=False):
+    op = Bash()
+    op.interactive = interactive
+    op.args = args
+    return op
 
 
 class BashArgParser(marcel.core.ArgParser):

@@ -2,7 +2,7 @@ import marcel.main
 import marcel.object.host
 import test_base
 
-MAIN = marcel.main.Main(op_testing=True)
+MAIN = marcel.main.Main(same_process=True)
 
 
 class Bug38(test_base.Test):

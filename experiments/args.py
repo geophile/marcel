@@ -1,7 +1,13 @@
 import argparse
 
-parser = argparse.ArgumentParser(prog='abc')
-parser.add_argument('-f', '--foo', type=int, help='Specify a foo')
-parser.add_argument('bar')
-print(parser.parse_args(['-f', '3', 'ABC']))
-print(parser.parse_args(['-h']))
+
+def test(s):
+    args = s.split()
+    print(f'{args} -> {parser.parse_args(args)}')
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--foo', nargs='?')
+test('--foo')
+test('--foo True')
+test('--foo False')

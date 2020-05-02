@@ -38,8 +38,11 @@ Notes:
 '''
 
 
-def timer():
-    return Timer()
+def timer(interval, components=False):
+    op = Timer()
+    op.interval = interval
+    op.components = components
+    return op
 
 
 class TimerArgParser(marcel.core.ArgParser):

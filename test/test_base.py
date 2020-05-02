@@ -20,7 +20,7 @@ class Test:
 
     def reset_environment(self, config_file='./.marcel.py'):
         sys.argv = [None, config_file]
-        self.main = marcel.main.Main(op_testing=True)
+        self.main = marcel.main.Main(same_process=True)
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')
         os.chdir(Test.start_dir)

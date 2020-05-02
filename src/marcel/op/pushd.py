@@ -14,8 +14,10 @@ and the current directory is changed to the new top directory on the stack.
 '''
 
 
-def pushd():
-    return Pushd()
+def pushd(directory=None):
+    op = Pushd()
+    op.directory = directory
+    return op
 
 
 class PushdArgParser(marcel.core.ArgParser):

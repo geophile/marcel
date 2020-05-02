@@ -13,8 +13,10 @@ If {r:directory} is omitted, then change the current directory to the home direc
 '''
 
 
-def cd():
-    return Cd()
+def cd(directory=None):
+    op = Cd()
+    op.directory = directory
+    return op
 
 
 class CdArgParser(marcel.core.ArgParser):

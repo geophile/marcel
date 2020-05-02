@@ -16,8 +16,10 @@ is specified.
 '''
 
 
-def unique():
-    return Unique()
+def unique(consecutive=False):
+    op = Unique()
+    op.consecutive = consecutive
+    return op
 
 
 class UniqueArgParser(marcel.core.ArgParser):

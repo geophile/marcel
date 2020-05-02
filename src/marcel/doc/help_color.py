@@ -21,7 +21,7 @@ sequence.
 
 {r:Color}s have two purposes:
 {L,indent=4:7}1. They can be used to customize the console prompt, (run {n:help prompt}
-   for more information.
+   for more information).
 {L,indent=4:7}2. They can be used to define a color scheme, to colorize various output items,
    (discussed next).
 

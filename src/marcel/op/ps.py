@@ -1,5 +1,3 @@
-import os
-
 import marcel.core
 import marcel.object.process
 
@@ -19,10 +17,7 @@ def ps():
 class PsArgParser(marcel.core.ArgParser):
 
     def __init__(self, env):
-        super().__init__('ps', env, ['-o', '--omit-self'], SUMMARY, DETAILS)
-        self.add_argument('-o', '--omit-self',
-                          action='store_true',
-                          help='OBSOLETE')
+        super().__init__('ps', env, None, SUMMARY, DETAILS)
 
 
 class Ps(marcel.core.Op):

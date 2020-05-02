@@ -12,8 +12,10 @@ output stream. All other input items will be discarded.
 '''
 
 
-def head():
-    return Head()
+def head(n):
+    op = Head()
+    op.n = n
+    return op
 
 
 class HeadArgParser(marcel.core.ArgParser):

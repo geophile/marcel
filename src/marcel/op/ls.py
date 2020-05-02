@@ -28,7 +28,7 @@ def ls(*paths, depth=1, recursive=False, file=False, dir=False, symlink=False):
     op = Ls()
     op.d0 = depth == 0
     op.d1 = depth == 1
-    op.recursive = recursive
+    op.dr = recursive
     op.file = file
     op.dir = dir
     op.symlink = symlink
