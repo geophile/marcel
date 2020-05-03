@@ -42,7 +42,8 @@ class LabelThread(marcel.core.Op):
 
     def receive_error(self, error):
         error.set_label(self.label[0])
-        self.send_error(error)
+        super().non_fatal_error(error=error)
+        super().receive_error(error)
 
     # LabelThread
 

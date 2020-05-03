@@ -99,14 +99,9 @@ class Out(marcel.core.Op):
         try:
             print(out, file=self.output, flush=True)
         except Exception as e:  # E.g. UnicodeEncodeError
-            error = marcel.object.error.Error(e)
-            self.print_error(error)
+            self.non_fatal_error(input=x, message=str(e))
         finally:
             self.send(x)
-
-    def receive_error(self, error):
-        self.ensure_output_initialized()
-        self.print_error(error)
 
     def receive_complete(self):
         self.ensure_output_initialized()
@@ -121,9 +116,6 @@ class Out(marcel.core.Op):
             self.output = (open(self.append, mode='a') if self.append else
                            open(self.file, mode='w') if self.file else
                            sys.stdout)
-
-    def print_error(self, error):
-        print(self.render(error, True), file=self.output, flush=True)
 
     def render(self, x, full):
         if x is None:

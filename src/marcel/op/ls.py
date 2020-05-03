@@ -140,7 +140,7 @@ class Ls(marcel.op.filenames.FilenamesOp):
                 for file in sorted(root.iterdir()):
                     self.visit(file, level + 1)
             except PermissionError:
-                self.send_error(marcel.object.error.Error(f'Cannot explore {root}: Permission denied'))
+                self.non_fatal_error(input=root, message='Permission denied')
 
     def send_path(self, path):
         s = path.is_symlink()

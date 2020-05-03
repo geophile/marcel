@@ -62,8 +62,6 @@ class Fork(marcel.core.Op):
                 try:
                     thread.join(0.1)
                 except BaseException as e:
-                    # print(f'{type(e)}: {e}')
-                    # print_stack()
                     thread.terminating_exception = e
         # Threads may complete normally or fail with a variety of exceptions. Merge them into a single action
         # for the termination of the fork op.
@@ -84,7 +82,7 @@ class Fork(marcel.core.Op):
         if ctrl_c:
             raise KeyboardInterrupt()
         if kill_and_resume:
-            raise marcel.exception.KillAndResumeException(self, None, str(kill_and_resume))
+            self.fatal_error(None, str(kill_and_resume))
 
     # Op
 
@@ -136,19 +134,19 @@ class Remote(ForkImplementation):
         super().setup_1()
         op = self.op
         remote_pipeline = marcel.core.Pipeline()
-        remote_pipeline.set_env(op.env())
-        remote_op = marcel.op.remote.Remote(op.fork_pipeline)
-        remote_pipeline.append(remote_op)
+        remote_pipeline.append(marcel.op.remote.Remote(op.fork_pipeline))
+        remote_pipeline.append(marcel.op.labelthread.LabelThread())
         op.fork_pipeline = remote_pipeline
-        op.fork_pipeline.append(marcel.op.labelthread.LabelThread())
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
 
     def setup_2(self):
         op = self.op
         for thread_label in op.thread_labels:
-            # Copy the pipeline
+            # Copy the pipeline. Env is set here, not in op.fork_pipeline. Env cloning preserves
+            # only minimal state, so it has to be set in the clone.
             pipeline_copy = marcel.util.clone(op.fork_pipeline)
+            pipeline_copy.set_env(op.env())
             # Attach thread label to Remote op.
             remote_op = pipeline_copy.first_op
             assert isinstance(remote_op, marcel.op.remote.Remote)

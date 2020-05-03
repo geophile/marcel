@@ -114,12 +114,6 @@ class BaseOp:
     def __repr__(self):
         assert False
 
-    def __getstate__(self):
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-
     # BaseOp runtime
 
     def usage(self, message):
@@ -151,7 +145,7 @@ class BaseOp:
             try:
                 self.receiver.receive_input(x)
             except marcel.exception.KillAndResumeException as e:
-                self.receiver.receive_error(Error(e))
+                self.receiver.receive_error(e.error)
 
     def send_error(self, error):
         assert isinstance(error, Error)
@@ -170,7 +164,7 @@ class BaseOp:
         try:
             self.receive(marcel.util.normalize_op_input(x))
         except marcel.exception.KillAndResumeException as e:
-            self.receive_error(Error(e))
+            self.receive_error(e.error)
 
     def receive(self, x):
         """Implemented by a op class to process an input object.
@@ -217,6 +211,18 @@ class Op(BaseOp):
         return self.op_name()
 
     # Op
+
+    def non_fatal_error(self, input=None, message=None, error=None):
+        assert (message is None) != (error is None)
+        if error is None:
+            error = Error(f'Running {self} on {input}: {message}')
+        # TODO: Invoke user-supplied handler instead of printing
+        print(error.render_full(self.owner.env.color_scheme()))
+        return error
+
+    def fatal_error(self, input, message):
+        error = self.non_fatal_error(input=input, message=message)
+        raise marcel.exception.KillAndResumeException(error)
 
     def must_be_first_in_pipeline(self):
         return False

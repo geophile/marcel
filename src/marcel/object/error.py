@@ -5,7 +5,7 @@ class Error(marcel.object.renderable.Renderable):
 
     def __init__(self, cause):
         self.message = str(cause)
-        self.label = None
+        self.label = None  # Thread label, for forked execution
 
     def __repr__(self):
         return self.render_compact()

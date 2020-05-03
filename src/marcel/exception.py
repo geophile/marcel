@@ -36,14 +36,12 @@ class KillCommandException(BaseException):
 # but command execution should continue.
 class KillAndResumeException(BaseException):
 
-    def __init__(self, op, input, message):
+    def __init__(self, error):
         super().__init__()
-        self.op = op
-        self.input = input
-        self.message = message
+        self.error = error
 
     def __str__(self):
-        return f'{self.op} failed on {self.input}: {self.message}'
+        return str(self.error)
 
 
 class KillShellException(BaseException):

@@ -51,7 +51,7 @@ class FunctionWrapper:
             if len(kwargs) > 0:
                 function_input.append(str(kwargs))
             function_input_string = ', '.join(function_input)
-            raise marcel.exception.KillAndResumeException(self._op, function_input_string, str(e))
+            self._op.fatal_error(function_input_string, str(e))
 
     def __getstate__(self):
         self._globals = None  # If function is being remotely executed, remote environment fills in globals

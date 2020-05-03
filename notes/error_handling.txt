@@ -1,0 +1,69 @@
+Error handling choices are general -- should apply to CLI, and all APIs:
+
+- Default: Handle it with out, if out is present. But what is the default
+  if there is no terminal out operator? Does printing the error when it occurs
+  produce the same ordering? It should.
+
+- Exception (killing command)
+
+- Call function
+
+----------------------------------------------------------------------
+
+Can print an Error when KillAndResume is raised. Don't have Out op
+implement receive_error. Still need to carry the Error along the
+stream, however, to get relayed from remote execution, and then be
+labelled by LabelThread.
+
+Problem with this approach: ls can complain about permission errors,
+and then move on with its recursion. ls.visit does
+self.send(Error(...)). Raising a KillAndResume ends the
+ls. KillAndResume mechanism is OK usually, I think, but not in this
+case. So RELYING on raise of KARE doesn't work here. 
+Same in bash, reporting stderr.
+
+----------------------------------------------------------------------
+
+Redesign:
+
+Fatal error: 
+
+- Invoke handler.
+- Pass Error downstream. Has to reach the end in case of remote.
+- Raise KARE.
+
+Non-fatal error (e.g. bash, ls):
+
+- Invoke handler.
+- Pass Error downstream.
+
+Local execution:
+
+- Default handler does Error.render_full().
+- Collect the into a list made available at the end of execution.
+- These can all be accomplished by profiding a handler function
+
+Remote execution:
+
+- IGNORE.
+
+----------------------------------------------------------------------
+
+Implementation:
+
+Op.fatal_error(inputs, message)
+
+- Invokes handler 
+- Raises KARE
+
+Op.non_fatal_error(inputs, message)
+
+- Invokes handler
+
+KARE:
+
+- Modified to carry the Error (not op, inputs, message)
+
+core.receive_input etc.:
+
+- Passes the Error (contained in the KARE) downstream.
