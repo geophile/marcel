@@ -33,4 +33,11 @@ def cat(*x):
 #     map(lambda ext, size: f'{ext}: {size}')
 # )))
 
-print(gather(gen(3, -1) | map(lambda x: 1/x)))
+for x in gather(
+        ls('/home/jao/git/marcel', file=True, recursive=True) |
+        select(lambda f: f.suffix == '.py') |
+        map(lambda f: (f, f)) |
+        expand(1) |
+        map(lambda f, line: (f, line.lower())) |
+        select(lambda f, line: 'send' in line and 'error' in line)):
+    print(x)

@@ -132,7 +132,7 @@ class NonInteractive(Escape):
             op.send(line)
         # stderr
         for line in NonInteractive.normalize_output(stderr):
-            op.send(marcel.object.error.Error(line))
+            op.send_error(marcel.object.error.Error(line))
 
     @staticmethod
     def normalize_output(x):

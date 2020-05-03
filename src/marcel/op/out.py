@@ -96,7 +96,6 @@ class Out(marcel.core.Op):
                     out = '(' + ', '.join(buffer) + ')'
             else:
                 out = str(x)
-        # Relying on print to provide the \n appears to result in a race condition.
         try:
             print(out, file=self.output, flush=True)
         except Exception as e:  # E.g. UnicodeEncodeError
