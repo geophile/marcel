@@ -60,7 +60,7 @@ class PipelineRunner(threading.Thread):
             # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
             # supporting more than one level of nesting.
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
-            self.pipeline.receive(None)
+            self.pipeline.receive_input(None)
         except BaseException as e:
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')
             marcel.util.print_stack(file=TRACE.file)

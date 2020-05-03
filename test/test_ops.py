@@ -436,7 +436,7 @@ def test_sudo():
     os.system('sudo touch /tmp/sudotest/f')
     os.system('sudo chmod 400 /tmp/sudotest')
     TEST.run(test='ls -f /tmp/sudotest',
-             expected_out=[Error('permission denied')])
+             expected_out=[Error('Permission denied')])
     TEST.run(test='sudo -i [ ls -f /tmp/sudotest | map (f: f.render_compact()) ]',
              expected_out=['f'])
     # TEST.run(test='sudo -i [ ls -f /tmp/sudotest ]',

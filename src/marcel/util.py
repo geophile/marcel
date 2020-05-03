@@ -46,8 +46,10 @@ def is_executable(x):
     return shutil.which(x) is not None
 
 
-def normalize_output(x):
-    return tuple(x) if is_sequence_except_string(x) else (x,)
+def normalize_op_input(x):
+    return (None if x is None else
+            tuple(x) if is_sequence_except_string(x) else
+            (x,))
 
 
 def normalize_path(x):

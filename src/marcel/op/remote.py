@@ -56,9 +56,10 @@ class Remote(marcel.core.Op):
         try:
             while True:
                 x = input.load()
-                if isinstance(x, marcel.exception.KillCommandException):
-                    raise marcel.exception.KillCommandException(x.cause)
-                self.send(x)
+                if isinstance(x, marcel.object.error.Error):
+                    self.send_error(x)
+                else:
+                    self.send(x)
         except EOFError as e:
             self.send_complete()
 

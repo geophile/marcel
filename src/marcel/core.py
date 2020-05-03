@@ -146,14 +146,17 @@ class BaseOp:
         pass
 
     def send(self, x):
-        """Called by a op class to send an object of op output to
-        the next op.
-        """
+        assert not isinstance(x, Error)
         if self.receiver:
             try:
-                self.receiver.receive_input_or_error(x)
+                self.receiver.receive_input(x)
             except marcel.exception.KillAndResumeException as e:
                 self.receiver.receive_error(Error(e))
+
+    def send_error(self, error):
+        assert isinstance(error, Error)
+        if self.receiver:
+            self.receiver.receive_error(error)
 
     def send_complete(self):
         """Called by a op class to indicate that there will
@@ -162,14 +165,12 @@ class BaseOp:
         if self.receiver:
             self.receiver.receive_complete()
 
-    def receive_input_or_error(self, x):
-        if isinstance(x, Error):
-            self.receive_error(x)
-        else:
-            try:
-                self.receive(marcel.util.normalize_output(x))
-            except Exception as e:
-                self.receive_error(Error(e))
+    def receive_input(self, x):
+        assert not isinstance(x, Error)
+        try:
+            self.receive(marcel.util.normalize_op_input(x))
+        except marcel.exception.KillAndResumeException as e:
+            self.receive_error(Error(e))
 
     def receive(self, x):
         """Implemented by a op class to process an input object.
@@ -177,7 +178,8 @@ class BaseOp:
         pass
 
     def receive_error(self, error):
-        self.send(error)
+        assert isinstance(error, Error)
+        self.send_error(error)
 
     def receive_complete(self):
         """Implemented by a op class to do any cleanup required
@@ -294,12 +296,7 @@ class Pipeline(BaseOp):
             op = op.next_op
 
     def receive(self, x):
-        try:
-            self.first_op.receive(x)
-        except marcel.exception.KillAndResumeException as e:
-            receiver = self.first_op.receiver
-            if receiver:
-                receiver.receive_error(Error(e))
+        self.first_op.receive_input(x)
 
     def receive_complete(self):
         self.first_op.receive_complete()

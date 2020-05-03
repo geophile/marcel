@@ -178,14 +178,28 @@ Change "object" to "type"? People hate objects.
 
 ----------------------------------------------------------------------
 
-Use dill. Can serialize functions, exceptions. Can extract source of
-function?!
+timer: allow interval to be an int or real (#sec)
+
+----------------------------------------------------------------------
 
 Revert to pickling if dill not present. And in that case, require
 function source for remote execution.
 
-Get rid of core.function_source
-
 Not all ops can be used in API, e.g. edit, help. What about fork? remote?
 
-timer: allow interval to be an int or real (#sec)
+
+API: What to do about error handling, when there is no out operator
+present? It would be nice to get the exit code too. What is the exit
+code for a pipeline in bash?
+
+API needs documentation. help? HTML?
+
+Exit codes? (Not just an api issue)
+
+Need an api version of test_ops.
+
+
+Pipelines are mutable. Don't modify them!
+
+- Adding a terminal operator is visible to the caller (API)
+- Removing attributes in __getstate__

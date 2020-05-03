@@ -172,6 +172,30 @@ def test_ls():
     expected.extend(sorted([absolute('/tmp/test', x) for x in ['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
     TEST.run('ls -1 . d | map (f: f.render_compact())',
              expected_out=expected)
+    # ls should continue past permission error
+    os.system('sudo rm -rf /tmp/lstest')
+    os.system('mkdir /tmp/lstest')
+    os.system('mkdir /tmp/lstest/d1')
+    os.system('mkdir /tmp/lstest/d2')
+    os.system('mkdir /tmp/lstest/d3')
+    os.system('mkdir /tmp/lstest/d4')
+    os.system('touch /tmp/lstest/d1/f1')
+    os.system('touch /tmp/lstest/d2/f2')
+    os.system('touch /tmp/lstest/d3/f3')
+    os.system('touch /tmp/lstest/d4/f4')
+    os.system('sudo chown root.root /tmp/lstest/d2')
+    os.system('sudo chown root.root /tmp/lstest/d3')
+    os.system('sudo chmod 700 /tmp/lstest/d?')
+    TEST.run(test='ls -r /tmp/lstest | map (f: f.render_compact())',
+             expected_out=['.',
+                           'd1',
+                           'd1/f1',
+                           'd2',
+                           Error('Permission denied'),
+                           'd3',
+                           Error('Permission denied'),
+                           'd4',
+                           'd4/f4'])
 
 
 # pushd, popd, dirs

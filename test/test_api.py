@@ -25,10 +25,12 @@ def cat(*x):
 # for x, y in gather(gen(10) | map(lambda x: (x, x))):
 #     print(f'{x}  {y}')
 
-print('\n'.join(gather(
-    ls('/home/jao/git/marcel', file=True, recursive=True) |
-    map(lambda f: (f.suffix.lower(), f.size)) |
-    red(None, plus) |
-    sort(lambda ext, size: -size) |
-    map(lambda ext, size: f'{ext}: {size}')
-)))
+# print('\n'.join(gather(
+#     ls('/home/jao/git/marcel', file=True, recursive=True) |
+#     map(lambda f: (f.suffix.lower(), f.size)) |
+#     red(None, plus) |
+#     sort(lambda ext, size: -size) |
+#     map(lambda ext, size: f'{ext}: {size}')
+# )))
+
+print(gather(gen(3, -1) | map(lambda x: 1/x)))
