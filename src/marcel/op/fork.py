@@ -146,7 +146,8 @@ class Remote(ForkImplementation):
             # Copy the pipeline. Env is set here, not in op.fork_pipeline. Env cloning preserves
             # only minimal state, so it has to be set in the clone.
             pipeline_copy = marcel.util.clone(op.fork_pipeline)
-            pipeline_copy.set_env(op.env())
+            pipeline_copy.set_env(op.owner.env)
+            pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to Remote op.
             remote_op = pipeline_copy.first_op
             assert isinstance(remote_op, marcel.op.remote.Remote)
@@ -194,6 +195,7 @@ class Local(ForkImplementation):
             # Copy the pipeline
             pipeline_copy = marcel.util.clone(op.fork_pipeline)
             pipeline_copy.set_env(op.env())
+            pipeline_copy.set_error_handler(op.fork_pipeline.error_handler)
             # Attach thread label to LabelThread op.
             label_thread_op = pipeline_copy.last_op
             assert isinstance(label_thread_op, marcel.op.labelthread.LabelThread)

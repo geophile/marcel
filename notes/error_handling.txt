@@ -26,6 +26,8 @@ Same in bash, reporting stderr.
 
 Redesign:
 
+Levels of error:
+
 Fatal error: 
 
 - Invoke handler.

@@ -216,8 +216,7 @@ class Op(BaseOp):
         assert (message is None) != (error is None)
         if error is None:
             error = Error(f'Running {self} on {input}: {message}')
-        # TODO: Invoke user-supplied handler instead of printing
-        print(error.render_full(self.owner.env.color_scheme()))
+        self.owner.handle_error(error)
         return error
 
     def fatal_error(self, input, message):
@@ -266,6 +265,7 @@ class Pipeline(BaseOp):
     def __init__(self):
         BaseOp.__init__(self)
         self.env = None
+        self.error_handler = None
         self.first_op = None
         self.last_op = None
 
@@ -280,6 +280,12 @@ class Pipeline(BaseOp):
     def set_env(self, env):
         self.env = env
 
+    def set_error_handler(self, error_handler):
+        self.error_handler = error_handler
+
+    def handle_error(self, error):
+        self.error_handler(self.env, error)
+
     # BaseOp
 
     def setup_1(self):
@@ -291,7 +297,8 @@ class Pipeline(BaseOp):
             op = op.next_op
             if isinstance(op, Op):
                 if op.must_be_first_in_pipeline():
-                    raise marcel.exception.KillCommandException('%s cannot receive input from a pipe' % op.op_name())
+                    raise marcel.exception.KillCommandException(
+                        '%s cannot receive input from a pipe' % op.op_name())
 
     def setup_2(self):
         op = self.first_op

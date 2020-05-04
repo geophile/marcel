@@ -7,7 +7,6 @@ import sys
 import marcel.exception
 import marcel.object.cluster
 import marcel.object.color
-import marcel.object.color
 
 VERSION = '0.4'
 
@@ -151,6 +150,9 @@ class Environment:
 
     def color_scheme(self):
         return self.getvar('COLOR_SCHEME')
+
+    def set_color_scheme(self, color_scheme):
+        self.setvar('COLOR_SCHEME', color_scheme)
 
     def read_config(self, config_path):
         config_path = (pathlib.Path(config_path)

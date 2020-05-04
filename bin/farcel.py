@@ -90,11 +90,15 @@ def kill_descendents(signal_id):
 
 
 def main():
+    def noop_error_handler(env, error):
+        pass
+
     env = marcel.env.Environment(None)
     # Use sys.stdin.buffer because we want binary data, not the text version
     input = dill.Unpickler(sys.stdin.buffer)
     pipeline = input.load()
     pipeline.set_env(env)
+    pipeline.set_error_handler(noop_error_handler)
     TRACE.write(f'pipeline: {pipeline}')
     pipeline_runner = PipelineRunner(pipeline)
     pipeline_runner.start()

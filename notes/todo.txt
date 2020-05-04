@@ -203,3 +203,6 @@ Pipelines are mutable. Don't modify them!
 
 - Adding a terminal operator is visible to the caller (API)
 - Removing attributes in __getstate__
+
+
+Turn off color scheme for API

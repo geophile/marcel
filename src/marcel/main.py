@@ -114,6 +114,7 @@ class Main:
                 parser = marcel.parse.Parser(line, self.op_modules)
                 pipeline = parser.parse()
                 pipeline.set_env(self.env)
+                pipeline.set_error_handler(Main.default_error_handler)
                 # Append an out op at the end of pipeline, if there is no output op there already.
                 if not isinstance(pipeline.last_op, marcel.op.out.Out):
                     out = marcel.op.out.Out()
@@ -185,6 +186,10 @@ class Main:
                             nargs='?')
         parser.parse_args(args=sys.argv[1:], namespace=self)
         self.dill = self.dill is None or self.dill not in ('F', 'f', 'False', 'false')
+
+    @staticmethod
+    def default_error_handler(env, error):
+        print(error.render_full(env.color_scheme()))
 
 
 if __name__ == '__main__':
