@@ -205,4 +205,4 @@ Pipelines are mutable. Don't modify them!
 - Removing attributes in __getstate__
 
 
-Turn off color scheme for API
+Get rid of op.doc functions

@@ -141,3 +141,15 @@ gather(pipeline, errors=None, error_handler=None)
 - errors NOT none, error_handler is None: errors go to the specified list
 
 - errors NOT none, error_handler NOT None: raise exception.
+
+----------------------------------------------------------------------
+
+only -> first
+
+first(pipeline): 
+
+- Return first
+- An error, if that's what it happens to be
+
+first(pipeline, errors=None, error_handler=):
+- As for gather

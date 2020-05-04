@@ -302,3 +302,8 @@ described.
 
 Need to handle {} chars in markup. See help_operator.py.
 
+----------------------------------------------------------------------
+
+
+Turn off color scheme for API
+

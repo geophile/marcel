@@ -32,6 +32,7 @@ class Gather(marcel.core.Op):
     def __init__(self):
         super().__init__()
         self.unwrap_singleton = None
+        self.stop_after_first = None
         self.output = None
         self.error_handler = None
 
@@ -50,8 +51,10 @@ class Gather(marcel.core.Op):
         if self.unwrap_singleton and len(x) == 1:
             x = x[0]
         self.output.append(x)
-        raise marcel.exception.KillCommandAfterFirstException()
+        if self.stop_after_first:
+            marcel.exception.KillCommandAfterFirstException()
 
     def receive_error(self, error):
         self.error_handler(self.owner.env, error)
-        raise marcel.exception.KillCommandAfterFirstException()
+        if self.stop_after_first:
+            marcel.exception.KillCommandAfterFirstException()
