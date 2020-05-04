@@ -472,6 +472,7 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('@1 [ gen 3 ]')
     pass
 
 

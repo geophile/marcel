@@ -289,6 +289,8 @@ class Pipeline(BaseOp):
     # BaseOp
 
     def setup_1(self):
+        assert self.env is not None, f'{self} has no env'
+        assert self.error_handler is not None, f'{self} has no error handler'
         op = self.first_op
         while op:
             if op.receiver is None:

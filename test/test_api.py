@@ -42,5 +42,4 @@ def cat(*x):
 #         select(lambda f, line: 'send' in line and 'error' in line)):
 #     print(x)
 
-run(gen(3, -1) |
-    map(lambda x: 1 / x))
+run(gen(3, -1) | map(lambda x: 1 / x))

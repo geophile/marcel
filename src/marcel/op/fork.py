@@ -194,8 +194,8 @@ class Local(ForkImplementation):
         for thread_label in op.thread_labels:
             # Copy the pipeline
             pipeline_copy = marcel.util.clone(op.fork_pipeline)
-            pipeline_copy.set_env(op.env())
-            pipeline_copy.set_error_handler(op.fork_pipeline.error_handler)
+            pipeline_copy.set_env(op.owner.env)
+            pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to LabelThread op.
             label_thread_op = pipeline_copy.last_op
             assert isinstance(label_thread_op, marcel.op.labelthread.LabelThread)

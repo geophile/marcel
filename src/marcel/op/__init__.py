@@ -30,7 +30,7 @@ documented = [
     'window'
 ]
 
-public = documented + ['fork']
+public = documented + ['fork', 'gather']
 
 private = [
     'labelthread',

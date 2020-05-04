@@ -28,8 +28,8 @@ class OpModule:
                     elif isclass and marcel.core.ArgParser in parents:
                         # The arg parser class, e.g. LsArgParser
                         self._arg_parser_function = v
-        assert self._arg_parser_function is not None
         assert self._constructor is not None, op_name
+        # arg parser not always present, e.g. for gather
 
     def op_name(self):
         return self._op_name

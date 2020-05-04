@@ -113,3 +113,31 @@ Error handling:
 - out: Error raises exception? Returns error?
 
 
+----------------------------------------------------------------------
+
+gather(pipeline):
+
+- Errors in pipeline, as usual
+
+
+errs = []
+gather(pipeline, errors=errs):
+
+- Put Errors in the errs list.
+
+
+gather(pipeline, error_handler=f):
+
+- Call f on each error. 
+- f arguments are env and error
+
+
+gather(pipeline, errors=None, error_handler=None)
+
+- errors is None, error_handler is None: errors go to output stream
+
+- errors is None, error_handler NOT None: call error_handler for each error
+
+- errors NOT none, error_handler is None: errors go to the specified list
+
+- errors NOT none, error_handler NOT None: raise exception.

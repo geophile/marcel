@@ -32,6 +32,11 @@ class KillCommandException(BaseException):
         return str(self.cause)
 
 
+# Exception for terminating command for API first().
+class KillCommandAfterFirstException(BaseException):
+    pass
+
+
 # Exception thrown to indicate that an op cannot complete for the current input,
 # but command execution should continue.
 class KillAndResumeException(BaseException):
