@@ -1,4 +1,4 @@
-documented = [
+public = [
     'bash',
     'bg',
     'cd',
@@ -6,6 +6,8 @@ documented = [
     'edit',
     'expand',
     'fg',
+    'fork',
+    'gather',
     'gen',
     'head',
     'help',
@@ -18,6 +20,7 @@ documented = [
     'pushd',
     'pwd',
     'red',
+    'remote',
     'reverse',
     'select',
     'sort',
@@ -30,11 +33,8 @@ documented = [
     'window'
 ]
 
-public = documented + ['fork', 'gather']
-
 private = [
-    'labelthread',
-    'remote',
+    'labelthread'
 ]
 
 

@@ -9,30 +9,65 @@ import marcel.op.remote
 import marcel.util
 
 
-def fork():
-    return Fork()
+SUMMARY = '''
+Run multiple copies of a pipeline, concurrently, usually on remote hosts.
+'''
+
+
+DETAILS = '''
+The {r:pipeline} is run on the specified {r:host}. The {r:host} must have been configured in
+the marcel configuration file.
+
+The output will contain the tuples obtained by running the command, including the configured name
+of the host. For example, if the cluster named {n:lab} contains hosts {n:192.169.0.100},
+and {n:192.169.0.101}, then this command:
+
+{L}@lab [ gen 3 ]
+
+will generate this output:
+
+{p,indent=4,wrap=F}
+('192.168.0.100', 0)
+('192.168.0.100', 1)
+('192.168.0.100', 2)
+('192.168.0.101', 0)
+('192.168.0.101', 1)
+('192.168.0.101', 2)
+'''
+
+
+def fork(host, pipeline_or_op):
+    if isinstance(pipeline_or_op, marcel.core.Op):
+        pipeline = marcel.core.Pipeline()
+        pipeline.append(pipeline_or_op)
+    else:
+        pipeline = pipeline_or_op
+    op = Fork()
+    op.host = host
+    op.pipeline = pipeline
+    return op
 
 
 class ForkArgParser(marcel.core.ArgParser):
 
     def __init__(self, env):
-        super().__init__('fork', env)
-        self.add_argument('fork_spec')
-        self.add_argument('fork_pipeline'),
+        super().__init__('fork', env, None, SUMMARY, DETAILS)
+        self.add_argument('host')
+        self.add_argument('pipeline'),
 
 
 class Fork(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.fork_spec = None
-        self.fork_pipeline = None
+        self.host = None
+        self.pipeline = None
         self.thread_labels = None
         self.threads = []
         self.impl = None
 
     def __repr__(self):
-        return f'fork({self.fork_spec}, {self.fork_pipeline})'
+        return f'fork({self.host}, {self.pipeline})'
 
     # BaseOp
 
@@ -40,14 +75,14 @@ class Fork(marcel.core.Op):
         assert False
 
     def setup_1(self):
-        self.fork_pipeline = self.referenced_pipeline(self.fork_pipeline)
-        cluster = self.env().cluster(self.fork_spec)
+        self.pipeline = self.referenced_pipeline(self.pipeline)
+        cluster = self.env().cluster(self.host)
         if cluster:
             self.impl = Remote(self)
-        elif self.fork_spec.isdigit():
+        elif self.host.isdigit():
             self.impl = Local(self)
         else:
-            raise marcel.exception.KillCommandException(f'Invalid fork specification: {self.fork_spec}')
+            raise marcel.exception.KillCommandException(f'Invalid fork specification: {self.host}')
         self.impl = Remote(self) if cluster else Local(self)
         self.impl.setup_1()
 
@@ -114,7 +149,7 @@ class ForkImplementation:
         # The fork_pipeline is not a top-level pipeline (executed from main), so its global state isn't
         # set yet. This op's owning pipeline has its global state by now. So set the fork_pipeline's global state.
         op = self.op
-        op.fork_pipeline.set_env(op.env())
+        op.pipeline.set_env(op.env())
         
     def setup_2(self):
         assert False
@@ -134,18 +169,18 @@ class Remote(ForkImplementation):
         super().setup_1()
         op = self.op
         remote_pipeline = marcel.core.Pipeline()
-        remote_pipeline.append(marcel.op.remote.Remote(op.fork_pipeline))
+        remote_pipeline.append(marcel.op.remote.Remote(op.pipeline))
         remote_pipeline.append(marcel.op.labelthread.LabelThread())
-        op.fork_pipeline = remote_pipeline
+        op.pipeline = remote_pipeline
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
 
     def setup_2(self):
         op = self.op
         for thread_label in op.thread_labels:
-            # Copy the pipeline. Env is set here, not in op.fork_pipeline. Env cloning preserves
+            # Copy the pipeline. Env is set here, not in op.pipeline. Env cloning preserves
             # only minimal state, so it has to be set in the clone.
-            pipeline_copy = marcel.util.clone(op.fork_pipeline)
+            pipeline_copy = marcel.util.clone(op.pipeline)
             pipeline_copy.set_env(op.owner.env)
             pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to Remote op.
@@ -167,25 +202,25 @@ class Remote(ForkImplementation):
 
     def generate_thread_labels(self):
         op = self.op
-        cluster = op.env().cluster(op.fork_spec)
+        cluster = op.env().cluster(op.host)
         if cluster:
             op.thread_labels = [host for host in cluster.hosts]
         else:
-            raise marcel.exception.KillCommandException(f'Invalid fork spec @{op.fork_spec}')
+            raise marcel.exception.KillCommandException(f'Invalid fork spec @{op.host}')
 
 
 class Local(ForkImplementation):
 
     def __init__(self, op):
         super().__init__(op)
-        op.fork_spec = int(op.fork_spec)
+        op.host = int(op.host)
 
     # BaseOp
 
     def setup_1(self):
         super().setup_1()
         op = self.op
-        op.fork_pipeline.append(marcel.op.labelthread.LabelThread())
+        op.pipeline.append(marcel.op.labelthread.LabelThread())
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
 
@@ -193,7 +228,7 @@ class Local(ForkImplementation):
         op = self.op
         for thread_label in op.thread_labels:
             # Copy the pipeline
-            pipeline_copy = marcel.util.clone(op.fork_pipeline)
+            pipeline_copy = marcel.util.clone(op.pipeline)
             pipeline_copy.set_env(op.owner.env)
             pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to LabelThread op.
@@ -210,10 +245,10 @@ class Local(ForkImplementation):
 
     def generate_thread_labels(self):
         op = self.op
-        if type(op.fork_spec) is int:
-            op.thread_labels = [x for x in range(op.fork_spec)]
+        if type(op.host) is int:
+            op.thread_labels = [x for x in range(op.host)]
         else:
-            raise marcel.exception.KillCommandException(f'Invalid fork spec @{op.fork_spec}')
+            raise marcel.exception.KillCommandException(f'Invalid fork spec @{op.host}')
 
 
 class PipelineThread(threading.Thread):

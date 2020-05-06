@@ -255,14 +255,17 @@ class Op(BaseOp):
 
     # For use by subclasses
 
-    def referenced_pipeline(self, pipeline_ref):
-        if not pipeline_ref.startswith('pipeline:'):
-            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {pipeline_ref}')
+    def referenced_pipeline(self, x):
+        if isinstance(x, marcel.core.Pipeline):
+            # This happens through the API
+            return x
+        if not x.startswith('pipeline:'):
+            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {x}')
         try:
-            pipeline_id = int(pipeline_ref[len('pipeline:'):])
+            pipeline_id = int(x[len('pipeline:'):])
             return self.pipelines[pipeline_id]
         except ValueError:
-            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {pipeline_ref}')
+            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {x}')
 
     @staticmethod
     def function_source(function):

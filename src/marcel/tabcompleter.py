@@ -18,7 +18,7 @@ def debug(message):
 
 class TabCompleter:
 
-    OPS = marcel.op.documented
+    OPS = marcel.op.public
     HELP_TOPICS = list(marcel.doc.topics) + OPS
     FILENAME_OPS = ['cd',
                     'cp',

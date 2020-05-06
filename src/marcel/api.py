@@ -10,6 +10,7 @@ from marcel.op.bash import bash
 from marcel.op.cd import cd
 from marcel.op.dirs import dirs
 from marcel.op.expand import expand
+from marcel.op.fork import fork
 from marcel.op.gen import gen
 from marcel.op.head import head
 from marcel.op.ls import ls
