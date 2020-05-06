@@ -197,12 +197,16 @@ API needs documentation. help? HTML?
 Exit codes? (Not just an api issue)
 
 Need an api version of test_ops.
-
-
-Pipelines are mutable. Don't modify them!
-
-- Adding a terminal operator is visible to the caller (API)
-- Removing attributes in __getstate__
+- Test run, gather, only
 
 
 Get rid of op.doc functions
+
+Can't rely on argparse type=... function to check inputs. Doesn't work
+for API. Move checking to setup1().
+
+window: what is supposed to happen if overlap = 0? disjoint = 0? Not tested.
+test types other than int
+
+
+sudo has a zillion args. How to express this on sudo()? **kwargs?

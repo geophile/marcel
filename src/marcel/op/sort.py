@@ -15,7 +15,7 @@ Otherwise, ordering is based on the values computed by applying {r:key} to each 
 
 def sort(key=None):
     op = Sort()
-    op.key = marcel.functionwrapper.FunctionWrapper(function=key)
+    op.key = None if key is None else marcel.functionwrapper.FunctionWrapper(function=key)
     return op
 
 

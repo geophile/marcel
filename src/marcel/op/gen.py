@@ -32,8 +32,7 @@ class GenArgParser(marcel.core.ArgParser):
         self.add_argument('count',
                           nargs='?',
                           default='0',
-                          type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                        'must be non-negative'),
+                          type=int,
                           help='''The number of integers to generate. Must be non-negative.
                           Default value is 0. 
                           If 0, then the sequence does not terminate''')
@@ -63,16 +62,11 @@ class Gen(marcel.core.Op):
 
     def setup_1(self):
         if self.pad is not None:
-            if self.count == 0:
-                raise marcel.exception.KillCommandException('Padding incompatible with unbounded output')
-            elif self.start < 0:
-                raise marcel.exception.KillCommandException('Padding incompatible with START < 0')
-            else:
-                max_length = len(str(self.start + self.count - 1))
-                if max_length > self.pad:
-                    raise marcel.exception.KillCommandException('Padding too small.')
-                else:
-                    self.format = '{:>0' + str(self.pad) + '}'
+            super().check_arg(self.count >= 0, 'count', 'Padding incompatible with unbounded output.')
+            super().check_arg(self.start >= 0, 'start', 'Padding incompatible with start < 0.')
+            max_length = len(str(self.start + self.count - 1))
+            super().check_arg(max_length <= self.pad, 'pad', 'Padding too small.')
+            self.format = '{:>0' + str(self.pad) + '}'
 
     def receive(self, _):
         if self.count is None or self.count == 0:

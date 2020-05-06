@@ -230,6 +230,16 @@ class Op(BaseOp):
     def op_name(cls):
         return cls.__name__.lower()
 
+    # For use by subclasses
+
+    @staticmethod
+    def check_arg(ok, arg, message):
+        if not ok:
+            cause = (f'Incorrect usage of {Op.op_name()}: {message}'
+                     if arg is None else
+                     f'Incorrect value for {arg} argument of {Op.op_name()}: {message}')
+            raise marcel.exception.KillCommandException(cause)
+
     # API
 
     def __or__(self, other):

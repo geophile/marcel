@@ -1,20 +1,21 @@
 import marcel.exception
+import marcel.reduction
 
 
 class FunctionWrapper:
 
     symbols = {
         # Red args can include these functions.
-        '+': lambda acc, x: x if acc is None else acc + x,
-        '*': lambda acc, x: x if acc is None else acc * x,
-        '^': lambda acc, x: x if acc is None else acc ^ x,
-        '&': lambda acc, x: x if acc is None else acc & x,
-        '|': lambda acc, x: x if acc is None else acc | x,
-        'and': lambda acc, x: x if acc is None else acc and x,
-        'or': lambda acc, x: x if acc is None else acc or x,
-        'max': lambda acc, x: x if acc is None else max(acc, x),
-        'min': lambda acc, x: x if acc is None else min(acc, x),
-        'count': lambda acc, x: 1 if acc is None else acc + 1,
+        '+': marcel.reduction.r_plus,
+        '*': marcel.reduction.r_times,
+        '^': marcel.reduction.r_xor,
+        '&': marcel.reduction.r_bit_and,
+        '|': marcel.reduction.r_bit_or,
+        'and': marcel.reduction.r_and,
+        'or': marcel.reduction.r_or,
+        'max': marcel.reduction.r_max,
+        'min': marcel.reduction.r_min,
+        'count': marcel.reduction.r_count,
         # Needed to support '.' notation for the red op, with grouping. Shouldn't actually be invoked.
         '.': lambda acc, x: None
     }
@@ -31,9 +32,6 @@ class FunctionWrapper:
         elif source is not None and globals is not None and function is None:
             self._source = source.strip()
             self._globals = globals
-            self.create_function()
-        else:
-            assert False
 
     def __repr__(self):
         return self._function if self._source is None else self._source
@@ -60,6 +58,11 @@ class FunctionWrapper:
     def __setstate__(self, state):
         self.__dict__.update(state)
 
+    def check_validity(self):
+        self.create_function()
+        if not callable(self._function):
+            raise marcel.exception.KillCommandException('Not a valid function')
+
     def source(self):
         return self._source if self.source else self._function
 
@@ -67,17 +70,20 @@ class FunctionWrapper:
         self._op = op
 
     def create_function(self):
-        assert self._function is None
-        self._function = FunctionWrapper.symbols.get(self._source, None)
         if self._function is None:
-            if self._source.split()[0] in ('lambda', 'lambda:'):
-                self._function = eval(self._source, self._globals)
-            else:
-                try:
-                    self._function = eval('lambda ' + self._source, self._globals)
-                except Exception:
-                    try:
-                        self._function = eval('lambda: ' + self._source, self._globals)
-                    except Exception:
-                        raise marcel.exception.KillCommandException(
-                            f'Invalid function syntax: {self._source}')
+            self._function = FunctionWrapper.symbols.get(self._source, None)
+            if self._function is None:
+                if self._source is not None:
+                    if self._source.split()[0] in ('lambda', 'lambda:'):
+                        self._function = eval(self._source, self._globals)
+                    else:
+                        try:
+                            self._function = eval('lambda ' + self._source, self._globals)
+                        except Exception:
+                            try:
+                                self._function = eval('lambda: ' + self._source, self._globals)
+                            except Exception:
+                                raise marcel.exception.KillCommandException(
+                                    f'Invalid function syntax: {self._source}')
+                else:
+                    raise marcel.exception.KillCommandException('Function required')

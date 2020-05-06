@@ -24,7 +24,7 @@ class MapArgParser(marcel.core.ArgParser):
     def __init__(self, env):
         super().__init__('map', env, None, SUMMARY, DETAILS)
         self.add_argument('function',
-                          type=super().constrained_type(self.check_function, 'not a valid function'),
+                          type=super().constrained_type(self.check_function, 'Function required'),
                           help='Function to be applied to input items')
 
 
@@ -43,6 +43,10 @@ class Map(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
+        try:
+            self.function.check_validity()
+        except marcel.exception.KillCommandException:
+            super().check_arg(False, 'function', 'Function either missing or invalid.')
         self.function.set_op(self)
 
     def receive(self, x):

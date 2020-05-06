@@ -134,7 +134,10 @@ class Main:
     def run_api(self, pipeline):
         pipeline.set_env(self.env)
         command = Command(None, pipeline)
-        command.execute()
+        try:
+            command.execute()
+        except marcel.exception.KillCommandException as e:
+            print(str(e), file=sys.stderr)
 
     def initialize_input(self):
         readline.set_history_length(HISTORY_LENGTH)

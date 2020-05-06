@@ -4,6 +4,8 @@ import os
 import pathlib
 import sys
 
+import dill.source
+
 import marcel.exception
 import marcel.main
 import marcel.util
@@ -56,27 +58,30 @@ class Test:
         else:
             ok = False
         if not ok:
-            print(f'{command} failed:', file=sys.__stderr__)
-            print(f'    expected:\n<<<{expected}>>>', file=sys.__stderr__)
-            print(f'    actual:\n<<<{actual}>>>', file=sys.__stderr__)
+            print(f'{self.description(command)} failed:', file=sys.__stdout__)
+            print(f'    expected:\n<<<{expected}>>>', file=sys.__stdout__)
+            print(f'    actual:\n<<<{actual}>>>', file=sys.__stdout__)
             self.failures += 1
 
     def check_substring(self, command, expected, actual):
         if expected not in actual:
-            print(f'{command} failed. Expected substring not found in actual:', file=sys.__stderr__)
-            print(f'    expected:\n<<<{expected}>>>', file=sys.__stderr__)
-            print(f'    actual:\n<<<{actual}>>>', file=sys.__stderr__)
+            print(f'{self.description(command)} failed. Expected substring not found in actual:', file=sys.__stdout__)
+            print(f'    expected:\n<<<{expected}>>>', file=sys.__stdout__)
+            print(f'    actual:\n<<<{actual}>>>', file=sys.__stdout__)
             self.failures += 1
 
     def fail(self, command, message):
-        print(f'{command} failed: {message}', file=sys.__stderr__)
+        print(f'{self.description(command)} failed: {message}', file=sys.__stdout__)
         self.failures += 1
 
     def run_and_capture_output(self, command):
         out = io.StringIO()
         err = io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-            self.main.run_command(command)
+            if type(command) is str:
+                self.main.run_command(command)
+            else:
+                command()
         return out.getvalue(), err.getvalue()
 
     def run(self,
@@ -88,9 +93,12 @@ class Test:
         # test is the thing being tested. Usually it will produce output that can be used for verification.
         # For operations with side effects (e.g. rm), a separate verification command is needed.
         if verification is None and expected_out is None and expected_err is None and file is None:
-            self.main.run_command(test)
+            if type(test) is str:
+                self.main.run_command(test)
+            else:
+                test()
         else:
-            print(f'TESTING: {test}')
+            print(f'TESTING: {self.description(test)}')
             try:
                 if verification is None:
                     actual_out, actual_err = self.run_and_capture_output(test)
@@ -106,11 +114,11 @@ class Test:
                 if expected_err:
                     self.check_substring(test, expected_err, actual_err)
             except Exception as e:
-                print(f'{test}: Terminated by uncaught exception: {e}', file=sys.__stderr__)
+                print(f'{self.description(test)}: Terminated by uncaught exception: {e}', file=sys.__stdout__)
                 marcel.util.print_stack()
                 self.failures += 1
             except marcel.exception.KillCommandException as e:
-                print(f'{test}: Terminated by KillCommandException: {e}', file=sys.__stderr__)
+                print(f'{self.description(test)}: Terminated by KillCommandException: {e}', file=sys.__stderr__)
 
     def file_contents(self, filename):
         file = open(filename, 'r')
@@ -136,3 +144,6 @@ class Test:
 
     def cd(self, path):
         self.main.run_command(f'cd {path}')
+
+    def description(self, x):
+        return x if type(x) is str else dill.source.getsource(x).split('\n')[0]

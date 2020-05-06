@@ -38,10 +38,8 @@ class OutArgParser(marcel.core.ArgParser):
                          DETAILS)
         file_group = self.add_mutually_exclusive_group()
         file_group.add_argument('-a', '--append',
-                                required=False,
                                 help='Append output to the specified file.')
         file_group.add_argument('-f', '--file',
-                                required=False,
                                 help='Write output to the specified file, replacing current contents.')
         self.add_argument('-c', '--csv',
                           action='store_true',
@@ -70,8 +68,17 @@ class Out(marcel.core.Op):
         return __doc__
 
     def setup_1(self):
-        if self.csv and self.format:
-            raise marcel.exception.KillCommandException('-c/--csv and FORMAT specifications are incompatible')
+        # For some reason, argparse sets file and append to False if neither specified.
+        if self.append == False:
+            self.append = None
+        if self.file == False:
+            self.file = None
+        super().check_arg(not self.csv or self.format is None,
+                          None,
+                          'csv=True is incompatible with format specification.')
+        super().check_arg(self.file is None or self.append is None,
+                          None,
+                          'append and file arguments cannot both be specified.')
 
     def receive(self, x):
         self.ensure_output_initialized()

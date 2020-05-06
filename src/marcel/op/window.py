@@ -73,18 +73,18 @@ tuples:
 '''
 
 
-def window(overlap=False, disjoint=0, predicate=None):
+def window(predicate=None, overlap=False, disjoint=None):
     op = Window()
+    op.predicate = None if predicate is None else marcel.functionwrapper.FunctionWrapper(function=predicate)
     op.overlap = overlap
     op.disjoint = disjoint
-    op.predicate = marcel.functionwrapper.FunctionWrapper(function=predicate)
     return op
 
 
 class WindowArgsParser(marcel.core.ArgParser):
 
     def __init__(self, env):
-        super().__init__('window', 
+        super().__init__('window',
                          env,
                          ['-o', '--overlap', '-d', '--disjoint'],
                          SUMMARY,
@@ -95,12 +95,10 @@ class WindowArgsParser(marcel.core.ArgParser):
                           help='Start a new window on tuples for which predicate evaultes to True')
         fixed_size = self.add_mutually_exclusive_group()
         fixed_size.add_argument('-o', '--overlap',
-                                type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                              'must be non-negative'),
+                                type=int,
                                 help='Specifies the size of overlapping windows.')
         fixed_size.add_argument('-d', '--disjoint',
-                                type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                              'must be non-negative'),
+                                type=int,
                                 help='Specifies the size of disjoint windows.')
 
 
@@ -129,24 +127,38 @@ class Window(marcel.core.Op):
         return ''.join(buffer)
 
     # BaseOp
-    
+
     def doc(self):
         return __doc__
 
     def setup_1(self):
+        # argparse seems to default args in mutually exclusive group to False instead of None
+        if self.overlap == False:
+            self.overlap = None    
+        if self.disjoint == False:
+            self.disjoint = None    
         # Exactly one of predicate, overlap, disjoint must be set.
         count = 1 if self.predicate is not None else 0
         count += 1 if self.overlap is not None else 0
         count += 1 if self.disjoint is not None else 0
-        if count != 1:
-            raise marcel.exception.KillCommandException('Incorrect arguments given for window.')
+        super().check_arg(count == 1,
+                          None,
+                          'Exactly one argument of window: predicate, overlap, or disjoint, must be specified.')
         if self.predicate:
+            try:
+                self.predicate.check_validity()
+            except marcel.exception.KillCommandException:
+                super().check_arg(False, 'predicate', 'Function either missing or invalid.')
             self.window_generator = PredicateWindow(self)
             self.predicate.set_op(self)
         elif self.overlap:
+            super().check_arg(type(self.overlap) is int and self.overlap >= 0,
+                              'overlap', 'must be a non-negative int')
             self.window_generator = OverlapWindow(self)
             self.n = self.overlap
         else:  # disjoint
+            super().check_arg(type(self.disjoint) is int and self.disjoint >= 0,
+                              'disjoint', 'must be a non-negative int')
             self.window_generator = DisjointWindow(self)
             self.n = self.disjoint
 

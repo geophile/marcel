@@ -31,15 +31,17 @@ from marcel.op.unique import unique
 from marcel.op.version import version
 from marcel.op.window import window
 
+from marcel.reduction import *
 from marcel.op.gather import gather as _gather
 
 _MAIN = _main.Main(same_process=True)
 # No colors for API
 _MAIN.env.set_color_scheme(_color.ColorScheme())
 
+# Utilities
 
 def _default_error_handler(env, error):
-    print(error.render_full(env.color_scheme()), file=_sys.stderr)
+    print(error.render_full(env.color_scheme()))
 
 
 def _noop_error_handler(env, error):

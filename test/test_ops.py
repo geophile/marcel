@@ -39,7 +39,7 @@ def test_gen():
     TEST.run('gen 3 -p 3 99 | out',
              expected_err='unrecognized arguments: 99')
     TEST.run('gen 3 -10 -p 4 | out',
-             expected_err='Padding incompatible with START < 0')
+             expected_err='Padding incompatible with start < 0')
     # Error along with output
     TEST.run('gen 3 -1 | map (x: 5 / x)',
              expected_out=[-5.0, Error('division by zero'), 5.0])
@@ -56,7 +56,7 @@ def test_out():
     TEST.run('gen 3 | out --csv',
              expected_out=[0, 1, 2])
     TEST.run('gen 3 | out -c {}',
-             expected_err='-c/--csv and FORMAT specifications are incompatible')
+             expected_err='csv=True is incompatible with format specification')
     TEST.run(f'gen 3 | out -f {output_filename}',
              expected_out=[0, 1, 2], file=output_filename)
     TEST.run(f'gen 3 | out --file {output_filename}',
@@ -128,11 +128,11 @@ def test_red():
              expected_out=[(1, 1), (2, 3), (3, 6), (4, 10), (5, 15)])
     TEST.run('gen 5 1 | red --incremental +',
              expected_out=[(1, 1), (2, 3), (3, 6), (4, 10), (5, 15)])
-    # Test lambdas
-    TEST.run('gen 5 1 | map (x: (x, x)) | red (x, y: y if x is None else x + y) (x, y: y if x is None else x * y)',
-             expected_out=[(15, 120)])
     # Test multiple reduction
     TEST.run('gen 5 1 | map (x: (x, x)) | red + *',
+             expected_out=[(15, 120)])
+    # Test lambdas
+    TEST.run('gen 5 1 | map (x: (x, x)) | red (x, y: y if x is None else x + y) (x, y: y if x is None else x * y)',
              expected_out=[(15, 120)])
     # Test multiple incremental reduction
     TEST.run('gen 5 1 | map (x: (x, x)) | red -i + *',
@@ -172,8 +172,6 @@ def test_expand():
     TEST.run('gen 5 | expand 0',
              expected_out=[0, 1, 2, 3, 4])
     TEST.run('gen 5 | map (x: ([x, x],)) | expand 0',
-             expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
-    TEST.run('gen 5 | map (x: ((x, x),)) | expand 0',
              expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
     # Test non-singletons
     TEST.run('gen 5 | map (x: (x, -x)) | expand',
@@ -360,9 +358,9 @@ def test_window():
     TEST.run('gen 10 | window -d 33 -o 22',
              expected_err='argument -o/--overlap: not allowed with argument -d/--disjoint')
     TEST.run('gen 10 | window',
-             expected_err='Incorrect arguments given for window')
+             expected_err='Exactly one')
     TEST.run('gen 10 | window -o 3 (x: True)',
-             expected_err='Incorrect arguments given for window')
+             expected_err='Exactly one')
 
 
 def test_bash():
@@ -411,8 +409,8 @@ def test_namespace():
 
 def test_remote():
     localhost = marcel.object.host.Host('localhost', None)
-    # TEST.run('@jao [ gen 3 ]',
-    #          expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
+    TEST.run('@jao [ gen 3 ]',
+             expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
     # Handling of remote error in execution
     TEST.run('@jao [ gen 3 -1 | map (x: 5 / x) ]',
              expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
@@ -472,7 +470,6 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('@1 [ gen 3 ]')
     pass
 
 
