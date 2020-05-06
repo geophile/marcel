@@ -16,6 +16,13 @@ contrast, if you know Python, then you already know the language used by marcel.
 Python expressions, combined with marcel operators, allow you to do much of what can
 be done relying on the more obscure corners of `awk` and `find`.
 
+Shells are intended for interactive usage, from a console. A script
+is created by putting commands into a text file, and setting the executable
+bits. Marcel takes a different approach. Because marcel commands and types
+expose Python, it doesn't make sense to define yet another scripting language.
+Instead, you can use Python as the scripting language, using the marcel
+API. (See example below.) 
+
 Marcel is the successor to [osh](http://github.com/geophile/osh) 
 (Object SHell). Osh
 is based on the same ideas, but it is not a full-fledged shell;
@@ -241,6 +248,58 @@ the `hi` and `welcome` directories.
 Normal output from this command comprises tuples of size 1, each containing a `File` object. The error
 is carried by an `Error` object. Filtering can be performed to separate out normal and error 
 output when desired.
+
+Scripting
+---------
+
+The second example above listed files recursively, summed the 
+file count and file size for each file extension,
+and then sorted by decreasing size, and reported the top 10:
+
+```
+    ls -fr |\
+    select (f: f.path.suffix != '') |\
+    map (f: (f.path.suffix.lower(), 1, f.size)) |\
+    red . + + |\
+    sort (ext, count, size: -size) |\
+    head 10
+```
+
+To implement this as a Python script:
+```
+    #!/usr/bin/python3
+    from marcel.api import *
+    
+    run(ls('.', file=True, recursive=True)
+        | select(lambda f: f.path.suffix != '')
+        | map(lambda f: (f.path.suffix.lower(), 1, f.size))
+        | red(None, r_plus, r_plus)
+        | sort(lambda ext, count, size: -size)
+        | head(10))
+```
+Each marcel operator is invoked via a function imported from `marcel.api`.
+For example, the console command `ls -fr` turns into `ls(file=True, recursive=True)`.
+Piping uses the same symbol as on the console, `|`. The 
+command pipeline is executed by calling `run`.
+
+If instead of printing the results you want to manipulate them further,
+in your script, call `gather` instead of run. `gather` returns the results
+in a list, e.g.
+
+```
+    #!/usr/bin/python3
+    from marcel.api import *
+
+    popular_extensions = gather(ls('.', file=True, recursive=True)
+                                | select(lambda f: f.path.suffix != '')
+                                | map(lambda f: (f.path.suffix.lower(), 1, f.size))
+                                | red(None, r_plus, r_plus)
+                                | sort(lambda ext, count, size: -size)
+                                | head(10))
+    for ext, count, size in popular_extensions:
+        average = size / count
+        print(f'{ext}: {average}')
+```
 
 Licensing
 ---------

@@ -216,3 +216,7 @@ todo: fork doc describes remote execution. Doesn't discuss @int, or
 @sequence. Does @sequence even work? Non-remote versions are kind of
 useless without more interesting kinds of sequences, and a way for
 each copy of the pipeline to access the label.
+
+
+
+Pipeline, op could implement __iter__. Then: for... in ls...

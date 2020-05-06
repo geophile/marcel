@@ -153,3 +153,24 @@ first(pipeline):
 
 first(pipeline, errors=None, error_handler=):
 - As for gather
+
+----------------------------------------------------------------------
+
+Executable marcel scripts:
+
+See: https://ownyourbits.com/2018/05/23/the-real-power-of-linux-executables/
+
+
+The Magic part (#!MARCEL) doesn't seem to be working. 
+
+echo ':marcel:M::#!MARCEL::/home/jao/bin/marcel:' > /proc/sys/fs/binfmt_misc/register
+
+
+Without doing this at all, or by trying #!/home/jao/bin/marcel, marcel
+invokes but goes to a prompt. Doesn't pass the script to marcel.
+
+
+THIS WORKS:
+
+
+echo ':marcel:M::#!marcel::/usr/bin/python3:' > /proc/sys/fs/binfmt_misc/register
