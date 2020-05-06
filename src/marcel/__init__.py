@@ -2,7 +2,7 @@ __all__ = [
     'core',
     'env',
     'exception',
-    'functionwrapper.py',
+    'functionwrapper',
     'opmodule',
     'parse',
     'util'
