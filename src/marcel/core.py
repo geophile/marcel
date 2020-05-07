@@ -108,11 +108,22 @@ class BaseOp:
         # this one.
         self.receiver = None
         self.command_state = None
+        # For shell usage, a BaseOp's env comes from the pipeline. For the API, the env
+        # is set directly on the BaseOp. self._env provides whichever is available when
+        # the env is requested.
+        self._env = None
 
     # object
 
     def __repr__(self):
         assert False
+
+    def __getstate__(self):
+        self._env = None
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
     # BaseOp runtime
 
@@ -185,7 +196,12 @@ class BaseOp:
         return False
 
     def env(self):
-        return self.owner.env
+        if self._env is None:
+            self._env = self.owner.env
+        return self._env
+
+    def set_env(self, env):
+        self._env = env
 
     # BaseOp compile-time
 
@@ -209,6 +225,11 @@ class Op(BaseOp):
     def __repr__(self):
         # TODO: Render args
         return self.op_name()
+
+    def __iter__(self):
+        pipeline = Pipeline()
+        pipeline.append(self)
+        return PipelineIterator(pipeline)
 
     # Op
 
@@ -290,6 +311,9 @@ class Pipeline(BaseOp):
             op = op.next_op
         return f'pipeline({" | ".join(buffer)})'
 
+    def __iter__(self):
+        return PipelineIterator(self)
+
     def set_env(self, env):
         self.env = env
 
@@ -329,7 +353,7 @@ class Pipeline(BaseOp):
     def receive_complete(self):
         self.first_op.receive_complete()
 
-    # Pipeline compile-time
+    # Pipeline
 
     def append(self, op):
         op.set_owner(self)
@@ -346,3 +370,51 @@ class Pipeline(BaseOp):
         self.append(op)
         return self
 
+
+class Command:
+
+    def __init__(self, source, pipeline):
+        self.source = source
+        self.pipeline = pipeline
+
+    def __repr__(self):
+        return str(self.pipeline)
+
+    def execute(self):
+        self.pipeline.setup_1()
+        self.pipeline.setup_2()
+        self.pipeline.receive(None)
+        self.pipeline.receive_complete()
+        # A Command is executed by a multiprocessing.Process. Need to transmit the Environment's vars
+        # relating to the directory, to the parent process, because they may have changed.
+        return self.pipeline.env.dir_state().directory_vars()
+
+
+class PipelineIterator:
+
+    def __init__(self, pipeline):
+        # Append gather if necessary.
+        env = pipeline.first_op.env()
+        assert env is not None  # Since PipelineIterator should only be used in the API, which sets op env.
+        pipeline.set_env(env)
+        pipeline.set_error_handler(PipelineIterator.noop_error_handler)
+        output = []
+        gather_op = env.op_modules['gather'].api_function()(output,
+                                                            unwrap_singleton=True,
+                                                            errors=None,
+                                                            error_handler=PipelineIterator.noop_error_handler)
+        pipeline.append(gather_op)
+        command = Command(None, pipeline)
+        try:
+            command.execute()
+            self.iterator = output.__iter__()
+        except marcel.exception.KillCommandException as e:
+            sys.stdout.flush()
+            print(str(e), file=sys.stderr, flush=True)
+
+    def __next__(self):
+        return next(self.iterator)
+
+    @staticmethod
+    def noop_error_handler(env, error):
+        pass

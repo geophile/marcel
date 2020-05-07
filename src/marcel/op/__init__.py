@@ -6,6 +6,7 @@ public = [
     'edit',
     'expand',
     'fg',
+    'first',
     'fork',
     'gather',
     'gen',

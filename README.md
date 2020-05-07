@@ -283,20 +283,18 @@ Piping uses the same symbol as on the console, `|`. The
 command pipeline is executed by calling `run`.
 
 If instead of printing the results you want to manipulate them further,
-in your script, call `gather` instead of run. `gather` returns the results
-in a list, e.g.
+use the pipeline as an iterator:
 
 ```
     #!/usr/bin/python3
     from marcel.api import *
 
-    popular_extensions = gather(ls('.', file=True, recursive=True)
-                                | select(lambda f: f.path.suffix != '')
-                                | map(lambda f: (f.path.suffix.lower(), 1, f.size))
-                                | red(None, r_plus, r_plus)
-                                | sort(lambda ext, count, size: -size)
-                                | head(10))
-    for ext, count, size in popular_extensions:
+    for ext, count, size in (ls('.', file=True, recursive=True)
+                             | select(lambda f: f.path.suffix != '')
+                             | map(lambda f: (f.path.suffix.lower(), 1, f.size))
+                             | red(None, r_plus, r_plus)
+                             | sort(lambda ext, count, size: -size)
+                             | head(10))
         average = size / count
         print(f'{ext}: {average}')
 ```

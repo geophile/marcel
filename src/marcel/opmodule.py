@@ -16,7 +16,8 @@ class OpModule:
         op_module = importlib.import_module(f'marcel.op.{op_name}')
         # Locate items in module needed during the lifecycle of an op.
         for k, v in op_module.__dict__.items():
-            if k == op_name:
+            # Leading underscore used by ops not intended for direction invocation by users.
+            if k == op_name or k == '_' + op_name:
                 self._api = v
             else:
                 isclass = inspect.isclass(v)

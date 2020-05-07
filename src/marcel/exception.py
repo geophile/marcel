@@ -33,7 +33,7 @@ class KillCommandException(BaseException):
 
 
 # Exception for terminating command for API first().
-class KillCommandAfterFirstException(BaseException):
+class StopAfterFirst(BaseException):
     pass
 
 

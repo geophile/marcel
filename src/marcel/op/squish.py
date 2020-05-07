@@ -2,7 +2,7 @@ import functools
 
 import marcel.core
 import marcel.functionwrapper
-
+from marcel.reduction import r_plus
 
 SUMMARY = '''
 The components of each input tuple are reduced using a given function.
@@ -23,7 +23,7 @@ If no {r:function} is provided, then {n:+} is assumed.
 '''
 
 
-def squish(function=None):
+def squish(function=r_plus):
     op = Squish()
     op.function = marcel.functionwrapper.FunctionWrapper(function=function)
     return op

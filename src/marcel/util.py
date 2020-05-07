@@ -69,7 +69,8 @@ def clone(x):
         copy = unpickler.load()
         return copy
     except Exception as e:
-        print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__)
+        sys.stdout.flush()
+        print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__, flush=True)
         print_stack()
 
 

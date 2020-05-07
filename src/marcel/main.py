@@ -33,25 +33,6 @@ class Console:
             self.handle_console_changes()
 
 
-class Command:
-
-    def __init__(self, source, pipeline):
-        self.source = source
-        self.pipeline = pipeline
-
-    def __repr__(self):
-        return str(self.pipeline)
-
-    def execute(self):
-        self.pipeline.setup_1()
-        self.pipeline.setup_2()
-        self.pipeline.receive(None)
-        self.pipeline.receive_complete()
-        # A Command is executed by a multiprocessing.Process. Need to transmit the Environment's vars
-        # relating to the directory, to the parent process, because they may have changed.
-        return self.pipeline.env.dir_state().directory_vars()
-
-
 class Reader(marcel.multilinereader.MultiLineReader):
 
     def __init__(self, env, history_file):
@@ -82,6 +63,7 @@ class Main:
             sys.exit(1)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self.env)
         self.op_modules = marcel.opmodule.import_op_modules(self.env)
+        self.env.op_modules = self.op_modules
         self.reader = None
         self.initialize_input()
         self.job_control = marcel.job.JobControl.start(self.update_env_vars)
@@ -122,22 +104,24 @@ class Main:
                     out.file = False
                     out.csv = False
                     pipeline.append(out)
-                command = Command(line, pipeline)
+                command = marcel.core.Command(line, pipeline)
                 if self.run_immediate(line):
                     command.execute()
                 else:
                     self.job_control.create_job(command)
             except marcel.exception.KillCommandException as e:
                 # print_stack()
-                print(e, file=sys.stderr)
+                sys.stdout.flush()
+                print(e, file=sys.stderr, flush=True)
 
     def run_api(self, pipeline):
         pipeline.set_env(self.env)
-        command = Command(None, pipeline)
+        command = marcel.core.Command(None, pipeline)
         try:
             command.execute()
         except marcel.exception.KillCommandException as e:
-            print(str(e), file=sys.stderr)
+            sys.stdout.flush()
+            print(str(e), file=sys.stderr, flush=True)
 
     def initialize_input(self):
         readline.set_history_length(HISTORY_LENGTH)

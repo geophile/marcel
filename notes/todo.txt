@@ -75,9 +75,18 @@ Distinct color for broken symlink.
 
 ----------------------------------------------------------------------
 
-Tab completion for command should distinguish between first op of
-pipeline and subsequent ones. I.e., only show those ops that can be
-used in the current position within the pipeline.
+Tab completion:
+
+- Tab completion for command should distinguish between first op of
+  pipeline and subsequent ones. I.e., only show those ops that can be
+  used in the current position within the pipeline.
+
+- Tab completion for directory should include / at end.
+
+- Tab completion for file should include ' ' at end.
+
+- Tab completion with more alternatives should end on the last common
+  character.
 
 ----------------------------------------------------------------------
 
@@ -217,6 +226,31 @@ todo: fork doc describes remote execution. Doesn't discuss @int, or
 useless without more interesting kinds of sequences, and a way for
 each copy of the pipeline to access the label.
 
+----------------------------------------------------------------------
 
+API execution
 
-Pipeline, op could implement __iter__. Then: for... in ls...
+- run(pipeline): Append Out() if not present, same as console.
+
+- first(pipeline): 
+
+    - Return the first result (or Error). 
+    - Should Error raise exception (by default)?
+
+- gather(pipeline):
+
+    - Return all results in a list.
+
+    - Options for Errors in output, errors in separate list, handler
+
+- for x in pipeline: ...
+
+    - What about Errors?
+
+    - pipeline is terminted with gather, by default, returning errors
+      in list. Allow for explicit gather() to control options.
+
+----------------------------------------------------------------------
+
+Merge Env and Main? Or maybe make Main the thing that is available
+globally?

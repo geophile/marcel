@@ -119,6 +119,7 @@ class Environment:
         self.directory_state = DirectoryState(self.namespace)
         # TODO: This is a hack. Clean it up once the env handles command history
         self.edited_command = None
+        self.op_modules = None
 
     def __getstate__(self):
         return {}
