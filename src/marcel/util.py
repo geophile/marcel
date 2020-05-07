@@ -117,6 +117,12 @@ def console_width():
     return console_columns
 
 
+# Utility to print to stderr, flushing stdout first, to minimize weird ordering due to buffering.
+def print_to_stderr(s):
+    sys.stdout.flush()
+    print(s, file=sys.stderr, flush=True)
+
+
 class Stack:
 
     def __init__(self):

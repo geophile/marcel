@@ -131,7 +131,7 @@ class Job:
                 debug(f'completed: {command.source} {dir_vars}')
                 writer.send(dir_vars)
             except marcel.exception.KillCommandException as e:
-                print(e, file=sys.stderr)
+                marcel.util.print_to_stderr(e)
             writer.close()
 
         # duplex=False: child writes to parent when function completes execution. No need to communicate in the

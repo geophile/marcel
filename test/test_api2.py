@@ -20,3 +20,7 @@ for ext, count, size in (ls('/home/jao/git/marcel', file=True, recursive=True)
                          | head(10)):
     print(f'{ext}: {size / count}')
 
+for pid, commandline in (ps()
+                         | select(lambda p: 'python' in p.commandline)
+                         | map(lambda p: (p.pid, p.commandline))):
+    print(f'{pid}: {commandline}')

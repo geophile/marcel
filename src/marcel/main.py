@@ -110,9 +110,7 @@ class Main:
                 else:
                     self.job_control.create_job(command)
             except marcel.exception.KillCommandException as e:
-                # print_stack()
-                sys.stdout.flush()
-                print(e, file=sys.stderr, flush=True)
+                marcel.util.print_to_stderr(e)
 
     def run_api(self, pipeline):
         pipeline.set_env(self.env)
@@ -120,8 +118,7 @@ class Main:
         try:
             command.execute()
         except marcel.exception.KillCommandException as e:
-            sys.stdout.flush()
-            print(str(e), file=sys.stderr, flush=True)
+            marcel.util.print_to_stderr(e)
 
     def initialize_input(self):
         readline.set_history_length(HISTORY_LENGTH)

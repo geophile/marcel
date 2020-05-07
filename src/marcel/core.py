@@ -409,8 +409,7 @@ class PipelineIterator:
             command.execute()
             self.iterator = output.__iter__()
         except marcel.exception.KillCommandException as e:
-            sys.stdout.flush()
-            print(str(e), file=sys.stderr, flush=True)
+            marcel.util.print_to_stderr(e)
 
     def __next__(self):
         return next(self.iterator)

@@ -5,6 +5,7 @@ import sys
 
 import marcel.core
 import marcel.object.error
+import marcel.util
 
 
 SUMMARY = '''
@@ -159,5 +160,5 @@ class Interactive(Escape):
         process.wait()
         if process.returncode != 0:
             print(f'Escaped command failed with exit code {process.returncode}: {" ".join(self.op.args)}')
-            print(process.stderr, file=sys.stderr)
+            marcel.util.print_to_stderr(process.stderr)
 1

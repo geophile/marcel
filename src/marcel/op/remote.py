@@ -50,8 +50,10 @@ class Remote(marcel.core.Op):
         stderr_lines = stderr.decode('utf-8').split('\n')
         if len(stderr_lines[-1]) == 0:
             del stderr_lines[-1]
+        sys.stdout.flush()
         for line in stderr_lines:
             print(line, file=sys.stderr)
+        sys.stderr.flush()
         input = dill.Unpickler(io.BytesIO(stdout))
         try:
             while True:
