@@ -18,10 +18,12 @@ be done relying on the more obscure corners of `awk` and `find`.
 
 Shells are intended for interactive usage, from a console. A script
 is created by putting commands into a text file, and setting the executable
-bits. Marcel takes a different approach. Because marcel commands and types
-expose Python, it doesn't make sense to define yet another scripting language.
-Instead, you can use Python as the scripting language, using the marcel
-API. (See example below.) 
+bits. This means that the shell language must include control constructs,
+functions, variables, and so on.  
+Marcel takes a different approach. Because marcel is based on Python,
+there is no need to invent a new language. 
+Instead, you can use Python as the scripting language, invoking
+marcel commands via an API, (more on this below).
 
 Marcel is the successor to [osh](http://github.com/geophile/osh) 
 (Object SHell). Osh

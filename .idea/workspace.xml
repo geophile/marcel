@@ -2,22 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/marcel/op/apiop.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/marcel/op/first.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/test_api2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/exception.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/gather.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/gather.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/squish.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/op/squish.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/opmodule.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/opmodule.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/marcel/util.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -883,7 +868,7 @@
       <workItem from="1588197907127" duration="73952000" />
       <workItem from="1588441003819" duration="35799000" />
       <workItem from="1588618883115" duration="40000" />
-      <workItem from="1588618936853" duration="49249000" />
+      <workItem from="1588618936853" duration="49595000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
