@@ -32,11 +32,6 @@ class Bg(marcel.op.jobop.JobOp):
     def __repr__(self):
         return f'bg(job={self.jid})' if self.jid is not None else f'bg(pid={self.pid})'
 
-    # BaseOp
-
-    def doc(self):
-        return __doc__
-
     # JobOp
 
     def action(self):

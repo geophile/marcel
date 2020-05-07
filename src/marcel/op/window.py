@@ -128,9 +128,6 @@ class Window(marcel.core.Op):
 
     # BaseOp
 
-    def doc(self):
-        return __doc__
-
     def setup_1(self):
         # argparse seems to default args in mutually exclusive group to False instead of None
         if self.overlap == False:

@@ -41,9 +41,6 @@ class Tail(marcel.core.Op):
 
     # BaseOp
     
-    def doc(self):
-        return __doc__
-
     def setup_1(self):
         self.queue = None if self.n == 0 else [None] * self.n
 

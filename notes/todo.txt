@@ -228,29 +228,13 @@ each copy of the pipeline to access the label.
 
 ----------------------------------------------------------------------
 
-API execution
-
-- run(pipeline): Append Out() if not present, same as console.
-
-- first(pipeline): 
-
-    - Return the first result (or Error). 
-    - Should Error raise exception (by default)?
-
-- gather(pipeline):
-
-    - Return all results in a list.
-
-    - Options for Errors in output, errors in separate list, handler
-
-- for x in pipeline: ...
-
-    - What about Errors?
-
-    - pipeline is terminted with gather, by default, returning errors
-      in list. Allow for explicit gather() to control options.
+Merge Env and Main? Or maybe make Main the thing that is available
+globally?
 
 ----------------------------------------------------------------------
 
-Merge Env and Main? Or maybe make Main the thing that is available
-globally?
+first constructs an Exception out of an Error.
+
+Is it feasible to have Error carry the original exception, and reraise
+it, or at least an exception of the same type? What if the Error was
+remote?

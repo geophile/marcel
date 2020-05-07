@@ -307,3 +307,29 @@ Need to handle {} chars in markup. See help_operator.py.
 
 Turn off color scheme for API
 
+----------------------------------------------------------------------
+
+API execution
+
+- run(pipeline): Append Out() if not present, same as console.
+
+- first(pipeline): 
+
+    - Return the first result (or Error). 
+    - Should Error raise exception (by default)?
+
+- gather(pipeline):
+
+    - Return all results in a list.
+
+    - Options for Errors in output, errors in separate list, handler
+
+- for x in pipeline: ...
+
+    - What about Errors?
+
+    - pipeline is terminted with gather, by default, returning errors
+      in list. Allow for explicit gather() to control options.
+
+----------------------------------------------------------------------
+

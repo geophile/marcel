@@ -50,9 +50,6 @@ class Squish(marcel.core.Op):
 
     # BaseOp
     
-    def doc(self):
-        return __doc__
-
     def setup_1(self):
         if self.function is None:
             self.function = marcel.functionwrapper.FunctionWrapper(source='+', globals=self.env().vars())

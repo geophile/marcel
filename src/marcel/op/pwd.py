@@ -29,9 +29,6 @@ class Pwd(marcel.core.Op):
 
     # BaseOp
 
-    def doc(self):
-        return self.__doc__
-
     def setup_1(self):
         pass
 

@@ -39,9 +39,6 @@ class Map(marcel.core.Op):
 
     # BaseOp
     
-    def doc(self):
-        return __doc__
-
     def setup_1(self):
         try:
             self.function.check_validity()

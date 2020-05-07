@@ -38,9 +38,6 @@ class Pushd(marcel.core.Op):
 
     # BaseOp
 
-    def doc(self):
-        return self.__doc__
-
     def setup_1(self):
         if self.directory is not None:
             self.directory = pathlib.Path(self.directory).expanduser()

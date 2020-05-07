@@ -64,9 +64,6 @@ class Out(marcel.core.Op):
 
     # BaseOp
 
-    def doc(self):
-        return __doc__
-
     def setup_1(self):
         # For some reason, argparse sets file and append to False if neither specified.
         if self.append == False:

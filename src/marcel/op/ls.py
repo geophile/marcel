@@ -101,9 +101,6 @@ class Ls(marcel.op.filenames.FilenamesOp):
 
     # BaseOp
 
-    def doc(self):
-        return __doc__
-
     def setup_1(self):
         super().setup_1()
         if len(self.roots) == 0:

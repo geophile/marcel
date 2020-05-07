@@ -81,9 +81,6 @@ class Expand(marcel.core.Op):
 
     # BaseOp
 
-    def doc(self):
-        return __doc__
-
     def setup_1(self):
         self.expander = SequenceExpander(self) if self.position is None else ComponentExpander(self)
 

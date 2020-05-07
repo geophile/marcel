@@ -24,3 +24,6 @@ for pid, commandline in (ps()
                          | select(lambda p: 'python' in p.commandline)
                          | map(lambda p: (p.pid, p.commandline))):
     print(f'{pid}: {commandline}')
+
+# first with exception
+print(first(map(lambda: 1/0)))

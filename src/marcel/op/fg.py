@@ -29,11 +29,6 @@ class Fg(marcel.op.jobop.JobOp):
     def __repr__(self):
         return f'fg(job={self.jid})' if self.jid is not None else f'fg(pid={self.pid})'
 
-    # BaseOp
-    
-    def doc(self):
-        return __doc__
-
     # JobOp
 
     def action(self):

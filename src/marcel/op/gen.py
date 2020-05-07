@@ -57,9 +57,6 @@ class Gen(marcel.core.Op):
 
     # BaseOp
 
-    def doc(self):
-        return self.__doc__
-
     def setup_1(self):
         if self.pad is not None:
             super().check_arg(self.count >= 0, 'count', 'Padding incompatible with unbounded output.')

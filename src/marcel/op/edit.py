@@ -41,9 +41,6 @@ class Edit(marcel.core.Op):
 
     # BaseOp
 
-    def doc(self):
-        return self.__doc__
-
     def setup_1(self):
         self.editor = os.getenv('EDITOR')
         if self.editor is None:

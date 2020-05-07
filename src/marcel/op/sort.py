@@ -42,9 +42,6 @@ class Sort(marcel.core.Op):
 
     # BaseOp
     
-    def doc(self):
-        return __doc__
-
     def setup_1(self):
         if self.key:
             self.key.set_op(self)

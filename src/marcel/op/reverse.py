@@ -27,9 +27,6 @@ class Reverse(marcel.core.Op):
 
     # BaseOp
     
-    def doc(self):
-        return __doc__
-
     def setup_1(self):
         pass
     

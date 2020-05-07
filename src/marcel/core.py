@@ -135,11 +135,6 @@ class BaseOp:
         print(message, file=sys.stderr)
         raise marcel.exception.KillCommandException(None)
 
-    def doc(self):
-        """Print op usage information.
-        """
-        assert False
-
     def setup_1(self):
         """setup_1 is run after command-line parsing and before setup_2. It is intended for
         the initialization of op state except for fork pipeline copying.

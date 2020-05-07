@@ -4,6 +4,7 @@ import marcel.core as _core
 import marcel.exception as _exception
 import marcel.main as _main
 import marcel.object.color as _color
+import marcel.object.error as _error
 import marcel.util as _util
 
 from marcel.op.bash import bash as _bash
@@ -131,4 +132,6 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
         _MAIN.run_api(pipeline)
     except _exception.StopAfterFirst:
         pass
-    return None if len(output) == 0 else output[0]
+    first = None if len(output) == 0 else output[0]
+    if isinstance(first, _error.Error):
+        raise Exception(first)

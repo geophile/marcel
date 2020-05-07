@@ -69,9 +69,6 @@ class Timer(marcel.core.Op):
 
     # BaseOp
     
-    def doc(self):
-        return __doc__
-
     def setup_1(self):
         self.interval = self.parse_interval(self.interval)
         self.metronome = Metronome(self)
