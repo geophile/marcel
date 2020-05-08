@@ -1,5 +1,4 @@
 import argparse
-import sys
 
 import marcel.exception
 import marcel.exception
@@ -383,9 +382,10 @@ class Command:
 class PipelineIterator:
 
     def __init__(self, pipeline):
-        # Append gather if necessary.
         env = pipeline.first_op.env()
-        assert env is not None  # Since PipelineIterator should only be used in the API, which sets op env.
+        # Clone the pipeline because modifications are required.
+        pipeline = marcel.util.clone(pipeline)
+        assert env is not None  # PipelineIterator should only be used in the API, which sets op env.
         pipeline.set_env(env)
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
         output = []

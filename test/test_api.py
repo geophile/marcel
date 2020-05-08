@@ -499,7 +499,6 @@ def test_api_iterator():
              expected_return=[-1.0, Error('division by zero'), 1.0])
 
 
-
 def main_stable():
     test_gen()
     test_out()
@@ -527,8 +526,6 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run(lambda: run(gen(5) | select(lambda x: False)),
-             expected_out=[])
     pass
 
 
