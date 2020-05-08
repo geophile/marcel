@@ -388,12 +388,9 @@ class PipelineIterator:
         assert env is not None  # Since PipelineIterator should only be used in the API, which sets op env.
         pipeline.set_env(env)
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
-        if pipeline.is_terminal_op('gather'):
-            output = pipeline.last_op.output
-        else:
-            output = []
-            gather_op = env.op_modules['gather'].api_function()(output)
-            pipeline.append(gather_op)
+        output = []
+        gather_op = env.op_modules['gather'].api_function()(output)
+        pipeline.append(gather_op)
         command = Command(None, pipeline)
         try:
             command.execute()

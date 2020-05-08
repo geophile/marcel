@@ -1,7 +1,7 @@
 import marcel.op.apiop
 
 
-def _gather(output=[], unwrap_singleton=True, errors=None, error_handler=None):
+def _gather(output, unwrap_singleton=True, errors=None, error_handler=None):
     return Gather(output, unwrap_singleton, errors, error_handler)
 
 
