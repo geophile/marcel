@@ -1,5 +1,7 @@
 from marcel.api import *
 
+run(ls())
+
 # run
 run(gen(3))
 

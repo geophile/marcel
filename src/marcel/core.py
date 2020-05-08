@@ -127,14 +127,6 @@ class BaseOp:
 
     # BaseOp runtime
 
-    def usage(self, message):
-        """Print usage message and exit.
-        """
-        if message is None:
-            message = self.doc()
-        print(message, file=sys.stderr)
-        raise marcel.exception.KillCommandException(None)
-
     def setup_1(self):
         """setup_1 is run after command-line parsing and before setup_2. It is intended for
         the initialization of op state except for fork pipeline copying.
@@ -359,6 +351,9 @@ class Pipeline(BaseOp):
             self.first_op = op
         self.last_op = op
 
+    def is_terminal_op(self, op_name):
+        return self.last_op.op_name() == op_name
+
     # API
 
     def __or__(self, op):
@@ -393,12 +388,12 @@ class PipelineIterator:
         assert env is not None  # Since PipelineIterator should only be used in the API, which sets op env.
         pipeline.set_env(env)
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
-        output = []
-        gather_op = env.op_modules['gather'].api_function()(output,
-                                                            unwrap_singleton=True,
-                                                            errors=None,
-                                                            error_handler=PipelineIterator.noop_error_handler)
-        pipeline.append(gather_op)
+        if pipeline.is_terminal_op('gather'):
+            output = pipeline.last_op.output
+        else:
+            output = []
+            gather_op = env.op_modules['gather'].api_function()(output)
+            pipeline.append(gather_op)
         command = Command(None, pipeline)
         try:
             command.execute()

@@ -333,3 +333,15 @@ API execution
 
 ----------------------------------------------------------------------
 
+Need an api version of test_ops.
+- Test run, gather, only
+
+----------------------------------------------------------------------
+
+Get rid of op.doc functions
+
+----------------------------------------------------------------------
+
+Can't rely on argparse type=... function to check inputs. Doesn't work
+for API. Move checking to setup1().
+

@@ -10,7 +10,7 @@ import test_base
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
 test_dir = '/tmp/test'
-TEST = test_base.Test()
+TEST = test_base.TestConsole()
 
 
 def relative(base, x):

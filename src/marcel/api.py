@@ -135,3 +135,4 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     first = None if len(output) == 0 else output[0]
     if isinstance(first, _error.Error):
         raise Exception(first)
+    return first

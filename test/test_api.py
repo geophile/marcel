@@ -8,7 +8,7 @@ from marcel.api import *
 
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
-TEST = test_base.Test()
+TEST = test_base.TestAPI()
 
 
 def test_gen():
@@ -395,7 +395,7 @@ def test_remote():
     # Bug 4
     TEST.run(lambda: run(fork('jao', gen(3)) | red(None, r_plus)),
              expected_out=[(localhost, 3)])
-    TEST.run(lambda: run(fork('jao', gen(10) | map(lambda x: (x%2, x)) | red(None, r_plus))),
+    TEST.run(lambda: run(fork('jao', gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
 
 
@@ -421,6 +421,85 @@ def test_version():
              expected_out=[marcel.env.VERSION])
 
 
+def test_api_run():
+    # Error-free output, just an op
+    TEST.run(test=lambda: run(gen(3)),
+             expected_out=[0, 1, 2])
+    # Error-free output, pipeline
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: -x)),
+             expected_out=[0, -1, -2])
+    # With errors
+    TEST.run(test=lambda: run(gen(3, -1) | map(lambda x: 1 / x)),
+             expected_out=[-1.0, Error('division by zero'), 1.0])
+
+
+def test_api_gather():
+    # Default gather behavior
+    TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x)),
+             expected_return=[-1.0, Error('division by zero'), 1.0])
+    # Don't unwrap singletons
+    TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x), unwrap_singleton=False),
+             expected_return=[(-1.0,), Error('division by zero'), (1.0,)])
+    # Collect errors separately
+    errors = []
+    TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x), errors=errors),
+             expected_return=[-1.0, 1.0],
+             expected_errors=[Error('division by zero')],
+             actual_errors=errors)
+    # error handler
+    errors = []
+    TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x),
+                                 error_handler=lambda env, error: errors.append(error)),
+             expected_return=[-1.0, 1.0],
+             expected_errors=[Error('division by zero')],
+             actual_errors=errors)
+    # errors and error_handler are mutually exclusive
+    errors = []
+    TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x),
+                                 errors=[],
+                                 error_handler=lambda env, error: errors.append(error)),
+             expected_err='Specify at most one of the errors and error_handler arguments')
+
+
+def test_api_first():
+    # Default first behavior
+    TEST.run(test=lambda: first(gen(3, -1) | map(lambda x: 1 / x)),
+             expected_return=-1.0)
+    # Don't unwrap singletons
+    TEST.run(test=lambda: first(gen(3, -1) | map(lambda x: 1 / x), unwrap_singleton=False),
+             expected_return=(-1.0,))
+    # First is Error
+    TEST.run(test=lambda: first(gen(3, 0) | map(lambda x: 1 / x)),
+             expected_exception='division by zero')
+    # Collect errors separately
+    errors = []
+    TEST.run(test=lambda: first(gen(3) | map(lambda x: x // 2) | map(lambda x: 1 / x), errors=errors),
+             expected_return=1.0,
+             expected_errors=[Error('division by zero'), Error('division by zero')],
+             actual_errors=errors)
+    # error handler
+    errors = []
+    TEST.run(test=lambda: first(gen(3) | map(lambda x: x // 2) | map(lambda x: 1 / x),
+                                error_handler=lambda env, error: errors.append(error)),
+             expected_return=1.0,
+             expected_errors=[Error('division by zero'), Error('division by zero')],
+             actual_errors=errors)
+    # errors and error_handler are mutually exclusive
+    errors = []
+    TEST.run(test=lambda: first(gen(3, -1) | map(lambda x: 1 / x),
+                                errors=[],
+                                error_handler=lambda env, error: errors.append(error)),
+             expected_err='Specify at most one of the errors and error_handler arguments')
+
+
+def test_api_iterator():
+    TEST.run(test=lambda: list(gen(3)),
+             expected_return=[0, 1, 2])
+    TEST.run(test=lambda: list(gen(3, -1) | map(lambda x: 1 / x)),
+             expected_return=[-1.0, Error('division by zero'), 1.0])
+
+
+
 def main_stable():
     test_gen()
     test_out()
@@ -441,9 +520,15 @@ def main_stable():
     test_remote()
     # test_sudo()
     test_version()
+    test_api_run()
+    test_api_gather()
+    test_api_first()
+    test_api_iterator()
 
 
 def main_dev():
+    TEST.run(lambda: run(gen(5) | select(lambda x: False)),
+             expected_out=[])
     pass
 
 

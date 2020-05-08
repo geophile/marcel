@@ -145,7 +145,7 @@ class File(marcel.object.renderable.Renderable):
 
     def _highlight_color(self, path, color_scheme):
         extension = path.suffix.lower()
-        highlight = color_scheme.file_extension.get(extension)
+        highlight = None if color_scheme.file_extension is None else color_scheme.file_extension.get(extension)
         if highlight is None:
             highlight = (
                 # Check symlink first, because is_executable (at least) follows symlinks.

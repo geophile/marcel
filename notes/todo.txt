@@ -194,32 +194,28 @@ timer: allow interval to be an int or real (#sec)
 Revert to pickling if dill not present. And in that case, require
 function source for remote execution.
 
+----------------------------------------------------------------------
+
 Not all ops can be used in API, e.g. edit, help. What about fork? remote?
 
-
-API: What to do about error handling, when there is no out operator
-present? It would be nice to get the exit code too. What is the exit
-code for a pipeline in bash?
+----------------------------------------------------------------------
 
 API needs documentation. help? HTML?
 
+----------------------------------------------------------------------
+
 Exit codes? (Not just an api issue)
 
-Need an api version of test_ops.
-- Test run, gather, only
-
-
-Get rid of op.doc functions
-
-Can't rely on argparse type=... function to check inputs. Doesn't work
-for API. Move checking to setup1().
+----------------------------------------------------------------------
 
 window: what is supposed to happen if overlap = 0? disjoint = 0? Not tested.
 test types other than int
 
+----------------------------------------------------------------------
 
 sudo has a zillion args. How to express this on sudo()? **kwargs?
 
+----------------------------------------------------------------------
 
 todo: fork doc describes remote execution. Doesn't discuss @int, or
 @sequence. Does @sequence even work? Non-remote versions are kind of
@@ -238,3 +234,5 @@ first constructs an Exception out of an Error.
 Is it feasible to have Error carry the original exception, and reraise
 it, or at least an exception of the same type? What if the Error was
 remote?
+
+----------------------------------------------------------------------

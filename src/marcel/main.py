@@ -11,7 +11,6 @@ import marcel.exception
 import marcel.job
 import marcel.multilinereader
 import marcel.opmodule
-import marcel.op.out
 import marcel.parse
 import marcel.tabcompleter
 
@@ -98,8 +97,8 @@ class Main:
                 pipeline.set_env(self.env)
                 pipeline.set_error_handler(Main.default_error_handler)
                 # Append an out op at the end of pipeline, if there is no output op there already.
-                if not isinstance(pipeline.last_op, marcel.op.out.Out):
-                    out = marcel.op.out.Out()
+                if not pipeline.is_terminal_op('out'):
+                    out = self.op_modules['out'].create_op()
                     out.append = False
                     out.file = False
                     out.csv = False

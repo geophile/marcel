@@ -8,7 +8,7 @@ import test_base
 
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
-TEST = test_base.Test()
+TEST = test_base.TestConsole()
 
 
 def test_no_such_op():
