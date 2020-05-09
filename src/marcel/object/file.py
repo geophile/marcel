@@ -87,14 +87,13 @@ class File(marcel.object.renderable.Renderable):
 
     def render_full(self, color_scheme):
         line = self._formatted_metadata()
-        if color_scheme:
-            line[-1] = marcel.util.colorize(line[-1], self._highlight_color(self, color_scheme))
+        # line[-1] is the filename.
+        line[-1] = marcel.util.colorize(line[-1], self._highlight_color(self, color_scheme))
         if self._is_symlink():
             line.append('->')
             link_target = pathlib.Path(os.readlink(self.path))
-            if color_scheme:
-                link_target = marcel.util.colorize(link_target,
-                                                   self._highlight_color(link_target, color_scheme))
+            link_target = marcel.util.colorize(link_target,
+                                               self._highlight_color(link_target, color_scheme))
             if isinstance(link_target, pathlib.Path):
                 link_target = link_target.as_posix()
             line.append(link_target)
@@ -144,15 +143,19 @@ class File(marcel.object.renderable.Renderable):
         return time.strftime('%Y %b %d %H:%M:%S', time.localtime(mtime))
 
     def _highlight_color(self, path, color_scheme):
-        extension = path.suffix.lower()
-        highlight = None if color_scheme.file_extension is None else color_scheme.file_extension.get(extension)
-        if highlight is None:
-            highlight = (
-                # Check symlink first, because is_executable (at least) follows symlinks.
-                color_scheme.file_link if self._is_symlink() else
-                color_scheme.file_executable if self._is_executable() else
-                color_scheme.file_dir if self._is_dir() else
-                color_scheme.file_file)
+        highlight = None
+        if color_scheme:
+            extension = path.suffix.lower()
+            highlight = (color_scheme.file_extension.get(extension, None)
+                         if color_scheme.file_extension is dict else
+                         None)
+            if highlight is None:
+                highlight = (
+                    # Check symlink first, because is_executable (at least) follows symlinks.
+                    color_scheme.file_link if self._is_symlink() else
+                    color_scheme.file_executable if self._is_executable() else
+                    color_scheme.file_dir if self._is_dir() else
+                    color_scheme.file_file)
         return highlight
 
     # Use stat.S_... methods instead of methods relying on pathlib. First, pathlib

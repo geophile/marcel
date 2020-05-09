@@ -38,7 +38,7 @@ from marcel.reduction import *
 
 _MAIN = _main.Main(same_process=True)
 # No colors for API
-_MAIN.env.set_color_scheme(_color.ColorScheme())
+_MAIN.env.set_color_scheme(None)
 
 
 def _generate_op(f, *args, **kwargs):
