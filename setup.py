@@ -1,7 +1,7 @@
 import setuptools
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+with open("README.md", "r") as readme:
+    long_description = readme.read()
 
 setuptools.setup(
     name='marcel',  
@@ -13,9 +13,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/geophile/marcel',
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages('./src'),
     classifiers=[
         'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: GPLv3',
         'Operating System :: OS Independent',
     ])

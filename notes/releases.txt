@@ -42,7 +42,7 @@
 
 - Installation (pip? setup script? PyPi? wheel? All of the above?)
 
-    - Add licensing text
+    + Add licensing text
 
     - https://packaging.python.org/
 
