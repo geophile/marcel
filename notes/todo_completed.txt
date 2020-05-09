@@ -345,3 +345,8 @@ Get rid of op.doc functions
 Can't rely on argparse type=... function to check inputs. Doesn't work
 for API. Move checking to setup1().
 
+----------------------------------------------------------------------
+
+API: What to do about error handling, when there is no out operator
+present? It would be nice to get the exit code too. What is the exit
+code for a pipeline in bash?

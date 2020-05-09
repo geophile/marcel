@@ -102,12 +102,12 @@ Another Example
 Find all files recursively, summing the file count and file size for each file extension,
 and then sort by decreasing size and report the top 10.
 ```
-ls -fr |\
-select (f: f.path.suffix != '') |\
-map (f: (f.path.suffix.lower(), 1, f.size)) |\
-red . + + |\
-sort (ext, count, size: -size) |\
-head 10
+ls -fr \
+| select (f: f.path.suffix != '') \
+| map (f: (f.path.suffix.lower(), 1, f.size)) \
+| red . + + \
+| sort (ext, count, size: -size) \
+| head 10
 
 ('.jpg', 82477, 63041371455)
 ('.mp3', 3492, 25752416039)
@@ -157,11 +157,11 @@ The output is condensed into one line through
 the use of `xargs` and `echo`. 
 
 ```
-cat /etc/passwd | \
-map (line: line.split(':')) | \
-select (*line: line[-1] == '/bin/bash') | \
-map (*line: line[0]) | \
-xargs echo
+cat /etc/passwd \
+| map (line: line.split(':')) \
+| select (*line: line[-1] == '/bin/bash') \
+| map (*line: line[0]) \
+| xargs echo
 ```
 
 * `cat /etc/passwd`: Obtain the contents of the file. Lines are piped to subsequent commands.
@@ -259,12 +259,12 @@ file count and file size for each file extension,
 and then sorted by decreasing size, and reported the top 10:
 
 ```
-    ls -fr |\
-    select (f: f.path.suffix != '') |\
-    map (f: (f.path.suffix.lower(), 1, f.size)) |\
-    red . + + |\
-    sort (ext, count, size: -size) |\
-    head 10
+    ls -fr \
+    | select (f: f.path.suffix != '') \
+    | map (f: (f.path.suffix.lower(), 1, f.size)) \
+    | red . + + \
+    | sort (ext, count, size: -size) \
+    | head 10
 ```
 
 To implement this as a Python script:

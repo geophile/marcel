@@ -18,8 +18,7 @@
   - interface
   - doc
 
-- Pipelines
-
+- DATE AND TIME
 
 - Highlight color for broken link. Not trivial, because File needs to
   survive pickling. Can't assume that file can be examined when
@@ -32,14 +31,25 @@
 
   - history
 
-  - Run previous command
+  - Run previous command, (!, !!)
 
   - fg/bg without specifying job#
 
   - Syntax for starting job in background (like bash &). Maybe 
     bg [ ... ]?
 
-- Host commands
+- Improve bash and sudo
+
+- Installation (pip? setup script? PyPi? wheel? All of the above?)
+
+    - Add licensing text
+
+    - https://packaging.python.org/
+
+- Revisit project directory structure
+
+- API needs easy access to env vars. What is the relationship between
+  the API namespace and the console's marcel namespace?
 
 ----------------------------------------------------------------------
 

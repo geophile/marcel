@@ -15,10 +15,10 @@ class APIOp(marcel.core.Op):
                               error_handler if errors is None and error_handler is not None else
                               None)  # indicates incorrect use of errors and error_handler args
 
-    # BaseOp
+    def __repr__(self):
+        return f'{self.op_name()}()'
 
-    def doc(self):
-        return None
+    # BaseOp
 
     def setup_1(self):
         self.check_arg(self.error_handler is not None,

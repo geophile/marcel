@@ -209,8 +209,7 @@ class Op(BaseOp):
         self.pipelines = None
 
     def __repr__(self):
-        # TODO: Render args
-        return self.op_name()
+        assert False, self.op_name()
 
     def __iter__(self):
         pipeline = Pipeline()

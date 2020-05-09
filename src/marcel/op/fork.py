@@ -71,9 +71,6 @@ class Fork(marcel.core.Op):
 
     # BaseOp
 
-    def doc(self):
-        assert False
-
     def setup_1(self):
         self.pipeline = self.referenced_pipeline(self.pipeline)
         cluster = self.env().cluster(self.host)

@@ -236,3 +236,12 @@ it, or at least an exception of the same type? What if the Error was
 remote?
 
 ----------------------------------------------------------------------
+
+Turning off color scheme involves using a ColorScheme will all entries
+set to None. Awkward for file extensions. Instead, do this by removing
+the COLOR_SCHEME variable.
+
+----------------------------------------------------------------------
+
+ls spacing is too wide. How to pick a width? Buffer results? Don't
+buffer and adapt?

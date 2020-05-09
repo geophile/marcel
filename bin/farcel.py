@@ -28,6 +28,9 @@ class PickleOutput(marcel.core.Op):
         super().__init__()
         self.pickler = dill.Pickler(sys.stdout.buffer)
 
+    def __repr__(self):
+        return 'pickleoutput()'
+
     def setup_1(self):
         pass
 
