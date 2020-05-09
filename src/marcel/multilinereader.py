@@ -1,3 +1,18 @@
+# This file is part of Marcel.
+# 
+# Marcel is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or at your
+# option) any later version.
+# 
+# Marcel is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
+
 """input() and the readline module support single-line input. I.e., each time the dude typing on the
 keyboard presses Enter, that ends the line of input, which is then added to the history maintained by
 readline. It would be nice to type a \\ at the end of the line, and continue typing a command on the next line

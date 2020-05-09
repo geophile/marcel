@@ -301,13 +301,6 @@ use the pipeline as an iterator:
         print(f'{ext}: {average}')
 ```
 
-Licensing
----------
-
-The predecessor project ([osh](https://github.com/geophile.osh)) was
-GPL. I've removed those headers, and will revisit the license issue,
-but there will be no restrictions on the use of this software.
-
 Status
 ------
 

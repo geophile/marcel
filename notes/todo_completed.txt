@@ -350,3 +350,9 @@ for API. Move checking to setup1().
 API: What to do about error handling, when there is no out operator
 present? It would be nice to get the exit code too. What is the exit
 code for a pipeline in bash?
+
+----------------------------------------------------------------------
+
+Turning off color scheme involves using a ColorScheme will all entries
+set to None. Awkward for file extensions. Instead, do this by removing
+the COLOR_SCHEME variable.
