@@ -1,11 +1,13 @@
 import setuptools
 
+import marcel.version
+
 with open("README.md", "r") as readme:
     long_description = readme.read()
 
 setuptools.setup(
     name='marcel',  
-    version='0.6.1',
+    version=marcel.version.VERSION,
     author='Jack Orenstein',
     author_email='jao@geophile.com',
     description='A modern shell',

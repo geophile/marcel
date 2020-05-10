@@ -2,13 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/marcel" beforeDir="false" afterPath="$PROJECT_DIR$/bin/marcel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/version.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -875,7 +869,7 @@
       <workItem from="1588441003819" duration="35799000" />
       <workItem from="1588618883115" duration="40000" />
       <workItem from="1588618936853" duration="72095000" />
-      <workItem from="1588997162984" duration="14473000" />
+      <workItem from="1588997162984" duration="14828000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

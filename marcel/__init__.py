@@ -21,5 +21,6 @@ __all__ = [
     'main',
     'opmodule',
     'parse',
-    'util'
+    'util',
+    'version'
 ]
