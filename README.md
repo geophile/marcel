@@ -304,7 +304,7 @@ use the pipeline as an iterator:
 Dependencies
 ------------
 
-Marcel is currently dependent on [dill](https://pypi.org/project/dill/), which can be installed
+Marcel depends on [dill](https://pypi.org/project/dill/), which can be installed
 like this:
 ```
 pip install dill

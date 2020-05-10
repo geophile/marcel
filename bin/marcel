@@ -1,9 +1,5 @@
 #!/bin/bash
 
-MARCEL_HOME=/home/jao/git/marcel
-MARCEL_MAIN=$MARCEL_HOME/marcel/main.py
-PYTHONPATH=$MARCEL_HOME
-
 function suppress_interruptions()
 {
   return 0
@@ -12,4 +8,4 @@ function suppress_interruptions()
 trap suppress_interruptions SIGINT
 trap suppress_interruptions SIGTSTP
 
-python3 $MARCEL_MAIN
+python3 -m marcel.main

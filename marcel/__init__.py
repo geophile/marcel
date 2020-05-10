@@ -18,6 +18,7 @@ __all__ = [
     'env',
     'exception',
     'functionwrapper',
+    'main',
     'opmodule',
     'parse',
     'util'

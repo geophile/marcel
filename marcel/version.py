@@ -13,45 +13,4 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import marcel.core
-import marcel.version
-
-
-SUMMARY = '''
-Write the marcel version number to the output stream.
-'''
-
-
-DETAILS = None
-
-
-def version():
-    return Version()
-
-
-class VersionArgParser(marcel.core.ArgParser):
-
-    def __init__(self, env):
-        super().__init__('version', env, None, SUMMARY, DETAILS)
-
-
-class Version(marcel.core.Op):
-
-    def __init__(self):
-        super().__init__()
-
-    def __repr__(self):
-        return 'version()'
-
-    # BaseOp
-
-    def setup_1(self):
-        pass
-
-    def receive(self, _):
-        self.send(marcel.version.VERSION)
-
-    # Op
-
-    def must_be_first_in_pipeline(self):
-        return True
+VERSION = '0.6.2'

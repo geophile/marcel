@@ -2,16 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/build/lib/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/scripts-3.7/farcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/build/scripts-3.7/farcel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/marcel-0.6-py3-none-any.whl" beforeDir="false" afterPath="$PROJECT_DIR$/dist/marcel-0.6-py3-none-any.whl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel.egg-info/PKG-INFO" beforeDir="false" afterPath="$PROJECT_DIR$/marcel.egg-info/PKG-INFO" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/marcel" beforeDir="false" afterPath="$PROJECT_DIR$/bin/marcel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/packaging.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/packaging.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/version.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -50,18 +47,18 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/test/pipeline_iterator.py" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="Errors" />
+    <property name="settings.editor.selected.configurable" value="fileTemplates" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/osh" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/marcel" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/src/marcel" />
       <recent name="$PROJECT_DIR$/src/osh" />
       <recent name="$PROJECT_DIR$/src/osh/object" />
-      <recent name="$PROJECT_DIR$/src" />
-    </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src/osh" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -878,7 +875,7 @@
       <workItem from="1588441003819" duration="35799000" />
       <workItem from="1588618883115" duration="40000" />
       <workItem from="1588618936853" duration="72095000" />
-      <workItem from="1588997162984" duration="12154000" />
+      <workItem from="1588997162984" duration="14473000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

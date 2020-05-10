@@ -22,8 +22,7 @@ import sys
 import marcel.exception
 import marcel.object.cluster
 import marcel.object.color
-
-VERSION = '0.6.2'
+import marcel.version
 
 
 class DirectoryState:
@@ -118,7 +117,7 @@ class Environment:
             'HOME': homedir.as_posix(),
             'HOST': host,
             'MARCEL_HOME': '/home/jao/git/marcel/src',  # TODO: Don't hardwire this
-            'MARCEL_VERSION': VERSION,
+            'MARCEL_VERSION': marcel.version.VERSION,
             'PWD': current_dir.as_posix(),
             'DIRS': [current_dir.as_posix()],
             'PROMPT': [Environment.DEFAULT_PROMPT],
