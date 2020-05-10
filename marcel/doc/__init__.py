@@ -26,5 +26,3 @@ topics = [
     'pipeline',
     'prompt'
 ]
-
-__all__ = ['help_' + topic for topic in topics]

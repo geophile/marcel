@@ -48,11 +48,3 @@ public = [
     'version',
     'window'
 ]
-
-private = [
-    'labelthread'
-]
-
-
-__all__ = public + private
-

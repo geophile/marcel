@@ -3,6 +3,7 @@ import pathlib
 from math import pi
 
 import marcel.object.error
+import marcel.version
 import test_base
 from marcel.api import *
 
@@ -418,7 +419,7 @@ def test_sudo():
 
 def test_version():
     TEST.run(test=lambda: run(version()),
-             expected_out=[marcel.env.VERSION])
+             expected_out=[marcel.version.VERSION])
 
 
 def test_api_run():

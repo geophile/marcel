@@ -307,7 +307,7 @@ Dependencies
 Marcel depends on [dill](https://pypi.org/project/dill/), which can be installed
 like this:
 ```
-pip install dill
+python3 -m pip install dill
 ```
 
 Installation
@@ -316,11 +316,11 @@ Installation
 Install using pip. To install to your home directory (e.g. under
 `~/.local`):
 ```
-pip install marcel
+python3 -m pip install marcel
 ```
 
 Or to install for all users, e.g. in `/usr/local`:
 
 ```
-sudo pip install --prefix=/usr/local marcel
+sudo python3 -m pip install --prefix /usr/local marcel
 ```

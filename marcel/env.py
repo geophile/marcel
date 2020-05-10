@@ -116,7 +116,6 @@ class Environment:
             'USER': user,
             'HOME': homedir.as_posix(),
             'HOST': host,
-            'MARCEL_HOME': '/home/jao/git/marcel/src',  # TODO: Don't hardwire this
             'MARCEL_VERSION': marcel.version.VERSION,
             'PWD': current_dir.as_posix(),
             'DIRS': [current_dir.as_posix()],

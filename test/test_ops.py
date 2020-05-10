@@ -2,7 +2,9 @@ import os
 import pathlib
 
 import marcel.main
+import marcel.version
 import marcel.object.host
+import marcel.version
 
 import test_base
 
@@ -443,7 +445,7 @@ def test_sudo():
 
 def test_version():
     TEST.run(test='version',
-             expected_out=[marcel.env.VERSION])
+             expected_out=[marcel.version.VERSION])
 
 
 def main_stable():

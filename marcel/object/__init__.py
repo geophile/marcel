@@ -12,12 +12,3 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
-
-__all__ = [
-    'cluster',
-    'color',
-    'error',
-    'file',
-    'host',
-    'process'
-]
