@@ -2,84 +2,93 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/api.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/core.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/help_color.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/help_command.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/help_configuration.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/help_function.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/help_marcel.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/help_namespace.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/help_object.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/help_operator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/help_overview.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/help_pipeline.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/doc/help_prompt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/exception.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/functionwrapper.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/helpformatter.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/job.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/multilinereader.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/object/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/object/cluster.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/object/color.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/object/error.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/object/file.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/object/host.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/object/process.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/object/renderable.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/apiop.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/bash.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/bg.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/cd.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/dirs.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/edit.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/expand.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/fg.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/filenames.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/first.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/fork.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/gather.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/gen.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/head.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/help.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/jobop.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/jobs.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/labelthread.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/ls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/map.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/out.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/popd.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/ps.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/pushd.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/pwd.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/red.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/remote.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/reverse.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/select.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/sort.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/squish.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/sudo.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/tail.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/timer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/unique.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/version.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/op/window.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/opmodule.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/parse.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/reduction.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/tabcompleter.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/lib/marcel/util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/scripts-3.7/farcel.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/scripts-3.7/marcel" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/marcel-0.6-py3-none-any.whl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/marcel.egg-info/PKG-INFO" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/marcel.egg-info/SOURCES.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/marcel.egg-info/dependency_links.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/marcel.egg-info/top_level.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notes/packaging.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel" beforeDir="false" afterPath="$PROJECT_DIR$/bin/marcel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/farcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/bin/farcel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_color.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_color.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_configuration.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_function.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_marcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_marcel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_namespace.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_namespace.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_object.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_object.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_operator.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_operator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_overview.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_overview.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_pipeline.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/help_prompt.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_prompt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/doc/unused.txt" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/unused.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/exception.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/functionwrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/functionwrapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/helpformatter.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/helpformatter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/job.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/job.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/multilinereader.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/multilinereader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/object/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/object/cluster.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/cluster.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/object/color.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/color.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/object/error.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/error.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/object/file.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/object/host.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/host.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/object/process.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/process.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/object/renderable.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/renderable.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/apiop.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/apiop.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/bash.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/bash.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/bg.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/bg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/cd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/cd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/dirs.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/dirs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/edit.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/edit.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/expand.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/expand.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/fg.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/fg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/filenames.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/filenames.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/first.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/first.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/fork.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/fork.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/gather.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/gather.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/gen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/head.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/head.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/help.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/help.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/jobop.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/jobop.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/jobs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/labelthread.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/labelthread.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/ls.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/map.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/map.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/out.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/out.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/popd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/popd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/ps.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/pushd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/pushd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/pwd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/pwd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/red.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/red.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/remote.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/remote.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/reverse.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/reverse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/select.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/select.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/sort.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/sort.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/squish.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/squish.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/sudo.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/sudo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/tail.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/tail.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/timer.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/timer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/unique.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/unique.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/version.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/op/window.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/window.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/opmodule.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/opmodule.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/parse.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/parse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/reduction.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/reduction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/tabcompleter.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/tabcompleter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/marcel/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/util.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -118,7 +127,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/test/pipeline_iterator.py" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="copyright.filetypes.Python" />
+    <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -946,7 +955,7 @@
       <workItem from="1588441003819" duration="35799000" />
       <workItem from="1588618883115" duration="40000" />
       <workItem from="1588618936853" duration="72095000" />
-      <workItem from="1588997162984" duration="8493000" />
+      <workItem from="1588997162984" duration="10554000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

@@ -301,6 +301,15 @@ use the pipeline as an iterator:
         print(f'{ext}: {average}')
 ```
 
+Dependencies
+------------
+
+Marcel is currently dependent on [dill](https://pypi.org/project/dill/), which can be installed
+like this:
+```
+pip install dill
+```
+
 Status
 ------
 
@@ -311,7 +320,7 @@ use a script like this:
 ```
     #!/bin/bash
 
-    MARCEL_HOME=~/git/marcel/src
+    MARCEL_HOME=~/git/marcel
     MARCEL_MAIN=$MARCEL_HOME/marcel/main.py
 
     PYTHONPATH=$MARCEL_HOME

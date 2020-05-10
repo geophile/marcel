@@ -1,0 +1,13 @@
+Create distribution:
+
+I think this is what I did:
+
+    python setup.py bdist_wheel
+
+Install from wheel:
+
+    python3 -m pip install marcel-0.6-py3-none-any.whl 
+
+This goes to ~/.local/bin (marcel, farcel.py), and lib/python3.7/site-packages
+
+--install could be used to install to /usr/local.

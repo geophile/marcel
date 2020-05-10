@@ -1,2 +1,6 @@
-*__pycache__*
 *.pyc
+*__pycache__*
+.idea
+build
+dist
+marcel.egg-info
