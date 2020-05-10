@@ -23,7 +23,7 @@ import marcel.exception
 import marcel.object.cluster
 import marcel.object.color
 
-VERSION = '0.5.0'
+VERSION = '0.6.2'
 
 
 class DirectoryState:

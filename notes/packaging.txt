@@ -1,8 +1,24 @@
 Create distribution:
 
-I think this is what I did:
+Create the distribution:
 
-    python setup.py bdist_wheel
+    python3 setup.py bdist_wheel
+
+To upload to pypi, from the marcel directory
+
+    python3 -m twine upload --repository pypi dist/*
+
+Install local:
+
+    python3 -m pip install marcel
+
+Install global:
+
+    sudo python3 -m pip install --prefix /usr/local marcel
+
+----------------------------------------------------------------------
+
+Installing directly (not from pypi):
 
 Install from wheel:
 
@@ -10,4 +26,7 @@ Install from wheel:
 
 This goes to ~/.local/bin (marcel, farcel.py), and lib/python3.7/site-packages
 
---install could be used to install to /usr/local.
+To install in /usr/local:
+
+    sudo python3 -m pip install --prefix /usr/local marcel-0.6-py3-none-any.whl 
+

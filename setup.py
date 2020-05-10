@@ -5,7 +5,7 @@ with open("README.md", "r") as readme:
 
 setuptools.setup(
     name='marcel',  
-    version='0.6',
+    version='0.6.1',
     author='Jack Orenstein',
     author_email='jao@geophile.com',
     description='A modern shell',
@@ -16,7 +16,7 @@ setuptools.setup(
     scripts=['bin/marcel', 'bin/farcel.py'] ,
     classifiers=[
         'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: POSIX :: Linux'
     ],
     python_requires='>=3.7'

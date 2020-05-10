@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: marcel
-Version: 0.6
+Version: 0.6.1
 Summary: A modern shell
 Home-page: https://github.com/geophile/marcel
 Author: Jack Orenstein
@@ -309,6 +309,15 @@ Description: Marcel
                 print(f'{ext}: {average}')
         ```
         
+        Dependencies
+        ------------
+        
+        Marcel is currently dependent on [dill](https://pypi.org/project/dill/), which can be installed
+        like this:
+        ```
+        pip install dill
+        ```
+        
         Status
         ------
         
@@ -319,7 +328,7 @@ Description: Marcel
         ```
             #!/bin/bash
         
-            MARCEL_HOME=~/git/marcel/src
+            MARCEL_HOME=~/git/marcel
             MARCEL_MAIN=$MARCEL_HOME/marcel/main.py
         
             PYTHONPATH=$MARCEL_HOME
@@ -330,7 +339,8 @@ Description: Marcel
         If you want examples of marcel commands, take a look at `test/test_ops.py`.
         
 Platform: UNKNOWN
-Classifier: Programming Language :: Python :: 3.7
-Classifier: License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
 Classifier: Operating System :: POSIX :: Linux
+Requires-Python: >=3.7
 Description-Content-Type: text/markdown

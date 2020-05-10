@@ -40,13 +40,11 @@
 
 - Improve bash and sudo
 
-- Installation (pip? setup script? PyPi? wheel? All of the above?)
++ Installation
 
     + Add licensing text
 
-    - https://packaging.python.org/
-
-- Revisit project directory structure
++ Revisit project directory structure
 
 - API needs easy access to env vars. What is the relationship between
   the API namespace and the console's marcel namespace?

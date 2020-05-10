@@ -310,22 +310,17 @@ like this:
 pip install dill
 ```
 
-Status
-------
+Installation
+------------
 
-Marcel is not yet a "daily driver". There is no installation script. However,
-it is getting to be pretty usable. If you want to try it out, 
-use a script like this:
-
+Install using pip. To install to your home directory (e.g. under
+`~/.local`):
 ```
-    #!/bin/bash
-
-    MARCEL_HOME=~/git/marcel
-    MARCEL_MAIN=$MARCEL_HOME/marcel/main.py
-
-    PYTHONPATH=$MARCEL_HOME
-
-    python3 $MARCEL_MAIN
+pip install marcel
 ```
 
-If you want examples of marcel commands, take a look at `test/test_ops.py`.
+Or to install for all users, e.g. in `/usr/local`:
+
+```
+sudo pip install --prefix=/usr/local marcel
+```

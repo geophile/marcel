@@ -97,6 +97,8 @@ def main():
         pass
 
     env = marcel.env.Environment(None)
+    version = env.getvar('MARCEL_VERSION')
+    TRACE.write(f'Marcel version {version}')
     # Use sys.stdin.buffer because we want binary data, not the text version
     input = dill.Unpickler(sys.stdin.buffer)
     pipeline = input.load()
