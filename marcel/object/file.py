@@ -29,8 +29,6 @@ FILE_TYPE_MASK = DIR_MASK | FILE_MASK | LINK_MASK
 
 
 class File(marcel.object.renderable.Renderable):
-    """Represents a file or directory.
-    """
 
     def __init__(self, path, base=None):
         assert path is not None
@@ -72,8 +70,6 @@ class File(marcel.object.renderable.Renderable):
             self.display_path = pathlib.Path(self.display_path_str)
             self.display_path_str = None
 
-    stat = property(lambda self: self._lstat(),
-                     doc="""lstat of this file""")
     mode = property(lambda self: self._lstat()[0],
                     doc="""mode of this file.""")
     inode = property(lambda self: self._lstat()[1],
@@ -94,6 +90,14 @@ class File(marcel.object.renderable.Renderable):
                      doc="""Modify time of this file.""")
     ctime = property(lambda self: self._lstat()[9],
                      doc="""Change time of this file.""")
+
+    def read(self):
+        with self.path.open(mode='r') as file:
+            return file.read()
+
+    def readlines(self):
+        with self.path.open(mode='r') as file:
+            return [line.rstrip('\r\n') for line in file.readlines()]
 
     # Renderable
 

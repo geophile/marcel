@@ -153,6 +153,8 @@ class Ls(marcel.op.filenames.FilenamesOp):
                     self.visit(file, level + 1)
             except PermissionError:
                 self.non_fatal_error(input=root, message='Permission denied')
+            except FileNotFoundError:
+                self.non_fatal_error(input=root, message='No such file or directory')
 
     def send_path(self, path):
         s = path.is_symlink()

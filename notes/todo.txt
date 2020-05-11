@@ -239,7 +239,3 @@ remote?
 
 ls spacing is too wide. How to pick a width? Buffer results? Don't
 buffer and adapt?
-
-----------------------------------------------------------------------
-
-Do __init__.py files need to specify __all__?

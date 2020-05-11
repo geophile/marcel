@@ -46,8 +46,7 @@ An output tuple is generated for each item in that embedded sequence, replacing 
 sequence by one of its contained items.
 
 The types that can be expanded are sequences ({r:list}, {r:tuple}, {r:str}), {r:generator}s, 
-{r:iterator}s and Files.
-Expansion of a {r:File} yields each line of the named file.
+and {r:iterator}s.
 
 {b:Example}: If the input contains these sequences:
 {p,wrap=F}
@@ -120,17 +119,6 @@ class Expander:
             # TODO: Generators
             if marcel.util.is_sequence(only):
                 return only
-            elif marcel.util.is_file(only):
-                lines = []
-                with open(only.path, 'r') as file:
-                    for line in file.readlines():
-                        # Remove EOL whitespace
-                        if line.endswith('\r\n') or line.endswith('\n\r'):
-                            line = line[:-2]
-                        elif line.endswith('\r') or line.endswith('\n'):
-                            line = line[:-1]
-                        lines.append(line)
-                return lines
             else:
                 return x
         else:

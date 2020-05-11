@@ -356,3 +356,14 @@ code for a pipeline in bash?
 Turning off color scheme involves using a ColorScheme will all entries
 set to None. Awkward for file extensions. Instead, do this by removing
 the COLOR_SCHEME variable.
+
+----------------------------------------------------------------------
+
+Do __init__.py files need to specify __all__?
+
+No.
+
+----------------------------------------------------------------------
+
+Now that there is File.readlines, expand no longer has to have special
+handling for files.

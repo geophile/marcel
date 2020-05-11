@@ -228,20 +228,6 @@ def test_expand():
                            (200, 3, -3),
                            (100, 4, -4),
                            (200, 4, -4)])
-    # Expand file
-    with open('/tmp/test_expand_1', 'w') as file:
-        file.writelines(['abc\n', 'def\n'])  # lf at end of file
-    with open('/tmp/test_expand_2', 'w') as file:
-        file.writelines(['ghi\n', 'jkl'])  # No lf at end of file
-    TEST.run(lambda: run(ls('/tmp/test_expand_?') | expand()),
-             expected_out=['abc', 'def', 'ghi', 'jkl'])
-    TEST.run(lambda: run(ls('/tmp/test_expand_?') | map(lambda f: (str(f), f)) | expand(1)),
-             expected_out=[('/tmp/test_expand_1', 'abc'),
-                           ('/tmp/test_expand_1', 'def'),
-                           ('/tmp/test_expand_2', 'ghi'),
-                           ('/tmp/test_expand_2', 'jkl')])
-    os.remove('/tmp/test_expand_1')
-    os.remove('/tmp/test_expand_2')
 
 
 def test_head():
