@@ -35,7 +35,8 @@ class TabCompleter:
 
     OPS = marcel.op.public
     HELP_TOPICS = list(marcel.doc.topics) + OPS
-    FILENAME_OPS = ['cd',
+    FILENAME_OPS = ['cat',
+                    'cd',
                     'cp',
                     'emacs',
                     'less',

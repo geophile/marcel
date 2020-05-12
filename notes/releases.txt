@@ -8,17 +8,17 @@
 
 - ps
 
++ process object
+  + interface
+  + doc
+
++ file object
+  + interface
+  + doc
+
+- DATE AND TIME: These should be objects.
+
 - help object
-
-- process object
-  - interface
-  - doc
-
-- file object
-  - interface
-  - doc
-
-- DATE AND TIME
 
 - Highlight color for broken link. Not trivial, because File needs to
   survive pickling. Can't assume that file can be examined when

@@ -269,3 +269,14 @@ As a function!
 - Use:
 
         x /some/dir
+
+----------------------------------------------------------------------
+
+timer could take an optional pipeline arg. If present, run it every
+second, making the timestamp available. PIPELINE ARGS!
+
+E.g., Run timer, run ps every tick and label ps output. This works:
+
+    timer 1 | map (t: (t, processes())) | expand 1
+
+Which gets into the discussion above about functions and ops.

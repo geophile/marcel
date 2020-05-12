@@ -1,0 +1,140 @@
+From ps man page:
+
+       By default, ps selects all processes with the same effective user ID (euid=EUID) as the
+       current user and associated with the same terminal as the invoker.  It displays the
+       process ID (pid=PID), the terminal associated with the process (tname=TTY), the
+       cumulated CPU time in [DD-]hh:mm:ss format (time=TIME), and the executable name
+       (ucmd=CMD).  Output is unsorted by default.
+
+       The use of BSD-style options will add process state (stat=STAT) to the default display
+       and show the command args (args=COMMAND) instead of the executable name.  You can
+       override this with the PS_FORMAT environment variable. The use of BSD-style options
+       will also change the process selection to include processes on other terminals (TTYs)
+       that are owned by you; alternately, this may be described as setting the selection to
+       be the set of all processes filtered to exclude processes owned by other users or not
+       on a terminal.  These effects are not considered when options are described as being
+       "identical" below, so -M will be considered identical to Z and so on.
+
+There are process tree options, e.g. ps -ejH
+
+ 1441  1441  1441 ?        00:00:00   ntpd
+ 1442  1442  1442 ?        00:00:00   sshd
+ 3527  3527  3527 ?        00:00:00     sshd
+ 3599  3527  3527 ?        00:00:53       sshd
+ 3602  3602  3602 pts/1    00:00:00         bash
+ 4547  4547  3602 pts/1    00:01:13           firefox
+ 4659  4547  3602 pts/1    00:00:07             Web Content
+ 4704  4547  3602 pts/1    00:00:10             WebExtensions
+ 4788  4547  3602 pts/1    00:00:10             Web Content
+ 4906  4547  3602 pts/1    00:00:16             Web Content
+ 5895  4547  3602 pts/1    00:00:00             Web Content
+ 1464  1464  1464 ?        00:00:00   apache2
+ 1465  1464  1464 ?        00:00:00     apache2
+ 1466  1464  1464 ?        00:00:00     apache2
+ 1533  1525  1525 ?        00:00:00   postgres
+ 1535  1535  1535 ?        00:00:00     postgres
+ 1536  1536  1536 ?        00:00:00     postgres
+ 1537  1537  1537 ?        00:00:00     postgres
+ 1538  1538  1538 ?        00:00:00     postgres
+ 1539  1539  1539 ?        00:00:00     postgres
+ 1540  1540  1540 ?        00:00:00     postgres
+
+Could do this by assigning list of ancestor process ids to each
+process, sort by it.
+
+
+Lots of selection flags, that marcel can do with select(p:...)
+
+- All processes: -A, -e
+
+- Select processes associated with this terminal: T
+
+- Running processes: r
+
+- By pid: -123 or --pid 123
+
+- -C cmdlist: selects processes whose executable name is in the list    
+
+- e: include env
+
+----------------------------------------------------------------------
+
+Flags control
+
+- What processes are displayed
+
+- What information is displayed
+
+- View (flat or hierarchical)
+
+What processes are displayed:
+
+- Default is same uid ("effective user id") and tty as user.
+- -e, -A: All processes
+- T: All from this terminal
+- r: Running
+- -p 123: List that pid
+- -C: Select command (may be list)
+- -g, -G, --group: Selecting by group or list
+- --ppid: select by parent id
+- -s: Select by session id
+- -t: select by tty or list
+- -u, -U, --user: select by EUID, RUID, name
+
+What information is displayed:
+
+- ps -f is "full": uid, pid, ppid, C, stime, tty, time, cmd
+
+    - C: CPU#
+    - stime: Start time.
+    - tty: Terminal associated with the process.
+    - time: Total cpu usage
+    - cmd: Command line
+
+- Others
+
+  - PRI: Priority
+  - NI: Niceness
+  - %cpu
+  - %mem
+  - State
+
+----------------------------------------------------------------------
+
+Status:
+
+- Uid: real UID, effective UID, saved set UID, and file system UID
+- Gid: real GID, effective GID, saved set GID, and file system GID
+
+Command line comes from /proc/NNNN/cmdline
+
+
+State output:
+               D    uninterruptible sleep (usually IO)
+               I    Idle kernel thread
+               R    running or runnable (on run queue)
+               S    interruptible sleep (waiting for an event to complete)
+               T    stopped by job control signal
+               t    stopped by debugger during the tracing
+               W    paging (not valid since the 2.6.xx kernel)
+               X    dead (should never be seen)
+               Z    defunct ("zombie") process, terminated but not reaped by its parent
+
+======================================================================
+
+Design of the Process object
+
+- Provide a few convenience methods.
+- Provide access to contents of status, env
+
+
+Design of the ps command
+
+- All processes? Just for the user? Just those with a command line?
+
+- compact: pid and name? Just pid?
+
+- full: 
+
+    - pick a few fields
+    - make it configurable (including color)

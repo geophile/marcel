@@ -17,8 +17,8 @@
   non-existent processes which are then used downstream. Can this even
   happen?
 
-- ps: If commandline blank, take contents of status file? That's what
-  ps appears to do.
+- ps: If commandline blank, take contents of Name from status file
+  (enclosed in [])? That's what ps appears to do.
 
 ----------------------------------------------------------------------
 
@@ -239,3 +239,30 @@ remote?
 
 ls spacing is too wide. How to pick a width? Buffer results? Don't
 buffer and adapt?
+
+----------------------------------------------------------------------
+
+Check csv formatting. Should strings have ' or "? They do, not sure
+that's right. 
+
+What if an output item contains a comma?
+
+----------------------------------------------------------------------
+
+This is broken: Op.op_name() evalutes to "op".
+
+    @staticmethod
+    def check_arg(ok, arg, message):
+        if not ok:
+            cause = (f'Incorrect usage of {Op.op_name()}: {message}'
+                     if arg is None else
+                     f'Incorrect value for {arg} argument of {Op.op_name()}: {message}')
+            raise marcel.exception.KillCommandException(cause)
+
+----------------------------------------------------------------------
+
+Multiline command actually works without \. But then it doesn't get recalled
+correctly on startup. 
+
+- Allow omission of \
+- But add it if missing, at least for stored history.

@@ -70,35 +70,6 @@ class File(marcel.object.renderable.Renderable):
             self.display_path = pathlib.Path(self.display_path_str)
             self.display_path_str = None
 
-    mode = property(lambda self: self._lstat()[0],
-                    doc="""mode of this file.""")
-    inode = property(lambda self: self._lstat()[1],
-                     doc="""inode of this file.""")
-    device = property(lambda self: self._lstat()[2],
-                      doc="""device of this file.""")
-    links = property(lambda self: self._lstat()[3],
-                     doc=""" Number of links of this file.""")
-    uid = property(lambda self: self._lstat()[4],
-                   doc="""Owner of this file.""")
-    gid = property(lambda self: self._lstat()[5],
-                   doc="""Owning group of this file.""")
-    size = property(lambda self: self._lstat()[6],
-                    doc="""Size of this file (bytes).""")
-    atime = property(lambda self: self._lstat()[7],
-                     doc="""Access time of this file.""")
-    mtime = property(lambda self: self._lstat()[8],
-                     doc="""Modify time of this file.""")
-    ctime = property(lambda self: self._lstat()[9],
-                     doc="""Change time of this file.""")
-
-    def read(self):
-        with self.path.open(mode='r') as file:
-            return file.read()
-
-    def readlines(self):
-        with self.path.open(mode='r') as file:
-            return [line.rstrip('\r\n') for line in file.readlines()]
-
     # Renderable
 
     def render_compact(self):
@@ -117,6 +88,27 @@ class File(marcel.object.renderable.Renderable):
                 link_target = link_target.as_posix()
             line.append(link_target)
         return ' '.join(line)
+
+    # File
+
+    mode = property(lambda self: self._lstat()[0])
+    inode = property(lambda self: self._lstat()[1])
+    device = property(lambda self: self._lstat()[2])
+    links = property(lambda self: self._lstat()[3])
+    uid = property(lambda self: self._lstat()[4])
+    gid = property(lambda self: self._lstat()[5])
+    size = property(lambda self: self._lstat()[6])
+    atime = property(lambda self: self._lstat()[7])
+    mtime = property(lambda self: self._lstat()[8])
+    ctime = property(lambda self: self._lstat()[9])
+
+    def read(self):
+        with self.path.open(mode='r') as file:
+            return file.read()
+
+    def readlines(self):
+        with self.path.open(mode='r') as file:
+            return [line.rstrip('\r\n') for line in file.readlines()]
 
     # For use by this class
 
@@ -189,9 +181,6 @@ class File(marcel.object.renderable.Renderable):
 
     @staticmethod
     def _rwx(m):
-        buffer = [
-            'r' if (m & 0o4) != 0 else '-',
-            'w' if (m & 0o2) != 0 else '-',
-            'x' if (m & 0o1) != 0 else '-'
-        ]
-        return ''.join(buffer)
+        return (('r' if (m & 0o4) != 0 else '-') +
+                ('w' if (m & 0o2) != 0 else '-') +
+                ('x' if (m & 0o1) != 0 else '-'))
