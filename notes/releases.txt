@@ -6,7 +6,7 @@
 
 0.6
 
-- ps
++ ps
 
 + process object
   + interface

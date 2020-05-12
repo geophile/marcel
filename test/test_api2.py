@@ -22,10 +22,9 @@ for ext, count, size in (ls('/home/jao/git/marcel', file=True, recursive=True)
                          | head(10)):
     print(f'{ext}: {size / count}')
 
-for size, pid, commandline in (ps()
-                               | select(lambda p: 'python' in p.commandline)
-                               | sort(lambda p: p.size)
-                               | map(lambda p: (p.size, p.pid, p.commandline))):
+for size, pid, commandline in (ps(command='python')
+                               | sort(lambda p: p.VmRSS)
+                               | map(lambda p: (p.VmRSS, p.pid, p.commandline))):
     print(f'{size} -- {pid}: {commandline}')
 
 for x in gen(3, -1) | map(lambda x: 1/x):

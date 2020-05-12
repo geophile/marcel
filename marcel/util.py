@@ -33,11 +33,25 @@ def username(uid):
         return str(uid)
 
 
+def uid(username):
+    for entry in pwd.getpwall():
+        if entry.pw_name == username:
+            return entry.pw_uid
+    return None
+
+
 def groupname(gid):
     try:
         return grp.getgrgid(gid).gr_name
     except KeyError:
         return str(gid)
+
+
+def gid(groupname):
+    for entry in grp.getgrall():
+        if entry.gr_name == groupname:
+            return entry.gr_gid
+    return None
 
 
 def is_sequence(x):

@@ -128,16 +128,25 @@ class Process(marcel.object.renderable.Renderable):
 
     def render_full(self, color_scheme):
         pid = '{:6n}'.format(self.pid)
+        ppid = '{:6n}'.format(self.ppid)
+        user = '{:8s}'.format(self.user)
+        state = '{}'.format(self.state)
         commandline = self.commandline
         if color_scheme:
             pid = marcel.util.colorize(pid, color_scheme.process_pid)
+            ppid = marcel.util.colorize(ppid, color_scheme.process_ppid)
+            user = marcel.util.colorize(user, color_scheme.process_user)
+            state = marcel.util.colorize(state, color_scheme.process_state)
             commandline = marcel.util.colorize(commandline, color_scheme.process_commandline)
         buffer = [
             '--' if self._exists() is None else '  ',
             pid,
+            ppid,
+            user,
+            state,
             commandline
         ]
-        return ' '.join(buffer)
+        return '  '.join(buffer)
 
     # For use by this class
 

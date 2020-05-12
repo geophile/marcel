@@ -60,6 +60,9 @@ class ColorScheme:
         self.file_executable = None
         self.file_extension = None
         self.process_pid = None
+        self.process_ppid = None
+        self.process_state = None
+        self.process_user = None
         self.process_commandline = None
         self.error = None
         self.help_reference = None
