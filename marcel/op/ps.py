@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
+
 import marcel.core
 import marcel.exception
 import marcel.object.process
@@ -57,8 +59,10 @@ class PsArgParser(marcel.core.ArgParser):
                          DETAILS)
         filter_group = self.add_mutually_exclusive_group()
         filter_group.add_argument('-u', '--user',
+                                  nargs='?',
                                   help='Select processes owned by the specified username or uid.')
         filter_group.add_argument('-g', '--group',
+                                  nargs='?',
                                   help='Select processes owned by the specified group name or gid.')
         filter_group.add_argument('-p', '--pid',
                                   help='Select the process with the given pid.')
@@ -68,12 +72,14 @@ class PsArgParser(marcel.core.ArgParser):
 
 class Ps(marcel.core.Op):
 
+    UNINITIALIZED = object()
+
     def __init__(self):
         super().__init__()
-        self.user = None
-        self.group = None
-        self.pid = None
-        self.command = None
+        self.user = Ps.UNINITIALIZED
+        self.group = Ps.UNINITIALIZED
+        self.pid = Ps.UNINITIALIZED
+        self.command = Ps.UNINITIALIZED
         self.filter = None
 
     # BaseOp
@@ -81,23 +87,25 @@ class Ps(marcel.core.Op):
     def setup_1(self):
         # user, group can be name or id. A name can be numeric, and in that case, the name interpretation
         # takes priority. Convert name to uid, since that is a cheaper lookup on a Project.
+        # If user or group is None, no user/group was specified, so use this user/group.
+        # UNINITIALIZED means it wasn't specified at all.
         option_count = 0
-        if self.user is not None:
+        if self.user is not Ps.UNINITIALIZED:
             option_count += 1
-            self.user = Ps.convert_to_id(self.user, marcel.util.uid)
+            self.user = os.getuid() if self.user is None else Ps.convert_to_id(self.user, marcel.util.uid)
             self.filter = lambda p: p.uid == self.user
-        if self.group is not None:
+        if self.group is not Ps.UNINITIALIZED:
             option_count += 1
-            self.group = Ps.convert_to_id(self.group, marcel.util.gid)
+            self.group = os.getgid() if self.group is None else Ps.convert_to_id(self.group, marcel.util.gid)
             self.filter = lambda p: p.gid == self.group
-        if self.pid is not None:
+        if self.pid is not Ps.UNINITIALIZED:
             option_count += 1
             try:
                 self.pid = int(self.pid)
                 self.filter = lambda p: p.pid == self.pid
             except ValueError:
                 raise marcel.exception.KillCommandException(f'pid must be an int: {self.pid}')
-        if self.command is not None:
+        if self.command is not Ps.UNINITIALIZED:
             option_count += 1
             self.filter = lambda p: self.command in p.commandline
         if option_count > 1:

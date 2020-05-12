@@ -130,7 +130,12 @@ Design of the Process object
 
 Design of the ps command
 
-- All processes? Just for the user? Just those with a command line?
+- By default, list all processes
+
+- -u/--user flag: this user. Or a specified user, identified by uid or name.
+- -g/--gid: gid, group
+- -p/--pid: pid
+- -c/--command: commandline (look for containment)
 
 - compact: pid and name? Just pid?
 
