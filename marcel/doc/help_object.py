@@ -56,9 +56,6 @@ produces this output:
 
 Use the {n:help} command to get more information on the following kinds of objects:
 
-{L}- {n:color}
-{L}- {n:error}
 {L}- {n:file}
-{L}- {n:host}
 {L}- {n:process}
 '''
