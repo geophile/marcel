@@ -701,3 +701,49 @@ FIXED
 
 \\ in help_command.py: Need space between \\ and } or crash. Also, not
 even \\ is showing up.
+
+----------------------------------------------------------------------
+
+45. Tab completion on "ls -l" (I think)
+
+M-0.6.3 jao@cheese:~/git/marcel$ ls -l test/test_opusage: ls [-h] [-0 | -1 | -r] [-f] [-d] [-s] ...
+Caught <class 'marcel.exception.KillCommandException'>: ls: error: unrecognized arguments: -l
+
+  File "/home/jao/git/marcel/marcel/tabcompleter.py", line 73, in complete
+    parser.parse(partial_text=True)
+  File "/home/jao/git/marcel/marcel/parse.py", line 443, in parse
+    self.args_action(token)
+  File "/home/jao/git/marcel/marcel/parse.py", line 417, in args_action
+    self.finish_op()
+  File "/home/jao/git/marcel/marcel/parse.py", line 513, in finish_op
+    arg_parser.parse_args(current.args, namespace=op)
+  File "/home/jao/git/marcel/marcel/core.py", line 61, in parse_args
+    return super().parse_args(args, namespace)
+  File "/usr/lib/python3.7/argparse.py", line 1767, in parse_args
+    self.error(msg % ' '.join(argv))
+  File "/usr/lib/python3.7/argparse.py", line 2516, in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+  File "/home/jao/git/marcel/marcel/core.py", line 68, in exit
+    raise marcel.exception.KillCommandException(message)
+ls: error: unrecognized arguments: -l
+
+usage: ls [-h] [-0 | -1 | -r] [-f] [-d] [-s] ...
+Caught <class 'marcel.exception.KillCommandException'>: ls: error: unrecognized arguments: -l
+
+  File "/home/jao/git/marcel/marcel/tabcompleter.py", line 73, in complete
+    parser.parse(partial_text=True)
+  File "/home/jao/git/marcel/marcel/parse.py", line 443, in parse
+    self.args_action(token)
+  File "/home/jao/git/marcel/marcel/parse.py", line 417, in args_action
+    self.finish_op()
+  File "/home/jao/git/marcel/marcel/parse.py", line 513, in finish_op
+    arg_parser.parse_args(current.args, namespace=op)
+  File "/home/jao/git/marcel/marcel/core.py", line 61, in parse_args
+    return super().parse_args(args, namespace)
+  File "/usr/lib/python3.7/argparse.py", line 1767, in parse_args
+    self.error(msg % ' '.join(argv))
+  File "/usr/lib/python3.7/argparse.py", line 2516, in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+  File "/home/jao/git/marcel/marcel/core.py", line 68, in exit
+    raise marcel.exception.KillCommandException(message)
+ls: error: unrecognized arguments: -l

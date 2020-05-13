@@ -43,10 +43,11 @@ import marcel.multilinereader
 import marcel.opmodule
 import marcel.parse
 import marcel.tabcompleter
+import marcel.util
 
 
 HISTORY_FILE = '.marcel_history'
-HISTORY_LENGTH = 100
+HISTORY_LENGTH = -1  # Unlimited
 
 
 class Console:

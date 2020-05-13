@@ -13,39 +13,44 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-public = [
-    'bash',
-    'bg',
-    'cd',
-    'dirs',
-    'edit',
-    'expand',
-    'fg',
-    'first',
-    'fork',
-    'gather',
-    'gen',
-    'head',
-    'help',
-    'history',
-    'jobs',
-    'ls',
-    'map',
-    'out',
-    'popd',
-    'ps',
-    'pushd',
-    'pwd',
-    'red',
-    'remote',
-    'reverse',
-    'select',
-    'sort',
-    'squish',
-    'sudo',
-    'tail',
-    'timer',
-    'unique',
-    'version',
-    'window'
-]
+import marcel.core
+
+
+SUMMARY = '''
+Generate a stream containing the history of commands executed.
+'''
+
+
+DETAILS = None
+
+
+def history():
+    return History()
+
+
+class HistoryArgParser(marcel.core.ArgParser):
+
+    def __init__(self, env):
+        super().__init__('history', env, None, SUMMARY, DETAILS)
+
+
+class History(marcel.core.Op):
+
+    def __init__(self):
+        super().__init__()
+
+    def __repr__(self):
+        return 'history()'
+
+    # BaseOp
+
+    def setup_1(self):
+        pass
+
+    def receive(self, _):
+        self.send(self.env().dir_state().pwd())
+
+    # Op
+
+    def must_be_first_in_pipeline(self):
+        return True

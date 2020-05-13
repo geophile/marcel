@@ -36,4 +36,7 @@ All marcel operators that rely on functions use the same syntax demonstrated
 here: The function is enclosed in parentheses; the parameters are bound
 to components of incoming tuples. And in all cases, the {n:lambda} keyword
 can be omitted.
+
+Marcel functions run in a namespace maintained by marcel. Run
+{n:help namespace} for more information.
 '''
