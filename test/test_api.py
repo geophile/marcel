@@ -341,6 +341,15 @@ def test_window():
              expected_err='Exactly one')
 
 
+def test_bash():
+    # Two space between hello and world not preserved.
+    TEST.run(lambda: run(bash('echo', 'hello', 'world')),
+             expected_out=['hello world'])
+    # Quoted, so they are preserved.
+    TEST.run(lambda: run(bash('echo', "hello  world")),
+             expected_out=['hello  world'])
+
+
 def test_namespace():
     config_file = '/tmp/.marcel.py'
     config_path = pathlib.Path(config_file)
@@ -513,13 +522,14 @@ def main_stable():
 
 
 def main_dev():
+    test_bash()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

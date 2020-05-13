@@ -16,9 +16,9 @@
 import argparse
 import shlex
 import subprocess
-import sys
 
 import marcel.core
+import marcel.exception
 import marcel.object.error
 import marcel.util
 

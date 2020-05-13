@@ -352,11 +352,12 @@ def test_window():
 
 
 def test_bash():
+    # Two space between hello and world not preserved.
     TEST.run('bash echo hello  world',
              expected_out=['hello world'])
-    # TODO: This doesn't work. quoted string has two spaces, but output has one.
-    # TEST.run('bash echo "hello  world"',
-    #          expected_out=['hello  world\n'])
+    # Quoted, so they are preserved.
+    TEST.run('bash echo "hello  world"',
+             expected_out=['hello  world'])
 
 
 def test_fork():

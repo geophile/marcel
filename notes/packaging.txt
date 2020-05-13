@@ -12,9 +12,17 @@ Install local:
 
     python3 -m pip install marcel
 
+Upgrade local:
+
+    python3 -m pip install -U marcel
+
 Install global:
 
     sudo python3 -m pip install --prefix /usr/local marcel
+
+Upgrade global:
+
+    sudo python3 -m pip install -U --prefix /usr/local marcel
 
 ----------------------------------------------------------------------
 

@@ -2,6 +2,8 @@
 
 - DB access
 
+- Improve bash and sudo
+
 ----------------------------------------------------------------------
 
 0.6
@@ -38,7 +40,7 @@
   - Syntax for starting job in background (like bash &). Maybe 
     bg [ ... ]?
 
-- Improve bash and sudo
+- Improve bash 
 
 + Installation
 
