@@ -58,8 +58,17 @@ The following file metadata properties are available on {n:File}s:
 {L}- gid
 {L}- size
 {L}- atime
-{L}- mtime
 {L}- ctime
+{L}- mtime
+
+{r:atime}, {r:ctime}, and {r:mtime} return seconds since the epoch
+(January 1, 1970). These can be used with the functions {n:now}, {n:hours},
+and {n:minutes} to select files based on these times. For example, this
+command finds files under {n:/etc} that have been modified in the past day:
+
+{L,wrap=F}ls -fr /etc | select (f: now() - f.mtime <= days(1))
+
+Run {n:help namespace} for more information on builtin functions.
 
 {b:File content}
 

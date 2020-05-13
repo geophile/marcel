@@ -1,0 +1,42 @@
+Need some ability to compute dates and times, e.g. files that changed
+in the last day.
+
+datetime seems like the best python type to use.
+
+Timezone needs to be provided explicitly, if it is to be used. (If
+omitted, we have a date/time without a timezone, and that is
+well-defined). Try leaving it off to start.
+
+
+File has atime, mtime, ctime properties. These are seconds since the
+epoch.
+
+Convert to datetime: datetime.datetime.fromtimestamp(file.mtime)
+
+Can subtract one from another to get a datetime.timedelta.
+
+Find files modifed within the past 7 days:
+
+ls -fr \
+| select (f: f.suffix == '.py') \
+| select (f: datetime.now() - datetime.fromtimestamp(f.mtime) < timedelta(hours=8))
+
+
+Or, sticking to unix time:
+
+ls -fr \
+| select (f: f.suffix == '.py') \
+| select (f: timedelta(seconds=time.time()-f.mtime) < timedelta(hours=8))
+
+
+The second one is more compact, involves less use of datetime objects,
+and so is probably faster. But it still involves lots of noise to
+construct timedeltas. 
+
+Could stick to epoch-based time if we had a convenient way to specify
+time intervals in that domain. Need to invent some functions. E.g.
+
+     ls -fr | select (f: f.suffix == '.py') and now()-f.mtime < hours(8))
+
+where hours(8) computes 8 hours in seconds, and now() is time.time().
+

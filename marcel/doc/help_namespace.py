@@ -49,6 +49,10 @@ then {r:sqrt} can be used:
     {c500b:M} {c021b:jao@cheese}:{c033b:~$} map ((1 + sqrt(5)) / 2)
     1.618033988749895
 
+You should probably include {n:import marcel.builtin} in your configuration
+file. This includes a collection of functions useful for shell operations.
+Run {n:help builtin} for more information.
+
 {b:Definitions:}
 
 You can also define symbols in the usual way, assigning variables,
