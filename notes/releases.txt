@@ -49,6 +49,10 @@
 - API needs easy access to env vars. What is the relationship between
   the API namespace and the console's marcel namespace?
 
+Bugs:
+
+  - 45
+
 ----------------------------------------------------------------------
 
 0.5 -- API
