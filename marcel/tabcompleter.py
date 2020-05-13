@@ -19,7 +19,9 @@ import readline
 
 import marcel.core
 import marcel.doc
+import marcel.exception
 import marcel.op
+import marcel.parse
 import marcel.util
 
 
@@ -79,9 +81,12 @@ class TabCompleter:
                 debug(f'caught ({type(e)}) {e}')
                 # Don't do tab completion
                 return None
+            except marcel.exception.KillCommandException as e:
+                debug(f'Arg parse failed? {e}')
+                return None
             except BaseException as e:
-                marcel.util.print_stack()
                 print(e)
+                marcel.util.print_stack()
             debug(f'parser.op_name: {parser.op_name}')
             if parser.op_name is None:
                 candidates = self.complete_op(text)

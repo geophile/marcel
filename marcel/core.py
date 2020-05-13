@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import sys
 
 import marcel.exception
 import marcel.exception
@@ -60,6 +61,9 @@ class ArgParser(argparse.ArgumentParser):
             namespace.set_pipeline_args(pipelines)
         return super().parse_args(args, namespace)
 
+    def print_usage(self, file=None):
+        pass
+
     def print_help(self, file=None):
         super().print_help(file)
 
@@ -68,7 +72,7 @@ class ArgParser(argparse.ArgumentParser):
             raise marcel.exception.KillCommandException(message)
         else:
             # Parser is exiting normally, probably because it was run to obtain a help message.
-            # We don't want to actually run a command. Proceeding asthe
+            # We don't want to actually run a command. Proceeding as
             # if the command were killed by Ctrl-C escapes correctly.
             raise KeyboardInterrupt()
 

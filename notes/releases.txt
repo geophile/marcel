@@ -4,6 +4,8 @@
 
 - Improve bash and sudo
 
+- "(...)" as shorthand for "map (...)"? (If no parameters)
+
 ----------------------------------------------------------------------
 
 0.6
@@ -27,8 +29,6 @@
   colorization is needed. And stat (computed before pickling) doesn't
   indicate whether the file exists. Could check and record this.
 
-- "(...)" as shorthand for "map (...)"? (If no parameters)
-
 - More work on jobs:
 
   - history
@@ -40,7 +40,7 @@
   - Syntax for starting job in background (like bash &). Maybe 
     bg [ ... ]?
 
-- Improve bash 
++ Improve bash 
 
 + Installation
 
