@@ -92,6 +92,7 @@ class MultiLineReader:
 
     def _fix_history(self):
         try:
+            readline.clear_history()
             readline.read_history_file(self.history_file)
         except FileNotFoundError:
             return

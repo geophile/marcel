@@ -212,3 +212,24 @@ class Process(marcel.object.renderable.Renderable):
         self._ensure_status()
         return self._status is not None
 
+    # Should get rid of this, but needed by farcel
+
+    def descendents(self):
+        processes = {}  # pid -> Process
+        for file in os.listdir('/proc'):
+            if file.isdigit():
+                process = Process(int(file))
+                processes[process.pid] = process
+        descendents = set()
+        descendents.add(self)
+        more = True
+        while more:
+            more = False
+            for child in processes.values():
+                parent = processes.get(child.pid, None)
+                if parent:
+                    if parent in descendents and child not in descendents:
+                        descendents.add(child)
+                        more = True
+        descendents.remove(self)
+        return descendents

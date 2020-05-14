@@ -78,7 +78,7 @@ def kill_descendents(signal_id):
         pid = os.getpid()
         try:
             process = marcel.object.process.Process(pid)
-            for p in process.descendents:
+            for p in process.descendents():
                 TRACE.write(f'Killing descendent pid {p.pid}')
                 p.kill(signal_id)
             # # Suicide

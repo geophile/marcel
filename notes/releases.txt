@@ -51,9 +51,14 @@
 - API needs easy access to env vars. What is the relationship between
   the API namespace and the console's marcel namespace?
 
+If marcel is my default shell (in /etc/passwd), then remote operations
+fail, probably because marcel doesn't work as the shell for executing
+a command by ssh. May be related to bug 46.
+
 Bugs:
 
   + 45
+  - 46
 
 ----------------------------------------------------------------------
 
