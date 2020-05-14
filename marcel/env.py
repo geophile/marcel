@@ -133,6 +133,7 @@ class Environment:
         # TODO: This is a hack. Clean it up once the env handles command history
         self.edited_command = None
         self.op_modules = None
+        self.linereader = None
 
     def __getstate__(self):
         return {}

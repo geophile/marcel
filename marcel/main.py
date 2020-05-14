@@ -95,7 +95,8 @@ class Main:
         self.op_modules = marcel.opmodule.import_op_modules(self.env)
         self.env.op_modules = self.op_modules
         self.reader = None
-        self.initialize_input()
+        self.initialize_input()  # Sets self.reader
+        self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.update_env_vars)
         self.console = Console(self.handle_console_changes)
         atexit.register(self.shutdown)

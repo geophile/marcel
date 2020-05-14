@@ -48,7 +48,9 @@ class History(marcel.core.Op):
         pass
 
     def receive(self, _):
-        self.send(self.env().dir_state().pwd())
+        history = self.env().reader.history()
+        for i in range(len(history)):
+            self.send((i, history[i]))
 
     # Op
 

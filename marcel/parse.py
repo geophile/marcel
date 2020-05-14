@@ -28,21 +28,7 @@ class MalformedStringError(Exception):
         self.text = text
 
 
-class Token:
-    # Special characters that need to be escaped for python strings
-    ESCAPABLE = '''\\\'\"\a\b\f\n\r\t\v'''
-    SINGLE_QUOTE = "'"
-    DOUBLE_QUOTE = '"'
-    QUOTES = SINGLE_QUOTE + DOUBLE_QUOTE
-    ESCAPE_CHAR = '\\'
-    OPEN = '('
-    CLOSE = ')'
-    PIPE = '|'
-    FORK = '@'
-    BEGIN = '['
-    END = ']'
-    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END]
-
+class Source:
     def __init__(self, text, position):
         self.text = text
         self.start = position
@@ -66,6 +52,27 @@ class Token:
 
     def remaining(self):
         return len(self.text) - self.end
+
+
+class Token(Source):
+    # Special characters that need to be escaped for python strings
+    ESCAPABLE = '''\\\'\"\a\b\f\n\r\t\v'''
+    SINGLE_QUOTE = "'"
+    DOUBLE_QUOTE = '"'
+    QUOTES = SINGLE_QUOTE + DOUBLE_QUOTE
+    ESCAPE_CHAR = '\\'
+    OPEN = '('
+    CLOSE = ')'
+    PIPE = '|'
+    FORK = '@'
+    BEGIN = '['
+    END = ']'
+    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END]
+
+    def __init__(self, text, position):
+        self.text = text
+        self.start = position
+        self.end = position
 
     def is_string(self):
         return False
@@ -346,7 +353,7 @@ class InProgress:
         self.args.clear()
 
 
-class Parser(Token):
+class Parser(Source):
 
     def __init__(self, text, op_modules):
         super().__init__(text, 0)

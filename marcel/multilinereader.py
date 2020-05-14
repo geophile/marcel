@@ -73,6 +73,15 @@ class MultiLineReader:
     def close(self):
         readline.write_history_file(self.history_file)
 
+    def history(self):
+        history = []  # Newest first
+        n = readline.get_current_history_length()
+        i = 1  # readline is 1-based
+        while i <= n:
+            history.append(readline.get_history_item(i))
+            i += 1
+        return history
+
     # A line recalled from history is a single string, constructed by joining together the individual lines
     # with \n. Return the original multi-line form. Return None if the input was not a joined-together line
     # from history.
