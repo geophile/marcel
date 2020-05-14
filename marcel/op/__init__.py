@@ -39,6 +39,7 @@ public = [
     'red',
     'remote',
     'reverse',
+    'run',
     'select',
     'sort',
     'squish',

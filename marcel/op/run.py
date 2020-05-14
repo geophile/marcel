@@ -24,24 +24,24 @@ import marcel.main
 
 
 SUMMARY = '''
-Open an editor to edit the previous command.
+Run a previous command.
 '''
 
 
 DETAILS = '''
-The editor is specified by the {n:EDITOR} environment variable. On exiting the editor, the edited command
-will be on the command line. (Hit enter to run the command, as usual.)
+If {r:n} is not specified, then run the previous command. Otherwise, run the specified command.
+The recalled command will replace {n:run} in the command history.
 '''
 
 
-def edit():
-    return Edit()
+def run():
+    return Run()
 
 
 class EditArgParser(marcel.core.ArgParser):
 
     def __init__(self, env):
-        super().__init__('edit', env, None, SUMMARY, DETAILS)
+        super().__init__('run', env, None, SUMMARY, DETAILS)
         self.add_argument('n',
                           nargs='?',
                           type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
@@ -49,7 +49,7 @@ class EditArgParser(marcel.core.ArgParser):
                           help='The identifying number of a history command.')
 
 
-class Edit(marcel.core.Op):
+class Run(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
@@ -63,33 +63,17 @@ class Edit(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
-        self.editor = os.getenv('EDITOR')
-        if self.editor is None:
-            raise marcel.exception.KillCommandException(
-                'Specify editor in the EDITOR environment variable')
-        _, self.tmp_file = tempfile.mkstemp(text=True)
+        pass
 
     def receive(self, _):
-        # Remove the edit command from history
+        # Remove the run command from history
         readline.remove_history_item(readline.get_current_history_length() - 1)
         length = readline.get_current_history_length()
         if self.n is None:
             self.n = length - 1
         # The last command (the one before edit) is the one of interest.
-        command = readline.get_history_item(readline.get_current_history_length() - length + self.n + 1)  # 1-based
-        assert command is not None
-        with open(self.tmp_file, 'w') as output:
-            output.write(command)
-        edit_command = f'{self.editor} {self.tmp_file}'
-        process = subprocess.Popen(edit_command,
-                                   shell=True,
-                                   executable='/bin/bash',
-                                   universal_newlines=True)
-        process.wait()
-        with open(self.tmp_file, 'r') as input:
-            command_lines = input.readlines()
-        self.env().edited_command = ''.join(command_lines)
-        os.remove(self.tmp_file)
+        self.env().edited_command = readline.get_history_item(
+            readline.get_current_history_length() - length + self.n + 1)  # 1-based
 
     # Op
 

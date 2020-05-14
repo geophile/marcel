@@ -47,7 +47,15 @@ import marcel.util
 
 
 HISTORY_FILE = '.marcel_history'
-HISTORY_LENGTH = -1  # Unlimited
+HISTORY_LENGTH = 10000
+IMMEDIATE_OPS = ('bg',
+                 'edit',
+                 'fg',
+                 'help',
+                 'history',
+                 'jobs',
+                 'kill',
+                 'run')
 
 
 class Console:
@@ -186,7 +194,7 @@ class Main:
     def run_immediate(self, line):
         # Job control commands should be run in this process, not a spawned process.
         # Also, if we're testing operator behavior, run in immediate mode.
-        return self.same_process or line.split()[0] in ('bg', 'edit', 'fg', 'help', 'jobs', 'kill')
+        return self.same_process or line.split()[0] in IMMEDIATE_OPS
 
     def handle_console_changes(self):
         for module in self.op_modules.values():

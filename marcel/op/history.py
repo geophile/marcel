@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import readline
+
 import marcel.core
 
 
@@ -21,7 +23,9 @@ Generate a stream containing the history of commands executed.
 '''
 
 
-DETAILS = None
+DETAILS = '''
+The history command itself will not show up in the command history.
+'''
 
 
 def history():
@@ -48,6 +52,8 @@ class History(marcel.core.Op):
         pass
 
     def receive(self, _):
+        # Remove the run command from history
+        readline.remove_history_item(readline.get_current_history_length() - 1)
         history = self.env().reader.history()
         for i in range(len(history)):
             self.send((i, history[i]))

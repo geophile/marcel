@@ -3,6 +3,7 @@ import pathlib
 from math import pi
 
 import marcel.object.error
+import marcel.object.host
 import marcel.version
 import test_base
 from marcel.api import *
