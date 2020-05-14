@@ -42,12 +42,18 @@ class EditArgParser(marcel.core.ArgParser):
 
     def __init__(self, env):
         super().__init__('edit', env, None, SUMMARY, DETAILS)
+        self.add_argument('n',
+                          nargs='?',
+                          type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
+                                                        'must be non-negative'),
+                          help='The identifying number of a history command.')
 
 
 class Edit(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
+        self.n = None
         self.editor = None
         self.tmp_file = None
 
@@ -57,6 +63,8 @@ class Edit(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
+        if self.n is None:
+            self.n = 0
         self.editor = os.getenv('EDITOR')
         if self.editor is None:
             raise marcel.exception.KillCommandException(
@@ -66,8 +74,11 @@ class Edit(marcel.core.Op):
     def receive(self, _):
         # Remove the edit command from history
         readline.remove_history_item(readline.get_current_history_length() - 1)
+        length = readline.get_current_history_length()
+        print(f'edit: length = {length}, n = {self.n}')
         # The last command (the one before edit) is the one of interest.
-        command = readline.get_history_item(readline.get_current_history_length())  # 1-based
+        command = readline.get_history_item(readline.get_current_history_length() - length + self.n + 1)  # 1-based
+        assert command is not None
         with open(self.tmp_file, 'w') as output:
             output.write(command)
         edit_command = f'{self.editor} {self.tmp_file}'
