@@ -33,11 +33,10 @@
 
   + history
 
-  - Run previous command, (!, !!)
+  + Run previous command, (!, !!)
 
       + Add run command, which takes a history id as input.
-      - ! and !! are alternative syntax for run N and run (with no arg, implying last)
-      - ! and !! tab completion substitute the recalled command.
+      + ! and !! are alternative syntax for run N and run (with no arg, implying last)
 
   - fg/bg without specifying job#
 

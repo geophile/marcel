@@ -2,29 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75987f50-1f5a-424e-8e7d-d18b54677943" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/marcel.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/marcel.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/doc/help_marcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_marcel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/cd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/cd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/dirs.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/dirs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/edit.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/edit.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/help.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/help.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/history.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/history.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/jobop.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/jobop.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/jobs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/popd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/popd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/pushd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/pushd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/pwd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/pwd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/run.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/parse.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/parse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/tabcompleter.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/tabcompleter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/grammar.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/notes/grammar.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/grammar.odg" beforeDir="false" afterPath="$PROJECT_DIR$/notes/grammar.odg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -925,7 +903,7 @@
       <workItem from="1589550549227" duration="8000" />
       <workItem from="1589550567300" duration="154000" />
       <workItem from="1589550772244" duration="2037000" />
-      <workItem from="1589564269712" duration="1297000" />
+      <workItem from="1589564269712" duration="1950000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
