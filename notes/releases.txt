@@ -35,14 +35,14 @@
 
   - Run previous command, (!, !!)
 
-      - Add run command, which takes a history id as input.
+      + Add run command, which takes a history id as input.
       - ! and !! are alternative syntax for run N and run (with no arg, implying last)
       - ! and !! tab completion substitute the recalled command.
 
   - fg/bg without specifying job#
 
   - Syntax for starting job in background (like bash &). Maybe 
-    bg [ ... ]?
+    bg [ ... ]? Awkward to recall and then edit. 
 
 + Improve bash 
 

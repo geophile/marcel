@@ -29,7 +29,7 @@ class MalformedStringError(Exception):
 
 
 class Source:
-    def __init__(self, text, position):
+    def __init__(self, text, position=0):
         self.text = text
         self.start = position
         self.end = position
@@ -64,20 +64,22 @@ class Token(Source):
     OPEN = '('
     CLOSE = ')'
     PIPE = '|'
+    BANG = '!'
     FORK = '@'
     BEGIN = '['
     END = ']'
     STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END]
 
     def __init__(self, text, position):
-        self.text = text
-        self.start = position
-        self.end = position
+        super().__init__(text, position)
 
     def is_string(self):
         return False
 
     def is_fork(self):
+        return False
+
+    def is_bang(self):
         return False
 
     def is_pipe(self):
@@ -94,6 +96,9 @@ class Token(Source):
 
     def value(self):
         return None
+
+    def op_name(self):
+        assert False, self
 
 
 # Python string literals are specified here:
@@ -211,6 +216,10 @@ class ShellString(Token):
     def value(self):
         return self.string
 
+    def op_name(self):
+        # Hopefully, this is only being called for the first op following START
+        return self.string
+
     def scan(self):
         quote = None
         chars = []
@@ -256,6 +265,33 @@ class ShellString(Token):
         self.string = ''.join(chars)
 
 
+class Run(Token):
+
+    def __init__(self, text, position):
+        super().__init__(text, position)
+        self.symbol = None
+        self.scan()  # Sets self.symbol
+
+    def value(self):
+        return self.symbol
+
+    def op_name(self):
+        return 'run'
+
+    def is_bang(self):
+        return True
+
+    def scan(self):
+        c = self.next_char()
+        assert c == Token.BANG
+        c = self.peek_char()
+        if c == Token.BANG:
+            self.next_char()
+            self.symbol = '!!'
+        else:
+            self.symbol = '!'
+
+
 class OneCharSymbol(Token):
 
     def __init__(self, text, position, symbol):
@@ -283,6 +319,9 @@ class Fork(OneCharSymbol):
 
     def is_fork(self):
         return True
+
+    def op_name(self):
+        return 'fork'
 
 
 class Begin(OneCharSymbol):
@@ -345,43 +384,40 @@ class InProgress:
 
     def __init__(self):
         self.pipeline = marcel.core.Pipeline()
-        self.op_name = None
+        self.op_token = None
         self.args = []
 
     def reset_op(self):
-        self.op_name = None
+        self.op_token = None
         self.args.clear()
 
 
 class Parser(Source):
 
     def __init__(self, text, op_modules):
-        super().__init__(text, 0)
+        super().__init__(text)
         self.op_modules = op_modules
         self.state = ParseState.START
         self.stack = marcel.util.Stack()
         self.stack.push(InProgress())
-        self.op_name = None  # For use by tabcompleter
+        self.op_token = None  # For use by tabcompleter
 
     def __repr__(self):
         return f'parser({self.text})'
 
-    def set_op_name(self, op_name):
-        self.current().op_name = op_name
-        self.op_name = op_name if self.is_op() else None
+    def set_op_token(self, op_token):
+        self.current().op_token = op_token
+        self.op_token = op_token if self.is_op() else None
 
     def current(self):
         return self.stack.top()
 
     def start_action(self, token):
-        if token.is_fork():
-            self.set_op_name('fork')
-            self.state = ParseState.OP
-        elif token.is_string() or token.is_fork():
-            self.set_op_name(token.value())
-            self.state = ParseState.OP
-        elif token is None:
+        if token is None:
             raise PrematureEndError(self.text)
+        elif token.is_fork() or token.is_bang() or token.is_string():
+            self.set_op_token(token)
+            self.state = ParseState.OP
         else:
             raise UnexpectedTokenError(self.text, self.end, 'Expected string')
 
@@ -466,6 +502,7 @@ class Parser(Source):
             if not partial_text:
                 raise marcel.exception.KillCommandException(e)
         except Exception as e:
+            marcel.util.print_stack()
             raise marcel.exception.KillCommandException(e)
 
     def next_token(self):
@@ -485,6 +522,8 @@ class Parser(Source):
                 token = End(self.text, self.end)
             elif c == Token.FORK:
                 token = Fork(self.text, self.end)
+            elif c == Token.BANG:
+                token = Run(self.text, self.end)
             else:
                 token = ShellString(self.text, self.end)
             self.end = token.end
@@ -497,13 +536,14 @@ class Parser(Source):
             c = self.peek_char()
 
     def is_op(self):
-        op_name = self.current().op_name
+        op_name = self.current().op_token.op_name()
         return self.op_modules.get(op_name, None) is not None or marcel.util.is_executable(op_name)
 
     def finish_op(self):
-        # Get the op module, bash in case of an executable.
+        # Get the op module, and handle the special cases of bash
         current = self.current()
-        op_name = current.op_name
+        op_token = current.op_token
+        op_name = op_token.op_name()
         try:
             op_module = self.op_modules[op_name]
         except KeyError:
@@ -514,6 +554,13 @@ class Parser(Source):
                 raise UnknownOpError(self.text, op_name)
         # Create the op
         op = op_module.create_op()
+        # Both ! and !! map to the run op.
+        if op_name == 'run':
+            # !: Expect a command number
+            # !!: Don't expect a command number, run the previous command
+            # else: 'run' was entered
+            op.expected_args = (1 if op_token.value() == '!' else
+                                0 if op_token.value() == '!!' else None)
         # Parse its args
         arg_parser = op_module.arg_parser()
         current = self.current()

@@ -251,6 +251,9 @@ class Op(BaseOp):
     def must_be_first_in_pipeline(self):
         return False
 
+    def run_in_main_process(self):
+        return True
+
     @classmethod
     def op_name(cls):
         return cls.__name__.lower()

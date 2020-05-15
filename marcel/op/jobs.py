@@ -63,3 +63,7 @@ class Jobs(marcel.core.Op):
             self.send(description)
             job_id += 1
 
+    # Op
+
+    def run_in_main_process(self):
+        return True

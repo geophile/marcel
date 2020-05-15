@@ -266,3 +266,21 @@ correctly on startup.
 
 - Allow omission of \
 - But add it if missing, at least for stored history.
+
+----------------------------------------------------------------------
+
+edit command relies on bash EDITOR variable. Should use a marcel
+variable.  Import selected bash env variables? Can't see anything
+other than EDITOR right now.
+
+----------------------------------------------------------------------
+
+ps lines are often long enough to wrap. Should render_full leave off
+args? If so, then provide an args method.
+
+----------------------------------------------------------------------
+
+What if there are two shells running at the same time -- how is
+history file maintained? Probably lose updates from the first one to
+exit. How should this be handled? To be safe, on exit, should read,
+append, write. Atomically.

@@ -50,11 +50,12 @@ Available topics:
     - {n:bash}        - {n:bg}          - {n:cd}
     - {n:dirs}        - {n:edit}        - {n:expand}
     - {n:fg}          - {n:gen}         - {n:head}
-    - {n:help}        - {n:jobs}        - {n:ls}
-    - {n:map}         - {n:out}         - {n:popd}
-    - {n:ps}          - {n:pushd}       - {n:pwd}
-    - {n:red}         - {n:reverse}     - {n:select}
-    - {n:sort}        - {n:squish}      - {n:sudo}
-    - {n:tail}        - {n:timer}       - {n:unique}
-    - {n:version}     - {n:window}
+    - {n:help}        - {n:history}     - {n:jobs}
+    - {n:ls}          - {n:map}         - {n:out}
+    - {n:popd}        - {n:ps}          - {n:pushd}
+    - {n:pwd}         - {n:red}         - {n:reverse}
+    - {n:run}         - {n:select}      - {n:sort}
+    - {n:squish}      - {n:sudo}        - {n:tail}
+    - {n:timer}       - {n:unique}      - {n:version}
+    - {n:window}
 '''

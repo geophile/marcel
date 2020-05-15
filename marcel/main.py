@@ -48,14 +48,6 @@ import marcel.util
 
 HISTORY_FILE = '.marcel_history'
 HISTORY_LENGTH = 10000
-IMMEDIATE_OPS = ('bg',
-                 'edit',
-                 'fg',
-                 'help',
-                 'history',
-                 'jobs',
-                 'kill',
-                 'run')
 
 
 class Console:
@@ -144,7 +136,7 @@ class Main:
                     out.csv = False
                     pipeline.append(out)
                 command = marcel.core.Command(line, pipeline)
-                if self.run_immediate(line):
+                if self.run_immediate(pipeline):
                     command.execute()
                 else:
                     self.job_control.create_job(command)
@@ -191,10 +183,10 @@ class Main:
         environment = self.env
         environment.setvar('DIRS', dirs)
 
-    def run_immediate(self, line):
+    def run_immediate(self, pipeline):
         # Job control commands should be run in this process, not a spawned process.
         # Also, if we're testing operator behavior, run in immediate mode.
-        return self.same_process or line.split()[0] in IMMEDIATE_OPS
+        return self.same_process or pipeline.first_op.run_in_main_process()
 
     def handle_console_changes(self):
         for module in self.op_modules.values():

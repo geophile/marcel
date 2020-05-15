@@ -72,11 +72,9 @@ class Edit(marcel.core.Op):
     def receive(self, _):
         # Remove the edit command from history
         readline.remove_history_item(readline.get_current_history_length() - 1)
-        length = readline.get_current_history_length()
         if self.n is None:
-            self.n = length - 1
-        # The last command (the one before edit) is the one of interest.
-        command = readline.get_history_item(readline.get_current_history_length() - length + self.n + 1)  # 1-based
+            self.n = readline.get_current_history_length() - 1
+        command = readline.get_history_item(self.n + 1)  # 1-based
         assert command is not None
         with open(self.tmp_file, 'w') as output:
             output.write(command)
@@ -94,4 +92,7 @@ class Edit(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        return True
+
+    def run_in_main_process(self):
         return True

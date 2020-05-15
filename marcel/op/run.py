@@ -13,10 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
 import readline
-import subprocess
-import tempfile
 
 import marcel.core
 import marcel.exception
@@ -38,7 +35,7 @@ def run():
     return Run()
 
 
-class EditArgParser(marcel.core.ArgParser):
+class RunArgParser(marcel.core.ArgParser):
 
     def __init__(self, env):
         super().__init__('run', env, None, SUMMARY, DETAILS)
@@ -53,29 +50,33 @@ class Run(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
+        self.expected_args = None  # Set during parse. ! -> 1, !! -> 0
         self.n = None
         self.editor = None
         self.tmp_file = None
 
     def __repr__(self):
-        return 'edit()'
+        return 'run()'
 
     # BaseOp
 
     def setup_1(self):
-        pass
+        if self.expected_args == 1 and self.n is None:
+            raise marcel.exception.KillCommandException('History command number required following !')
+        elif self.expected_args == 0 and self.n is not None:
+            raise marcel.exception.KillCommandException('No arguments permitted after !!')
 
     def receive(self, _):
         # Remove the run command from history
         readline.remove_history_item(readline.get_current_history_length() - 1)
-        length = readline.get_current_history_length()
         if self.n is None:
-            self.n = length - 1
-        # The last command (the one before edit) is the one of interest.
-        self.env().edited_command = readline.get_history_item(
-            readline.get_current_history_length() - length + self.n + 1)  # 1-based
+            self.n = readline.get_current_history_length() - 1
+        self.env().edited_command = readline.get_history_item(self.n + 1)  # 1-based
 
     # Op
 
     def must_be_first_in_pipeline(self):
+        return True
+
+    def run_in_main_process(self):
         return True

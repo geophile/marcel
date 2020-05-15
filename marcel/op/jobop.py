@@ -72,6 +72,9 @@ class JobOp(marcel.core.Op):
     def must_be_first_in_pipeline(self):
         return True
 
+    def run_in_main_process(self):
+        return True
+
     # JobOp
 
     def action(self):

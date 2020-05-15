@@ -87,13 +87,13 @@ class TabCompleter:
             except BaseException as e:
                 print(e)
                 marcel.util.print_stack()
-            debug(f'parser.op_name: {parser.op_name}')
-            if parser.op_name is None:
+            debug(f'parser.op_name: {parser.op_token}')
+            if parser.op_token is None:
                 candidates = self.complete_op(text)
-            elif parser.op_name == 'help':
+            elif parser.op_token == 'help':
                 candidates = self.complete_help(text)
             else:
-                self.op_name = parser.op_name
+                self.op_name = parser.op_token
                 debug(f'op_name: {self.op_name}, text: {text}')
                 if text.startswith('-'):
                     candidates = TabCompleter.complete_flag(text, self.op_name)
