@@ -3,7 +3,7 @@ import pathlib
 from math import pi
 
 import marcel.object.error
-import marcel.object.host
+import marcel.object.cluster
 import marcel.version
 import test_base
 from marcel.api import *
@@ -351,6 +351,18 @@ def test_bash():
              expected_out=['hello  world'])
 
 
+def test_fork():
+    TEST.run(lambda: run(fork(1, gen(3, 100))),
+             expected_out=[(0, 100), (0, 101), (0, 102)])
+    TEST.run(lambda: run(fork(3, gen(3, 100)) | sort()),
+             expected_out=[(0, 100), (0, 101), (0, 102),
+                           (1, 100), (1, 101), (1, 102),
+                           (2, 100), (2, 101), (2, 102)])
+    # Bug 40
+    TEST.run(lambda: run(fork('notacluster', gen(5))),
+             expected_err='Invalid fork specification')
+
+
 def test_namespace():
     config_file = '/tmp/.marcel.py'
     config_path = pathlib.Path(config_file)
@@ -380,7 +392,7 @@ def test_namespace():
 
 
 def test_remote():
-    localhost = marcel.object.host.Host('localhost', None)
+    localhost = marcel.object.cluster.Host('localhost', None)
     TEST.run(lambda: run(fork('jao', gen(3))),
              expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
     # Handling of remote error in execution
@@ -511,7 +523,7 @@ def main_stable():
     test_unique()
     test_window()
     test_bash()
-    # test_fork()
+    test_fork()
     # test_namespace()
     test_remote()
     # test_sudo()

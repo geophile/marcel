@@ -5,7 +5,7 @@ Marcel
 The main idea is to rely on piping as the primary
 means of building up functionality, as with any Unix or Linux
 shell. However, instead of passing strings from one command to the
-next, marcel passes Python objects: builtin types such as lists,
+next, marcel passes Python values: builtin types such as lists,
 tuples, strings, and numbers; but also objects representing files and
 processes.
 
@@ -25,49 +25,25 @@ there is no need to invent a new language.
 Instead, you can use Python as the scripting language, invoking
 marcel commands via an API, (more on this below).
 
-Marcel is the successor to [osh](http://github.com/geophile/osh) 
-(Object SHell). Osh
-is based on the same ideas, but it is not a full-fledged shell;
-it is an executable
-that takes shell-like commands as input, composes them using pipes, 
-and passes Python objects,
-as Marcel does. Marcel improves on osh in a number of ways:
-
-* Marcel is a full-fledged shell.
-
-* If you know Python you know marcel. There are no obscure sublanguages
-(e.g. for awk, find, PS1). Commands are customized by writing Python
-lambda expressions on the command line. Configuration is done
-by assigning Python variables.
-
-* A planned abstraction mechanism is to offer pipelines as first-class constructs. 
-This will allow for more complex commands (which combine multiple pipelines), and the composition of pipelines.
-
-* Marcel started with the osh code base (for commands and pipelines), but cleaned up a number of ugly hacks and 
-non-pythonic constructs.
-
-* Osh requires Python 2.x. Marcel requires Python 3.x. (Whether you regard that as an improvement is 
-obviously subjective.)
-
 Shell Features
 --------------
 
 Marcel provides:
+
+* Customizable highlighted output of file and process listings.
+
+* Context-sensitive tab completion (for commands, their flags, 
+filenames, help topics).
 
 * Command history and recall, including correct handling of multi-line commands. (Muti-line support
 is implemented using [multilinereader](https://github.com/geophile/multilinereader).)
 
 * Searching of command history (e.g. ctrl-R).
 
-* Editing of last command in the editor of your choice.
+* Editing of previous commands in the editor of your choice.
 
 * Extensive help facility, providing information on concepts, objects,
 and commands.
-
-* Customizable highlighted output of file and process listings.
-
-* Context-sensitive tab completion (for commands, their flags, 
-filenames, help topics).
 
 Example
 -------
@@ -90,10 +66,11 @@ specified as part of the implementation of
 the `Process` object. 
 
 ```
-      921 /usr/bin/python3 /usr/lib/system76-driver/system76-daemon
-      933 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
-     2228 /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-daemon
-     2295 /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-notification
+       949       1  root      S  /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+       980       1  root      S  /usr/bin/python3 /usr/lib/system76-driver/system76-daemon
+      2270    2056  jao       S  /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-daemon
+      2339    2056  jao       S  /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-notification
+     11775   11460  jao       S  /usr/bin/python3 /usr/bin/chrome-gnome-shell /usr/lib/mozilla/native-messaging-hosts/org.gnome.chrome_gnome_shell.json chrome-gnome-shell@gnome.org
 ```
 
 
@@ -309,6 +286,11 @@ like this:
 ```
 python3 -m pip install dill
 ```
+Or to install for all users, e.g. in /usr/local:
+```
+sudo python3 -m pip install --prefix /usr/local dill
+```
+
 
 Installation
 ------------
@@ -324,3 +306,31 @@ Or to install for all users, e.g. in `/usr/local`:
 ```
 sudo python3 -m pip install --prefix /usr/local marcel
 ```
+
+History
+-------
+
+Marcel is the successor to [osh](http://github.com/geophile/osh) 
+(Object SHell). Osh
+is based on the same ideas, but it is not a full-fledged shell;
+it is an executable
+that takes shell-like commands as input, composes them using pipes, 
+and passes Python objects,
+as Marcel does. Marcel improves on osh in a number of ways:
+
+* Marcel is a full-fledged shell.
+
+* If you know Python you know marcel. There are no obscure sublanguages
+(e.g. for awk, find, PS1). Commands are customized by writing Python
+lambda expressions on the command line. Configuration is done
+by assigning Python variables.
+
+* A planned abstraction mechanism is to offer pipelines as first-class constructs. 
+This will allow for more complex commands (which combine multiple pipelines), and the composition of pipelines.
+
+* Marcel started with the osh code base (for commands and pipelines), but cleaned up a number of ugly hacks and 
+non-pythonic constructs.
+
+* Osh requires Python 2.x. Marcel requires Python 3.x. (Whether you regard that as an improvement is 
+obviously subjective.)
+

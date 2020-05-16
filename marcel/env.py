@@ -125,7 +125,7 @@ class Environment:
             'BOLD': marcel.object.color.Color.BOLD,
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-            'define_cluster': self.define_cluster
+            'define_remote': self.define_remote
         }
         self.clusters = {}
         self.read_config(config_file)
@@ -154,10 +154,10 @@ class Environment:
         return (self.prompt_string(self.getvar('PROMPT')),
                 self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
 
-    def cluster(self, name):
+    def remote(self, name):
         return self.clusters.get(name, None)
 
-    def define_cluster(self, name, hosts, user, identity):
+    def define_remote(self, name, hosts, user, identity):
         self.clusters[name] = marcel.object.cluster.Cluster(name, hosts, user, identity)
 
     def dir_state(self):

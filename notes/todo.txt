@@ -284,3 +284,13 @@ What if there are two shells running at the same time -- how is
 history file maintained? Probably lose updates from the first one to
 exit. How should this be handled? To be safe, on exit, should read,
 append, write. Atomically.
+
+----------------------------------------------------------------------
+
+Cluster.set_host called by Remote.setup_2 and
+Fork.attach_thread_label. Unclear why both are needed.
+
+----------------------------------------------------------------------
+
+API has fork and remote, and they are bound bound to Fork. remote
+*intended* for remote execution. 

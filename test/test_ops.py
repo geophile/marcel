@@ -3,14 +3,15 @@ import pathlib
 
 import marcel.main
 import marcel.version
-import marcel.object.host
+import marcel.object.cluster
+import marcel.object.error
 import marcel.version
 
-import test_base
+import test.test_base
 
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
-TEST = test_base.TestConsole()
+TEST = test.test_base.TestConsole()
 
 
 def test_no_such_op():
@@ -397,7 +398,7 @@ def test_namespace():
 
 
 def test_remote():
-    localhost = marcel.object.host.Host('localhost', None)
+    localhost = marcel.object.cluster.Host('localhost', None)
     TEST.run('@jao [ gen 3 ]',
              expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
     # Handling of remote error in execution

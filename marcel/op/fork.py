@@ -88,10 +88,15 @@ class Fork(marcel.core.Op):
 
     def setup_1(self):
         self.pipeline = self.referenced_pipeline(self.pipeline)
-        cluster = self.env().cluster(self.host)
+        cluster = self.env().remote(self.host)
         if cluster:
             self.impl = Remote(self)
+        elif isinstance(self.host, int):
+            # Number of threads, from API
+            self.impl = Local(self)
         elif self.host.isdigit():
+            # Number of threads, from console
+            self.host = int(self.host)
             self.impl = Local(self)
         else:
             raise marcel.exception.KillCommandException(f'Invalid fork specification: {self.host}')
@@ -214,7 +219,7 @@ class Remote(ForkImplementation):
 
     def generate_thread_labels(self):
         op = self.op
-        cluster = op.env().cluster(op.host)
+        cluster = op.env().remote(op.host)
         if cluster:
             op.thread_labels = [host for host in cluster.hosts]
         else:
@@ -225,7 +230,6 @@ class Local(ForkImplementation):
 
     def __init__(self, op):
         super().__init__(op)
-        op.host = int(op.host)
 
     # BaseOp
 

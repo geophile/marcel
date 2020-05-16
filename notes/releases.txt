@@ -8,7 +8,7 @@
 
 ----------------------------------------------------------------------
 
-0.6
+0.6 -- Objects, jobs
 
 + ps
 
@@ -24,11 +24,6 @@
 
 + help object
 
-- Highlight color for broken link. Not trivial, because File needs to
-  survive pickling. Can't assume that file can be examined when
-  colorization is needed. And stat (computed before pickling) doesn't
-  indicate whether the file exists. Could check and record this.
-
 - More work on jobs:
 
   + history
@@ -38,11 +33,6 @@
       + Add run command, which takes a history id as input.
       + ! and !! are alternative syntax for run N and run (with no arg, implying last)
 
-  - fg/bg without specifying job#
-
-  - Syntax for starting job in background (like bash &). Maybe 
-    bg [ ... ]? Awkward to recall and then edit. 
-
 + Improve bash 
 
 + Installation
@@ -50,9 +40,6 @@
     + Add licensing text
 
 + Revisit project directory structure
-
-- API needs easy access to env vars. What is the relationship between
-  the API namespace and the console's marcel namespace?
 
 If marcel is my default shell (in /etc/passwd), then remote operations
 fail, probably because marcel doesn't work as the shell for executing

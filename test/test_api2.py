@@ -1,7 +1,9 @@
 from marcel.api import *
 
-run(bash('echo', 'hello', 'world'))
-run(bash('echo', 'hello  world'))
+# run(remote('jao', gen(3)))
+
+for x, y in fork(3, gen(3)):
+    print(f'{x}, {y}')
 
 # run(ls())
 #
