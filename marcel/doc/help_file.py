@@ -14,7 +14,6 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 HELP = ''' 
-
 A {i:File} encapsulates a path,
 e.g. {n:/home/jao/git/marcel/setup.py}.  Marcel's {n:ls} command
 generates a stream of {n:File}s.  {n:File} provides a large set of

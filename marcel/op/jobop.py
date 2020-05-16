@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import marcel.core
+import marcel.exception
 import marcel.job
 
 

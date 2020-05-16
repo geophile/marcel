@@ -16,6 +16,7 @@
 import readline
 
 import marcel.core
+import marcel.object.command
 
 
 SUMMARY = '''
@@ -56,7 +57,7 @@ class History(marcel.core.Op):
         readline.remove_history_item(readline.get_current_history_length() - 1)
         history = self.env().reader.history()
         for i in range(len(history)):
-            self.send((i, history[i]))
+            self.send(marcel.object.command.Command(i, history[i]))
 
     # Op
 

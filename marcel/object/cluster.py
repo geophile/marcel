@@ -46,7 +46,7 @@ class Host:
 
 class Cluster:
 
-    def __init__(self, name, hosts, user, identity):
+    def __init__(self, name, user, identity, hosts):
         self.name = name
         self.hosts = [Host(host, self) for host in hosts]
         self.user = user

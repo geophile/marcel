@@ -55,7 +55,7 @@ Notes:
 
 def timer(interval, components=False):
     op = Timer()
-    op.interval = interval
+    op.interval = str(interval)
     op.components = components
     return op
 
@@ -81,6 +81,9 @@ class Timer(marcel.core.Op):
         self.lock = threading.Condition()
         self.done = False
         self.now = None
+
+    def __repr__(self):
+        return f'timer({self.interval})'
 
     # BaseOp
     

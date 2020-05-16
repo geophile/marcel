@@ -16,9 +16,9 @@ def timestamp(x):
     return datetime.datetime.strptime(x + "000", '%Y-%m-%d %H:%M:%S.%f').strftime('%s')
 
 define_remote(name='jao',
-              hosts=['localhost'],
               user='jao',
-              identity='/home/jao/.ssh/id_rsa')
+              identity='/home/jao/.ssh/id_rsa',
+              host='localhost')
 
 define_colors(image_highlight=Color(3, 0, 2, bold=True),
               red_bold=Color(5, 0, 0, bold=True),

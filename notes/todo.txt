@@ -294,3 +294,8 @@ Fork.attach_thread_label. Unclear why both are needed.
 
 API has fork and remote, and they are bound bound to Fork. remote
 *intended* for remote execution. 
+
+----------------------------------------------------------------------
+
+Should jobs and commands be objects? That would allow for better
+formatting.

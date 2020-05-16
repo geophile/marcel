@@ -33,4 +33,5 @@ For more detail on configuration run {n:help} on the following topics:
 {L}- {n:color}: Customizing the color scheme.
 {L}- {n:prompt}: Customizing the prompt.
 {L}- {n:namespace}: Adding symbols to the marcel namespace.
+{L}- {n:remote}: Configuring remote access.
 '''

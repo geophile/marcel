@@ -18,15 +18,6 @@ To learn more about a topic, run the command:
 
     help TOPIC
 
-Available topics:
-
-{b:Top-level help:}
-
-{p,wrap=F}
-    - {n:marcel}
-
-(Or just run {n:help} with no topic.)
-
 {b:Overview:}
 
 {p,wrap=F}

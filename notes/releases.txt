@@ -45,10 +45,19 @@ If marcel is my default shell (in /etc/passwd), then remote operations
 fail, probably because marcel doesn't work as the shell for executing
 a command by ssh. May be related to bug 46.
 
+- Doc
+
+  - Job control: mention in overview
+  - Discuss: fg, bg, jobs, history, !, !!, run
+
+- Import EDITOR var from host env.
+
+
 Bugs:
 
   + 45
   - 46
+  - 47
 
 ----------------------------------------------------------------------
 

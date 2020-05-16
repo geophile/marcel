@@ -252,7 +252,7 @@ class Op(BaseOp):
         return False
 
     def run_in_main_process(self):
-        return True
+        return False
 
     @classmethod
     def op_name(cls):

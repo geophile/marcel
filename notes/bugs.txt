@@ -126,3 +126,15 @@ tab-completion runs into permission problems trying to do its work.
     M-0.6.5 jao@cheese:~$ 
 
 Why does remote session end up in marcel, logged in as jao?
+
+----------------------------------------------------------------------
+
+47. Backgrounding interactive jobs stop everything
+
+- Run emacs
+- Ctrl-Z
+
+Don't get a prompt. Now emacs is unresponsive, so is marcel. The emacs
+process needs to be killed to get back control of marcel.
+
+Complete "help interaction" when this is working.
