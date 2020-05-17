@@ -28,7 +28,7 @@ The specified files, directories, and symlinks are written to the output stream.
 
 
 DETAILS = '''
-Generates a stream of {n:Files}, representing files, directories and symlinks.
+Generates a stream of {n:File} objects, representing files, directories and symlinks.
 
 The flags {r:-0}, {r:-1}, and {r:-r} are mutually exclusive. {r:-1} is the default.
 
@@ -36,6 +36,8 @@ Flags {r:-f}, {r:-d}, and {r:-s} may be combined. If none of these flags are spe
 and symlinks are all listed.
 
 If no {r:filename}s are provided, then the currentn directory is listed.
+
+Run {n:help file} for more information on {n:File} objects.
 '''
 
 

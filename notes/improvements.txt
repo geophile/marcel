@@ -1,0 +1,10 @@
+- Highlight color for broken link. Not trivial, because File needs to
+  survive pickling. Can't assume that file can be examined when
+  colorization is needed. And stat (computed before pickling) doesn't
+  indicate whether the file exists. Could check and record this.
+
+- fg/bg without specifying job#
+
+- Syntax for starting job in background (like bash &). Maybe 
+  bg [ ... ]? Awkward to recall and then edit. 
+

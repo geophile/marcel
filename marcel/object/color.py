@@ -69,8 +69,8 @@ class ColorScheme:
         self.help_bold = None
         self.help_italic = None
         self.help_name = None
-        self.command_id = None
-        self.command_command = None
+        self.history_id = None
+        self.history_command = None
 
     def color(self, r, g, b, style):
         return Color(r, g, b, style)

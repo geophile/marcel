@@ -37,6 +37,8 @@ concerned with filtering:
 
 These are conveniences, as arbitrary predicates can be applied by piping {r:ps} output to 
 {n:select}.
+
+Run {n:help process} for more information on {n:Process} objects.
 '''
 
 

@@ -58,4 +58,5 @@ Use the {n:help} command to get more information on the following kinds of objec
 
 {L}- {n:file}
 {L}- {n:process}
+{L}- {n:history_record}
 '''

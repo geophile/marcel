@@ -16,16 +16,16 @@
 import readline
 
 import marcel.core
-import marcel.object.command
+import marcel.object.historyrecord
 
 
 SUMMARY = '''
-Generate a stream containing the history of commands executed.
+Generates a stream containing the history of commands executed, in chronological order (newest last).
 '''
 
 
 DETAILS = '''
-The history command itself will not show up in the command history.
+The {n:history} command itself will not show up in the command history.
 '''
 
 
@@ -57,7 +57,7 @@ class History(marcel.core.Op):
         readline.remove_history_item(readline.get_current_history_length() - 1)
         history = self.env().reader.history()
         for i in range(len(history)):
-            self.send(marcel.object.command.Command(i, history[i]))
+            self.send(marcel.object.historyrecord.HistoryRecord(i, history[i]))
 
     # Op
 

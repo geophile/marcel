@@ -69,12 +69,12 @@ COLOR_SCHEME.help_name = Color(3, 3, 5)
 Notes:
 
 {L}- The {r:file_...} entries control how {n:File} objects are displayed in a
-     detailed listing (e.g., obtained by the {n:ls} command. Run 
+     detailed listing (e.g., obtained by the {n:ls} operator. Run 
      {n:help object} for more information on how builtin objects are 
      displayed and colorized).
 {L}- The {r:COLOR_SCHEME.file_extension} key is bound to a Python dict which maps
      file extensions to colors. 
-{L}- {r:error} is the color used for printing {n:Error} objects by the {n:out} command.
+{L}- {r:error} is the color used for printing {n:Error} objects by the {n:out} operator.
 {L}- {r:process_...} entries control the display of {n:Process} objects.
 {L}- {r:help_...} entries control colorization of {n:help} text, (like the text you are 
      reading right now).

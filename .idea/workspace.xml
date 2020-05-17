@@ -20,22 +20,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/marcel/doc/help_interaction.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/marcel/object/command.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/marcel/doc/help_history_record.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notes/bugs_closed.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notes/improvements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/doc/help_configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_configuration.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/doc/help_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/doc/help_marcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_marcel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/object/cluster.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/cluster.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_color.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_color.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_function.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_interaction.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_interaction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_object.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_object.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/object/color.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/color.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/object/command.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/historyrecord.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/op/history.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/history.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/jobop.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/jobop.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/timer.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/timer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/tabcompleter.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/tabcompleter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/ls.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/ps.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ps.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/bugs_fixed.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
     </list>
@@ -64,7 +63,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/test/test_api.py" />
-    <property name="settings.editor.selected.configurable" value="fileTemplates" />
+    <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RunManager" selected="Python.test_api">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
@@ -172,7 +171,7 @@
       <option name="presentableId" value="Default" />
       <updated>1589582779228</updated>
       <workItem from="1589582780585" duration="13590000" />
-      <workItem from="1589649309868" duration="695000" />
+      <workItem from="1589649309868" duration="5599000" />
     </task>
     <servers />
   </component>
@@ -196,6 +195,10 @@
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
     <state x="792" y="455" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1589588846547" />
+    <state x="974" y="27" width="824" height="1413" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1589669972466">
+      <screen x="0" y="27" width="2560" height="1413" />
+    </state>
+    <state x="974" y="27" width="824" height="1413" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1589669972466" />
     <state x="1067" y="546" width="524" height="508" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1589587351049">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
@@ -240,10 +243,11 @@
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
     <state width="1492" height="311" key="GridCell.Tab.1.right/0.27.2560.1413@0.27.2560.1413" timestamp="1589646245987" />
-    <state x="838" y="432" width="992" height="737" key="SettingsEditor" timestamp="1589649231989">
-      <screen x="0" y="27" width="2560" height="1413" />
+    <state x="1920" y="432" width="992" height="737" key="SettingsEditor" timestamp="1589659892036">
+      <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="838" y="432" width="992" height="737" key="SettingsEditor/0.27.2560.1413@0.27.2560.1413" timestamp="1589649231989" />
+    <state x="1920" y="432" key="SettingsEditor/0.27.4480.1413@0.27.4480.1413" timestamp="1589659892036" />
     <state x="1063" y="527" width="549" height="524" key="StructurePopup" timestamp="1589643783015">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
@@ -284,7 +288,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/marcel$.coverage" NAME=" Coverage Results" MODIFIED="1589644517031" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/marcel$test_api2.coverage" NAME="test_api2 Coverage Results" MODIFIED="1589603081732" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
-    <SUITE FILE_PATH="coverage/marcel$test_api.coverage" NAME="test_api Coverage Results" MODIFIED="1589637105259" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/marcel$test_api.coverage" NAME="test_api Coverage Results" MODIFIED="1589673636541" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$test_ops.coverage" NAME="test_ops Coverage Results" MODIFIED="1589603017963" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
   </component>
 </project>

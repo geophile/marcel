@@ -21,7 +21,7 @@ list {n:.mp3} files anywhere inside your home directory as follows:
     ls -fr ~ | select (lambda f: f.suffix.lower() == '.mp3')
 
 {r:ls -fr ~} lists files only ({r:-f}), recursively ({r:-r}), starting with
-the home directory ({r:~}). The {r:ls} command yields {n:File} objects
+the home directory ({r:~}). The {r:ls} operator yields {n:File} objects
 which are then piped to the {r:select} operator.
 
 {r:select} has a function, delimited by parentheses. This function binds

@@ -104,37 +104,11 @@ tab-completion runs into permission problems trying to do its work.
 
 ----------------------------------------------------------------------
 
-46. ssh identity confusion
-
-    M-0.6.5 jao@cheese:~$ ssh -Y z@localhost
-    z@localhost's password: 
-    Welcome to Pop!_OS 19.10 (GNU/Linux 5.3.0-7648-generic x86_64)
-    
-     * Documentation:  https://help.ubuntu.com
-     * Management:     https://landscape.canonical.com
-     * Support:        https://ubuntu.com/advantage
-    
-     * Ubuntu 20.04 LTS is out, raising the bar on performance, security,
-       and optimisation for Intel, AMD, Nvidia, ARM64 and Z15 as well as
-       AWS, Azure and Google Cloud.
-    
-         https://ubuntu.com/blog/ubuntu-20-04-lts-arrives
-    
-    New release '20.04 LTS' available.
-    Run 'do-release-upgrade' to upgrade to it.
-    
-    M-0.6.5 jao@cheese:~$ 
-
-Why does remote session end up in marcel, logged in as jao?
-
-----------------------------------------------------------------------
-
-47. Backgrounding interactive jobs stop everything
+47. Emacs in background doesn't work
 
 - Run emacs
 - Ctrl-Z
 
-Don't get a prompt. Now emacs is unresponsive, so is marcel. The emacs
-process needs to be killed to get back control of marcel.
+Goes to background, but bg and fg do not revive it.
 
 Complete "help interaction" when this is working.

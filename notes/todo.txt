@@ -299,3 +299,15 @@ API has fork and remote, and they are bound bound to Fork. remote
 
 Should jobs and commands be objects? That would allow for better
 formatting.
+
+----------------------------------------------------------------------
+
+Should {...} work as a glob pattern? It does in bash. pathlib.Path.glob
+doesn't.
+
+ls -fr ~/git/marcel/{marcel,test} \
+| select (f: f.suffix == '.py') \
+| map (f: f.readlines()) \
+| expand \
+| red count
+No qualifying paths: ['~/git/marcel/{marcel,test}']

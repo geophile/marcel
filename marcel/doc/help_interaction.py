@@ -50,10 +50,10 @@ to more recent commands. Example:
 {p,wrap=F,indent=4}
 M jao@cheese:~$ history
 ...
-(418, 'cd ../..')
-(419, 'git status')
-(420, 'git diff > /tmp/marcel.diff')
-(421, 'git commit -a')
+  418:  cd ../..
+  419:  git status
+  420:  git diff > /tmp/marcel.diff
+  421:  git commit -a
  
 {b:Editing commands}
 

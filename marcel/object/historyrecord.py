@@ -17,7 +17,7 @@ import marcel.object.renderable
 import marcel.util
 
 
-class Command(marcel.object.renderable.Renderable):
+class HistoryRecord(marcel.object.renderable.Renderable):
 
     def __init__(self, id, command):
         self.id = id
@@ -47,9 +47,12 @@ class Command(marcel.object.renderable.Renderable):
     # Renderable
     
     def render_compact(self):
-        return f'  {self.id}:  {self.command}'
+        return HistoryRecord.format(self.id, self.command)
 
     def render_full(self, color_scheme):
-        id = marcel.util.colorize(self.id, color_scheme.command_id)
-        command = marcel.util.colorize(self.command, color_scheme.command_command)
+        return HistoryRecord.format(marcel.util.colorize(self.id, color_scheme.history_id),
+                                    marcel.util.colorize(self.command, color_scheme.history_command))
+
+    @staticmethod
+    def format(id, command):
         return f'  {id}:  {command}'
