@@ -240,7 +240,9 @@ class Op(BaseOp):
     def non_fatal_error(self, input=None, message=None, error=None):
         assert (message is None) != (error is None)
         if error is None:
-            error = Error(f'Running {self} on {input}: {message}')
+            error = Error(f'Running {self}: {message}'
+                          if input is None else
+                          f'Running {self} on {input}: {message}')
         self.owner.handle_error(error)
         return error
 

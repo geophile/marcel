@@ -4,7 +4,7 @@
 
 - Improve sudo
 
-- "(...)" as shorthand for "map (...)"? (If no parameters)
++ "(...)" as shorthand for "map (...)"? (If no parameters)
 
 - Import EDITOR var from host env.
 

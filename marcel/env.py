@@ -22,6 +22,8 @@ import sys
 import marcel.exception
 import marcel.object.cluster
 import marcel.object.color
+import marcel.object.file
+import marcel.object.process
 import marcel.util
 import marcel.version
 
@@ -122,11 +124,13 @@ class Environment:
             'DIRS': [current_dir.as_posix()],
             'PROMPT': [Environment.DEFAULT_PROMPT],
             'PROMPT_CONTINUATION': [Environment.DEFAULT_PROMPT_CONTINUATION],
-            'Color': marcel.object.color.Color,
             'BOLD': marcel.object.color.Color.BOLD,
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-            'define_remote': self.define_remote
+            'define_remote': self.define_remote,
+            'Color': marcel.object.color.Color,
+            'File': marcel.object.file.File,
+            'Process': marcel.object.process.Process
         }
         self.clusters = {}
         self.read_config(config_file)

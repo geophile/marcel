@@ -14,6 +14,8 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import marcel.core
+import marcel.object.error
+import marcel.exception
 import marcel.functionwrapper
 
 
@@ -62,5 +64,8 @@ class Map(marcel.core.Op):
         self.function.set_op(self)
 
     def receive(self, x):
-        output = self.function() if x is None else self.function(*x)
-        self.send(output)
+        try:
+            output = self.function() if x is None else self.function(*x)
+            self.send(output)
+        except Exception as e:
+            self.fatal_error(x, str(e))

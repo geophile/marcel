@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import marcel.object.renderable
+import marcel.util
 
 
 class Error(marcel.object.renderable.Renderable):

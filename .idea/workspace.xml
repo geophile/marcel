@@ -21,9 +21,12 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/parse.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/parse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/grammar.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/notes/grammar.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/grammar.odg" beforeDir="false" afterPath="$PROJECT_DIR$/notes/grammar.odg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/core.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/object/error.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/error.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/object/process.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/process.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/map.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/map.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/test_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_ops.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -159,7 +162,7 @@
       <option name="presentableId" value="Default" />
       <updated>1589582779228</updated>
       <workItem from="1589582780585" duration="13590000" />
-      <workItem from="1589649309868" duration="8985000" />
+      <workItem from="1589649309868" duration="13011000" />
     </task>
     <servers />
   </component>
@@ -199,47 +202,47 @@
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
     <state x="1117" y="555" width="424" height="491" key="FileChooserDialogImpl/0.27.2560.1413@0.27.2560.1413" timestamp="1589588844581" />
-    <state width="1492" height="251" key="GridCell.Tab.0.bottom" timestamp="1589677768878">
+    <state width="1492" height="311" key="GridCell.Tab.0.bottom" timestamp="1589728184908">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
-    <state width="1492" height="251" key="GridCell.Tab.0.bottom/0.27.2560.1413@0.27.2560.1413" timestamp="1589677768878" />
-    <state width="1492" height="251" key="GridCell.Tab.0.center" timestamp="1589677768878">
+    <state width="1492" height="311" key="GridCell.Tab.0.bottom/0.27.2560.1413@0.27.2560.1413" timestamp="1589728184908" />
+    <state width="1492" height="311" key="GridCell.Tab.0.center" timestamp="1589728184908">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
-    <state width="1492" height="251" key="GridCell.Tab.0.center/0.27.2560.1413@0.27.2560.1413" timestamp="1589677768878" />
-    <state width="1492" height="251" key="GridCell.Tab.0.left" timestamp="1589677768878">
+    <state width="1492" height="311" key="GridCell.Tab.0.center/0.27.2560.1413@0.27.2560.1413" timestamp="1589728184908" />
+    <state width="1492" height="311" key="GridCell.Tab.0.left" timestamp="1589728184907">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
-    <state width="1492" height="251" key="GridCell.Tab.0.left/0.27.2560.1413@0.27.2560.1413" timestamp="1589677768878" />
-    <state width="1492" height="251" key="GridCell.Tab.0.right" timestamp="1589677768878">
+    <state width="1492" height="311" key="GridCell.Tab.0.left/0.27.2560.1413@0.27.2560.1413" timestamp="1589728184907" />
+    <state width="1492" height="311" key="GridCell.Tab.0.right" timestamp="1589728184908">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
-    <state width="1492" height="251" key="GridCell.Tab.0.right/0.27.2560.1413@0.27.2560.1413" timestamp="1589677768878" />
-    <state width="1492" height="311" key="GridCell.Tab.1.bottom" timestamp="1589677638021">
+    <state width="1492" height="311" key="GridCell.Tab.0.right/0.27.2560.1413@0.27.2560.1413" timestamp="1589728184908" />
+    <state width="1492" height="311" key="GridCell.Tab.1.bottom" timestamp="1589728184909">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
-    <state width="1492" height="311" key="GridCell.Tab.1.bottom/0.27.2560.1413@0.27.2560.1413" timestamp="1589677638021" />
-    <state width="1492" height="311" key="GridCell.Tab.1.center" timestamp="1589677638021">
+    <state width="1492" height="311" key="GridCell.Tab.1.bottom/0.27.2560.1413@0.27.2560.1413" timestamp="1589728184909" />
+    <state width="1492" height="311" key="GridCell.Tab.1.center" timestamp="1589728184908">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
-    <state width="1492" height="311" key="GridCell.Tab.1.center/0.27.2560.1413@0.27.2560.1413" timestamp="1589677638021" />
-    <state width="1492" height="311" key="GridCell.Tab.1.left" timestamp="1589677638021">
+    <state width="1492" height="311" key="GridCell.Tab.1.center/0.27.2560.1413@0.27.2560.1413" timestamp="1589728184908" />
+    <state width="1492" height="311" key="GridCell.Tab.1.left" timestamp="1589728184908">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
-    <state width="1492" height="311" key="GridCell.Tab.1.left/0.27.2560.1413@0.27.2560.1413" timestamp="1589677638021" />
-    <state width="1492" height="311" key="GridCell.Tab.1.right" timestamp="1589677638021">
+    <state width="1492" height="311" key="GridCell.Tab.1.left/0.27.2560.1413@0.27.2560.1413" timestamp="1589728184908" />
+    <state width="1492" height="311" key="GridCell.Tab.1.right" timestamp="1589728184908">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
-    <state width="1492" height="311" key="GridCell.Tab.1.right/0.27.2560.1413@0.27.2560.1413" timestamp="1589677638021" />
+    <state width="1492" height="311" key="GridCell.Tab.1.right/0.27.2560.1413@0.27.2560.1413" timestamp="1589728184908" />
     <state x="1920" y="432" width="992" height="737" key="SettingsEditor" timestamp="1589659892036">
       <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="838" y="432" width="992" height="737" key="SettingsEditor/0.27.2560.1413@0.27.2560.1413" timestamp="1589649231989" />
     <state x="1920" y="432" key="SettingsEditor/0.27.4480.1413@0.27.4480.1413" timestamp="1589659892036" />
-    <state x="1063" y="527" width="549" height="524" key="StructurePopup" timestamp="1589677657141">
+    <state x="1063" y="527" width="549" height="524" key="StructurePopup" timestamp="1589719529251">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
-    <state x="1063" y="527" width="549" height="524" key="StructurePopup/0.27.2560.1413@0.27.2560.1413" timestamp="1589677657141" />
+    <state x="1063" y="527" width="549" height="524" key="StructurePopup/0.27.2560.1413@0.27.2560.1413" timestamp="1589719529251" />
     <state x="96" y="284" width="1109" height="932" key="dock-window-1" timestamp="1589650047280">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
@@ -248,27 +251,36 @@
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
     <state x="800" y="27" width="1119" height="932" key="dock-window-2/0.27.2560.1413@0.27.2560.1413" timestamp="1589586996648" />
-    <state x="1043" y="413" width="581" height="768" key="find.popup" timestamp="1589587541038">
+    <state x="1043" y="413" width="581" height="768" key="find.popup" timestamp="1589728088940">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
-    <state x="1043" y="413" width="581" height="768" key="find.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1589587541038" />
+    <state x="1043" y="413" width="581" height="768" key="find.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1589728088940" />
     <state x="1113" y="521" width="306" height="459" key="refactoring.ChangeSignatureDialog" timestamp="1589638477576">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
     <state x="1113" y="521" width="306" height="459" key="refactoring.ChangeSignatureDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1589638477576" />
-    <state x="934" y="466" width="672" height="678" key="search.everywhere.popup" timestamp="1589649054362">
+    <state x="934" y="466" width="672" height="678" key="search.everywhere.popup" timestamp="1589728033590">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
-    <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1589649054362" />
+    <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1589728033590" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <condition expression="not isinstance(op, Op)" language="Python" />
           <url>file://$PROJECT_DIR$/marcel/core.py</url>
-          <line>365</line>
-          <option name="timeStamp" value="2" />
+          <line>182</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/marcel/functionwrapper.py</url>
+          <line>60</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/marcel/object/process.py</url>
+          <line>132</line>
+          <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -277,6 +289,6 @@
     <SUITE FILE_PATH="coverage/marcel$.coverage" NAME=" Coverage Results" MODIFIED="1589644517031" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/marcel$test_api2.coverage" NAME="test_api2 Coverage Results" MODIFIED="1589603081732" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$test_api.coverage" NAME="test_api Coverage Results" MODIFIED="1589677590184" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
-    <SUITE FILE_PATH="coverage/marcel$test_ops.coverage" NAME="test_ops Coverage Results" MODIFIED="1589677892758" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/marcel$test_ops.coverage" NAME="test_ops Coverage Results" MODIFIED="1589735011499" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
   </component>
 </project>

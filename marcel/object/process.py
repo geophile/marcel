@@ -17,6 +17,7 @@ import os
 import os.path
 import pathlib
 
+import marcel.exception
 import marcel.object.renderable
 import marcel.util
 
@@ -127,6 +128,8 @@ class Process(marcel.object.renderable.Renderable):
         return f'process({self.pid})'
 
     def render_full(self, color_scheme):
+        if not self._exists():
+            raise Exception(f'Process {self.pid} does not exist.')
         pid = '{:6n}'.format(self.pid)
         ppid = '{:6n}'.format(self.ppid)
         user = '{:8s}'.format(self.user)

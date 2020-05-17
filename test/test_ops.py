@@ -93,8 +93,11 @@ def test_map():
              expected_out=[3])
     TEST.run('map (lambda: 3)',
              expected_out=[3])
+    # Implicit map
     TEST.run('(419)',
              expected_out=[419])
+    TEST.run('(File("/tmp").path)',
+             expected_out=['/tmp'])
 
 
 def test_select():
