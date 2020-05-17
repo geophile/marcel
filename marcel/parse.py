@@ -21,12 +21,50 @@ import marcel.opmodule
 import marcel.util
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+
+# Parsing errors
+
+class UnexpectedTokenError(Exception):
+
+    def __init__(self, text, position, message):
+        self.text = text
+        self.position = position
+        self.message = message
+
+    def __str__(self):
+        return f'Parsing error at position {self.position} of "{self.text}": {self.message}'
+
+
+class PrematureEndError(UnexpectedTokenError):
+
+    def __init__(self, text):
+        super().__init__(text, None, None)
+
+    def __str__(self):
+        return f'Command ended prematurely: {self.text}'
+
+
+class UnknownOpError(UnexpectedTokenError):
+
+    def __init__(self, text, op_name):
+        super().__init__(text, None, None)
+        self.op_name = op_name
+
+    def __str__(self):
+        return f'Unknown command: {self.op_name}'
+
+
 class MalformedStringError(Exception):
 
     def __init__(self, text, message):
         super().__init__(message)
         self.text = text
 
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+# Tokens
 
 class Source:
     def __init__(self, text, position=0):
@@ -342,42 +380,16 @@ class End(OneCharSymbol):
         return True
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+
+# Parsing
+
 class ParseState(Enum):
     START = auto()
     DONE = auto()
     END = auto()
     OP = auto()
     ARGS = auto()
-
-
-class UnexpectedTokenError(Exception):
-
-    def __init__(self, text, position, message):
-        self.text = text
-        self.position = position
-        self.message = message
-
-    def __str__(self):
-        return f'Parsing error at position {self.position} of "{self.text}": {self.message}'
-
-
-class PrematureEndError(UnexpectedTokenError):
-
-    def __init__(self, text):
-        super().__init__(text, None, None)
-
-    def __str__(self):
-        return f'Command ended prematurely: {self.text}'
-
-
-class UnknownOpError(UnexpectedTokenError):
-
-    def __init__(self, text, op_name):
-        super().__init__(text, None, None)
-        self.op_name = op_name
-
-    def __str__(self):
-        return f'Unknown command: {self.op_name}'
 
 
 class InProgress:
