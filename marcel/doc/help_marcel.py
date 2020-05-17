@@ -33,6 +33,7 @@ To learn more about a topic, run the command:
 
 {p,wrap=F}
     - {n:file}
+    - {n:history_record}
     - {n:process}
 
 {b:Operators:}
