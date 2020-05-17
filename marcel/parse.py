@@ -380,6 +380,15 @@ class End(OneCharSymbol):
         return True
 
 
+class ImpliedMap(Token):
+
+    def __init__(self):
+        super().__init__(None, None)
+
+    def op_name(self):
+        return 'map'
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Parsing
@@ -427,6 +436,10 @@ class Parser(Source):
     def start_action(self, token):
         if token is None:
             raise PrematureEndError(self.text)
+        elif token.is_expr():
+            self.set_op_token(ImpliedMap())
+            self.current().args.append(token.value())
+            self.state = ParseState.ARGS
         elif token.is_fork() or token.is_bang() or token.is_string():
             self.set_op_token(token)
             self.state = ParseState.OP
@@ -451,8 +464,7 @@ class Parser(Source):
             self.finish_op()
             self.state = ParseState.DONE
         elif token.is_string() or token.is_expr():
-            arg = token.value()
-            self.current().args.append(arg)
+            self.current().args.append(token.value())
             self.state = ParseState.ARGS
         elif token.is_pipe():
             self.finish_op()
@@ -472,8 +484,7 @@ class Parser(Source):
             self.finish_op()
             self.state = ParseState.DONE
         elif token.is_string() or token.is_expr():
-            arg = token.value()
-            self.current().args.append(arg)
+            self.current().args.append(token.value())
         elif token.is_pipe():
             self.finish_op()
             self.state = ParseState.START

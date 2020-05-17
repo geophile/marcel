@@ -93,6 +93,8 @@ def test_map():
              expected_out=[3])
     TEST.run('map (lambda: 3)',
              expected_out=[3])
+    TEST.run('(419)',
+             expected_out=[419])
 
 
 def test_select():
@@ -412,6 +414,9 @@ def test_remote():
              expected_out=[(localhost, 3)])
     TEST.run('@jao [ gen 10 | map (x: (x%2, x)) | red . + ]',
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
+    # Implied map
+    TEST.run('@jao[(419)]',
+             expected_out=[(localhost, 419)])
 
 
 def test_sudo():
