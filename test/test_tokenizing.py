@@ -46,8 +46,8 @@ def test_all(input_filename, tokenizer):
 
 def main():
     test_all('test_python_string.txt', lambda text: marcel.parse.PythonString(text, 0))
-    test_all('test_shell_string.txt', lambda text: marcel.parse.ShellString(text, 0))
-    test_all('test_embedded_python.txt', lambda text: marcel.parse.PythonExpression(text, 0))
+    test_all('test_shell_string.txt', lambda text: marcel.parse.String(text, 0))
+    test_all('test_embedded_python.txt', lambda text: marcel.parse.Expression(text, 0))
 
 
 main()

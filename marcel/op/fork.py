@@ -18,10 +18,7 @@ import threading
 import marcel.core
 import marcel.exception
 import marcel.op.labelthread
-import marcel.op.labelthread
 import marcel.op.remote
-import marcel.op.remote
-import marcel.util
 
 
 SUMMARY = '''
@@ -87,7 +84,7 @@ class Fork(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
-        self.pipeline = self.referenced_pipeline(self.pipeline)
+        self.pipeline = self.resolve_pipeline_reference(self.pipeline)
         cluster = self.env().remote(self.host)
         if cluster:
             self.impl = Remote(self)
@@ -141,11 +138,6 @@ class Fork(marcel.core.Op):
     def must_be_first_in_pipeline(self):
         return True
 
-    # For use by subclasses
-
-    def generate_thread_labels(self):
-        assert False
-
     # For use by this class
 
     @staticmethod
@@ -197,7 +189,7 @@ class Remote(ForkImplementation):
         for thread_label in op.thread_labels:
             # Copy the pipeline. Env is set here, not in op.pipeline. Env cloning preserves
             # only minimal state, so it has to be set in the clone.
-            pipeline_copy = marcel.util.clone(op.pipeline)
+            pipeline_copy = op.pipeline.copy()
             pipeline_copy.set_env(op.owner.env)
             pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to Remote op.
@@ -244,7 +236,7 @@ class Local(ForkImplementation):
         op = self.op
         for thread_label in op.thread_labels:
             # Copy the pipeline
-            pipeline_copy = marcel.util.clone(op.pipeline)
+            pipeline_copy = op.pipeline.copy()
             pipeline_copy.set_env(op.owner.env)
             pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to LabelThread op.

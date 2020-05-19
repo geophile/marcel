@@ -444,6 +444,21 @@ def test_version():
              expected_out=[marcel.version.VERSION])
 
 
+def test_assign():
+    TEST.run(test='a = 3',
+             verification='(a)',
+             expected_out=[3])
+    TEST.run(test='a = (5+6)',
+             verification='(a)',
+             expected_out=[11])
+    TEST.run(test='a = [(419)]',
+             verification='a',
+             expected_out=[419])
+    TEST.run(test='a = [ map (x: (x, -x)) ]',
+             verification='gen 3 | a',
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+
+
 def main_stable():
     test_gen()
     test_out()
@@ -464,17 +479,19 @@ def main_stable():
     test_remote()
     test_sudo()
     test_version()
+    test_assign()
     test_no_such_op()
 
 
 def main_dev():
+    test_assign()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

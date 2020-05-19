@@ -1,0 +1,34 @@
+command: 
+        assignment
+        pipeline
+
+assignment:
+        var = [ pipeline ]
+        var = expr
+        var = str
+
+pipeline: 
+        op_sequence
+
+op_sequence:
+        op_args | op_sequence
+        op_args
+
+op_args:
+        op arg*
+        expr
+
+op:
+        str
+        @
+        !
+        !!
+
+arg:
+        expr
+        str
+        [ pipeline ]
+
+expr: Expression
+
+var: String

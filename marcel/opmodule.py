@@ -16,6 +16,7 @@
 import importlib
 import inspect
 
+import marcel.core
 import marcel.op
 
 

@@ -1,0 +1,57 @@
+No-arg functions:
+
+(...) is a function with no args, so (3) -> 3. This allows for shell
+access to env vars, e.g. (USER), or:
+
+       ls (HOME)/bin
+
+PROBLEM: These have to be detected in the middle of an unquoted
+string. Should just work, since OPEN is in STRING_TERMINATING.
+
+
+Vars and pipelines:
+
+Allow assignment of pipeline to var, e.g.
+
+    cat = [ map (f: (f, f.readlines())) | expand 1 ]
+
+But then this doesn't work:
+
+    ls | cat
+
+It would have to be 
+
+   ls | (cat)
+
+Unless:
+
+1) There are different rules for ops and args.
+
+2) Or there need to be different kinds of assignment.
+
+3) Or we can detect vars without any syntax (like parens).
+
+#3 is nice syntactically, but ambiguous. E.g. 
+
+    ls HOME/bin
+
+HOME could be a var or an actual directory inside the current
+directory.
+
+There is no such ambiguity for #1.
+
+    ls | cat
+
+cat is either an op (or executable) or it isn't. (cat could mask an
+executable, but if that's not what's wanted, just change the name from
+cat to somethine else.)
+
+Actually, (HOME)/bin isn't really special var syntax. () is the syntax for evaluating
+any expression, and inside the (), the var is referred to without any syntax. So:
+
+    ls (f'{HOME}/bin')
+
+would work just as well. I.e., #3 mischaracterizes what's going on.
+
+To make the cat example work, we just have to allow for a var as a 3rd
+possibility beyond operator and executable.

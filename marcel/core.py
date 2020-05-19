@@ -14,7 +14,10 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import io
 import sys
+
+import dill
 
 import marcel.exception
 import marcel.exception
@@ -149,6 +152,7 @@ class BaseOp:
         """setup_1 is run after command-line parsing and before setup_2. It is intended for
         the initialization of op state except for fork pipeline copying.
         """
+        pass
 
     def setup_2(self):
         """setup_2 is run after setup_1 and before execution. It is intended for fork pipeline copying.
@@ -285,7 +289,7 @@ class Op(BaseOp):
 
     # For use by subclasses
 
-    def referenced_pipeline(self, x):
+    def resolve_pipeline_reference(self, x):
         if isinstance(x, marcel.core.Pipeline):
             # This happens through the API
             return x
@@ -364,6 +368,19 @@ class Pipeline(BaseOp):
 
     # Pipeline
 
+    def copy(self):
+        try:
+            buffer = io.BytesIO()
+            pickler = dill.Pickler(buffer)
+            pickler.dump(self)
+            buffer.seek(0)
+            unpickler = dill.Unpickler(buffer)
+            copy = unpickler.load()
+            return copy
+        except Exception as e:
+            sys.stdout.flush()
+            print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__, flush=True)
+
     def append(self, op):
         op.set_owner(self)
         if self.last_op:
@@ -406,8 +423,8 @@ class PipelineIterator:
 
     def __init__(self, pipeline):
         env = pipeline.first_op.env()
-        # Clone the pipeline because modifications are required.
-        pipeline = marcel.util.clone(pipeline)
+        # Copy the pipeline because modifications are required.
+        pipeline = pipeline.copy()
         assert env is not None  # PipelineIterator should only be used in the API, which sets op env.
         pipeline.set_env(env)
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)

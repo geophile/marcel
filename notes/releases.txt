@@ -1,4 +1,4 @@
-0.7
+0.7 -- Abstraction mechanisms
 
 - DB access
 
@@ -7,6 +7,20 @@
 + "(...)" as shorthand for "map (...)"? (If no parameters)
 
 - Import EDITOR var from host env.
+
+- Assignment
+
+  - Pipelines
+
+  - Strings
+
+  - Expressions
+
+  - Use of assigned pipelines
+
+  - Use of assigned var in expression
+
+- Expr as arg, e.g. to ls.
 
 If marcel is my default shell (in /etc/passwd), then remote operations
 fail, probably because marcel doesn't work as the shell for executing

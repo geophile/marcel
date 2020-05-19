@@ -88,21 +88,6 @@ def normalize_path(x):
     return x
 
 
-def clone(x):
-    try:
-        buffer = io.BytesIO()
-        pickler = dill.Pickler(buffer)
-        pickler.dump(x)
-        buffer.seek(0)
-        unpickler = dill.Unpickler(buffer)
-        copy = unpickler.load()
-        return copy
-    except Exception as e:
-        sys.stdout.flush()
-        print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__, flush=True)
-        print_stack()
-
-
 def print_stack(file=None):
     if file is None:
         file = sys.__stderr__

@@ -56,7 +56,7 @@ class Run(marcel.core.Op):
         self.tmp_file = None
 
     def __repr__(self):
-        return 'run()'
+        return 'run()' if self.n is None else f'run({self.n})'
 
     # BaseOp
 

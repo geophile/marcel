@@ -25,41 +25,57 @@ import marcel.util
 
 # Parsing errors
 
-class UnexpectedTokenError(Exception):
+class UnexpectedTokenError(marcel.exception.KillCommandException):
 
-    def __init__(self, text, position, message):
-        self.text = text
-        self.position = position
+    SNIPPET_SIZE = 10
+
+    def __init__(self, token, message):
+        super().__init__(message)
+        self.token = token
         self.message = message
 
     def __str__(self):
-        return f'Parsing error at position {self.position} of "{self.text}": {self.message}'
+        if self.token is None:
+            return f'Premature end of input: {self.message}'
+        else:
+            token_start = self.token.position
+            token_text = self.token.text
+            snippet_start = max(token_start - UnexpectedTokenError.SNIPPET_SIZE, 0)
+            snippet_end = max(token_start + UnexpectedTokenError.SNIPPET_SIZE + 1, len(token_text))
+            snippet = token_text[snippet_start:snippet_end]
+            return f'Parsing error at position {token_start - snippet_start} of "...{snippet}...": {self.message}'
 
 
-class PrematureEndError(UnexpectedTokenError):
+class PrematureEndError(Exception):
 
-    def __init__(self, text):
-        super().__init__(text, None, None)
+    def __init__(self):
+        super().__init__()
 
     def __str__(self):
-        return f'Command ended prematurely: {self.text}'
+        return 'Command ended prematurely.'
 
 
-class UnknownOpError(UnexpectedTokenError):
+class UnknownOpError(marcel.exception.KillCommandException):
 
-    def __init__(self, text, op_name):
-        super().__init__(text, None, None)
+    def __init__(self, op_name):
+        super().__init__(op_name)
         self.op_name = op_name
 
     def __str__(self):
         return f'Unknown command: {self.op_name}'
 
 
-class MalformedStringError(Exception):
+class MalformedStringError(marcel.exception.KillCommandException):
 
     def __init__(self, text, message):
         super().__init__(message)
         self.text = text
+
+
+class ParseError(marcel.exception.KillCommandException):
+
+    def __init__(self, message):
+        super().__init__(message)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -106,7 +122,8 @@ class Token(Source):
     FORK = '@'
     BEGIN = '['
     END = ']'
-    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END]
+    ASSIGN = '='
+    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN]
 
     def __init__(self, text, position):
         super().__init__(text, position)
@@ -132,13 +149,21 @@ class Token(Source):
     def is_end(self):
         return False
 
+    def is_assign(self):
+        return False
+
     def value(self):
         return None
 
     def op_name(self):
-        assert False, self
+        return None
 
 
+# PythonString isn't a top-level token that appears on a command line. An Expression is defined as
+# everything in between a top-level ( and the matching ). Everything delimited by those parens is
+# simply passed to Python's eval. However, in order to do the matching, any parens inside a Python
+# string (which could be part of the Expression) must be ignored.
+#
 # Python string literals are specified here:
 # https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals.
 class PythonString(Token):
@@ -210,7 +235,7 @@ class PythonString(Token):
             return False
 
 
-class PythonExpression(Token):
+class Expression(Token):
 
     def __init__(self, text, position):
         super().__init__(text, position)
@@ -241,7 +266,7 @@ class PythonExpression(Token):
                 f'Malformed Python expression {self.text[self.start:self.end]}')
 
 
-class ShellString(Token):
+class String(Token):
 
     def __init__(self, text, position):
         super().__init__(text, position)
@@ -255,7 +280,7 @@ class ShellString(Token):
         return self.string
 
     def op_name(self):
-        # Hopefully, this is only being called for the first op following START
+        # This should only being called for the first op following START
         return self.string
 
     def scan(self):
@@ -380,6 +405,18 @@ class End(OneCharSymbol):
         return True
 
 
+class Assign(OneCharSymbol):
+
+    def __init__(self, text, position):
+        super().__init__(text, position, Token.ASSIGN)
+
+    def is_assign(self):
+        return True
+
+    def op_name(self):
+        return 'assign'
+
+
 class ImpliedMap(Token):
 
     def __init__(self):
@@ -413,120 +450,23 @@ class InProgress:
         self.args.clear()
 
 
-class Parser(Source):
+# ----------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, text, op_modules):
+# Lexing
+
+
+class Lexer(Source):
+
+    def __init__(self, text):
         super().__init__(text)
-        self.op_modules = op_modules
-        self.state = ParseState.START
-        self.stack = marcel.util.Stack()
-        self.stack.push(InProgress())
-        self.op_token = None  # For use by tabcompleter
 
-    def __repr__(self):
-        return f'parser({self.text})'
-
-    def set_op_token(self, op_token):
-        self.current().op_token = op_token
-        self.op_token = op_token if self.is_op() else None
-
-    def current(self):
-        return self.stack.top()
-
-    def start_action(self, token):
-        if token is None:
-            raise PrematureEndError(self.text)
-        elif token.is_expr():
-            self.set_op_token(ImpliedMap())
-            self.current().args.append(token.value())
-            self.state = ParseState.ARGS
-        elif token.is_fork() or token.is_bang() or token.is_string():
-            self.set_op_token(token)
-            self.state = ParseState.OP
-        else:
-            raise UnexpectedTokenError(self.text, self.end, 'Expected string')
-
-    def end_action(self, token):
-        if token is None:
-            self.finish_command()
-            self.state = ParseState.DONE
-        elif token.is_pipe():
-            self.finish_op()
-            self.state = ParseState.START
-        elif token.is_string() or token.is_expr():
-            self.current().args.append(token.value())
-            self.state = ParseState.ARGS
-        else:
-            raise UnexpectedTokenError(self.text, self.end, 'Expected pipe or end of input')
-
-    def op_action(self, token):
-        if token is None:
-            self.finish_op()
-            self.state = ParseState.DONE
-        elif token.is_string() or token.is_expr():
-            self.current().args.append(token.value())
-            self.state = ParseState.ARGS
-        elif token.is_pipe():
-            self.finish_op()
-            self.state = ParseState.START
-        elif token.is_begin():
-            self.stack.push(InProgress())
-            self.state = ParseState.START
-        elif token.is_end():
-            self.finish_op()
-            self.finish_pipeline()
-            self.state = ParseState.END
-        else:
-            raise UnexpectedTokenError(self.text, self.end, 'Expected string or pipe')
-
-    def args_action(self, token):
-        if token is None:
-            self.finish_op()
-            self.state = ParseState.DONE
-        elif token.is_string() or token.is_expr():
-            self.current().args.append(token.value())
-        elif token.is_pipe():
-            self.finish_op()
-            self.state = ParseState.START
-        elif token.is_begin():
-            self.stack.push(InProgress())
-            self.state = ParseState.START
-        elif token.is_end():
-            self.finish_op()
-            self.finish_pipeline()
-            self.state = ParseState.END
-        else:
-            raise UnexpectedTokenError(self.text, self.end, 'Expected string or pipe')
-
-    # partial_text is True for parsing done during tab completion
-    def parse(self, partial_text=False):
-        try:
+    def tokens(self):
+        tokens = []
+        token = self.next_token()
+        while token is not None:
+            tokens.append(token)
             token = self.next_token()
-            while self.state != ParseState.DONE:
-                if self.state == ParseState.OP:
-                    self.op_action(token)
-                elif self.state == ParseState.ARGS:
-                    self.args_action(token)
-                elif self.state == ParseState.START:
-                    self.start_action(token)
-                elif self.state == ParseState.END:
-                    self.end_action(token)
-                else:
-                    assert False
-                token = self.next_token()
-            pipeline = self.stack.pop().pipeline
-            assert self.stack.is_empty()
-            return pipeline
-        except UnknownOpError as e:
-            # An unknown op could occur because someone got an op wrong. I.e., we are parsing complete text
-            # (partial_text is False) and the op is just wrong. But it could also occur if we are doing tab
-            # completion (partial_text is True), and we have an op prefix, which is the whole point of
-            # tab completion. In the latter case, the UnknownOpError is not exceptional.
-            if not partial_text:
-                raise marcel.exception.KillCommandException(e)
-        except Exception as e:
-            marcel.util.print_stack()
-            raise marcel.exception.KillCommandException(e)
+        return tokens
 
     def next_token(self):
         token = None
@@ -534,9 +474,9 @@ class Parser(Source):
         c = self.peek_char()
         if c is not None:
             if c == Token.OPEN:
-                token = PythonExpression(self.text, self.end)
+                token = Expression(self.text, self.end)
             elif c == Token.CLOSE:
-                raise UnexpectedTokenError(self.text, self.end, 'Unmatched )')
+                raise ParseError('Unmatched )')
             elif c == Token.PIPE:
                 token = Pipe(self.text, self.end)
             elif c == Token.BEGIN:
@@ -547,8 +487,10 @@ class Parser(Source):
                 token = Fork(self.text, self.end)
             elif c == Token.BANG:
                 token = Run(self.text, self.end)
+            elif c == Token.ASSIGN:
+                token = Assign(self.text, self.end)
             else:
-                token = ShellString(self.text, self.end)
+                token = String(self.text, self.end)
             self.end = token.end
         return token
 
@@ -558,45 +500,230 @@ class Parser(Source):
             self.next_char()
             c = self.peek_char()
 
-    def is_op(self):
-        op_name = self.current().op_token.op_name()
-        return self.op_modules.get(op_name, None) is not None or marcel.util.is_executable(op_name)
+# ----------------------------------------------------------------------------------------------------------------------
 
-    def finish_op(self):
-        # Get the op module, and handle the special cases of bash
-        current = self.current()
-        op_token = current.op_token
+# Parsing
+
+# Grammar:
+#
+#     command:
+#             assignment
+#             pipeline
+#    
+#     assignment:
+#             var = [ pipeline ]
+#             var = expr
+#             var = str
+#    
+#     pipeline:
+#             op_sequence
+#
+#     op_sequence:
+#             op_args | op_sequence
+#             op_args
+#    
+#     op_args:
+#             op arg*
+#             expr
+#    
+#     op:
+#             str
+#             @
+#             !
+#             !!
+#    
+#     arg:
+#             expr
+#             str
+#             [ pipeline ]
+#    
+#     var: str
+#
+#     expr: Expression
+#
+#     str: String
+
+
+class Parser:
+
+    def __init__(self, text, main):
+        self.text = text
+        self.env = main.env
+        self.op_modules = main.op_modules
+        self.tokens = Lexer(text).tokens()
+        self.t = 0
+        self.token = None  # The current token
+
+    def parse(self):
+        return self.command()
+
+    def command(self):
+        if self.next_token(String, Assign):
+            return self.assignment(self.token.value())
+        else:
+            return self.pipeline()
+
+    def assignment(self, var):
+        self.next_token(Assign)
+        if self.next_token(Begin):
+            value = self.pipeline()
+            op = self.create_assignment(var, pipeline=value)
+            self.next_token(End)
+        elif self.next_token(String):
+            value = self.token.value()
+            op = self.create_assignment(var, string=value)
+        elif self.next_token(Expression):
+            value = self.token.value()
+            op = self.create_assignment(var, source=value)
+        else:
+            self.next_token()
+            raise UnexpectedTokenError(self.token, 'Unexpected token type.')
+        return op
+
+    def pipeline(self):
+        op_sequence = Parser.ensure_sequence(self.op_sequence())
+        op_sequence.reverse()
+        pipeline = marcel.core.Pipeline()
+        for op_args in op_sequence:
+            pipeline.append(op_args)
+        return pipeline
+
+    # Accumulates ops in REVERSE order, to avoid list prepend.
+    # Top-level caller needs to reverse the result..
+    def op_sequence(self):
+        op_args = self.op_args()
+        if self.next_token(Pipe):
+            op_sequence = Parser.ensure_sequence(self.op_sequence())
+            op_sequence.append(op_args)
+            return op_sequence
+        else:
+            return op_args
+
+    def op_args(self):
+        if self.next_token(Expression):
+            return self.create_map(self.token)
+        else:
+            op_token = self.op()
+            args = []
+            arg = self.arg()
+            while arg is not None:
+                args.append(arg)
+                arg = self.arg()
+            return self.create_op(op_token, args)
+
+    def op(self):
+        if self.next_token(String) or self.next_token(Fork) or self.next_token(Run):
+            return self.token
+        else:
+            if self.next_token():
+                raise UnexpectedTokenError(self.token, 'Unexpected token type.')
+            else:
+                raise PrematureEndError()
+
+    def arg(self):
+        if self.next_token(Begin):
+            pipeline = self.pipeline()
+            self.next_token(End)
+            return pipeline
+        elif self.next_token(String) or self.next_token(Expression):
+            return self.token.value()
+        else:
+            return None
+
+    # Returns True if a qualifying token was found, and sets self.token to it.
+    # Returns False if a qualifying token was not found, and leaves self.token unchanged.
+    def next_token(self, *expected_token_types):
+        n = len(expected_token_types)
+        if self.t + n <= len(self.tokens):
+            for i in range(n):
+                if type(self.tokens[self.t + i]) is not expected_token_types[i]:
+                    return False
+            if self.t < len(self.tokens):
+                self.token = self.tokens[self.t]
+                self.t += 1
+                return True
+        return False
+
+    @staticmethod
+    def raise_unexpected_token_error(token, message):
+        raise UnexpectedTokenError(token, message)
+
+    def create_op(self, op_token, args):
+        op = self.create_op_builtin(op_token, args)
+        if op is None:
+            op = self.create_op_variable(op_token, args)
+        if op is None:
+            op = self.create_op_executable(op_token, args)
+        if op is None:
+            raise UnknownOpError(op_token.value())
+        return op
+
+    def create_op_builtin(self, op_token, args):
+        op = None
         op_name = op_token.op_name()
         try:
             op_module = self.op_modules[op_name]
+            op = op_module.create_op()
+            # Both ! and !! map to the run op.
+            if op_name == 'run':
+                # !: Expect a command number
+                # !!: Don't expect a command number, run the previous command
+                # else: 'run' was entered
+                op.expected_args = (1 if op_token.value() == '!' else
+                                    0 if op_token.value() == '!!' else None)
+            arg_parser = op_module.arg_parser()
+            arg_parser.parse_args(args, namespace=op)
         except KeyError:
-            if marcel.util.is_executable(op_name):
-                op_module = self.op_modules['bash']
-                current.args = [op_name] + current.args
-            else:
-                raise UnknownOpError(self.text, op_name)
-        # Create the op
-        op = op_module.create_op()
-        # Both ! and !! map to the run op.
-        if op_name == 'run':
-            # !: Expect a command number
-            # !!: Don't expect a command number, run the previous command
-            # else: 'run' was entered
-            op.expected_args = (1 if op_token.value() == '!' else
-                                0 if op_token.value() == '!!' else None)
-        # Parse its args
-        arg_parser = op_module.arg_parser()
-        current = self.current()
-        arg_parser.parse_args(current.args, namespace=op)
-        # Append the op to the pipeline
-        current.pipeline.append(op)
-        # Clear op state
-        current.reset_op()
+            pass
+        return op
 
-    def finish_pipeline(self):
-        fork_pipeline = self.stack.pop().pipeline
-        current = self.current()
-        current.args.append(fork_pipeline)
+    def create_op_variable(self, op_token, args):
+        op = None
+        var = op_token.value()
+        value = self.env.getvar(var)
+        if value:
+            op_module = self.op_modules['runpipeline']
+            op = op_module.create_op()
+            op.var = var
+        return op
 
-    def finish_command(self):
-        self.finish_op()
+    def create_op_executable(self, op_token, args):
+        op = None
+        name = op_token.value()
+        if marcel.util.is_executable(name):
+            op_module = self.op_modules['bash']
+            op = op_module.create_op()
+            args = [name] + args
+            arg_parser = op_module.arg_parser()
+            arg_parser.parse_args(args, namespace=op)
+        return op
+
+    def create_assignment(self, var, string=None, pipeline=None, source=None):
+        assign_module = self.op_modules['assign']
+        assert assign_module is not None
+        op = assign_module.create_op()
+        op.var = var
+        if string is not None:
+            op.string = string
+        if pipeline is not None:
+            op.pipeline = pipeline
+        if source is not None:
+            op.source = source
+        pipeline = marcel.core.Pipeline()
+        pipeline.append(op)
+        return pipeline
+
+    def create_map(self, expr):
+        assert type(expr) is Expression
+        map_module = self.op_modules['map']
+        assert map_module is not None
+        op = map_module.create_op()
+        arg_parser = map_module.arg_parser()
+        arg_parser.parse_args([expr.value()], namespace=op)
+        return op
+
+    @staticmethod
+    def ensure_sequence(x):
+        if not marcel.util.is_sequence_except_string(x):
+            x = [x]
+        return x

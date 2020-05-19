@@ -124,7 +124,7 @@ class Main:
     def run_command(self, line):
         if line:
             try:
-                parser = marcel.parse.Parser(line, self.op_modules)
+                parser = marcel.parse.Parser(line, self)
                 pipeline = parser.parse()
                 pipeline.set_env(self.env)
                 pipeline.set_error_handler(Main.default_error_handler)

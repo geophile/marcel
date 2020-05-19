@@ -20,7 +20,6 @@ import marcel.exception as _exception
 import marcel.main as _main
 import marcel.object.color as _color
 import marcel.object.error as _error
-import marcel.util as _util
 
 from marcel.op.bash import bash as _bash
 from marcel.op.cd import cd as _cd
@@ -107,7 +106,7 @@ def _noop_error_handler(env, error):
 # don't want to modify the original.
 def _prepare_pipeline(x):
     if isinstance(x, _core.Pipeline):
-        pipeline = _util.clone(x)
+        pipeline = x.copy()
     elif isinstance(x, _core.Op):
         pipeline = _core.Pipeline()
         pipeline.append(x)

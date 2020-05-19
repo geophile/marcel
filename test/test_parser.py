@@ -13,42 +13,24 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-public = [
-    'assign',
-    'bash',
-    'bg',
-    'cd',
-    'dirs',
-    'edit',
-    'expand',
-    'fg',
-    'first',
-    'fork',
-    'gather',
-    'gen',
-    'head',
-    'help',
-    'history',
-    'jobs',
-    'ls',
-    'map',
-    'out',
-    'popd',
-    'ps',
-    'pushd',
-    'pwd',
-    'red',
-    'remote',
-    'reverse',
-    'run',
-    'runpipeline',
-    'select',
-    'sort',
-    'squish',
-    'sudo',
-    'tail',
-    'timer',
-    'unique',
-    'version',
-    'window'
-]
+import marcel.main
+import marcel.parse
+
+MAIN = marcel.main.Main(same_process=True)
+
+
+def test(text):
+    parser = marcel.parse.Parser(text, MAIN.op_modules)
+    pipeline = parser.parse()
+    print(f'{text} ->\n{pipeline}')
+
+
+test('gen 5')
+test('gen 5 | out')
+test('(3)')
+test('@jao [ gen 5 ]')
+test('!!')
+test('!4')
+# test('a = 3')
+# test('a = (3)')
+# test('a = [ls | out]')
