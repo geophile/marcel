@@ -26,8 +26,8 @@ Write the entries in the directory stack to the output stream, top first.
 DETAILS = None
 
 
-def dirs():
-    return Dirs()
+def dirs(env):
+    return Dirs(env)
 
 
 class DirsArgParser(marcel.core.ArgParser):
@@ -41,8 +41,8 @@ class DirsArgParser(marcel.core.ArgParser):
 
 class Dirs(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.clear = None
 
     def __repr__(self):

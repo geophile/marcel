@@ -66,8 +66,8 @@ Note that an empty nested sequence (as in the last input tuple) results in no ou
 '''
 
 
-def expand(position=None):
-    op = Expand()
+def expand(env, position=None):
+    op = Expand(env)
     op.position = position
     return op
 
@@ -85,8 +85,8 @@ class ExpandArgParser(marcel.core.ArgParser):
 
 class Expand(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.position = None
         self.expander = None
 

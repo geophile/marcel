@@ -51,7 +51,6 @@ from marcel.op.version import version as _version
 from marcel.op.window import window as _window
 from marcel.reduction import *
 
-
 _MAIN = _main.Main(same_process=True)
 # No colors for API
 _MAIN.env.set_color_scheme(None)
@@ -90,8 +89,7 @@ remote = fork
 # Utilities
 
 def _generate_op(f, *args, **kwargs):
-    op = f(*args, **kwargs)
-    op.set_env(_MAIN.env)
+    op = f(_MAIN.env, *args, **kwargs)
     return op
 
 
@@ -129,7 +127,8 @@ def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
     pipeline = _prepare_pipeline(x)
     pipeline.set_error_handler(_noop_error_handler)
     output = []
-    terminal_op = _gather(output=output,
+    terminal_op = _gather(_MAIN.env,
+                          output=output,
                           unwrap_singleton=unwrap_singleton,
                           errors=errors,
                           error_handler=error_handler)
@@ -142,7 +141,8 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     pipeline = _prepare_pipeline(x)
     pipeline.set_error_handler(_noop_error_handler)
     output = []
-    terminal_op = _first(output=output,
+    terminal_op = _first(_MAIN.env,
+                         output=output,
                          unwrap_singleton=unwrap_singleton,
                          errors=errors,
                          error_handler=error_handler)

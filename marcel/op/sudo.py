@@ -22,8 +22,8 @@ import sys
 import marcel.core
 
 
-def sudo(pipeline, *args):
-    op = Sudo()
+def sudo(env, pipeline, *args):
+    op = Sudo(env)
     op.args = args
     op.pipeline = pipeline
     return op
@@ -51,8 +51,8 @@ class SudoArgParser(marcel.core.ArgParser):
 
 class Sudo(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.args = None
         self.pipeline = None
 

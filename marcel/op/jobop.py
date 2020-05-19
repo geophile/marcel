@@ -42,8 +42,8 @@ class JobOpArgParser(marcel.core.ArgParser):
 
 class JobOp(marcel.core.Op):
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.jid = None
         self.pid = None
         self.job_id = None

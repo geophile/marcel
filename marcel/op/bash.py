@@ -34,8 +34,8 @@ Use this command if  the interactive flag is needed.
 '''
 
 
-def bash(*args, interactive=False):
-    op = Bash()
+def bash(env, *args, interactive=False):
+    op = Bash(env)
     op.interactive = interactive
     op.args = args
     return op
@@ -66,8 +66,8 @@ class Bash(marcel.core.Op):
         'vi'
     }
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.interactive = None
         self.args = None
         self.runner = None

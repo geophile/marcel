@@ -53,8 +53,8 @@ Notes:
 '''
 
 
-def timer(interval, components=False):
-    op = Timer()
+def timer(env, interval, components=False):
+    op = Timer(env)
     op.interval = str(interval)
     op.components = components
     return op
@@ -73,8 +73,8 @@ class TimerArgParser(marcel.core.ArgParser):
 
 class Timer(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.components = None
         self.metronome = None
         self.interval = None

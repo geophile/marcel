@@ -31,8 +31,8 @@ is specified.
 '''
 
 
-def unique(consecutive=False):
-    op = Unique()
+def unique(env, consecutive=False):
+    op = Unique(env)
     op.consecutive = consecutive
     return op
 
@@ -48,8 +48,8 @@ class UniqueArgParser(marcel.core.ArgParser):
 
 class Unique(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.consecutive = None
         self.uniquer = None
 

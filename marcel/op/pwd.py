@@ -24,8 +24,8 @@ Write the current directory to the output stream.
 DETAILS = None
 
 
-def pwd():
-    return Pwd()
+def pwd(env):
+    return Pwd(env)
 
 
 class PwdArgParser(marcel.core.ArgParser):
@@ -36,8 +36,8 @@ class PwdArgParser(marcel.core.ArgParser):
 
 class Pwd(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
 
     def __repr__(self):
         return 'pwd()'

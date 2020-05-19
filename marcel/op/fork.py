@@ -48,13 +48,13 @@ will generate this output:
 '''
 
 
-def fork(host, pipeline_or_op):
+def fork(env, host, pipeline_or_op):
     if isinstance(pipeline_or_op, marcel.core.Op):
         pipeline = marcel.core.Pipeline()
         pipeline.append(pipeline_or_op)
     else:
         pipeline = pipeline_or_op
-    op = Fork()
+    op = Fork(env)
     op.host = host
     op.pipeline = pipeline
     return op
@@ -70,8 +70,8 @@ class ForkArgParser(marcel.core.ArgParser):
 
 class Fork(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.host = None
         self.pipeline = None
         self.thread_labels = None
@@ -178,8 +178,8 @@ class Remote(ForkImplementation):
         super().setup_1()
         op = self.op
         remote_pipeline = marcel.core.Pipeline()
-        remote_pipeline.append(marcel.op.remote.Remote(op.pipeline))
-        remote_pipeline.append(marcel.op.labelthread.LabelThread())
+        remote_pipeline.append(marcel.op.remote.Remote(self.op.env, op.pipeline))
+        remote_pipeline.append(marcel.op.labelthread.LabelThread(self.op.env))
         op.pipeline = remote_pipeline
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
@@ -228,7 +228,7 @@ class Local(ForkImplementation):
     def setup_1(self):
         super().setup_1()
         op = self.op
-        op.pipeline.append(marcel.op.labelthread.LabelThread())
+        op.pipeline.append(marcel.op.labelthread.LabelThread(self.op.env))
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
 

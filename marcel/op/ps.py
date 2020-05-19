@@ -42,8 +42,8 @@ Run {n:help process} for more information on {n:Process} objects.
 '''
 
 
-def ps(user=None, group=None, pid=None, command=None):
-    op = Ps()
+def ps(env, user=None, group=None, pid=None, command=None):
+    op = Ps(env)
     op.user = user
     op.group = group
     op.pid = pid
@@ -76,8 +76,8 @@ class Ps(marcel.core.Op):
 
     UNINITIALIZED = object()
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.user = Ps.UNINITIALIZED
         self.group = Ps.UNINITIALIZED
         self.pid = Ps.UNINITIALIZED

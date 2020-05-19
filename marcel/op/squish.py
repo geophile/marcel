@@ -38,8 +38,8 @@ If no {r:function} is provided, then {n:+} is assumed.
 '''
 
 
-def squish(function=r_plus):
-    op = Squish()
+def squish(env, function=r_plus):
+    op = Squish(env)
     op.function = marcel.functionwrapper.FunctionWrapper(function=function)
     return op
 
@@ -56,8 +56,8 @@ class SquishArgParser(marcel.core.ArgParser):
 
 class Squish(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.function = None
 
     def __repr__(self):

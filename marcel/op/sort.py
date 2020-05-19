@@ -28,8 +28,8 @@ Otherwise, ordering is based on the values computed by applying {r:key} to each 
 '''
 
 
-def sort(key=None):
-    op = Sort()
+def sort(env, key=None):
+    op = Sort(env)
     op.key = None if key is None else marcel.functionwrapper.FunctionWrapper(function=key)
     return op
 
@@ -47,8 +47,8 @@ class SortArgParser(marcel.core.ArgParser):
 
 class Sort(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.key = None
         self.contents = []
 

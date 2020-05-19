@@ -20,8 +20,8 @@ import marcel.functionwrapper
 
 class Assign(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.var = None
         self.string = None
         self.pipeline = None

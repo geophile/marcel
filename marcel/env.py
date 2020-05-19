@@ -40,12 +40,6 @@ class DirectoryState:
             buffer.append(f'{name}: {self.namespace[name]}')
         return f'DirectoryState({", ".join(buffer)})'
 
-    def __getstate__(self):
-        return self.directory_vars()
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-
     def pwd(self):
         return pathlib.Path(self.namespace['PWD'])
 
@@ -139,12 +133,6 @@ class Environment:
         self.edited_command = None
         self.op_modules = None
         self.linereader = None
-
-    def __getstate__(self):
-        return {}
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
 
     def getvar(self, var):
         return self.namespace.get(var, None)

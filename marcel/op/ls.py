@@ -41,8 +41,8 @@ Run {n:help file} for more information on {n:File} objects.
 '''
 
 
-def ls(*paths, depth=1, recursive=False, file=False, dir=False, symlink=False):
-    op = Ls()
+def ls(env, *paths, depth=1, recursive=False, file=False, dir=False, symlink=False):
+    op = Ls(env)
     op.d0 = depth == 0
     op.d1 = depth == 1
     op.dr = recursive
@@ -88,8 +88,8 @@ class LsArgParser(marcel.core.ArgParser):
 
 class Ls(marcel.op.filenames.FilenamesOp):
 
-    def __init__(self):
-        super().__init__(op_has_target=False)
+    def __init__(self, env):
+        super().__init__(env, op_has_target=False)
         self.d0 = False
         self.d1 = False
         self.dr = False

@@ -88,9 +88,11 @@ tuples:
 '''
 
 
-def window(predicate=None, overlap=False, disjoint=None):
-    op = Window()
-    op.predicate = None if predicate is None else marcel.functionwrapper.FunctionWrapper(function=predicate)
+def window(env, predicate=None, overlap=False, disjoint=None):
+    op = Window(env)
+    op.predicate = (None 
+                    if predicate is None else
+                    marcel.functionwrapper.FunctionWrapper(function=predicate))
     op.overlap = overlap
     op.disjoint = disjoint
     return op
@@ -119,8 +121,8 @@ class WindowArgsParser(marcel.core.ArgParser):
 
 class Window(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.predicate = None
         self.overlap = None
         self.disjoint = None

@@ -31,8 +31,8 @@ The recalled command will replace {n:run} in the command history.
 '''
 
 
-def run():
-    return Run()
+def run(env):
+    return Run(env)
 
 
 class RunArgParser(marcel.core.ArgParser):
@@ -48,8 +48,8 @@ class RunArgParser(marcel.core.ArgParser):
 
 class Run(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.expected_args = None  # Set during parse. ! -> 1, !! -> 0
         self.n = None
         self.editor = None

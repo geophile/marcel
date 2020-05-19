@@ -24,8 +24,8 @@ TRACE = marcel.util.Trace('/tmp/farcel.log')
 
 class PickleOutput(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.pickler = dill.Pickler(sys.stdout.buffer)
 
     def __repr__(self):
@@ -50,15 +50,16 @@ class PickleOutput(marcel.core.Op):
 
 class PipelineRunner(threading.Thread):
 
-    def __init__(self, pipeline):
+    def __init__(self, env, pipeline):
         super().__init__()
-        self.pickler = PickleOutput()
+        self.pickler = PickleOutput(env)
         pipeline.append(self.pickler)
         self.pipeline = pipeline
 
     def run(self):
         try:
             TRACE.write(f'PipelineRunner: About to setup_1 {self.pipeline}')
+            TRACE.write(f'PipelineRunner: env.dir_state() {self.pipeline.env.dir_state()}')
             self.pipeline.setup_1()
             # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
             # supporting more than one level of nesting.
@@ -99,13 +100,14 @@ def main():
     env = marcel.env.Environment(None)
     version = env.getvar('MARCEL_VERSION')
     TRACE.write(f'Marcel version {version}')
+    TRACE.write(f'env: {env.namespace}')
     # Use sys.stdin.buffer because we want binary data, not the text version
     input = dill.Unpickler(sys.stdin.buffer)
     pipeline = input.load()
     pipeline.set_env(env)
     pipeline.set_error_handler(noop_error_handler)
     TRACE.write(f'pipeline: {pipeline}')
-    pipeline_runner = PipelineRunner(pipeline)
+    pipeline_runner = PipelineRunner(env, pipeline)
     pipeline_runner.start()
     try:
         signal_id = input.load()

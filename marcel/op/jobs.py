@@ -32,8 +32,8 @@ as a job number simply reflects the job's position in the list of jobs. Process 
 '''
 
 
-def jobs():
-    return Jobs()
+def jobs(env):
+    return Jobs(env)
 
 
 class JobsArgParser(marcel.core.ArgParser):
@@ -44,8 +44,8 @@ class JobsArgParser(marcel.core.ArgParser):
 
 class Jobs(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
 
     def __repr__(self):
         return f'jobs'

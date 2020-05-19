@@ -30,8 +30,8 @@ are bound to the {r:function}'s parameters. The output from the function is writ
 '''
 
 
-def map(function):
-    op = Map()
+def map(env, function):
+    op = Map(env)
     op.function = marcel.functionwrapper.FunctionWrapper(function=function)
     return op
 
@@ -47,8 +47,8 @@ class MapArgParser(marcel.core.ArgParser):
 
 class Map(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.function = None
 
     def __repr__(self):

@@ -29,8 +29,8 @@ and the current directory is changed to the new top directory on the stack.
 '''
 
 
-def pushd(directory=None):
-    op = Pushd()
+def pushd(env, directory=None):
+    op = Pushd(env)
     op.directory = directory
     return op
 
@@ -44,8 +44,8 @@ class PushdArgParser(marcel.core.ArgParser):
 
 class Pushd(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.directory = None
 
     def __repr__(self):

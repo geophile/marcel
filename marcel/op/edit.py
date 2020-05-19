@@ -34,8 +34,8 @@ will be on the command line. (Hit enter to run the command, as usual.)
 '''
 
 
-def edit():
-    return Edit()
+def edit(env):
+    return Edit(env)
 
 
 class EditArgParser(marcel.core.ArgParser):
@@ -51,8 +51,8 @@ class EditArgParser(marcel.core.ArgParser):
 
 class Edit(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.n = None
         self.editor = None
         self.tmp_file = None

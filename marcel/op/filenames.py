@@ -24,8 +24,8 @@ import marcel.object.file
 
 class FilenamesOp(marcel.core.Op):
 
-    def __init__(self, op_has_target):
-        super().__init__()
+    def __init__(self, env, op_has_target):
+        super().__init__(env)
         self.filename = None
         self.current_dir = None
         self.roots = []

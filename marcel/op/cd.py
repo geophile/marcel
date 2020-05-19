@@ -28,8 +28,8 @@ If {r:directory} is omitted, then change the current directory to the home direc
 '''
 
 
-def cd(directory=None):
-    op = Cd()
+def cd(env, directory=None):
+    op = Cd(env)
     op.directory = directory
     return op
 
@@ -46,8 +46,8 @@ class CdArgParser(marcel.core.ArgParser):
 
 class Cd(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.directory = None
 
     def __repr__(self):

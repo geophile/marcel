@@ -26,8 +26,8 @@ Pop the directory stack, and cd to the new top directory.
 DETAILS = None
 
 
-def popd():
-    return Popd()
+def popd(env):
+    return Popd(env)
 
 
 class PopdArgParser(marcel.core.ArgParser):
@@ -38,8 +38,8 @@ class PopdArgParser(marcel.core.ArgParser):
 
 class Popd(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
 
     def __repr__(self):
         return 'popd()'

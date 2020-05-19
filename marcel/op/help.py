@@ -30,8 +30,8 @@ Provide help on marcel's concepts, objects, and operations.
 DETAILS = None
 
 
-def help():
-    return Help()
+def help(env):
+    return Help(env)
 
 
 class HelpArgParser(marcel.core.ArgParser):
@@ -46,8 +46,8 @@ class HelpArgParser(marcel.core.ArgParser):
 
 class Help(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.topic = None
         self.module = None
 

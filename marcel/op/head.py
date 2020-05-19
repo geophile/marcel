@@ -27,8 +27,8 @@ output stream. All other input items will be discarded.
 '''
 
 
-def head(n):
-    op = Head()
+def head(env, n):
+    op = Head(env)
     op.n = n
     return op
 
@@ -45,8 +45,8 @@ class HeadArgParser(marcel.core.ArgParser):
 
 class Head(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.n = None
         self.received = 0
 

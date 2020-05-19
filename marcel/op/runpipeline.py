@@ -19,8 +19,8 @@ import marcel.exception
 
 class RunPipeline(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.var = None
         self.pipeline = None
 

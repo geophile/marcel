@@ -24,8 +24,8 @@ The input stream is output in reverse order.
 DETAILS = None
 
 
-def reverse():
-    return Reverse()
+def reverse(env):
+    return Reverse(env)
 
 
 class ReverseArgParser(marcel.core.ArgParser):
@@ -36,8 +36,8 @@ class ReverseArgParser(marcel.core.ArgParser):
 
 class Reverse(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.contents = []
 
     # BaseOp

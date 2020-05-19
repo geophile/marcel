@@ -29,8 +29,8 @@ The {n:history} command itself will not show up in the command history.
 '''
 
 
-def history():
-    return History()
+def history(env):
+    return History(env)
 
 
 class HistoryArgParser(marcel.core.ArgParser):
@@ -41,8 +41,8 @@ class HistoryArgParser(marcel.core.ArgParser):
 
 class History(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
 
     def __repr__(self):
         return 'history()'

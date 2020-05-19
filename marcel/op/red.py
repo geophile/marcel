@@ -95,8 +95,8 @@ The output stream would be {n:('a', 1, 1), ('a', 2, 3), ('b', 3, 3), ('b', 4, 7)
 '''
 
 
-def red(*functions, incremental=False):
-    op = Red()
+def red(env, *functions, incremental=False):
+    op = Red(env)
     op.function = []
     for function in functions:
         op.function.append(marcel.functionwrapper.FunctionWrapper(source='.', globals={})
@@ -123,8 +123,8 @@ class RedArgParser(marcel.core.ArgParser):
 
 class Red(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.incremental = None
         self.function = None
         self.reducer = None

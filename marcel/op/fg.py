@@ -26,8 +26,8 @@ The new foreground job is resumed if necessary.
 '''
 
 
-def fg():
-    return Fg()
+def fg(env):
+    return Fg(env)
 
 
 class FgArgParser(marcel.op.jobop.JobOpArgParser):
@@ -38,8 +38,8 @@ class FgArgParser(marcel.op.jobop.JobOpArgParser):
 
 class Fg(marcel.op.jobop.JobOp):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
 
     def __repr__(self):
         return f'fg(job={self.jid})' if self.jid is not None else f'fg(pid={self.pid})'

@@ -28,8 +28,8 @@ True are written to the output stream.
 '''
 
 
-def select(function):
-    op = Select()
+def select(env, function):
+    op = Select(env)
     op.function = marcel.functionwrapper.FunctionWrapper(function=function)
     return op
 
@@ -45,8 +45,8 @@ class SelectArgParser(marcel.core.ArgParser):
 
 class Select(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.function = None
 
     def __repr__(self):

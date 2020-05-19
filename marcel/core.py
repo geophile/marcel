@@ -119,7 +119,9 @@ class BaseOp:
     by subclasses to receive and process input from upstream commands.
     """
 
-    def __init__(self):
+    def __init__(self, env):
+        assert isinstance(self, Pipeline) or env is not None
+        self._env = env
         # The pipeline to which this op belongs
         self.owner = None
         # The next op in the pipeline, or None if this is the last op in the pipeline.
@@ -129,22 +131,11 @@ class BaseOp:
         # this one.
         self.receiver = None
         self.command_state = None
-        # For shell usage, a BaseOp's env comes from the pipeline. For the API, the env
-        # is set directly on the BaseOp. self._env provides whichever is available when
-        # the env is requested.
-        self._env = None
 
     # object
 
     def __repr__(self):
         assert False
-
-    def __getstate__(self):
-        self._env = None
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
 
     # BaseOp runtime
 
@@ -205,12 +196,8 @@ class BaseOp:
         return False
 
     def env(self):
-        if self._env is None:
-            self._env = self.owner.env
+        assert self._env is not None
         return self._env
-
-    def set_env(self, env):
-        self._env = env
 
     # BaseOp compile-time
 
@@ -225,8 +212,8 @@ class Op(BaseOp):
     """Base class for all ops, (excluding pipelines).
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         # pipelines is for pipeline args. The actual pipelines are stored here, while a
         # reference to it is substituted into the command's args, for purposes of parsing.
         self.pipelines = None
@@ -310,7 +297,7 @@ class Op(BaseOp):
 class Pipeline(BaseOp):
 
     def __init__(self):
-        BaseOp.__init__(self)
+        BaseOp.__init__(self, None)
         self.env = None
         self.error_handler = None
         self.first_op = None
@@ -429,7 +416,7 @@ class PipelineIterator:
         pipeline.set_env(env)
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
         output = []
-        gather_op = env.op_modules['gather'].api_function()(output)
+        gather_op = env.op_modules['gather'].api_function()(env, output)
         pipeline.append(gather_op)
         command = Command(None, pipeline)
         try:

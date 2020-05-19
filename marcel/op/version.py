@@ -25,8 +25,8 @@ Write the marcel version number to the output stream.
 DETAILS = None
 
 
-def version():
-    return Version()
+def version(env):
+    return Version(env)
 
 
 class VersionArgParser(marcel.core.ArgParser):
@@ -37,8 +37,8 @@ class VersionArgParser(marcel.core.ArgParser):
 
 class Version(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
 
     def __repr__(self):
         return 'version()'

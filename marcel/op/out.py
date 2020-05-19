@@ -34,8 +34,8 @@ Error objects are not subject to formatting specifications, and are not passed o
 '''
 
 
-def out(append=None, file=None, csv=False, format=None):
-    op = Out()
+def out(env, append=None, file=None, csv=False, format=None):
+    op = Out(env)
     op.append = append
     op.file = file
     op.csv = csv
@@ -66,8 +66,8 @@ class OutArgParser(marcel.core.ArgParser):
 
 class Out(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.append = None
         self.file = None
         self.csv = False

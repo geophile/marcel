@@ -29,8 +29,8 @@ Resume execution of the selected job, and leave it running in the background.
 '''
 
 
-def bg():
-    return Bg()
+def bg(env):
+    return Bg(env)
 
 
 class BgArgParser(marcel.op.jobop.JobOpArgParser):
@@ -41,8 +41,8 @@ class BgArgParser(marcel.op.jobop.JobOpArgParser):
 
 class Bg(marcel.op.jobop.JobOp):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
 
     def __repr__(self):
         return f'bg(job={self.jid})' if self.jid is not None else f'bg(pid={self.pid})'

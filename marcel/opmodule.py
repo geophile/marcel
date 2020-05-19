@@ -55,7 +55,7 @@ class OpModule:
         return self._api
 
     def create_op(self):
-        return self._constructor()
+        return self._constructor(self._env)
 
     def arg_parser(self):
         if self._arg_parser is None:

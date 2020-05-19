@@ -29,8 +29,8 @@ permitted if the stream does not terminate, or if {r:start} is negative.
 '''
 
 
-def gen(count=0, start=0, pad=None):
-    op = Gen()
+def gen(env, count=0, start=0, pad=None):
+    op = Gen(env)
     op.count = count
     op.start = start
     op.pad = pad
@@ -60,8 +60,8 @@ class GenArgParser(marcel.core.ArgParser):
 
 class Gen(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.pad = None
         self.count = None
         self.start = None

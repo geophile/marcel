@@ -27,8 +27,8 @@ output stream. All other input items will be discarded.
 '''
 
 
-def tail(n):
-    op = Tail()
+def tail(env, n):
+    op = Tail(env)
     op.n = n
     return op
 
@@ -45,8 +45,8 @@ class TailArgParser(marcel.core.ArgParser):
 
 class Tail(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.n = None
         self.queue = None  # Circular queue
         self.end = 0  # End of the queue

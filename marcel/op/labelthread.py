@@ -21,8 +21,8 @@ ID_COUNTER = 0
 
 class LabelThread(marcel.core.Op):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, env):
+        super().__init__(env)
         self.label = None
         global ID_COUNTER
         self.id = ID_COUNTER
