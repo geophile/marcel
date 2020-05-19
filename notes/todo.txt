@@ -311,3 +311,15 @@ ls -fr ~/git/marcel/{marcel,test} \
 | expand \
 | red count
 No qualifying paths: ['~/git/marcel/{marcel,test}']
+
+----------------------------------------------------------------------
+
+# as comment
+
+----------------------------------------------------------------------
+
+a = [...]
+b = [a | ...]
+
+Should expand a when defining b? Or only at execution time?
+

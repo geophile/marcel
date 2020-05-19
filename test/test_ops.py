@@ -484,14 +484,13 @@ def main_stable():
 
 
 def main_dev():
-    test_assign()
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

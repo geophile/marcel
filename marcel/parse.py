@@ -553,6 +553,8 @@ class Parser:
         self.tokens = Lexer(text).tokens()
         self.t = 0
         self.token = None  # The current token
+        # For use by tab completer
+        self.current_op_name = None
 
     def parse(self):
         return self.command()
@@ -591,6 +593,7 @@ class Parser:
     # Accumulates ops in REVERSE order, to avoid list prepend.
     # Top-level caller needs to reverse the result..
     def op_sequence(self):
+        self.current_op_name = None
         op_args = self.op_args()
         if self.next_token(Pipe):
             op_sequence = Parser.ensure_sequence(self.op_sequence())
@@ -604,21 +607,22 @@ class Parser:
             return self.create_map(self.token)
         else:
             op_token = self.op()
+            self.current_op_name = op_token.value()
             args = []
             arg = self.arg()
             while arg is not None:
                 args.append(arg)
                 arg = self.arg()
-            return self.create_op(op_token, args)
+            op = self.create_op(op_token, args)
+            return op
 
     def op(self):
         if self.next_token(String) or self.next_token(Fork) or self.next_token(Run):
             return self.token
+        elif self.next_token():
+            raise UnexpectedTokenError(self.token, 'Unexpected token type.')
         else:
-            if self.next_token():
-                raise UnexpectedTokenError(self.token, 'Unexpected token type.')
-            else:
-                raise PrematureEndError()
+            raise PrematureEndError()
 
     def arg(self):
         if self.next_token(Begin):

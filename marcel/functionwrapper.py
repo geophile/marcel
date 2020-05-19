@@ -66,13 +66,6 @@ class FunctionWrapper:
             function_input_string = ', '.join(function_input)
             self._op.fatal_error(function_input_string, str(e))
 
-    def __getstate__(self):
-        self._globals = None  # If function is being remotely executed, remote environment fills in globals
-        return self.__dict__
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-
     def check_validity(self):
         self.create_function()
         if not callable(self._function):

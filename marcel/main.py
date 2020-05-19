@@ -91,7 +91,7 @@ class Main:
         except marcel.exception.KillShellException as e:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)
-        self.tab_completer = marcel.tabcompleter.TabCompleter(self.env)
+        self.tab_completer = marcel.tabcompleter.TabCompleter(self)
         self.op_modules = marcel.opmodule.import_op_modules(self.env)
         self.env.op_modules = self.op_modules
         self.reader = None
