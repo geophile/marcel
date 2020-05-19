@@ -41,7 +41,7 @@ import marcel.exception
 import marcel.job
 import marcel.multilinereader
 import marcel.opmodule
-import marcel.parse
+import marcel.parser
 import marcel.tabcompleter
 import marcel.util
 
@@ -124,7 +124,7 @@ class Main:
     def run_command(self, line):
         if line:
             try:
-                parser = marcel.parse.Parser(line, self)
+                parser = marcel.parser.Parser(line, self)
                 pipeline = parser.parse()
                 pipeline.set_env(self.env)
                 pipeline.set_error_handler(Main.default_error_handler)

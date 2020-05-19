@@ -778,3 +778,39 @@ bash -i ssh ... works as expected.
     M-0.6.5 jao@cheese:~$ 
 
 Why does remote session end up in marcel, logged in as jao?
+
+----------------------------------------------------------------------
+
+FIXED
+
+49. Symbol defined in config file not visible to pipeline assigned to var
+
+M-0.7.1 jao@cheese:~/git/marcel/test$ recent = [select(f: now() - f.mtime < hours(8))]
+M-0.7.1 jao@cheese:~/git/marcel/test$ (recent)
+pipeline(select(f: now() - f.mtime < hours(8)))
+M-0.7.1 jao@cheese:~/git/marcel/test$ ls | recent
+Error(Running select(f: now() - f.mtime < hours(8)) on (.,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (.marcel.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (.marcel_bug29.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (__init__.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (__pycache__,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (bug_28.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (bug_29.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (bug_30.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (bug_31.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (bug_33.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (bug_38.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (bug_39.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_api.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_api2.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_base.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_embedded_python.txt,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_filename_ops.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_help.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_native_filename_ops.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_ops.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_parser.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_python_string.txt,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_shell_string.txt,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (test_tokenizing.py,): name 'now' is not defined)
+Error(Running select(f: now() - f.mtime < hours(8)) on (testall,): name 'now' is not defined)

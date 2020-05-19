@@ -58,7 +58,7 @@ class PipelineRunner(threading.Thread):
 
     def run(self):
         try:
-            TRACE.write(f'PipelineRunner: About to setup1 {self.pipeline}')
+            TRACE.write(f'PipelineRunner: About to setup_1 {self.pipeline}')
             self.pipeline.setup_1()
             # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
             # supporting more than one level of nesting.

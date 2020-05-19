@@ -1,9 +1,14 @@
 from marcel.api import *
 
-# run(remote('jao', gen(3)))
+# negate = map(lambda x: -x)
+# run(gen(5) | negate)
+# run(gen(5) | negate | negate)
 
-for x, y in fork(3, gen(3)):
-    print(f'{x}, {y}')
+# cat = map(lambda f: (f, f.readlines())) | expand(1)
+# for f, line in ls('/home/jao/*.txt', file=True, recursive=True) | cat:
+#     print(f'{f}: {line}')
+
+# run(remote('jao', gen(3)))
 
 # run(ls())
 #

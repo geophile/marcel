@@ -1,24 +1,31 @@
-0.7 -- Abstraction mechanisms
+0.8
 
 - DB access
 
 - Improve sudo
 
+- Bugs
+  - 47
+
+----------------------------------------------------------------------
+
+0.7 -- Abstraction mechanisms
+
 + "(...)" as shorthand for "map (...)"? (If no parameters)
 
 - Import EDITOR var from host env.
 
-- Assignment
++ Assignment
 
-  - Pipelines
+  + Pipelines
 
-  - Strings
+  + Strings
 
-  - Expressions
+  + Expressions
 
-  - Use of assigned pipelines
+  + Use of assigned pipelines
 
-  - Use of assigned var in expression
+  + Use of assigned var in expression
 
 - Expr as arg, e.g. to ls.
 
@@ -26,9 +33,19 @@ If marcel is my default shell (in /etc/passwd), then remote operations
 fail, probably because marcel doesn't work as the shell for executing
 a command by ssh. May be related to bug 46.
 
-Bugs:
+- Need a way to define var-bound pipelines in config script. API to
+  take string with commands?
 
-  - 47
+- Doc:
+
+  - Assignment
+  - Pipeline execution
+  - Function eval (implicit map)
+
+
+- Bugs:
+
+  + 49
 
 ----------------------------------------------------------------------
 

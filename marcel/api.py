@@ -57,12 +57,6 @@ _MAIN = _main.Main(same_process=True)
 _MAIN.env.set_color_scheme(None)
 
 
-def _generate_op(f, *args, **kwargs):
-    op = f(*args, **kwargs)
-    op.set_env(_MAIN.env)
-    return op
-
-
 def bash(*args, **kwargs): return _generate_op(_bash, *args, **kwargs)
 def cd(*args, **kwargs): return _generate_op(_cd, *args, **kwargs)
 def dirs(*args, **kwargs): return _generate_op(_dirs, *args, **kwargs)
@@ -92,7 +86,14 @@ def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 
 remote = fork
 
+
 # Utilities
+
+def _generate_op(f, *args, **kwargs):
+    op = f(*args, **kwargs)
+    op.set_env(_MAIN.env)
+    return op
+
 
 def _default_error_handler(env, error):
     print(error.render_full(env.color_scheme()))
@@ -109,10 +110,10 @@ def _prepare_pipeline(x):
         pipeline = x.copy()
     elif isinstance(x, _core.Op):
         pipeline = _core.Pipeline()
+        pipeline.set_env(_MAIN.env)
         pipeline.append(x)
     else:
         raise _exception.KillCommandException(f'Not an operator or pipeline: {x}')
-    pipeline.set_env(_MAIN.env)
     return pipeline
 
 

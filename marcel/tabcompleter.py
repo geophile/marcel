@@ -21,7 +21,7 @@ import marcel.core
 import marcel.doc
 import marcel.exception
 import marcel.op
-import marcel.parse
+import marcel.parser
 import marcel.util
 
 
@@ -70,11 +70,11 @@ class TabCompleter:
             # Parse the text so far, to get information needed for tab completion. It is expected that
             # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
             # which can be ignored. The important point is that the parse will set Parser.op.
-            parser = marcel.parse.Parser(line, self.main)
+            parser = marcel.parser.Parser(line, self.main)
             try:
                 parser.parse()
                 debug('parse succeeded')
-            except marcel.parse.PrematureEndError:
+            except marcel.parser.PrematureEndError:
                 debug('premature end')
                 pass
             except Exception as e:

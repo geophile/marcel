@@ -14,13 +14,13 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import marcel.main
-import marcel.parse
+import marcel.parser
 
 MAIN = marcel.main.Main(same_process=True)
 
 
 def test(text):
-    parser = marcel.parse.Parser(text, MAIN.op_modules)
+    parser = marcel.parser.Parser(text, MAIN.op_modules)
     pipeline = parser.parse()
     print(f'{text} ->\n{pipeline}')
 

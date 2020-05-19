@@ -138,34 +138,38 @@ SyntaxError: invalid syntax
 
 ----------------------------------------------------------------------
 
-49. Symbol defined in config file not visible to pipeline assigned to var
+50. Assigning function with unbound args blows up
 
-M-0.7.1 jao@cheese:~/git/marcel/test$ recent = [select(f: now() - f.mtime < hours(8))]
-M-0.7.1 jao@cheese:~/git/marcel/test$ (recent)
-pipeline(select(f: now() - f.mtime < hours(8)))
-M-0.7.1 jao@cheese:~/git/marcel/test$ ls | recent
-Error(Running select(f: now() - f.mtime < hours(8)) on (.,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (.marcel.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (.marcel_bug29.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (__init__.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (__pycache__,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (bug_28.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (bug_29.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (bug_30.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (bug_31.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (bug_33.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (bug_38.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (bug_39.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_api.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_api2.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_base.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_embedded_python.txt,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_filename_ops.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_help.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_native_filename_ops.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_ops.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_parser.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_python_string.txt,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_shell_string.txt,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (test_tokenizing.py,): name 'now' is not defined)
-Error(Running select(f: now() - f.mtime < hours(8)) on (testall,): name 'now' is not defined)
+    M-0.7.1 jao@cheese:~$ x = (a: a + 1)
+    Error(Running assign(x, None) on : <lambda>() missing 1 required positional argument: 'a')
+    Traceback (most recent call last):
+      File "/home/jao/git/marcel/marcel/functionwrapper.py", line 59, in __call__
+        return self._function(*args, **kwargs)
+    TypeError: <lambda>() missing 1 required positional argument: 'a'
+    
+    During handling of the above exception, another exception occurred:
+    
+    Traceback (most recent call last):
+      File "/usr/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+        "__main__", mod_spec)
+      File "/usr/lib/python3.7/runpy.py", line 85, in _run_code
+        exec(code, run_globals)
+      File "/home/jao/git/marcel/marcel/main.py", line 212, in <module>
+        MAIN.run()
+      File "/home/jao/git/marcel/marcel/main.py", line 116, in run
+        self.run_command(line)
+      File "/home/jao/git/marcel/marcel/main.py", line 140, in run_command
+        command.execute()
+      File "/home/jao/git/marcel/marcel/core.py", line 413, in execute
+        self.pipeline.setup_1()
+      File "/home/jao/git/marcel/marcel/core.py", line 348, in setup_1
+        op.setup_1()
+      File "/home/jao/git/marcel/marcel/op/assign.py", line 48, in setup_1
+        self.value = function()
+      File "/home/jao/git/marcel/marcel/functionwrapper.py", line 67, in __call__
+        self._op.fatal_error(function_input_string, str(e))
+      File "/home/jao/git/marcel/marcel/core.py", line 255, in fatal_error
+        raise marcel.exception.KillAndResumeException(error)
+    marcel.exception.KillAndResumeException: Error(Running assign(x, None) on : <lambda>() missing 1 required positional argument: 'a')
+
+Allow this? If not, then at least fail gracefully.
