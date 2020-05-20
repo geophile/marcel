@@ -97,7 +97,7 @@ class Ls(marcel.op.filenames.FilenamesOp):
         self.dir = False
         self.symlink = False
         self.base = None
-        self.emitted = set()
+        self.emitted = None
 
     def __repr__(self):
         if self.d0:
@@ -120,6 +120,7 @@ class Ls(marcel.op.filenames.FilenamesOp):
 
     def setup_1(self):
         super().setup_1()
+        self.emitted = set()
         if len(self.roots) == 0:
             self.roots = [self.current_dir]
         if not (self.d0 or self.d1 or self.dr):

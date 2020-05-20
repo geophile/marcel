@@ -49,7 +49,7 @@ class Tail(marcel.core.Op):
         super().__init__(env)
         self.n = None
         self.queue = None  # Circular queue
-        self.end = 0  # End of the queue
+        self.end = None  # End of the queue
 
     def __repr__(self):
         return f'tail({self.n})'
@@ -58,6 +58,7 @@ class Tail(marcel.core.Op):
     
     def setup_1(self):
         self.queue = None if self.n == 0 else [None] * self.n
+        self.end = 0
 
     def receive(self, x):
         if self.queue:

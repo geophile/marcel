@@ -28,11 +28,12 @@ class FilenamesOp(marcel.core.Op):
         super().__init__(env)
         self.filename = None
         self.current_dir = None
-        self.roots = []
+        self.roots = None
 
     # BaseOp
 
     def setup_1(self):
+        self.roots = []
         self.current_dir = self.env().dir_state().pwd()
         self.roots = FilenamesOp.deglob(self.current_dir, self.filename)
         if len(self.filename) > 0 and len(self.roots) == 0:

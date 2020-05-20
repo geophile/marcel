@@ -78,7 +78,7 @@ class Timer(marcel.core.Op):
         self.components = None
         self.metronome = None
         self.interval = None
-        self.lock = threading.Condition()
+        self.lock = None
         self.done = False
         self.now = None
 
@@ -88,6 +88,7 @@ class Timer(marcel.core.Op):
     # BaseOp
     
     def setup_1(self):
+        self.lock = threading.Condition()
         self.interval = self.parse_interval(self.interval)
         self.metronome = Metronome(self)
 

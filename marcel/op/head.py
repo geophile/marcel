@@ -48,7 +48,7 @@ class Head(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.n = None
-        self.received = 0
+        self.received = None
 
     def __repr__(self):
         return f'head({self.n})'
@@ -56,7 +56,7 @@ class Head(marcel.core.Op):
     # BaseOp
     
     def setup_1(self):
-        pass
+        self.received = 0
 
     def receive(self, x):
         self.received += 1

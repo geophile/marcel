@@ -14,10 +14,6 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import io
-import sys
-
-import dill
 
 import marcel.exception
 import marcel.functionwrapper
@@ -110,7 +106,49 @@ class ArgParser(argparse.ArgumentParser):
         return marcel.functionwrapper.FunctionWrapper(source=s, globals=self.env.vars())
 
 
-class BaseOp:
+class Pipelineable:
+
+    def create_pipeline(self):
+        assert False
+
+
+class Node(Pipelineable):
+
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def __or__(self, other):
+        return Node(self, other)
+
+    def __iter__(self):
+        return PipelineIterator(self.create_pipeline())
+
+    # Pipelineable
+
+    def create_pipeline(self):
+        def visit(op):
+            assert isinstance(op, Op)
+            pipeline.append(op.copy())
+
+        pipeline = Pipeline()
+        self.traverse(visit)
+        return pipeline
+
+    # Node
+
+    def traverse(self, visit):
+        if type(self.left) is Node:
+            self.left.traverse(visit)
+        else:
+            visit(self.left)
+        if type(self.right) is Node:
+            self.right.traverse(visit)
+        else:
+            visit(self.right)
+
+
+class BaseOp(Pipelineable):
     """Base class for all ops, and for pipelines (sequences of
     ops). Methods of this class implement the op execution and
     inter-op communication. The send* commands are used by subclasses to
@@ -131,9 +169,12 @@ class BaseOp:
         self.receiver = None
         self.command_state = None
 
-    # object
-
     def __repr__(self):
+        assert False
+
+    # Pipelineable
+
+    def create_pipeline(self):
         assert False
 
     # BaseOp runtime
@@ -231,9 +272,14 @@ class Op(BaseOp):
         assert False, self.op_name()
 
     def __iter__(self):
+        return PipelineIterator(self.create_pipeline())
+
+    # Pipelineable
+
+    def create_pipeline(self):
         pipeline = Pipeline()
-        pipeline.append(self)
-        return PipelineIterator(pipeline)
+        pipeline.append(self.copy())
+        return pipeline
 
     # Op
 
@@ -273,17 +319,12 @@ class Op(BaseOp):
     # API
 
     def __or__(self, other):
-        # Copy the inputs. The API can attach the same op or pipeline multiple times, e.g.
-        #    x = [ ... ]
-        #    run(ls ... | x | x)
-        # An op carries runtime state, so using the same (identical) op twice is asking
-        # for trouble.
-        self_copy = marcel.util.copy(self)
-        other_copy = marcel.util.copy(other)
-        pipeline = Pipeline()
-        pipeline.append(self_copy)
-        pipeline.append(self.ensure_op(other_copy))
-        return pipeline
+        return Node(self, other)
+
+    def copy(self):
+        copy = self.__class__(self.env)
+        copy.__dict__.update(self.__dict__)
+        return copy
 
     # For use by this module
 
@@ -293,9 +334,9 @@ class Op(BaseOp):
     # For use by subclasses
 
     def resolve_pipeline_reference(self, x):
-        if isinstance(x, marcel.core.Pipeline):
+        if isinstance(x, marcel.core.Pipelineable):
             # This happens through the API
-            return x
+            return x.create_pipeline()
         if not x.startswith('pipeline:'):
             raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {x}')
         try:
@@ -326,9 +367,6 @@ class Pipeline(BaseOp):
             op = op.next_op
         return f'pipeline({" | ".join(buffer)})'
 
-    def __iter__(self):
-        return PipelineIterator(self)
-
     @property
     def env(self):
         return self.first_op.env()
@@ -338,6 +376,11 @@ class Pipeline(BaseOp):
 
     def handle_error(self, error):
         self.error_handler(self.env, error)
+
+    # Pipelineable
+
+    def create_pipeline(self):
+        return marcel.util.copy(self)
 
     # BaseOp
 
@@ -384,19 +427,6 @@ class Pipeline(BaseOp):
 
     def is_terminal_op(self, op_name):
         return self.last_op.op_name() == op_name
-
-    # API
-
-    def __or__(self, op):
-        # Copy the inputs. The API can attach the same op or pipeline multiple times, e.g.
-        #    x = [ ... ]
-        #    run(ls ... | x | x)
-        # An op carries runtime state, so using the same (identical) op twice is asking
-        # for trouble.
-        self_copy = marcel.util.copy(self)
-        op_copy = marcel.util.copy(op)
-        self_copy.append(self.ensure_op(op_copy))
-        return self_copy
 
 
 class Command:

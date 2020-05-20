@@ -333,8 +333,3 @@ prints:
     pipeline(map(f: (f, f.readlines())) | expand(1))
 
 It would be nice to have the original source.
-
-----------------------------------------------------------------------
-
-There is a lot of Op and Pipeline copying in the core __or__
-functions. Try to minimize it. 

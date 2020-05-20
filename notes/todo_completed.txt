@@ -367,3 +367,58 @@ No.
 
 Now that there is File.readlines, expand no longer has to have special
 handling for files.
+
+----------------------------------------------------------------------
+
+There is a lot of Op and Pipeline copying in the core __or__
+functions. Try to minimize it. 
+
+API performance is now terrible, (per profiler), due to the copying.
+
+......................................................................
+
+a = ls ...
+b = a | map ... 
+c = b | select ...
+
+a: Create op, no copying
+b: Copy a and the op
+c: Copy b and the op
+
+The problem is that the pipeline is mutable, and to protect the state
+of each var's pipeline, a copy has to be made.
+
+Alternative: 
+
+- Build up immutable structures
+
+- Create pipeline at execution time.
+
+- Creating ops pre-execution is fine, but the pipelines have to be
+  built later.
+
+
+op1 | op2 -> Node(op1, op2)
+
+node | op -> Node(node, op)
+
+Example above:
+
+a = ls
+b = Node(ls, map)
+c = Node(Node(ls, map), select)
+
+Reassigning a var does not change anything previous computed form it.
+
+
+a = ls | map
+b = foo | bar
+c = abc | def
+
+a | b | c
+
+equivalent to ls | map | foo | bar | abc | def. Don't need RunPipeline
+to maintain the nested structure.
+
+
+Remote(self, env, pipeline): needs work

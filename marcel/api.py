@@ -104,14 +104,8 @@ def _noop_error_handler(env, error):
 # Create a pipeline, by copying if necessary. The caller is going to append an op, and we
 # don't want to modify the original.
 def _prepare_pipeline(x):
-    if isinstance(x, _core.Pipeline):
-        pipeline = x.copy()
-    elif isinstance(x, _core.Op):
-        pipeline = _core.Pipeline()
-        pipeline.append(x)
-    else:
-        raise _exception.KillCommandException(f'Not an operator or pipeline: {x}')
-    return pipeline
+    assert isinstance(x, _core.Pipelineable)
+    return x.create_pipeline()
 
 
 def run(x):

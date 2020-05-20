@@ -50,7 +50,7 @@ class Sort(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.key = None
-        self.contents = []
+        self.contents = None
 
     def __repr__(self):
         return 'sort'
@@ -58,6 +58,7 @@ class Sort(marcel.core.Op):
     # BaseOp
     
     def setup_1(self):
+        self.contents = []
         if self.key:
             self.key.set_op(self)
 

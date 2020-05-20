@@ -75,7 +75,7 @@ class Fork(marcel.core.Op):
         self.host = None
         self.pipeline = None
         self.thread_labels = None
-        self.threads = []
+        self.threads = None
         self.impl = None
 
     def __repr__(self):
@@ -84,6 +84,7 @@ class Fork(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
+        self.threads = []
         self.pipeline = self.resolve_pipeline_reference(self.pipeline)
         cluster = self.env().remote(self.host)
         if cluster:
@@ -174,7 +175,7 @@ class Remote(ForkImplementation):
         super().setup_1()
         op = self.op
         remote_pipeline = marcel.core.Pipeline()
-        remote_pipeline.append(marcel.op.remote.Remote(self.op.env(), op.pipeline))
+        remote_pipeline.append(marcel.op.remote.remote(self.op.env(), None, op.pipeline))
         remote_pipeline.append(marcel.op.labelthread.LabelThread(self.op.env()))
         op.pipeline = remote_pipeline
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,

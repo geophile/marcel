@@ -71,7 +71,7 @@ class Bash(marcel.core.Op):
         self.interactive = None
         self.args = None
         self.runner = None
-        self.input = []
+        self.input = None
 
     def __repr__(self):
         return f'bash(args={self.args})'
@@ -79,6 +79,7 @@ class Bash(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
+        self.input = []
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('No command provided.')
         if self.args[0] in Bash.INTERACTIVE_EXECUTABLES:

@@ -23,21 +23,21 @@ import marcel.object.error
 
 
 def remote(env, host, pipeline):
-    if isinstance(pipeline, marcel.core.Op):
-        op = pipeline
-        pipeline = marcel.core.Pipeline()
-        pipeline.append(op)
-    op = Remote(env, pipeline)
+    if isinstance(pipeline, marcel.core.Pipelineable):
+        # Could be an Op, Pipeline, or Node
+        pipeline = pipeline.create_pipeline()
+    op = Remote(env)
     op.set_host(host)
+    op.pipeline = pipeline
     return op
 
 
 class Remote(marcel.core.Op):
 
-    def __init__(self, env, pipeline):
+    def __init__(self, env):
         super().__init__(env)
         self.host = None
-        self.pipeline = pipeline
+        self.pipeline = None
         self.process = None
 
     def __repr__(self):
