@@ -4,9 +4,19 @@ from marcel.api import *
 # run(gen(5) | negate)
 # run(gen(5) | negate | negate)
 
-# cat = map(lambda f: (f, f.readlines())) | expand(1)
+cat = map(lambda f: (f, f.readlines())) | expand(1)
 # for f, line in ls('/home/jao/*.txt', file=True, recursive=True) | cat:
 #     print(f'{f}: {line}')
+
+from time import time as now
+import marcel.util
+start = now()
+N = 1000
+for i in range(N):
+    marcel.util.copy(cat)
+stop = now()
+avg_msec = 1000 * (stop - start) / N
+print(f'Average copy time: {avg_msec} msec')
 
 # run(remote('jao', gen(3)))
 

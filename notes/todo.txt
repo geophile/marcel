@@ -336,28 +336,5 @@ It would be nice to have the original source.
 
 ----------------------------------------------------------------------
 
-Copy of pipeline, created via Pipeline.copy, needs env and
-error_handler. Can these be set by copy?
-
-......................................................................
-
-Env access:
-
-BaseOp:
-
-- BaseOp._env
-- env(): Initialized from owner.env, lazily. (owner is a pipeline)
-- set_env: Assigns to _env
-    - Called by api when instantiating op
-    - ForImplementation.setup_1()
-    - fork.Remote.setup_2, applied to pipeline copy.
-    - fork.Local.setup_2, applied to pipeline copy.
-    - RunPipeline.setup_1, applied to pipeline copy.
-
-Pipeline:
-
-- Pipeline.env
-- Set by set_env()
-    - Called by api, _prepare_pipeline (Creates or copies a pipeline)
-    - Called by Main.run_command, after pipeline is created by parsing.
-    - Called by Main.run_api, applied to pipeline passed in.
+There is a lot of Op and Pipeline copying in the core __or__
+functions. Try to minimize it. 

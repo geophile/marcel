@@ -30,12 +30,19 @@ class RunPipeline(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
-        pipeline = self.env().getvar(self.var)
-        if pipeline is None:
-            raise marcel.exception.KillCommandException(f'The variable {self.var} is undefined.')
-        if not isinstance(pipeline, marcel.core.Pipeline):
-            raise marcel.exception.KillCommandException(f'The variable {self.var} is not bound to anything executable.')
-        self.pipeline = pipeline.copy()
+        # API usage:
+        #     op | pipeline
+        # is handled by wrapping the pipeline in a RunPipeline op. In this case, the op's pipeline is set,
+        # and there is no var.
+        if self.pipeline is None:
+            pipeline = self.env().getvar(self.var)
+            if pipeline is None:
+                raise marcel.exception.KillCommandException(
+                    f'The variable {self.var} is undefined.')
+            if not isinstance(pipeline, marcel.core.Pipeline):
+                raise marcel.exception.KillCommandException(
+                    f'The variable {self.var} is not bound to anything executable.')
+            self.pipeline = pipeline.copy()
         self.pipeline.set_error_handler(self.owner.error_handler)
         self.pipeline.setup_1()
         self.pipeline.last_op.receiver = self.receiver

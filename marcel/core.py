@@ -206,6 +206,16 @@ class BaseOp:
     def connect(self, new_op):
         self.next_op = new_op
 
+    def ensure_op(self, x):
+        if isinstance(x, Op):
+            return x
+        elif isinstance(x, Pipeline):
+            op = self._env.op_modules['runpipeline'].create_op()
+            op.pipeline = x
+            return op
+        else:
+            assert False
+
 
 class Op(BaseOp):
     """Base class for all ops, (excluding pipelines).
@@ -263,9 +273,16 @@ class Op(BaseOp):
     # API
 
     def __or__(self, other):
+        # Copy the inputs. The API can attach the same op or pipeline multiple times, e.g.
+        #    x = [ ... ]
+        #    run(ls ... | x | x)
+        # An op carries runtime state, so using the same (identical) op twice is asking
+        # for trouble.
+        self_copy = marcel.util.copy(self)
+        other_copy = marcel.util.copy(other)
         pipeline = Pipeline()
-        pipeline.append(self)
-        pipeline.append(other)
+        pipeline.append(self_copy)
+        pipeline.append(self.ensure_op(other_copy))
         return pipeline
 
     # For use by this module
@@ -325,7 +342,6 @@ class Pipeline(BaseOp):
     # BaseOp
 
     def setup_1(self):
-        assert self.env is not None, f'{self} has no env'
         assert self.error_handler is not None, f'{self} has no error handler'
         op = self.first_op
         while op:
@@ -355,17 +371,7 @@ class Pipeline(BaseOp):
     # Pipeline
 
     def copy(self):
-        try:
-            buffer = io.BytesIO()
-            pickler = dill.Pickler(buffer)
-            pickler.dump(self)
-            buffer.seek(0)
-            unpickler = dill.Unpickler(buffer)
-            copy = unpickler.load()
-            return copy
-        except Exception as e:
-            sys.stdout.flush()
-            print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__, flush=True)
+        return marcel.util.copy(self)
 
     def append(self, op):
         op.set_owner(self)
@@ -382,8 +388,15 @@ class Pipeline(BaseOp):
     # API
 
     def __or__(self, op):
-        self.append(op)
-        return self
+        # Copy the inputs. The API can attach the same op or pipeline multiple times, e.g.
+        #    x = [ ... ]
+        #    run(ls ... | x | x)
+        # An op carries runtime state, so using the same (identical) op twice is asking
+        # for trouble.
+        self_copy = marcel.util.copy(self)
+        op_copy = marcel.util.copy(op)
+        self_copy.append(self.ensure_op(op_copy))
+        return self_copy
 
 
 class Command:
@@ -408,12 +421,12 @@ class Command:
 class PipelineIterator:
 
     def __init__(self, pipeline):
-        env = pipeline.first_op.env()
         # Copy the pipeline because modifications are required.
         pipeline = pipeline.copy()
-        assert env is not None  # PipelineIterator should only be used in the API, which sets op env.
+        # Errors go to output, so no other error handling is needed
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
         output = []
+        env = pipeline.first_op.env()
         gather_op = env.op_modules['gather'].api_function()(env, output)
         pipeline.append(gather_op)
         command = Command(None, pipeline)
@@ -421,6 +434,8 @@ class PipelineIterator:
             command.execute()
             self.iterator = output.__iter__()
         except marcel.exception.KillCommandException as e:
+            print(e)
+            marcel.util.print_stack()
             marcel.util.print_to_stderr(e)
 
     def __next__(self):
