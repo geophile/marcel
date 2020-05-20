@@ -102,7 +102,6 @@ def main():
     # Use sys.stdin.buffer because we want binary data, not the text version
     input = dill.Unpickler(sys.stdin.buffer)
     pipeline = input.load()
-    pipeline.set_env(env)
     pipeline.set_error_handler(noop_error_handler)
     TRACE.write(f'pipeline: {pipeline}')
     pipeline_runner = PipelineRunner(env, pipeline)

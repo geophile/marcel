@@ -108,7 +108,6 @@ def _prepare_pipeline(x):
         pipeline = x.copy()
     elif isinstance(x, _core.Op):
         pipeline = _core.Pipeline()
-        pipeline.set_env(_MAIN.env)
         pipeline.append(x)
     else:
         raise _exception.KillCommandException(f'Not an operator or pipeline: {x}')

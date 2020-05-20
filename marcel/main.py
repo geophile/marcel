@@ -126,7 +126,6 @@ class Main:
             try:
                 parser = marcel.parser.Parser(line, self)
                 pipeline = parser.parse()
-                pipeline.set_env(self.env)
                 pipeline.set_error_handler(Main.default_error_handler)
                 # Append an out op at the end of pipeline, if there is no output op there already.
                 if not pipeline.is_terminal_op('out'):
@@ -144,7 +143,6 @@ class Main:
                 marcel.util.print_to_stderr(e)
 
     def run_api(self, pipeline):
-        pipeline.set_env(self.env)
         command = marcel.core.Command(None, pipeline)
         try:
             command.execute()

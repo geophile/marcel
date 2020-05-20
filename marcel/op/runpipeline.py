@@ -36,7 +36,6 @@ class RunPipeline(marcel.core.Op):
         if not isinstance(pipeline, marcel.core.Pipeline):
             raise marcel.exception.KillCommandException(f'The variable {self.var} is not bound to anything executable.')
         self.pipeline = pipeline.copy()
-        self.pipeline.set_env(self.env())
         self.pipeline.set_error_handler(self.owner.error_handler)
         self.pipeline.setup_1()
         self.pipeline.last_op.receiver = self.receiver

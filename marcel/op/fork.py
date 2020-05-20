@@ -155,11 +155,7 @@ class ForkImplementation:
         
     def setup_1(self):
         self.generate_thread_labels()
-        # The fork_pipeline is not a top-level pipeline (executed from main), so its global state isn't
-        # set yet. This op's owning pipeline has its global state by now. So set the fork_pipeline's global state.
-        op = self.op
-        op.pipeline.set_env(op.env())
-        
+
     def setup_2(self):
         assert False
         
@@ -190,7 +186,6 @@ class Remote(ForkImplementation):
             # Copy the pipeline. Env is set here, not in op.pipeline. Env cloning preserves
             # only minimal state, so it has to be set in the clone.
             pipeline_copy = op.pipeline.copy()
-            pipeline_copy.set_env(op.env())
             pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to Remote op.
             remote_op = pipeline_copy.first_op
@@ -237,7 +232,6 @@ class Local(ForkImplementation):
         for thread_label in op.thread_labels:
             # Copy the pipeline
             pipeline_copy = op.pipeline.copy()
-            pipeline_copy.set_env(op.env())
             pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to LabelThread op.
             label_thread_op = pipeline_copy.last_op

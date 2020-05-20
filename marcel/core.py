@@ -316,9 +316,6 @@ class Pipeline(BaseOp):
     def env(self):
         return self.first_op.env()
 
-    def set_env(self, env):
-        pass
-
     def set_error_handler(self, error_handler):
         self.error_handler = error_handler
 
@@ -415,7 +412,6 @@ class PipelineIterator:
         # Copy the pipeline because modifications are required.
         pipeline = pipeline.copy()
         assert env is not None  # PipelineIterator should only be used in the API, which sets op env.
-        pipeline.set_env(env)
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
         output = []
         gather_op = env.op_modules['gather'].api_function()(env, output)
