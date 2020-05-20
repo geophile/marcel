@@ -178,8 +178,8 @@ class Remote(ForkImplementation):
         super().setup_1()
         op = self.op
         remote_pipeline = marcel.core.Pipeline()
-        remote_pipeline.append(marcel.op.remote.Remote(self.op.env, op.pipeline))
-        remote_pipeline.append(marcel.op.labelthread.LabelThread(self.op.env))
+        remote_pipeline.append(marcel.op.remote.Remote(self.op.env(), op.pipeline))
+        remote_pipeline.append(marcel.op.labelthread.LabelThread(self.op.env()))
         op.pipeline = remote_pipeline
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
@@ -190,7 +190,7 @@ class Remote(ForkImplementation):
             # Copy the pipeline. Env is set here, not in op.pipeline. Env cloning preserves
             # only minimal state, so it has to be set in the clone.
             pipeline_copy = op.pipeline.copy()
-            pipeline_copy.set_env(op.owner.env)
+            pipeline_copy.set_env(op.env())
             pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to Remote op.
             remote_op = pipeline_copy.first_op
@@ -228,7 +228,7 @@ class Local(ForkImplementation):
     def setup_1(self):
         super().setup_1()
         op = self.op
-        op.pipeline.append(marcel.op.labelthread.LabelThread(self.op.env))
+        op.pipeline.append(marcel.op.labelthread.LabelThread(self.op.env()))
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
 
@@ -237,7 +237,7 @@ class Local(ForkImplementation):
         for thread_label in op.thread_labels:
             # Copy the pipeline
             pipeline_copy = op.pipeline.copy()
-            pipeline_copy.set_env(op.owner.env)
+            pipeline_copy.set_env(op.env())
             pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to LabelThread op.
             label_thread_op = pipeline_copy.last_op

@@ -59,7 +59,6 @@ class PipelineRunner(threading.Thread):
     def run(self):
         try:
             TRACE.write(f'PipelineRunner: About to setup_1 {self.pipeline}')
-            TRACE.write(f'PipelineRunner: env.dir_state() {self.pipeline.env.dir_state()}')
             self.pipeline.setup_1()
             # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
             # supporting more than one level of nesting.
@@ -100,7 +99,6 @@ def main():
     env = marcel.env.Environment(None)
     version = env.getvar('MARCEL_VERSION')
     TRACE.write(f'Marcel version {version}')
-    TRACE.write(f'env: {env.namespace}')
     # Use sys.stdin.buffer because we want binary data, not the text version
     input = dill.Unpickler(sys.stdin.buffer)
     pipeline = input.load()

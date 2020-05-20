@@ -20,7 +20,6 @@ import sys
 import dill
 
 import marcel.exception
-import marcel.exception
 import marcel.functionwrapper
 import marcel.helpformatter
 import marcel.object.error
@@ -298,7 +297,6 @@ class Pipeline(BaseOp):
 
     def __init__(self):
         BaseOp.__init__(self, None)
-        self.env = None
         self.error_handler = None
         self.first_op = None
         self.last_op = None
@@ -314,8 +312,12 @@ class Pipeline(BaseOp):
     def __iter__(self):
         return PipelineIterator(self)
 
+    @property
+    def env(self):
+        return self.first_op.env()
+
     def set_env(self, env):
-        self.env = env
+        pass
 
     def set_error_handler(self, error_handler):
         self.error_handler = error_handler
