@@ -333,3 +333,7 @@ prints:
     pipeline(map(f: (f, f.readlines())) | expand(1))
 
 It would be nice to have the original source.
+
+----------------------------------------------------------------------
+
+Need a way to dump the entire environment.

@@ -454,7 +454,7 @@ class PipelineIterator:
         # Errors go to output, so no other error handling is needed
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
         output = []
-        env = pipeline.first_op.env()
+        env = pipeline.env
         gather_op = env.op_modules['gather'].api_function()(env, output)
         pipeline.append(gather_op)
         command = Command(None, pipeline)
@@ -462,8 +462,6 @@ class PipelineIterator:
             command.execute()
             self.iterator = output.__iter__()
         except marcel.exception.KillCommandException as e:
-            print(e)
-            marcel.util.print_stack()
             marcel.util.print_to_stderr(e)
 
     def __next__(self):

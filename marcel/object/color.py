@@ -32,13 +32,13 @@ class Color:
         # See https://unix.stackexchange.com/questions/124407/what-color-codes-can-i-use-in-my-ps1-prompt
         self.code = 16 + r * 36 + g * 6 + b
 
-    def __str__(self):
+    def __repr__(self):
         style = ''
         if self.bold() != 0:
             style += 'b'
         if self.italic() != 0:
             style += 'i'
-        return f'Color({self.r}, {self.g}, {self.b}){style}'
+        return f'{self.r}{self.g}{self.b}{style}'
 
     def bold(self):
         return self.style & Color.BOLD != 0

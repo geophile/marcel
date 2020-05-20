@@ -24,6 +24,10 @@ Upgrade global:
 
     sudo python3 -m pip install -U --prefix /usr/local marcel
 
+Push to github:
+
+    git push -u origin master
+
 ----------------------------------------------------------------------
 
 Installing directly (not from pypi):
