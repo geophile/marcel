@@ -41,8 +41,10 @@ These are conveniences, as arbitrary predicates can be applied by piping {r:ps} 
 Run {n:help process} for more information on {n:Process} objects.
 '''
 
+_UNINITIALIZED = object()
 
-def ps(env, user=None, group=None, pid=None, command=None):
+
+def ps(env, user=_UNINITIALIZED, group=_UNINITIALIZED, pid=_UNINITIALIZED, command=_UNINITIALIZED):
     op = Ps(env)
     op.user = user
     op.group = group
@@ -74,14 +76,12 @@ class PsArgParser(marcel.core.ArgParser):
 
 class Ps(marcel.core.Op):
 
-    UNINITIALIZED = object()
-
     def __init__(self, env):
         super().__init__(env)
-        self.user = Ps.UNINITIALIZED
-        self.group = Ps.UNINITIALIZED
-        self.pid = Ps.UNINITIALIZED
-        self.command = Ps.UNINITIALIZED
+        self.user = _UNINITIALIZED
+        self.group = _UNINITIALIZED
+        self.pid = _UNINITIALIZED
+        self.command = _UNINITIALIZED
         self.filter = None
 
     # BaseOp
@@ -92,22 +92,22 @@ class Ps(marcel.core.Op):
         # If user or group is None, no user/group was specified, so use this user/group.
         # UNINITIALIZED means it wasn't specified at all.
         option_count = 0
-        if self.user is not Ps.UNINITIALIZED:
+        if self.user is not _UNINITIALIZED:
             option_count += 1
             self.user = os.getuid() if self.user is None else Ps.convert_to_id(self.user, marcel.util.uid)
             self.filter = lambda p: p.uid == self.user
-        if self.group is not Ps.UNINITIALIZED:
+        if self.group is not _UNINITIALIZED:
             option_count += 1
             self.group = os.getgid() if self.group is None else Ps.convert_to_id(self.group, marcel.util.gid)
             self.filter = lambda p: p.gid == self.group
-        if self.pid is not Ps.UNINITIALIZED:
+        if self.pid is not _UNINITIALIZED:
             option_count += 1
             try:
                 self.pid = int(self.pid)
                 self.filter = lambda p: p.pid == self.pid
             except ValueError:
                 raise marcel.exception.KillCommandException(f'pid must be an int: {self.pid}')
-        if self.command is not Ps.UNINITIALIZED:
+        if self.command is not _UNINITIALIZED:
             option_count += 1
             self.filter = lambda p: self.command in p.commandline
         if option_count > 1:

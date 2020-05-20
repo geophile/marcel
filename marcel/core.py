@@ -451,8 +451,6 @@ class Command:
 class PipelineIterator:
 
     def __init__(self, pipeline):
-        # Copy the pipeline because modifications are required.
-        pipeline = pipeline.copy()
         # Errors go to output, so no other error handling is needed
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
         output = []
