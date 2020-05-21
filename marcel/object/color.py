@@ -38,7 +38,7 @@ class Color:
             style += 'b'
         if self.italic() != 0:
             style += 'i'
-        return f'{self.r}{self.g}{self.b}{style}'
+        return f'C{self.r}{self.g}{self.b}{style}'
 
     def bold(self):
         return self.style & Color.BOLD != 0

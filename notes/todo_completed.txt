@@ -422,3 +422,7 @@ to maintain the nested structure.
 
 
 Remote(self, env, pipeline): needs work
+
+----------------------------------------------------------------------
+
+Need a way to dump the entire environment.

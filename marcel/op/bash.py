@@ -173,5 +173,5 @@ class Interactive(Escape):
         process.wait()
         if process.returncode != 0:
             print(f'Escaped command failed with exit code {process.returncode}: {" ".join(self.op.args)}')
-            marcel.util.print_to_stderr(process.stderr)
+            marcel.util.print_to_stderr(process.stderr, self.op.env())
 1

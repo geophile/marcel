@@ -63,7 +63,7 @@ class FunctionWrapper:
                 function_input.append(str(args))
             if len(kwargs) > 0:
                 function_input.append(str(kwargs))
-            function_input_string = ', '.join(function_input)
+            function_input_string = None if len(function_input) == 0 else ', '.join(function_input)
             self._op.fatal_error(function_input_string, str(e))
 
     def check_validity(self):

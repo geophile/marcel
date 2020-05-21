@@ -535,7 +535,6 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run(lambda: run(fork('jao', gen(3, -1) | map(lambda x: 5 / x))))
     pass
 
 

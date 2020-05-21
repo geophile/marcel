@@ -336,4 +336,11 @@ It would be nice to have the original source.
 
 ----------------------------------------------------------------------
 
-Need a way to dump the entire environment.
+These commands do different things:
+
+    ls -fr **/*.py
+    ls -fr | select (f: f.suffix == '.py')
+
+The first one avoids symlinks (or symlinks to visited directories? or
+files?). The second one explores both paths.
+ 

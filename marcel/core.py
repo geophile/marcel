@@ -286,14 +286,12 @@ class Op(BaseOp):
     def non_fatal_error(self, input=None, message=None, error=None):
         assert (message is None) != (error is None)
         if error is None:
-            error = Error(f'Running {self}: {message}'
-                          if input is None else
-                          f'Running {self} on {input}: {message}')
+            error = self.error(input, message)
         self.owner.handle_error(error)
-        return error
 
     def fatal_error(self, input, message):
-        error = self.non_fatal_error(input=input, message=message)
+        error = self.error(input=input, message=message)
+        self.owner.handle_error(error)
         raise marcel.exception.KillAndResumeException(error)
 
     def must_be_first_in_pipeline(self):
@@ -305,16 +303,6 @@ class Op(BaseOp):
     @classmethod
     def op_name(cls):
         return cls.__name__.lower()
-
-    # For use by subclasses
-
-    @staticmethod
-    def check_arg(ok, arg, message):
-        if not ok:
-            cause = (f'Incorrect usage of {Op.op_name()}: {message}'
-                     if arg is None else
-                     f'Incorrect value for {arg} argument of {Op.op_name()}: {message}')
-            raise marcel.exception.KillCommandException(cause)
 
     # API
 
@@ -333,6 +321,14 @@ class Op(BaseOp):
 
     # For use by subclasses
 
+    @staticmethod
+    def check_arg(ok, arg, message):
+        if not ok:
+            cause = (f'Incorrect usage of {Op.op_name()}: {message}'
+                     if arg is None else
+                     f'Incorrect value for {arg} argument of {Op.op_name()}: {message}')
+            raise marcel.exception.KillCommandException(cause)
+
     def resolve_pipeline_reference(self, x):
         if isinstance(x, marcel.core.Pipelineable):
             # This happens through the API
@@ -344,6 +340,13 @@ class Op(BaseOp):
             return self.pipelines[pipeline_id]
         except ValueError:
             raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {x}')
+
+    # For use by this class
+
+    def error(self, input, message):
+        return Error(f'Running {self}: {message}'
+                     if input is None else
+                     f'Running {self} on {input}: {message}')
 
     @staticmethod
     def function_source(function):
@@ -462,7 +465,7 @@ class PipelineIterator:
             command.execute()
             self.iterator = output.__iter__()
         except marcel.exception.KillCommandException as e:
-            marcel.util.print_to_stderr(e)
+            marcel.util.print_to_stderr(e, env)
 
     def __next__(self):
         return next(self.iterator)

@@ -145,8 +145,10 @@ def console_width():
 
 
 # Utility to print to stderr, flushing stdout first, to minimize weird ordering due to buffering.
-def print_to_stderr(s):
+def print_to_stderr(s, env):
     sys.stdout.flush()
+    if env.color_scheme() is not None:
+        s = colorize(s, env.color_scheme().error)
     print(s, file=sys.stderr, flush=True)
 
 

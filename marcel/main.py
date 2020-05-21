@@ -140,14 +140,17 @@ class Main:
                 else:
                     self.job_control.create_job(command)
             except marcel.exception.KillCommandException as e:
-                marcel.util.print_to_stderr(e)
+                marcel.util.print_to_stderr(e, self.env)
+            except marcel.exception.KillAndResumeException as e:
+                # Error handler printed the error
+                pass
 
     def run_api(self, pipeline):
         command = marcel.core.Command(None, pipeline)
         try:
             command.execute()
         except marcel.exception.KillCommandException as e:
-            marcel.util.print_to_stderr(e)
+            marcel.util.print_to_stderr(e, self.env)
 
     def initialize_input(self):
         readline.set_history_length(HISTORY_LENGTH)
