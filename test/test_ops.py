@@ -459,6 +459,27 @@ def test_assign():
              expected_out=[(0, 0), (1, -1), (2, -2)])
 
 
+def test_join():
+    # Join losing right inputs
+    TEST.run(test='gen 4 | map (x: (x, -x)) | join [gen 3 | map (x: (x, x * 100))]',
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
+    # Left join
+    TEST.run(test='gen 4 | map (x: (x, -x)) | join -k [gen 3 | map (x: (x, x * 100))]',
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200), (3, -3)])
+    TEST.run(test='gen 4 | map (x: (x, -x)) | join --keep [gen 3 | map (x: (x, x * 100))]',
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200), (3, -3)])
+    # Compound key
+    TEST.run(test='gen 4 | map (x: ((x, x + 1), -x)) | join [gen 3 | map (x: ((x, x + 1), x * 100))]',
+             expected_out=[((0, 1), 0, 0), ((1, 2), -1, 100), ((2, 3), -2, 200)])
+    # Multiple matches on the right
+    TEST.run(test='gen 4 '
+                  '| map (x: (x, -x)) '
+                  '| join [gen 3 '
+                  '        | map (x: (x, (x * 100, x * 100 + 1))) '
+                  '        | expand 1]',
+             expected_out=[(0, 0, 0), (0, 0, 1), (1, -1, 100), (1, -1, 101), (2, -2, 200), (2, -2, 201)])
+
+
 def main_stable():
     test_gen()
     test_out()
@@ -480,18 +501,18 @@ def main_stable():
     test_sudo()
     test_version()
     test_assign()
+    test_join()
     test_no_such_op()
 
 
 def main_dev():
-    TEST.run('x = (a: a)')
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

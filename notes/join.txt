@@ -1,0 +1,49 @@
+op ... | join [ op ... ] | join [ op ... ]
+
+- Flag for outer join
+
+- How are join columns specified?
+
+- What is the output?
+
+  - flat: [l0, l1, ..., r0, r1, ...]
+      - with duplicates?
+      - without?
+  - nested: [[l0, l1, ...], [r0, r1, ...]]
+
+
+Nested is a pain to deal with, and is invariably followed by the use
+of squish, to flatten. 
+
+
+L inputs could be bound to args of a function specifying join condition.
+Doesn't work so well for R:
+
+- R output is at the end of the pipeline (visually distant).
+
+- No precedent for having pipeline arg output show up as function
+  args.
+
+
+Idea!
+
+Join input arranges for first item to be the join column, a tuple if necessary.
+
+Join output is L + R[1:]
+
+
+----------------------------------------------------------------------
+
+outerjoins are a problem with flat output. E.g., a nested right output would be, e.g.
+
+           ((j0, j1), None, (r0, r1, ...))
+
+With flat output, can't distinguish L and R contributions. It might be:
+
+           ((j0, j1), r0, r1, ...)
+
+which looks a lot like left join output.
+
+......................................................................
+
+What about not doing right joins? Then a "sho

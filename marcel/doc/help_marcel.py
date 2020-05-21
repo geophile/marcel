@@ -40,14 +40,14 @@ To learn more about a topic, run the command:
 
 {p,wrap=F}
     - {n:bash}        - {n:bg}          - {n:cd}
-    - {n:dirs}        - {n:edit}        - {n:expand}
-    - {n:fg}          - {n:gen}         - {n:head}
-    - {n:help}        - {n:history}     - {n:jobs}
-    - {n:ls}          - {n:map}         - {n:out}
-    - {n:popd}        - {n:ps}          - {n:pushd}
-    - {n:pwd}         - {n:red}         - {n:reverse}
-    - {n:run}         - {n:select}      - {n:sort}
-    - {n:squish}      - {n:sudo}        - {n:tail}
-    - {n:timer}       - {n:unique}      - {n:version}
-    - {n:window}
+    - {n:dirs}        - {n:edit}        - {n:env}
+    - {n:expand}      - {n:fg}          - {n:gen}
+    - {n:head}        - {n:help}        - {n:history}
+    - {n:jobs}        - {n:join}        - {n:ls}
+    - {n:map}         - {n:out}         - {n:popd}
+    - {n:ps}          - {n:pushd}       - {n:pwd}
+    - {n:red}         - {n:reverse}     - {n:run}
+    - {n:select}      - {n:sort}        - {n:squish}
+    - {n:sudo}        - {n:tail}        - {n:timer}
+    - {n:unique}      - {n:version}     - {n:window}
 '''

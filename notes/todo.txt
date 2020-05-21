@@ -344,3 +344,12 @@ These commands do different things:
 The first one avoids symlinks (or symlinks to visited directories? or
 files?). The second one explores both paths.
  
+
+----------------------------------------------------------------------
+
+fork() can be simplified by using Pipelineable.
+
+----------------------------------------------------------------------
+
+I keep forgetting to set pipeline's error handler. Could be done by
+Pipeline.copy.

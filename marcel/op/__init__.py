@@ -31,6 +31,7 @@ public = [
     'help',
     'history',
     'jobs',
+    'join',
     'ls',
     'map',
     'out',

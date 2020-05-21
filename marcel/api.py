@@ -30,6 +30,7 @@ from marcel.op.fork import fork as _fork
 from marcel.op.gather import _gather
 from marcel.op.gen import gen as _gen
 from marcel.op.head import head as _head
+from marcel.op.join import join as _join
 from marcel.op.ls import ls as _ls
 from marcel.op.map import map as _map
 from marcel.op.out import out as _out, Out as _Out
@@ -63,6 +64,7 @@ def expand(*args, **kwargs): return _generate_op(_expand, *args, **kwargs)
 def fork(*args, **kwargs): return _generate_op(_fork, *args, **kwargs)
 def gen(*args, **kwargs): return _generate_op(_gen, *args, **kwargs)
 def head(*args, **kwargs): return _generate_op(_head, *args, **kwargs)
+def join(*args, **kwargs): return _generate_op(_join, *args, **kwargs)
 def ls(*args, **kwargs): return _generate_op(_ls, *args, **kwargs)
 def map(*args, **kwargs): return _generate_op(_map, *args, **kwargs)
 def out(*args, **kwargs): return _generate_op(_out, *args, **kwargs)
