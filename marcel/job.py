@@ -22,6 +22,7 @@ import threading
 
 import marcel.object.error
 import marcel.exception
+import marcel.util
 
 # The code for processing child input from multiple processes is adapted from here:
 # https://docs.python.org/3/library/multiprocessing.html#multiprocessing.connection.wait
@@ -68,8 +69,8 @@ class Job:
     # Params
     JOIN_DELAY_SEC = 0.2
 
-    def __init__(self, command):
-        super().__init__()
+    def __init__(self, env, command):
+        self.env = env
         self.command = command
         self.state = Job.RUNNING_FOREGROUND
         self.process = None
@@ -146,7 +147,7 @@ class Job:
                 debug(f'completed: {command.source} {dir_vars}')
                 writer.send(dir_vars)
             except marcel.exception.KillCommandException as e:
-                marcel.util.print_to_stderr(e)
+                marcel.util.print_to_stderr(e, self.env)
             writer.close()
 
         # duplex=False: child writes to parent when function completes execution. No need to communicate in the
@@ -215,7 +216,8 @@ class JobControl:
     only = None
     pid = os.getpid()
 
-    def __init__(self, child_completion_handler):
+    def __init__(self, env, child_completion_handler):
+        self.env = env
         self._jobs = []
         self.child_listener = ChildListener(child_completion_handler)
         self.child_listener.start()
@@ -227,7 +229,7 @@ class JobControl:
             job.kill()
 
     def create_job(self, command):
-        job = Job(command)
+        job = Job(self.env, command)
         self._jobs.append(job)
 
     def jobs(self):
@@ -285,7 +287,7 @@ class JobControl:
         self._jobs = new_jobs
 
     @staticmethod
-    def start(child_completion_handler):
+    def start(env, child_completion_handler):
         debug('starting job control')
-        JobControl.only = JobControl(child_completion_handler)
+        JobControl.only = JobControl(env, child_completion_handler)
         return JobControl.only

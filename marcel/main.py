@@ -97,7 +97,7 @@ class Main:
         self.reader = None
         self.initialize_input()  # Sets self.reader
         self.env.reader = self.reader
-        self.job_control = marcel.job.JobControl.start(self.update_env_vars)
+        self.job_control = marcel.job.JobControl.start(self.env, self.update_env_vars)
         self.console = Console(self.handle_console_changes)
         atexit.register(self.shutdown)
 
