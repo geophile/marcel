@@ -44,6 +44,12 @@ class MultiLineReader:
         if history_file:
             self._fix_history()
 
+    def __getstate__(self):
+        assert False
+
+    def __setstate__(self, state):
+        assert False
+
     def input(self, prompt, continuation_prompt):
         """Get input from the user, similar to the Python input() function. The prompt is printed
         before the first line of input. If the input line ends with the continuation string,

@@ -75,6 +75,13 @@ def is_executable(x):
     return shutil.which(x) is not None
 
 
+# def normalize_op_input(x):
+#     t = type(x)
+#     return (None if x is None else
+#             x if t is tuple  or t is list else
+#             (x,))
+#
+
 def normalize_op_input(x):
     return (None if x is None else
             tuple(x) if is_sequence_except_string(x) else

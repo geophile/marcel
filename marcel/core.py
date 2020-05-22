@@ -310,7 +310,7 @@ class Op(BaseOp):
         return Node(self, other)
 
     def copy(self):
-        copy = self.__class__(self.env)
+        copy = self.__class__(self.env())
         copy.__dict__.update(self.__dict__)
         return copy
 
@@ -370,7 +370,6 @@ class Pipeline(BaseOp):
             op = op.next_op
         return f'pipeline({" | ".join(buffer)})'
 
-    @property
     def env(self):
         return self.first_op.env()
 
@@ -378,7 +377,7 @@ class Pipeline(BaseOp):
         self.error_handler = error_handler
 
     def handle_error(self, error):
-        self.error_handler(self.env, error)
+        self.error_handler(self.env(), error)
 
     # Pipelineable
 
@@ -448,7 +447,7 @@ class Command:
         self.pipeline.receive_complete()
         # A Command is executed by a multiprocessing.Process. Need to transmit the Environment's vars
         # relating to the directory, to the parent process, because they may have changed.
-        return self.pipeline.env.dir_state().directory_vars()
+        return self.pipeline.env().dir_state().directory_vars()
 
 
 class PipelineIterator:
@@ -457,7 +456,7 @@ class PipelineIterator:
         # Errors go to output, so no other error handling is needed
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
         output = []
-        env = pipeline.env
+        env = pipeline.env()
         gather_op = env.op_modules['gather'].api_function()(env, output)
         pipeline.append(gather_op)
         command = Command(None, pipeline)

@@ -132,7 +132,14 @@ class Environment:
         # TODO: This is a hack. Clean it up once the env handles command history
         self.edited_command = None
         self.op_modules = None
-        self.linereader = None
+        self.reader = None
+
+    def __getstate__(self):
+        return {'namespace': self.namespace,
+                'directory_state': self.directory_state}
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
     def getvar(self, var):
         return self.namespace.get(var, None)
