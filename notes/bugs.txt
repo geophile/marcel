@@ -173,3 +173,14 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/parser.py", line 625, in op
     raise PrematureEndError()
 marcel.parser.PrematureEndError: Command ended prematurely.
+
+----------------------------------------------------------------------
+
+52. Pickling/unpickling Environment
+
+What is the right thing to do? Parts of it make no sense for farcel:
+color scheme, PWD, probably others. HOMEDIR may or may not be right.
+Also, sometimes we copy for remote execution, sometimes for local
+execution. 
+
+Need to rethink Environment transmission.

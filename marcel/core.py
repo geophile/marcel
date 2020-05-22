@@ -25,7 +25,6 @@ Error = marcel.object.error.Error
 
 
 class ArgParser(argparse.ArgumentParser):
-
     op_flags = {}  # op name -> [flags], for use in tab completion
     help_formatter = None
 
@@ -210,10 +209,17 @@ class BaseOp(Pipelineable):
         if self.receiver:
             self.receiver.receive_complete()
 
+    # This function is performance-critical, so the assertion is commented out,
+    # and util.normalize_op_input is inlined.
     def receive_input(self, x):
-        assert not isinstance(x, Error)
+        # assert not isinstance(x, Error)
         try:
-            self.receive(marcel.util.normalize_op_input(x))
+            # Inlining
+            t = type(x)
+            self.receive(None if x is None else
+                         x if t is tuple else
+                         tuple(x) if t is list else
+                         (x,))
         except marcel.exception.KillAndResumeException as e:
             self.receive_error(e.error)
 
