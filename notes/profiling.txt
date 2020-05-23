@@ -54,3 +54,21 @@ Inlining normalize_op_input is a big win:
 
 - 3.5 usec
 - 21%
+
+----------------------------------------------------------------------
+
+Disable assertion in send:
+
+- 3.2 -> 2.7 usec
+- 21% -> 17%
+
+----------------------------------------------------------------------
+
+Seeing big own times in send and receive_input. Probably function call
+overhead, as with inlining normalize_op_input.
+
+Should be able to go a lot faster buffering input. Sent around batches
+of input.
+
+This is a big change, as it modifies receive for EVERY op, and
+requires each to iterate over input.

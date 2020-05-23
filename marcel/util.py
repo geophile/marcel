@@ -17,13 +17,14 @@ import collections.abc
 import grp
 import io
 import pathlib
-import dill
 import pwd
 import shutil
 import subprocess
 import sys
 import time
 import traceback
+
+import dill
 
 
 def username(uid):
@@ -59,7 +60,8 @@ def is_sequence(x):
 
 
 def is_sequence_except_string(x):
-    return isinstance(x, collections.abc.Sequence) and not isinstance(x, str)
+    t = type(x)
+    return t is tuple or t is list
 
 
 def is_generator(x):

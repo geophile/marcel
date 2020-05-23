@@ -26,3 +26,45 @@ run(gen(N) | map(lambda x: x+1) | map(lambda x: x+1) | map(lambda x: x+1) | sele
 stop = time.time()
 usec = (stop - start) * 1000000 / N
 print(f'{usec} usec per unit')
+
+# import time
+#
+#
+# def f(x):
+#     return x + 1
+#
+#
+# def call():
+#     sum = 0
+#     for i in range(1000000):
+#         sum += f(i)
+#     return sum
+#
+#
+# def call_with_try():
+#     sum = 0
+#     for i in range(5000000):
+#         try:
+#             sum += f(i)
+#         except Exception:
+#             print('oops')
+#     return sum
+#
+#
+# for i in range(5):
+#     call()
+#     call_with_try()
+#
+# N = 5
+#
+# start = time.time()
+# for i in range(N):
+#     call()
+# stop = time.time()
+# print(f'call: {((stop - start) * 1000000)/ N} usec per call')
+#
+# start = time.time()
+# for i in range(N):
+#     call_with_try()
+# stop = time.time()
+# print(f'call_with_try: {((stop - start) * 1000000)/ N} usec per call')

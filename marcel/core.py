@@ -147,13 +147,12 @@ class Node(Pipelineable):
             visit(self.right)
 
 
+# Base class for all ops, and for pipelines. Methods of this class 
+# implement the op execution and inter-op communication. The send* 
+# commands are used by subclasses to send output to downstream commands. 
+# The receive* commands are implemented by subclasses to receive and process 
+# input from upstream commands.
 class BaseOp(Pipelineable):
-    """Base class for all ops, and for pipelines (sequences of
-    ops). Methods of this class implement the op execution and
-    inter-op communication. The send* commands are used by subclasses to
-    send output to downstream commands. The receive* commands are implemented
-    by subclasses to receive and process input from upstream commands.
-    """
 
     def __init__(self, env):
         assert isinstance(self, Pipeline) or env is not None
@@ -179,23 +178,15 @@ class BaseOp(Pipelineable):
     # BaseOp runtime
 
     def setup_1(self):
-        """setup_1 is run after command-line parsing and before setup_2. It is intended for
-        the initialization of op state except for fork pipeline copying.
-        """
         pass
 
     def setup_2(self):
-        """setup_2 is run after setup_1 and before execution. It is intended for fork pipeline copying.
-        """
         pass
 
     def send(self, x):
-        assert not isinstance(x, Error)
-        if self.receiver:
-            try:
-                self.receiver.receive_input(x)
-            except marcel.exception.KillAndResumeException as e:
-                self.receiver.receive_error(e.error)
+        receiver = self.receiver
+        if receiver:
+            receiver.receive_input(x)
 
     def send_error(self, error):
         assert isinstance(error, Error)
@@ -203,9 +194,6 @@ class BaseOp(Pipelineable):
             self.receiver.receive_error(error)
 
     def send_complete(self):
-        """Called by a op class to indicate that there will
-        be no more output from the op.
-        """
         if self.receiver:
             self.receiver.receive_complete()
 
@@ -214,7 +202,6 @@ class BaseOp(Pipelineable):
     def receive_input(self, x):
         # assert not isinstance(x, Error)
         try:
-            # Inlining
             t = type(x)
             self.receive(None if x is None else
                          x if t is tuple else
@@ -224,8 +211,6 @@ class BaseOp(Pipelineable):
             self.receive_error(e.error)
 
     def receive(self, x):
-        """Implemented by a op class to process an input object.
-        """
         pass
 
     def receive_error(self, error):
@@ -233,9 +218,6 @@ class BaseOp(Pipelineable):
         self.send_error(error)
 
     def receive_complete(self):
-        """Implemented by a op class to do any cleanup required
-        after all input has been received.
-        """
         self.send_complete()
 
     def run_local(self):
@@ -264,9 +246,8 @@ class BaseOp(Pipelineable):
             assert False
 
 
+# Base class for all ops, excluding pipelines
 class Op(BaseOp):
-    """Base class for all ops, (excluding pipelines).
-    """
 
     def __init__(self, env):
         super().__init__(env)
@@ -389,7 +370,6 @@ class Pipeline(BaseOp):
 
     def create_pipeline(self):
         return marcel.util.copy(self)
-
     # BaseOp
 
     def setup_1(self):
