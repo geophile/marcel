@@ -48,15 +48,12 @@ will generate this output:
 '''
 
 
-def fork(env, host, pipeline_or_op):
-    if isinstance(pipeline_or_op, marcel.core.Op):
-        pipeline = marcel.core.Pipeline()
-        pipeline.append(pipeline_or_op)
-    else:
-        pipeline = pipeline_or_op
+def fork(env, host, pipelineable):
+    assert isinstance(pipelineable, marcel.core.Pipelineable)
+    pipelineable = pipelineable.create_pipeline()
     op = Fork(env)
     op.host = host
-    op.pipeline = pipeline
+    op.pipeline = pipelineable
     return op
 
 

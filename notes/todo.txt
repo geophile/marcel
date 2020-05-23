@@ -356,10 +356,6 @@ Pipeline.copy.
 
 ----------------------------------------------------------------------
 
-Further optimization: see profiling.txt
-
-----------------------------------------------------------------------
-
 history command doesn't go into history, so this is missed:
 
     history | select (h: 'join' in h.command)
