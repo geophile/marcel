@@ -316,6 +316,9 @@ class Op(BaseOp):
                      f'Incorrect value for {arg} argument of {Op.op_name()}: {message}')
             raise marcel.exception.KillCommandException(cause)
 
+    def is_pipeline_reference(self, x):
+        return x.startswith('pipeline:')
+
     def resolve_pipeline_reference(self, x):
         if isinstance(x, marcel.core.Pipelineable):
             # This happens through the API

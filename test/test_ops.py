@@ -478,6 +478,12 @@ def test_join():
                   '        | map (x: (x, (x * 100, x * 100 + 1))) '
                   '        | expand 1]',
              expected_out=[(0, 0, 0), (0, 0, 1), (1, -1, 100), (1, -1, 101), (2, -2, 200), (2, -2, 201)])
+    # Right argument in variable
+    TEST.run('x100 = [gen 3 | map (x: (x, x * 100))]')
+    TEST.run(test='gen 4 | map (x: (x, -x)) | join x100',
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
+    TEST.run(test='gen 4 | map (x: (x, -x)) | join [x100]',
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
 
 
 def main_stable():

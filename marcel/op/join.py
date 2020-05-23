@@ -102,7 +102,19 @@ class Join(marcel.core.Op):
                 # match is first value associated with join_value, x is the second. Need a list.
                 self.pipeline_map[join_value] = [match, x]
         self.pipeline_map = {}
-        pipeline = self.resolve_pipeline_reference(self.pipeline)
+        # self.pipeline is permitted to be one of:
+        #     - a pipeline literal: [ ... ]
+        #     - a var bound to a pipeline
+        #     - TODO: an expression that evaluates to a pipeline, e.g. (pipeline_var)
+        if isinstance(self.pipeline, marcel.core.Pipelineable):
+            pipeline = self.pipeline.create_pipeline()
+        elif self.is_pipeline_reference(self.pipeline):
+            pipeline = self.resolve_pipeline_reference(self.pipeline)
+        else:
+            pipeline = self.env().getvar(self.pipeline)
+        if type(pipeline) is not marcel.core.Pipeline:
+            raise marcel.exception.KillCommandException(f'The variable {self.pipeline} is not bound to a pipeline')
+        pipeline = pipeline.copy()
         pipeline.set_error_handler(self.owner.error_handler)
         op = self.env().op_modules['map'].api_function()(self.env, load_pipeline_map)
         pipeline.append(op)

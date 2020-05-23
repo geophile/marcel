@@ -439,16 +439,22 @@ def test_join():
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200), (3, -3)])
     # Compound key
     TEST.run(test=lambda: run(gen(4)
-                              | map(lambda x: ((x, x+1), -x))
-                              | join(gen(3) | map(lambda x: ((x, x+1), x * 100)))),
+                              | map(lambda x: ((x, x + 1), -x))
+                              | join(gen(3) | map(lambda x: ((x, x + 1), x * 100)))),
              expected_out=[((0, 1), 0, 0), ((1, 2), -1, 100), ((2, 3), -2, 200)])
     # Multiple matches on the right
     TEST.run(test=lambda: run(gen(4)
-                  | map(lambda x: (x, -x))
-                  | join(gen(3)
-                         | map(lambda x: (x, (x * 100, x * 100 + 1)))
-                         | expand(1))),
+                              | map(lambda x: (x, -x))
+                              | join(gen(3)
+                                     | map(lambda x: (x, (x * 100, x * 100 + 1)))
+                                     | expand(1))),
              expected_out=[(0, 0, 0), (0, 0, 1), (1, -1, 100), (1, -1, 101), (2, -2, 200), (2, -2, 201)])
+    # Right argument in variable
+    x100 = gen(3) | map(lambda x: (x, x * 100))
+    TEST.run(test=lambda: run(gen(4)
+                              | map(lambda x: (x, -x))
+                              | join(x100)),
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
 
 
 def test_api_run():

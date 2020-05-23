@@ -14,9 +14,10 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import marcel.core
-import marcel.object.error
 import marcel.exception
+import marcel.object.error
 import marcel.functionwrapper
+import marcel.util
 
 
 SUMMARY = '''

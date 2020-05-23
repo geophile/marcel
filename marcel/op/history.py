@@ -53,8 +53,6 @@ class History(marcel.core.Op):
         pass
 
     def receive(self, _):
-        # Remove the run command from history
-        readline.remove_history_item(readline.get_current_history_length() - 1)
         history = self.env().reader.history()
         for i in range(len(history)):
             self.send(marcel.object.historyrecord.HistoryRecord(i, history[i]))
