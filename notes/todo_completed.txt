@@ -426,3 +426,15 @@ Remote(self, env, pipeline): needs work
 ----------------------------------------------------------------------
 
 Need a way to dump the entire environment.
+ 
+----------------------------------------------------------------------
+
+fork() can be simplified by using Pipelineable.
+
+----------------------------------------------------------------------
+
+history command doesn't go into history, so this is missed:
+
+    history | select (h: 'join' in h.command)
+
+Can't recall it.

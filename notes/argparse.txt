@@ -1,0 +1,32 @@
+Keep argparse?
+
+Reasons for using argparse:
+
+- arg parsing
+
+- arg checking
+
+- command help
+
+Reality:
+
+- Command help isn't that good. Had to write my own formatter. 
+
+- setup_1() needs to check args, to support API. This duplicates the
+  checking by argparse.
+
+- argparse is geared to strings. Need hacks for other things. E.g. the
+  pipeline_reference hack. More of this would be needed for expr args.
+
+  argparse type doesn't really work for pipelines. The problem is that
+  for this mechanism, the arg has to be a string visible to the type
+  function. But pipelines aren't formed from a single string, they are
+  formed from the parse of lots of strings.
+
+Replacing argparse:
+
+- args is just a sequence of tokens. Might want to add a Flag token
+  type.
+
+- setup_1() would have to do arg checking: required flags, mutual
+  exclusion, types, etc.

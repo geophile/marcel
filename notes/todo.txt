@@ -318,13 +318,6 @@ No qualifying paths: ['~/git/marcel/{marcel,test}']
 
 ----------------------------------------------------------------------
 
-a = [...]
-b = [a | ...]
-
-Should expand a when defining b? Or only at execution time?
-
-----------------------------------------------------------------------
-
 cat = [ map (f: (f, f.readlines())) | expand 1 ]
 (cat)
 
@@ -343,11 +336,6 @@ These commands do different things:
 
 The first one avoids symlinks (or symlinks to visited directories? or
 files?). The second one explores both paths.
- 
-
-----------------------------------------------------------------------
-
-fork() can be simplified by using Pipelineable.
 
 ----------------------------------------------------------------------
 
@@ -356,11 +344,5 @@ Pipeline.copy.
 
 ----------------------------------------------------------------------
 
-history command doesn't go into history, so this is missed:
-
-    history | select (h: 'join' in h.command)
-
-Can't recall it.
-
-----------------------------------------------------------------------
+env has paths as strings. Should be Paths.
 
