@@ -15,7 +15,9 @@
 
 import pathlib
 
+import marcel.argsparser
 import marcel.core
+import marcel.exception
 
 
 SUMMARY = '''
@@ -35,11 +37,12 @@ def pushd(env, directory=None):
     return op
 
 
-class PushdArgParser(marcel.core.ArgParser):
+class PushdArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('pushd', env, None, SUMMARY, DETAILS)
-        self.add_argument('directory', nargs='?', help='New current directory')
+        super().__init__('pushd', env)
+        self.add_anon('directory', default=None)
+        self.validate()
 
 
 class Pushd(marcel.core.Op):

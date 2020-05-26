@@ -20,15 +20,20 @@ import threading
 import time
 
 
+ARGS = '''[-c|--components] INTERVAL
+{p,indent=4:20}
+-c --components     Output timestamp as a Python {n:time.struct_time} value, instead of seconds.
+{p,indent=4:20}
+INTERVAL            Time between successive timestamps.            
+'''
+
+
 SUMMARY = 'Generate a sequence of timestamps, separated in time by a specified interval'
 
 
 DETAILS = '''
-The {r:interval} format is:
-{p,wrap=F}
-    HH:MM:SS
-
-where {r:HH} is hours, {r:MM} is minutes, {r:SS} is seconds. {r:HH:} and
+The {r:interval} format is {n:HH:MM:SS} where {r:HH} is hours, 
+{r:MM} is minutes, {r:SS} is seconds. {r:HH:} and
 {r:HH:MM:} may be omitted.
 
 {b:Examples}:
@@ -58,17 +63,6 @@ def timer(env, interval, components=False):
     op.interval = str(interval)
     op.components = components
     return op
-
-
-class TimerArgParser(marcel.core.ArgParser):
-
-    def __init__(self, env):
-        super().__init__('timer', env, ['-c', '--components'], SUMMARY, DETAILS)
-        self.add_argument('-c', '--components',
-                          action='store_true',
-                          help='Print time components instead of seconds since epoch.')
-        self.add_argument('interval',
-                          help='Time between timestamps.')
 
 
 class Timer(marcel.core.Op):
@@ -126,10 +120,10 @@ class Timer(marcel.core.Op):
     @staticmethod
     def parse_interval(interval):
         try:
-            colon1 = interval.find(':')
+            colon1 = interval.find_flag(':')
             colon2 = -1
             if colon1 > 0:
-                colon2 = interval.find(':', colon1 + 1)
+                colon2 = interval.find_flag(':', colon1 + 1)
             # Normalize
             if colon1 < 0:
                 # No colons

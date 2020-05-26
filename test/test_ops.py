@@ -28,20 +28,20 @@ def test_gen():
     TEST.run('gen 5 10 | out',
              expected_out=[10, 11, 12, 13, 14])
     TEST.run('gen 5 10 123 | out',
-             expected_err='unrecognized arguments: 123')
+             expected_err='Too many anonymous')
     TEST.run('gen 5 -5 | out',
              expected_out=[-5, -4, -3, -2, -1])
     TEST.run('gen 3 -p 2 | out',
+             expected_err='Flags must all appear before the first anonymous arg')
+    TEST.run('gen -p 2 3 | out',
              expected_out=['00', '01', '02'])
-    TEST.run('gen 3 --pad 2 | out',
+    TEST.run('gen --pad 2 3 | out',
              expected_out=['00', '01', '02'])
-    TEST.run('gen 3 99 -p 3 | out',
+    TEST.run('gen -p 3 3 99 | out',
              expected_out=['099', '100', '101'])
-    TEST.run('gen 3 99 -p 2 | out',
-             expected_err='Padding too small')
-    TEST.run('gen 3 -p 3 99 | out',
-             expected_err='unrecognized arguments: 99')
-    TEST.run('gen 3 -10 -p 4 | out',
+    TEST.run('gen -p 2 3 99 | out',
+             expected_err='Padding 2 too small')
+    TEST.run('gen -p 4 3 -10 | out',
              expected_err='Padding incompatible with start < 0')
     # Error along with output
     TEST.run('gen 3 -1 | map (x: 5 / x)',
@@ -59,7 +59,7 @@ def test_out():
     TEST.run('gen 3 | out --csv',
              expected_out=[0, 1, 2])
     TEST.run('gen 3 | out -c {}',
-             expected_err='csv=True is incompatible with format specification')
+             expected_err='Cannot specify more than one of')
     TEST.run(f'gen 3 | out -f {output_filename}',
              expected_out=[0, 1, 2], file=output_filename)
     TEST.run(f'gen 3 | out --file {output_filename}',
@@ -72,7 +72,7 @@ def test_out():
              expected_out=[0, 1, 2, 0, 1, 2],
              file=output_filename)
     TEST.run(f'gen 3 | out -a {output_filename} -f {output_filename}',
-             expected_err='argument -f/--file: not allowed with argument -a/--append')
+             expected_err='Cannot specify more than one of')
     TEST.delete_file(output_filename)
 
 
@@ -350,11 +350,11 @@ def test_window():
                            ((9,), (None,), (None,))])
     # Negative-test args
     TEST.run('gen 10 | window -d 33 -o 22',
-             expected_err='argument -o/--overlap: not allowed with argument -d/--disjoint')
+             expected_err='Must specify exactly one')
     TEST.run('gen 10 | window',
-             expected_err='Exactly one')
+             expected_err='Must specify exactly one')
     TEST.run('gen 10 | window -o 3 (x: True)',
-             expected_err='Exactly one')
+             expected_err='Must specify exactly one')
 
 
 def test_bash():
@@ -423,8 +423,6 @@ def test_remote():
 
 
 def test_sudo():
-    TEST.run(test='gen 3',
-             expected_out=[0, 1, 2])
     TEST.run(test='sudo -i [ gen 3 ]',
              expected_out=[0, 1, 2])
     os.system('sudo rm -rf /tmp/sudotest')

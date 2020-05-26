@@ -15,6 +15,7 @@
 
 import readline
 
+import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.main
@@ -35,15 +36,11 @@ def run(env):
     return Run(env)
 
 
-class RunArgParser(marcel.core.ArgParser):
+class RunArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('run', env, None, SUMMARY, DETAILS)
-        self.add_argument('n',
-                          nargs='?',
-                          type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                        'must be non-negative'),
-                          help='The identifying number of a history command.')
+        super().__init__('run', env)
+        self.add_anon('n', default=None, convert=int)
 
 
 class Run(marcel.core.Op):

@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 
 
@@ -33,14 +34,12 @@ def tail(env, n):
     return op
 
 
-class TailArgParser(marcel.core.ArgParser):
+class TailArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('tail', env, None, SUMMARY, DETAILS)
-        self.add_argument('n',
-                          type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                        'must be non-negative'),
-                          help='The number of input items to keep.')
+        super().__init__('tail', env)
+        self.add_anon('n', convert=int)
+        self.validate()
 
 
 class Tail(marcel.core.Op):

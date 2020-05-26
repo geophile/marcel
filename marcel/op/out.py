@@ -15,7 +15,9 @@
 
 import sys
 
+import marcel.argsparser
 import marcel.core
+import marcel.exception
 import marcel.object.error
 import marcel.object.renderable
 
@@ -43,25 +45,17 @@ def out(env, append=None, file=None, csv=False, format=None):
     return op
 
 
-class OutArgParser(marcel.core.ArgParser):
+class OutArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('out',
-                         env,
-                         ['-a', '--append', '-f', '--file', '-c', '--csv'],
-                         SUMMARY,
-                         DETAILS)
-        file_group = self.add_mutually_exclusive_group()
-        file_group.add_argument('-a', '--append',
-                                help='Append output to the specified file.')
-        file_group.add_argument('-f', '--file',
-                                help='Write output to the specified file, replacing current contents.')
-        self.add_argument('-c', '--csv',
-                          action='store_true',
-                          help='Generate output in comma-separated value format.')
-        self.add_argument('format',
-                          nargs='?',
-                          help='Python formatting string')
+        super().__init__('out', env)
+        self.add_flag_one_value('append', '-a', '--append')
+        self.add_flag_one_value('file', '-f', '--file')
+        self.add_flag_no_value('csv', '-c', '--csv')
+        self.add_anon('format', default=None)
+        self.at_most_one('csv', 'format')
+        self.at_most_one('file', 'append')
+        self.validate()
 
 
 class Out(marcel.core.Op):
@@ -78,19 +72,6 @@ class Out(marcel.core.Op):
         return f'out(append={self.append}, file={self.file}, csv={self.csv}, format={Out.ensure_quoted(self.format)})'
 
     # BaseOp
-
-    def setup_1(self):
-        # For some reason, argparse sets file and append to False if neither specified.
-        if self.append == False:
-            self.append = None
-        if self.file == False:
-            self.file = None
-        super().check_arg(not self.csv or self.format is None,
-                          None,
-                          'csv=True is incompatible with format specification.')
-        super().check_arg(self.file is None or self.append is None,
-                          None,
-                          'append and file arguments cannot both be specified.')
 
     def receive(self, x):
         self.ensure_output_initialized()

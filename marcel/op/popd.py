@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import pathlib
-
+import marcel.argsparser
 import marcel.core
 
 
@@ -30,10 +29,11 @@ def popd(env):
     return Popd(env)
 
 
-class PopdArgParser(marcel.core.ArgParser):
+class PopdArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('popd', env, None, SUMMARY, DETAILS)
+        super().__init__('popd', env)
+        self.validate()
 
 
 class Popd(marcel.core.Op):
@@ -45,9 +45,6 @@ class Popd(marcel.core.Op):
         return 'popd()'
 
     # BaseOp
-
-    def setup_1(self):
-        pass
 
     def receive(self, _):
         self.env().dir_state().popd()

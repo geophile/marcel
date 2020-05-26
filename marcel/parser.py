@@ -430,14 +430,6 @@ class ImpliedMap(Token):
 
 # Parsing
 
-class ParseState(Enum):
-    START = auto()
-    DONE = auto()
-    END = auto()
-    OP = auto()
-    ARGS = auto()
-
-
 class InProgress:
 
     def __init__(self):
@@ -675,8 +667,7 @@ class Parser:
                 # else: 'run' was entered
                 op.expected_args = (1 if op_token.value() == '!' else
                                     0 if op_token.value() == '!!' else None)
-            arg_parser = op_module.arg_parser()
-            arg_parser.parse_args(args, namespace=op)
+            op_module.args_parser().parse(args, op)
         except KeyError:
             pass
         return op
@@ -697,9 +688,7 @@ class Parser:
         if marcel.util.is_executable(name):
             op_module = self.op_modules['bash']
             op = op_module.create_op()
-            args = [name] + args
-            arg_parser = op_module.arg_parser()
-            arg_parser.parse_args(args, namespace=op)
+            op_module.args_parser().parse([name] + args, op)
         return op
 
     def create_assignment(self, var, string=None, pipeline=None, source=None):
@@ -719,11 +708,10 @@ class Parser:
 
     def create_map(self, expr):
         assert type(expr) is Expression
-        map_module = self.op_modules['map']
-        assert map_module is not None
-        op = map_module.create_op()
-        arg_parser = map_module.arg_parser()
-        arg_parser.parse_args([expr.value()], namespace=op)
+        op_module = self.op_modules['map']
+        assert op_module is not None
+        op = op_module.create_op()
+        op_module.args_parser().parse([expr.value()], op)
         return op
 
     @staticmethod

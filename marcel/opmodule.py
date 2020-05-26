@@ -16,6 +16,7 @@
 import importlib
 import inspect
 
+import marcel.argsparser
 import marcel.core
 import marcel.op
 
@@ -26,9 +27,9 @@ class OpModule:
         self._op_name = op_name
         self._env = env
         self._api = None  # For creating op instances from the api
-        self._constructor = None
-        self._arg_parser = None
-        self._arg_parser_function = None
+        self._op_constructor = None
+        self._args_parser = None
+        self._args_parser_constructor = None
         op_module = importlib.import_module(f'marcel.op.{op_name}')
         # Locate items in module needed during the lifecycle of an op.
         for k, v in op_module.__dict__.items():
@@ -41,12 +42,12 @@ class OpModule:
                     parents = inspect.getmro(v)
                     if isclass and marcel.core.Op in parents:
                         # The op class, e.g. Ls
-                        self._constructor = v
-                    elif isclass and marcel.core.ArgParser in parents:
-                        # The arg parser class, e.g. LsArgParser
-                        self._arg_parser_function = v
-        assert self._constructor is not None, op_name
-        # arg parser not always present, e.g. for gather
+                        self._op_constructor = v
+                    elif isclass and marcel.argsparser.ArgsParser in parents:
+                        # E.g. LsArgsParser
+                        self._args_parser_constructor = v
+        assert self._op_constructor is not None, op_name
+        # args validator not always present, e.g. for gather
 
     def op_name(self):
         return self._op_name
@@ -55,17 +56,18 @@ class OpModule:
         return self._api
 
     def create_op(self):
-        return self._constructor(self._env)
+        return self._op_constructor(self._env)
 
-    def arg_parser(self):
-        if self._arg_parser is None:
-            self._arg_parser = self._arg_parser_function(self._env)
-        return self._arg_parser
+    def args_parser(self):
+        if self._args_parser is None:
+            assert self._args_parser_constructor is not None
+            self._args_parser = self._args_parser_constructor(self._env)
+        return self._args_parser
 
     # The operator's help info is formatted when the arg parser is created. When the screen
     # size changes, this info has to be reformatted.
     def reformat_help(self):
-        self._arg_parser = None
+        self._args_parser = None
 
 
 def import_op_modules(env):

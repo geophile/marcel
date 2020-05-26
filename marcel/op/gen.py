@@ -13,7 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
+import marcel.exception
 
 
 SUMMARY = '''
@@ -37,34 +39,23 @@ def gen(env, count=0, start=0, pad=None):
     return op
 
 
-class GenArgParser(marcel.core.ArgParser):
+class GenArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('gen', env, ['-p', '--pad'], SUMMARY, DETAILS)
-        self.add_argument('-p', '--pad',
-                          type=int,
-                          help='Left-pad with zeros to PAD characters')
-        self.add_argument('count',
-                          nargs='?',
-                          default='0',
-                          type=int,
-                          help='''The number of integers to generate. Must be non-negative.
-                          Default value is 0. 
-                          If 0, then the sequence does not terminate''')
-        self.add_argument('start',
-                          nargs='?',
-                          default='0',
-                          type=int,
-                          help='The first integer in the stream. Default value is 0.')
+        super().__init__('gen', env)
+        self.add_flag_one_value('pad', '-p', '--pad', convert=int)
+        self.add_anon('count', default=0, convert=int)
+        self.add_anon('start', default=0, convert=int)
+        self.validate()
 
 
 class Gen(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.pad = None
         self.count = None
         self.start = None
+        self.pad = None
         self.format = None
 
     def __repr__(self):
@@ -74,10 +65,13 @@ class Gen(marcel.core.Op):
 
     def setup_1(self):
         if self.pad is not None:
-            super().check_arg(self.count >= 0, 'count', 'Padding incompatible with unbounded output.')
-            super().check_arg(self.start >= 0, 'start', 'Padding incompatible with start < 0.')
+            if self.count == 0:
+                raise marcel.exception.KillCommandException(f'Padding {self.pad} incompatible with unbounded output.')
+            if self.start < 0:
+                raise marcel.exception.KillCommandException(f'Padding incompatible with start < 0: {self.start}')
             max_length = len(str(self.start + self.count - 1))
-            super().check_arg(max_length <= self.pad, 'pad', 'Padding too small.')
+            if max_length > self.pad:
+                raise marcel.exception.KillCommandException(f'Padding {self.pad} too small.')
             self.format = '{:>0' + str(self.pad) + '}'
 
     def receive(self, _):

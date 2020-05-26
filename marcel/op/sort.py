@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 import marcel.functionwrapper
 
@@ -34,15 +35,12 @@ def sort(env, key=None):
     return op
 
 
-class SortArgParser(marcel.core.ArgParser):
-    
+class SortArgsParser(marcel.argsparser.ArgsParser):
+
     def __init__(self, env):
-        super().__init__('sort', env, None, SUMMARY, DETAILS)
-        self.add_argument('key',
-                          nargs='?',
-                          default=None,
-                          type=super().constrained_type(self.check_function, 'not a valid function'),
-                          help='Function to obtain the value used for ordering.')
+        super().__init__('sort', env)
+        self.add_anon('key', default=None, convert=self.function)
+        self.validate()
 
 
 class Sort(marcel.core.Op):
@@ -59,8 +57,6 @@ class Sort(marcel.core.Op):
     
     def setup_1(self):
         self.contents = []
-        if self.key:
-            self.key.set_op(self)
 
     def receive(self, x):
         self.contents.append(x)

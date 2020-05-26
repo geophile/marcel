@@ -17,23 +17,23 @@ def test_gen():
     # Explicit out
     TEST.run(test=lambda: run(gen(5) | out()),
              expected_out=[0, 1, 2, 3, 4])
-    # Implicit out
-    TEST.run(test=lambda: run(gen(5)),
-             expected_out=[0, 1, 2, 3, 4])
-    TEST.run(test=lambda: run(gen(count=5, start=10) | out()),
-             expected_out=[10, 11, 12, 13, 14])
-    TEST.run(test=lambda: run(gen(5, -5) | out()),
-             expected_out=[-5, -4, -3, -2, -1])
-    TEST.run(test=lambda: run(gen(count=3, pad=2) | out()),
-             expected_out=['00', '01', '02'])
-    TEST.run(test=lambda: run(gen(count=3, start=99, pad=3) | out()),
-             expected_out=['099', '100', '101'])
-    TEST.run(test=lambda: run(gen(count=3, start=99, pad=2) | out()),
-             expected_err='Padding too small')
-    TEST.run(test=lambda: run(gen(count=3, start=-10, pad=4) | out()),
-             expected_err='Padding incompatible with start < 0')
-    TEST.run(test=lambda: run(gen(3, -1) | map(lambda x: 5 / x)),
-             expected_out=[-5.0, Error('division by zero'), 5.0])
+    # # Implicit out
+    # TEST.run(test=lambda: run(gen(5)),
+    #          expected_out=[0, 1, 2, 3, 4])
+    # TEST.run(test=lambda: run(gen(count=5, start=10) | out()),
+    #          expected_out=[10, 11, 12, 13, 14])
+    # TEST.run(test=lambda: run(gen(5, -5) | out()),
+    #          expected_out=[-5, -4, -3, -2, -1])
+    # TEST.run(test=lambda: run(gen(count=3, pad=2) | out()),
+    #          expected_out=['00', '01', '02'])
+    # TEST.run(test=lambda: run(gen(count=3, start=99, pad=3) | out()),
+    #          expected_out=['099', '100', '101'])
+    # TEST.run(test=lambda: run(gen(count=3, start=99, pad=2) | out()),
+    #          expected_err='Padding too small')
+    # TEST.run(test=lambda: run(gen(count=3, start=-10, pad=4) | out()),
+    #          expected_err='Padding incompatible with start < 0')
+    # TEST.run(test=lambda: run(gen(3, -1) | map(lambda x: 5 / x)),
+    #          expected_out=[-5.0, Error('division by zero'), 5.0])
 
 
 def test_out():
@@ -409,8 +409,6 @@ def test_remote():
 
 
 def test_sudo():
-    TEST.run(test=lambda: run(gen(3)),
-             expected_out=[0, 1, 2])
     TEST.run(test='sudo -i [ gen 3 ]',
              expected_out=[0, 1, 2])
     # os.system('sudo rm -rf /tmp/sudotest')

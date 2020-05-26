@@ -30,10 +30,10 @@ def fg(env):
     return Fg(env)
 
 
-class FgArgParser(marcel.op.jobop.JobOpArgParser):
+class FgArgsValidator(marcel.op.jobop.JobOpArgsParser):
 
     def __init__(self, env):
-        super().__init__('fg', env, None, None)
+        super().__init__('fg', env)
 
 
 class Fg(marcel.op.jobop.JobOp):

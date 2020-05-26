@@ -13,16 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import argparse
-
+import marcel.argsparser
 import marcel.core
 import marcel.functionwrapper
-
 
 SUMMARY = '''
 Reduces tuples from the input stream by repeatedly applying binary functions, such as {r:+}, {r:min}, {r:max}.
 '''
-
 
 DETAILS = '''
 Each {r:function} takes two inputs and produces one output.
@@ -97,28 +94,22 @@ The output stream would be {n:('a', 1, 1), ('a', 2, 3), ('b', 3, 3), ('b', 4, 7)
 
 def red(env, *functions, incremental=False):
     op = Red(env)
-    op.function = []
+    op.functions = []
     for function in functions:
-        op.function.append(marcel.functionwrapper.FunctionWrapper(source='.', globals={})
-                           if function is None else
-                           marcel.functionwrapper.FunctionWrapper(function=function))
+        op.functions.append(marcel.functionwrapper.FunctionWrapper(source='.', globals={})
+                            if function is None else
+                            marcel.functionwrapper.FunctionWrapper(function=function))
     op.incremental = incremental
     return op
 
 
-class RedArgParser(marcel.core.ArgParser):
+class RedArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('red', env, ['-i', '--incremental'], SUMMARY, DETAILS)
-        self.add_argument('-i', '--incremental',
-                          action='store_true',
-                          help='Output a tuple containing the partially reduced values for each input tuple.')
-        self.add_argument('function',
-                          nargs=argparse.REMAINDER,
-                          type=super().constrained_type(self.check_function, 'not a valid function'),
-                          help='''A reduction function, which takes two inputs: the partially reduced
-                          value, and a value from an input tuple. The output is another partially reduced
-                          value.''')
+        super().__init__('red', env)
+        self.add_flag_no_value('incremental', '-i', '--incremental')
+        self.add_anon_list('functions', convert=self.function)
+        self.validate()
 
 
 class Red(marcel.core.Op):
@@ -126,24 +117,23 @@ class Red(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.incremental = None
-        self.function = None
+        self.functions = None
         self.reducer = None
 
     def __repr__(self):
-        sources = [None if f is None else f.source() for f in self.function]
-        return f'red(incremental={self.incremental}, function={sources})'
+        sources = [None if f is None else f.source() for f in self.functions]
+        return f'red(incremental={self.incremental}, functions={sources})'
 
     # BaseOp
 
     def setup_1(self):
         grouping_positions = []
         data_positions = []
-        for i in range(len(self.function)):
-            function = self.function[i]
-            function.set_op(self)
+        for i in range(len(self.functions)):
+            function = self.functions[i]
             if Red.is_grouping(function.source()):
                 grouping_positions.append(i)
-                self.function[i] = None
+                self.functions[i] = None
             else:
                 data_positions.append(i)
         if len(grouping_positions) == 0:
@@ -167,9 +157,9 @@ class Red(marcel.core.Op):
 class Reducer:
 
     def __init__(self, op):
-        self.function = op.function
+        self.functions = op.functions
         self.op = op
-        self.n = len(self.function)
+        self.n = len(self.functions)
 
     def receive(self, x):
         assert False
@@ -186,7 +176,7 @@ class NonGroupingReducer(Reducer):
 
     def receive(self, x):
         accumulator = self.accumulator
-        function = self.function
+        function = self.functions
         for i in range(self.n):
             accumulator[i] = function[i](accumulator[i], x[i])
         if self.op.incremental:
@@ -202,7 +192,7 @@ class GroupingReducer(Reducer):
 
     def __init__(self, op, grouping_positions, data_positions):
         super().__init__(op)
-        self.function = op.function
+        self.function = op.functions
         self.grouping_positions = grouping_positions
         self.data_positions = data_positions
         self.accumulators = {}  # group -> accumulator

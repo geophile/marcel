@@ -130,9 +130,7 @@ class Main:
                 # Append an out op at the end of pipeline, if there is no output op there already.
                 if not pipeline.is_terminal_op('out'):
                     out = self.op_modules['out'].create_op()
-                    out.append = False
-                    out.file = False
-                    out.csv = False
+                    out.args = []
                     pipeline.append(out)
                 command = marcel.core.Command(line, pipeline)
                 if self.run_immediate(pipeline):

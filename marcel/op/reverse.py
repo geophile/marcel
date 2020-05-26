@@ -13,13 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
-
 
 SUMMARY = '''
 The input stream is output in reverse order.
 '''
-
 
 DETAILS = None
 
@@ -28,10 +27,11 @@ def reverse(env):
     return Reverse(env)
 
 
-class ReverseArgParser(marcel.core.ArgParser):
+class ReverseArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('reverse', env, None, SUMMARY, DETAILS)
+        super().__init__('reverse', env)
+        self.validate()
 
 
 class Reverse(marcel.core.Op):
@@ -41,13 +41,13 @@ class Reverse(marcel.core.Op):
         self.contents = []
 
     # BaseOp
-    
+
     def setup_1(self):
         pass
-    
+
     def receive(self, x):
         self.contents.append(x)
-    
+
     def receive_complete(self):
         self.contents.reverse()
         for x in self.contents:

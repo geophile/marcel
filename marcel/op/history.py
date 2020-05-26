@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import readline
-
+import marcel.argsparser
 import marcel.core
 import marcel.object.historyrecord
 
@@ -33,10 +32,11 @@ def history(env):
     return History(env)
 
 
-class HistoryArgParser(marcel.core.ArgParser):
+class HistoryArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('history', env, None, SUMMARY, DETAILS)
+        super().__init__('history', env)
+        self.validate()
 
 
 class History(marcel.core.Op):

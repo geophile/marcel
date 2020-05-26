@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.functionwrapper
@@ -98,25 +99,15 @@ def window(env, predicate=None, overlap=False, disjoint=None):
     return op
 
 
-class WindowArgsParser(marcel.core.ArgParser):
+class WindowArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('window',
-                         env,
-                         ['-o', '--overlap', '-d', '--disjoint'],
-                         SUMMARY,
-                         DETAILS)
-        self.add_argument('predicate',
-                          nargs='?',
-                          type=super().constrained_type(self.check_function, 'not a valid function'),
-                          help='Start a new window on tuples for which predicate evaultes to True')
-        fixed_size = self.add_mutually_exclusive_group()
-        fixed_size.add_argument('-o', '--overlap',
-                                type=int,
-                                help='Specifies the size of overlapping windows.')
-        fixed_size.add_argument('-d', '--disjoint',
-                                type=int,
-                                help='Specifies the size of disjoint windows.')
+        super().__init__('window', env)
+        self.add_flag_one_value('overlap', '-o', '--overlap', convert=int)
+        self.add_flag_one_value('disjoint', '-d', '--disjoint', convert=int)
+        self.add_anon('predicate', default=None, convert=self.function)
+        self.exactly_one('overlap', 'disjoint', 'predicate')
+        self.validate()
 
 
 class Window(marcel.core.Op):
@@ -146,18 +137,6 @@ class Window(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
-        # argparse seems to default args in mutually exclusive group to False instead of None
-        if self.overlap == False:
-            self.overlap = None    
-        if self.disjoint == False:
-            self.disjoint = None    
-        # Exactly one of predicate, overlap, disjoint must be set.
-        count = 1 if self.predicate is not None else 0
-        count += 1 if self.overlap is not None else 0
-        count += 1 if self.disjoint is not None else 0
-        super().check_arg(count == 1,
-                          None,
-                          'Exactly one argument of window: predicate, overlap, or disjoint, must be specified.')
         if self.predicate:
             try:
                 self.predicate.check_validity()

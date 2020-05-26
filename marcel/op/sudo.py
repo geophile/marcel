@@ -13,13 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import argparse
 import io
-import dill
 import subprocess
 import sys
 
+import dill
+
+import marcel.argsparser
 import marcel.core
+import marcel.exception
 
 
 def sudo(env, pipeline, *args):
@@ -36,17 +38,12 @@ def sudo(env, pipeline, *args):
 # This means that setup_1 has to convert the pipeline ref to a pipeline.
 
 
-class SudoArgParser(marcel.core.ArgParser):
+class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('sudo', env)
-        self.add_argument('args', nargs=argparse.REMAINDER)
-
-    # Insert -- as first arg to cause parse_args to treat all sudo args as positional.
-    def parse_args(self, args=None, namespace=None):
-        if args is not None:
-            args = ['--'] + args
-        super().parse_args(args, namespace)
+        self.add_anon_list('args')
+        self.validate()
 
 
 class Sudo(marcel.core.Op):
@@ -62,14 +59,10 @@ class Sudo(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
-        # Now the -- arg has to be removed
-        # TODO: ArgumentParser.parse_known_args might be a better way to go.
-        assert self.args[0] == '--'
         self.args = self.args[1:]
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('Missing pipeline')
-        pipeline_ref = self.args.pop()
-        self.pipeline = self.resolve_pipeline_reference(pipeline_ref)
+        self.pipeline = self.args.pop()
         if not isinstance(self.pipeline, marcel.core.Pipeline):
             raise marcel.exception.KillCommandException('Last argument to sudo must be a pipeline')
 

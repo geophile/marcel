@@ -26,7 +26,7 @@ class FilenamesOp(marcel.core.Op):
 
     def __init__(self, env, op_has_target):
         super().__init__(env)
-        self.filename = None
+        self.filenames = None
         self.current_dir = None
         self.roots = None
 
@@ -35,9 +35,9 @@ class FilenamesOp(marcel.core.Op):
     def setup_1(self):
         self.roots = []
         self.current_dir = self.env().dir_state().pwd()
-        self.roots = FilenamesOp.deglob(self.current_dir, self.filename)
-        if len(self.filename) > 0 and len(self.roots) == 0:
-            raise marcel.exception.KillCommandException(f'No qualifying paths: {self.filename}')
+        self.roots = FilenamesOp.deglob(self.current_dir, self.filenames)
+        if len(self.filenames) > 0 and len(self.roots) == 0:
+            raise marcel.exception.KillCommandException(f'No qualifying paths: {self.filenames}')
 
     def receive(self, _):
         for root in self.roots:
@@ -56,7 +56,7 @@ class FilenamesOp(marcel.core.Op):
     # For use by this class
 
     def find_roots(self):
-        self.roots = None if len(self.filename) == 0 else FilenamesOp.deglob(self.current_dir, self.filename)
+        self.roots = None if len(self.filenames) == 0 else FilenamesOp.deglob(self.current_dir, self.filenames)
 
     @staticmethod
     def normalize_paths(filenames):

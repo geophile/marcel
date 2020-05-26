@@ -47,6 +47,8 @@ class FunctionWrapper:
         elif source is not None and globals is not None and function is None:
             self._source = source.strip()
             self._globals = globals
+        else:
+            assert False
 
     def __repr__(self):
         return self._function if self._source is None else self._source
@@ -72,7 +74,7 @@ class FunctionWrapper:
             raise marcel.exception.KillCommandException('Not a valid function')
 
     def source(self):
-        return self._source if self.source else self._function
+        return self._source if self._source else self._function
 
     def set_op(self, op):
         self._op = op

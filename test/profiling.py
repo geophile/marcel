@@ -13,4 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-VERSION = '0.7.4'
+import time
+
+from marcel.api import*
+
+N = 1000000
+start = time.time()
+run(gen(N) | map(lambda x: x+1) | map(lambda x: x+1) | map(lambda x: x+1) | select(lambda x: False))
+stop = time.time()
+usec = (stop - start) * 1000000 / N
+print(f'{usec} usec per unit')
+

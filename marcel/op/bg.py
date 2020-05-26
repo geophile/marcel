@@ -33,10 +33,10 @@ def bg(env):
     return Bg(env)
 
 
-class BgArgParser(marcel.op.jobop.JobOpArgParser):
+class BgArgsValidator(marcel.op.jobop.JobOpArgsParser):
 
     def __init__(self, env):
-        super().__init__('bg', env, SUMMARY, DETAILS)
+        super().__init__('bg', env)
 
 
 class Bg(marcel.op.jobop.JobOp):

@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.object.error
@@ -69,12 +70,13 @@ def join(env, pipeline, keep=False):
     return op
 
 
-class JoinArgParser(marcel.core.ArgParser):
+class JoinArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('join', env, [], SUMMARY, DETAILS)
-        self.add_argument('-k', '--keep', action='store_true')
-        self.add_argument('pipeline')
+        super().__init__('join', env)
+        self.add_flag_no_value('keep', '-k', '--keep')
+        self.add_anon('pipeline')
+        self.validate()
 
 
 class Join(marcel.core.Op):

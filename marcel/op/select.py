@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.functionwrapper
@@ -35,13 +36,12 @@ def select(env, function):
     return op
 
 
-class SelectArgParser(marcel.core.ArgParser):
+class SelectArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('select', env, None, SUMMARY, DETAILS)
-        self.add_argument('function',
-                          type=super().constrained_type(self.check_function, 'Function required.'),
-                          help='Predicate for filtering input tuples')
+        super().__init__('select', env)
+        self.add_anon('function', convert=self.function)
+        self.validate()
 
 
 class Select(marcel.core.Op):
@@ -56,11 +56,7 @@ class Select(marcel.core.Op):
     # BaseOp
     
     def setup_1(self):
-        try:
-            self.function.check_validity()
-        except marcel.exception.KillCommandException:
-            super().check_arg(False, 'function', 'Function either missing or invalid.')
-        self.function.set_op(self)
+        pass
 
     def receive(self, x):
         if self.function(*x):

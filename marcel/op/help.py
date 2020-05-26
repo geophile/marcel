@@ -17,6 +17,7 @@ import contextlib
 import importlib
 import io
 
+import marcel.argsparser
 import marcel.core
 import marcel.helpformatter
 import marcel.util
@@ -34,14 +35,12 @@ def help(env):
     return Help(env)
 
 
-class HelpArgParser(marcel.core.ArgParser):
+class HelpArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('help', env, None, SUMMARY, DETAILS)
-        self.add_argument('topic',
-                          default='marcel',
-                          nargs='?',
-                          help='Topic to be described.')
+        super().__init__('help', env)
+        self.add_anon('topic')
+        self.validate()
 
 
 class Help(marcel.core.Op):
@@ -76,7 +75,7 @@ class Help(marcel.core.Op):
 
     @staticmethod
     def op_help(op_module):
-        arg_parser = op_module.arg_parser()
+        arg_parser = op_module.args_parser()
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
             try:

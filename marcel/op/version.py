@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 import marcel.version
 
@@ -29,10 +30,11 @@ def version(env):
     return Version(env)
 
 
-class VersionArgParser(marcel.core.ArgParser):
+class VersionArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('version', env, None, SUMMARY, DETAILS)
+        super().__init__('version', env)
+        self.validate()
 
 
 class Version(marcel.core.Op):
@@ -44,9 +46,6 @@ class Version(marcel.core.Op):
         return 'version()'
 
     # BaseOp
-
-    def setup_1(self):
-        pass
 
     def receive(self, _):
         self.send(marcel.version.VERSION)

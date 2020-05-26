@@ -15,6 +15,7 @@
 
 import pathlib
 
+import marcel.argsparser
 import marcel.core
 
 
@@ -34,14 +35,12 @@ def cd(env, directory=None):
     return op
 
 
-class CdArgParser(marcel.core.ArgParser):
+class CdArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('cd', env, None, SUMMARY, DETAILS)
-        self.add_argument('directory',
-                          nargs='?',
-                          default='~',
-                          help='New current directory')
+        super().__init__('cd', env)
+        self.add_anon('directory', default='~')
+        self.validate()
 
 
 class Cd(marcel.core.Op):

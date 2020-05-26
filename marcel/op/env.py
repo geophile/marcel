@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 
 
@@ -32,10 +33,11 @@ def env(env):
     return Env(env)
 
 
-class EnvArgParser(marcel.core.ArgParser):
+class EnvArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('env', env, None, SUMMARY, DETAILS)
+        super().__init__('env', env)
+        self.validate()
 
 
 class Env(marcel.core.Op):

@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import pathlib
-
+import marcel.argsparser
 import marcel.core
 
 
@@ -30,13 +29,12 @@ def dirs(env):
     return Dirs(env)
 
 
-class DirsArgParser(marcel.core.ArgParser):
+class DirsArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('pushd', env, ['-c'], SUMMARY, DETAILS)
-        self.add_argument('-c', '--clear',
-                          action='store_true',
-                          help='Clear the directory stack and place the current directory in it.')
+        super().__init__('dirs', env)
+        self.add_flag_no_value('clear', '-c', '--clear')
+        self.validate()
 
 
 class Dirs(marcel.core.Op):
@@ -49,9 +47,6 @@ class Dirs(marcel.core.Op):
         return f'dirs(clear={self.clear})'
 
     # BaseOp
-
-    def setup_1(self):
-        pass
 
     def receive(self, _):
         if self.clear:

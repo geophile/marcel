@@ -346,3 +346,21 @@ Pipeline.copy.
 
 env has paths as strings. Should be Paths.
 
+----------------------------------------------------------------------
+
+Make namespace protected. Use vars() instead externally.  BTW:
+"vars()" is not a good name for returning the namespace. globals()?
+
+----------------------------------------------------------------------
+
+    TEST.run('x100 = [gen 3 | map (x: (x, x * 100))]')
+    TEST.run(test='gen 4 | map (x: (x, -x)) | join x100',
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
+    TEST.run(test='gen 4 | map (x: (x, -x)) | join [x100]',
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
+
+Why should the last one work?
+
+----------------------------------------------------------------------
+
+Get rid of argparse in main.

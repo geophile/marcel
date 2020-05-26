@@ -18,6 +18,7 @@ import readline
 import subprocess
 import tempfile
 
+import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.main
@@ -38,15 +39,12 @@ def edit(env):
     return Edit(env)
 
 
-class EditArgParser(marcel.core.ArgParser):
+class EditArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('edit', env, None, SUMMARY, DETAILS)
-        self.add_argument('n',
-                          nargs='?',
-                          type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                        'must be non-negative'),
-                          help='The identifying number of a history command.')
+        super().__init__('edit', env)
+        self.add_anon('n', default=None, convert=int)
+        self.validate()
 
 
 class Edit(marcel.core.Op):

@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 import marcel.util
 
@@ -37,13 +38,12 @@ def unique(env, consecutive=False):
     return op
 
 
-class UniqueArgParser(marcel.core.ArgParser):
+class UniqueArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('unique', env, ['-c', '--consecutive'], SUMMARY, DETAILS)
-        self.add_argument('-c', '--consecutive',
-                          action='store_true',
-                          help='Remove duplicates only when consecutive.')
+        super().__init__('unique', env)
+        self.add_flag_no_value('consecutive', '-c', '--consecutive')
+        self.validate()
 
 
 class Unique(marcel.core.Op):

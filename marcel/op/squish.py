@@ -15,6 +15,7 @@
 
 import functools
 
+import marcel.argsparser
 import marcel.core
 import marcel.functionwrapper
 from marcel.reduction import r_plus
@@ -44,14 +45,12 @@ def squish(env, function=r_plus):
     return op
 
 
-class SquishArgParser(marcel.core.ArgParser):
+class SquishArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('squish', env, None, SUMMARY, DETAILS)
-        self.add_argument('function',
-                          nargs='?',
-                          type=super().constrained_type(self.check_function, 'not a valid function'),
-                          help='Reduction function, applied to the components of an input tuple.')
+        super().__init__('squish', env)
+        self.add_anon('function', default=None, convert=self.function)
+        self.validate()
 
 
 class Squish(marcel.core.Op):
@@ -67,7 +66,7 @@ class Squish(marcel.core.Op):
     
     def setup_1(self):
         if self.function is None:
-            self.function = marcel.functionwrapper.FunctionWrapper(source='+', globals=self.env().vars())
+            self.function = marcel.functionwrapper.FunctionWrapper(source='+', globals=self.env().namespace)
         self.function.set_op(self)
 
     def receive(self, x):

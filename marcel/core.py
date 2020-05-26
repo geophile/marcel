@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import argparse
-
 import marcel.exception
 import marcel.functionwrapper
 import marcel.helpformatter
@@ -22,87 +20,6 @@ import marcel.object.error
 import marcel.util
 
 Error = marcel.object.error.Error
-
-
-class ArgParser(argparse.ArgumentParser):
-    op_flags = {}  # op name -> [flags], for use in tab completion
-    help_formatter = None
-
-    def __init__(self, op_name, env, flags=None, summary=None, details=None):
-        if ArgParser.help_formatter is None:
-            ArgParser.help_formatter = marcel.helpformatter.HelpFormatter(env.color_scheme())
-        super().__init__(prog=op_name,
-                         formatter_class=argparse.RawDescriptionHelpFormatter,
-                         description=ArgParser.help_formatter.format(summary),
-                         epilog=ArgParser.help_formatter.format(details))
-        ArgParser.op_flags[op_name] = flags
-        self.env = env
-
-    # ArgumentParser (argparse)
-
-    def parse_args(self, args=None, namespace=None):
-        assert isinstance(namespace, Op)
-        if args is not None:
-            # Replace pipelines by string-valued pipeline references, since argparse operates on strings.
-            # Arg processing by each op will convert the pipeline reference back to a pipeline.
-            assert marcel.util.is_sequence_except_string(args)
-            args_without_pipelines = []
-            pipelines = []
-            for arg in args:
-                if isinstance(arg, Pipeline):
-                    pipeline_ref = self.pipeline_reference(len(pipelines))
-                    pipelines.append(arg)
-                    arg = pipeline_ref
-                args_without_pipelines.append(arg)
-            args = args_without_pipelines
-            namespace.set_pipeline_args(pipelines)
-        return super().parse_args(args, namespace)
-
-    def print_usage(self, file=None):
-        pass
-
-    def print_help(self, file=None):
-        super().print_help(file)
-
-    def exit(self, status=0, message=None):
-        if status:
-            raise marcel.exception.KillCommandException(message)
-        else:
-            # Parser is exiting normally, probably because it was run to obtain a help message.
-            # We don't want to actually run a command. Proceeding as
-            # if the command were killed by Ctrl-C escapes correctly.
-            raise KeyboardInterrupt()
-
-    # For use by subclasses
-
-    def pipeline_reference(self, pipeline_id):
-        return f'pipeline:{pipeline_id}'
-
-    @staticmethod
-    def constrained_type(check_and_convert, message):
-        def arg_checker(s):
-            try:
-                return check_and_convert(s)
-            except Exception as e:
-                raise argparse.ArgumentTypeError(message)
-        return arg_checker
-
-    @staticmethod
-    def check_non_negative(s):
-        n = int(s)
-        if n < 0:
-            raise ValueError()
-        return n
-
-    @staticmethod
-    def check_signal_number(s):
-        n = int(s)
-        if n < 1 or n > 30:
-            raise ValueError()
-        return n
-
-    def check_function(self, s):
-        return marcel.functionwrapper.FunctionWrapper(source=s, globals=self.env.vars())
 
 
 class Pipelineable:

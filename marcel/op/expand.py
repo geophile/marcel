@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 import marcel.util
 
@@ -72,15 +73,12 @@ def expand(env, position=None):
     return op
 
 
-class ExpandArgParser(marcel.core.ArgParser):
+class ExpandArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('expand', env, None, SUMMARY, DETAILS)
-        self.add_argument('position',
-                          nargs='?',
-                          type=super().constrained_type(marcel.core.ArgParser.check_non_negative,
-                                                        'must be non-negative'),
-                          help='Position of the tuple to be expanded')
+        super().__init__('expand', env)
+        self.add_anon('position', default=None, convert=int)
+        self.validate()
 
 
 class Expand(marcel.core.Op):

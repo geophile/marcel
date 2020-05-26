@@ -13,9 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import argparse
-import sys
-
+import marcel.argsparser
 import marcel.core
 import marcel.object.error
 import marcel.object.file
@@ -49,41 +47,23 @@ def ls(env, *paths, depth=1, recursive=False, file=False, dir=False, symlink=Fal
     op.file = file
     op.dir = dir
     op.symlink = symlink
-    op.filename = paths
+    op.filenames = paths
     return op
 
 
-class LsArgParser(marcel.core.ArgParser):
+class LsArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('ls', env, ['-0', '-1', '-r', '-f', '--file', '-d', '--dir', '-s', '--symlink'],
-                         SUMMARY, DETAILS)
-        depth_group = self.add_mutually_exclusive_group()
-        depth_group.add_argument('-0',
-                                 action='store_true',
-                                 dest='d0',
-                                 help='Do not descend into directories, (i.e., expore to depth 0)')
-        depth_group.add_argument('-1',
-                                 action='store_true',
-                                 dest='d1',
-                                 help='''Descend into directories listed on the command line,
-                                  (i.e., explore to depth 1)''')
-        depth_group.add_argument('-r', '--recursive',
-                                 action='store_true',
-                                 dest='dr',
-                                 help='Descend into all directories, recursively')
-        self.add_argument('-f', '--file',
-                          action='store_true',
-                          help='Include files in output')
-        self.add_argument('-d', '--dir',
-                          action='store_true',
-                          help='Include directories in output')
-        self.add_argument('-s', '--symlink',
-                          action='store_true',
-                          help='Include symbolic links in output')
-        self.add_argument('filename',
-                          nargs=argparse.REMAINDER,
-                          help='A filename or glob pattern')
+        super().__init__('ls', env)
+        self.add_flag_no_value('d0', '-0', None)
+        self.add_flag_no_value('d1', '-1', None)
+        self.add_flag_no_value('dr', '-r', None)
+        self.add_flag_no_value('file', '-f', '--file')
+        self.add_flag_no_value('dir', '-d', '--dir')
+        self.add_flag_no_value('symlink', '-s', '--symlink')
+        self.add_anon_list('filenames')
+        self.at_most_one('d0', 'd1', 'dr')
+        self.validate()
 
 
 class Ls(marcel.op.filenames.FilenamesOp):
@@ -113,7 +93,7 @@ class Ls(marcel.op.filenames.FilenamesOp):
             include += 'd'
         if self.symlink:
             include += 's'
-        filenames = [str(p) for p in self.filename] if self.filename else '?'
+        filenames = [str(p) for p in self.filenames] if self.filenames else '?'
         return f'ls(depth={depth}, include={include}, filename={filenames})'
 
     # BaseOp

@@ -15,6 +15,7 @@
 
 import threading
 
+import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.op.labelthread
@@ -57,12 +58,13 @@ def fork(env, host, pipelineable):
     return op
 
 
-class ForkArgParser(marcel.core.ArgParser):
+class ForkArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('fork', env, None, SUMMARY, DETAILS)
-        self.add_argument('host')
-        self.add_argument('pipeline'),
+        super().__init__('fork', env)
+        self.add_anon('host')
+        self.add_anon('pipeline')
+        self.validate()
 
 
 class Fork(marcel.core.Op):
@@ -82,7 +84,6 @@ class Fork(marcel.core.Op):
 
     def setup_1(self):
         self.threads = []
-        self.pipeline = self.resolve_pipeline_reference(self.pipeline)
         cluster = self.env().remote(self.host)
         if cluster:
             self.impl = Remote(self)

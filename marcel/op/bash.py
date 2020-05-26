@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import argparse
 import shlex
 import subprocess
 
+import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.object.error
@@ -30,7 +30,7 @@ Run an executable (as opposed to a marcel command).
 
 DETAILS = '''
 It is usually possible to run an executable directly, without using the bash command.
-Use this command if  the interactive flag is needed.
+Use this command if the interactive flag is needed.
 '''
 
 
@@ -41,17 +41,13 @@ def bash(env, *args, interactive=False):
     return op
 
 
-class BashArgParser(marcel.core.ArgParser):
+class BashArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('bash', env, None, SUMMARY, DETAILS)
-        self.add_argument('-i', '--interactive',
-                          action='store_true',
-                          help='The command is run interactively. stdin, stdout, and stderr are ignored.')
-        self.add_argument('args',
-                          nargs=argparse.REMAINDER,
-                          help='''These arguments comprise a command that can be executed by a Linux
-                          bash shell.''')
+        super().__init__('bash', env)
+        self.add_flag_no_value('interactive', '-i', '--interactive')
+        self.add_anon_list('args')
+        self.validate()
 
 
 class Bash(marcel.core.Op):

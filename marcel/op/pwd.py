@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 
 
@@ -28,10 +29,11 @@ def pwd(env):
     return Pwd(env)
 
 
-class PwdArgParser(marcel.core.ArgParser):
+class PwdArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('pwd', env, None, SUMMARY, DETAILS)
+        super().__init__('pwd', env)
+        self.validate()
 
 
 class Pwd(marcel.core.Op):
@@ -43,9 +45,6 @@ class Pwd(marcel.core.Op):
         return 'pwd()'
 
     # BaseOp
-
-    def setup_1(self):
-        pass
 
     def receive(self, _):
         self.send(self.env().dir_state().pwd())

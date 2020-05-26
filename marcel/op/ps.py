@@ -15,6 +15,7 @@
 
 import os
 
+import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.object.process
@@ -53,25 +54,16 @@ def ps(env, user=_UNINITIALIZED, group=_UNINITIALIZED, pid=_UNINITIALIZED, comma
     return op
 
 
-class PsArgParser(marcel.core.ArgParser):
+class PsArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('ps',
-                         env,
-                         ['-u', '--user', '-g', '--group', '-p', '--pid', '-c', '--command'],
-                         SUMMARY,
-                         DETAILS)
-        filter_group = self.add_mutually_exclusive_group()
-        filter_group.add_argument('-u', '--user',
-                                  nargs='?',
-                                  help='Select processes owned by the specified username or uid.')
-        filter_group.add_argument('-g', '--group',
-                                  nargs='?',
-                                  help='Select processes owned by the specified group name or gid.')
-        filter_group.add_argument('-p', '--pid',
-                                  help='Select the process with the given pid.')
-        filter_group.add_argument('-c', '--command',
-                                  help='Select processes whose commandline contains the given string.')
+        super().__init__('ps', env)
+        self.add_flag_optional_value('user', '-u', '--user')
+        self.add_flag_optional_value('group', '-g', '--group')
+        self.add_flag_optional_value('pid', '-p', '--pid')
+        self.add_flag_optional_value('command', '-c', '--command')
+        self.exactly_one('user', 'group', 'pid', 'command')
+        self.validate()
 
 
 class Ps(marcel.core.Op):
@@ -91,29 +83,21 @@ class Ps(marcel.core.Op):
         # takes priority. Convert name to uid, since that is a cheaper lookup on a Project.
         # If user or group is None, no user/group was specified, so use this user/group.
         # UNINITIALIZED means it wasn't specified at all.
-        option_count = 0
+        self.filter = lambda p: True
         if self.user is not _UNINITIALIZED:
-            option_count += 1
             self.user = os.getuid() if self.user is None else Ps.convert_to_id(self.user, marcel.util.uid)
             self.filter = lambda p: p.uid == self.user
         if self.group is not _UNINITIALIZED:
-            option_count += 1
             self.group = os.getgid() if self.group is None else Ps.convert_to_id(self.group, marcel.util.gid)
             self.filter = lambda p: p.gid == self.group
         if self.pid is not _UNINITIALIZED:
-            option_count += 1
             try:
                 self.pid = int(self.pid)
                 self.filter = lambda p: p.pid == self.pid
             except ValueError:
                 raise marcel.exception.KillCommandException(f'pid must be an int: {self.pid}')
         if self.command is not _UNINITIALIZED:
-            option_count += 1
             self.filter = lambda p: self.command in p.commandline
-        if option_count > 1:
-            raise marcel.exception.KillCommandException('ps options are mutually exclusive')
-        if option_count == 0:
-            self.filter = lambda p: True
 
     def receive(self, _):
         for process in marcel.object.process.processes():

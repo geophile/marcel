@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 import marcel.job
 
@@ -36,10 +37,11 @@ def jobs(env):
     return Jobs(env)
 
 
-class JobsArgParser(marcel.core.ArgParser):
+class JobsArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('jobs', env, SUMMARY, DETAILS)
+        super().__init__('jobs', env)
+        self.validate()
 
 
 class Jobs(marcel.core.Op):
