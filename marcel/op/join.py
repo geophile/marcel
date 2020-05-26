@@ -109,8 +109,6 @@ class Join(marcel.core.Op):
         #     - TODO: an expression that evaluates to a pipeline, e.g. (pipeline_var)
         if isinstance(self.pipeline, marcel.core.Pipelineable):
             pipeline = self.pipeline.create_pipeline()
-        elif self.is_pipeline_reference(self.pipeline):
-            pipeline = self.resolve_pipeline_reference(self.pipeline)
         else:
             pipeline = self.env().getvar(self.pipeline)
         if type(pipeline) is not marcel.core.Pipeline:

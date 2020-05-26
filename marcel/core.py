@@ -173,9 +173,6 @@ class Op(BaseOp):
 
     def __init__(self, env):
         super().__init__(env)
-        # pipelines is for pipeline args. The actual pipelines are stored here, while a
-        # reference to it is substituted into the command's args, for purposes of parsing.
-        self.pipelines = None
 
     def __repr__(self):
         assert False, self.op_name()
@@ -223,11 +220,6 @@ class Op(BaseOp):
         copy.__dict__.update(self.__dict__)
         return copy
 
-    # For use by this module
-
-    def set_pipeline_args(self, pipelines):
-        self.pipelines = pipelines
-
     # For use by subclasses
 
     @staticmethod
@@ -237,21 +229,6 @@ class Op(BaseOp):
                      if arg is None else
                      f'Incorrect value for {arg} argument of {Op.op_name()}: {message}')
             raise marcel.exception.KillCommandException(cause)
-
-    def is_pipeline_reference(self, x):
-        return x.startswith('pipeline:')
-
-    def resolve_pipeline_reference(self, x):
-        if isinstance(x, marcel.core.Pipelineable):
-            # This happens through the API
-            return x.create_pipeline()
-        if not x.startswith('pipeline:'):
-            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {x}')
-        try:
-            pipeline_id = int(x[len('pipeline:'):])
-            return self.pipelines[pipeline_id]
-        except ValueError:
-            raise marcel.exception.KillCommandException(f'Incorrect pipeline reference: {x}')
 
     # For use by this class
 
