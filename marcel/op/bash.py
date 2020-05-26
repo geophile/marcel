@@ -35,10 +35,9 @@ Use this command if the interactive flag is needed.
 
 
 def bash(env, *args, interactive=False):
-    op = Bash(env)
-    op.interactive = interactive
-    op.args = args
-    return op
+    op_args = ['--interactive'] if interactive else []
+    op_args.extend(args)
+    return Bash(env), op_args
 
 
 class BashArgsParser(marcel.argsparser.ArgsParser):

@@ -5,4 +5,4 @@ PYTHON=python3
 $PYTHON ./test_ops.py
 $PYTHON ./test_filename_ops.py
 $PYTHON ./test_native_filename_ops.py
-# $PYTHON ./test_api.py
+$PYTHON ./test_api.py

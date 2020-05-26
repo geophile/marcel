@@ -45,7 +45,7 @@ class FunctionWrapper:
         if source is None and globals is None and function is not None:
             self._function = function
         elif source is not None and globals is not None and function is None:
-            self._source = source.strip()
+            self._source = source
             self._globals = globals
         else:
             assert False
@@ -76,14 +76,24 @@ class FunctionWrapper:
     def source(self):
         return self._source if self._source else self._function
 
+    def is_grouping(self):
+        return (self._source is not None and self._source == '.' or
+                self._function is not None and self._function == marcel.reduction.r_group)
+
     def set_op(self, op):
         self._op = op
 
+    # Can't call self._op.fatal_error here, because this function is called while the op and it's pipeline
+    # are being created. fatal_error assumes that the op has a pipeline and that the pipeline has an
+    # error handler.
     def create_function(self):
         if self._function is None:
             self._function = FunctionWrapper.symbols.get(self._source, None)
             if self._function is None:
                 if self._source is not None:
+                    if type(self._source) is not str:
+                        raise marcel.exception.KillCommandException(f'Function source must be a string: {self._source}')
+                    self._source = self._source.strip()
                     if self._source.split()[0] in ('lambda', 'lambda:'):
                         self._function = eval(self._source, self._globals)
                     else:
@@ -93,7 +103,6 @@ class FunctionWrapper:
                             try:
                                 self._function = eval('lambda: ' + self._source, self._globals)
                             except Exception:
-                                raise marcel.exception.KillCommandException(
-                                    f'Invalid function syntax: {self._source}')
+                                raise marcel.exception.KillCommandException(f'Invalid function syntax: {self._source}')
                 else:
                     raise marcel.exception.KillCommandException('Function required')

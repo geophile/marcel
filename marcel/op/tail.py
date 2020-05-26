@@ -29,9 +29,7 @@ output stream. All other input items will be discarded.
 
 
 def tail(env, n):
-    op = Tail(env)
-    op.n = n
-    return op
+    return Tail(env), [n]
 
 
 class TailArgsParser(marcel.argsparser.ArgsParser):

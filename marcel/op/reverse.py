@@ -24,7 +24,7 @@ DETAILS = None
 
 
 def reverse(env):
-    return Reverse(env)
+    return Reverse(env), []
 
 
 class ReverseArgsParser(marcel.argsparser.ArgsParser):

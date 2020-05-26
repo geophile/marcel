@@ -31,9 +31,7 @@ True are written to the output stream.
 
 
 def select(env, function):
-    op = Select(env)
-    op.function = marcel.functionwrapper.FunctionWrapper(function=function)
-    return op
+    return Select(env), [] if function is None else [function]
 
 
 class SelectArgsParser(marcel.argsparser.ArgsParser):

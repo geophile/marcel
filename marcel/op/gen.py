@@ -32,11 +32,10 @@ permitted if the stream does not terminate, or if {r:start} is negative.
 
 
 def gen(env, count=0, start=0, pad=None):
-    op = Gen(env)
-    op.count = count
-    op.start = start
-    op.pad = pad
-    return op
+    args = ['--pad', pad] if pad else []
+    args.append(count)
+    args.append(start)
+    return Gen(env), args
 
 
 class GenArgsParser(marcel.argsparser.ArgsParser):

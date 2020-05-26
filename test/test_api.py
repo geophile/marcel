@@ -17,23 +17,23 @@ def test_gen():
     # Explicit out
     TEST.run(test=lambda: run(gen(5) | out()),
              expected_out=[0, 1, 2, 3, 4])
-    # # Implicit out
-    # TEST.run(test=lambda: run(gen(5)),
-    #          expected_out=[0, 1, 2, 3, 4])
-    # TEST.run(test=lambda: run(gen(count=5, start=10) | out()),
-    #          expected_out=[10, 11, 12, 13, 14])
-    # TEST.run(test=lambda: run(gen(5, -5) | out()),
-    #          expected_out=[-5, -4, -3, -2, -1])
-    # TEST.run(test=lambda: run(gen(count=3, pad=2) | out()),
-    #          expected_out=['00', '01', '02'])
-    # TEST.run(test=lambda: run(gen(count=3, start=99, pad=3) | out()),
-    #          expected_out=['099', '100', '101'])
-    # TEST.run(test=lambda: run(gen(count=3, start=99, pad=2) | out()),
-    #          expected_err='Padding too small')
-    # TEST.run(test=lambda: run(gen(count=3, start=-10, pad=4) | out()),
-    #          expected_err='Padding incompatible with start < 0')
-    # TEST.run(test=lambda: run(gen(3, -1) | map(lambda x: 5 / x)),
-    #          expected_out=[-5.0, Error('division by zero'), 5.0])
+    # Implicit out
+    TEST.run(test=lambda: run(gen(5)),
+             expected_out=[0, 1, 2, 3, 4])
+    TEST.run(test=lambda: run(gen(count=5, start=10) | out()),
+             expected_out=[10, 11, 12, 13, 14])
+    TEST.run(test=lambda: run(gen(5, -5) | out()),
+             expected_out=[-5, -4, -3, -2, -1])
+    TEST.run(test=lambda: run(gen(count=3, pad=2) | out()),
+             expected_out=['00', '01', '02'])
+    TEST.run(test=lambda: run(gen(count=3, start=99, pad=3) | out()),
+             expected_out=['099', '100', '101'])
+    TEST.run(test=lambda: run(gen(count=3, start=99, pad=2) | out()),
+             expected_err='Padding 2 too small')
+    TEST.run(test=lambda: run(gen(count=3, start=-10, pad=4) | out()),
+             expected_err='Padding incompatible with start < 0')
+    TEST.run(test=lambda: run(gen(3, -1) | map(lambda x: 5 / x)),
+             expected_out=[-5.0, Error('division by zero'), 5.0])
 
 
 def test_out():
@@ -45,7 +45,7 @@ def test_out():
     TEST.run(test=lambda: run(gen(3) | out(csv=True)),
              expected_out=[0, 1, 2])
     TEST.run(test=lambda: run(gen(3) | out(csv=True, format='{}')),
-             expected_err='csv=True is incompatible with format specification')
+             expected_err='Cannot specify more than one of')
     TEST.run(test=lambda: run(gen(3) | out(file=output_filename)),
              expected_out=[0, 1, 2],
              file=output_filename)
@@ -57,7 +57,7 @@ def test_out():
              expected_out=[0, 1, 2, 0, 1, 2],
              file=output_filename)
     TEST.run(test=lambda: run(gen(3) | out(append=output_filename, file=output_filename)),
-             expected_err='append and file arguments cannot both be specified')
+             expected_err='Cannot specify more than one of')
     TEST.delete_file(output_filename)
 
 
@@ -74,9 +74,9 @@ def test_map():
     TEST.run(test=lambda: run(gen(5) | map(lambda x: -x)),
              expected_out=[0, -1, -2, -3, -4])
     TEST.run(test=lambda: run(gen(5) | map(None)),
-             expected_err='Function either missing or invalid')
+             expected_err='No value specified for function')
     TEST.run(test=lambda: run(gen(5) | map(True)),
-             expected_err='Function either missing or invalid')
+             expected_err='Function source must be a string')
 
 
 def test_select():
@@ -87,7 +87,7 @@ def test_select():
     TEST.run(lambda: run(gen(5) | select(lambda x: x % 2 == 1)),
              expected_out=[1, 3])
     TEST.run(lambda: run(gen(5) | select(None)),
-             expected_err='Function either missing or invalid')
+             expected_err='No value specified for function')
 
 
 def test_red():
@@ -335,11 +335,15 @@ def test_window():
                            ((9,), (None,), (None,))])
     # Negative-test args
     TEST.run(lambda: run(gen(10) | window(disjoint=33, overlap=33)),
-             expected_err='Exactly one')
+             expected_err='Must specify exactly one')
     TEST.run(lambda: run(gen(10) | window()),
-             expected_err='Exactly one')
+             expected_err='Must specify exactly one')
     TEST.run(lambda: run(gen(10) | window(lambda x: True, overlap=3)),
-             expected_err='Exactly one')
+             expected_err='Must specify exactly one')
+    TEST.run(lambda: run(gen(10) | window(overlap='abc')),
+             expected_err='invalid literal')
+    TEST.run(lambda: run(gen(10) | window(disjoint=[])),
+             expected_err='int() argument')
 
 
 def test_bash():

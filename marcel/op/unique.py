@@ -33,9 +33,7 @@ is specified.
 
 
 def unique(env, consecutive=False):
-    op = Unique(env)
-    op.consecutive = consecutive
-    return op
+    return Unique(env), ['--consecutive'] if consecutive else []
 
 
 class UniqueArgsParser(marcel.argsparser.ArgsParser):

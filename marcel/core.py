@@ -45,6 +45,11 @@ class Node(Pipelineable):
     def create_pipeline(self):
         def visit(op):
             assert isinstance(op, Op)
+            # The need to set the owner on the source of the copy is a bit subtle. op might be something that owns
+            # a FunctionWrapper. A FunctionWrapper points to it's op, and error handling requires the op's owner
+            # for error handling. If the owner isn't set prior to the copy, then the copy won't have its
+            # FunctionWrapper's op's owner set.
+            op.set_owner(pipeline)
             pipeline.append(op.copy())
 
         pipeline = Pipeline()
@@ -368,9 +373,10 @@ class PipelineIterator:
         command = Command(None, pipeline)
         try:
             command.execute()
-            self.iterator = output.__iter__()
         except marcel.exception.KillCommandException as e:
             marcel.util.print_to_stderr(e, env)
+        finally:
+            self.iterator = iter(output)
 
     def __next__(self):
         return next(self.iterator)

@@ -30,9 +30,7 @@ Otherwise, ordering is based on the values computed by applying {r:key} to each 
 
 
 def sort(env, key=None):
-    op = Sort(env)
-    op.key = None if key is None else marcel.functionwrapper.FunctionWrapper(function=key)
-    return op
+    return Sort(env), [] if key is None else [key]
 
 
 class SortArgsParser(marcel.argsparser.ArgsParser):

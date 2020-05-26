@@ -89,14 +89,15 @@ tuples:
 '''
 
 
-def window(env, predicate=None, overlap=False, disjoint=None):
-    op = Window(env)
-    op.predicate = (None 
-                    if predicate is None else
-                    marcel.functionwrapper.FunctionWrapper(function=predicate))
-    op.overlap = overlap
-    op.disjoint = disjoint
-    return op
+def window(env, predicate=None, overlap=None, disjoint=None):
+    args = []
+    if overlap is not None:
+        args.extend(['--overlap', overlap])
+    if disjoint is not None:
+        args.extend(['--disjoint', disjoint])
+    if predicate:
+        args.append(predicate)
+    return Window(env), args
 
 
 class WindowArgsParser(marcel.argsparser.ArgsParser):

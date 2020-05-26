@@ -29,9 +29,7 @@ output stream. All other input items will be discarded.
 
 
 def head(env, n):
-    op = Head(env)
-    op.n = n
-    return op
+    return Head(env), [n]
 
 
 class HeadArgsParser(marcel.argsparser.ArgsParser):

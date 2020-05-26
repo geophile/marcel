@@ -364,3 +364,17 @@ Why should the last one work?
 ----------------------------------------------------------------------
 
 Get rid of argparse in main.
+
+----------------------------------------------------------------------
+
+This API test doesn't fail correctly:
+
+    TEST.run(lambda: run(gen(10) | window(disjoint=False)),
+             expected_err='oops')
+
+The disjoint arg specifies convert=int, and int(False) -> 0. Need to
+check arg types.
+
+----------------------------------------------------------------------
+
+ls API: Need to complain if depth is other than 0 or 1

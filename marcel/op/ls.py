@@ -15,6 +15,7 @@
 
 import marcel.argsparser
 import marcel.core
+import marcel.exception
 import marcel.object.error
 import marcel.object.file
 import marcel.op.filenames
@@ -40,15 +41,23 @@ Run {n:help file} for more information on {n:File} objects.
 
 
 def ls(env, *paths, depth=1, recursive=False, file=False, dir=False, symlink=False):
-    op = Ls(env)
-    op.d0 = depth == 0
-    op.d1 = depth == 1
-    op.dr = recursive
-    op.file = file
-    op.dir = dir
-    op.symlink = symlink
-    op.filenames = paths
-    return op
+    args = []
+    if depth == 0:
+        args.append('-0')
+    elif depth == 1:
+        args.append('-1')
+    else:
+        raise marcel.exception.KillCommandException(f'ls: If specified, depth must be 0 or 1: {depth}')
+    if recursive:
+        args.append('-r')
+    if file:
+        args.append('--file')
+    if dir:
+        args.append('--dir')
+    if symlink:
+        args.append('--symlink')
+    args.extend(paths)
+    return Ls(env), args
 
 
 class LsArgsParser(marcel.argsparser.ArgsParser):

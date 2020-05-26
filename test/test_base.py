@@ -202,14 +202,16 @@ class TestAPI(TestBase):
                     print(f'{self.description(test)}: Terminated by unexpected exception: {e}', file=sys.__stdout__)
                     marcel.util.print_stack()
                     self.failures += 1
-            except marcel.exception.KillCommandException as e:
-                print(f'{self.description(test)}: Terminated by KillCommandException: {e}', file=sys.__stderr__)
 
     def run_and_capture_output(self, command):
         out = io.StringIO()
         err = io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-            actual_return = command()
+            try:
+                actual_return = command()
+            except marcel.exception.KillCommandException as e:
+                print(f'{self.description(command)}: Terminated by KillCommandException: {e}', file=sys.stderr)
+                actual_return = None
         actual_stdout = out.getvalue()
         actual_stderr = err.getvalue()
         return actual_stdout, actual_stderr, actual_return

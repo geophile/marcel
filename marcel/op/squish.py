@@ -40,9 +40,7 @@ If no {r:function} is provided, then {n:+} is assumed.
 
 
 def squish(env, function=r_plus):
-    op = Squish(env)
-    op.function = marcel.functionwrapper.FunctionWrapper(function=function)
-    return op
+    return Squish(env), [] if function is None else [function]
 
 
 class SquishArgsParser(marcel.argsparser.ArgsParser):

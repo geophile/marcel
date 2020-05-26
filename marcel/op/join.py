@@ -64,10 +64,9 @@ If the {r:--keep} flag were included, the output would have two additional rows:
 
 
 def join(env, pipeline, keep=False):
-    op = Join(env)
-    op.pipeline = pipeline
-    op.keep = keep
-    return op
+    args = ['--keep'] if keep else []
+    args.append(pipeline)
+    return Join(env), args
 
 
 class JoinArgsParser(marcel.argsparser.ArgsParser):
@@ -118,7 +117,9 @@ class Join(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'The variable {self.pipeline} is not bound to a pipeline')
         pipeline = pipeline.copy()
         pipeline.set_error_handler(self.owner.error_handler)
-        op = self.env().op_modules['map'].api_function()(self.env, load_pipeline_map)
+        op_module = self.env().op_modules['map']
+        op, args = op_module.api_function()(self.env(), load_pipeline_map)
+        op_module.args_parser().parse(args, op)
         pipeline.append(op)
         marcel.core.Command(None, pipeline).execute()
 

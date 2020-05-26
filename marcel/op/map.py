@@ -33,9 +33,7 @@ are bound to the {r:function}'s parameters. The output from the function is writ
 
 
 def map(env, function):
-    op = Map(env)
-    op.function = marcel.functionwrapper.FunctionWrapper(function=function)
-    return op
+    return Map(env), [] if function is None else [function]
 
 
 class MapArgsParser(marcel.argsparser.ArgsParser):

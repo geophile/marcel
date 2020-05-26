@@ -37,12 +37,16 @@ Error objects are not subject to formatting specifications, and are not passed o
 
 
 def out(env, append=None, file=None, csv=False, format=None):
-    op = Out(env)
-    op.append = append
-    op.file = file
-    op.csv = csv
-    op.format = format
-    return op
+    args = []
+    if append:
+        args.extend(['--append', append])
+    if file:
+        args.extend(['--file', file])
+    if csv:
+        args.append('--csv')
+    if format:
+        args.append(format)
+    return Out(env), args
 
 
 class OutArgsParser(marcel.argsparser.ArgsParser):

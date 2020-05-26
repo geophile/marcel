@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+
 def r_plus(acc, x):
     return x if acc is None else acc + x
 
@@ -51,3 +52,8 @@ def r_min(acc, x):
 
 def r_count(acc, x):
     return 1 if acc is None else acc + 1
+
+
+# Should never be called. Used to identify grouping for the red operator.
+def r_group(acc, x):
+    assert False

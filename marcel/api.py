@@ -91,7 +91,8 @@ remote = fork
 # Utilities
 
 def _generate_op(f, *args, **kwargs):
-    op = f(_MAIN.env, *args, **kwargs)
+    op, arglist = f(_MAIN.env, *args, **kwargs)
+    _MAIN.op_modules[op.op_name()].args_parser().parse(arglist, op)
     return op
 
 
@@ -112,15 +113,14 @@ def _prepare_pipeline(x):
 
 def run(x):
     pipeline = _prepare_pipeline(x)
-    pipeline.set_error_handler(_default_error_handler)
     if not isinstance(pipeline.last_op, _Out):
         pipeline.append(out())
+    pipeline.set_error_handler(_default_error_handler)
     _MAIN.run_api(pipeline)
 
 
 def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
     pipeline = _prepare_pipeline(x)
-    pipeline.set_error_handler(_noop_error_handler)
     output = []
     terminal_op = _gather(_MAIN.env,
                           output=output,
@@ -128,13 +128,13 @@ def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
                           errors=errors,
                           error_handler=error_handler)
     pipeline.append(terminal_op)
+    pipeline.set_error_handler(_noop_error_handler)
     _MAIN.run_api(pipeline)
     return output
 
 
 def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     pipeline = _prepare_pipeline(x)
-    pipeline.set_error_handler(_noop_error_handler)
     output = []
     terminal_op = _first(_MAIN.env,
                          output=output,
@@ -142,6 +142,7 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
                          errors=errors,
                          error_handler=error_handler)
     pipeline.append(terminal_op)
+    pipeline.set_error_handler(_noop_error_handler)
     try:
         _MAIN.run_api(pipeline)
     except _exception.StopAfterFirst:

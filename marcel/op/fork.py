@@ -52,10 +52,7 @@ will generate this output:
 def fork(env, host, pipelineable):
     assert isinstance(pipelineable, marcel.core.Pipelineable)
     pipelineable = pipelineable.create_pipeline()
-    op = Fork(env)
-    op.host = host
-    op.pipeline = pipelineable
-    return op
+    return Fork(env), [host, pipelineable]
 
 
 class ForkArgsParser(marcel.argsparser.ArgsParser):

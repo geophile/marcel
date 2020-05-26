@@ -15,7 +15,7 @@
 
 import marcel.argsparser
 import marcel.core
-import marcel.functionwrapper
+import marcel.reduction
 
 SUMMARY = '''
 Reduces tuples from the input stream by repeatedly applying binary functions, such as {r:+}, {r:min}, {r:max}.
@@ -93,14 +93,9 @@ The output stream would be {n:('a', 1, 1), ('a', 2, 3), ('b', 3, 3), ('b', 4, 7)
 
 
 def red(env, *functions, incremental=False):
-    op = Red(env)
-    op.functions = []
-    for function in functions:
-        op.functions.append(marcel.functionwrapper.FunctionWrapper(source='.', globals={})
-                            if function is None else
-                            marcel.functionwrapper.FunctionWrapper(function=function))
-    op.incremental = incremental
-    return op
+    args = ['--incremental'] if incremental else []
+    args.extend([marcel.reduction.r_group if f is None else f for f in functions])
+    return Red(env), args
 
 
 class RedArgsParser(marcel.argsparser.ArgsParser):
@@ -131,7 +126,7 @@ class Red(marcel.core.Op):
         data_positions = []
         for i in range(len(self.functions)):
             function = self.functions[i]
-            if Red.is_grouping(function.source()):
+            if function.is_grouping():
                 grouping_positions.append(i)
                 self.functions[i] = None
             else:
@@ -146,12 +141,6 @@ class Red(marcel.core.Op):
 
     def receive_complete(self):
         self.reducer.receive_complete()
-
-    # For use by this class
-
-    @staticmethod
-    def is_grouping(function):
-        return function == '.'
 
 
 class Reducer:

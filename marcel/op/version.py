@@ -27,7 +27,7 @@ DETAILS = None
 
 
 def version(env):
-    return Version(env)
+    return Version(env), []
 
 
 class VersionArgsParser(marcel.argsparser.ArgsParser):

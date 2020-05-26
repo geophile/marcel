@@ -16,6 +16,7 @@
 
 import marcel.exception
 import marcel.functionwrapper
+import marcel.util
 
 # A marcel op has arguments. An argument is one of:
 #    - An optional flag with no value
@@ -142,12 +143,16 @@ class ArgsParser:
         self.specification_checked = True
 
     # An ArgsParser subclass uses this function as the value of convert, to validate
-    # Python expressions, (parser.Expression).
-    def function(self, source):
-        f = marcel.functionwrapper.FunctionWrapper(source=source, globals=self.env.namespace)
-        f.set_op(self.current_op)
-        f.check_validity()
-        return f
+    # Python expressions, (parser.Expression). x is function source for console usage,
+    # a callable for API usage.
+    def function(self, x):
+        function_wrapper = marcel.functionwrapper.FunctionWrapper
+        fw = (function_wrapper(function=x)
+              if callable(x) else
+              function_wrapper(source=x, globals=self.env.namespace))
+        fw.set_op(self.current_op)
+        fw.check_validity()
+        return fw
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -317,7 +322,8 @@ class ArgsParser:
             if current_flag_arg:
                 raise ArgsError(self.op_name, f'flag {current_flag_arg}: {e}')
             else:
-                raise ArgsError(self.op_name, f'{e}')
+                marcel.util.print_stack()
+                raise ArgsError(self.op_name, f'{type(e)}: {str(e)}')
         return flags, anon, anon_list
 
     # An anon list is permitted only if declared
