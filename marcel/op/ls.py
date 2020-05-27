@@ -49,7 +49,7 @@ def ls(env, *paths, depth=1, recursive=False, file=False, dir=False, symlink=Fal
     else:
         raise marcel.exception.KillCommandException(f'ls: If specified, depth must be 0 or 1: {depth}')
     if recursive:
-        args.append('-r')
+        args.append('--recursive')
     if file:
         args.append('--file')
     if dir:
@@ -66,7 +66,7 @@ class LsArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('ls', env)
         self.add_flag_no_value('d0', '-0', None)
         self.add_flag_no_value('d1', '-1', None)
-        self.add_flag_no_value('dr', '-r', None)
+        self.add_flag_no_value('dr', '-r', '--recursive')
         self.add_flag_no_value('file', '-f', '--file')
         self.add_flag_no_value('dir', '-d', '--dir')
         self.add_flag_no_value('symlink', '-s', '--symlink')
