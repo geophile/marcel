@@ -148,6 +148,9 @@ class Job:
                 writer.send(dir_vars)
             except marcel.exception.KillCommandException as e:
                 marcel.util.print_to_stderr(e, self.env)
+            except marcel.exception.KillAndResumeException as e:
+                # Error handler printed the error
+                pass
             writer.close()
 
         # duplex=False: child writes to parent when function completes execution. No need to communicate in the

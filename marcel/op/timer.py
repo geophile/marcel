@@ -129,10 +129,10 @@ class Timer(marcel.core.Op):
     @staticmethod
     def parse_interval(interval):
         try:
-            colon1 = interval.find_flag(':')
+            colon1 = interval.find(':')
             colon2 = -1
             if colon1 > 0:
-                colon2 = interval.find_flag(':', colon1 + 1)
+                colon2 = interval.find(':', colon1 + 1)
             # Normalize
             if colon1 < 0:
                 # No colons

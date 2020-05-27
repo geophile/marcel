@@ -236,13 +236,14 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('gen 5 | map (x: (x, x*10)) | sort (x: -x)')
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
 
 
