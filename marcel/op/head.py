@@ -36,7 +36,7 @@ class HeadArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('head', env)
-        self.add_anon('n', convert=int)
+        self.add_anon('n', input_type=[str, int], convert=int)
         self.validate()
 
 

@@ -47,19 +47,30 @@ class ArgsError(marcel.exception.KillCommandException):
 
 class Arg:
 
-    def __init__(self, name, convert):
+    def __init__(self, op_name, name, input_type, convert):
         assert name is not None
+        self.op_name = op_name
         self.name = name
+        self.input_type = input_type if type(input_type) in (list, tuple) else [input_type]
         self.convert = (lambda x: x) if convert is None else convert
 
     def __repr__(self):
         return self.name
 
+    def check_type(self, arg):
+        if type(arg) not in self.input_type:
+            if len(self.input_type) == 1:
+                raise ArgsError(self.op_name, f'Type of {self.name} argument is {type(arg)}, '
+                                              f'must be {self.input_type[0]}')
+            else:
+                raise ArgsError(self.op_name, f'Type of {self.name} argument is {type(arg)}, '
+                                              f'must be one of {self.input_type}')
+
 
 class Flag(Arg):
 
-    def __init__(self, name, convert, short, long, value):
-        super().__init__(name, convert)
+    def __init__(self, op_name, name, input_type, convert, short, long, value):
+        super().__init__(op_name, name, input_type, convert)
         assert short is not None or long is not None
         assert short is None or len(short) == 2 and short[0] == '-' and short[1] != '-'
         assert long is None or len(long) >= 3 and long[:2] == '--' and long[2] != '-'
@@ -82,15 +93,15 @@ class Flag(Arg):
 
 class Anon(Arg):
 
-    def __init__(self, name, convert, default):
-        super().__init__(name, convert)
+    def __init__(self, op_name, name, input_type, convert, default):
+        super().__init__(op_name, name, input_type, convert)
         self.default = default
 
 
 class AnonList(Arg):
 
-    def __init__(self, name, convert):
-        super().__init__(name, convert)
+    def __init__(self, op_name, name, input_type, convert):
+        super().__init__(op_name, name, input_type, convert)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -109,24 +120,24 @@ class ArgsParser:
         self.anon_list_arg = None
         self.at_most_one_names = []
         self.exactly_one_names = []
-        self.specification_checked = False
+        self.validated = False
         # A hack to sneak the op currently being validated to function()
         self.current_op = None
 
     def add_flag_no_value(self, name, short, long):
-        self.flag_args.append(Flag(name, None, short, long, VALUE_NONE))
+        self.flag_args.append(Flag(self.op_name, name, None, None, short, long, VALUE_NONE))
 
-    def add_flag_one_value(self, name, short, long, convert=None):
-        self.flag_args.append(Flag(name, convert, short, long, VALUE_ONE))
+    def add_flag_one_value(self, name, short, long, input_type, convert=None):
+        self.flag_args.append(Flag(self.op_name, name, input_type, convert, short, long, VALUE_ONE))
 
-    def add_flag_optional_value(self, name, short, long, convert=None):
-        self.flag_args.append(Flag(name, convert, short, long, VALUE_OPTIONAL))
+    def add_flag_optional_value(self, name, short, long, input_type, convert=None):
+        self.flag_args.append(Flag(self.op_name, name, input_type, convert, short, long, VALUE_OPTIONAL))
 
-    def add_anon(self, name, default=NO_DEFAULT, convert=None):
-        self.anon_args.append(Anon(name, convert, default))
+    def add_anon(self, name, input_type, convert=None, default=NO_DEFAULT):
+        self.anon_args.append(Anon(self.op_name, name, input_type, convert, default))
 
-    def add_anon_list(self, name, convert=None):
-        self.anon_list_arg = AnonList(name, convert)
+    def add_anon_list(self, name, input_type, convert=None):
+        self.anon_list_arg = AnonList(self.op_name, name, input_type, convert)
 
     def at_most_one(self, *names):
         self.at_most_one_names.append(self.name_set(names))
@@ -140,26 +151,25 @@ class ArgsParser:
         self.check_no_ambiguous_args()
         self.check_anon_order()
         self.check_anon_list_terminal()
-        self.specification_checked = True
+        self.validated = True
 
     # An ArgsParser subclass uses this function as the value of convert, to validate
     # Python expressions, (parser.Expression). x is function source for console usage,
     # a callable for API usage.
     def function(self, x):
         function_wrapper = marcel.functionwrapper.FunctionWrapper
-        fw = (function_wrapper(function=x)
-              if callable(x) else
-              function_wrapper(source=x, globals=self.env.namespace))
-        fw.set_op(self.current_op)
-        fw.check_validity()
-        return fw
+        f = (function_wrapper(function=x) if callable(x) else
+             function_wrapper(source=x, globals=self.env.namespace))
+        f.set_op(self.current_op)
+        f.check_validity()
+        return f
 
     # ------------------------------------------------------------------------------------------------------------------
 
     # Parsing
 
     def parse(self, args, op):
-        assert self.specification_checked
+        assert self.validated
         self.current_op = op
         flags, anon, anon_list = self.extract_flags_and_anon(args)
         # Compute the set of names for supplied args
@@ -304,16 +314,19 @@ class ArgsParser:
                             if len(anon) >= len(self.anon_args):
                                 # Anon list
                                 if self.anon_list_arg:
+                                    self.anon_list_arg.check_type(arg)
                                     anon_list.append(self.anon_list_arg.convert(arg))
                                 else:
                                     raise ArgsError(self.op_name, f'Too many anonymous args.')
                             else:
                                 # Anon
                                 anon_arg = self.anon_args[len(anon)]
+                                anon_arg.check_type(arg)
                                 anon[anon_arg.name] = anon_arg.convert(arg)
                             flag_ok = False
                         else:
                             # Flag value
+                            current_flag_arg.check_type(arg)
                             flags[current_flag_arg.name] = current_flag_arg.convert(arg)
                             current_flag_arg = None
         except StopIteration:
@@ -322,7 +335,6 @@ class ArgsParser:
             if current_flag_arg:
                 raise ArgsError(self.op_name, f'flag {current_flag_arg}: {e}')
             else:
-                marcel.util.print_stack()
                 raise ArgsError(self.op_name, f'{type(e)}: {str(e)}')
         return flags, anon, anon_list
 

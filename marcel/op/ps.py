@@ -58,10 +58,10 @@ class PsArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('ps', env)
-        self.add_flag_optional_value('user', '-u', '--user')
-        self.add_flag_optional_value('group', '-g', '--group')
-        self.add_flag_optional_value('pid', '-p', '--pid')
-        self.add_flag_optional_value('command', '-c', '--command')
+        self.add_flag_optional_value('user', '-u', '--user', input_type=str)
+        self.add_flag_optional_value('group', '-g', '--group', input_type=str)
+        self.add_flag_optional_value('pid', '-p', '--pid', input_type=str)
+        self.add_flag_optional_value('command', '-c', '--command', input_type=str)
         self.exactly_one('user', 'group', 'pid', 'command')
         self.validate()
 

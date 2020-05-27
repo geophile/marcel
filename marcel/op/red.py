@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import types
+
 import marcel.argsparser
 import marcel.core
 import marcel.reduction
@@ -103,7 +105,7 @@ class RedArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('red', env)
         self.add_flag_no_value('incremental', '-i', '--incremental')
-        self.add_anon_list('functions', convert=self.function)
+        self.add_anon_list('functions', input_type=[str, types.FunctionType], convert=self.function)
         self.validate()
 
 

@@ -43,7 +43,7 @@ class EditArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('edit', env)
-        self.add_anon('n', default=None, convert=int)
+        self.add_anon('n', convert=int, default=None)
         self.validate()
 
 

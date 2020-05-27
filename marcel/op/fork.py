@@ -59,8 +59,8 @@ class ForkArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('fork', env)
-        self.add_anon('host')
-        self.add_anon('pipeline')
+        self.add_anon('host', input_type=[str, int])
+        self.add_anon('pipeline', input_type=marcel.core.Pipeline)
         self.validate()
 
 
@@ -170,7 +170,7 @@ class Remote(ForkImplementation):
         super().setup_1()
         op = self.op
         remote_pipeline = marcel.core.Pipeline()
-        remote_pipeline.append(marcel.op.remote.remote(self.op.env(), None, op.pipeline))
+        remote_pipeline.append(self.remote_op())
         remote_pipeline.append(marcel.op.labelthread.LabelThread(self.op.env()))
         op.pipeline = remote_pipeline
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
@@ -207,6 +207,14 @@ class Remote(ForkImplementation):
             op.thread_labels = [host for host in cluster.hosts]
         else:
             raise marcel.exception.KillCommandException(f'Invalid fork spec @{op.host}')
+
+    # For use by this class
+
+    def remote_op(self):
+        op_module = self.op.env().op_modules['remote']
+        op, args = op_module.api_function()(self.op.env(), self.op.pipeline)
+        op_module.args_parser().parse(args, op)
+        return op
 
 
 class Local(ForkImplementation):

@@ -42,7 +42,8 @@ class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('sudo', env)
-        self.add_anon_list('args')
+        # This isn't really accurate. The last arg must be a pipeline. The preceding ones must be str.
+        self.add_anon_list('args', input_type=[str, marcel.core.Pipeline])
         self.validate()
 
 

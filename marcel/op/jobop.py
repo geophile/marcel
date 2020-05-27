@@ -23,9 +23,9 @@ class JobOpArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, op_name, env):
         super().__init__(op_name, env)
-        self.add_flag_one_value('jid', '-j', '--job', convert=int)
-        self.add_flag_one_value('pid', '-p', '--process', convert=int)
-        self.add_anon('job_id', convert=int)
+        self.add_flag_one_value('jid', '-j', '--job', input_type=str, convert=int)
+        self.add_flag_one_value('pid', '-p', '--process', input_type=str, convert=int)
+        self.add_anon('job_id', input_type=str, convert=int)
         self.exactly_one('jid', 'pid', 'job_id')
         self.validate()
 

@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 import marcel.exception
 
@@ -59,10 +60,18 @@ Notes:
 
 
 def timer(env, interval, components=False):
-    op = Timer(env)
-    op.interval = str(interval)
-    op.components = components
-    return op
+    args = ['--components'] if components else []
+    args.append(interval)
+    return Timer(env), args
+
+
+class TimerArgsParser(marcel.argsparser.ArgsParser):
+
+    def __init__(self, env):
+        super().__init__('timer', env)
+        self.add_flag_no_value('components', '-c', '--components')
+        self.add_anon('interval', input_type=str)
+        self.validate()
 
 
 class Timer(marcel.core.Op):

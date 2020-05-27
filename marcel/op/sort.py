@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import types
+
 import marcel.argsparser
 import marcel.core
 import marcel.functionwrapper
@@ -37,7 +39,7 @@ class SortArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('sort', env)
-        self.add_anon('key', default=None, convert=self.function)
+        self.add_anon('key', input_type=[str, types.FunctionType], convert=self.function, default=None)
         self.validate()
 
 

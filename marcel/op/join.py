@@ -64,8 +64,9 @@ If the {r:--keep} flag were included, the output would have two additional rows:
 
 
 def join(env, pipeline, keep=False):
+    assert isinstance(pipeline, marcel.core.Pipelineable)
     args = ['--keep'] if keep else []
-    args.append(pipeline)
+    args.append(pipeline.create_pipeline())
     return Join(env), args
 
 
@@ -74,7 +75,8 @@ class JoinArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('join', env)
         self.add_flag_no_value('keep', '-k', '--keep')
-        self.add_anon('pipeline')
+        # str: To accommodate var names
+        self.add_anon('pipeline', input_type=[str, marcel.core.Pipeline])
         self.validate()
 
 

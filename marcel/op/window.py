@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import types
+
 import marcel.argsparser
 import marcel.core
 import marcel.exception
@@ -104,9 +106,9 @@ class WindowArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('window', env)
-        self.add_flag_one_value('overlap', '-o', '--overlap', convert=int)
-        self.add_flag_one_value('disjoint', '-d', '--disjoint', convert=int)
-        self.add_anon('predicate', default=None, convert=self.function)
+        self.add_flag_one_value('overlap', '-o', '--overlap', input_type=[str, int], convert=int)
+        self.add_flag_one_value('disjoint', '-d', '--disjoint', input_type=[str, int], convert=int)
+        self.add_anon('predicate', input_type=[str, types.FunctionType], convert=self.function, default=None)
         self.exactly_one('overlap', 'disjoint', 'predicate')
         self.validate()
 

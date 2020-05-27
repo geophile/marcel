@@ -91,8 +91,6 @@ class FunctionWrapper:
             self._function = FunctionWrapper.symbols.get(self._source, None)
             if self._function is None:
                 if self._source is not None:
-                    if type(self._source) is not str:
-                        raise marcel.exception.KillCommandException(f'Function source must be a string: {self._source}')
                     self._source = self._source.strip()
                     if self._source.split()[0] in ('lambda', 'lambda:'):
                         self._function = eval(self._source, self._globals)

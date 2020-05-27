@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import types
+
 import marcel.argsparser
 import marcel.core
-import marcel.exception
-import marcel.functionwrapper
 
 
 SUMMARY = '''
@@ -38,7 +38,7 @@ class SelectArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('select', env)
-        self.add_anon('function', convert=self.function)
+        self.add_anon('function', input_type=[str, types.FunctionType], convert=self.function)
         self.validate()
 
 

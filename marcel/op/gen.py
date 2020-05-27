@@ -42,9 +42,9 @@ class GenArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('gen', env)
-        self.add_flag_one_value('pad', '-p', '--pad', convert=int)
-        self.add_anon('count', default=0, convert=int)
-        self.add_anon('start', default=0, convert=int)
+        self.add_flag_one_value('pad', '-p', '--pad', input_type=[str, int], convert=int)
+        self.add_anon('count', input_type=[str, int], convert=int, default=0)
+        self.add_anon('start', input_type=[str, int], convert=int, default=0)
         self.validate()
 
 

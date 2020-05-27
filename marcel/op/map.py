@@ -13,11 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import types
+
 import marcel.argsparser
 import marcel.core
-import marcel.exception
-import marcel.object.error
-import marcel.functionwrapper
 import marcel.util
 
 
@@ -40,7 +39,7 @@ class MapArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('map', env)
-        self.add_anon('function', convert=self.function)
+        self.add_anon('function', input_type=[str, types.FunctionType], convert=self.function)
         self.validate()
 
 

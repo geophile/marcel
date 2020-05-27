@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import functools
+import types
 
 import marcel.argsparser
 import marcel.core
@@ -47,7 +48,7 @@ class SquishArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('squish', env)
-        self.add_anon('function', default=None, convert=self.function)
+        self.add_anon('function', input_type=[str, types.FunctionType], convert=self.function, default=None)
         self.validate()
 
 

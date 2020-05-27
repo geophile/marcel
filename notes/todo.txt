@@ -378,3 +378,24 @@ check arg types.
 ----------------------------------------------------------------------
 
 ls API: Need to complain if depth is other than 0 or 1
+
+----------------------------------------------------------------------
+
+Revise op help. Without argparse, automatic generation of command line
+and arg docs is gone.
+
+----------------------------------------------------------------------
+
+Revise README.
+
+----------------------------------------------------------------------
+
+Exhaustive type error testing in API?
+
+----------------------------------------------------------------------
+
+Different input_types for console and API
+
+----------------------------------------------------------------------
+
+OpModule can probably be simplified.

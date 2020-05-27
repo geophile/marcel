@@ -40,7 +40,7 @@ class RunArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('run', env)
-        self.add_anon('n', default=None, convert=int)
+        self.add_anon('n', convert=int, default=None)
 
 
 class Run(marcel.core.Op):

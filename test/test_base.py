@@ -185,11 +185,17 @@ class TestAPI(TestBase):
                 if file:
                     actual_out = self.file_contents(file)
                 if expected_out is not None:
-                    self.check_ok(test, self.to_string(expected_out), actual_out)
+                    if len(actual_err) > 0:
+                        print(f'Unexpected error output: {actual_err}')
+                    else:
+                        self.check_ok(test, self.to_string(expected_out), actual_out)
                 if expected_err is not None:
                     self.check_substring(test, expected_err, actual_err)
                 if expected_return is not None:
-                    self.check_eq(test, expected_return, actual_return)
+                    if len(actual_err) > 0:
+                        print(f'Unexpected error output: {actual_err}')
+                    else:
+                        self.check_eq(test, expected_return, actual_return)
                 assert (expected_errors is None) == (actual_errors is None)
                 if expected_errors is not None:
                     self.check_eq(test, expected_errors, actual_errors)

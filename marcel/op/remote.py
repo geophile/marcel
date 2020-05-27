@@ -18,18 +18,23 @@ import dill
 import subprocess
 import sys
 
+import marcel.argsparser
 import marcel.core
 import marcel.object.error
 
 
-def remote(env, host, pipeline):
-    if isinstance(pipeline, marcel.core.Pipelineable):
-        # Could be an Op, Pipeline, or Node
-        pipeline = pipeline.create_pipeline()
-    op = Remote(env)
-    op.set_host(host)
-    op.pipeline = pipeline
-    return op
+def remote(env, pipeline):
+    assert isinstance(pipeline, marcel.core.Pipelineable)
+    pipeline = pipeline.create_pipeline()
+    return Remote(env), [pipeline]
+
+
+class RemoteArgsParser(marcel.argsparser.ArgsParser):
+
+    def __init__(self, env):
+        super().__init__('remote', env)
+        self.add_anon('pipeline', input_type=marcel.core.Pipeline)
+        self.validate()
 
 
 class Remote(marcel.core.Op):

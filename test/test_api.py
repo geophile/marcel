@@ -34,6 +34,14 @@ def test_gen():
              expected_err='Padding incompatible with start < 0')
     TEST.run(test=lambda: run(gen(3, -1) | map(lambda x: 5 / x)),
              expected_out=[-5.0, Error('division by zero'), 5.0])
+    # Bad types
+    TEST.run(test=lambda: run(gen(True)),
+             expected_err='Type of count argument')
+    # str is OK, but it had better look like an int
+    TEST.run(test=lambda: run(gen('5')),
+             expected_out=[0, 1, 2, 3, 4])
+    TEST.run(test=lambda: run(gen('abc')),
+             expected_err='invalid literal')
 
 
 def test_out():
@@ -68,6 +76,9 @@ def test_sort():
              expected_out=[4, 3, 2, 1, 0])
     TEST.run(test=lambda: run(gen(5) | map(lambda x: (-x, x)) | sort()),
              expected_out=[(-4, 4), (-3, 3), (-2, 2), (-1, 1), (0, 0)])
+    # Bad types
+    TEST.run(test=lambda: run(gen(5) | map(lambda x: (-x, x)) | sort(123)),
+             expected_err='Type of key argument')
 
 
 def test_map():
@@ -76,7 +87,7 @@ def test_map():
     TEST.run(test=lambda: run(gen(5) | map(None)),
              expected_err='No value specified for function')
     TEST.run(test=lambda: run(gen(5) | map(True)),
-             expected_err='Function source must be a string')
+             expected_err='Type of function argument')
 
 
 def test_select():
@@ -86,8 +97,11 @@ def test_select():
              expected_out=[])
     TEST.run(lambda: run(gen(5) | select(lambda x: x % 2 == 1)),
              expected_out=[1, 3])
+    # Negative tests
     TEST.run(lambda: run(gen(5) | select(None)),
              expected_err='No value specified for function')
+    TEST.run(lambda: run(gen(5) | select(5.6)),
+             expected_err='Type of function argument')
 
 
 def test_red():
@@ -343,7 +357,7 @@ def test_window():
     TEST.run(lambda: run(gen(10) | window(overlap='abc')),
              expected_err='invalid literal')
     TEST.run(lambda: run(gen(10) | window(disjoint=[])),
-             expected_err='int() argument')
+             expected_err='Type of disjoint argument')
 
 
 def test_bash():
