@@ -77,8 +77,14 @@ class JoinArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('join', env)
         self.add_flag_no_value('keep', '-k', '--keep')
         # str: To accommodate var names
-        self.add_anon('pipeline', input_type=[str, marcel.core.Pipeline])
+        self.add_anon('pipeline', convert=self.check_str_or_pipeline)
         self.validate()
+
+    def check_str_or_pipeline(self, arg, x):
+        if type(x) not in (str, marcel.core.Pipeline):
+            raise marcel.argsparser.ArgsError(self.op_name,
+                                              f'{arg.name} argument must be a Pipeline: {x}')
+        return x
 
 
 class Join(marcel.core.Op):

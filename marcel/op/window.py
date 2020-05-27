@@ -106,9 +106,9 @@ class WindowArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('window', env)
-        self.add_flag_one_value('overlap', '-o', '--overlap', input_type=[str, int], convert=int)
-        self.add_flag_one_value('disjoint', '-d', '--disjoint', input_type=[str, int], convert=int)
-        self.add_anon('predicate', input_type=[str, types.FunctionType], convert=self.function, default=None)
+        self.add_flag_one_value('overlap', '-o', '--overlap', convert=self.str_to_int)
+        self.add_flag_one_value('disjoint', '-d', '--disjoint', convert=self.str_to_int)
+        self.add_anon('predicate', convert=self.function, default=None)
         self.exactly_one('overlap', 'disjoint', 'predicate')
         self.validate()
 

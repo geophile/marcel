@@ -70,7 +70,7 @@ class TimerArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('timer', env)
         self.add_flag_no_value('components', '-c', '--components')
-        self.add_anon('interval', input_type=str)
+        self.add_anon('interval', convert=self.check_str)
         self.validate()
 
 

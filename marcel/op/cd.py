@@ -37,7 +37,7 @@ class CdArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('cd', env)
-        self.add_anon('directory', input_type=str, default='~')
+        self.add_anon('directory', convert=self.check_str, default='~')
         self.validate()
 
 

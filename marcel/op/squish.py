@@ -48,7 +48,7 @@ class SquishArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('squish', env)
-        self.add_anon('function', input_type=[str, types.FunctionType], convert=self.function, default=None)
+        self.add_anon('function', convert=self.function, default=None)
         self.validate()
 
 

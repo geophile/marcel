@@ -39,7 +39,7 @@ class MapArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('map', env)
-        self.add_anon('function', input_type=[str, types.FunctionType], convert=self.function)
+        self.add_anon('function', convert=self.function)
         self.validate()
 
 

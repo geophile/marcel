@@ -45,7 +45,7 @@ class BashArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('bash', env)
         self.add_flag_no_value('interactive', '-i', '--interactive')
-        self.add_anon_list('args', input_type=str)
+        self.add_anon_list('args', convert=self.check_str)
         self.validate()
 
 

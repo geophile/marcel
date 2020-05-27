@@ -391,11 +391,3 @@ Revise README.
 ----------------------------------------------------------------------
 
 Exhaustive type error testing in API?
-
-----------------------------------------------------------------------
-
-Different input_types for console and API
-
-----------------------------------------------------------------------
-
-OpModule can probably be simplified.

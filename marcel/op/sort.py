@@ -39,7 +39,7 @@ class SortArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('sort', env)
-        self.add_anon('key', input_type=[str, types.FunctionType], convert=self.function, default=None)
+        self.add_anon('key', convert=self.function, default=None)
         self.validate()
 
 

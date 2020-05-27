@@ -75,7 +75,7 @@ class ExpandArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('expand', env)
-        self.add_anon('position', input_type=[str, int], convert=int, default=None)
+        self.add_anon('position', convert=self.str_to_int, default=None)
         self.validate()
 
 

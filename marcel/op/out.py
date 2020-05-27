@@ -53,10 +53,10 @@ class OutArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('out', env)
-        self.add_flag_one_value('append', '-a', '--append', input_type=str)
-        self.add_flag_one_value('file', '-f', '--file', input_type=str)
+        self.add_flag_one_value('append', '-a', '--append', convert=self.check_str)
+        self.add_flag_one_value('file', '-f', '--file', convert=self.check_str)
         self.add_flag_no_value('csv', '-c', '--csv')
-        self.add_anon('format', input_type=str, default=None)
+        self.add_anon('format', default=None, convert=self.check_str)
         self.at_most_one('csv', 'format')
         self.at_most_one('file', 'append')
         self.validate()

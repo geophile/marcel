@@ -59,8 +59,8 @@ class ForkArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('fork', env)
-        self.add_anon('host', input_type=[str, int])
-        self.add_anon('pipeline', input_type=marcel.core.Pipeline)
+        self.add_anon('host', convert=self.fork_spec)
+        self.add_anon('pipeline', convert=self.check_pipeline)
         self.validate()
 
 

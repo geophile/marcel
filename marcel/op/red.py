@@ -105,7 +105,7 @@ class RedArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('red', env)
         self.add_flag_no_value('incremental', '-i', '--incremental')
-        self.add_anon_list('functions', input_type=[str, types.FunctionType], convert=self.function)
+        self.add_anon_list('functions', convert=self.function)
         self.validate()
 
 

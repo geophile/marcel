@@ -36,7 +36,7 @@ class TailArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('tail', env)
-        self.add_anon('n', input_type=[str, int], convert=int)
+        self.add_anon('n', convert=self.str_to_int)
         self.validate()
 
 

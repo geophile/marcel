@@ -70,7 +70,7 @@ class LsArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_no_value('file', '-f', '--file')
         self.add_flag_no_value('dir', '-d', '--dir')
         self.add_flag_no_value('symlink', '-s', '--symlink')
-        self.add_anon_list('filenames', input_type=str)
+        self.add_anon_list('filenames', convert=self.check_str)
         self.at_most_one('d0', 'd1', 'dr')
         self.validate()
 

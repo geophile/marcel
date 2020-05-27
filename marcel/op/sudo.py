@@ -42,9 +42,15 @@ class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('sudo', env)
-        # This isn't really accurate. The last arg must be a pipeline. The preceding ones must be str.
-        self.add_anon_list('args', input_type=[str, marcel.core.Pipeline])
+        self.add_anon_list('args', convert=self.check_str_and_pipeline)
         self.validate()
+
+    def check_str_and_pipeline(self, arg, x):
+        # This isn't really accurate. The last arg must be a pipeline. The preceding ones must be str.
+        if type(x) not in (str, marcel.core.Pipeline):
+            raise marcel.argsparser.ArgsError(self.op_name,
+                                              f'Arguments must be strings (flags to sudo) followed by a pipeline: {x}')
+        return x
 
 
 class Sudo(marcel.core.Op):
