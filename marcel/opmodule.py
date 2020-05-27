@@ -76,3 +76,10 @@ def import_op_modules(env):
         op_modules[op_name] = OpModule(op_name, env)
     env.op_modules = op_modules
     return op_modules
+
+
+def create_op(env, op_name, *op_args):
+    op_module = env.op_modules[op_name]
+    op, args = op_module.api_function()(env, *op_args)
+    op_module.args_parser().parse(args, op)
+    return op

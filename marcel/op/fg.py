@@ -26,10 +26,6 @@ The new foreground job is resumed if necessary.
 '''
 
 
-def fg(env):
-    return Fg(env)
-
-
 class FgArgsValidator(marcel.op.jobop.JobOpArgsParser):
 
     def __init__(self, env):

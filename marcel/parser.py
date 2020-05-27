@@ -686,9 +686,7 @@ class Parser:
         op = None
         name = op_token.value()
         if marcel.util.is_executable(name):
-            op_module = self.op_modules['bash']
-            op = op_module.create_op()
-            op_module.args_parser().parse([name] + args, op)
+            op = marcel.opmodule.create_op(self.env, 'bash', *([name] + args))
         return op
 
     def create_assignment(self, var, string=None, pipeline=None, source=None):
@@ -708,11 +706,7 @@ class Parser:
 
     def create_map(self, expr):
         assert type(expr) is Expression
-        op_module = self.op_modules['map']
-        assert op_module is not None
-        op = op_module.create_op()
-        op_module.args_parser().parse([expr.value()], op)
-        return op
+        return marcel.opmodule.create_op(self.env, 'map', expr.value())
 
     @staticmethod
     def ensure_sequence(x):

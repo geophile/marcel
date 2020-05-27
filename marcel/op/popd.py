@@ -26,7 +26,7 @@ DETAILS = None
 
 
 def popd(env):
-    return Popd(env)
+    return Popd(env), []
 
 
 class PopdArgsParser(marcel.argsparser.ArgsParser):

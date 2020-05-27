@@ -26,7 +26,7 @@ DETAILS = None
 
 
 def pwd(env):
-    return Pwd(env)
+    return Pwd(env), []
 
 
 class PwdArgsParser(marcel.argsparser.ArgsParser):

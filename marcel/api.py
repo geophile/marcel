@@ -13,12 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import sys as _sys
-
 import marcel.core as _core
 import marcel.exception as _exception
 import marcel.main as _main
-import marcel.object.color as _color
 import marcel.object.error as _error
 
 from marcel.op.bash import bash as _bash

@@ -30,7 +30,7 @@ from output.
 
 
 def env(env):
-    return Env(env)
+    return Env(env), []
 
 
 class EnvArgsParser(marcel.argsparser.ArgsParser):

@@ -2,7 +2,6 @@ import os
 import pathlib
 import shutil
 
-import marcel.main
 import marcel.object.error
 
 import test_base

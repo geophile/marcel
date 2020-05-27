@@ -32,9 +32,7 @@ and the current directory is changed to the new top directory on the stack.
 
 
 def pushd(env, directory=None):
-    op = Pushd(env)
-    op.directory = directory
-    return op
+    return Pushd(env), [] if directory is None else [directory]
 
 
 class PushdArgsParser(marcel.argsparser.ArgsParser):

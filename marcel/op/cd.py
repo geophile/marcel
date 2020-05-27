@@ -30,9 +30,7 @@ If {r:directory} is omitted, then change the current directory to the home direc
 
 
 def cd(env, directory=None):
-    op = Cd(env)
-    op.directory = directory
-    return op
+    return Cd(env), [] if directory is None else [directory]
 
 
 class CdArgsParser(marcel.argsparser.ArgsParser):

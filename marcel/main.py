@@ -129,9 +129,7 @@ class Main:
                 pipeline.set_error_handler(Main.default_error_handler)
                 # Append an out op at the end of pipeline, if there is no output op there already.
                 if not pipeline.is_terminal_op('out'):
-                    out = self.op_modules['out'].create_op()
-                    out.args = []
-                    pipeline.append(out)
+                    pipeline.append(marcel.opmodule.create_op(self.env, 'out'))
                 command = marcel.core.Command(line, pipeline)
                 if self.run_immediate(pipeline):
                     command.execute()

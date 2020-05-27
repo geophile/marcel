@@ -18,9 +18,9 @@ import threading
 import marcel.argsparser
 import marcel.core
 import marcel.exception
+import marcel.opmodule
 import marcel.op.labelthread
 import marcel.op.remote
-
 
 SUMMARY = '''
 Run multiple copies of a pipeline, concurrently, usually on remote hosts.
@@ -170,7 +170,7 @@ class Remote(ForkImplementation):
         super().setup_1()
         op = self.op
         remote_pipeline = marcel.core.Pipeline()
-        remote_pipeline.append(self.remote_op())
+        remote_pipeline.append(marcel.opmodule.create_op(self.op.env(), 'remote', self.op.pipeline))
         remote_pipeline.append(marcel.op.labelthread.LabelThread(self.op.env()))
         op.pipeline = remote_pipeline
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
@@ -207,14 +207,6 @@ class Remote(ForkImplementation):
             op.thread_labels = [host for host in cluster.hosts]
         else:
             raise marcel.exception.KillCommandException(f'Invalid fork spec @{op.host}')
-
-    # For use by this class
-
-    def remote_op(self):
-        op_module = self.op.env().op_modules['remote']
-        op, args = op_module.api_function()(self.op.env(), self.op.pipeline)
-        op_module.args_parser().parse(args, op)
-        return op
 
 
 class Local(ForkImplementation):

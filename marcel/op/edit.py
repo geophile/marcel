@@ -35,8 +35,8 @@ will be on the command line. (Hit enter to run the command, as usual.)
 '''
 
 
-def edit(env):
-    return Edit(env)
+def edit(env, n=None):
+    return Edit(env), [] if n is None else [n]
 
 
 class EditArgsParser(marcel.argsparser.ArgsParser):

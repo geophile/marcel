@@ -16,6 +16,7 @@
 import marcel.argsparser
 import marcel.core
 import marcel.exception
+import marcel.opmodule
 import marcel.object.error
 import marcel.util
 
@@ -117,10 +118,7 @@ class Join(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'The variable {self.pipeline} is not bound to a pipeline')
         pipeline = pipeline.copy()
         pipeline.set_error_handler(self.owner.error_handler)
-        op_module = self.env().op_modules['map']
-        op, args = op_module.api_function()(self.env(), load_pipeline_map)
-        op_module.args_parser().parse(args, op)
-        pipeline.append(op)
+        pipeline.append(marcel.opmodule.create_op(self.env(), 'map', load_pipeline_map))
         marcel.core.Command(None, pipeline).execute()
 
     def receive(self, x):

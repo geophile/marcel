@@ -29,10 +29,6 @@ Resume execution of the selected job, and leave it running in the background.
 '''
 
 
-def bg(env):
-    return Bg(env)
-
-
 class BgArgsValidator(marcel.op.jobop.JobOpArgsParser):
 
     def __init__(self, env):

@@ -19,6 +19,7 @@ import io
 
 import marcel.argsparser
 import marcel.core
+import marcel.exception
 import marcel.helpformatter
 import marcel.util
 
