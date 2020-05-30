@@ -140,6 +140,7 @@ class Window(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
+        self.eval_functions('overlap', 'disjoint')
         if self.predicate:
             try:
                 self.predicate.check_validity()

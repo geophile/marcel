@@ -195,6 +195,23 @@ def test_ls():
                            Error('Permission denied'),
                            'd4',
                            'd4/f4'])
+    # Flag-valued args
+    TEST.run('TEST = test')
+    TEST.run('ls -r /tmp/(TEST) | map (f: f.render_compact())',
+             expected_out=sorted(['.',
+                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                  'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
+                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
+                                  ]))
+    TEST.run('TMP = TMP')
+    TEST.run('ls -r /(TMP.lower())/(TEST) | map (f: f.render_compact())',
+             expected_out=sorted(['.',
+                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                  'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
+                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
+                                  ]))
 
 
 # pushd, popd, dirs

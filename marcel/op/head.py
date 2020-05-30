@@ -53,6 +53,7 @@ class Head(marcel.core.Op):
     # BaseOp
     
     def setup_1(self):
+        self.eval_functions('n')
         self.received = 0
 
     def receive(self, x):

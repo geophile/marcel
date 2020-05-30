@@ -25,7 +25,7 @@ class Assign(marcel.core.Op):
         self.var = None
         self.string = None
         self.pipeline = None
-        self.source = None
+        self.function = None
         self.value = None
 
     def __repr__(self):
@@ -41,8 +41,8 @@ class Assign(marcel.core.Op):
         if self.pipeline is not None:
             self.value = self.pipeline
             count += 1
-        if self.source is not None:
-            function = marcel.functionwrapper.FunctionWrapper(source=self.source, globals=self.env().vars())
+        if self.function is not None:
+            function = marcel.functionwrapper.FunctionWrapper(function=self.function)
             function.check_validity()
             function.set_op(self)
             self.value = function()

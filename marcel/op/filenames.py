@@ -15,10 +15,10 @@
 
 import os
 import pathlib
-import shutil
 
 import marcel.core
 import marcel.exception
+import marcel.functionwrapper
 import marcel.object.file
 
 
@@ -33,6 +33,7 @@ class FilenamesOp(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
+        self.eval_functions('filenames')
         self.roots = []
         self.current_dir = self.env().dir_state().pwd()
         self.roots = FilenamesOp.deglob(self.current_dir, self.filenames)

@@ -17,6 +17,7 @@ from enum import Enum, auto
 
 import marcel.core
 import marcel.exception
+import marcel.functionwrapper
 import marcel.opmodule
 import marcel.util
 
@@ -38,7 +39,7 @@ class UnexpectedTokenError(marcel.exception.KillCommandException):
         if self.token is None:
             return f'Premature end of input: {self.message}'
         else:
-            token_start = self.token.position
+            token_start = self.token.start
             token_text = self.token.text
             snippet_start = max(token_start - UnexpectedTokenError.SNIPPET_SIZE, 0)
             snippet_end = max(token_start + UnexpectedTokenError.SNIPPET_SIZE + 1, len(token_text))
@@ -89,7 +90,13 @@ class Source:
         self.end = position
 
     def __repr__(self):
-        return self.text[self.start:self.end]
+        name = self.__class__.__name__
+        if self.start is None or self.end is None:
+            text = '' if self.text is None else self.text
+        else:
+            assert self.text is not None
+            text = self.text[self.start:self.end]
+        return f'{name}({text})'
 
     def peek_char(self):
         c = None
@@ -125,8 +132,9 @@ class Token(Source):
     ASSIGN = '='
     STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN]
 
-    def __init__(self, text, position):
+    def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position)
+        self.adjacent_to_previous = adjacent_to_previous
 
     def is_string(self):
         return False
@@ -168,8 +176,8 @@ class Token(Source):
 # https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals.
 class PythonString(Token):
 
-    def __init__(self, text, position):
-        super().__init__(text, position)
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, position, adjacent_to_previous)
         self.string = None
         self.scan()
 
@@ -237,15 +245,36 @@ class PythonString(Token):
 
 class Expression(Token):
 
-    def __init__(self, text, position):
-        super().__init__(text, position)
+    def __init__(self, text, position, adjacent_to_previous, globals):
+        super().__init__(text, position, adjacent_to_previous)
+        self._globals = globals
+        self._source = None
+        self._function = None
         self.scan()
 
     def is_expr(self):
         return True
 
     def value(self):
-        return self.text[self.start + 1:self.end - 1]
+        if self._function is None:
+            source = self.source()
+            if source.split()[0] in ('lambda', 'lambda:'):
+                function = eval(source, self._globals)
+            else:
+                try:
+                    function = eval('lambda ' + source, self._globals)
+                except Exception:
+                    try:
+                        function = eval('lambda: ' + source, self._globals)
+                    except Exception:
+                        raise marcel.exception.KillCommandException(f'Invalid function syntax: {source}')
+            self._function = marcel.functionwrapper.FunctionWrapper(function=function)
+        return self._function
+    
+    def source(self):
+        if self._source is None:
+            self._source = self.text[self.start + 1:self.end - 1]
+        return self._source
 
     def scan(self):
         c = self.next_char()
@@ -260,7 +289,7 @@ class Expression(Token):
             elif c == Token.CLOSE:
                 nesting -= 1
             elif c in Token.QUOTES:
-                self.end = PythonString(self.text, self.end - 1).end
+                self.end = PythonString(self.text, self.end - 1, False).end
         if self.text[self.end - 1] != Token.CLOSE:
             raise marcel.exception.KillCommandException(
                 f'Malformed Python expression {self.text[self.start:self.end]}')
@@ -268,10 +297,15 @@ class Expression(Token):
 
 class String(Token):
 
-    def __init__(self, text, position):
-        super().__init__(text, position)
-        self.string = None
-        self.scan()
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, 0 if position is None else position, adjacent_to_previous)
+        if position is None:
+            # Text is fine as is.
+            self.string = text
+        else:
+            # Text is from the input being parsed. Scan it to deal with escapes and quotes.
+            self.string = None
+            self.scan()
 
     def is_string(self):
         return True
@@ -330,8 +364,8 @@ class String(Token):
 
 class Run(Token):
 
-    def __init__(self, text, position):
-        super().__init__(text, position)
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, position, adjacent_to_previous)
         self.symbol = None
         self.scan()  # Sets self.symbol
 
@@ -357,8 +391,8 @@ class Run(Token):
 
 class OneCharSymbol(Token):
 
-    def __init__(self, text, position, symbol):
-        super().__init__(text, position)
+    def __init__(self, text, position, adjacent_to_previous, symbol):
+        super().__init__(text, position, adjacent_to_previous)
         self.symbol = symbol
         self.end += 1
 
@@ -368,8 +402,8 @@ class OneCharSymbol(Token):
 
 class Pipe(OneCharSymbol):
 
-    def __init__(self, text, position):
-        super().__init__(text, position, Token.PIPE)
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, position, adjacent_to_previous, Token.PIPE)
 
     def is_pipe(self):
         return True
@@ -377,8 +411,8 @@ class Pipe(OneCharSymbol):
 
 class Fork(OneCharSymbol):
 
-    def __init__(self, text, position):
-        super().__init__(text, position, Token.FORK)
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, position, adjacent_to_previous, Token.FORK)
 
     def is_fork(self):
         return True
@@ -389,8 +423,8 @@ class Fork(OneCharSymbol):
 
 class Begin(OneCharSymbol):
 
-    def __init__(self, text, position):
-        super().__init__(text, position, Token.BEGIN)
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, position, adjacent_to_previous, Token.BEGIN)
 
     def is_begin(self):
         return True
@@ -398,8 +432,8 @@ class Begin(OneCharSymbol):
 
 class End(OneCharSymbol):
 
-    def __init__(self, text, position):
-        super().__init__(text, position, Token.END)
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, position, adjacent_to_previous, Token.END)
 
     def is_end(self):
         return True
@@ -407,8 +441,8 @@ class End(OneCharSymbol):
 
 class Assign(OneCharSymbol):
 
-    def __init__(self, text, position):
-        super().__init__(text, position, Token.ASSIGN)
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, position, adjacent_to_previous, Token.ASSIGN)
 
     def is_assign(self):
         return True
@@ -420,26 +454,10 @@ class Assign(OneCharSymbol):
 class ImpliedMap(Token):
 
     def __init__(self):
-        super().__init__(None, None)
+        super().__init__(None, None, False)
 
     def op_name(self):
         return 'map'
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-# Parsing
-
-class InProgress:
-
-    def __init__(self):
-        self.pipeline = marcel.core.Pipeline()
-        self.op_token = None
-        self.args = []
-
-    def reset_op(self):
-        self.op_token = None
-        self.args.clear()
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -449,8 +467,9 @@ class InProgress:
 
 class Lexer(Source):
 
-    def __init__(self, text):
+    def __init__(self, env, text):
         super().__init__(text)
+        self.env = env
 
     def tokens(self):
         tokens = []
@@ -458,39 +477,83 @@ class Lexer(Source):
         while token is not None:
             tokens.append(token)
             token = self.next_token()
-        return tokens
+        return self.consolidate_adjacent(tokens)
 
     def next_token(self):
         token = None
-        self.skip_whitespace()
+        skipped = self.skip_whitespace()
         c = self.peek_char()
         if c is not None:
+            adjacent_to_previous = self.end > 0 and skipped == 0
             if c == Token.OPEN:
-                token = Expression(self.text, self.end)
+                token = Expression(self.text, self.end, adjacent_to_previous, self.env.namespace)
             elif c == Token.CLOSE:
                 raise ParseError('Unmatched )')
             elif c == Token.PIPE:
-                token = Pipe(self.text, self.end)
+                token = Pipe(self.text, self.end, adjacent_to_previous)
             elif c == Token.BEGIN:
-                token = Begin(self.text, self.end)
+                token = Begin(self.text, self.end, adjacent_to_previous)
             elif c == Token.END:
-                token = End(self.text, self.end)
+                token = End(self.text, self.end, adjacent_to_previous)
             elif c == Token.FORK:
-                token = Fork(self.text, self.end)
+                token = Fork(self.text, self.end, adjacent_to_previous)
             elif c == Token.BANG:
-                token = Run(self.text, self.end)
+                token = Run(self.text, self.end, adjacent_to_previous)
             elif c == Token.ASSIGN:
-                token = Assign(self.text, self.end)
+                token = Assign(self.text, self.end, adjacent_to_previous)
             else:
-                token = String(self.text, self.end)
+                token = String(self.text, self.end, adjacent_to_previous)
             self.end = token.end
         return token
 
     def skip_whitespace(self):
+        before = self.end
         c = self.peek_char()
         while c is not None and c.isspace():
             self.next_char()
             c = self.peek_char()
+        after = self.end
+        return after - before
+
+    # Adjacent String and Expression tokens must be consolidated. Turn them into an Expression that concatenates
+    # the values.
+    def consolidate_adjacent(self, tokens):
+        def eligible(token):
+            return token.is_string() or token.is_expr()
+
+        def consolidate(start, end):
+            if end == start + 1:
+                token = tokens[start]
+            else:
+                # Generate a new Expression token that combines the strings and expressions into
+                # a Python f'...' string.
+                buffer = ["(f'''"]
+                t = start
+                while t < end:
+                    token = tokens[t]
+                    t += 1
+                    if token.is_string():
+                        buffer.append(token.value())
+                    else:
+                        buffer.extend(['{', token.source(), '}'])
+                buffer.append("''')")
+                token = Expression(''.join(buffer), 0, False, self.env.namespace)
+            return token
+
+        consolidated = []
+        n = len(tokens)
+        start = 0
+        while start < n:
+            while start < n and not eligible(tokens[start]):
+                consolidated.append(tokens[start])
+                start += 1
+            end = start + 1
+            while end < n and eligible(tokens[end]) and tokens[end].adjacent_to_previous:
+                end += 1
+            if start < n:
+                consolidated.append(consolidate(start, end))
+            start = end
+        return consolidated
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -542,7 +605,7 @@ class Parser:
         self.text = text
         self.env = main.env
         self.op_modules = main.op_modules
-        self.tokens = Lexer(text).tokens()
+        self.tokens = Lexer(self.env, text).tokens()
         self.t = 0
         self.token = None  # The current token
         # For use by tab completer
@@ -560,15 +623,12 @@ class Parser:
     def assignment(self, var):
         self.next_token(Assign)
         if self.next_token(Begin):
-            value = self.pipeline()
-            op = self.create_assignment(var, pipeline=value)
+            op = self.create_assignment(var, pipeline=(self.pipeline()))
             self.next_token(End)
         elif self.next_token(String):
-            value = self.token.value()
-            op = self.create_assignment(var, string=value)
+            op = self.create_assignment(var, string=(self.token.value()))
         elif self.next_token(Expression):
-            value = self.token.value()
-            op = self.create_assignment(var, source=value)
+            op = self.create_assignment(var, function=(self.token.value()))
         else:
             self.next_token()
             raise UnexpectedTokenError(self.token, 'Unexpected token type.')
@@ -612,7 +672,7 @@ class Parser:
         if self.next_token(String) or self.next_token(Fork) or self.next_token(Run):
             return self.token
         elif self.next_token():
-            raise UnexpectedTokenError(self.token, 'Unexpected token type.')
+            raise UnexpectedTokenError(self.token, f'Unexpected token type: {self.token}')
         else:
             raise PrematureEndError()
 
@@ -673,6 +733,7 @@ class Parser:
         return op
 
     def create_op_variable(self, op_token, args):
+        # TODO: There shouldn't be any args
         op = None
         var = op_token.value()
         value = self.env.getvar(var)
@@ -689,7 +750,7 @@ class Parser:
             op = marcel.opmodule.create_op(self.env, 'bash', *([name] + args))
         return op
 
-    def create_assignment(self, var, string=None, pipeline=None, source=None):
+    def create_assignment(self, var, string=None, pipeline=None, function=None):
         assign_module = self.op_modules['assign']
         assert assign_module is not None
         op = assign_module.create_op()
@@ -698,8 +759,8 @@ class Parser:
             op.string = string
         if pipeline is not None:
             op.pipeline = pipeline
-        if source is not None:
-            op.source = source
+        if function is not None:
+            op.function = function
         pipeline = marcel.core.Pipeline()
         pipeline.append(op)
         return pipeline

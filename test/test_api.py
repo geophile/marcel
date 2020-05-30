@@ -42,6 +42,14 @@ def test_gen():
              expected_out=[0, 1, 2, 3, 4])
     TEST.run(test=lambda: run(gen('abc')),
              expected_err='count cannot be converted to int')
+    # Function-valued args
+    N = 7
+    TEST.run(test=lambda: run(gen(lambda: N - 2)),
+             expected_out=[0, 1, 2, 3, 4])
+    TEST.run(test=lambda: run(gen(lambda: N - 2, lambda: N + 3)),
+             expected_out=[10, 11, 12, 13, 14])
+    TEST.run(test=lambda: run(gen(lambda: N - 2, lambda: N + 3, pad=lambda: N - 4)),
+             expected_out=['010', '011', '012', '013', '014'])
 
 
 def test_out():
@@ -67,6 +75,16 @@ def test_out():
     TEST.run(test=lambda: run(gen(3) | out(append=output_filename, file=output_filename)),
              expected_err='Cannot specify more than one of')
     TEST.delete_file(output_filename)
+    # Function-valued args
+    TEST.run(test=lambda: run(gen(3) | out(file=lambda: output_filename)),
+             expected_out=[0, 1, 2],
+             file=output_filename)
+    TEST.run(test=lambda: run(gen(3) | out(append=lambda: output_filename)),
+             expected_out=[0, 1, 2, 0, 1, 2],
+             file=output_filename)
+    TEST.delete_file(output_filename)
+    TEST.run(test=lambda: run(gen(3)| out(format=lambda: '{}')),
+             expected_out=[0, 1, 2])
 
 
 def test_sort():
@@ -243,6 +261,10 @@ def test_expand():
                            (200, 3, -3),
                            (100, 4, -4),
                            (200, 4, -4)])
+    # Function-valued args
+    N = 1
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, (x * 10, x * 10 + 1))) | expand(lambda: N)),
+             expected_out=[(0, 0), (0, 1), (1, 10), (1, 11), (2, 20), (2, 21)])
 
 
 def test_head():
@@ -258,6 +280,9 @@ def test_head():
              expected_out=[0, 1, 2])
     TEST.run(lambda: run(gen(3) | head(4)),
              expected_out=[0, 1, 2])
+    # Function-valued args
+    TEST.run(test=lambda: run(gen(3) | head(lambda: 4)),
+             expected_out=[0, 1, 2])
 
 
 def test_tail():
@@ -272,6 +297,9 @@ def test_tail():
     TEST.run(lambda: run(gen(3) | tail(3)),
              expected_out=[0, 1, 2])
     TEST.run(lambda: run(gen(3) | tail(4)),
+             expected_out=[0, 1, 2])
+    # Function-valued args
+    TEST.run(lambda: run(gen(3) | tail(lambda: 4)),
              expected_out=[0, 1, 2])
 
 
@@ -358,6 +386,21 @@ def test_window():
              expected_err='overlap cannot be converted to int')
     TEST.run(lambda: run(gen(10) | window(disjoint=[])),
              expected_err='disjoint must be a string')
+    # Function-valued args
+    THREE = 3
+    TEST.run(lambda: run(gen(10) | window(overlap=lambda: THREE)),
+             expected_out=[((0,), (1,), (2,)),
+                           ((1,), (2,), (3,)),
+                           ((2,), (3,), (4,)),
+                           ((3,), (4,), (5,)),
+                           ((4,), (5,), (6,)),
+                           ((5,), (6,), (7,)),
+                           ((6,), (7,), (8,)),
+                           ((7,), (8,), (9,)),
+                           ((8,), (9,), (None,)),
+                           ((9,), (None,), (None,))])
+    TEST.run(lambda: run(gen(10) | window(disjoint=lambda: THREE - 2)),
+             expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
 
 
 def test_bash():
@@ -366,6 +409,10 @@ def test_bash():
              expected_out=['hello world'])
     # Quoted, so they are preserved.
     TEST.run(lambda: run(bash('echo', "hello  world")),
+             expected_out=['hello  world'])
+    # Function-valed args
+    HELLO = 'hello'
+    TEST.run(test=lambda: run(bash('echo', lambda: HELLO+'  world')),
              expected_out=['hello  world'])
 
 
@@ -379,6 +426,9 @@ def test_fork():
     # Bug 40
     TEST.run(lambda: run(fork('notacluster', gen(5))),
              expected_err='Invalid fork specification')
+    # Function-valued args
+    TEST.run(lambda: run(fork(lambda: 1, gen(lambda: 3, 100))),
+             expected_out=[(0, 100), (0, 101), (0, 102)])
 
 
 def test_namespace():
@@ -424,6 +474,9 @@ def test_remote():
              expected_out=[(localhost, 3)])
     TEST.run(lambda: run(fork('jao', gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
+    # Function-valued args
+    TEST.run(lambda: run(fork(lambda: 'jao', map(lambda: 419))),
+             expected_out=[(localhost, 419)])
 
 
 def test_sudo():

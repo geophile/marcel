@@ -74,6 +74,7 @@ class Bash(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
+        self.eval_functions('args')
         self.input = []
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('No command provided.')

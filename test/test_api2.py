@@ -1,6 +1,8 @@
 from marcel.api import *
 import time
 
+run(gen(10) | window(disjoint=False))
+
 # cat = map(lambda f: (f, f.readlines())) | expand(1)
 # for f, line in ls('/home/jao/*.txt', file=True, recursive=True) | cat:
 #     print(f'{f}: {line}')

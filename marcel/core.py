@@ -20,6 +20,7 @@ import marcel.object.error
 import marcel.util
 
 Error = marcel.object.error.Error
+FunctionWrapper = marcel.functionwrapper.FunctionWrapper
 
 
 class Pipelineable:
@@ -222,6 +223,19 @@ class Op(BaseOp):
 
     # For use by subclasses
 
+    def eval_functions(self, *fields):
+        state = self.__dict__
+        for f in fields:
+            val = state[f]
+            if callable(val):
+                # TODO: DON'T DO THIS: val.set_op(self)
+                # TODO: Otherwise, we get resumable error handling (op's error handler) instead of
+                # TODO: raising KillCommandException. But this is only correct during setup_1(), not
+                # TODO: during receive()? FW error handling is kind of a mess.
+                state[f] = val()
+            elif type(val) in (tuple, list):
+                state[f] = [x() if callable(x) else x for x in val]
+
     @staticmethod
     def check_arg(ok, arg, message):
         if not ok:
@@ -239,7 +253,7 @@ class Op(BaseOp):
 
     @staticmethod
     def function_source(function):
-        assert isinstance(function, marcel.functionwrapper.FunctionWrapper)
+        assert isinstance(function, FunctionWrapper)
         return function.source()
 
 

@@ -80,6 +80,7 @@ class Fork(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
+        self.eval_functions('host')
         self.threads = []
         cluster = self.env().remote(self.host)
         if cluster:

@@ -51,12 +51,11 @@ class FunctionWrapper:
             assert False
 
     def __repr__(self):
-        return self._function if self._source is None else self._source
+        return str(self._function) if self._source is None else self._source
 
     def __call__(self, *args, **kwargs):
         if self._function is None:
             self.create_function()
-        assert self._function is not None
         try:
             return self._function(*args, **kwargs)
         except Exception as e:
@@ -66,7 +65,10 @@ class FunctionWrapper:
             if len(kwargs) > 0:
                 function_input.append(str(kwargs))
             function_input_string = None if len(function_input) == 0 else ', '.join(function_input)
-            self._op.fatal_error(function_input_string, str(e))
+            if self._op:
+                self._op.fatal_error(function_input_string, str(e))
+            else:
+                raise marcel.exception.KillCommandException(f'Error evaluating {self} on {function_input_string}: {e}')
 
     def check_validity(self):
         self.create_function()

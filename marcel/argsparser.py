@@ -19,6 +19,8 @@ import marcel.exception
 import marcel.functionwrapper
 import marcel.util
 
+FunctionWrapper = marcel.functionwrapper.FunctionWrapper
+
 # A marcel op has arguments. An argument is one of:
 #    - An optional flag with no value
 #    - An optional flag with one value
@@ -149,43 +151,44 @@ class ArgsParser:
     # Conversion and type checking
 
     def str_to_int(self, arg, x):
-        if type(x) is int:
+        if type(x) is int or callable(x):
             return x
-        if type(x) is not str:
-            raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
-        try:
-            return int(x)
-        except ValueError:
-            raise ArgsError(arg.op_name, f'{arg.name} cannot be converted to int: {x}')
+        if type(x) is str:
+            try:
+                return int(x)
+            except ValueError:
+                raise ArgsError(arg.op_name, f'{arg.name} cannot be converted to int: {x}')
+        raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
 
     def check_str(self, arg, x):
-        if type(x) is not str:
-            raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
-        return x
+        if type(x) is str or callable(x):
+            return x
+        raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
 
     def fork_spec(self, arg, x):
         if type(x) is int:
             if x <= 0:
                 raise ArgsError(arg.op_name, f'{arg.name} must be a positive int: {x}')
             return x
-        if type(x) is str:
+        if type(x) is str or callable(x):
             return x
         raise ArgsError(arg.op_name, f'{arg.name} must be an int or cluster name: {x}')
 
     def check_pipeline(self, arg, x):
-        if type(x) is not marcel.core.Pipeline:
-            raise ArgsError(arg.op_name, f'{arg.name} must be a pipeline.')
-        return x
+        if type(x) is marcel.core.Pipeline or callable(x):
+            return x
+        raise ArgsError(arg.op_name, f'{arg.name} must be a pipeline.')
 
     # An ArgsParser subclass uses this function as the value of convert, to validate
     # Python expressions, (parser.Expression). x is function source for console usage,
     # a callable for API usage.
     def function(self, arg, x):
-        function_wrapper = marcel.functionwrapper.FunctionWrapper
-        if callable(x):
-            f = function_wrapper(function=x)
+        if type(x) is FunctionWrapper:
+            f = x
+        elif callable(x):
+            f = FunctionWrapper(function=x)
         elif type(x) is str:
-            f = function_wrapper(source=x, globals=self.env.namespace)
+            f = FunctionWrapper(source=x, globals=self.env.namespace)
         else:
             raise ArgsError(arg.op_name, f'{arg.name} argument must be a function.')
         f.set_op(self.current_op)

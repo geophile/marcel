@@ -361,19 +361,13 @@ Make namespace protected. Use vars() instead externally.  BTW:
 
 Why should the last one work?
 
+Well, this should work:
+
+      gen 3 | map ... | join [x100 | ...]
+
 ----------------------------------------------------------------------
 
 Get rid of argparse in main.
-
-----------------------------------------------------------------------
-
-This API test doesn't fail correctly:
-
-    TEST.run(lambda: run(gen(10) | window(disjoint=False)),
-             expected_err='oops')
-
-The disjoint arg specifies convert=int, and int(False) -> 0. Need to
-check arg types.
 
 ----------------------------------------------------------------------
 
@@ -391,3 +385,67 @@ Revise README.
 ----------------------------------------------------------------------
 
 Exhaustive type error testing in API?
+
+----------------------------------------------------------------------
+
+str expr -> str
+Also allow expr str -> str
+
+======================================================================
+
+    def tokens(self):
+        def consolidate_adjacent():
+            if len(adjacent_strings) > 0:
+                concatenated_string = ''.join(adjacent_strings)
+                consolidated_tokens.append(String(concatenated_string, None, False))
+                adjacent_strings.clear()
+        tokens = []
+        token = self.next_token()
+        # Parse and collect tokens, evaluating Expressions.
+        while token is not None:
+            if token.is_expr():
+                value = self.evaluate(token.value())
+                tokens.append(String(value, None, token.adjacent_to_previous)
+                              if type(value) is str else
+                              ExpressionValue(value))
+            else:
+                tokens.append(token)
+            token = self.next_token()
+        # Now that Expressions have been evaluated, look for adjacent strings and combine them.
+        adjacent_strings = []
+        consolidated_tokens = []
+        for token in tokens:
+            if token.is_string():
+                if token.adjacent_to_previous:
+                    adjacent_strings.append(token.value())
+                else:
+                    consolidate_adjacent()
+                    adjacent_strings.append(token.value())
+            else:
+                consolidate_adjacent()
+                consolidated_tokens.append(token)
+        consolidate_adjacent()
+        return consolidated_tokens
+
+----------------------------------------------------------------------
+
+Function is evaluated in map.receive:
+
+    map (x: ...)
+
+Function COULD be evaluated in map.receive. Currently, glob expansion
+is done during setup, (and this seems like that).
+
+    ls /home/(USER)
+
+Idea:
+
+- Turn expressions like /home/(USER) into a function, e.g. (f'/home/{USER})
+
+- Allow function as any arg type. So these would all be legal
+
+  gen (N)
+  bash cat (...)
+  ls /foo/bar/(...)
+
+----------------------------------------------------------------------

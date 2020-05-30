@@ -46,6 +46,17 @@ def test_gen():
     # Error along with output
     TEST.run('gen 3 -1 | map (x: 5 / x)',
              expected_out=[-5.0, Error('division by zero'), 5.0])
+    # Function-valued args
+    TEST.run('N = (7)')
+    TEST.run('gen (N - 2)',
+             expected_out=[0, 1, 2, 3, 4])
+    TEST.run('gen (N - 2) (N + 3)',
+             expected_out=[10, 11, 12, 13, 14])
+    TEST.run('gen -p (N - 4) (N - 2) (N + 3)',
+             expected_out=['010', '011', '012', '013', '014'])
+    TEST.run('N = ("7")')
+    TEST.run('gen (N - 2)',
+             expected_err="unsupported operand type(s) for -: 'str' and 'int'")
 
 
 def test_out():
@@ -73,7 +84,16 @@ def test_out():
              file=output_filename)
     TEST.run(f'gen 3 | out -a {output_filename} -f {output_filename}',
              expected_err='Cannot specify more than one of')
+    # Function-valued args
+    TEST.run(f'gen 3 | out -f ("{output_filename}")',
+             expected_out=[0, 1, 2],
+             file=output_filename)
+    TEST.run(f'gen 3 | out -a ("{output_filename}")',
+             expected_out=[0, 1, 2, 0, 1, 2],
+             file=output_filename)
     TEST.delete_file(output_filename)
+    TEST.run('gen 3 | out ("{}")',
+             expected_out=[0, 1, 2])
 
 
 def test_sort():
@@ -242,6 +262,10 @@ def test_expand():
                            (200, 3, -3),
                            (100, 4, -4),
                            (200, 4, -4)])
+    # Function-valued args
+    TEST.run('N = (1)')
+    TEST.run('gen 3 | map (x: (x, (x * 10, x * 10 + 1))) | expand (N)',
+             expected_out=[(0, 0), (0, 1), (1, 10), (1, 11), (2, 20), (2, 21)])
 
 
 def test_head():
@@ -257,6 +281,9 @@ def test_head():
              expected_out=[0, 1, 2])
     TEST.run('gen 3 | head 4',
              expected_out=[0, 1, 2])
+    # Function-valued args
+    TEST.run('gen 3 | head (4)',
+             expected_out=[0, 1, 2])
 
 
 def test_tail():
@@ -271,6 +298,9 @@ def test_tail():
     TEST.run('gen 3 | tail 3',
              expected_out=[0, 1, 2])
     TEST.run('gen 3 | tail 4',
+             expected_out=[0, 1, 2])
+    # Function-valued args
+    TEST.run('gen 3 | tail (4)',
              expected_out=[0, 1, 2])
 
 
@@ -355,6 +385,22 @@ def test_window():
              expected_err='Must specify exactly one')
     TEST.run('gen 10 | window -o 3 (x: True)',
              expected_err='Must specify exactly one')
+    # Function-valued args
+    TEST.run('THREE = (3)')
+    TEST.run('gen 10 | window -o (THREE)',
+             expected_out=[((0,), (1,), (2,)),
+                           ((1,), (2,), (3,)),
+                           ((2,), (3,), (4,)),
+                           ((3,), (4,), (5,)),
+                           ((4,), (5,), (6,)),
+                           ((5,), (6,), (7,)),
+                           ((6,), (7,), (8,)),
+                           ((7,), (8,), (9,)),
+                           ((8,), (9,), (None,)),
+                           ((9,), (None,), (None,))])
+    TEST.run('gen 10 | window -d (THREE-2)',
+             expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
+
 
 
 def test_bash():
@@ -363,6 +409,10 @@ def test_bash():
              expected_out=['hello world'])
     # Quoted, so they are preserved.
     TEST.run('bash echo "hello  world"',
+             expected_out=['hello  world'])
+    # Function-valed args
+    TEST.run('HELLO = hello')
+    TEST.run('bash echo (HELLO)"  world"',
              expected_out=['hello  world'])
 
 
@@ -376,6 +426,9 @@ def test_fork():
     # Bug 40
     TEST.run(test='@notacluster [ gen 5 ]',
              expected_err='Invalid fork specification')
+    # Function-valued args
+    TEST.run('@(1) [ gen (3) 100 ]',
+             expected_out=[(0, 100), (0, 101), (0, 102)])
 
 
 def test_namespace():
@@ -419,6 +472,9 @@ def test_remote():
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
     # Implied map
     TEST.run('@jao[(419)]',
+             expected_out=[(localhost, 419)])
+    # Function-valued args
+    TEST.run('@("jao")[(419)]',
              expected_out=[(localhost, 419)])
 
 

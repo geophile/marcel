@@ -17,6 +17,8 @@ import marcel.argsparser
 import marcel.core
 import marcel.exception
 
+Op = marcel.core.Op
+
 
 SUMMARY = '''
 Generates a stream of {r:count} integers, starting at {r:start}.
@@ -48,7 +50,7 @@ class GenArgsParser(marcel.argsparser.ArgsParser):
         self.validate()
 
 
-class Gen(marcel.core.Op):
+class Gen(Op):
 
     def __init__(self, env):
         super().__init__(env)
@@ -63,6 +65,7 @@ class Gen(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
+        self.eval_functions('pad', 'count', 'start')
         if self.pad is not None:
             if self.count == 0:
                 raise marcel.exception.KillCommandException(f'Padding {self.pad} incompatible with unbounded output.')

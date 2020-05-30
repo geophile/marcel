@@ -51,7 +51,7 @@ class Remote(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
-        pass
+        self.eval_functions('host')
 
     def receive(self, _):
         # Start the remote process
