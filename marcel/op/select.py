@@ -53,9 +53,6 @@ class Select(marcel.core.Op):
 
     # BaseOp
     
-    def setup_1(self):
-        pass
-
     def receive(self, x):
         if self.function(*x):
             self.send(x)

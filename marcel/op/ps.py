@@ -62,7 +62,7 @@ class PsArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_optional_value('group', '-g', '--group', convert=self.check_str)
         self.add_flag_optional_value('pid', '-p', '--pid', convert=self.check_str)
         self.add_flag_optional_value('command', '-c', '--command', convert=self.check_str)
-        self.exactly_one('user', 'group', 'pid', 'command')
+        self.at_most_one('user', 'group', 'pid', 'command')
         self.validate()
 
 

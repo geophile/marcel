@@ -124,12 +124,7 @@ def colorize(s, color):
              '\033[1m' if bold else
              '\033[3m' if italic else
              '\033[0m')
-    return (s
-            if color is None else
-            '\001{}\002\001\033[38;5;{}m\002{}\001\033[0m\002'.format(
-                style,
-                color.code,
-                s))
+    return f'\001{style}\002\001\033[38;5;{color.code}m\002{s}\001\033[0m\002'
 
 
 def console_width():

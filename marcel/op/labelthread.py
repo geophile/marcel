@@ -35,9 +35,6 @@ class LabelThread(marcel.core.Op):
 
     # BaseOp
 
-    def setup_1(self):
-        pass
-
     def receive(self, x):
         assert self.label is not None
         self.send(self.label + x)

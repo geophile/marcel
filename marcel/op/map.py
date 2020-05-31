@@ -54,9 +54,6 @@ class Map(marcel.core.Op):
 
     # BaseOp
     
-    def setup_1(self):
-        pass
-
     def receive(self, x):
         output = self.function() if x is None else self.function(*x)
         self.send(output)

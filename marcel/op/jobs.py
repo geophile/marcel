@@ -54,9 +54,6 @@ class Jobs(marcel.core.Op):
 
     # BaseOp
     
-    def setup_1(self):
-        pass
-
     def receive(self, x):
         job_id = 0
         for job in marcel.job.JobControl.only.jobs():

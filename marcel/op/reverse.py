@@ -42,9 +42,6 @@ class Reverse(marcel.core.Op):
 
     # BaseOp
 
-    def setup_1(self):
-        pass
-
     def receive(self, x):
         self.contents.append(x)
 

@@ -27,7 +27,7 @@
 
   + Use of assigned var in expression
 
-- Expr as arg, e.g. to ls.
++ Expr as arg, e.g. to ls.
 
 If marcel is my default shell (in /etc/passwd), then remote operations
 fail, probably because marcel doesn't work as the shell for executing
@@ -48,6 +48,8 @@ a command by ssh. May be related to bug 46.
   + 49
   + 50
   - 51
+  - 53
+  - 54
 
 ----------------------------------------------------------------------
 

@@ -49,9 +49,6 @@ class History(marcel.core.Op):
 
     # BaseOp
 
-    def setup_1(self):
-        pass
-
     def receive(self, _):
         history = self.env().reader.history()
         for i in range(len(history)):

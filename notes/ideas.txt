@@ -280,3 +280,26 @@ E.g., Run timer, run ps every tick and label ps output. This works:
     timer 1 | map (t: (t, processes())) | expand 1
 
 Which gets into the discussion above about functions and ops.
+
+----------------------------------------------------------------------
+
+Args to pipeline vars:
+
+E.g., a pipeline that finds files with a given extension.
+
+To get python files:
+
+    py = [select (f: f.suffix == '.py')]
+    ls -fr | py
+
+To specify the extension of interest:
+
+    ext = [select (f: f.suffix == e)]
+    ls -fr | ext -e '.py'
+
+I.e., in the ext pipeline 'e' is a variable. It is bound to '.py' by
+specifying the arg as a flag. It is currently OK for e not to be
+defined when the pipeline is defined.
+
+WHAT WOULD THE TYPE OF e BE? Assume string; Use an expr to construct a
+value of a specific type, e.g. "foo -x (2)"
