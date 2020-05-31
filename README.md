@@ -9,127 +9,131 @@ next, marcel passes Python values: builtin types such as lists,
 tuples, strings, and numbers; but also objects representing files and
 processes.
 
-Linux has extremely powerful commands such as `awk` and `find`.
-Most people know how to do a few simple operations using these commands,
-but cannot fully exploit them due to their reliance on extensive "sublanguages".  By 
-contrast, if you know Python, then you already know the language used by marcel.
-Python expressions, combined with marcel operators, allow you to do much of what can
-be done relying on the more obscure corners of `awk` and `find`.
+Linux has extremely powerful commands such as `awk` and `find`.  Most
+people know how to do a few simple operations using these commands,
+but cannot easily exploit the full power of these command due to their
+reliance on extensive "sublanguages" which do:
 
-Shells are intended for interactive usage, from a console. A script
-is created by putting commands into a text file, and setting the executable
-bits. This means that the shell language must include control constructs,
-functions, variables, and so on.  
-Marcel takes a different approach. Because marcel is based on Python,
-there is no need to invent a new language. 
-Instead, you can use Python as the scripting language, invoking
-marcel commands via an API, (more on this below).
+* __Filtering__: What data is of interest?
+* __Processing__: What should be done with the data?
+* __Formatting__: How should results be presented?
 
-Shell Features
---------------
+By contrast, if you know Python, then you already know the language
+used by marcel.  You use Python to filter data,
+process it, and control command output.
 
-Marcel provides:
-
-* Customizable highlighted output of file and process listings.
-
-* Context-sensitive tab completion (for commands, their flags, 
-filenames, help topics).
-
-* Command history and recall, including correct handling of multi-line commands. (Muti-line support
-is implemented using [multilinereader](https://github.com/geophile/multilinereader).)
-
-* Searching of command history (e.g. ctrl-R).
-
-* Editing of previous commands in the editor of your choice.
-
-* Extensive help facility, providing information on concepts, objects,
-and commands.
-
-Example
--------
-Print all processes running Python:
-
-    M jao@cheese:~$ ps | select (p: p.commandline.startswith('/usr/bin/python')) 
-
-* `ps`: Generates a stream of `Process` objects.
-
-* `|`: Pipes the processes to the next command. (Note that `|` is not
-a Unix pipe. The entire command runs in a single Python process.)
-
-* `select (p: ...)`: Selects processes, `p`, for which the
-condition is true: The commandline of `p` starts with
-`'/usr/bin/python'`. The code inside the parens is a Python function, (marcel permits
-the `lambda` keyword to be omitted).
-
-* The output renders each qualifying `Process` using formatting
-specified as part of the implementation of
-the `Process` object. 
+The commands and syntax supported by a shell constitute a language
+which can be used to create scripts. Of course, in creating a script,
+you rely on language features that you typically do not use
+interactively: control structures, data types, and abstraction
+mechanisms (e.g. functions), for example. And 
+from a lanugage point of view,
+shell scripting is notoriously bad. Marcel takes a different
+approach, using Python as a scripting language. While Python is
+sometimes considered to already be a scripting language, it isn't really. 
+Executing shell commands from Python code is cumbersome. You've got to use
+`os.system`, or `subprocess.Popen`, and write some additional code to
+do the integration. Marcel provides a Python module, `marcel.api`,
+which brings shell commands into Python in a much cleaner way. For
+example, to list file names and sizes in `/home/jao`:
 
 ```
-       949       1  root      S  /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
-       980       1  root      S  /usr/bin/python3 /usr/lib/system76-driver/system76-daemon
-      2270    2056  jao       S  /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-daemon
-      2339    2056  jao       S  /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-notification
-     11775   11460  jao       S  /usr/bin/python3 /usr/bin/chrome-gnome-shell /usr/lib/mozilla/native-messaging-hosts/org.gnome.chrome_gnome_shell.json chrome-gnome-shell@gnome.org
+from marcel.api import *
+
+for file, size in ls('/home/jao') | map(lambda f: (f, f.size)):
+    print(f'{file.name}: {size}')
 ```
 
+This is a standard Python for loop, iterating over the results of the `ls` command,
+piped to a function which maps files to (file, file size) tuples, which are then printed.
 
-Another Example
----------------
-Find all files recursively, summing the file count and file size for each file extension,
-and then sort by decreasing size and report the top 10.
+Pipelines
+---------
+
+Marcel provides commands, called _operators_, which do the basic work of a shell. 
+An operator takes a _stream_ of data as input, and generates another stream as output.
+Operators can be combined by pipes, causing one operator's output to be the next operator's input.
+For exampe, this command uses the `ls` and `map` operators to list the
+names and sizes of files in the `/home/jao` directory:
+
 ```
-ls -fr \
-| select (f: f.path.suffix != '') \
-| map (f: (f.path.suffix.lower(), 1, f.size)) \
-| red . + + \
-| sort (ext, count, size: -size) \
-| head 10
+ls /home/jao | map (f: (f, f.size)
+``` 
 
-('.jpg', 82477, 63041371455)
-('.mp3', 3492, 25752416039)
-('.avi', 225, 19301810684)
-('.m4a', 1251, 9798087657)
-('.log', 630, 9425357624)
-('.jar', 5202, 7111116450)
-('.m4v', 5, 4462527594)
-('.csv', 1418, 4094816065)
-('.mkv', 1, 3195052033)
-('.pack', 179, 2969390041)
+* The `ls` operator produces a stream of `File` objects, representing the contents
+of the `/home/jao` directory.
+* `|` is the symbol denoting a pipe, as in any Linux shell.
+* The pipe connects the output stream from `ls` to the input stream of the next
+operator, `map`.
+* The `map` operator applies a given function to each element of the input stream,
+and writes the output from the function to the output stream. The function is enclosed
+in parentheses. It is an ordinary Python function, except that the keyword `lambda` is optional.
+In this case, an incoming `File` is mapped to a tuple containing the file and the file's size.
+
+A `pipeline` is a sequence of operators connected by pipes. They can be used directly
+on the command line, as above. They also have various other uses in marcel. For example,
+a pipeline can be assigned to a variable, essentially defining a function.
+For example, here is a pipeline, assigned to the variable `recent`, which selects
+`File`s modified within the past day:
+
+```
+recent = [select (file: now() - file.mtime < hours(24))] 
+``` 
+
+* The pipeline being defined is bracketed by `[...]`. (Without the brackets, marcel would
+attempt to evaluate the pipeline immediately, and then complain because the parameter
+`file` is not bound.)
+* The pipeline contains a single operator, `select`, which uses a function to define
+the items of interest. In this case, `select` operates on a `File`, bound to the 
+parameter `file`. 
+* `now()` is a function defined by marcel which gives the current time in seconds since
+the epoch, (i.e., it is just `time.time()`).
+* `File` objects have an `mtime` property, providing the time since the last content modification.
+* `hours()` is another function defined by marcel, which simply maps hours to seconds, i.e.,
+it multiplies by 3600.
+
+This pipeline can be used in conjunction with any pipeline yielding files. E.g., to locate
+the recently changed files in `~/git/myproject`:
+
+```
+ls ~/git/myproject | recent
 ```
 
-* The command is broken up across a few lines using a \ at the end of each non-terminal line.
+Functions
+---------
 
-* `ls -fr`: List just files (`-f`) recursively (`-r`).
+As shown above, a number of operators, like `map` and `select`, take Python functions as 
+command-line arguments. Functions can also be invoked to provide function arguments.
+For example, to list the contents of your home directory, you could write:
 
-* `select (f: f.path.suffix != '')`: For each file, `f`, keep those for which the file's
-extension (`f.path.suffix`) is not the empty string. The syntax inside the parentheses
-is a Python function, (marcel permits omission of the `lambda` keyword).
+```
+ls /home/(USER)
+```
 
-* `map(f: (f.path.suffix.lower(), 1, f.size))`: Map each file, `f`, to a tuple containing 
-the file's extension (folded to lower case), the integer 1, and the file size.
+This concatenates the string `/home/` with the string resulting from the evaluation of
+the expression `lambda: USER`. `USER` is a marcel environment variable identifying the
+current user, so this command is equivalent to `ls ~`.
 
-* `red . + +`: Reduce the incoming stream, grouping by the file extensions (in the tuple position 
-identified by
-the `.`), and summing up the `1`s (to obtain the count for that extension), 
-and the sizes.
+If you simply want to evaluate a Python expression, you could use the `map` operator, e.g.
 
-* `sort (ext, count, size: -size)`: Sort the incoming (extension, count, size) tuples
-by decreasing size. 
+```
+map (5 + 6)
+```  
 
-* `head 10`: Keep the first 10 input tuples and discard the rest.
+which prints `11`. In a situation like this, marcel also permits you to omit `map`; it is
+implied. So writing `(5 + 6)` as the entire command is also supported.
 
 Executables
 -----------
 
-In addition to using built-in operators, you can, of course, call any executable provided by
-the operating system. Pipelines may contain a mixture of operators and executables. The stdout of
-an executable pipes into an operator as a string. Output from an operator is turned into a string
-when it is piped into an executable.
+In addition to using built-in operators, you can, of course, call any executable.
+Pipelines may contain a mixture of marcel operators and host executables. Piping between
+operators and executables is done via streams of strings.
 
-For example, this command scans `/etc/passwd` and lists the usernames of 
+For example, this command combines operators and executables. 
+It scans `/etc/passwd` and lists the usernames of 
 users whose shell is `/bin/bash`. 
-`cat`, `xargs`, and `echo` are Linux commands. `map` and `select` are marcel operators.
+`cat`, `xargs`, and `echo` are Linux executables. `map` and `select` are marcel operators.
 The output is condensed into one line through
 the use of `xargs` and `echo`. 
 
@@ -142,143 +146,58 @@ cat /etc/passwd \
 ```
 
 * `cat /etc/passwd`: Obtain the contents of the file. Lines are piped to subsequent commands.
-
 * `map (line: line.split(':'))`: Split the lines at the `:` separators, yielding 7-tuples.
-
 * `select (*line: line[-1] == '/bin/bash')`: select those lines in which the last field is `/bin/bash`.
-
 * `map (*line: line[0]) |`: Keep the username field of each input tuple.
-
 * `xargs echo`: Combine the incoming usernames into a single line, which is printed to `stdout`.
 
+Shell Features
+--------------
 
+Marcel provides:
 
-Remote access
--------------
-
-Marcel can submit commands to all of the nodes in a cluster, and then combine the results.
-For example, a cluster named `qa` can be configured in `~/.marcel.py`:
-
-```
-    qa = Cluster('qa')
-    qa.hosts = ['192.168.10.100', '192.168.10.101']
-    qa.user = 'qa_joe'
-    qa.identity = '~qa_joe/home/.ssh/id_rsa'
-```
-
-Then, to get a list of files in `/usr/local/bin` in each node of the cluster:
-
-    M jao@cheese:~$ @qa [ ls /usr/local/bin ]
-
-- `@qa [ ... ]` executes the bracketed commands on each node of the `qa` cluster.
-
-- The output includes an identification of the node that produced the output, e.g.
-
-```
-    ('192.168.100.0', .)
-    ('192.168.100.0', decompile)
-    ('192.168.100.0', nosetests)
-    ('192.168.100.0', nosetests-2.7)
-    ('192.168.100.0', nosetests-3.4)
-    ('192.168.100.0', piximporter)
-    ('192.168.100.1', .)
-    ('192.168.100.1', decompile)
-    ('192.168.100.1', erdo)
-    ('192.168.100.1', movements)
-```
-
-
-Errors
-------
-
-The POSIX model of `stdout` and `stderr` streams distinguishes normal output from errors.
-An unfortunate aspect of this approach is that the interleaving of normal output and errors is lost.
-A marcel pipeline generates a stream of values, and each value has a type. This allows for normal
-and error output to be combined in one stream, since error values can be identified by type.
-
-For example, directory `/tmp/d` has three directories:
- 
- ```
-    M jao@cheese:/tmp/d$ ls
-    drwxr-xr-x jao      jao              4096 /tmp/d/hi
-    dr-------- z        z                4096 /tmp/d/nope
-    drwxr-xr-x jao      jao              4096 /tmp/d/welcome
-```
-
-The `nope` directory cannot be visited, due to permissions. If we try to list all files
-and directories recursively:  
-
-```
-    M jao@cheese:/tmp/d$ ls -r
-    drwxr-xr-x jao      jao              4096 /tmp/d/hi
-    -rw-r--r-- jao      jao                 0 /tmp/d/hi/a.txt
-    -rw-r--r-- jao      jao                 0 /tmp/d/hi/b.txt
-    dr-------- z        z                4096 /tmp/d/nope
-    Error(Cannot explore /tmp/d/nope: permission denied)
-    drwxr-xr-x jao      jao              4096 /tmp/d/welcome
-    -rw-r--r-- jao      jao                 0 /tmp/d/welcome/c.txt
-    -rw-r--r-- jao      jao                 0 /tmp/d/welcome/d.txt
-```
-
-Notice that the nope directory is listed as before, but we get an error on the attempt
-to go inside of it. The error indicates when the attempt was made -- between listing
-the `hi` and `welcome` directories.
-
-Normal output from this command comprises tuples of size 1, each containing a `File` object. The error
-is carried by an `Error` object. Filtering can be performed to separate out normal and error 
-output when desired.
+* __Command history:__ A `history` operator, rerunning and editing of previous commands,
+reverse search, etc.
+* __Customizable prompts:__ Configured in Python, of course.
+* __Customizable color highlighting:__ The colors used to render output for builtin types such 
+as `File` and `Process`, and `help` output can be customized too.
+* __Tab completion:__ For operators, flags, and filename arguments.
+* __help:__ Extensive help facility, providing information on concepts, objects,
+and operators.
 
 Scripting
 ---------
 
-The second example above listed files recursively, summed the 
-file count and file size for each file extension,
-and then sorted by decreasing size, and reported the top 10:
+Marcel's syntax for constructing and running pipelines, and defining and using
+variables and functions, was designed for interactive usage. Extending this syntax
+to a full scripting language is pointless, as it would be unlikely to yield a first-rate
+implementation of a first-rate language. Instead, my approach is to make it possible
+to use Python as a scripting language by adding a marcel API. Recall this example:
 
 ```
-    ls -fr \
-    | select (f: f.path.suffix != '') \
-    | map (f: (f.path.suffix.lower(), 1, f.size)) \
-    | red . + + \
-    | sort (ext, count, size: -size) \
-    | head 10
+recent = [select (file: now() - file.mtime < hours(24))] 
+ls ~/git/myproject | recent
 ```
 
-To implement this as a Python script:
-```
-    #!/usr/bin/python3
-    from marcel.api import *
-    
-    run(ls('.', file=True, recursive=True)
-        | select(lambda f: f.path.suffix != '')
-        | map(lambda f: (f.path.suffix.lower(), 1, f.size))
-        | red(None, r_plus, r_plus)
-        | sort(lambda ext, count, size: -size)
-        | head(10))
-```
-Each marcel operator is invoked via a function imported from `marcel.api`.
-For example, the console command `ls -fr` turns into `ls(file=True, recursive=True)`.
-Piping uses the same symbol as on the console, `|`. The 
-command pipeline is executed by calling `run`.
+The same thing could be done from Python after importing the marcel API:
 
-If instead of printing the results you want to manipulate them further,
-use the pipeline as an iterator:
+```python
+from marcel.api import *
 
-```
-    #!/usr/bin/python3
-    from marcel.api import *
-
-    for ext, count, size in (ls('.', file=True, recursive=True)
-                             | select(lambda f: f.path.suffix != '')
-                             | map(lambda f: (f.path.suffix.lower(), 1, f.size))
-                             | red(None, r_plus, r_plus)
-                             | sort(lambda ext, count, size: -size)
-                             | head(10))
-        average = size / count
-        print(f'{ext}: {average}')
+recent = select(lambda file: now() - file.mtime < hours(24))
+for file in ls('~/git/myproject') | recent:
+    print(f'{file}')
 ```
 
-Dependencies
+* Each marcel operator is represented by a function imported by `marcel.api`.
+* Command-line arguments turn into function arguments. For `select`, note that
+its function argument is the same as in the shell version, except that the `lambda`
+keyword is now required, because we are now bound by Python syntax rules.
+* `ls(...) | recent` defines a marcel pipeline. The Python class representing pipelines
+defines `__iter__` so that the pipeline can be used directly in a Python `for` loop.
+
+
+Installation
 ------------
 
 Marcel depends on [dill](https://pypi.org/project/dill/), which can be installed
@@ -286,51 +205,11 @@ like this:
 ```
 python3 -m pip install dill
 ```
-Or to install for all users, e.g. in /usr/local:
-```
-sudo python3 -m pip install --prefix /usr/local dill
-```
 
-
-Installation
-------------
-
-Install using pip. To install to your home directory (e.g. under
-`~/.local`):
+To install marcel:
 ```
 python3 -m pip install marcel
 ```
 
-Or to install for all users, e.g. in `/usr/local`:
-
-```
-sudo python3 -m pip install --prefix /usr/local marcel
-```
-
-History
--------
-
-Marcel is the successor to [osh](http://github.com/geophile/osh) 
-(Object SHell). Osh
-is based on the same ideas, but it is not a full-fledged shell;
-it is an executable
-that takes shell-like commands as input, composes them using pipes, 
-and passes Python objects,
-as Marcel does. Marcel improves on osh in a number of ways:
-
-* Marcel is a full-fledged shell.
-
-* If you know Python you know marcel. There are no obscure sublanguages
-(e.g. for awk, find, PS1). Commands are customized by writing Python
-lambda expressions on the command line. Configuration is done
-by assigning Python variables.
-
-* A planned abstraction mechanism is to offer pipelines as first-class constructs. 
-This will allow for more complex commands (which combine multiple pipelines), and the composition of pipelines.
-
-* Marcel started with the osh code base (for commands and pipelines), but cleaned up a number of ugly hacks and 
-non-pythonic constructs.
-
-* Osh requires Python 2.x. Marcel requires Python 3.x. (Whether you regard that as an improvement is 
-obviously subjective.)
-
+These commands install for the current user. To install for the entire system,
+use `sudo python3 -m pip ...` instead.

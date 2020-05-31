@@ -47,6 +47,7 @@ from marcel.op.timer import timer as _timer
 from marcel.op.unique import unique as _unique
 from marcel.op.version import version as _version
 from marcel.op.window import window as _window
+from marcel.builtin import *
 from marcel.reduction import *
 
 _MAIN = _main.Main(same_process=True)

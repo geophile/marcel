@@ -303,3 +303,32 @@ defined when the pipeline is defined.
 
 WHAT WOULD THE TYPE OF e BE? Assume string; Use an expr to construct a
 value of a specific type, e.g. "foo -x (2)"
+
+----------------------------------------------------------------------
+
+Data pipeline:
+
+Imagine an if operator:
+
+... | if PREDICATE-1 VAR-1 | if PREDICATE-2 VAR-2 | ...
+
+- var-n captures the incoming stream for which predicate-n is true.
+- Data is stored and can be reused later, e.g.
+
+  var-1 | ...
+
+Could also save data, e.g. "out -s|--save"
+
+  gen 10 | out -s n10
+  n10 | ...
+
+- if: send everything downstream, regardless of predicate value.
+
+- ifelse: send x downstream if predicate(x) is false.
+
+- if without var: send x downstream if predicate(x) is true, i.e. select op.
+
+
+Replace var-n with a pipeline, which could save results. So
+
+    gen 10 | ifelse (x: x%2 == 0) [out -s evens] | out -s odds
