@@ -610,6 +610,7 @@ class Parser:
         self.token = None  # The current token
         # For use by tab completer
         self.current_op_name = None
+        self.current_op_flags = None
 
     def parse(self):
         return self.command()
@@ -646,6 +647,7 @@ class Parser:
     # Top-level caller needs to reverse the result..
     def op_sequence(self):
         self.current_op_name = None
+        self.current_op_flags = None
         op_args = self.op_args()
         if self.next_token(Pipe):
             op_sequence = Parser.ensure_sequence(self.op_sequence())
@@ -659,13 +661,13 @@ class Parser:
             return self.create_map(self.token)
         else:
             op_token = self.op()
-            self.current_op_name = op_token.value()
             args = []
             arg = self.arg()
             while arg is not None:
                 args.append(arg)
                 arg = self.arg()
             op = self.create_op(op_token, args)
+            self.current_op_name = op.op_name()
             return op
 
     def op(self):
@@ -727,7 +729,9 @@ class Parser:
                 # else: 'run' was entered
                 op.expected_args = (1 if op_token.value() == '!' else
                                     0 if op_token.value() == '!!' else None)
-            op_module.args_parser().parse(args, op)
+            args_parser = op_module.args_parser()
+            self.current_op_flags = args_parser.flags()
+            args_parser.parse(args, op)
         except KeyError:
             pass
         return op

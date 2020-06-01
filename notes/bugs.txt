@@ -220,3 +220,11 @@ M-0.7.6 jao@cheese:~/git/marcel$
 54. "ps -u" is broken
 
 Without a userid. Seems to work with one.
+
+----------------------------------------------------------------------
+
+55. Tab completion showing non-public commands
+
+E.g. tab completion of "g" ->gather gen
+
+gather should not be visible.

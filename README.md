@@ -37,7 +37,7 @@ do the integration. Marcel provides a Python module, `marcel.api`,
 which brings shell commands into Python in a much cleaner way. For
 example, to list file names and sizes in `/home/jao`:
 
-```
+```python
 from marcel.api import *
 
 for file, size in ls('/home/jao') | map(lambda f: (f, f.size)):
@@ -56,7 +56,7 @@ Operators can be combined by pipes, causing one operator's output to be the next
 For example, this command uses the `ls` and `map` operators to list the
 names and sizes of files in the `/home/jao` directory:
 
-```
+```shell script
 ls /home/jao | map (f: (f, f.size)
 ``` 
 
@@ -76,7 +76,7 @@ a pipeline can be assigned to a variable, essentially defining a function.
 For example, here is a pipeline, assigned to the variable `recent`, which selects
 `File`s modified within the past day:
 
-```
+```shell script
 recent = [select (file: now() - file.mtime < hours(24))] 
 ``` 
 
@@ -95,7 +95,7 @@ it multiplies by 3600.
 This pipeline can be used in conjunction with any pipeline yielding files. E.g., to locate
 the recently changed files in `~/git/myproject`:
 
-```
+```shell script
 ls ~/git/myproject | recent
 ```
 
@@ -106,7 +106,7 @@ As shown above, a number of operators, like `map` and `select`, take Python func
 command-line arguments. Functions can also be invoked to provide function arguments.
 For example, to list the contents of your home directory, you could write:
 
-```
+```shell script
 ls /home/(USER)
 ```
 
@@ -116,7 +116,7 @@ current user, so this command is equivalent to `ls ~`.
 
 If you simply want to evaluate a Python expression, you could use the `map` operator, e.g.
 
-```
+```shell script
 map (5 + 6)
 ```  
 
@@ -137,7 +137,7 @@ users whose shell is `/bin/bash`.
 The output is condensed into one line through
 the use of `xargs` and `echo`. 
 
-```
+```shell script
 cat /etc/passwd \
 | map (line: line.split(':')) \
 | select (*line: line[-1] == '/bin/bash') \
@@ -202,14 +202,15 @@ Installation
 
 Marcel depends on [dill](https://pypi.org/project/dill/), which can be installed
 like this:
-```
+```shell script
 python3 -m pip install dill
 ```
 
 To install marcel:
-```
+```shell script
 python3 -m pip install marcel
 ```
 
 These commands install for the current user. To install for the entire system,
-use `sudo python3 -m pip ...` instead.
+use `sudo python3 -m pip install --prefix ...` instead. (The value of the `prefix` flag should
+be something like `/usr/local`.)

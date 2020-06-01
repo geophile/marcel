@@ -55,6 +55,7 @@ class TabCompleter:
     def __init__(self, main):
         self.main = main
         self.op_name = None
+        self.op_flags = None
         self.executables = None
         self.homedirs = None
         readline.set_completer(self.complete)
@@ -82,8 +83,9 @@ class TabCompleter:
                 # Don't do tab completion
                 return None
             except marcel.exception.KillCommandException as e:
-                debug(f'Arg parse failed? {e}')
-                return None
+                # Parse may have failed because of an unrecognized op, for example. Normal continuation should
+                # do the right thing.
+                pass
             except BaseException as e:
                 debug(f'Something went really wrong: {e}')
                 marcel.util.print_stack()
@@ -95,9 +97,10 @@ class TabCompleter:
                 candidates = self.complete_help(text)
             else:
                 self.op_name = op_name
+                self.op_flags = parser.current_op_flags
                 debug(f'op_name: {self.op_name}, text: {text}')
                 if text.startswith('-'):
-                    candidates = TabCompleter.complete_flag(text, self.op_name)
+                    candidates = self.complete_flag(text)
                 elif self.is_filename_arg(parser):
                     candidates = self.complete_filename(text)
                 else:
@@ -139,11 +142,9 @@ class TabCompleter:
         return (self.op_name in TabCompleter.FILENAME_OPS or
                 self.op_name == 'bash' and parser.op.args[0] in TabCompleter.FILENAME_OPS)
 
-    @staticmethod
-    def complete_flag(text, op_name):
-        flags = marcel.core.ArgParser.op_flags[op_name]
+    def complete_flag(self, text):
         candidates = []
-        for f in flags:
+        for f in self.op_flags:
             if f.startswith(text):
                 candidates.append(f)
         debug('complete_flag candidates for <{}>: {}'.format(text, candidates))

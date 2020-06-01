@@ -146,6 +146,16 @@ class ArgsParser:
         self.check_anon_list_terminal()
         self.validated = True
 
+    # For TabCompleter
+    def flags(self):
+        flags = []
+        for flag in self.flag_args:
+            if flag.short:
+                flags.append(flag.short)
+            if flag.long:
+                flags.append(flag.long)
+        return flags
+
     # ------------------------------------------------------------------------------------------------------------------
 
     # Conversion and type checking

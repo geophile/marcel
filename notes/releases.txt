@@ -42,6 +42,13 @@ a command by ssh. May be related to bug 46.
   - Pipeline execution
   - Function eval (implicit map)
 
+- Resurrect tab completion
+  - ops
+  - flags
+  - files
+
+- Resurrect op help
+
 
 - Bugs:
 
@@ -50,6 +57,7 @@ a command by ssh. May be related to bug 46.
   - 51
   - 53
   - 54
+  - 55
 
 ----------------------------------------------------------------------
 

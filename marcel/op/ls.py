@@ -40,14 +40,12 @@ Run {n:help file} for more information on {n:File} objects.
 '''
 
 
-def ls(env, *paths, depth=1, recursive=False, file=False, dir=False, symlink=False):
+def ls(env, *paths, depth=None, recursive=False, file=False, dir=False, symlink=False):
     args = []
     if depth == 0:
         args.append('-0')
     elif depth == 1:
         args.append('-1')
-    else:
-        raise marcel.exception.KillCommandException(f'ls: If specified, depth must be 0 or 1: {depth}')
     if recursive:
         args.append('--recursive')
     if file:

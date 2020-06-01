@@ -1,0 +1,12 @@
+Marcel is a shell. It is intended to be familiar to anyone who knows bash, but it emphasizes piping objects between commands, instead of strings. E.g., to explore the current directory recursively and find files changed in the past day:
+
+    ls -r | select (file: now() - file.mtime < days(1))
+
+Marcel is designed for interactive use. Python would be a fine scripting language if the integration with shell commands were better.  So I made marcel's capabilities available as a module, marcel.api. The integration is extremely clean, (IMHO). To do the above example in Python:
+
+    from marcel.api import *
+
+    for file in ls(recursive=True) | select(lambda file: now() - file.mtime < days(1)):
+        print(file)
+
+Check it out here: https://github.com/geophile/marcel
