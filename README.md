@@ -200,17 +200,15 @@ defines `__iter__` so that the pipeline can be used directly in a Python `for` l
 Installation
 ------------
 
-Marcel depends on [dill](https://pypi.org/project/dill/), which can be installed
-like this:
-```shell script
-python3 -m pip install dill
-```
-
 To install marcel:
 ```shell script
 python3 -m pip install marcel
 ```
 
-These commands install for the current user. To install for the entire system,
+This command installs marcel for the current user. To install for the entire system,
 use `sudo python3 -m pip install --prefix ...` instead. (The value of the `prefix` flag should
 be something like `/usr/local`.)
+
+Marcel depends on [dill](https://pypi.org/project/dill/). This package
+will be installed automatically if needed, when marcel is installed
+via pip.
