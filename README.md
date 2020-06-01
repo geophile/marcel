@@ -53,7 +53,7 @@ Pipelines
 Marcel provides commands, called _operators_, which do the basic work of a shell. 
 An operator takes a _stream_ of data as input, and generates another stream as output.
 Operators can be combined by pipes, causing one operator's output to be the next operator's input.
-For exampe, this command uses the `ls` and `map` operators to list the
+For example, this command uses the `ls` and `map` operators to list the
 names and sizes of files in the `/home/jao` directory:
 
 ```
