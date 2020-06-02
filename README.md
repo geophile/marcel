@@ -3,49 +3,35 @@ Marcel
 
 [Marcel is a shell](https://www.youtube.com/watch?v=VF9-sEbqDvU). 
 The main idea is to rely on piping as the primary
-means of building up functionality, as with any Unix or Linux
+means of composition, as with any Unix or Linux
 shell. However, instead of passing strings from one command to the
 next, marcel passes Python values: builtin types such as lists,
 tuples, strings, and numbers; but also objects representing files and
 processes.
 
 Linux has extremely powerful commands such as `awk` and `find`.  Most
-people know how to do a few simple operations using these commands,
-but cannot easily exploit the full power of these command due to their
-reliance on extensive "sublanguages" which do:
+people know how to do a few simple operations using these commands.
+But it is not easy to exploit the full power of these commands
+due to their reliance on extensive "sublanguages" which do:
 
 * __Filtering__: What data is of interest?
 * __Processing__: What should be done with the data?
 * __Formatting__: How should results be presented?
 
 By contrast, if you know Python, then you already know the language
-used by marcel.  You use Python to filter data,
-process it, and control command output.
+used by marcel.  You use marcel operators combined with Python code
+to filter data, process it, and control command output.
 
 The commands and syntax supported by a shell constitute a language
 which can be used to create scripts. Of course, in creating a script,
 you rely on language features that you typically do not use
 interactively: control structures, data types, and abstraction
-mechanisms (e.g. functions), for example. And 
-from a lanugage point of view,
-shell scripting is notoriously bad. Marcel takes a different
-approach, using Python as a scripting language. While Python is
-sometimes considered to already be a scripting language, it isn't really. 
-Executing shell commands from Python code is cumbersome. You've got to use
-`os.system`, or `subprocess.Popen`, and write some additional code to
-do the integration. Marcel provides a Python module, `marcel.api`,
-which brings shell commands into Python in a much cleaner way. For
-example, to list file names and sizes in `/home/jao`:
-
-```python
-from marcel.api import *
-
-for file, size in ls('/home/jao') | map(lambda f: (f, f.size)):
-    print(f'{file.name}: {size}')
-```
-
-This is a standard Python for loop, iterating over the results of the `ls` command,
-piped to a function which maps files to (file, file size) tuples, which are then printed.
+mechanisms (e.g. functions), for example. 
+Viewed as a programming language, shell scripting languages 
+are notoriously bad. I didn't think it was wise to bring another one
+into the world. So marcel takes a different
+approach, using Python as a scripting language, (see below for more 
+on scripting).
 
 Pipelines
 ---------
@@ -72,7 +58,7 @@ In this case, an incoming `File` is mapped to a tuple containing the file and th
 
 A `pipeline` is a sequence of operators connected by pipes. They can be used directly
 on the command line, as above. They also have various other uses in marcel. For example,
-a pipeline can be assigned to a variable, essentially defining a function.
+a pipeline can be assigned to a variable, essentially defining a new operator.
 For example, here is a pipeline, assigned to the variable `recent`, which selects
 `File`s modified within the past day:
 
@@ -121,7 +107,11 @@ map (5 + 6)
 ```  
 
 which prints `11`. In a situation like this, marcel also permits you to omit `map`; it is
-implied. So writing `(5 + 6)` as the entire command is also supported.
+implied, so this also works:
+
+```shell script
+(5 + 6)
+```
 
 Executables
 -----------
@@ -159,42 +149,41 @@ Marcel provides:
 * __Command history:__ A `history` operator, rerunning and editing of previous commands,
 reverse search, etc.
 * __Customizable prompts:__ Configured in Python, of course.
+* __Tab completion:__ For operators, flags, and filename arguments.
+* __Help:__ Extensive help facility, providing information on concepts, objects,
+and operators.
 * __Customizable color highlighting:__ The colors used to render output for builtin types such 
 as `File` and `Process`, and `help` output can be customized too.
-* __Tab completion:__ For operators, flags, and filename arguments.
-* __help:__ Extensive help facility, providing information on concepts, objects,
-and operators.
 
 Scripting
 ---------
 
 Marcel's syntax for constructing and running pipelines, and defining and using
-variables and functions, was designed for interactive usage. Extending this syntax
-to a full scripting language is pointless, as it would be unlikely to yield a first-rate
-implementation of a first-rate language. Instead, my approach is to make it possible
-to use Python as a scripting language by adding a marcel API. Recall this example:
+variables and functions, was designed for interactive usage. Instead of extending
+this syntax to a full-fledged scripting language, marcel provides a Python API,
+allowing Python to be used as the scripting language.
+While Python is
+sometimes considered to _already be_ a scripting language, it isn't really. 
+Executing shell commands from Python code is cumbersome. You've got to use
+`os.system`, or `subprocess.Popen`, and write some additional code to
+do the integration.
 
-```
-recent = [select (file: now() - file.mtime < hours(24))] 
-ls ~/git/myproject | recent
-```
-
-The same thing could be done from Python after importing the marcel API:
+Marcel provides a Python module, `marcel.api`,
+which brings shell commands into Python in a much cleaner way. For
+example, to list file names and sizes in `/home/jao`:
 
 ```python
 from marcel.api import *
 
-recent = select(lambda file: now() - file.mtime < hours(24))
-for file in ls('~/git/myproject') | recent:
-    print(f'{file}')
+for file, size in ls('/home/jao') | map(lambda f: (f, f.size)):
+    print(f'{file.name}: {size}')
 ```
-
-* Each marcel operator is represented by a function imported by `marcel.api`.
-* Command-line arguments turn into function arguments. For `select`, note that
-its function argument is the same as in the shell version, except that the `lambda`
-keyword is now required, because we are now bound by Python syntax rules.
-* `ls(...) | recent` defines a marcel pipeline. The Python class representing pipelines
-defines `__iter__` so that the pipeline can be used directly in a Python `for` loop.
+This code uses the `ls` and `map` functions, provided by `marcel.api`. These correspond to
+marcel operators that you can use on the command line. Output from the `ls` is a stream
+of `File`s, which are piped to `map`, which maps files to (file, file size) tuples. 
+`ls ... | map ...` defines a pipeline (just as on the command line). The Python
+class representing pipelines defines `__iter__`, so that the pipeline's output can be
+iterated over using the standard Python `for` loop.
 
 
 Installation
