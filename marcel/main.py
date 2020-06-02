@@ -199,10 +199,10 @@ def fail(message):
 
 
 # --dill: bool
-# --mpstart: fork/spawn/forkserver. Use default if not specified
+# --mpstart: fork/spawn/forkserver. Use fork if not specified
 def args():
     dill = True
-    mpstart = None
+    mpstart = 'fork'
     flag = None
     for arg in sys.argv[1:]:
         if arg == '--dill' or arg == '--mpstart':
@@ -210,13 +210,14 @@ def args():
         elif arg.startswith('-'):
             fail(f'Unrecognized flag {arg}')
         else:
+            # arg is a flag value
             if flag == '--dill':
                 dill = arg.lower() in ('t', 'true')
             elif flag == '--mpstart':
                 if arg in ('fork', 'spawn', 'forkserver'):
                     mpstart = arg
                 else:
-                    fail(f'Set --mpstart to fork, forkserver, or spawn')
+                    fail(f'Set --mpstart to fork (default), forkserver, or spawn')
     return dill, mpstart
 
 

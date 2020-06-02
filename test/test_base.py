@@ -61,6 +61,9 @@ class TestBase:
     def cd(self, path):
         self.main.run_command(f'cd {path}')
 
+    def tab_complete(self, line, text):
+        return self.main.tab_completer.candidates(line, text)
+
     def description(self, x):
         return x if type(x) is str else dill.source.getsource(x).split('\n')[0]
 
@@ -135,6 +138,7 @@ class TestConsole(TestBase):
                     self.check_substring(test, expected_err, actual_err)
             except Exception as e:
                 print(f'{self.description(test)}: Terminated by uncaught exception: {e}', file=sys.__stdout__)
+                marcel.util.print_stack()
                 self.failures += 1
             except marcel.exception.KillCommandException as e:
                 print(f'{self.description(test)}: Terminated by KillCommandException: {e}', file=sys.__stderr__)
@@ -245,4 +249,23 @@ class TestAPI(TestBase):
             print(f'{self.description(test)} failed, expected != actual:', file=sys.__stdout__)
             print(f'    expected:\n<<<{expected}>>>', file=sys.__stdout__)
             print(f'    actual:\n<<<{actual}>>>', file=sys.__stdout__)
+            self.failures += 1
+
+
+class TestTabCompletion(TestBase):
+
+    def __init__(self, config_file='./.marcel.py'):
+        super().__init__(config_file)
+
+    def reset_environment(self, config_file='./.marcel.py'):
+        self.main = marcel.main.Main(config_file, same_process=True)
+
+    def run(self, line, text, expected):
+        print(f'TESTING: line="{line}", text="{text}"')
+        actual = self.main.tab_completer.candidates(line, text)
+        if actual is None:
+            actual = []
+        if sorted(expected) != sorted(actual):
+            print(f'    Expected: {sorted(expected)}')
+            print(f'    Actual:   {sorted(actual)}')
             self.failures += 1

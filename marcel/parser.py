@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-from enum import Enum, auto
-
 import marcel.core
 import marcel.exception
 import marcel.functionwrapper
@@ -599,6 +597,28 @@ class Lexer(Source):
 #     str: String
 
 
+# Used mainly by TabCompleter.
+class CurrentOp:
+
+    def __init__(self, parser, op_token):
+        op_name = op_token.op_name()
+        op_module = parser.op_modules.get(op_name, None)
+        if op_module:
+            self.op = op_module.create_op()
+            self.args_parser = op_module.args_parser()
+        else:
+            self.op = None
+            self.args_parser = None
+        self.processing_args = False
+
+    def __repr__(self):
+        return f'CurrentOp({self.op.op_name()})' if self.op else 'CurrentOp(<not builtin>)'
+
+    @property
+    def flags(self):
+        return self.args_parser.flags() if self.args_parser else None
+
+
 class Parser:
 
     def __init__(self, text, main):
@@ -608,9 +628,9 @@ class Parser:
         self.tokens = Lexer(self.env, text).tokens()
         self.t = 0
         self.token = None  # The current token
-        # For use by tab completer
-        self.current_op_name = None
-        self.current_op_flags = None
+        self.current_ops = marcel.util.Stack()
+        # For use by TabCompleter
+        self.current_op = None
 
     def parse(self):
         return self.command()
@@ -646,8 +666,6 @@ class Parser:
     # Accumulates ops in REVERSE order, to avoid list prepend.
     # Top-level caller needs to reverse the result..
     def op_sequence(self):
-        self.current_op_name = None
-        self.current_op_flags = None
         op_args = self.op_args()
         if self.next_token(Pipe):
             op_sequence = Parser.ensure_sequence(self.op_sequence())
@@ -661,13 +679,16 @@ class Parser:
             return self.create_map(self.token)
         else:
             op_token = self.op()
+            self.current_op = CurrentOp(self, op_token)
+            self.current_ops.push(self.current_op)
             args = []
             arg = self.arg()
             while arg is not None:
+                self.current_op.processing_args = True
                 args.append(arg)
                 arg = self.arg()
             op = self.create_op(op_token, args)
-            self.current_op_name = op.op_name()
+            self.current_op = self.current_ops.pop()
             return op
 
     def op(self):
@@ -717,23 +738,19 @@ class Parser:
         return op
 
     def create_op_builtin(self, op_token, args):
-        op = None
+        current_op = self.current_ops.top()
+        if current_op.op is None:
+            return None
+        op = current_op.op
         op_name = op_token.op_name()
-        try:
-            op_module = self.op_modules[op_name]
-            op = op_module.create_op()
-            # Both ! and !! map to the run op.
-            if op_name == 'run':
-                # !: Expect a command number
-                # !!: Don't expect a command number, run the previous command
-                # else: 'run' was entered
-                op.expected_args = (1 if op_token.value() == '!' else
-                                    0 if op_token.value() == '!!' else None)
-            args_parser = op_module.args_parser()
-            self.current_op_flags = args_parser.flags()
-            args_parser.parse(args, op)
-        except KeyError:
-            pass
+        # Both ! and !! map to the run op.
+        if op_name == 'run':
+            # !: Expect a command number
+            # !!: Don't expect a command number, run the previous command
+            # else: 'run' was entered
+            op.expected_args = (1 if op_token.value() == '!' else
+                                0 if op_token.value() == '!!' else None)
+        current_op.args_parser.parse(args, op)
         return op
 
     def create_op_variable(self, op_token, args):

@@ -393,13 +393,5 @@ determine if they should really be printed.
 
 ----------------------------------------------------------------------
 
-Tab completion:
-
-"window -"<TAB>:
-
-- In TabCompletion, op_name is not set, because "window -" is not a
-  valid command. - does not parse as any arg to window.
-
-"ls -"<TAB>:
-
-- op_name is set, so tab completion works. - is parsed as a filename.
+TestBase.reset_environment does too much. Move everything but Main
+construction into subclasses.
