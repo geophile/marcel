@@ -328,6 +328,13 @@ Could also save data, e.g. "out -s|--save"
 
 - if without var: send x downstream if predicate(x) is true, i.e. select op.
 
+- Could do a lispish generalization to cond:
+
+  cond pred-1 pipeline-1 pred-1 pipeline-2 ...
+
+There's actually little point to this. It saves very little
+typing. Might save some receive/send calls, and so be faster.
+
 
 Replace var-n with a pipeline, which could save results. So
 

@@ -59,7 +59,9 @@ class MultiLineReader:
             line = input(prompt if len(lines) == 0 else continuation_prompt)
             # The len(lines) > 0 check is needed to fix bug 41.
             if len(line) > 0 or len(lines) > 0:
-                readline.remove_history_item(readline.get_current_history_length() - 1)
+                history_length = readline.get_current_history_length()
+                if history_length > 0:
+                    readline.remove_history_item(history_length - 1)
                 # If line was recalled from history, then convert to its original multiline form.
                 from_history = self._multiline(line)
                 if from_history is None:

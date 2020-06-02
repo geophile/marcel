@@ -243,3 +243,14 @@ jao@cheese:~$
 
 print 'a' is a shell command which writes to stderr. Marcel doesn't
 report it.
+
+----------------------------------------------------------------------
+
+57. This seems wrong
+
+    M-0.7.9 jao@cheese:~/git/marcel/test$ printa
+    Unknown command: printa
+    M-0.7.9 jao@cheese:~/git/marcel/test$ print('a')
+    printa
+
+In bash, ls, "ls", 'l's all do the same thing.

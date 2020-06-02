@@ -8,4 +8,4 @@ function suppress_interruptions()
 trap suppress_interruptions SIGINT
 trap suppress_interruptions SIGTSTP
 
-python3 -m marcel.main
+python3 -m marcel.main $*

@@ -97,8 +97,8 @@ class DirectoryState:
 class Environment:
 
     CONFIG_FILENAME = '.marcel.py'
-    DEFAULT_PROMPT = '$ '
-    DEFAULT_PROMPT_CONTINUATION = '+ '
+    DEFAULT_PROMPT = f'M-{marcel.version.VERSION} $ '
+    DEFAULT_PROMPT_CONTINUATION = '+$    '
 
     def __init__(self, config_file):
         user = getpass.getuser()

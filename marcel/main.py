@@ -30,6 +30,7 @@
 
 import argparse
 import atexit
+import multiprocessing
 import pathlib
 import readline
 import sys
@@ -79,15 +80,13 @@ class Main:
 
     MAIN_SLEEP_SEC = 0.1
 
-    def __init__(self, same_process=False):
+    def __init__(self, config_file, same_process=False):
         # sys.argv sets config_path, dill
-        self.config = None
-        self.dill = None
-        self.parse_args()
+        self.dill = True
         #
         self.same_process = same_process
         try:
-            self.env = marcel.env.Environment(self.config)
+            self.env = marcel.env.Environment(config_file)
         except marcel.exception.KillShellException as e:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)
@@ -189,21 +188,42 @@ class Main:
         for module in self.op_modules.values():
             module.reformat_help()
 
-    def parse_args(self):
-        parser = argparse.ArgumentParser(prog='marcel')
-        parser.add_argument('config',
-                            nargs='?',
-                            help='The location of the marcel configuration file, (typically named .marcel.py)')
-        parser.add_argument('--dill',
-                            nargs='?')
-        parser.parse_args(args=sys.argv[1:], namespace=self)
-        self.dill = self.dill is None or self.dill not in ('F', 'f', 'False', 'false')
-
     @staticmethod
     def default_error_handler(env, error):
         print(error.render_full(env.color_scheme()))
 
 
+def fail(message):
+    print(message, file=sys.stderr)
+    exit(1)
+
+
+# --dill: bool
+# --mpstart: fork/spawn/forkserver. Use default if not specified
+def args():
+    dill = True
+    mpstart = None
+    flag = None
+    for arg in sys.argv[1:]:
+        if arg == '--dill' or arg == '--mpstart':
+            flag = arg
+        elif arg.startswith('-'):
+            fail(f'Unrecognized flag {arg}')
+        else:
+            if flag == '--dill':
+                dill = arg.lower() in ('t', 'true')
+            elif flag == '--mpstart':
+                if arg in ('fork', 'spawn', 'forkserver'):
+                    mpstart = arg
+                else:
+                    fail(f'Set --mpstart to fork, forkserver, or spawn')
+    return dill, mpstart
+
+
 if __name__ == '__main__':
-    MAIN = Main()
+    dill, mpstart = args()
+    if mpstart is not None:
+        multiprocessing.set_start_method(mpstart)
+    MAIN = Main(None)
+    MAIN.dill = dill
     MAIN.run()

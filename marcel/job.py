@@ -139,12 +139,25 @@ class Job:
     # For use by this class
 
     def start_process(self):
+        def run_command_in_child(command, writer):
+            debug(f'running: {command.source}')
+            try:
+                dir_vars = command.execute()
+                debug(f'completed: {command.source} {dir_vars}')
+                writer.send(dir_vars)
+            except marcel.exception.KillCommandException as e:
+                marcel.util.print_to_stderr(e, self.env)
+            except marcel.exception.KillAndResumeException as e:
+                # Error handler printed the error
+                pass
+            writer.close()
+
         # duplex=False: child writes to parent when function completes execution. No need to communicate in the
         # other direction
         debug(f'About to spawn process for {self.command.source}')
         reader, writer = mp.Pipe(duplex=False)
         JobControl.only.child_listener.add_listener(reader)
-        self.process = mp.Process(target=Job.run_command_in_child, args=(self.command, writer, self.env))
+        self.process = mp.Process(target=run_command_in_child, args=(self.command, writer))
         self.process.daemon = True
         try:
             # Set up process handling as it should exist in the child process. Ignore ctrl-c (since that
@@ -162,20 +175,6 @@ class Job:
         if self.process is None or not self.process.is_alive():
             self.state = Job.DEAD
             self.process = None
-
-    @staticmethod
-    def run_command_in_child(command, writer, env):
-        debug(f'running: {command.source}')
-        try:
-            dir_vars = command.execute()
-            debug(f'completed: {command.source} {dir_vars}')
-            writer.send(dir_vars)
-        except marcel.exception.KillCommandException as e:
-            marcel.util.print_to_stderr(e, env)
-        except marcel.exception.KillAndResumeException as e:
-            # Error handler printed the error
-            pass
-        writer.close()
 
 
 class ChildListener(threading.Thread):
