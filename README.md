@@ -57,7 +57,7 @@ For example, this command uses the `ls` and `map` operators to list the
 names and sizes of files in the `/home/jao` directory:
 
 ```shell script
-ls /home/jao | map (f: (f, f.size)
+ls /home/jao | map (f: (f, f.size))
 ``` 
 
 * The `ls` operator produces a stream of `File` objects, representing the contents
