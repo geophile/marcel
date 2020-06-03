@@ -17,7 +17,9 @@ import marcel.argsparser
 import marcel.core
 
 
-SUMMARY = '''
+HELP = '''
+{L,wrap=F}popd
+
 Pop the directory stack, and cd to the new top directory.
 '''
 

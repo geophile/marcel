@@ -391,3 +391,10 @@ determine if they should really be printed.
 
 TestBase.reset_environment does too much. Move everything but Main
 construction into subclasses.
+
+----------------------------------------------------------------------
+
+Make sure that help adapts to change in screen size. There's been
+bitrot. See opmodule.reformat_help.
+
+Does "help" use the op version or the topic version?

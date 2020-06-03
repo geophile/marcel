@@ -23,14 +23,17 @@ import marcel.object.error
 import marcel.util
 
 
-SUMMARY = '''
-Run an executable (as opposed to a marcel command). 
-'''
+HELP = '''
+{L,wrap=F}bash [-i|--interactive] ARG ...
 
+{L,indent=4:28}-i, --interactive       Specifies that the executable to be run 
+is interactive. stdin, stdout, and stderr are not handled by marcel. 
 
-DETAILS = '''
+Runs the executable specified by the first {r:ARG}, (as opposed to a marcel command).
+Remaining {r:ARG}s are arguments to the executable. 
+
 It is usually possible to run an executable directly, without using the bash command.
-Use this command if the interactive flag is needed.
+Use this command if the {r:--interactive} flag is needed.
 '''
 
 

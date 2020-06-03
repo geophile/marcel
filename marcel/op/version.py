@@ -18,12 +18,11 @@ import marcel.core
 import marcel.version
 
 
-SUMMARY = '''
+HELP = '''
+{L,wrap=F}version
+
 Write the marcel version number to the output stream.
 '''
-
-
-DETAILS = None
 
 
 def version(env):

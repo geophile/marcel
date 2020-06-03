@@ -18,16 +18,17 @@ import marcel.core
 import marcel.util
 
 
-SUMMARY = '''
+HELP = '''
+{L,wrap=F}unique [-c|--consecutive]
+
+{L,indent=4:28}-c, --consecutive       Only look for consecutive duplicates.
+
 Write to the output stream all input tuples, but without duplicates.
-'''
 
-
-DETAILS = '''
 Input tuples are passed to output, removing duplicates. No output is
 generated until the end of the input stream occurs. However, if the
-duplicates are known to be consecutive, then {r:-c} allows
-output to be generated sooner. Input order is preserved only if {r:-c}
+duplicates are known to be consecutive, then {r:--consecutive} allows
+output to be generated sooner. Input order is preserved only if {r:--consecutive}
 is specified.
 '''
 

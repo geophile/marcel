@@ -21,19 +21,15 @@ import threading
 import time
 
 
-ARGS = '''[-c|--components] INTERVAL
-{p,indent=4:20}
--c --components     Output timestamp as a Python {n:time.struct_time} value, instead of seconds.
-{p,indent=4:20}
-INTERVAL            Time between successive timestamps.            
-'''
+HELP = '''
+{L,wrap=F}timer [-c|--components] INTERVAL
 
+{L,indent=4:28}-c, --components        Output timestamp as a Python {n:time.struct_time} value, instead of seconds.
+{L,indent=4:28}INTERVAL                The amount of time to wait between consecutive timestamps.
 
-SUMMARY = 'Generate a sequence of timestamps, separated in time by a specified interval'
+Generate a sequence of timestamps, separated in time by a specified {r:INTERVAL}.
 
-
-DETAILS = '''
-The {r:interval} format is {n:HH:MM:SS} where {r:HH} is hours, 
+The {r:INTERVAL} format is {n:HH:MM:SS} where {r:HH} is hours, 
 {r:MM} is minutes, {r:SS} is seconds. {r:HH:} and
 {r:HH:MM:} may be omitted.
 

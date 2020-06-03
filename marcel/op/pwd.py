@@ -17,7 +17,9 @@ import marcel.argsparser
 import marcel.core
 
 
-SUMMARY = '''
+HELP = '''
+{L,wrap=F}pwd
+
 Write the current directory to the output stream.
 '''
 

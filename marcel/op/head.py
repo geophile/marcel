@@ -17,14 +17,12 @@ import marcel.argsparser
 import marcel.core
 
 
-SUMMARY = '''
-Output the leading items of the input stream, and discard the others.  
-'''
+HELP = '''
+{L,wrap=F}head N
 
+{L,indent=4:28}N                       The number of input tuples to be written to output.
 
-DETAILS = '''
-The first {r:n} items received from the input stream will be written to the
-output stream. All other input items will be discarded. 
+Output the first {r:N} tuples of the input stream, and discard the others.  
 '''
 
 

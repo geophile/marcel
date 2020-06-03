@@ -21,21 +21,23 @@ import marcel.exception
 import marcel.functionwrapper
 
 
-SUMMARY = '''
+HELP = '''
+{L,wrap=F}window [-o|--overlap N] [-d|--disjoint N] [PREDICATE]
+
+{L,indent=4:28}-o, --overlap           Generate overlapping windows of size N.
+{L,indent=4:28}-d, --disjoint          Generate disjoint windows of size N.
+{L,indent=4:28}PREDICATE               Start a new window on inputs for which the predicate evaluates to True.
+
 Groups of consecutive input tuples are combined into a single tuple, which is written to
 the output stream. 
-'''
 
-
-DETAILS = '''
-Groups of consecutive input tuples are combined and written
-to the output stream. The objects are grouped using one of two
+The objects are grouped using one of two
 mechanisms.
 
 {b:Predicate-based:}
 
 A new group is started on the first input object, and for any
-subsequent object for which {r:predicate} returns true. For example, if
+subsequent object for which {r:PREDICATE} returns true. For example, if
 the input stream contains the integers {n:1, 2, 3, ...}, then:
 {p,wrap=F}
     window (x: x % 3 == 2)
@@ -52,8 +54,8 @@ I.e., a new tuple is started for each integer n, (after the first integer) such 
 
 {b:Fixed-size}:
 
-Groups have a fixed number of objects. The {r:-o} and {r:-d} flags
-specify {r:N}, the number of objects in the groups.  {r:-o}
+Groups have a fixed number of objects. The {r:--overlap} and {r:--disjoint} flags
+specify {r:N}, the number of objects in the groups.  {r:--overlap}
 specifies {i:overlapping} windows, in which each input object begins a
 new list containing {r:N} items. Groups may be padded with
 {r:None} values to ensure that the group's size is {r:N}.
@@ -74,7 +76,7 @@ tuples:
     ((8,), (9,), (None,))
     ((9,), (None,), (None,))
 
-{r:-d} specifies {i:disjoint} windows, in which each input object
+{r:--disjoint} specifies {i:disjoint} windows, in which each input object
 appears in only one group. A new group is started every {r:N}
 objects. The last window may be padded with (None,) to ensure that it
 has {r:N} elements.

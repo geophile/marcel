@@ -20,13 +20,14 @@ import marcel.core
 import marcel.exception
 
 
-SUMMARY = '''
-Push a given directory onto the directory stack, and cd to that directory.
-'''
+HELP = '''
+{L,wrap=F}pushd [DIRECTORY]
 
+{L,indent=4:28}DIRECTORY               The directory to be added to the directory stack.
 
-DETAILS = '''
-If no {r:directory} is supplied, then the top two items on the directory stack are swapped,
+Push The given {r:DIRECTORY} onto the directory stack, and cd to it.
+
+If no {r:DIRECTORY} is supplied, then the top two items on the directory stack are swapped,
 and the current directory is changed to the new top directory on the stack.
 '''
 

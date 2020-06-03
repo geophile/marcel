@@ -18,15 +18,16 @@ import marcel.core
 import marcel.util
 
 
-SUMMARY = '''
-Flatten input tuples (or parts of them) and write the flattened result to the output stream.
-'''
+HELP = '''
+{L,wrap=F}expand [POSITION]
 
+{L,indent=4:28}POSITION                The position, within input tuples, of the sequence to be expanded.
 
-DETAILS = '''
-If {r:position} is omitted, then each element of an input tuple is generated as a separate
+Flattens input tuples (or parts of them) and write the flattened result to the output stream.
+
+If {r:POSITION} is omitted, then each element of an input tuple is generated as a separate
 1-tuple in the output stream. (If the input has one element, then the output matches the input.)
-If {r:position} is provided, it must be non-negative. If {r:position} exceeds the length of an
+If {r:POSITION} is provided, it must be non-negative. If {r:POSITION} exceeds the length of an
 input sequence, then nothing is expanded (the input sequence is sent as output).
 
 {b:Example}: If the input contains these sequences:

@@ -21,18 +21,32 @@ import marcel.exception
 import marcel.object.error
 import marcel.object.renderable
 
-SUMMARY = '''
-Prints items received on the input stream.
-'''
+HELP = '''
+{L,wrap=F}out [-a|--append FILENAME] [-f|--file FILENAME] [-c|--csv] [FORMAT]
 
-DETAILS = '''
+{L,indent=4:28}-a, --append            Append output to the file identified by FILENAME.
+{L,indent=4:28}-f, --file              Write output to the file identified by FILENAME, replacing an existing
+file if necessary.
+{L,indent=4:28}-c, --csv               Format output as comma-separated values.
+{L,indent=4:28}FORMAT                  The Python formatting specification to be applied to output tuples.
+
+
+Prints tuples received on the input stream.
+
 Tuples received on the input stream are passed to the output stream. As a side-effect, input
-tuples are printed to stdout or to the file specified by {r:file} or {r:append}.
+tuples are printed to stdout or to the specified {r:FILENAME}. If the {r:FILENAME} is specified
+by {r:--file}, then an existing file is replaced. If the {r:FILENAME} is specified
+by {r:--append}, then output is appended to an existing file.
 
+The {r:--append} and {r:--file} options are mutually exclusive.
+
+The {r:--csv} and {r:FORMAT} options are mutually exclusive.
 If no formatting options are specified, then the default rendering is used, except
-that 1-tuples are unwrapped.
+that 1-tuples are unwrapped. (Note that for certain objects, including
+{r:File} and {r:Process}, the default rendering is specified by the {n:render_compact()}
+or {n:render_full()} methods. Run {n:help object} for more information.)
 
-Error objects are not subject to formatting specifications, and are not passed on as output.
+{n:Error} objects are not subject to formatting specifications, and are not passed on as output.
 '''
 
 

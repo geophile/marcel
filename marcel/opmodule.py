@@ -30,12 +30,15 @@ class OpModule:
         self._op_constructor = None
         self._args_parser = None
         self._args_parser_constructor = None
+        self._help = None
         op_module = importlib.import_module(f'marcel.op.{op_name}')
         # Locate items in module needed during the lifecycle of an op.
         for k, v in op_module.__dict__.items():
             # Leading underscore used by ops not intended for direction invocation by users.
             if k == op_name or k == '_' + op_name:
                 self._api = v
+            elif k == 'HELP':
+                self._help = v
             else:
                 isclass = inspect.isclass(v)
                 if isclass:
@@ -63,6 +66,9 @@ class OpModule:
             assert self._args_parser_constructor is not None
             self._args_parser = self._args_parser_constructor(self._env)
         return self._args_parser
+
+    def help(self):
+        return self._help
 
     # The operator's help info is formatted when the arg parser is created. When the screen
     # size changes, this info has to be reformatted.

@@ -198,3 +198,15 @@ Without a userid. Seems to work with one.
 E.g. tab completion of "g" ->gather gen
 
 gather should not be visible.
+
+----------------------------------------------------------------------
+
+58. Infinite loop in help
+
+There was a typo in the HELP for ps:
+
+HELP = '''
+{L,wrap=F}ps [-u|--user [USER]] [-g|--group [GROUP}] [-p|--pid PID] [-c|--command STRING]
+
+Note that GROUP is followed by } instead of ]. That seemed to put 
+help into an infinite loop.

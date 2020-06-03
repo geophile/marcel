@@ -21,20 +21,27 @@ import marcel.object.file
 import marcel.op.filenames
 
 
-SUMMARY = '''
-The specified files, directories, and symlinks are written to the output stream.
-'''
+HELP = '''
+{L,wrap=F}ls [[-01] [-r|--recursive]] [-f|--file] [-d|--dir] [-s|--symlink] [FILENAME ...]
 
+{L,indent=4:28}-0                      Include only files matching the specified FILENAMEs, (i.e., depth 0).
+{L,indent=4:28}-1                      Include files matching the specified FILENAMEs, and in any directories
+among the FILENAMEs, (i.e., depth 1).
+{L,indent=4:28}-r, --recursive         Include all files contained in the identified FILENAMEs, recursively,
+to any depth.
+{L,indent=4:28}-f, --file              Include files in output.
+{L,indent=4:28}-d, --dir               Include directories in output.
+{L,indent=4:28}-s, --symlink           Include symbolic links in output.
+{L,indent=4:28}FILENAME                A filename or glob pattern.
 
-DETAILS = '''
 Generates a stream of {n:File} objects, representing files, directories and symlinks.
 
 The flags {r:-0}, {r:-1}, and {r:-r} are mutually exclusive. {r:-1} is the default.
 
 Flags {r:-f}, {r:-d}, and {r:-s} may be combined. If none of these flags are specified, then files, directories
-and symlinks are all listed.
+and symbolic links are all listed.
 
-If no {r:filename}s are provided, then the currentn directory is listed.
+If no {r:FILENAME}s are provided, then the current directory is listed.
 
 Run {n:help file} for more information on {n:File} objects.
 '''

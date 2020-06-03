@@ -21,14 +21,22 @@ import marcel.exception
 import marcel.main
 
 
-SUMMARY = '''
+HELP = '''
+{L,wrap=F}run [COMMAND]
+{L,wrap=F}! COMMAND
+{L,wrap=F}!!
+
+{L,indent=4:28}COMMAND                 The command number (from history) to be rerun.
+
 Run a previous command.
-'''
 
+If a {r:COMMAND} number is specified, identifying a command in the command history, then that
+command will be recalled and written to the current prompt. Hit enter to run that command again.
 
-DETAILS = '''
-If {r:n} is not specified, then run the previous command. Otherwise, run the specified command.
-The recalled command will replace {n:run} in the command history.
+If a {r:COMMAND} number is omitted, (i.e., {r:run} with no argument, or {r:!!}, then reruen the previous
+command.
+
+For more information on command history, run {n:help history}.
 '''
 
 

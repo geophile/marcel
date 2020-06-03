@@ -19,13 +19,13 @@ import marcel.argsparser
 import marcel.core
 
 
-SUMMARY = '''
+HELP = '''
+{L}cd [DIRECTORY]
+
+{L,indent=4:28}DIRECTORY               The new current directory.
+
 Change the current directory to the given directory.
-'''
-
-
-DETAILS = '''
-If {r:directory} is omitted, then change the current directory to the home directory.
+If {r:DIRECTORY} is omitted, then change the current directory to the home directory.
 '''
 
 

@@ -21,14 +21,15 @@ import marcel.core
 import marcel.functionwrapper
 from marcel.reduction import r_plus
 
-SUMMARY = '''
+HELP = '''
+{L,wrap=F}squish [FUNCTION]
+
+{L,indent=4:28}                        A reduction function.
+
 The components of each input tuple are reduced using a given function.
-'''
 
-
-DETAILS = '''
-Each input sequence is reduced to a single value, using {r:function} to combine the values.
-{r:function} is a binary function that can be used for reduction, e.g. {n:+}, {n:*}, {n:max}, {n:min}.
+Each input sequence is reduced to a single value, using {r:FUNCTION} to combine the values.
+{r:FUNCTION} is a binary function that can be used for reduction, e.g. {n:+}, {n:*}, {n:max}, {n:min}.
 
 {b:Example:} If one of the inputs is the list {n:[1, 2, 3, 4]}, then:
 {p,wrap=F}
@@ -36,7 +37,7 @@ Each input sequence is reduced to a single value, using {r:function} to combine 
 
 will generate {n:10}.
 
-If no {r:function} is provided, then {n:+} is assumed.
+If no {r:FUNCTION} is provided, then {n:+} is assumed.
 '''
 
 

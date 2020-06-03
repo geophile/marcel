@@ -19,12 +19,18 @@ import marcel.argsparser
 import marcel.core
 import marcel.reduction
 
-SUMMARY = '''
-Reduces tuples from the input stream by repeatedly applying binary functions, such as {r:+}, {r:min}, {r:max}.
-'''
+HELP = '''
+{L,wrap=F}red [-i|--interactive] FUNCTION ...
 
-DETAILS = '''
-Each {r:function} takes two inputs and produces one output.
+{L,indent=4:28}-i, --incremental       Output a tuple for each step of the reduction. I.e., there will be one
+output tuple for each input tuple, with the reductions showing the result of the reduction up to and including
+the most recent input.
+{L,indent=4:28}FUNCTION                A reduction function.
+
+
+Reduces tuples from the input stream by repeatedly applying binary functions, such as {r:+}, {r:min}, {r:max}.
+
+Each {r:FUNCTION} takes two inputs and produces one output.
 
 {b:Basic usage}
 

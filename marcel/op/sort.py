@@ -20,14 +20,16 @@ import marcel.core
 import marcel.functionwrapper
 
 
-SUMMARY = '''
+HELP = '''
+{L,wrap=F}sort [KEY]
+
+{L,indent=4:28}KEY                     The function to be applied to input tuples, to get the values by which tuples 
+should be ranked.
+
 The input stream is sorted and written to the output stream.
-'''
 
-
-DETAILS = '''
-If {r:key} is not specified, then input tuples are ordered according to Python rules.
-Otherwise, ordering is based on the values computed by applying {r:key} to each input tuple.
+If a {r:KEY} is not specified, then input tuples are ordered according to Python rules.
+Otherwise, ordering is based on the values computed by applying {r:KEY} to each input tuple.
 '''
 
 

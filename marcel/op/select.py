@@ -19,13 +19,14 @@ import marcel.argsparser
 import marcel.core
 
 
-SUMMARY = '''
-Tuples in the input stream are filtered using a predicate.
-'''
+HELP = '''
+{L,wrap=F}select FUNCTION
 
+{L,indent=4:28}FUNCTION                The function to be applied to each input tuple.
 
-DETAILS = '''
-The {r:function} is applied to each input tuple. Tuples for which the {r:function} evalutes to
+Tuples in the input stream are filtered using a predicate. 
+
+The {r:FUNCTION} is applied to each input tuple. Tuples for which the {r:FUNCTION} evalutes to
 True are written to the output stream.
 '''
 

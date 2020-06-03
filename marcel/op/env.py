@@ -18,12 +18,10 @@ import marcel.core
 
 
 SUMMARY = '''
-Write the contents of the marcel namespace to the output stream.
-'''
+{L,wrap=F}env
 
-
-DETAILS = '''
-The marcel namespace is a Python {n:dict}. Each key/value pair is written to the output stream as a tuple,
+Write the contents of the environment, (i.e., the marcel namespace), to the output stream.
+Each key/value pair is written to the output stream as a tuple,
 (key, value), sorted by key. Python's {n:__builtins__} is part of the marcel namespace, but is omitted
 from output. 
 '''

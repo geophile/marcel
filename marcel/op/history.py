@@ -18,13 +18,12 @@ import marcel.core
 import marcel.object.historyrecord
 
 
-SUMMARY = '''
+HELP = '''
+{L,wrap=F}history
+
 Generates a stream containing the history of commands executed, in chronological order (newest last).
-'''
-
-
-DETAILS = '''
-The {n:history} command itself will not show up in the command history.
+The number identifying each command can be used in conjunction with the {r:edit}, {r:run}, 
+and {r:!} operators.
 '''
 
 

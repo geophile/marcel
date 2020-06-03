@@ -21,12 +21,42 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/core.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/op/bash.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/bash.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/bg.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/bg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/cd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/cd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/dirs.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/dirs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/edit.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/edit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/expand.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/expand.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/fg.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/fg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/fork.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/fork.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/gen.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/head.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/head.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/help.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/help.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/history.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/history.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/jobs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/join.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/join.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/ls.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/map.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/map.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/out.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/out.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/popd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/popd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/ps.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/pushd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/pushd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/pwd.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/pwd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/red.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/red.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/reverse.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/reverse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/select.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/select.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/sort.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/sort.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/squish.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/squish.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/tail.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/tail.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/timer.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/timer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/unique.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/unique.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/version.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/window.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/opmodule.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/opmodule.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs_closed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs_closed.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_ops.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -337,7 +367,8 @@
       <workItem from="1590876396273" duration="21063000" />
       <workItem from="1591032961362" duration="7204000" />
       <workItem from="1591067037017" duration="30000" />
-      <workItem from="1591067076514" duration="28861000" />
+      <workItem from="1591067076514" duration="35158000" />
+      <workItem from="1591220523035" duration="3158000" />
     </task>
     <servers />
   </component>
@@ -559,12 +590,13 @@
     <state x="823" y="257" width="828" height="440" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.27.1920.1053@0.27.1920.1053" timestamp="1590791849319" />
     <state x="944" y="336" width="900" height="562" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.27.2560.1413@0.27.2560.1413" timestamp="1589896386610" />
     <state x="1920" y="336" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.27.4480.1413@0.27.4480.1413" timestamp="1590546956755" />
-    <state x="797" y="290" width="1112" height="889" key="dock-window-1" timestamp="1590791849796">
+    <state x="6" y="114" width="1112" height="889" key="dock-window-1" timestamp="1591221077717">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="797" y="290" width="1112" height="889" key="dock-window-1/0.27.1920.1053@0.27.1920.1053" timestamp="1590791849796" />
+    <state x="6" y="114" width="1112" height="889" key="dock-window-1/0.27.1920.1053@0.27.1920.1053" timestamp="1591221077717" />
     <state x="196" y="145" width="1229" height="889" key="dock-window-1/0.27.2560.1413@0.27.2560.1413" timestamp="1590442841868" />
     <state x="2396" y="261" width="1190" height="1025" key="dock-window-1/0.27.4480.1413@0.27.4480.1413" timestamp="1589841913692" />
+    <state x="1920" y="27" width="1043" height="915" key="dock-window-1/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1591205264572" />
     <state x="230" y="256" width="1109" height="932" key="dock-window-2" timestamp="1590432768571">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
@@ -573,14 +605,14 @@
       <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="2006" y="27" width="1124" height="889" key="dock-window-3/0.27.4480.1413@0.27.4480.1413" timestamp="1590509098216" />
-    <state x="2702" y="210" width="851" height="672" key="find.popup" timestamp="1591153281470">
+    <state x="2702" y="210" width="851" height="672" key="find.popup" timestamp="1591191621487">
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state x="320" y="152" width="1075" height="747" key="find.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1591034508311" />
     <state x="1043" y="302" width="1134" height="879" key="find.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1590433685549" />
     <state x="2190" y="197" width="796" height="658" key="find.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1591057922902" />
     <state x="1969" y="422" width="1017" height="768" key="find.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1590552865520" />
-    <state x="2702" y="210" width="851" height="672" key="find.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1591153281470" />
+    <state x="2702" y="210" width="851" height="672" key="find.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1591191621487" />
     <state x="782" y="232" width="851" height="656" key="find.popup/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1590976944424" />
     <state x="2963" y="280" width="1134" height="896" key="find.popup/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1589912842415" />
     <state width="669" height="625" key="javadoc.popup" timestamp="1591151959766">
@@ -596,15 +628,15 @@
     </state>
     <state x="1113" y="521" width="306" height="459" key="refactoring.ChangeSignatureDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1589638477576" />
     <state x="1948" y="521" key="refactoring.ChangeSignatureDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1590544776135" />
-    <state x="2621" y="335" width="672" height="519" key="search.everywhere.popup" timestamp="1591191108922">
-      <screen x="1920" y="0" width="1920" height="1080" />
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup" timestamp="1591222962114">
+      <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1591034731679" />
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1591222962114" />
     <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1590515908206" />
     <state x="1401" y="354" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1591058116381" />
     <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1590604011044" />
     <state x="701" y="354" width="672" height="507" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1590286500344" />
-    <state x="2621" y="335" width="672" height="519" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1591191108922" />
+    <state x="2621" y="335" width="672" height="519" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1591200269943" />
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1591020437893" />
     <state x="2854" y="447" width="672" height="691" key="search.everywhere.popup/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1590878659011" />
   </component>
@@ -618,18 +650,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/marcel/op/timer.py</url>
-          <line>93</line>
+          <line>89</line>
           <option name="timeStamp" value="193" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/marcel/argsparser.py</url>
           <line>398</line>
           <option name="timeStamp" value="238" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/marcel/op/ls.py</url>
-          <line>43</line>
-          <option name="timeStamp" value="240" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/marcel/argsparser.py</url>

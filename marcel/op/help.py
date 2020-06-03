@@ -24,14 +24,6 @@ import marcel.helpformatter
 import marcel.util
 
 
-SUMMARY = '''
-Provide help on marcel's concepts, objects, and operations.  
-'''
-
-
-DETAILS = None
-
-
 def help(env):
     return Help(env)
 
@@ -61,7 +53,7 @@ class Help(marcel.core.Op):
 
     def receive(self, _):
         op_module = self.env().op_modules.get(self.topic, None)
-        help_text = Help.op_help(op_module) if op_module else self.topic_help()
+        help_text = self.op_help(op_module) if op_module else self.topic_help()
         self.send(help_text)
 
     # Op
@@ -74,17 +66,10 @@ class Help(marcel.core.Op):
 
     # For use by this class
 
-    @staticmethod
-    def op_help(op_module):
-        arg_parser = op_module.args_parser()
-        buffer = io.StringIO()
-        with contextlib.redirect_stdout(buffer):
-            try:
-                arg_parser.parse_args(['-h'], op_module.create_op())
-            except KeyboardInterrupt:
-                # Parsing -h causes exit to raise KeyboardInterrupt
-                pass
-        return buffer.getvalue()
+    def op_help(self, op_module):
+        help_text = op_module.help()
+        formatter = marcel.helpformatter.HelpFormatter(self.env().color_scheme())
+        return formatter.format(help_text)
 
     def topic_help(self):
         try:

@@ -22,22 +22,32 @@ import marcel.opmodule
 import marcel.op.labelthread
 import marcel.op.remote
 
-SUMMARY = '''
+HELP = '''
+{L,wrap=F}fork HOST PIPELINE
+{L,wrap=F}fork N PIPELINE
+
+{L,indent=4:28}HOST                    The name of the host or set of hosts on which to run the given PIPELINE.
+{L,indent=4:28}N                       The number of instances of the PIPELINE to run locally (and concurrently).
+{L,indent=4:28}PIPELINE                The PIPELINE to be executed.
+
 Run multiple copies of a pipeline, concurrently, usually on remote hosts.
-'''
 
+If the first argument is a {r:HOST}, then the 
+{r:PIPELINE} is run on the specified {r:HOST}. The {r:HOST} must have been configured in
+the marcel configuration file. (Note that {r:HOST} may identify one or more hosts.)
 
-DETAILS = '''
-The {r:pipeline} is run on the specified {r:host}. The {r:host} must have been configured in
-the marcel configuration file.
+If the first argument is {r:N}, then the {r:PIPELINE} is run the specified
+number of times, concurrently.
 
-The output will contain the tuples obtained by running the command, including the configured name
-of the host. For example, if the cluster named {n:lab} contains hosts {n:192.169.0.100},
-and {n:192.169.0.101}, then this command:
+The output will contain the tuples obtained by running the command. The first
+element of each tuple will either identify the host, or be a number between
+0 and {r:N}-1.
+For example, if the cluster named {n:lab} contains hosts {n:192.168.0.100},
+and {n:198.169.0.101}, then this command:
 
 {L}@lab [ gen 3 ]
 
-will generate this output:
+will generate this output (possibly reordered):
 
 {p,indent=4,wrap=F}
 ('192.168.0.100', 0)
@@ -46,6 +56,20 @@ will generate this output:
 ('192.168.0.101', 0)
 ('192.168.0.101', 1)
 ('192.168.0.101', 2)
+
+This command:
+
+{L}@2 [ gen 3 ]
+
+will generate this output (possibly reordered):
+
+{p,indent=4,wrap=F}
+(0, 0)
+(0, 1)
+(0, 2)
+(1, 0)
+(1, 1)
+(1, 2)
 '''
 
 

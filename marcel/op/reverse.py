@@ -16,11 +16,11 @@
 import marcel.argsparser
 import marcel.core
 
-SUMMARY = '''
+HELP = '''
+{L,wrap=F}reverse
+
 The input stream is output in reverse order.
 '''
-
-DETAILS = None
 
 
 def reverse(env):

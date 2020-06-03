@@ -20,14 +20,15 @@ import marcel.core
 import marcel.util
 
 
-SUMMARY = '''
-For each item in the input stream, apply a given function and write the result to the output stream.
-'''
+HELP = '''
+{L,wrap=F}map FUNCTION
 
+{L,indent=4:28}FUNCTION                The function to be applied to each input tuple.
 
-DETAILS = '''
-The {r:function} is applied to each input tuple in the input stream. The components of a tuple
-are bound to the {r:function}'s parameters. The output from the function is written to the output stream.
+For each tuple in the input stream, apply the given {r:FUNCTION}} and write the result to the output stream.
+
+The components of an input tuple
+are bound to the {r:FUNCTION}'s parameters.
 '''
 
 

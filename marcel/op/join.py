@@ -20,16 +20,20 @@ import marcel.opmodule
 import marcel.object.error
 import marcel.util
 
-SUMMARY = '''
-Computes a database-style join between the incoming stream, 
-and the input stream from a second pipeline.
-'''
+HELP = '''
+{L,wrap=F}join [-k|--keep] PIPELINE
 
-DETAILS = '''
+{L,indent=4:28}-k, --keep              Write an output tuple from the left input even if there is no matching
+tuple from the right input.
+{L,indent=4:28}PIPELINE                The second (right) input to the join.
+
+Computes a database-style join between the input stream, 
+and a second stream from the given {r:PIPELINE}.
+
 The input pipeline provides one input to the join, named {i:left}.
-The {r:pipeline} argument provides the second input, named {i:right}.
-Left and right tuples are matched by comparing the first component. For matching
-pairs, an output tuple consists of the left input followed by the right row with the
+The {r:PIPELINE} argument provides the second input, named {i:right}.
+Left and right tuples are matched by comparing their first elements. For matching
+pairs, an output tuple consists of the left tuple followed by the right tuple with the
 first value removed. (That would be redundant since the tuples were matched on their
 first values.)
 

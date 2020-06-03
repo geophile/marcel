@@ -20,16 +20,20 @@ import marcel.exception
 Op = marcel.core.Op
 
 
-SUMMARY = '''
-Generates a stream of {r:count} integers, starting at {r:start}.
-'''
+HELP = '''
+{L,wrap=F}gen [-p|--pad PAD] [COUNT [START]]
 
+{L,indent=4:28}-p, --pad               Specifies the width of the padded output.
+{L,indent=4:28}COUNT                   The number of integers to be written to output. 
+{L,indent=4:28}START                   The first integer to be written to output. 
 
-DETAILS = '''
-The first integer in the stream is {r:start}. The number of integers in the stream is {r:count},
-although if {r:count} is 0, then the stream does not terminate. If {r:pad} is specified, 
-then each integer is converted to a string and left-padded with zeros. Padding is not 
-permitted if the stream does not terminate, or if {r:start} is negative.
+Generates a stream of {r:COUNT} integers, starting at {r:START}.
+
+The first integer in the stream is {r:START}. The number of integers in the stream is {r:COUNT},
+although if {r:COUNT} is 0, then the stream does not terminate. If {r:PAD} is specified, 
+then each integer is converted to a string and left-padded with zeros so that the 
+string's length is {r:PAD}. Padding is not 
+permitted if the stream does not terminate, or if {r:START} is negative.
 '''
 
 

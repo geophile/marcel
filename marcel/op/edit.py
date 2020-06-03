@@ -24,13 +24,15 @@ import marcel.exception
 import marcel.main
 
 
-SUMMARY = '''
-Open an editor to edit the previous command.
-'''
+HELP = '''
+{L,wrap=F}edit [COMMAND]
 
+{L,indent=4:28}COMMAND                 The number of the command to be edited.
 
-DETAILS = '''
-The editor is specified by the {n:EDITOR} environment variable. On exiting the editor, the edited command
+Open an editor to edit the command identified by {r:COMMAND} in the command history,
+(obtained by running the {n:history} operator). I {r:COMMAND} is omitted, the most recently
+executed command will be edited. The editor is selected by the {n:EDITOR}
+environment variable. On exiting the editor, the edited command
 will be on the command line. (Hit enter to run the command, as usual.)
 '''
 

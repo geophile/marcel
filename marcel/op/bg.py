@@ -19,13 +19,11 @@ import marcel.op.jobop
 job_control = marcel.job.JobControl.only
 
 
-SUMMARY = '''
-Resume background execution of a suspended job. 
-'''
+HELP = '''
+{L}bg JOB
 
-
-DETAILS = '''
-Resume execution of the selected job, and leave it running in the background.
+Resumes background execution of a suspended job. The {r:JOB} number is the one
+provided by the {n:jobs} operator.
 '''
 
 
