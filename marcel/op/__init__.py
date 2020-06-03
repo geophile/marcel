@@ -14,7 +14,6 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 public = [
-    'assign',
     'bash',
     'bg',
     'cd',
@@ -52,6 +51,7 @@ public = [
 ]
 
 all = public + [
+    'assign',
     'first',
     'fork',
     'gather',
