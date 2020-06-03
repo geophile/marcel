@@ -897,6 +897,14 @@ Without a userid. Seems to work with one.
 
 ----------------------------------------------------------------------
 
+55. Tab completion showing non-public commands
+
+E.g. tab completion of "g" ->gather gen
+
+gather should not be visible.
+
+----------------------------------------------------------------------
+
 FIXED
 
 56. stderr not captured

@@ -23,9 +23,6 @@ public = [
     'env',
     'expand',
     'fg',
-    'first',
-    'fork',
-    'gather',
     'gen',
     'head',
     'help',
@@ -40,7 +37,6 @@ public = [
     'pushd',
     'pwd',
     'red',
-    'remote',
     'reverse',
     'run',
     'runpipeline',
@@ -53,4 +49,11 @@ public = [
     'unique',
     'version',
     'window'
+]
+
+all = public + [
+    'first',
+    'fork',
+    'gather',
+    'remote'
 ]

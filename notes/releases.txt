@@ -56,8 +56,8 @@ a command by ssh. May be related to bug 46.
   + 50
   - 51
   + 53
-  - 54
-  - 55
+  + 54
+  + 55
   + 56
   + 57
 

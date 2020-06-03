@@ -187,14 +187,6 @@ Need to rethink Environment transmission.
 
 ----------------------------------------------------------------------
 
-55. Tab completion showing non-public commands
-
-E.g. tab completion of "g" ->gather gen
-
-gather should not be visible.
-
-----------------------------------------------------------------------
-
 58. Infinite loop in help
 
 There was a typo in the HELP for ps:
