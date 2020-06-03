@@ -230,10 +230,6 @@ class Op(BaseOp):
         state = self.__dict__
         val = state[field]
         if callable(val):
-            # TODO: DON'T DO THIS: val.set_op(self)
-            # TODO: Otherwise, we get resumable error handling (op's error handler) instead of
-            # TODO: raising KillCommandException. But this is only correct during setup_1(), not
-            # TODO: during receive()? FW error handling is kind of a mess.
             val = val()
             if len(types) > 0 and type(val) not in types:
                 raise marcel.exception.KillCommandException(

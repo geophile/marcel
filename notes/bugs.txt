@@ -198,29 +198,3 @@ Without a userid. Seems to work with one.
 E.g. tab completion of "g" ->gather gen
 
 gather should not be visible.
-
-----------------------------------------------------------------------
-
-56. stderr not captured
-
-M-0.7.8 jao@cheese:~$ print 'a'
-M-0.7.8 jao@cheese:~$ 
-jao@cheese:~$ print 'a'
-"my" variable $file masks earlier declaration in same scope at /usr/bin/print line 339.
-Use of uninitialized value $code in concatenation (.) or string at /usr/bin/print line 356, <READER> line 1.
-Error: no such file "a"
-jao@cheese:~$ 
-
-print 'a' is a shell command which writes to stderr. Marcel doesn't
-report it.
-
-----------------------------------------------------------------------
-
-57. This seems wrong
-
-    M-0.7.9 jao@cheese:~/git/marcel/test$ printa
-    Unknown command: printa
-    M-0.7.9 jao@cheese:~/git/marcel/test$ print('a')
-    printa
-
-In bash, ls, "ls", 'l's all do the same thing.

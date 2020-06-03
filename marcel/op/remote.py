@@ -89,7 +89,7 @@ class Remote(marcel.core.Op):
             while True:
                 x = input.load()
                 if isinstance(x, marcel.object.error.Error):
-                    self.send_error(x)
+                    self.non_fatal_error(error=x)
                 else:
                     self.send(x)
         except EOFError as e:
