@@ -76,7 +76,7 @@ class LsArgsParser(marcel.argsparser.ArgsParser):
 class Ls(marcel.op.filenames.FilenamesOp):
 
     def __init__(self, env):
-        super().__init__(env, op_has_target=False)
+        super().__init__(env)
         self.d0 = False
         self.d1 = False
         self.dr = False

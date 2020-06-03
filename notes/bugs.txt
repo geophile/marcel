@@ -187,36 +187,6 @@ Need to rethink Environment transmission.
 
 ----------------------------------------------------------------------
 
-53. Stack trace on unexpected arg type to ls
-
-M-0.7.6 jao@cheese:~/git/marcel$ ls (File('bin'))
-Process Process-11:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 297, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.7/multiprocessing/process.py", line 99, in run
-    self._target(*self._args, **self._kwargs)
-  File "/home/jao/git/marcel/marcel/job.py", line 146, in run_command
-    dir_vars = command.execute()
-  File "/home/jao/git/marcel/marcel/core.py", line 346, in execute
-    self.pipeline.setup_1()
-  File "/home/jao/git/marcel/marcel/core.py", line 297, in setup_1
-    op.setup_1()
-  File "/home/jao/git/marcel/marcel/op/ls.py", line 111, in setup_1
-    super().setup_1()
-  File "/home/jao/git/marcel/marcel/op/filenames.py", line 39, in setup_1
-    self.roots = FilenamesOp.deglob(self.current_dir, self.filenames)
-  File "/home/jao/git/marcel/marcel/op/filenames.py", line 82, in deglob
-    paths = FilenamesOp.normalize_paths(filenames)
-  File "/home/jao/git/marcel/marcel/op/filenames.py", line 70, in normalize_paths
-    filename = os.path.normpath(filename)
-  File "/usr/lib/python3.7/posixpath.py", line 340, in normpath
-    path = os.fspath(path)
-TypeError: expected str, bytes or os.PathLike object, not File
-M-0.7.6 jao@cheese:~/git/marcel$ 
-
-----------------------------------------------------------------------
-
 54. "ps -u" is broken
 
 Without a userid. Seems to work with one.
