@@ -33,11 +33,7 @@ class FilenamesOp(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
-        self.eval_functions('filenames')
-        for f in self.filenames:
-            if not (type(f) is str or isinstance(f, pathlib.Path)):
-                raise marcel.exception.KillCommandException(
-                    f'filenames must be of type str or pathlib.Path: type of {f} is {type(f)}')
+        self.eval_function('filenames', str, pathlib.Path)
         self.roots = []
         self.current_dir = self.env().dir_state().pwd()
         self.roots = FilenamesOp.deglob(self.current_dir, self.filenames)

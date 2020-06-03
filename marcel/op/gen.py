@@ -65,7 +65,9 @@ class Gen(Op):
     # BaseOp
 
     def setup_1(self):
-        self.eval_functions('pad', 'count', 'start')
+        self.eval_function('pad', int)
+        self.eval_function('count', int)
+        self.eval_function('start', int)
         if self.pad is not None:
             if self.count == 0:
                 raise marcel.exception.KillCommandException(f'Padding {self.pad} incompatible with unbounded output.')

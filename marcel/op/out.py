@@ -78,7 +78,9 @@ class Out(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
-        self.eval_functions('append', 'file', 'format')
+        self.eval_function('append', str)
+        self.eval_function('file', str)
+        self.eval_function('format', str)
 
     def receive(self, x):
         self.ensure_output_initialized()

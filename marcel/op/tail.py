@@ -54,7 +54,7 @@ class Tail(marcel.core.Op):
     # BaseOp
     
     def setup_1(self):
-        self.eval_functions('n')
+        self.eval_function('n', int)
         self.queue = None if self.n == 0 else [None] * self.n
         self.end = 0
 

@@ -223,18 +223,32 @@ class Op(BaseOp):
 
     # For use by subclasses
 
-    def eval_functions(self, *fields):
+    # Examine the named field, which is a single- or list-valued attr of self.
+    # Evaluate any functions found, and then check that the resulting type is
+    # one of the given types.
+    def eval_function(self, field, *types):
         state = self.__dict__
-        for f in fields:
-            val = state[f]
-            if callable(val):
-                # TODO: DON'T DO THIS: val.set_op(self)
-                # TODO: Otherwise, we get resumable error handling (op's error handler) instead of
-                # TODO: raising KillCommandException. But this is only correct during setup_1(), not
-                # TODO: during receive()? FW error handling is kind of a mess.
-                state[f] = val()
-            elif type(val) in (tuple, list):
-                state[f] = [x() if callable(x) else x for x in val]
+        val = state[field]
+        if callable(val):
+            # TODO: DON'T DO THIS: val.set_op(self)
+            # TODO: Otherwise, we get resumable error handling (op's error handler) instead of
+            # TODO: raising KillCommandException. But this is only correct during setup_1(), not
+            # TODO: during receive()? FW error handling is kind of a mess.
+            val = val()
+            if len(types) > 0 and type(val) not in types:
+                raise marcel.exception.KillCommandException(
+                    f'Type of {self.op_name()}.{field} is {type(val)}, but must be one of {types}')
+            state[field] = val
+        elif type(val) in (tuple, list):
+            evaled = []
+            for x in val:
+                if callable(x):
+                    x = x()
+                    if len(types) > 0 and type(x) not in types:
+                        raise marcel.exception.KillCommandException(
+                            f'Type of {self.op_name()}.{field} element {x} is {type(x)}, but must be one of {types}')
+                evaled.append(x)
+            state[field] = evaled
 
     @staticmethod
     def check_arg(ok, arg, message):

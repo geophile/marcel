@@ -79,7 +79,10 @@ class Ps(marcel.core.Op):
     # BaseOp
     
     def setup_1(self):
-        self.eval_functions('user', 'group', 'pid', 'command')
+        self.eval_function('user', int, str)
+        self.eval_function('group', int, str)
+        self.eval_function('pid', int)
+        self.eval_function('command', str)
         # user, group can be name or id. A name can be numeric, and in that case, the name interpretation
         # takes priority. Convert name to uid, since that is a cheaper lookup on a Project.
         # If user or group is None, no user/group was specified, so use this user/group.
