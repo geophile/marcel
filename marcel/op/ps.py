@@ -105,12 +105,14 @@ class Ps(marcel.core.Op):
         # takes priority. Convert name to uid, since that is a cheaper lookup on a Project.
         # If user or group is None, no user/group was specified, so use this user/group.
         # UNINITIALIZED means it wasn't specified at all.
+        #
+        # user can be True if -u is specified with no value.
         self.filter = lambda p: True
         if self.user is not _UNINITIALIZED:
-            self.user = os.getuid() if self.user is None else Ps.convert_to_id(self.user, marcel.util.uid)
+            self.user = os.getuid() if self.user in (None, True) else Ps.convert_to_id(self.user, marcel.util.uid)
             self.filter = lambda p: p.uid == self.user
         if self.group is not _UNINITIALIZED:
-            self.group = os.getgid() if self.group is None else Ps.convert_to_id(self.group, marcel.util.gid)
+            self.group = os.getgid() if self.group in (None, True) else Ps.convert_to_id(self.group, marcel.util.gid)
             self.filter = lambda p: p.gid == self.group
         if self.pid is not _UNINITIALIZED:
             try:

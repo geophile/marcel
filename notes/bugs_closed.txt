@@ -891,6 +891,14 @@ M-0.7.6 jao@cheese:~/git/marcel$
 
 FIXED
 
+54. "ps -u" is broken
+
+Without a userid. Seems to work with one.
+
+----------------------------------------------------------------------
+
+FIXED
+
 56. stderr not captured
 
 M-0.7.8 jao@cheese:~$ print 'a'

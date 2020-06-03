@@ -4,6 +4,10 @@
 
 - Improve sudo
 
+If marcel is my default shell (in /etc/passwd), then remote operations
+fail, probably because marcel doesn't work as the shell for executing
+a command by ssh. May be related to bug 46.
+
 - Bugs
   - 47
 
@@ -29,10 +33,6 @@
 
 + Expr as arg, e.g. to ls.
 
-If marcel is my default shell (in /etc/passwd), then remote operations
-fail, probably because marcel doesn't work as the shell for executing
-a command by ssh. May be related to bug 46.
-
 - Need a way to define var-bound pipelines in config script. API to
   take string with commands?
 
@@ -47,7 +47,7 @@ a command by ssh. May be related to bug 46.
   + flags
   + files
 
-- Resurrect op help
++ Resurrect op help
 
 
 - Bugs:

@@ -566,7 +566,7 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('print "a"')
+    TEST.run('ps -u')
     pass
 
 

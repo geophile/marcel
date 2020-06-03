@@ -187,12 +187,6 @@ Need to rethink Environment transmission.
 
 ----------------------------------------------------------------------
 
-54. "ps -u" is broken
-
-Without a userid. Seems to work with one.
-
-----------------------------------------------------------------------
-
 55. Tab completion showing non-public commands
 
 E.g. tab completion of "g" ->gather gen
