@@ -38,7 +38,6 @@ public = [
     'red',
     'reverse',
     'run',
-    'runpipeline',
     'select',
     'sort',
     'squish',
@@ -55,5 +54,6 @@ all = public + [
     'first',
     'fork',
     'gather',
-    'remote'
+    'remote',
+    'runpipeline'
 ]
