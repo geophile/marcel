@@ -408,11 +408,7 @@ def test_bash():
     TEST.run(lambda: run(bash('echo', 'hello', 'world')),
              expected_out=['hello world'])
     # Quoted, so they are preserved.
-    TEST.run(lambda: run(bash('echo', "hello  world")),
-             expected_out=['hello  world'])
-    # Function-valed args
-    HELLO = 'hello'
-    TEST.run(test=lambda: run(bash('echo', lambda: HELLO+'  world')),
+    TEST.run(lambda: run(bash('echo', '"hello  world"')),
              expected_out=['hello  world'])
 
 

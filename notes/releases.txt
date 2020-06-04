@@ -11,6 +11,8 @@ a command by ssh. May be related to bug 46.
 - Need a way to define var-bound pipelines in config script. API to
   take string with commands?
 
+- bash and sudo: Pass args exactly as typed, without removal of quotes.
+
 - Bugs
   - 47
 

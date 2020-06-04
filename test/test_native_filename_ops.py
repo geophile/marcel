@@ -2,7 +2,6 @@ import os
 import pathlib
 import shutil
 
-import marcel.main
 import marcel.object.error
 
 import test_base
@@ -50,7 +49,7 @@ def test_mv():
     test_setup()
     os.system('echo asdf > "a b"')
     os.system('echo asdfasdf > c\\ d')
-    TEST.run(test='mv a\\ b c\\ d',
+    TEST.run(test='mv a\\\\ b c\\\\ d',
              verification='ls -f | map (f: (f.name, f.size))',
              expected_out=[('c d', 5)])
     # TODO: Test error
@@ -76,7 +75,7 @@ def test_cp():
     test_setup()
     os.system('echo asdf > "a b"')
     os.system('echo asdfasdf > c\\ d')
-    TEST.run(test='cp a\\ b c\\ d',
+    TEST.run(test='cp a\\\\ b c\\\\ d',
              verification='ls -f | map (f: (f.name, f.size))',
              expected_out=[('a b', 5), ('c d', 5)])
 
@@ -84,6 +83,7 @@ def test_cp():
 def main():
     TEST.reset_environment()
     test_mv()
+    test_cp()
     print(f'Test failures: {TEST.failures}')
 
 

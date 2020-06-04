@@ -438,3 +438,12 @@ history command doesn't go into history, so this is missed:
     history | select (h: 'join' in h.command)
 
 Can't recall it.
+
+----------------------------------------------------------------------
+
+Multiline command actually works without \. But then it doesn't get recalled
+correctly on startup. 
+
+- Allow omission of \
+- But add it if missing, at least for stored history.
+

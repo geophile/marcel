@@ -107,7 +107,8 @@ class Escape:
         assert False
 
     def command(self):
-        return ' '.join([Escape.quote(a) for a in self.op.args])
+        return ' '.join(self.op.args)
+        # return ' '.join([Escape.quote(a) for a in self.op.args])
 
     # The use of looks_globby is a hack due to bug 38. Quoting of a glob prevents glob
     # expansion. So this is definitely wrong sometimes, but I'm not sure what else to do.

@@ -261,14 +261,6 @@ This is broken: Op.op_name() evalutes to "op".
 
 ----------------------------------------------------------------------
 
-Multiline command actually works without \. But then it doesn't get recalled
-correctly on startup. 
-
-- Allow omission of \
-- But add it if missing, at least for stored history.
-
-----------------------------------------------------------------------
-
 edit command relies on bash EDITOR variable. Should use a marcel
 variable.  Import selected bash env variables? Can't see anything
 other than EDITOR right now.
