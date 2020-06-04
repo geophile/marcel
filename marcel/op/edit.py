@@ -86,7 +86,16 @@ class Edit(marcel.core.Op):
         process.wait()
         with open(self.tmp_file, 'r') as input:
             command_lines = input.readlines()
-        self.env().edited_command = ''.join(command_lines)
+        # Make sure that each new line after the first is preceded by a continuation string.
+        continued_correctly = []
+        correct_termination = self.env().reader.continuation + '\n'
+        for line in command_lines[:-1]:
+            if not line.endswith(correct_termination):
+                assert line[-1] == '\n', line
+                line = line[:-1] + correct_termination
+            continued_correctly.append(line)
+        continued_correctly.append(command_lines[-1])
+        self.env().edited_command = ''.join(continued_correctly)
         os.remove(self.tmp_file)
 
     # Op
