@@ -859,6 +859,46 @@ Allow this? If not, then at least fail gracefully.
 
 FIXED
 
+51. Crash on editing and entering line with no line continuation after \ (?)
+
+M-0.7.3 jao@cheese:~/git/marcel$ ls -fr \
+| select (f: f.suffix == '.py') \
+| map (f: f.read().count('\n')) |
+Traceback (most recent call last):
+  File "/usr/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/usr/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 210, in <module>
+    MAIN.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 116, in run
+    self.run_command(line)
+  File "/home/jao/git/marcel/marcel/main.py", line 128, in run_command
+    pipeline = parser.parse()
+  File "/home/jao/git/marcel/marcel/parser.py", line 560, in parse
+    return self.command()
+  File "/home/jao/git/marcel/marcel/parser.py", line 566, in command
+    return self.pipeline()
+  File "/home/jao/git/marcel/marcel/parser.py", line 586, in pipeline
+    op_sequence = Parser.ensure_sequence(self.op_sequence())
+  File "/home/jao/git/marcel/marcel/parser.py", line 599, in op_sequence
+    op_sequence = Parser.ensure_sequence(self.op_sequence())
+  File "/home/jao/git/marcel/marcel/parser.py", line 599, in op_sequence
+    op_sequence = Parser.ensure_sequence(self.op_sequence())
+  File "/home/jao/git/marcel/marcel/parser.py", line 599, in op_sequence
+    op_sequence = Parser.ensure_sequence(self.op_sequence())
+  File "/home/jao/git/marcel/marcel/parser.py", line 597, in op_sequence
+    op_args = self.op_args()
+  File "/home/jao/git/marcel/marcel/parser.py", line 609, in op_args
+    op_token = self.op()
+  File "/home/jao/git/marcel/marcel/parser.py", line 625, in op
+    raise PrematureEndError()
+marcel.parser.PrematureEndError: Command ended prematurely.
+
+----------------------------------------------------------------------
+
+FIXED
+
 53. Stack trace on unexpected arg type to ls
 
 M-0.7.6 jao@cheese:~/git/marcel$ ls (File('bin'))

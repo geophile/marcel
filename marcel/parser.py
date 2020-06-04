@@ -35,7 +35,7 @@ class UnexpectedTokenError(marcel.exception.KillCommandException):
 
     def __str__(self):
         if self.token is None:
-            return f'Premature end of input: {self.message}'
+            return 'Premature end of input'
         else:
             token_start = self.token.start
             token_text = self.token.text
@@ -45,13 +45,10 @@ class UnexpectedTokenError(marcel.exception.KillCommandException):
             return f'Parsing error at position {token_start - snippet_start} of "...{snippet}...": {self.message}'
 
 
-class PrematureEndError(Exception):
+class PrematureEndError(UnexpectedTokenError):
 
     def __init__(self):
-        super().__init__()
-
-    def __str__(self):
-        return 'Command ended prematurely.'
+        super().__init__(None, None)
 
 
 class UnknownOpError(marcel.exception.KillCommandException):

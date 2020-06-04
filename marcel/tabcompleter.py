@@ -145,9 +145,6 @@ class TabCompleter:
             try:
                 parser.parse()
                 debug('parse succeeded')
-            except marcel.parser.PrematureEndError:
-                debug('premature end')
-                pass
             except Exception as e:
                 debug(f'caught ({type(e)}) {e}')
                 # Don't do tab completion
