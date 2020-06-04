@@ -63,7 +63,7 @@ class Edit(marcel.core.Op):
     # BaseOp
 
     def setup_1(self):
-        self.editor = os.getenv('EDITOR')
+        self.editor = self.env().getvar('EDITOR')
         if self.editor is None:
             raise marcel.exception.KillCommandException(
                 'Specify editor in the EDITOR environment variable')

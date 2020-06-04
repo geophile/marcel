@@ -22,7 +22,7 @@ a command by ssh. May be related to bug 46.
 
 + "(...)" as shorthand for "map (...)"? (If no parameters)
 
-- Import EDITOR var from host env.
++ Import EDITOR var from host env.
 
 + Assignment
 
@@ -62,7 +62,7 @@ a command by ssh. May be related to bug 46.
   + 55
   + 56
   + 57
-  - 59
+  + 59
 
 ----------------------------------------------------------------------
 

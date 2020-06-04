@@ -104,6 +104,7 @@ class Environment:
         user = getpass.getuser()
         homedir = pathlib.Path.home().resolve()
         host = socket.gethostname()
+        editor = os.getenv('EDITOR')
         try:
             current_dir = pathlib.Path.cwd().resolve()
         except FileNotFoundError:
@@ -126,6 +127,8 @@ class Environment:
             'File': marcel.object.file.File,
             'Process': marcel.object.process.Process
         }
+        if editor:
+            self.namespace['EDITOR'] = editor
         self.clusters = {}
         self.read_config(config_file)
         self.directory_state = DirectoryState(self.namespace)
