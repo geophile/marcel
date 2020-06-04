@@ -20,14 +20,16 @@ To learn more about a topic, run the command:
 
 {b:Overview:}
 
-{p,wrap=F}
-    - {n:configuration}: How to configure the prompt, color scheme, remote access.
-    - {n:overview}: The main concepts of marcel. How it differs from other shells.
-    - {n:interaction}: Interacting with marcel.
-    - {n:command}: Marcel operators, Linux executables.
-    - {n:function}: Several operators rely on Python functions.
-    - {n:pipeline}: Structuring commands into sequences, using pipes.
-    - {n:object}: The objects you work with. 
+Run {n:help overview} to start learning about marcel. Or run {n:help}
+on these introductory topics:
+
+{L,indent=4:12}- {n:configuration}: How to customize and configure marcel.
+{L,indent=4:12}- {n:interaction}: Interacting with marcel.
+{L,indent=4:12}- {n:command}: Marcel operators, Linux executables.
+{L,indent=4:12}- {n:function}: The use of functions in marcel commands.
+{L,indent=4:12}- {n:pipeline}: The main structuring mechanism of marcel, relying on pipes 
+as in other shells.
+{L,indent=4:12}- {n:object}: The data operated on by commands, and carried by pipes.
 
 {b:Objects:}
 

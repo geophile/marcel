@@ -14,21 +14,23 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 HELP = '''
-Several marcel operators take function arguments. These functions 
-run in a namespace maintained by marcel. This namespace contains
-the equivalent of environment variables from other shells. For example,
-there are {n:USER} and {n:PWD} variables, which contain the values of
-the user and the current directory.
+Marcel is configured and customized by running the script
+{n:~/.marcel.py} on startup. In this script, you can 
+customize the prompt, output colorization, remote host configuration,
+as well as defining any other symbols you would like to have
+available. As usual, these symbols can be defined by imports, by
+assigning variables, and by defining functions and classes.
 
-Marcel is configured by running the configuration file
-{n:~/.marcel.py} on startup. This script operates on the marcel
-namespace, allowing you to customize the prompt, the color scheme used
-for output, database and remote host login configuration, as well as
-defining any other symbols you would like to have available. As usual,
-these symbols can be defined by imports, by assigning variables, and
-by defining functions and classes.
+These symbols exist in an ordinary Python namespace, the {i:marcel
+namespace}. This namespace is used when evaluating functions, (such as
+are used in conjunction with the {n:map} and {n:select} operators).
+Variables in the marcel namespace are equivalent to environment
+variables in other shells. So, for example, the {n:USER} and {n:PWD}
+variables are present in the marcel namespace, and identify the
+current user and current directory, respectively.
 
-For more detail on configuration run {n:help} on the following topics:
+Further information can be obtained by running {n:help} on the
+following topics:
 
 {L}- {n:color}: Customizing the color scheme.
 {L}- {n:prompt}: Customizing the prompt.

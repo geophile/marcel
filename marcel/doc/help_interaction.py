@@ -22,7 +22,7 @@ background.
 {b:Running commands}
 
 Marcel can accept a command when the prompt is present. Otherwise, a command is
-running. You can stop a (foreground) command at any time by pressing ctrl-C.
+running. You can kill a (oreground command at any time by pressing Ctrl-C.
 
 In general, the traditional keyboard interactions for a Linux shell can be used,
 e.g.
@@ -58,8 +58,7 @@ M jao@cheese:~$ history
 {b:Editing commands}
 
 You can edit previous command using your editor of choice, configured using the
-{n:EDITOR} environment variable. (If this variable is defined in your host environment,
-e.g. in {n:~/.bashrc}, then marcel will import it.)
+{n:EDITOR} environment variable.
 
 To edit the previous command run the {n:edit} command.
 To edit a different command run the {n:edit} command, and provide the command number
@@ -72,13 +71,13 @@ You can then edit the command further on the command line, or hit enter to execu
 
 Marcel will wait for a command to complete execution before providing
 another prompt. I.e., the command runs in the {i:foreground}. You can suspend
-this command by typing ctrl-Z. The job then goes into the {i:background}, in a suspended
+this command by typing Ctrl-Z. The job then goes into the {i:background}, in a suspended
 state. You are then provided with a prompt, allowing you to initiate another command
 (which will run in the foreground).
 
 The {n:jobs} command will list all current jobs. (Those will all be in the background
 since the {n:jobs} command itself was running in the foreground when it produced
-the list of commands.) Example: {b:TBD}.
+the list of commands.)
 
 To run a suspended job in the background, use the {n:bg} command, identifying the
 job by its job number. The {n:fg} command will run a suspended job, placing it in

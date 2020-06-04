@@ -1,0 +1,58 @@
+Help document structure
+
+marcel:
+
+    Overview
+
+        - configuration
+        - overview
+        - interaction
+        - command
+        - function
+        - pipeline
+        - object
+
+    Objects
+
+        - file
+        - history_record
+        - process
+
+    Operators
+
+        - <all operators>
+
+
+configuration
+
+    - color
+    - prompt
+    - namespace
+    - remote
+
+overview
+
+    - command
+    - function
+    - pipeline
+
+interaction
+
+command
+
+function
+
+pipeline
+
+object
+
+    - file
+    - history_record
+    - process
+
+file
+
+history_record
+
+process
+

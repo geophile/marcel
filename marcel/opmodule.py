@@ -70,11 +70,6 @@ class OpModule:
     def help(self):
         return self._help
 
-    # The operator's help info is formatted when the arg parser is created. When the screen
-    # size changes, this info has to be reformatted.
-    def reformat_help(self):
-        self._args_parser = None
-
 
 def import_op_modules(env):
     op_modules = {}

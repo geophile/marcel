@@ -20,6 +20,12 @@
 - ps: If commandline blank, take contents of Name from status file
   (enclosed in [])? That's what ps appears to do.
 
+- Documentation of Errors. Revisit error handling: Since errors are
+  now handled by Op, why do they need to be sent down the pipeline? We
+  are no longer relying on out to print them. farcel's handler could
+  pickle them immediately, (i.e., it doesn't have to rely on the error
+  reaching the end of the pipeline).
+
 ----------------------------------------------------------------------
 
 File objects
@@ -383,10 +389,3 @@ determine if they should really be printed.
 
 TestBase.reset_environment does too much. Move everything but Main
 construction into subclasses.
-
-----------------------------------------------------------------------
-
-Make sure that help adapts to change in screen size. There's been
-bitrot. See opmodule.reformat_help.
-
-Does "help" use the op version or the topic version?

@@ -195,7 +195,7 @@ python3 -m pip install marcel
 ```
 
 This command installs marcel for the current user. To install for the entire system,
-use `sudo python3 -m pip install --prefix ...` instead. (The value of the `prefix` flag should
+use `sudo python3 -m pip install --prefix ...` instead. (The value of the `--prefix` flag should
 be something like `/usr/local`.)
 
 Marcel depends on [dill](https://pypi.org/project/dill/). This package

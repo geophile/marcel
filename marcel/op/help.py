@@ -32,7 +32,7 @@ class HelpArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('help', env)
-        self.add_anon('topic', convert=self.check_str)
+        self.add_anon('topic', convert=self.check_str, default='marcel')
         self.validate()
 
 

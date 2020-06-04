@@ -16,9 +16,9 @@
 HELP = '''
 Marcel is a shell. As in any Linux shell, there are commands which
 can be executed, and the output from one command
-can be piped to another.  The conventional piping syntax is used, {n:|}. Linux
+can be piped to another.  The conventional piping syntax is used: {n:|}. Linux
 pipes stream unstructured text between commands. In marcel, streams
-carry arbitrary Python objects.
+carry arbitrary Python values.
 
 Marcel is implemented in, and based on the Python language. Whereas
 other shells invent new languages for control constructs, expressions,

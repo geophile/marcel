@@ -57,7 +57,7 @@ property, whose value is a string containing four uids. (The second of
 these is extracted as the value of the {n:uid} property).
 
 
-{b:Process functions}
+{b:Process methods}
 
 A signal can be sent to a process by using the {n:signal} function. For example,
 to attempt to kill all processes owned by user "djt":

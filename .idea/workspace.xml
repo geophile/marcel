@@ -20,9 +20,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notes/doc.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_configuration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_function.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_interaction.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_interaction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_marcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_marcel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_overview.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_overview.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_pipeline.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_process.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_process.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/help.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/help.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/opmodule.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/opmodule.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -334,7 +346,7 @@
       <workItem from="1591032961362" duration="7204000" />
       <workItem from="1591067037017" duration="30000" />
       <workItem from="1591067076514" duration="35158000" />
-      <workItem from="1591220523035" duration="12183000" />
+      <workItem from="1591220523035" duration="15115000" />
     </task>
     <servers />
   </component>
@@ -515,12 +527,12 @@
     <state x="629" y="329" width="910" height="737" key="SettingsEditor/0.27.1920.1053@0.27.1920.1053" timestamp="1590781341511" />
     <state x="838" y="432" width="992" height="737" key="SettingsEditor/0.27.2560.1413@0.27.2560.1413" timestamp="1590126636405" />
     <state x="1920" y="432" key="SettingsEditor/0.27.4480.1413@0.27.4480.1413" timestamp="1589659892036" />
-    <state x="2342" y="486" width="961" height="524" key="StructurePopup" timestamp="1591286361828">
+    <state x="2342" y="486" width="961" height="524" key="StructurePopup" timestamp="1591286786042">
       <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="1004" y="369" width="549" height="391" key="StructurePopup/0.27.1920.1053@0.27.1920.1053" timestamp="1590847581442" />
     <state x="1063" y="527" width="549" height="524" key="StructurePopup/0.27.2560.1413@0.27.2560.1413" timestamp="1590501899019" />
-    <state x="2342" y="486" width="961" height="524" key="StructurePopup/0.27.4480.1413@0.27.4480.1413" timestamp="1591286361828" />
+    <state x="2342" y="486" width="961" height="524" key="StructurePopup/0.27.4480.1413@0.27.4480.1413" timestamp="1591286786042" />
     <state x="797" y="399" width="549" height="391" key="StructurePopup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1590288360757" />
     <state x="2717" y="382" width="549" height="401" key="StructurePopup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1591191305798" />
     <state x="797" y="400" width="549" height="392" key="StructurePopup/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1590977533113" />
@@ -571,13 +583,13 @@
       <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="2006" y="27" width="1124" height="889" key="dock-window-3/0.27.4480.1413@0.27.4480.1413" timestamp="1590509098216" />
-    <state x="2702" y="210" width="851" height="672" key="find.popup" timestamp="1591191621487">
-      <screen x="1920" y="0" width="1920" height="1080" />
+    <state x="1969" y="422" width="1017" height="768" key="find.popup" timestamp="1591293529730">
+      <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="320" y="152" width="1075" height="747" key="find.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1591034508311" />
     <state x="1043" y="302" width="1134" height="879" key="find.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1590433685549" />
     <state x="2190" y="197" width="796" height="658" key="find.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1591057922902" />
-    <state x="1969" y="422" width="1017" height="768" key="find.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1590552865520" />
+    <state x="1969" y="422" width="1017" height="768" key="find.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1591293529730" />
     <state x="2702" y="210" width="851" height="672" key="find.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1591191621487" />
     <state x="782" y="232" width="851" height="656" key="find.popup/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1590976944424" />
     <state x="2963" y="280" width="1134" height="896" key="find.popup/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1589912842415" />
@@ -594,13 +606,13 @@
     </state>
     <state x="1113" y="521" width="306" height="459" key="refactoring.ChangeSignatureDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1589638477576" />
     <state x="1948" y="521" key="refactoring.ChangeSignatureDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1590544776135" />
-    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup" timestamp="1591286625547">
+    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup" timestamp="1591293467028">
       <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1591226224773" />
     <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1590515908206" />
     <state x="1401" y="354" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1591058116381" />
-    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1591286625547" />
+    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1591293467028" />
     <state x="701" y="354" width="672" height="507" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1590286500344" />
     <state x="2621" y="335" width="672" height="519" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1591200269943" />
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1591020437893" />
@@ -633,11 +645,6 @@
           <url>file://$PROJECT_DIR$/marcel/parser.py</url>
           <line>696</line>
           <option name="timeStamp" value="284" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/marcel/env.py</url>
-          <line>108</line>
-          <option name="timeStamp" value="292" />
         </line-breakpoint>
         <breakpoint enabled="true" type="python-exception">
           <properties notifyOnTerminate="true" exception="ValueError">
