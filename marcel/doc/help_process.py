@@ -63,5 +63,5 @@ A signal can be sent to a process by using the {n:signal} function. For example,
 to attempt to kill all processes owned by user "djt":
 
 {p,wrap=F,indent=4}
-ps | select (p: p.user == 'djt') | map (p: p.signal(9))
+ps -u djt | map (p: p.signal(9))
 '''

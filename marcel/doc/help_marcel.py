@@ -16,7 +16,7 @@
 HELP = '''
 To learn more about a topic, run the command:
 
-    help TOPIC
+{L}help TOPIC
 
 {b:Overview:}
 

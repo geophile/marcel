@@ -14,7 +14,6 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import functools
-import types
 
 import marcel.argsparser
 import marcel.core
@@ -66,7 +65,7 @@ class Squish(marcel.core.Op):
     
     def setup_1(self):
         if self.function is None:
-            self.function = marcel.functionwrapper.FunctionWrapper(source='+', globals=self.env().namespace)
+            self.function = marcel.functionwrapper.FunctionWrapper(function=r_plus)
         self.function.set_op(self)
 
     def receive(self, x):

@@ -9,4 +9,4 @@ Marcel is designed for interactive use. Python would be a fine scripting languag
     for file in ls(recursive=True) | select(lambda file: now() - file.mtime < days(1)):
         print(file)
 
-Check it out here: https://github.com/geophile/marcel
+Check it out here: https://github.com/geophile/marcel.

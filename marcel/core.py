@@ -14,13 +14,11 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import marcel.exception
-import marcel.functionwrapper
 import marcel.helpformatter
 import marcel.object.error
 import marcel.util
 
 Error = marcel.object.error.Error
-FunctionWrapper = marcel.functionwrapper.FunctionWrapper
 
 
 class Pipelineable:
@@ -260,11 +258,6 @@ class Op(BaseOp):
         return Error(f'Running {self}: {message}'
                      if input is None else
                      f'Running {self} on {input}: {message}')
-
-    @staticmethod
-    def function_source(function):
-        assert isinstance(function, FunctionWrapper)
-        return function.source()
 
 
 class Pipeline(BaseOp):

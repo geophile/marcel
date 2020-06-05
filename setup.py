@@ -2,7 +2,7 @@ import setuptools
 
 import marcel.version
 
-with open("README.md", "r") as readme:
+with open('README.md', 'r') as readme:
     long_description = readme.read()
 
 setuptools.setup(
@@ -15,7 +15,7 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     url='https://github.com/geophile/marcel',
     packages=setuptools.find_packages('.'),
-    scripts=['bin/marcel', 'bin/farcel.py'] ,
+    scripts=['bin/marcel', 'bin/farcel.py'],
     install_requires=['dill'],
     classifiers=[
         'Programming Language :: Python :: 3',

@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import dill.source
+
 import marcel.exception
 import marcel.reduction
 
@@ -44,6 +46,10 @@ class FunctionWrapper:
         self._op = None
         if source is None and globals is None and function is not None:
             self._function = function
+            try:
+                self._source = dill.source.getsource(function)
+            except:
+                pass
         elif source is not None and globals is not None and function is None:
             self._source = source
             self._globals = globals

@@ -389,3 +389,15 @@ determine if they should really be printed.
 
 TestBase.reset_environment does too much. Move everything but Main
 construction into subclasses.
+
+----------------------------------------------------------------------
+
+FunctionWrapper:
+
+- Fill in source when possible.
+
+- Can create_function be eliminated?
+
+----------------------------------------------------------------------
+
+Config path: Resolve ~
