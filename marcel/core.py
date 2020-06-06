@@ -68,25 +68,7 @@ class Node(Pipelineable):
             visit(self.right)
 
 
-# Base class for all ops, and for pipelines. Methods of this class 
-# implement the op execution and inter-op communication. The send* 
-# commands are used by subclasses to send output to downstream commands. 
-# The receive* commands are implemented by subclasses to receive and process 
-# input from upstream commands.
-class BaseOp(Pipelineable):
-
-    def __init__(self, env):
-        assert isinstance(self, Pipeline) or env is not None
-        self._env = env
-        # The pipeline to which this op belongs
-        self.owner = None
-        # The next op in the pipeline, or None if this is the last op in the pipeline.
-        self.next_op = None
-        # receiver is where op output is sent. Same as next_op unless this is the last
-        # op in the pipeline. In which case, the receiver is that of the pipeline containing
-        # this one.
-        self.receiver = None
-        self.command_state = None
+class AbstractOp(Pipelineable):
 
     def __repr__(self):
         assert False
@@ -96,13 +78,49 @@ class BaseOp(Pipelineable):
     def create_pipeline(self):
         assert False
 
-    # BaseOp runtime
+    # AbstractOp runtime
 
     def setup_1(self):
         pass
 
     def setup_2(self):
         pass
+
+
+class Op(AbstractOp):
+
+    def __init__(self, env):
+        super().__init__()
+        self._env = env
+        # The next op in the pipeline, or None if this is the last op in the pipeline.
+        self.next_op = None
+        # receiver is where op output is sent. Same as next_op unless this is the last
+        # op in the pipeline. In which case, the receiver is that of the pipeline containing
+        # this one.
+        self.receiver = None
+        # The pipeline to which this op belongs
+        self.owner = None
+
+    def __repr__(self):
+        assert False, self.op_name()
+
+    def __iter__(self):
+        return PipelineIterator(self.create_pipeline())
+
+    # Pipelineable
+
+    def create_pipeline(self):
+        pipeline = Pipeline()
+        pipeline.append(self.copy())
+        return pipeline
+
+    # Op
+
+    def set_owner(self, pipeline):
+        self.owner = pipeline
+
+    def connect(self, new_op):
+        self.next_op = new_op
 
     def send(self, x):
         receiver = self.receiver
@@ -147,46 +165,6 @@ class BaseOp(Pipelineable):
     def env(self):
         assert self._env is not None
         return self._env
-
-    # BaseOp compile-time
-
-    def set_owner(self, pipeline):
-        self.owner = pipeline
-
-    def connect(self, new_op):
-        self.next_op = new_op
-
-    def ensure_op(self, x):
-        if isinstance(x, Op):
-            return x
-        elif isinstance(x, Pipeline):
-            op = self._env.op_modules['runpipeline'].create_op()
-            op.pipeline = x
-            return op
-        else:
-            assert False
-
-
-# Base class for all ops, excluding pipelines
-class Op(BaseOp):
-
-    def __init__(self, env):
-        super().__init__(env)
-
-    def __repr__(self):
-        assert False, self.op_name()
-
-    def __iter__(self):
-        return PipelineIterator(self.create_pipeline())
-
-    # Pipelineable
-
-    def create_pipeline(self):
-        pipeline = Pipeline()
-        pipeline.append(self.copy())
-        return pipeline
-
-    # Op
 
     def non_fatal_error(self, input=None, message=None, error=None):
         assert (message is None) != (error is None)
@@ -260,10 +238,10 @@ class Op(BaseOp):
                      f'Running {self} on {input}: {message}')
 
 
-class Pipeline(BaseOp):
+class Pipeline(AbstractOp):
 
     def __init__(self):
-        BaseOp.__init__(self, None)
+        AbstractOp.__init__(self)
         self.error_handler = None
         self.first_op = None
         self.last_op = None
@@ -289,7 +267,8 @@ class Pipeline(BaseOp):
 
     def create_pipeline(self):
         return marcel.util.copy(self)
-    # BaseOp
+
+    # AbstractOp
 
     def setup_1(self):
         assert self.error_handler is not None, f'{self} has no error handler'

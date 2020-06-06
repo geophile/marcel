@@ -66,7 +66,7 @@ class Gen(Op):
     def __repr__(self):
         return f'gen(count={self.count}, start={self.start}, pad={self.pad})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.eval_function('pad', int)

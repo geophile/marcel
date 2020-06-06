@@ -46,7 +46,7 @@ class Pwd(marcel.core.Op):
     def __repr__(self):
         return 'pwd()'
 
-    # BaseOp
+    # AbstractOp
 
     def receive(self, _):
         self.send(self.env().dir_state().pwd())

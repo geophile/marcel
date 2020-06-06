@@ -40,7 +40,7 @@ class Reverse(marcel.core.Op):
         super().__init__(env)
         self.contents = []
 
-    # BaseOp
+    # AbstractOp
 
     def receive(self, x):
         self.contents.append(x)

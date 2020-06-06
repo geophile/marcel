@@ -64,7 +64,7 @@ class Run(marcel.core.Op):
     def __repr__(self):
         return 'run()' if self.n is None else f'run({self.n})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         if self.expected_args == 1 and self.n is None:

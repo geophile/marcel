@@ -392,12 +392,10 @@ construction into subclasses.
 
 ----------------------------------------------------------------------
 
-FunctionWrapper:
+Why does parser.Expression.value duplicate code in FunctionWrapper?
 
-- Fill in source when possible.
 
-- Can create_function be eliminated?
 
-----------------------------------------------------------------------
-
-Config path: Resolve ~
+Referral for 6/9
+Dr. Crystal Klaahsen
+npi 1528076288

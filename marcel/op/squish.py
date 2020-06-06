@@ -61,7 +61,7 @@ class Squish(marcel.core.Op):
     def __repr__(self):
         return f'squish({self.function.source()})' if self.function else 'squish()'
 
-    # BaseOp
+    # AbstractOp
     
     def setup_1(self):
         if self.function is None:

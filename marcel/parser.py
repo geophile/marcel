@@ -751,7 +751,6 @@ class Parser:
         return op
 
     def create_op_variable(self, op_token, args):
-        # TODO: There shouldn't be any args
         op = None
         var = op_token.value()
         value = self.env.getvar(var)
@@ -759,6 +758,7 @@ class Parser:
             op_module = self.op_modules['runpipeline']
             op = op_module.create_op()
             op.var = var
+            op.args = args
         return op
 
     def create_op_executable(self, op_token, args):

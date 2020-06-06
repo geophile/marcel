@@ -5,13 +5,13 @@ import io
 import pickle
 
 
-class BaseOp:
+class AbstractOp:
 
     def __init__(self):
         self.base = 111
 
 
-class Op(BaseOp):
+class Op(AbstractOp):
 
     def __init__(self, name, f):
         super().__init__()

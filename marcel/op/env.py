@@ -48,7 +48,7 @@ class Env(marcel.core.Op):
     def __repr__(self):
         return 'env()'
 
-    # BaseOp
+    # AbstractOp
 
     def receive(self, _):
         for key, value in sorted(self.env().namespace.items()):

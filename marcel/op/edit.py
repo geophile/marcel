@@ -60,7 +60,7 @@ class Edit(marcel.core.Op):
     def __repr__(self):
         return 'edit()'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.editor = self.env().getvar('EDITOR')

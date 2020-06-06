@@ -110,7 +110,7 @@ class Ls(marcel.op.filenames.FilenamesOp):
         filenames = [str(p) for p in self.filenames] if self.filenames else '?'
         return f'ls(depth={depth}, include={include}, filename={filenames})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         super().setup_1()

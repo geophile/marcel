@@ -46,7 +46,7 @@ class Popd(marcel.core.Op):
     def __repr__(self):
         return 'popd()'
 
-    # BaseOp
+    # AbstractOp
 
     def receive(self, _):
         self.env().dir_state().popd()

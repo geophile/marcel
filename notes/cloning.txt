@@ -1,0 +1,38 @@
+Pickling/unpickling has been a constant source of trouble. It is
+really only needed for execution in another process (e.g. bash, sudo,
+remote).
+
+For local forking, it is only needed because of the labelthread
+op. But thread-local storage would work here too.
+
+Copying is also needed whenever a pipeline is modified, to avoid
+changing the source. E.g., when the api needs to append an op for
+gathering or iteration.
+
+What if I get rid of Pipeline completely, and stick to the Node-based
+approach? This avoids the need to copy for the API. 
+
+----------------------------------------------------------------------
+
+AbstractOp state (parent of Pipeline):
+
++ _env: Can this be moved down to Op?
+
+- owner: The pipeline. Still needed?
+
+- next_op: Next op in the pipeline. Used to set receiver, but needed
+  otherwise?
+
+- receiver: Used at runtime, must keep this for Ops. Needed for
+  Pipeline?
+
++ command_state: In use? No.
+
+
+Pipeline state:
+
+- error_handler
+
+- first_op
+
+- last_op

@@ -39,7 +39,7 @@ class FunctionWrapper:
 
     # For creating a Function from source, we need source and globals. If the function itself (i.e., lambda)
     # is provided, then the globals aren't needed, since we don't need to use eval.
-    def __init__(self, source=None, globals=None, function=None):
+    def __init__(self, function=None, source=None, globals=None):
         self._source = None
         self._globals = None
         self._function = None
@@ -83,6 +83,9 @@ class FunctionWrapper:
 
     def source(self):
         return self._source if self._source else self._function
+
+    def snippet(self):
+        return self._source.split('\n')[0].strip() if self._source else self._function
 
     def is_grouping(self):
         return (self._source is not None and self._source == '.' or

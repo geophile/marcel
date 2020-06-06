@@ -51,9 +51,9 @@ class Map(marcel.core.Op):
         self.function = None
 
     def __repr__(self):
-        return f'map({self.function.source()})'
+        return f'map({self.function.snippet()})'
 
-    # BaseOp
+    # AbstractOp
     
     def receive(self, x):
         output = self.function() if x is None else self.function(*x)

@@ -30,7 +30,7 @@ class FilenamesOp(marcel.core.Op):
         self.current_dir = None
         self.roots = None
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.eval_function('filenames', str, pathlib.Path)

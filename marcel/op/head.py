@@ -48,7 +48,7 @@ class Head(marcel.core.Op):
     def __repr__(self):
         return f'head({self.n})'
 
-    # BaseOp
+    # AbstractOp
     
     def setup_1(self):
         self.eval_function('n', int)

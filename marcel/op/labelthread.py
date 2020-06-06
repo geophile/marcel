@@ -33,7 +33,7 @@ class LabelThread(marcel.core.Op):
                 if self.label is not None
                 else f'labelthread(#{self.id})')
 
-    # BaseOp
+    # AbstractOp
 
     def receive(self, x):
         assert self.label is not None

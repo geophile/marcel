@@ -55,7 +55,7 @@ class Sort(marcel.core.Op):
     def __repr__(self):
         return 'sort'
 
-    # BaseOp
+    # AbstractOp
     
     def setup_1(self):
         self.contents = []

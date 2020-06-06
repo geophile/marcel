@@ -31,7 +31,7 @@ class Assign(marcel.core.Op):
     def __repr__(self):
         return f'assign({self.var}, {self.value})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         count = 0

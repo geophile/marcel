@@ -1,4 +1,8 @@
 from marcel.api import *
 
-zero = 0
-run(gen(4) | red(lambda acc, x: x if acc is None else acc + x + zero))
+negate = map(lambda x: -x)
+
+print('ONE NEGATE')
+run(gen(3) | negate)
+print('TWO NEGATES')
+run(gen(3) | negate | negate)

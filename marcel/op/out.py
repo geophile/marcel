@@ -89,7 +89,7 @@ class Out(marcel.core.Op):
     def __repr__(self):
         return f'out(append={self.append}, file={self.file}, csv={self.csv}, format={Out.ensure_quoted(self.format)})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.eval_function('append', str)

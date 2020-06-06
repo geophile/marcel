@@ -127,7 +127,7 @@ class Red(marcel.core.Op):
         sources = [None if f is None else f.source() for f in self.functions]
         return f'red(incremental={self.incremental}, functions={sources})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         grouping_positions = []

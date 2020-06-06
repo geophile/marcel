@@ -48,7 +48,7 @@ class Remote(marcel.core.Op):
     def __repr__(self):
         return f'remote({self.host}, {self.pipeline})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.eval_function('host', str)

@@ -50,7 +50,7 @@ class Cd(marcel.core.Op):
     def __repr__(self):
         return f'cd({self.directory})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.directory = pathlib.Path(self.directory)

@@ -102,10 +102,11 @@ class Join(marcel.core.Op):
     def __repr__(self):
         return 'join(keep)' if self.keep else 'join()'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         def load_pipeline_map(*x):
+            assert len(x) > 0
             join_value = x[0]
             match = self.pipeline_map.get(join_value, None)
             if match is None:

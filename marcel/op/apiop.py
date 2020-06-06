@@ -33,7 +33,7 @@ class APIOp(marcel.core.Op):
     def __repr__(self):
         return f'{self.op_name()}()'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.check_arg(self.error_handler is not None,

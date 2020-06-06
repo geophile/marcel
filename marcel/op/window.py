@@ -139,7 +139,7 @@ class Window(marcel.core.Op):
         buffer.append(')')
         return ''.join(buffer)
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.eval_function('overlap', int)

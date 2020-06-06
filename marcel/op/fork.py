@@ -101,7 +101,7 @@ class Fork(marcel.core.Op):
     def __repr__(self):
         return f'fork({self.host}, {self.pipeline})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.eval_function('host', int, str)
@@ -189,7 +189,7 @@ class Remote(ForkImplementation):
     def __init__(self, op):
         super().__init__(op)
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         super().setup_1()
@@ -239,7 +239,7 @@ class Local(ForkImplementation):
     def __init__(self, op):
         super().__init__(op)
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         super().setup_1()

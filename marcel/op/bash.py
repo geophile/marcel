@@ -74,7 +74,7 @@ class Bash(marcel.core.Op):
     def __repr__(self):
         return f'bash(args={self.args})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.eval_function('args')

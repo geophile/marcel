@@ -63,7 +63,7 @@ class Sudo(marcel.core.Op):
     def __repr__(self):
         return f'sudo({self.pipeline})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.args = self.args[1:]

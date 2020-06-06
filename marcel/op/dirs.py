@@ -52,7 +52,7 @@ class Dirs(marcel.core.Op):
     def __repr__(self):
         return f'dirs(clear={self.clear})'
 
-    # BaseOp
+    # AbstractOp
 
     def receive(self, _):
         if self.clear:

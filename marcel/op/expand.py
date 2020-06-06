@@ -90,7 +90,7 @@ class Expand(marcel.core.Op):
     def __repr__(self):
         return 'expand()' if self.position is None else f'expand({self.position})'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         self.eval_function('position', int)

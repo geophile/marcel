@@ -150,6 +150,12 @@ class Environment:
     def setvar(self, var, value):
         self.namespace[var] = value
 
+    def set_locals(self, locals):
+        self.namespace.update(locals)
+
+    def clear_locals(self):
+        pass
+
     def vars(self):
         return self.namespace
 
@@ -189,7 +195,7 @@ class Environment:
     def read_config(self, config_path):
         config_path = (pathlib.Path(config_path)
                        if config_path else
-                       pathlib.Path.home() / Environment.CONFIG_FILENAME)
+                       pathlib.Path.home() / Environment.CONFIG_FILENAME).expanduser()
         if config_path.exists():
             with open(config_path.as_posix()) as config_file:
                 config_source = config_file.read()

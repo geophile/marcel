@@ -44,7 +44,7 @@ class Version(marcel.core.Op):
     def __repr__(self):
         return 'version()'
 
-    # BaseOp
+    # AbstractOp
 
     def receive(self, _):
         self.send(marcel.version.VERSION)

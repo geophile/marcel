@@ -52,7 +52,7 @@ class Select(marcel.core.Op):
     def __repr__(self):
         return f'select({self.function.source()})'
 
-    # BaseOp
+    # AbstractOp
     
     def receive(self, x):
         if self.function(*x):

@@ -46,7 +46,7 @@ class History(marcel.core.Op):
     def __repr__(self):
         return 'history()'
 
-    # BaseOp
+    # AbstractOp
 
     def receive(self, _):
         history = self.env().reader.history()

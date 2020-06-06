@@ -53,7 +53,7 @@ class Pushd(marcel.core.Op):
     def __repr__(self):
         return f'pushd({self.directory})' if self.directory else 'pushd()'
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         if self.directory is not None:

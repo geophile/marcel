@@ -39,7 +39,7 @@ class JobOp(marcel.core.Op):
         self.job_id = None
         self.job = None
 
-    # BaseOp
+    # AbstractOp
 
     def setup_1(self):
         job_control = marcel.job.JobControl.only

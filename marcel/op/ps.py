@@ -94,7 +94,7 @@ class Ps(marcel.core.Op):
         self.command = _UNINITIALIZED
         self.filter = None
 
-    # BaseOp
+    # AbstractOp
     
     def setup_1(self):
         self.eval_function('user', int, str)
