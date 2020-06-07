@@ -198,7 +198,7 @@ class ArgsParser:
         elif callable(x):
             f = FunctionWrapper(function=x)
         elif type(x) is str:
-            f = FunctionWrapper(source=x, globals=self.env.namespace)
+            f = FunctionWrapper(source=x)
         else:
             raise ArgsError(arg.op_name, f'{arg.name} argument must be a function.')
         f.set_op(self.current_op)
