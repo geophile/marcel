@@ -64,14 +64,13 @@ class FunctionWrapper:
             raise marcel.exception.KillCommandException('Not a valid function')
 
     def source(self):
-        return self._source if self._source else self._function
+        return self._source if self._source else None
 
     def snippet(self):
         return self._source.split('\n')[0].strip() if self._source else self._function
 
     def is_grouping(self):
-        return (self._source is not None and self._source == '.' or
-                self._function is not None and self._function == marcel.reduction.r_group)
+        return self._function == marcel.reduction.r_group
 
     def set_op(self, op):
         self._op = op
