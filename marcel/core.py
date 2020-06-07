@@ -73,11 +73,6 @@ class AbstractOp(Pipelineable):
     def __repr__(self):
         assert False
 
-    # Pipelineable
-
-    def create_pipeline(self):
-        assert False
-
     # AbstractOp runtime
 
     def setup_1(self):

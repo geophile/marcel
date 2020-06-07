@@ -125,8 +125,8 @@ class Join(marcel.core.Op):
             pipeline = self.pipeline.create_pipeline()
         else:
             pipeline = self.env().getvar(self.pipeline)
-        if type(pipeline) is not marcel.core.Pipeline:
-            raise marcel.exception.KillCommandException(f'The variable {self.pipeline} is not bound to a pipeline')
+            if type(pipeline) is not marcel.core.Pipeline:
+                raise marcel.exception.KillCommandException(f'The variable {self.pipeline} is not bound to a pipeline')
         pipeline = pipeline.copy()
         pipeline.set_error_handler(self.owner.error_handler)
         pipeline.append(marcel.opmodule.create_op(self.env(), 'map', load_pipeline_map))

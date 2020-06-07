@@ -1,6 +1,10 @@
 Pickling/unpickling has been a constant source of trouble. It is
 really only needed for execution in another process (e.g. bash, sudo,
-remote).
+remote). 
+
+Latest problem: Cloning a pipeline clones the env so execution of a
+function compiled against one env runs into trouble when run against a
+different one. See experiments/pickle_vs_eval.py.
 
 For local forking, it is only needed because of the labelthread
 op. But thread-local storage would work here too.
@@ -10,29 +14,48 @@ changing the source. E.g., when the api needs to append an op for
 gathering or iteration.
 
 What if I get rid of Pipeline completely, and stick to the Node-based
-approach? This avoids the need to copy for the API. 
+approach? This avoids the need to copy for the API. The problem with
+this is the last op. 
 
-----------------------------------------------------------------------
+     x = a | b
+     y = x | c
 
-AbstractOp state (parent of Pipeline):
+If x and y share state, then b.receiver = c, which is a problem when
+running x. Unless execution can somehow know that we are running x and
+not y, and stop when we reach x's last op.  Note that op.owner points
+to the op's pipeline, which is a problem for making this
+determination. Also, the whole notion of an op having an owner
+pipeline breaks if ops can be shared between pipelines. But keeping
+Nodes and creating pipelines only for execution fixes this.
 
-+ _env: Can this be moved down to Op?
+So:
 
-- owner: The pipeline. Still needed?
+- Keep pipelines.
 
-- next_op: Next op in the pipeline. Used to set receiver, but needed
-  otherwise?
+- Implement labelthread using thread-local.
 
-- receiver: Used at runtime, must keep this for Ops. Needed for
-  Pipeline?
+- Pickle/unpickle only for remote. But this isn't possible. E.g., join
+needs to copy a pipeline, so that it can append an op to the copy (for
+the right input to join). If that pipeline has a function, the
+function gets a COPY of its namespace.
 
-+ command_state: In use? No.
+In this case, we want the namespace to be shared.
+
+So avoid pickle/unpickle for pipelines? 
+
+Or is there some way for FunctionWrapper.__get/setstate__ to share
+environments?  Even if this were possible, it wouldn't help for
+FunctionWrappers created from callables (as opposed to source).
+
+What about sharing functions between an op and its copy?
 
 
-Pipeline state:
+- Create a dict: function id -> function.
+- getstate returns the function id.
+- setstate replaces the function id by the function.
 
-- error_handler
+Actualy, this same technique works inside of FunctionWrapper.
 
-- first_op
-
-- last_op
+Where does the dict live? In the Pipeline. Need to be able to traverse
+a Pipeline and get all the FWs. Pipeline.copy can then find all the FW
+copies and restore the functions.

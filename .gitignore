@@ -4,4 +4,4 @@
 build
 dist
 marcel.egg-info
-venv
+venv*

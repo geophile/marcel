@@ -94,10 +94,6 @@ def _generate_op(f, *args, **kwargs):
     return op
 
 
-def _default_error_handler(env, error):
-    print(error.render_full(env.color_scheme()))
-
-
 def _noop_error_handler(env, error):
     pass
 
@@ -113,7 +109,7 @@ def run(x):
     pipeline = _prepare_pipeline(x)
     if not isinstance(pipeline.last_op, _Out):
         pipeline.append(out())
-    pipeline.set_error_handler(_default_error_handler)
+    pipeline.set_error_handler(_MAIN.default_error_handler)
     _MAIN.run_api(pipeline)
 
 
