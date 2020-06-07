@@ -21,22 +21,6 @@ import marcel.reduction
 
 class FunctionWrapper:
 
-    symbols = {
-        # Red args can include these functions.
-        '+': marcel.reduction.r_plus,
-        '*': marcel.reduction.r_times,
-        '^': marcel.reduction.r_xor,
-        '&': marcel.reduction.r_bit_and,
-        '|': marcel.reduction.r_bit_or,
-        'and': marcel.reduction.r_and,
-        'or': marcel.reduction.r_or,
-        'max': marcel.reduction.r_max,
-        'min': marcel.reduction.r_min,
-        'count': marcel.reduction.r_count,
-        # Needed to support '.' notation for the red op, with grouping. Shouldn't actually be invoked.
-        '.': lambda acc, x: None
-    }
-
     # For creating a Function from source, we need source and globals. If the function itself (i.e., lambda)
     # is provided, then the globals aren't needed, since we don't need to use eval.
     def __init__(self, function=None, source=None, globals=None):
@@ -51,6 +35,7 @@ class FunctionWrapper:
             except:
                 pass
         elif source is not None and globals is not None and function is None:
+            self._function = marcel.reduction.SYMBOLS[source]
             self._source = source
             self._globals = globals
         else:
@@ -60,8 +45,6 @@ class FunctionWrapper:
         return str(self._function) if self._source is None else self._source
 
     def __call__(self, *args, **kwargs):
-        if self._function is None:
-            self.create_function()
         try:
             return self._function(*args, **kwargs)
         except Exception as e:
@@ -77,7 +60,6 @@ class FunctionWrapper:
                 raise marcel.exception.KillCommandException(f'Error evaluating {self} on {function_input_string}: {e}')
 
     def check_validity(self):
-        self.create_function()
         if not callable(self._function):
             raise marcel.exception.KillCommandException('Not a valid function')
 
@@ -93,25 +75,3 @@ class FunctionWrapper:
 
     def set_op(self, op):
         self._op = op
-
-    # Can't call self._op.fatal_error here, because this function is called while the op and it's pipeline
-    # are being created. fatal_error assumes that the op has a pipeline and that the pipeline has an
-    # error handler.
-    def create_function(self):
-        if self._function is None:
-            self._function = FunctionWrapper.symbols.get(self._source, None)
-            if self._function is None:
-                if self._source is not None:
-                    self._source = self._source.strip()
-                    if self._source.split()[0] in ('lambda', 'lambda:'):
-                        self._function = eval(self._source, self._globals)
-                    else:
-                        try:
-                            self._function = eval('lambda ' + self._source, self._globals)
-                        except Exception:
-                            try:
-                                self._function = eval('lambda: ' + self._source, self._globals)
-                            except Exception:
-                                raise marcel.exception.KillCommandException(f'Invalid function syntax: {self._source}')
-                else:
-                    raise marcel.exception.KillCommandException('Function required')

@@ -15,14 +15,26 @@
 
 import marcel.util
 
-namespace = {'a': 10}
+
+def ab(namespace):
+    m = {}
+    for key in ('a', 'b'):
+        m[key] = namespace.get(key, None)
+    return m
+
+
+namespace = {'a': 10, 'b': 5}
+print(f'namespace: {ab(namespace)}')
 f = eval('lambda: a + b', namespace)
-namespace['b'] = 5
-print(f())
-
 g = marcel.util.copy(f)
-print(g())
+print(f'f globals: {ab(f.__globals__)}')
+print(f'g globals: {ab(g.__globals__)}')
+print(f'f: {f()}')
+print(f'g: {g()}')
 
-namespace['b'] = 33
-print(f())
-print(g())
+namespace['b'] = 20
+print(f'namespace: {ab(namespace)}')
+print(f'f globals: {ab(f.__globals__)}')
+print(f'g globals: {ab(g.__globals__)}')
+print(f'f: {f()}')
+print(f'g: {g()}')

@@ -57,3 +57,18 @@ def r_count(acc, x):
 # Should never be called. Used to identify grouping for the red operator.
 def r_group(acc, x):
     assert False
+
+
+SYMBOLS = {
+    '+': r_plus,
+    '*': r_times,
+    '^': r_xor,
+    '&': r_bit_and,
+    '|': r_bit_or,
+    'and': r_and,
+    'or': r_or,
+    'max': r_max,
+    'min': r_min,
+    'count': r_count,
+    '.': r_group
+}

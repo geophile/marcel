@@ -175,3 +175,26 @@ Quote-sensitive tests in test_ops fail otherwise.
 
 RE-ENABLE test_bash() in test_ops once this is fixed.
 
+----------------------------------------------------------------------
+
+61. runpipeline op doesn't work when first in pipeline.
+
+Create a pipeline and use it:
+
+    M-0.8.0 jao@cheese:~/git/marcel/test$ a = [gen 3]
+    M-0.8.0 jao@cheese:~/git/marcel/test$ a
+    0
+    1
+    2
+    M-0.8.0 jao@cheese:~/git/marcel/test$ (a)
+    pipeline(gen(count=3, start=0, pad=None))
+
+Embed the pipeline in another one:
+
+    M-0.8.0 jao@cheese:~/git/marcel/test$ b = [a]
+    M-0.8.0 jao@cheese:~/git/marcel/test$ (b)
+    pipeline(runpipeline(a))
+    M-0.8.0 jao@cheese:~/git/marcel/test$ b
+    M-0.8.0 jao@cheese:~/git/marcel/test$ 
+
+Executing b produces no output. It should have run a.
