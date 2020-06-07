@@ -1,61 +1,60 @@
-Pickling/unpickling has been a constant source of trouble. It is
-really only needed for execution in another process (e.g. bash, sudo,
-remote). 
+OVERVIEW
 
-Latest problem: Cloning a pipeline clones the env so execution of a
-function compiled against one env runs into trouble when run against a
-different one. See experiments/pickle_vs_eval.py.
+Cloning (Pickling/unpickling) has been a constant source of trouble. 
 
-For local forking, it is only needed because of the labelthread
-op. But thread-local storage would work here too.
+- It is expensive.
 
-Copying is also needed whenever a pipeline is modified, to avoid
-changing the source. E.g., when the api needs to append an op for
-gathering or iteration.
+- It occasionally runs into trouble due to things being pickled that
+  weren't intended, or cannot be pickled. (The latter is less of an
+  issue with dill.)
 
-What if I get rid of Pipeline completely, and stick to the Node-based
-approach? This avoids the need to copy for the API. The problem with
-this is the last op. 
+- Latest problem: Cloning a pipeline clones the env so execution of a
+  function compiled against one env runs into trouble when run against
+  a different one. See experiments/pickle_vs_eval.py.
 
-     x = a | b
-     y = x | c
+A Pipeline has a linked list of Ops, and is mutable. Pipeline.append
+adds a new Op to the end of the list, changing the Pipeline's
+behavior. So when an Op has to be appended for implementation reasons,
+the append has to be done to a copy, to avoid affecting anyone
+depending on the original. E.g., PipelineIterator, join.
 
-If x and y share state, then b.receiver = c, which is a problem when
-running x. Unless execution can somehow know that we are running x and
-not y, and stop when we reach x's last op.  Note that op.owner points
-to the op's pipeline, which is a problem for making this
-determination. Also, the whole notion of an op having an owner
-pipeline breaks if ops can be shared between pipelines. But keeping
-Nodes and creating pipelines only for execution fixes this.
+Fork copies its pipeline, so that each copy can have its own instance
+of labelthread, each with its own label. An alternative is to have
+labelthread use thread-local storage.
 
-So:
+And of course, cloning is necessary for remote execution (sender
+pickles, remote receiver unpickles).
 
-- Keep pipelines.
+----------------------------------------------------------------------
 
-- Implement labelthread using thread-local.
+CLONING VS. FUNCTION NAMESPACES
 
-- Pickle/unpickle only for remote. But this isn't possible. E.g., join
-needs to copy a pipeline, so that it can append an op to the copy (for
-the right input to join). If that pipeline has a function, the
-function gets a COPY of its namespace.
+Cloning creates functions that will break once we start relying on
+namespace updates within a pipeline. E.g.
 
-In this case, we want the namespace to be shared.
+    ext = [select (f: f.suffix == e)]
+    ls -fr | ext -e '.py'
 
-So avoid pickle/unpickle for pipelines? 
+ext filters files with extension e. The current implementation places
+{'e': '.py'} in the namespace. This only works now because of a hack
+in runpipeline:
 
-Or is there some way for FunctionWrapper.__get/setstate__ to share
-environments?  Even if this were possible, it wouldn't help for
-FunctionWrappers created from callables (as opposed to source).
+    def receive(self, x):
+        namespace = self.pipeline.first_op.env().namespace
+        namespace.update(self.locals)
 
-What about sharing functions between an op and its copy?
+self.pipeline is a copy of ext (so that the receiver can be attached
+to the top level pipeline's out). This reaches into
+self.pipeline.first_op to modify the namespace attached to the copy of
+the select op.
 
+FIX
 
-- Create a dict: function id -> function.
-- getstate returns the function id.
-- setstate replaces the function id by the function.
+- Add an id to FunctionWrapper
 
-Actualy, this same technique works inside of FunctionWrapper.
+- Pipeline maintains mapping from function id to FunctionWrapper.
 
-Where does the dict live? In the Pipeline. Need to be able to traverse
-a Pipeline and get all the FWs. Pipeline.copy can then find all the FW
-copies and restore the functions.
+- FW.__getstate__ returns function id only.
+
+- Pipeline.copy, after calling util.copy(), uses the id->FW mapping to
+  reconstitute FWs.

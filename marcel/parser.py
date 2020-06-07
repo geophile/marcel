@@ -758,7 +758,6 @@ class Parser:
             op_module = self.op_modules['runpipeline']
             op = op_module.create_op()
             op.var = var
-            op.args = args
         return op
 
     def create_op_executable(self, op_token, args):

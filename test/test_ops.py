@@ -567,8 +567,6 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('ext = [select (f: f.suffix == e)]')
-    TEST.run('ls -fr /home/jao/git/marcel/test | ext -e ".py"')
     pass
 
 
