@@ -495,6 +495,15 @@ def test_version():
              expected_out=[marcel.version.VERSION])
 
 
+def test_assign():
+    a = 3
+    TEST.run(test=lambda: run(map(lambda: a)),
+             expected_out=[3])
+    a = map(lambda x: (x, -x))
+    TEST.run(test=lambda: run(gen(3) | a),
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+
+
 def test_join():
     # Join losing right inputs
     TEST.run(test=lambda: run(gen(4) | map(lambda x: (x, -x)) | join(gen(3) | map(lambda x: (x, x * 100)))),
@@ -620,6 +629,7 @@ def main_stable():
     test_remote()
     # test_sudo()
     test_version()
+    test_assign()
     test_join()
     test_api_run()
     test_api_gather()

@@ -512,6 +512,13 @@ def test_assign():
     TEST.run(test='a = [ map (x: (x, -x)) ]',
              verification='gen 3 | a',
              expected_out=[(0, 0), (1, -1), (2, -2)])
+    # Bug 61
+    TEST.run('a = [gen 3]')
+    TEST.run(test='a',
+             expected_out=[0, 1, 2])
+    TEST.run('b = [a]')
+    TEST.run(test='b',
+             expected_out=[0, 1, 2])
 
 
 def test_join():

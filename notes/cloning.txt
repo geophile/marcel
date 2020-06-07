@@ -58,3 +58,9 @@ FIX
 
 - Pipeline.copy, after calling util.copy(), uses the id->FW mapping to
   reconstitute FWs.
+
+----------------------------------------------------------------------
+
+
+    ext = [e: select (f: f.suffix == e)]
+    ls -fr | ext -e '.py'
