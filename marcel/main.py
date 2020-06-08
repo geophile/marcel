@@ -189,10 +189,11 @@ class Main:
             lines = script.readlines()
         command = ''
         for line in lines:
-            command += line
-            if not line.endswith('\\\n'):
-                self.run_command(command)
-                command = ''
+            if len(line.strip()) > 0:
+                command += line
+                if not line.endswith('\\\n'):
+                    self.run_command(command)
+                    command = ''
         if len(command) > 0:
             self.run_command(command)
 
