@@ -51,8 +51,6 @@ def sudo(env, pipeline, *args):
 # differ across distros? And since the flags aren't being modeled by the arg parser, we can't say that the
 # last arg is, specifically, a pipeline. So just get all the args, and assume the last one is a pipeline.
 # This means that setup_1 has to convert the pipeline ref to a pipeline.
-
-
 class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):

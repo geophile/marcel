@@ -20,7 +20,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/op/sudo.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/sudo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/releases.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/releases.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -246,7 +250,7 @@
       <workItem from="1591364491100" duration="34901000" />
       <workItem from="1591476142634" duration="3225000" />
       <workItem from="1591491299140" duration="19952000" />
-      <workItem from="1591571840423" duration="18216000" />
+      <workItem from="1591571840423" duration="20939000" />
     </task>
     <servers />
   </component>
@@ -486,10 +490,10 @@
     </state>
     <state x="230" y="256" width="1109" height="932" key="dock-window-2/0.27.2560.1413@0.27.2560.1413" timestamp="1590432768571" />
     <state x="1920" y="27" width="1129" height="935" key="dock-window-2/0.27.4480.1413@0.27.4480.1413" timestamp="1591650058476" />
-    <state x="1920" y="27" width="1129" height="935" key="dock-window-3" timestamp="1591652035901">
+    <state x="1920" y="27" width="1129" height="935" key="dock-window-3" timestamp="1591652455251">
       <screen x="0" y="27" width="4480" height="1413" />
     </state>
-    <state x="1920" y="27" width="1129" height="935" key="dock-window-3/0.27.4480.1413@0.27.4480.1413" timestamp="1591652035901" />
+    <state x="1920" y="27" width="1129" height="935" key="dock-window-3/0.27.4480.1413@0.27.4480.1413" timestamp="1591652455251" />
     <state x="1969" y="422" width="1017" height="768" key="find.popup" timestamp="1591634925051">
       <screen x="0" y="27" width="4480" height="1413" />
     </state>
@@ -513,10 +517,10 @@
     </state>
     <state x="1113" y="521" width="306" height="466" key="refactoring.ChangeSignatureDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1591380771348" />
     <state x="1948" y="521" key="refactoring.ChangeSignatureDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1590544776135" />
-    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup" timestamp="1591651881088">
-      <screen x="0" y="27" width="4480" height="1413" />
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup" timestamp="1591659012646">
+      <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1591647007354" />
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1591659012646" />
     <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1591628234592" />
     <state x="1401" y="354" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1591058116381" />
     <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1591651881088" />

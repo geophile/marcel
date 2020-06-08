@@ -84,6 +84,7 @@ class Main:
         self.initialize_input()  # Sets self.reader
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_env_vars)
+        self.run_init_scripts()
         atexit.register(self.shutdown)
 
     def __getstate__(self):
@@ -168,6 +169,33 @@ class Main:
         # Job control commands should be run in this process, not a spawned process.
         # Also, if we're testing operator behavior, run in immediate mode.
         return self.same_process or pipeline.first_op.run_in_main_process()
+
+    def run_init_scripts(self):
+        load_on_startup = self.env.getvar('LOAD_ON_STARTUP')
+        if type(load_on_startup) is str:
+            self.load(load_on_startup)
+        elif type(load_on_startup) in (list, tuple):
+            for x in load_on_startup:
+                if type(x) is str:
+                    self.load(x)
+                else:
+                    fail(f'Cannot run startup script {x}')
+        else:
+            fail(f'Cannot run startup script {load_on_startup}')
+
+    def load(self, script_file):
+        script_file = pathlib.Path(script_file).expanduser()
+        with open(script_file, 'r') as script:
+            lines = script.readlines()
+        command = ''
+        for line in lines:
+            command += line
+            if not line.endswith('\\\n'):
+                self.run_command(command)
+                command = ''
+        if len(command) > 0:
+            self.run_command(command)
+
 
     @staticmethod
     def default_error_handler(env, error):

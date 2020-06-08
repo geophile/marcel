@@ -36,4 +36,5 @@ following topics:
 {L}- {n:prompt}: Customizing the prompt.
 {L}- {n:namespace}: Adding symbols to the marcel namespace.
 {L}- {n:remote}: Configuring remote access.
+{L}- {n:startup}: Running scripts on startup.
 '''
