@@ -410,6 +410,10 @@ def test_bash():
     # Quoted, so they are preserved.
     TEST.run(lambda: run(bash('echo', '"hello  world"')),
              expected_out=['hello  world'])
+    # Function-valued args
+    HELLO = 'hello'
+    TEST.run(lambda: run(bash('echo', f"'{HELLO}  world'")),
+             expected_out=['hello  world'])
 
 
 def test_fork():

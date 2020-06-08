@@ -158,7 +158,7 @@ class File(marcel.object.renderable.Renderable):
         if color_scheme:
             extension = path.suffix.lower()
             highlight = (color_scheme.file_extension.get(extension, None)
-                         if color_scheme.file_extension is dict else
+                         if type(color_scheme.file_extension) is dict else
                          None)
             if highlight is None:
                 highlight = (

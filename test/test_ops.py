@@ -402,19 +402,25 @@ def test_window():
              expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
 
 
-
 def test_bash():
     # Two space between hello and world not preserved.
     TEST.run('bash echo hello  world',
              expected_out=['hello world'])
-    # TODO: DISABLED UNTIL BUG 60 IS FIXED
-    # # Quoted, so they are preserved.
-    # TEST.run('bash echo "hello  world"',
-    #          expected_out=['hello  world'])
-    # # Function-valed args
-    # TEST.run('HELLO = hello')
-    # TEST.run('bash echo (HELLO)"  world"',
-    #          expected_out=['hello  world'])
+    # Quoted, so they are preserved.
+    TEST.run('bash echo "hello  world"',
+             expected_out=['hello  world'])
+    # Function-valued args
+    TEST.run('HELLO = hello')
+    TEST.run('''bash echo (f"'{HELLO}  world'")''',
+             expected_out=['hello  world'])
+    # without 'bash'
+    TEST.run('echo hello  world',
+             expected_out=['hello world'])
+    TEST.run('echo "hello  world"',
+             expected_out=['hello  world'])
+    TEST.run('HELLO = hello')
+    TEST.run('''echo (f"'{HELLO}  world'")''',
+             expected_out=['hello  world'])
 
 
 def test_fork():

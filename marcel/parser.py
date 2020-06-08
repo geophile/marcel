@@ -109,6 +109,9 @@ class Source:
     def remaining(self):
         return len(self.text) - self.end
 
+    def raw(self):
+        return self.text[self.start:self.end]
+
 
 class Token(Source):
     # Special characters that need to be escaped for python strings
@@ -263,7 +266,7 @@ class Expression(Token):
                         function = eval('lambda: ' + source, self._globals)
                     except Exception:
                         raise marcel.exception.KillCommandException(f'Invalid function syntax: {source}')
-            self._function = marcel.functionwrapper.FunctionWrapper(function=function)
+            self._function = marcel.functionwrapper.FunctionWrapper(function=function, source=source)
         return self._function
     
     def source(self):
@@ -678,13 +681,13 @@ class Parser:
             op_token = self.op()
             self.current_op = CurrentOp(self, op_token)
             self.current_ops.push(self.current_op)
-            args = []
-            arg = self.arg()
-            while arg is not None:
+            arg_tokens = []
+            arg_token = self.arg()
+            while arg_token is not None:
                 self.current_op.processing_args = True
-                args.append(arg)
-                arg = self.arg()
-            op = self.create_op(op_token, args)
+                arg_tokens.append(arg_token)
+                arg_token = self.arg()
+            op = self.create_op(op_token, arg_tokens)
             self.current_op = self.current_ops.pop()
             return op
 
@@ -702,7 +705,7 @@ class Parser:
             self.next_token(End)
             return pipeline
         elif self.next_token(String) or self.next_token(Expression):
-            return self.token.value()
+            return self.token
         else:
             return None
 
@@ -724,17 +727,17 @@ class Parser:
     def raise_unexpected_token_error(token, message):
         raise UnexpectedTokenError(token, message)
 
-    def create_op(self, op_token, args):
-        op = self.create_op_builtin(op_token, args)
+    def create_op(self, op_token, arg_tokens):
+        op = self.create_op_builtin(op_token, arg_tokens)
         if op is None:
-            op = self.create_op_variable(op_token, args)
+            op = self.create_op_variable(op_token, arg_tokens)
         if op is None:
-            op = self.create_op_executable(op_token, args)
+            op = self.create_op_executable(op_token, arg_tokens)
         if op is None:
             raise UnknownOpError(op_token.value())
         return op
 
-    def create_op_builtin(self, op_token, args):
+    def create_op_builtin(self, op_token, arg_tokens):
         current_op = self.current_ops.top()
         if current_op.op is None:
             return None
@@ -747,10 +750,19 @@ class Parser:
             # else: 'run' was entered
             op.expected_args = (1 if op_token.value() == '!' else
                                 0 if op_token.value() == '!!' else None)
+        args = []
+        if op_name == 'bash':
+            for x in arg_tokens:
+                args.append(x.raw() if type(x) is String else
+                            x.value() if isinstance(x, Token) else
+                            x)
+        else:
+            for x in arg_tokens:
+                args.append(x.value() if isinstance(x, Token) else x)
         current_op.args_parser.parse(args, op)
         return op
 
-    def create_op_variable(self, op_token, args):
+    def create_op_variable(self, op_token, arg_tokens):
         op = None
         var = op_token.value()
         value = self.env.getvar(var)
@@ -760,11 +772,16 @@ class Parser:
             op.var = var
         return op
 
-    def create_op_executable(self, op_token, args):
+    def create_op_executable(self, op_token, arg_tokens):
         op = None
         name = op_token.value()
         if marcel.util.is_executable(name):
-            op = marcel.opmodule.create_op(self.env, 'bash', *([name] + args))
+            args = [name]
+            for x in arg_tokens:
+                args.append(x.raw() if type(x) is String else
+                            x.value() if isinstance(x, Token) else
+                            x)
+            op = marcel.opmodule.create_op(self.env, 'bash', *args)
         return op
 
     def create_assignment(self, var, string=None, pipeline=None, function=None):

@@ -24,20 +24,21 @@ class FunctionWrapper:
     # For creating a Function from source, we need source and globals. If the function itself (i.e., lambda)
     # is provided, then the globals aren't needed, since we don't need to use eval.
     def __init__(self, function=None, source=None):
-        self._source = None
-        self._function = None
         self._op = None
-        if source is None and function is not None:
+        if function and source:
+            self._function = function
+            self._source = source
+        elif function:
             self._function = function
             try:
                 self._source = dill.source.getsource(function)
             except:
                 pass
-        elif source is not None and function is None:
-            self._function = marcel.reduction.SYMBOLS[source]
+        else:  # source is not None
             self._source = source
-        else:
-            assert False
+            self._function = marcel.reduction.SYMBOLS[source]
+        assert self._function
+
 
     def __repr__(self):
         return str(self._function) if self._source is None else self._source

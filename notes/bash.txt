@@ -1,0 +1,54 @@
+A command like this:
+
+    cp *.txt dir
+
+invokes an executable. It is implemented using the bash operator, with
+arguments [cp, *.txt, dir].
+
+I've gone back and forth on quoting args, as quoting changes
+semantics, only sometimes in desirable ways. E.g., quoting prevents a
+filename with embedded whitespace from being interpreted as two
+separate tokens. But it also prevents globs from being interpreted.
+
+It seems best to pass on the command line exactly as is. Parsing
+removes quotes, and then adding quotes tries to restore user meaning,
+which is hopeless.
+
+
+BUT: Sometimes we want interpretation of args passed to bash.
+
+Example: Expression evaluation. EXT is a variable bound to a string,
+(e.g. it stores a file extension):
+
+  cp *(EXT) dir
+
+
+
+In bash:
+
+    jao@cheese:~/git/marcel/test$ H=hello
+    jao@cheese:~/git/marcel/test$ echo $H
+    hello
+    jao@cheese:~/git/marcel/test$ echo "$H"
+    hello
+    jao@cheese:~/git/marcel/test$ echo '$H'
+    $H
+
+So $H and "$H" evaluated the $H expression, but '$H' does not.
+
+
+Simple marcel rule that gets both preservation of quotes and
+expression evaluation:
+
+- Keep command line as is, quotes and everything.
+
+- But evaluate Expressions, i.e., (...). 
+
+----------------------------------------------------------------------
+
+Implementation:
+
+Parsing collects token values in args, not tokens. token.value()
+discards quote marks.
+
+Keep tokens too? Or replace args by tokens?

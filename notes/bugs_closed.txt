@@ -996,6 +996,18 @@ I'm going to say this is not a bug.
 
 ----------------------------------------------------------------------
 
+FIXED
+
+60. Preserve quotes when passing args to bash
+
+Quote-sensitive tests in test_ops fail otherwise.
+
+RE-ENABLE test_bash() in test_ops once this is fixed.
+
+----------------------------------------------------------------------
+
+FIXED
+
 61. runpipeline op doesn't work when first in pipeline.
 
 Create a pipeline and use it:
