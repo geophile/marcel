@@ -24,6 +24,22 @@ import marcel.core
 import marcel.exception
 
 
+HELP = '''
+{L,wrap=F}sudo FLAGS PIPELINE
+
+{L,indent=4:28}FLAGS                   Flags to the host OS sudo command.
+{L,indent=4:28}PIPELINE                Command to be executed under control of sudo
+
+For example, running this command (assuming you are not root), would result in "Permission denied":
+
+{L,wrap=F}ls /root
+
+Running the command via {r:sudo} would work:
+
+{L,wrap=F}sudo [ ls /root ]
+'''
+
+
 def sudo(env, pipeline, *args):
     args = list(args)
     args.append(pipeline.create_pipeline())
