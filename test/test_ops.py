@@ -486,7 +486,7 @@ def test_remote():
 
 
 def test_sudo():
-    TEST.run(test='sudo -i [ gen 3 ]',
+    TEST.run(test='sudo [ gen 3 ]',
              expected_out=[0, 1, 2])
     os.system('sudo rm -rf /tmp/sudotest')
     os.system('sudo mkdir /tmp/sudotest')
@@ -494,10 +494,8 @@ def test_sudo():
     os.system('sudo chmod 400 /tmp/sudotest')
     TEST.run(test='ls -f /tmp/sudotest',
              expected_out=[Error('Permission denied')])
-    TEST.run(test='sudo -i [ ls -f /tmp/sudotest | map (f: f.render_compact()) ]',
+    TEST.run(test='sudo [ ls -f /tmp/sudotest | map (f: f.render_compact()) ]',
              expected_out=['f'])
-    # TEST.run(test='sudo -i [ ls -f /tmp/sudotest ]',
-    #          expected_out=['f'])
 
 
 def test_version():

@@ -2,7 +2,7 @@
 
 - DB access
 
-- Improve sudo
++ Improve sudo
 
 If marcel is my default shell (in /etc/passwd), then remote operations
 fail, probably because marcel doesn't work as the shell for executing
@@ -19,7 +19,7 @@ a command by ssh. May be related to bug 46.
 - Bugs
   - 47
   - 59
-  - 60
+  + 60
   + 61
 
 ----------------------------------------------------------------------

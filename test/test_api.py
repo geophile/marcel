@@ -480,18 +480,16 @@ def test_remote():
 
 
 def test_sudo():
-    TEST.run(test='sudo -i [ gen 3 ]',
+    TEST.run(test=lambda: run(sudo(gen(3))),
              expected_out=[0, 1, 2])
-    # os.system('sudo rm -rf /tmp/sudotest')
-    # os.system('sudo mkdir /tmp/sudotest')
-    # os.system('sudo touch /tmp/sudotest/f')
-    # os.system('sudo chmod 400 /tmp/sudotest')
-    # TEST.run(test='ls -f /tmp/sudotest',
-    #          expected_out=[Error('Permission denied')])
-    # TEST.run(test='sudo -i [ ls -f /tmp/sudotest | map (f: f.render_compact()) ]',
-    #          expected_out=['f'])
-    # # TEST.run(test='sudo -i [ ls -f /tmp/sudotest ]',
-    # #          expected_out=['f'])
+    os.system('sudo rm -rf /tmp/sudotest')
+    os.system('sudo mkdir /tmp/sudotest')
+    os.system('sudo touch /tmp/sudotest/f')
+    os.system('sudo chmod 400 /tmp/sudotest')
+    TEST.run(test=lambda: run(ls('/tmp/sudotest', file=True)),
+             expected_out=[Error('Permission denied')])
+    TEST.run(test=lambda: run(sudo(ls('/tmp/sudotest', file=True) | map(lambda f: f.render_compact()))),
+             expected_out=['f'])
 
 
 def test_version():
@@ -631,7 +629,7 @@ def main_stable():
     test_fork()
     # test_namespace()
     test_remote()
-    # test_sudo()
+    test_sudo()
     test_version()
     test_assign()
     test_join()

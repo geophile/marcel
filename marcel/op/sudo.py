@@ -25,10 +25,9 @@ import marcel.exception
 
 
 def sudo(env, pipeline, *args):
-    op = Sudo(env)
-    op.args = args
-    op.pipeline = pipeline
-    return op
+    args = list(args)
+    args.append(pipeline.create_pipeline())
+    return Sudo(env), args
 
 
 # The sudo command has 0 or more flags and arguments for the native sudo command, followed by a pipeline.
@@ -66,7 +65,6 @@ class Sudo(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.args = self.args[1:]
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('Missing pipeline')
         self.pipeline = self.args.pop()
@@ -75,7 +73,6 @@ class Sudo(marcel.core.Op):
 
     def receive(self, _):
         # Start the remote process
-        # TODO: shlex.quote args, as in bash.Escape
         command = ' '.join(['sudo'] + self.args + ['farcel.py'])
         self.process = subprocess.Popen(command,
                                         stdin=subprocess.PIPE,
