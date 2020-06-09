@@ -130,7 +130,7 @@ class Environment:
         if editor:
             self.namespace['EDITOR'] = editor
         self.clusters = {}
-        self.read_config(config_file)
+        self.config_path = self.read_config(config_file)
         self.directory_state = DirectoryState(self.namespace)
         # TODO: This is a hack. Clean it up once the env handles command history
         self.edited_command = None
@@ -204,6 +204,7 @@ class Environment:
             # will then be added to self.namespace, for use in the execution of op functions.
             exec(config_source, self.namespace, locals)
             self.namespace.update(locals)
+        return config_path
 
     def prompt_string(self, prompt_pieces):
         try:

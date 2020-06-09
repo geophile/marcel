@@ -28,9 +28,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import argparse
 import atexit
 import multiprocessing
+import os.path
 import pathlib
 import readline
 import sys
@@ -63,6 +63,25 @@ class Reader(marcel.multilinereader.MultiLineReader):
         return edited_command
 
 
+class ReloadConfigException(BaseException):
+
+    def __init__(self):
+        super().__init__()
+
+
+# Used to reload configuration if any config files change.
+class ConfigurationMonitor:
+
+    def __init__(self, config_files):
+        self.config_time = time.time()
+        self.config_files = config_files
+
+    def check_for_config_update(self):
+        max_mtime = max([os.path.getmtime(f) for f in self.config_files])
+        if max_mtime > self.config_time:
+            raise ReloadConfigException()
+
+
 class Main:
 
     MAIN_SLEEP_SEC = 0.1
@@ -84,7 +103,9 @@ class Main:
         self.initialize_input()  # Sets self.reader
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_env_vars)
-        self.run_init_scripts()
+        config_files = self.run_init_scripts()
+        config_files.append(self.env.config_path)
+        self.config_monitor = ConfigurationMonitor(config_files)
         atexit.register(self.shutdown)
 
     def __getstate__(self):
@@ -103,6 +124,7 @@ class Main:
                         time.sleep(Main.MAIN_SLEEP_SEC)
                 except KeyboardInterrupt:  # ctrl-C
                     print()
+                self.config_monitor.check_for_config_update()
         except EOFError:  # ctrl-D
             print()
 
@@ -175,17 +197,25 @@ class Main:
     def run_init_scripts(self):
         load_on_startup = self.env.getvar('LOAD_ON_STARTUP')
         if load_on_startup is None:
-            return
-        elif type(load_on_startup) is str:
-            self.load(load_on_startup)
-        elif type(load_on_startup) in (list, tuple):
-            for x in load_on_startup:
-                if type(x) is str:
-                    self.load(x)
-                else:
-                    fail(f'Cannot run startup script {x}')
+            return []
         else:
-            fail(f'Cannot run startup script {load_on_startup}')
+            if type(load_on_startup) in (list, tuple):
+                load_on_startup = list(load_on_startup)
+            elif type(load_on_startup) is str:
+                load_on_startup = [load_on_startup]
+            else:
+                fail(f'Cannot run startup script {load_on_startup}')
+            normalized = []
+            for script in load_on_startup:
+                path = pathlib.Path(script).expanduser()
+                if not path.exists():
+                    fail(f'Startup script {script} does not exist.')
+                elif not path.is_file():
+                    fail(f'Startup script {script} is not a file.')
+                else:
+                    self.load(path)
+                    normalized.append(path)
+            return normalized
 
     def load(self, script_file):
         script_file = pathlib.Path(script_file).expanduser()
@@ -200,7 +230,6 @@ class Main:
                     command = ''
         if len(command) > 0:
             self.run_command(command)
-
 
     @staticmethod
     def default_error_handler(env, error):
@@ -239,6 +268,11 @@ if __name__ == '__main__':
     dill, mpstart = args()
     if mpstart is not None:
         multiprocessing.set_start_method(mpstart)
-    MAIN = Main(None)
-    MAIN.dill = dill
-    MAIN.run()
+    while True:
+        MAIN = Main(None)
+        MAIN.dill = dill
+        try:
+            MAIN.run()
+            break
+        except ReloadConfigException:
+            pass

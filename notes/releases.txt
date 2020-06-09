@@ -18,7 +18,7 @@
 + bash: Pass args exactly as typed, without removal of quotes. See bug
   60.
 
-- Provide a way to reset the environment, to pick up changes in
++ Provide a way to reset the environment, to pick up changes in
   .marcel.py or LOAD_ON_STARTUP scripts.
 
 - Pipeline with args
