@@ -39,6 +39,11 @@ For a multi-line command, type a \\\\ and then hit return. You will then see a
 {i:continuation prompt}, following each line ending with a \\\\. (Run {n:help prompt} 
 for more information on prompts.)
 
+All text following a {n:#} on the command line is ignored, i.e., the text
+following the {n:#} is considered to be a comment. This is useful in scripts
+loaded on startup (run {n:help startup} for more information); and to stash a long
+command in history for later use.
+
 
 {b:Command history}
 
