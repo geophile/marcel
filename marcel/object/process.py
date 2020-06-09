@@ -38,6 +38,7 @@ class Process(marcel.object.renderable.Renderable):
         self._uid = None
         self._gid = None
         self._state = None
+        self._process_group = None
         self._commandline = None
         self._env = None
         # Contents of files under /proc
@@ -110,6 +111,11 @@ class Process(marcel.object.renderable.Renderable):
         return self._state
 
     @property
+    def process_group(self):
+        self._ensure_status()
+        return self._process_group
+
+    @property
     def commandline(self):
         self._ensure_cmdline()
         return self._commandline
@@ -179,6 +185,9 @@ class Process(marcel.object.renderable.Renderable):
                 v = self._status.get('Gid')
                 if v is not None:
                     self._gid = int(v.split()[1])  # Effective gid
+                v = self._status.get('NSpgid')
+                if v is not None:
+                    self._process_group = int(v.split()[0])  # Process group
             except IOError:
                 pass
 

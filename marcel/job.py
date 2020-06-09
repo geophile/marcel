@@ -170,6 +170,7 @@ class Job:
             # Restore process handling needed by the console process.
             signal.signal(signal.SIGINT, JobControl.only.ctrl_c_handler)
             signal.signal(signal.SIGTSTP, JobControl.only.ctrl_z_handler)
+        debug(f'Started process {self.process.pid}')
 
     def check_alive(self):
         if self.process is None or not self.process.is_alive():
