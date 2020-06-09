@@ -998,6 +998,17 @@ I'm going to say this is not a bug.
 
 FIXED
 
+59. cat can't find file that exists
+
+Is bash not expanding ~?
+
+M-0.7.12 jao@cheese:~/git/marcel/test$ cat ~/system76.txt
+Error(cat: '~/system76.txt': No such file or directory)
+
+----------------------------------------------------------------------
+
+FIXED
+
 60. Preserve quotes when passing args to bash
 
 Quote-sensitive tests in test_ops fail otherwise.

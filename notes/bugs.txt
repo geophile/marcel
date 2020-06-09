@@ -160,13 +160,4 @@ help into an infinite loop.
 
 ----------------------------------------------------------------------
 
-59. cat can't find file that exists
-
-Is bash not expanding ~?
-
-M-0.7.12 jao@cheese:~/git/marcel/test$ cat ~/system76.txt
-Error(cat: '~/system76.txt': No such file or directory)
-
-----------------------------------------------------------------------
-
 62. 

@@ -74,6 +74,12 @@ class ParseError(marcel.exception.KillCommandException):
         super().__init__(message)
 
 
+class EmptyCommand(marcel.exception.KillCommandException):
+
+    def __init__(self):
+        super().__init__(None)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Tokens
@@ -128,7 +134,8 @@ class Token(Source):
     BEGIN = '['
     END = ']'
     ASSIGN = '='
-    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN]
+    COMMENT = '#'
+    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT]
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position)
@@ -499,6 +506,9 @@ class Lexer(Source):
                 token = Run(self.text, self.end, adjacent_to_previous)
             elif c == Token.ASSIGN:
                 token = Assign(self.text, self.end, adjacent_to_previous)
+            elif c == Token.COMMENT:
+                # Ignore the rest of the line
+                return None
             else:
                 token = String(self.text, self.end, adjacent_to_previous)
             self.end = token.end
@@ -633,6 +643,8 @@ class Parser:
         self.current_op = None
 
     def parse(self):
+        if len(self.tokens) == 0:
+            raise EmptyCommand()
         return self.command()
 
     def command(self):

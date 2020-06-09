@@ -552,6 +552,17 @@ def test_join():
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
 
 
+def test_comment():
+    TEST.run('# this is a comment',
+             expected_out=[])
+    TEST.run('#',
+             expected_out=[])
+    TEST.run('gen 3 # comment',
+             expected_out=[0, 1, 2])
+    TEST.run('gen 3 | map (x: -x) # comment',
+             expected_out=[0, -1, -2])
+
+
 def main_stable():
     test_gen()
     test_out()
@@ -574,6 +585,7 @@ def main_stable():
     test_version()
     test_assign()
     test_join()
+    test_comment()
     test_no_such_op()
 
 

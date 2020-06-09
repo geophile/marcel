@@ -120,6 +120,8 @@ class Main:
                     command.execute()
                 else:
                     self.job_control.create_job(command)
+            except marcel.parser.EmptyCommand:
+                pass
             except marcel.exception.KillCommandException as e:
                 marcel.util.print_to_stderr(e, self.env)
             except marcel.exception.KillAndResumeException as e:
@@ -172,7 +174,9 @@ class Main:
 
     def run_init_scripts(self):
         load_on_startup = self.env.getvar('LOAD_ON_STARTUP')
-        if type(load_on_startup) is str:
+        if load_on_startup is None:
+            return
+        elif type(load_on_startup) is str:
             self.load(load_on_startup)
         elif type(load_on_startup) in (list, tuple):
             for x in load_on_startup:
