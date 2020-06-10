@@ -240,6 +240,8 @@ class Pipeline(AbstractOp):
         self.error_handler = None
         self.first_op = None
         self.last_op = None
+        self.params = None
+        self.param_values = None
 
     def __repr__(self):
         buffer = []
@@ -293,6 +295,20 @@ class Pipeline(AbstractOp):
         self.first_op.receive_complete()
 
     # Pipeline
+
+    def set_parameters(self, parameters):
+        if parameters is not None:
+            assert len(parameters) > 0
+            self.params = parameters
+
+    def parameters(self):
+        return self.params
+
+    def set_parameter_values(self, param_values):
+        self.param_values = param_values
+
+    def parameter_values(self):
+        return self.param_values
 
     def copy(self):
         return marcel.util.copy(self)

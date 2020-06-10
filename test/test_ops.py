@@ -590,6 +590,8 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('adda = [a: map (x: (x, x + a)) | select (x, y: y == a)]')
+    TEST.run('gen 3 | adda (100)')
     pass
 
 

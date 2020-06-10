@@ -159,8 +159,9 @@ class Stack:
     def push(self, x):
         self.contents.append(x)
 
-    def top(self):
-        return self.contents[-1]
+    # Returns nth from the top
+    def top(self, n=0):
+        return self.contents[n - 1]
 
     def pop(self):
         return self.contents.pop()

@@ -23,7 +23,8 @@ class FunctionWrapper:
 
     # For creating a Function from source, we need source and globals. If the function itself (i.e., lambda)
     # is provided, then the globals aren't needed, since we don't need to use eval.
-    def __init__(self, function=None, source=None):
+    def __init__(self, function=None, source=None, parameterized_pipelines=[]):
+        self._parameterized_pipelines = parameterized_pipelines
         self._op = None
         if function and source:
             self._function = function
@@ -39,13 +40,23 @@ class FunctionWrapper:
             self._function = marcel.reduction.SYMBOLS[source]
         assert self._function
 
-
     def __repr__(self):
         return str(self._function) if self._source is None else self._source
 
     def __call__(self, *args, **kwargs):
+        # The function may be nested lambdas, with each level of nesting corresponding to a pipeline with
+        # parameters. Apply the pipeline parameters, from outermost to innermost.
+        p = len(self._parameterized_pipelines)
+        f = self._function
+        while p > 0:
+            p -= 1
+            param_values = self._parameterized_pipelines[p].parameter_values()
+            try:
+                f = f(*param_values)
+            except Exception as e:
+                self.handle_error(e, ', '.join(param_values))
         try:
-            return self._function(*args, **kwargs)
+            return f(*args, **kwargs)
         except Exception as e:
             function_input = []
             if len(args) > 0:
@@ -53,10 +64,7 @@ class FunctionWrapper:
             if len(kwargs) > 0:
                 function_input.append(str(kwargs))
             function_input_string = None if len(function_input) == 0 else ', '.join(function_input)
-            if self._op:
-                self._op.fatal_error(function_input_string, str(e))
-            else:
-                raise marcel.exception.KillCommandException(f'Error evaluating {self} on {function_input_string}: {e}')
+            self.handle_error(e, function_input_string)
 
     def check_validity(self):
         if not callable(self._function):
@@ -73,3 +81,10 @@ class FunctionWrapper:
 
     def set_op(self, op):
         self._op = op
+
+    def handle_error(self, e, function_input_string):
+        if self._op:
+            self._op.fatal_error(function_input_string, str(e))
+        else:
+            raise marcel.exception.KillCommandException(f'Error evaluating {self} on {function_input_string}: {e}')
+

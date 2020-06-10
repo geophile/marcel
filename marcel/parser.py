@@ -135,11 +135,16 @@ class Token(Source):
     END = ']'
     ASSIGN = '='
     COMMENT = '#'
-    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT]
+    COMMA = ','
+    COLON = ':'
+    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON]
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position)
         self.adjacent_to_previous = adjacent_to_previous
+
+    def value(self, parser):
+        return None
 
     def is_string(self):
         return False
@@ -165,8 +170,11 @@ class Token(Source):
     def is_assign(self):
         return False
 
-    def value(self):
-        return None
+    def is_comma(self):
+        return False
+
+    def is_colon(self):
+        return False
 
     def op_name(self):
         return None
@@ -189,7 +197,7 @@ class PythonString(Token):
     def __repr__(self):
         return self.string
 
-    def value(self):
+    def value(self, parser):
         return self.string
 
     # TODO: string prefixes
@@ -250,32 +258,47 @@ class PythonString(Token):
 
 class Expression(Token):
 
-    def __init__(self, text, position, adjacent_to_previous, globals):
+    def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position, adjacent_to_previous)
-        self._globals = globals
         self._source = None
         self._function = None
         self.scan()
 
+    def value(self, parser):
+        if self._function is None:
+            source = self.source()
+            globals = parser.env.namespace
+            if source.split()[0] in ('lambda', 'lambda:'):
+                function = eval(source, globals)
+            else:
+                try:
+                    function = eval('lambda ' + source, globals)
+                    source = 'lambda ' + source
+                except Exception:
+                    try:
+                        function = eval('lambda: ' + source, globals)
+                        source = 'lambda: ' + source
+                    except Exception:
+                        raise marcel.exception.KillCommandException(f'Invalid function syntax: {source}')
+            # Each pipeline with parameters, containing this function, introduces a layer of wrapping.
+            pipelines = parser.current_pipelines
+            parameterized_pipelines = []
+            for i in range(pipelines.size()):
+                pipeline = pipelines.top(i)
+                if pipeline.params is not None:
+                    param_list = ', '.join(pipeline.parameters())
+                    source = f'lambda {param_list}: {source}'
+                    parameterized_pipelines.append(pipeline)
+            if len(parameterized_pipelines) > 0:
+                function = eval(source, globals)
+            self._function = marcel.functionwrapper.FunctionWrapper(function=function,
+                                                                    source=source,
+                                                                    parameterized_pipelines=parameterized_pipelines)
+        return self._function
+    
     def is_expr(self):
         return True
 
-    def value(self):
-        if self._function is None:
-            source = self.source()
-            if source.split()[0] in ('lambda', 'lambda:'):
-                function = eval(source, self._globals)
-            else:
-                try:
-                    function = eval('lambda ' + source, self._globals)
-                except Exception:
-                    try:
-                        function = eval('lambda: ' + source, self._globals)
-                    except Exception:
-                        raise marcel.exception.KillCommandException(f'Invalid function syntax: {source}')
-            self._function = marcel.functionwrapper.FunctionWrapper(function=function, source=source)
-        return self._function
-    
     def source(self):
         if self._source is None:
             self._source = self.text[self.start + 1:self.end - 1]
@@ -312,11 +335,11 @@ class String(Token):
             self.string = None
             self.scan()
 
+    def value(self, parser):
+        return self.string
+
     def is_string(self):
         return True
-
-    def value(self):
-        return self.string
 
     def op_name(self):
         # This should only being called for the first op following START
@@ -374,14 +397,14 @@ class Run(Token):
         self.symbol = None
         self.scan()  # Sets self.symbol
 
-    def value(self):
+    def value(self, parser):
         return self.symbol
-
-    def op_name(self):
-        return 'run'
 
     def is_bang(self):
         return True
+
+    def op_name(self):
+        return 'run'
 
     def scan(self):
         c = self.next_char()
@@ -401,7 +424,7 @@ class OneCharSymbol(Token):
         self.symbol = symbol
         self.end += 1
 
-    def value(self):
+    def value(self, parser):
         return self.symbol
 
 
@@ -456,6 +479,24 @@ class Assign(OneCharSymbol):
         return 'assign'
 
 
+class Comma(OneCharSymbol):
+
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, position, adjacent_to_previous, Token.COMMA)
+
+    def is_comma(self):
+        return True
+
+
+class Colon(OneCharSymbol):
+
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, position, adjacent_to_previous, Token.COLON)
+
+    def is_colon(self):
+        return True
+
+
 class ImpliedMap(Token):
 
     def __init__(self):
@@ -491,7 +532,7 @@ class Lexer(Source):
         if c is not None:
             adjacent_to_previous = self.end > 0 and skipped == 0
             if c == Token.OPEN:
-                token = Expression(self.text, self.end, adjacent_to_previous, self.env.namespace)
+                token = Expression(self.text, self.end, adjacent_to_previous)
             elif c == Token.CLOSE:
                 raise ParseError('Unmatched )')
             elif c == Token.PIPE:
@@ -506,6 +547,10 @@ class Lexer(Source):
                 token = Run(self.text, self.end, adjacent_to_previous)
             elif c == Token.ASSIGN:
                 token = Assign(self.text, self.end, adjacent_to_previous)
+            elif c == Token.COMMA:
+                token = Comma(self.text, self.end, adjacent_to_previous)
+            elif c == Token.COLON:
+                token = Colon(self.text, self.end, adjacent_to_previous)
             elif c == Token.COMMENT:
                 # Ignore the rest of the line
                 return None
@@ -541,11 +586,11 @@ class Lexer(Source):
                     token = tokens[t]
                     t += 1
                     if token.is_string():
-                        buffer.append(token.value())
+                        buffer.append(token.value(None))
                     else:
                         buffer.extend(['{', token.source(), '}'])
                 buffer.append("''')")
-                token = Expression(''.join(buffer), 0, False, self.env.namespace)
+                token = Expression(''.join(buffer), 0, False)
             return token
 
         consolidated = []
@@ -596,8 +641,12 @@ class Lexer(Source):
 #     arg:
 #             expr
 #             str
-#             begin pipeline end
-#    
+#             begin [vars :] pipeline end
+#
+#     vars:
+#             vars, var
+#             var
+#
 #     var: str
 #
 #     expr: Expression
@@ -641,6 +690,7 @@ class Parser:
         self.t = 0
         self.token = None  # The current token
         self.current_ops = marcel.util.Stack()
+        self.current_pipelines = marcel.util.Stack()
         # For use by TabCompleter
         self.current_op = None
 
@@ -651,15 +701,15 @@ class Parser:
 
     def command(self):
         if self.next_token(String, Assign):
-            return self.assignment(self.token.value())
+            return self.assignment(self.token.value(self))
         else:
-            return self.pipeline()
+            return self.pipeline(None)
 
     def assignment(self, var):
         self.next_token(Assign)
         arg = self.arg()
         if isinstance(arg, Token):
-            value = arg.value()
+            value = arg.value(self)
         elif type(arg) is marcel.core.Pipeline:
             value = arg
         elif arg is None:
@@ -669,12 +719,15 @@ class Parser:
         op = self.create_assignment(var, value)
         return op
 
-    def pipeline(self):
+    def pipeline(self, parameters):
+        pipeline = marcel.core.Pipeline()
+        pipeline.set_parameters(parameters)
+        self.current_pipelines.push(pipeline)
         op_sequence = Parser.ensure_sequence(self.op_sequence())
         op_sequence.reverse()
-        pipeline = marcel.core.Pipeline()
         for op_args in op_sequence:
             pipeline.append(op_args)
+        self.current_pipelines.pop()
         return pipeline
 
     # Accumulates ops in REVERSE order, to avoid list prepend.
@@ -715,13 +768,35 @@ class Parser:
 
     def arg(self):
         if self.next_token(Begin):
-            pipeline = self.pipeline()
+            # If the next tokens are var comma, or var colon, then we have
+            # pipeline variables being declared.
+            if self.next_token(String, Comma) or self.next_token(String, Colon):
+                pipeline_parameters = self.vars()
+            else:
+                pipeline_parameters = None
+            pipeline = self.pipeline(pipeline_parameters)
             self.next_token(End)
             return pipeline
         elif self.next_token(String) or self.next_token(Expression):
             return self.token
         else:
             return None
+
+    def vars(self):
+        vars = []
+        while self.token.is_string():
+            vars.append(self.token.value(self))
+            if self.next_token(Comma):
+                if not self.next_token(String):
+                    self.next_token()
+                    raise UnexpectedTokenError(self.token, f'Expected a var, found {self.token}')
+            else:
+                self.next_token()  # Should be string or colon
+        # Shouldn't have called vars() unless the token (on entry) was a string.
+        assert len(vars) > 0
+        if not self.token.is_colon():
+            raise UnexpectedTokenError(self.token, f'Expected comma or colon, found {self.token}')
+        return vars
 
     # Returns True if a qualifying token was found, and sets self.token to it.
     # Returns False if a qualifying token was not found, and leaves self.token unchanged.
@@ -748,7 +823,7 @@ class Parser:
         if op is None:
             op = self.create_op_executable(op_token, arg_tokens)
         if op is None:
-            raise UnknownOpError(op_token.value())
+            raise UnknownOpError(op_token.value(self))
         return op
 
     def create_op_builtin(self, op_token, arg_tokens):
@@ -762,38 +837,39 @@ class Parser:
             # !: Expect a command number
             # !!: Don't expect a command number, run the previous command
             # else: 'run' was entered
-            op.expected_args = (1 if op_token.value() == '!' else
-                                0 if op_token.value() == '!!' else None)
+            op.expected_args = (1 if op_token.value(self) == '!' else
+                                0 if op_token.value(self) == '!!' else None)
         args = []
         if op_name == 'bash':
             for x in arg_tokens:
                 args.append(x.raw() if type(x) is String else
-                            x.value() if isinstance(x, Token) else
+                            x.value(self) if isinstance(x, Token) else
                             x)
         else:
             for x in arg_tokens:
-                args.append(x.value() if isinstance(x, Token) else x)
+                args.append(x.value(self) if isinstance(x, Token) else x)
         current_op.args_parser.parse(args, op)
         return op
 
     def create_op_variable(self, op_token, arg_tokens):
         op = None
-        var = op_token.value()
+        var = op_token.value(self)
         value = self.env.getvar(var)
         if value:
             op_module = self.op_modules['runpipeline']
             op = op_module.create_op()
             op.var = var
+            op.args = [token.value(self) for token in arg_tokens]
         return op
 
     def create_op_executable(self, op_token, arg_tokens):
         op = None
-        name = op_token.value()
+        name = op_token.value(self)
         if marcel.util.is_executable(name):
             args = [name]
             for x in arg_tokens:
                 args.append(x.raw() if type(x) is String else
-                            x.value() if isinstance(x, Token) else
+                            x.value(self) if isinstance(x, Token) else
                             x)
             op = marcel.opmodule.create_op(self.env, 'bash', *args)
         return op
@@ -817,7 +893,7 @@ class Parser:
 
     def create_map(self, expr):
         assert type(expr) is Expression
-        return marcel.opmodule.create_op(self.env, 'map', expr.value())
+        return marcel.opmodule.create_op(self.env, 'map', expr.value(self))
 
     @staticmethod
     def ensure_sequence(x):

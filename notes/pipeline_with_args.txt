@@ -1,0 +1,50 @@
+A pipeline can sort of create a new op, e.g.
+
+  py = [select(f: f.suffix == '.py')]
+  ls -fr | py
+
+
+Turn the '.py' into a parameter:
+
+  ext = [e: select(f: f.suffix == e)]
+  ls -fr | ext '.py'
+
+or
+
+  ls -fr | ext -e '.py'
+
+
+How would the same pipeline be used as a literal?
+This seems clunky:
+
+  ls -fr | [e: select (f: f.suffix == e)] '.py'
+
+Putting '.py' first is ugly and probably confusing for the
+parser. Inventing new syntax, e.g. [...]('.py') is undesirable.
+
+Just don't allow it? Syntactic ugliness seems like a bad reason to
+introduce an artificial restriction.
+
+----------------------------------------------------------------------
+
+Functions:
+
+The functions using pipeline parameters are Python, and inaccessble to
+marcel. To bind these parameters, wrap the functions inside the
+pipeline, e.g.
+
+    lambda e: lambda f: f.suffix == e
+
+Parsing:
+
+Function is current evaled by Expression.value. For each containing
+pipeline, add a layer of wrapping, using the pipeline's parameters. If
+a pipeline has no vars, don't bother wrapper.
+
+Runtime:
+
+Pipeline needs to maintain bindings for its parameters. To evaluate a
+function, bind parameters from outermost pipeline inward. So for the
+function above, F: F(e)(f).
+
+So each FunctionWrapper needs access to enclosing pipelines.
