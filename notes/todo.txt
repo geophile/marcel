@@ -392,10 +392,6 @@ construction into subclasses.
 
 ----------------------------------------------------------------------
 
-Why does parser.Expression.value duplicate code in FunctionWrapper?
+Controlling Popen processes:
 
-
-
-Referral for 6/9
-Dr. Crystal Klaahsen
-npi 1528076288
+https://pymotw.com/2/subprocess/#process-groups-sessions

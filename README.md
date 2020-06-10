@@ -154,6 +154,7 @@ reverse search, etc.
 and operators.
 * __Customizable color highlighting:__ The colors used to render output for builtin types such 
 as `File` and `Process`, and `help` output can be customized too.
+* __Dynamic reconfiguration:__ Changes to configuration and startup scripts are picked up without restarting.
 
 Scripting
 ---------

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import shlex
+import os
 import subprocess
 
 import marcel.argsparser
@@ -122,10 +122,10 @@ class NonInteractive(Escape):
                                    stdin=subprocess.PIPE,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE,
-                                   universal_newlines=True)
+                                   universal_newlines=True,
+                                   preexec_fn=os.setsid)
         input = NonInteractive.to_string(self.op.input)
         stdout, stderr = process.communicate(input=input)
-        process.wait()
         # stdout
         op = self.op
         for line in NonInteractive.normalize_output(stdout):
@@ -155,7 +155,8 @@ class Interactive(Escape):
         process = subprocess.Popen(self.command(),
                                    shell=True,
                                    executable='/bin/bash',
-                                   universal_newlines=True)
+                                   universal_newlines=True,
+                                   preexec_fn=os.setsid)
         process.wait()
         if process.returncode != 0:
             print(f'Escaped command failed with exit code {process.returncode}: {" ".join(self.op.args)}')

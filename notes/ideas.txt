@@ -339,3 +339,10 @@ typing. Might save some receive/send calls, and so be faster.
 Replace var-n with a pipeline, which could save results. So
 
     gen 10 | ifelse (x: x%2 == 0) [out -s evens] | out -s odds
+
+----------------------------------------------------------------------
+
+Argument invocation from Nu: https://www.nushell.sh/blog/2020/06/09/nushell_0_15_0.html
+
+Pipeline used to provide arg value. Sort of like API gather or
+first. Functions are already allowed, so this is easy.
