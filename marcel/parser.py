@@ -574,9 +574,7 @@ class Lexer(Source):
 #             pipeline
 #    
 #     assignment:
-#             var = [ pipeline ]
-#             var = expr
-#             var = str
+#             var = arg
 #    
 #     pipeline:
 #             op_sequence
@@ -598,13 +596,17 @@ class Lexer(Source):
 #     arg:
 #             expr
 #             str
-#             [ pipeline ]
+#             begin pipeline end
 #    
 #     var: str
 #
 #     expr: Expression
 #
 #     str: String
+#
+#     begin: [
+#
+#     end: ]
 
 
 # Used mainly by TabCompleter.
@@ -655,16 +657,16 @@ class Parser:
 
     def assignment(self, var):
         self.next_token(Assign)
-        if self.next_token(Begin):
-            op = self.create_assignment(var, pipeline=(self.pipeline()))
-            self.next_token(End)
-        elif self.next_token(String):
-            op = self.create_assignment(var, string=(self.token.value()))
-        elif self.next_token(Expression):
-            op = self.create_assignment(var, function=(self.token.value()))
-        else:
-            self.next_token()
+        arg = self.arg()
+        if isinstance(arg, Token):
+            value = arg.value()
+        elif type(arg) is marcel.core.Pipeline:
+            value = arg
+        elif arg is None:
             raise UnexpectedTokenError(self.token, 'Unexpected token type.')
+        else:
+            assert False, arg
+        op = self.create_assignment(var, value)
         return op
 
     def pipeline(self):
@@ -796,17 +798,19 @@ class Parser:
             op = marcel.opmodule.create_op(self.env, 'bash', *args)
         return op
 
-    def create_assignment(self, var, string=None, pipeline=None, function=None):
+    def create_assignment(self, var, value):
         assign_module = self.op_modules['assign']
         assert assign_module is not None
         op = assign_module.create_op()
         op.var = var
-        if string is not None:
-            op.string = string
-        if pipeline is not None:
-            op.pipeline = pipeline
-        if function is not None:
-            op.function = function
+        if callable(value):
+            op.function = value
+        elif type(value) is marcel.core.Pipeline:
+            op.pipeline = value
+        elif type(value) is str:
+            op.string = value
+        else:
+            assert False, value
         pipeline = marcel.core.Pipeline()
         pipeline.append(op)
         return pipeline

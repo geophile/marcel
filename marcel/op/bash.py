@@ -36,6 +36,9 @@ It is usually possible to run an executable directly, without using the bash com
 Use this command if the {r:--interactive} flag is needed.
 '''
 
+# About the use of preexec_fn in Popen:
+# See https://pymotw.com/2/subprocess/#process-groups-sessions for more information.
+
 
 def bash(env, *args, interactive=False):
     op_args = ['--interactive'] if interactive else []

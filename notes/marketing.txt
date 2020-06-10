@@ -1,0 +1,22 @@
+
+Website
+
+Blog
+
+Need help with:
+
+- Porting
+- Testing
+- Dev?
+- Design
+- Review
+- Marketing
+
+Nushell: 
+
+- nu_shell on twitter
+
+- nushell.sh
+
+- Covered nushell?: https://linuxunplugged.com/
+
