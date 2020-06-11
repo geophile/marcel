@@ -16,7 +16,7 @@ Now, to find Python source files:
 ls -fr | ext -e py
 ```
 
-You can also use positional notation for argument, so `ls -fr | ext py` would work too. 
+You can also use positional notation for arguments to pipelines, so `ls -fr | ext py` would work too. 
 
 Marcel
 ======
