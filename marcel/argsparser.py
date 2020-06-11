@@ -103,8 +103,6 @@ class AnonList(Arg):
 
 class ArgsParser:
 
-    # Constructing an ArgsValidator
-
     def __init__(self, op_name, env):
         self.op_name = op_name
         self.env = env
@@ -416,3 +414,39 @@ class ArgsParser:
             anon[anon_arg.name] = anon_arg.default
         if self.anon_list_arg:
             anon[self.anon_list_arg.name] = anon_list
+
+
+class PipelineArgsParser:
+
+    def __init__(self, var):
+        self.var = var
+
+    def parse_pipeline_args(self, op_args):
+        args = []
+        kwargs = {}
+        param_name = None
+        flags_done = None
+        for arg in op_args:
+            flag_name = PipelineArgsParser.flag_name(arg)
+            if flag_name:
+                if flags_done:
+                    raise ArgsError(self.var, f'Flag {flag_name} appears after anonymous arguments.')
+                param_name = flag_name
+            else:
+                if param_name is None:
+                    flags_done = True
+                    args.append(arg)
+                else:
+                    if param_name in kwargs:
+                        raise ArgsError(self.var, f'Flag {param_name} given more than once.')
+                    kwargs[param_name] = arg
+                    param_name = None
+        return args, kwargs
+
+    @staticmethod
+    def flag_name(arg):
+        name = (None if type(arg) is not str else
+                arg[2:] if arg.startswith('--') else
+                arg[1:] if arg.startswith('-') else
+                None)
+        return name if name and name.isidentifier() else None

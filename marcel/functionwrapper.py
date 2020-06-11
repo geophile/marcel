@@ -50,11 +50,16 @@ class FunctionWrapper:
         f = self._function
         while p > 0:
             p -= 1
-            param_values = self._parameterized_pipelines[p].parameter_values()
+            pipeline = self._parameterized_pipelines[p]
             try:
-                f = f(*param_values)
+                f = f(*pipeline.args, **pipeline.kwargs)
             except Exception as e:
-                self.handle_error(e, ', '.join(param_values))
+                function_input = ''
+                if pipeline.args:
+                    function_input = ', '.join(pipeline.args)
+                if pipeline.kwargs:
+                    function_input += str(pipeline.kwargs)
+                self.handle_error(e, function_input)
         try:
             return f(*args, **kwargs)
         except Exception as e:

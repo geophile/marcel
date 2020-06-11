@@ -563,6 +563,34 @@ def test_comment():
              expected_out=[0, -1, -2])
 
 
+def test_pipeline_args():
+    TEST.run('add = [a: map (x: (x, x + a))]')
+    TEST.run('gen 3 | add (100)',
+             expected_out=[(0, 100), (1, 101), (2, 102)])
+    # Multiple functions
+    TEST.run('add = [a: map (x: (x, x + a)) | map (x, y: (x + a, y - a))]')
+    TEST.run('gen 3 | add (100)',
+             expected_out=[(100, 0), (101, 1), (102, 2)])
+    # Flag instead of anon arg
+    TEST.run('add = [a: map (x: (x, x + a))]')
+    TEST.run('gen 3 | add -a (100)',
+             expected_out=[(0, 100), (1, 101), (2, 102)])
+    # Multiple anon args
+    TEST.run('ab = [a, b: map (x: (x, x + a + b))]')
+    TEST.run('gen 3 | ab (100) (10)',
+             expected_out=[(0, 110), (1, 111), (2, 112)])
+    # Multiple flag args
+    TEST.run('ab = [a, b: map (x: (x, x * a + b))]')
+    TEST.run('gen 3 | ab -a (100) -b (10)',
+             expected_out=[(0, 10), (1, 110), (2, 210)])
+    TEST.run('gen 3 | ab -b (10) -a (100)',
+             expected_out=[(0, 10), (1, 110), (2, 210)])
+    TEST.run('gen 3 | ab -b (10) -a (100) -a (200)',
+             expected_err='Flag a given more than once')
+    TEST.run('gen 3 | ab -b (10)',
+             expected_out=[Error('missing'), Error('missing'), Error('missing')])
+
+
 def main_stable():
     test_gen()
     test_out()
@@ -586,12 +614,11 @@ def main_stable():
     test_assign()
     test_join()
     test_comment()
+    test_pipeline_args()
     test_no_such_op()
 
 
 def main_dev():
-    TEST.run('adda = [a: map (x: (x, x + a)) | select (x, y: y == a)]')
-    TEST.run('gen 3 | adda (100)')
     pass
 
 

@@ -13,6 +13,25 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-f = lambda e: lambda x: x + e
+# f = lambda e: lambda x: x + e
+#
+# print(f(10)(4))
+#
+#
+# def f(*args, **kwargs):
+#     print(f'args: {args}, kwargs: {kwargs}')
+#
+#
+# f(1, 2, 3)
+# f(5, 6, c=4)
+# f(1, 2, 3, 4, **{'a': 1, 'b': 2})
+#
+#
+# def g(a, b, c):
+#     print(f'a: {a}, b: {b}, c: {c}')
+#
+# g(**{'a': 1, 'b': 2, 'c': 3})
 
-print(f(10)(4))
+f = lambda a: lambda x: x + a
+g = f(*[], **{'a': 100})
+print(g(5))

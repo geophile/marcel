@@ -23,6 +23,9 @@
 
 - Pipeline with args
 
+- Pipeline as arg, yielding singleton or list (analogous to API gather
+  and first).
+
 + Comments
 
 - Bugs

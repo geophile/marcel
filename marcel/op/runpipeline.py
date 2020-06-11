@@ -23,6 +23,7 @@ class RunPipeline(marcel.core.Op):
         super().__init__(env)
         self.var = None
         self.args = None
+        self.kwargs = None
         self.pipeline = None
 
     def __repr__(self):
@@ -33,6 +34,7 @@ class RunPipeline(marcel.core.Op):
     def setup_1(self):
         assert self.pipeline is None
         self.eval_function('args')
+        self.eval_function('kwargs')
         pipeline = self.env().getvar(self.var)
         if pipeline is None:
             raise marcel.exception.KillCommandException(
@@ -43,7 +45,7 @@ class RunPipeline(marcel.core.Op):
         self.pipeline = pipeline.copy()
         self.pipeline.set_error_handler(self.owner.error_handler)
         self.pipeline.last_op.receiver = self.receiver
-        self.pipeline.set_parameter_values(self.args)
+        self.pipeline.set_parameter_values(self.args, self.kwargs)
         self.pipeline.setup_1()
 
     def receive(self, x):
@@ -51,3 +53,9 @@ class RunPipeline(marcel.core.Op):
 
     def receive_complete(self):
         self.pipeline.receive_complete()
+
+    # RunPipeline
+
+    def set_pipeline_args(self, args, kwargs):
+        self.args = args
+        self.kwargs = kwargs

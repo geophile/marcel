@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.functionwrapper
@@ -859,7 +860,10 @@ class Parser:
             op_module = self.op_modules['runpipeline']
             op = op_module.create_op()
             op.var = var
-            op.args = [token.value(self) for token in arg_tokens]
+            if len(arg_tokens) > 0:
+                pipeline_args = [token.value(self) for token in arg_tokens]
+                args, kwargs = marcel.argsparser.PipelineArgsParser(var).parse_pipeline_args(pipeline_args)
+                op.set_pipeline_args(args, kwargs)
         return op
 
     def create_op_executable(self, op_token, arg_tokens):

@@ -216,6 +216,16 @@ class Op(AbstractOp):
                             f'Type of {self.op_name()}.{field} element {x} is {type(x)}, but must be one of {types}')
                 evaled.append(x)
             state[field] = evaled
+        elif type(val) is dict:
+            evaled = {}
+            for k, v in val.items():
+                if callable(v):
+                    v = v()
+                    if len(types) > 0 and type(v) not in types:
+                        raise marcel.exception.KillCommandException(
+                            f'Type of {self.op_name()}.{field} element {x} is {type(v)}, but must be one of {types}')
+                evaled[k] = v
+            state[field] = evaled
 
     @staticmethod
     def check_arg(ok, arg, message):
@@ -241,7 +251,8 @@ class Pipeline(AbstractOp):
         self.first_op = None
         self.last_op = None
         self.params = None
-        self.param_values = None
+        self.args = None
+        self.kwargs = None
 
     def __repr__(self):
         buffer = []
@@ -304,11 +315,9 @@ class Pipeline(AbstractOp):
     def parameters(self):
         return self.params
 
-    def set_parameter_values(self, param_values):
-        self.param_values = param_values
-
-    def parameter_values(self):
-        return self.param_values
+    def set_parameter_values(self, args, kwargs):
+        self.args = args
+        self.kwargs = kwargs
 
     def copy(self):
         return marcel.util.copy(self)
