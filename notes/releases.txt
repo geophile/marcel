@@ -6,6 +6,9 @@
   operations fail, probably because marcel doesn't work as the shell
   for executing a command by ssh. May be related to bug 46.
 
+- Bugs
+  - 47
+
 ----------------------------------------------------------------------
 
 0.8
@@ -21,7 +24,7 @@
 + Provide a way to reset the environment, to pick up changes in
   .marcel.py or LOAD_ON_STARTUP scripts.
 
-- Pipeline with args
++ Pipeline with args
 
 - Pipeline as arg, yielding singleton or list (analogous to API gather
   and first).
@@ -29,7 +32,6 @@
 + Comments
 
 - Bugs
-  - 47
   + 59
   + 60
   + 61

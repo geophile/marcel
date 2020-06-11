@@ -103,9 +103,8 @@ class Main:
         self.initialize_input()  # Sets self.reader
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_env_vars)
-        config_files = self.run_init_scripts()
-        config_files.append(self.env.config_path)
-        self.config_monitor = ConfigurationMonitor(config_files)
+        self.run_startup()
+        self.config_monitor = ConfigurationMonitor([self.env.config_path])
         atexit.register(self.shutdown)
 
     def __getstate__(self):
@@ -194,42 +193,21 @@ class Main:
         # Also, if we're testing operator behavior, run in immediate mode.
         return self.same_process or pipeline.first_op.run_in_main_process()
 
-    def run_init_scripts(self):
-        load_on_startup = self.env.getvar('LOAD_ON_STARTUP')
-        if load_on_startup is None:
-            return []
-        else:
-            if type(load_on_startup) in (list, tuple):
-                load_on_startup = list(load_on_startup)
-            elif type(load_on_startup) is str:
-                load_on_startup = [load_on_startup]
-            else:
-                fail(f'Cannot run startup script {load_on_startup}')
-            normalized = []
-            for script in load_on_startup:
-                path = pathlib.Path(script).expanduser()
-                if not path.exists():
-                    fail(f'Startup script {script} does not exist.')
-                elif not path.is_file():
-                    fail(f'Startup script {script} is not a file.')
-                else:
-                    self.load(path)
-                    normalized.append(path)
-            return normalized
-
-    def load(self, script_file):
-        script_file = pathlib.Path(script_file).expanduser()
-        with open(script_file, 'r') as script:
-            lines = script.readlines()
-        command = ''
-        for line in lines:
-            if len(line.strip()) > 0:
-                command += line
-                if not line.endswith('\\\n'):
+    def run_startup(self):
+        run_on_startup = self.env.getvar('RUN_ON_STARTUP')
+        if run_on_startup:
+            if type(run_on_startup) is str:
+                command = ''
+                for line in run_on_startup.split('\n'):
+                    if len(line.strip()) > 0:
+                        command += line
+                        if not line.endswith('\\\n'):
+                            self.run_command(command)
+                            command = ''
+                if len(command) > 0:
                     self.run_command(command)
-                    command = ''
-        if len(command) > 0:
-            self.run_command(command)
+            else:
+                fail(f'RUN_ON_STARTUP must be a string')
 
     @staticmethod
     def default_error_handler(env, error):
