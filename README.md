@@ -1,3 +1,23 @@
+What's New
+----------
+
+You can assign a pipeline to a variable. And now, pipelines can have
+parameters. Put these together, and you have an easy way to create new
+commands. For example, you can create a filter to look for files with
+a given extension, `e`:
+
+```shell script
+ext = [e: (select (file: file.suffix == '.' + e))]
+```
+
+Now, to find Python source files:
+
+```shell script
+ls -fr | ext -e py
+```
+
+You can also use positional notation for argument, so `ls -fr | ext py` would work too. 
+
 Marcel
 ======
 
