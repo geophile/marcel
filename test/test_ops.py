@@ -187,6 +187,13 @@ def test_red():
                            (7, 3, 700, 3, 13, 1300),
                            (8, 4, 800, 4, 8, 800),
                            (9, 4, 900, 4, 17, 1700)])
+    # Test short input
+    TEST.run('gen 4 | map (x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x)) | red + + +',
+             expected_out=[Error('too short'), Error('too short'), (4, 40, 400)])
+    TEST.run('gen 4 | map (x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x)) | red . + +',
+             expected_out=[Error('too short'), Error('too short'), (1, 10, 100), (3, 30, 300)])
+    TEST.run('gen 4 | map (x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x)) | red -i . + +',
+             expected_out=[Error('too short'), (1, 10, 100, 10, 100), Error('too short'), (3, 30, 300, 30, 300)])
 
 
 def test_expand():

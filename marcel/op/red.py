@@ -97,6 +97,12 @@ be computed as follows:
     ... | red -i . +
 
 The output stream would be {n:('a', 1, 1), ('a', 2, 3), ('b', 3, 3), ('b', 4, 7)}.
+
+{b:Errors}
+
+If {n:n} reduction functions are specified, then input tuples are expected to have at least {n:n}
+elements. Each shorter tuples will cause an {n:Error} to be output. For longer tuples, elements after
+the first {n:n} will be ignored. 
 '''
 
 
@@ -154,9 +160,8 @@ class Red(marcel.core.Op):
 class Reducer:
 
     def __init__(self, op):
-        self.functions = op.functions
         self.op = op
-        self.n = len(self.functions)
+        self.n = len(self.op.functions)
 
     def receive(self, x):
         assert False
@@ -172,8 +177,10 @@ class NonGroupingReducer(Reducer):
         self.accumulator = [None] * self.n
 
     def receive(self, x):
+        if len(x) < self.n:
+            self.op.fatal_error(x, 'Input too short.')
         accumulator = self.accumulator
-        function = self.functions
+        function = self.op.functions
         for i in range(self.n):
             accumulator[i] = function[i](accumulator[i], x[i])
         if self.op.incremental:
@@ -189,19 +196,20 @@ class GroupingReducer(Reducer):
 
     def __init__(self, op, grouping_positions, data_positions):
         super().__init__(op)
-        self.function = op.functions
         self.grouping_positions = grouping_positions
         self.data_positions = data_positions
         self.accumulators = {}  # group -> accumulator
 
     def receive(self, x):
+        if len(x) < self.n:
+            self.op.fatal_error(x, 'Input too short.')
         group = tuple(self.group(x))
         accumulator = self.accumulators.get(group, None)
         if accumulator is None:
             accumulator = [None] * self.n
             self.accumulators[group] = accumulator
         for i in range(self.n):
-            reducer = self.function[i]
+            reducer = self.op.functions[i]
             accumulator[i] = reducer(accumulator[i], x[i]) if reducer else x[i]
         if self.op.incremental:
             self.op.send(x + tuple(self.data(accumulator)))

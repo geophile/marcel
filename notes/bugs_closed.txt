@@ -107,15 +107,10 @@ Should produce (localhost, 3). But it produces that output TWICE.
 
 ----------------------------------------------------------------------
 
-FIXED
+5. Unspecified behavior for red
 
-8. Fix rendering of links
-
-- Color schema shows link using same color as directory in
-  prompt. Confusing.
-
-- Show link and target (different colors)
-
+red . + does something given inputs of size 3. What is supposed to
+happen? Document and test for it.
 
 ----------------------------------------------------------------------
 
@@ -143,9 +138,21 @@ fail and kills the shell. Should be a usage error instead.
 
 ----------------------------------------------------------------------
 
+Oops, there are two bug 8s.
+
 FIXED
 
-8. Highlighting confusion
+8a. Fix rendering of links
+
+- Color schema shows link using same color as directory in
+  prompt. Confusing.
+
+- Show link and target (different colors)
+
+
+FIXED
+
+8b. Highlighting confusion
 
 If a directory (or file) matches the name of an executable, then the
 highlighting is wrong. It is highlighted as an executable, not what it

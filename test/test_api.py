@@ -186,6 +186,19 @@ def test_red():
                            (7, 3, 700, 3, 13, 1300),
                            (8, 4, 800, 4, 8, 800),
                            (9, 4, 900, 4, 17, 1700)])
+    # Test short input
+    TEST.run(test=lambda: run(gen(4)
+                              | map(lambda x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x))
+                              | red(r_plus, r_plus, r_plus)),
+             expected_out=[Error('too short'), Error('too short'), (4, 40, 400)])
+    TEST.run(test=lambda: run(gen(4)
+                              | map(lambda x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x))
+                              | red(None, r_plus, r_plus)),
+             expected_out=[Error('too short'), Error('too short'), (1, 10, 100), (3, 30, 300)])
+    TEST.run(test=lambda: run(gen(4)
+                              | map(lambda x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x))
+                              | red(None, r_plus, r_plus, incremental=True)),
+             expected_out=[Error('too short'), (1, 10, 100, 10, 100), Error('too short'), (3, 30, 300, 30, 300)])
 
 
 def test_expand():
