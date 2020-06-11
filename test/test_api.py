@@ -97,6 +97,8 @@ def test_sort():
     # Bad types
     TEST.run(test=lambda: run(gen(5) | map(lambda x: (-x, x)) | sort(123)),
              expected_err='key argument must be a function')
+    # Bug 10
+    TEST.run(test=lambda: run(sort()), expected_out=[])
 
 
 def test_map():

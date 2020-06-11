@@ -100,6 +100,8 @@ def test_sort():
     TEST.run('gen 5 | sort', expected_out=[0, 1, 2, 3, 4])
     TEST.run('gen 5 | sort (lambda x: -x)', expected_out=[4, 3, 2, 1, 0])
     TEST.run('gen 5 | map (x: (-x, x)) | sort', expected_out=[(-4, 4), (-3, 3), (-2, 2), (-1, 1), (0, 0)])
+    # Bug 10
+    TEST.run('sort', expected_out=[])
 
 
 def test_map():
