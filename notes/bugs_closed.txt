@@ -107,6 +107,8 @@ Should produce (localhost, 3). But it produces that output TWICE.
 
 ----------------------------------------------------------------------
 
+FIXED
+
 5. Unspecified behavior for red
 
 red . + does something given inputs of size 3. What is supposed to
@@ -178,6 +180,35 @@ usage: map [-h] function
 map: error: argument function: not a valid function
 
 - There shouldn't be a stack, just an error message.
+
+----------------------------------------------------------------------
+
+FIXED
+
+10. sort all by itself produces None as output
+
+This seems wrong:
+
+     M jao@cheese:~/git/marcel$ sort
+     None
+
+----------------------------------------------------------------------
+
+FIXED
+
+11. ls () works?!
+
+M jao@cheese:~/git/marcel$ ls ()
+drwxr-xr-x   jao      jao              4096   2020 Feb 25 15:33:00   .
+drwxr-xr-x   jao      jao              4096   2020 Feb 26 23:43:50   .git
+-rw-r--r--   jao      jao                20   2020 Jan 24 17:07:26   .gitignore
+drwxr-xr-x   jao      jao              4096   2020 Feb 26 23:59:32   .idea
+-rw-r--r--   jao      jao              6420   2020 Feb 25 15:59:14   README.md
+drwxr-xr-x   jao      jao              4096   2020 Feb 25 11:22:15   bin
+drwxr-xr-x   jao      jao              4096   2020 Feb 21 13:22:22   experiments
+drwxr-xr-x   jao      jao              4096   2020 Feb 26 09:35:03   notes
+drwxr-xr-x   jao      jao              4096   2020 Feb 19 10:31:26   src
+drwxr-xr-x   jao      jao              4096   2020 Feb 25 09:38:13   test
 
 ----------------------------------------------------------------------
 

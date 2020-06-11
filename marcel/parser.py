@@ -269,7 +269,10 @@ class Expression(Token):
         if self._function is None:
             source = self.source()
             globals = parser.env.namespace
-            if source.split()[0] in ('lambda', 'lambda:'):
+            split = source.split()
+            if len(split) == 0:
+                raise marcel.exception.KillCommandException(f'Empty function definition.')
+            if split[0] in ('lambda', 'lambda:'):
                 function = eval(source, globals)
             else:
                 try:

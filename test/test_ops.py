@@ -120,6 +120,9 @@ def test_map():
              expected_out=[419])
     TEST.run('(File("/tmp").path)',
              expected_out=['/tmp'])
+    # Empty function definition
+    TEST.run('gen 3 | map ()',
+             expected_err='Empty function definition')
 
 
 def test_select():
