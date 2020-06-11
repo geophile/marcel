@@ -589,6 +589,12 @@ def test_pipeline_args():
              expected_err='Flag a given more than once')
     TEST.run('gen 3 | ab -b (10)',
              expected_out=[Error('missing'), Error('missing'), Error('missing')])
+    # Long flags
+    TEST.run('foobar = [foo, bar: map (x: x * foo) | select (x: x < bar)')
+    TEST.run('gen 10 | foobar --foo (10) --bar (45)',
+             expected_out=[0, 10, 20, 30, 40])
+    TEST.run('gen 10 | foobar --bar (73) --foo (10)',
+             expected_out=[0, 10, 20, 30, 40, 50, 60, 70])
 
 
 def main_stable():
