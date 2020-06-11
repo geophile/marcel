@@ -533,6 +533,29 @@ def test_join():
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
 
 
+def test_pipeline_args():
+    add = lambda a: map(lambda x: (x, x + a))
+    TEST.run(test=lambda: run(gen(3) | add(100)),
+             expected_out=[(0, 100), (1, 101), (2, 102)])
+    # Multiple functions
+    add = lambda a: map(lambda x: (x, x + a)) | map(lambda x, y: (x + a, y - a))
+    TEST.run(test=lambda: run(gen(3) | add(100)),
+             expected_out=[(100, 0), (101, 1), (102, 2)])
+    # Flag instead of anon arg
+    add = lambda a: map(lambda x: (x, x + a))
+    TEST.run(test=lambda: run(gen(3) | add(a=100)),
+             expected_out=[(0, 100), (1, 101), (2, 102)])
+    # Multiple anon args
+    ab = lambda a, b: map(lambda x: (x, x * a + b))
+    TEST.run(test=lambda: run(gen(3) | ab(100, 10)),
+             expected_out=[(0, 10), (1, 110), (2, 210)])
+    # Multiple flag args
+    TEST.run(test=lambda: run(gen(3) | ab(a=100, b=10)),
+             expected_out=[(0, 10), (1, 110), (2, 210)])
+    TEST.run(test=lambda: run(gen(3) | ab(b=10, a=100)),
+             expected_out=[(0, 10), (1, 110), (2, 210)])
+
+
 def test_api_run():
     # Error-free output, just an op
     TEST.run(test=lambda: run(gen(3)),
@@ -633,6 +656,7 @@ def main_stable():
     test_version()
     test_assign()
     test_join()
+    test_pipeline_args()
     test_api_run()
     test_api_gather()
     test_api_first()

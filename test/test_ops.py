@@ -576,9 +576,9 @@ def test_pipeline_args():
     TEST.run('gen 3 | add -a (100)',
              expected_out=[(0, 100), (1, 101), (2, 102)])
     # Multiple anon args
-    TEST.run('ab = [a, b: map (x: (x, x + a + b))]')
+    TEST.run('ab = [a, b: map (x: (x, x * a + b))]')
     TEST.run('gen 3 | ab (100) (10)',
-             expected_out=[(0, 110), (1, 111), (2, 112)])
+             expected_out=[(0, 10), (1, 110), (2, 210)])
     # Multiple flag args
     TEST.run('ab = [a, b: map (x: (x, x * a + b))]')
     TEST.run('gen 3 | ab -a (100) -b (10)',
