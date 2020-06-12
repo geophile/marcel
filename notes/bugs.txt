@@ -82,6 +82,10 @@ Goes to background, but bg and fg do not revive it.
 
 Complete "help interaction" when this is working.
 
+As of about June 9, job control works on the console, but emacs never
+suspends, and in fact it is no longer owned by the marcel
+process. Exiting marcel leaves emacs running.
+
 ----------------------------------------------------------------------
 
 48. Syntax error in .marcel.py should be handled more gracefully

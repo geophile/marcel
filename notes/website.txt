@@ -1,0 +1,70 @@
+Home page:
+
+- Top bar links to Documentation, Contribute, About, Blog, Install
+
+- Pipes
+
+- Tabular output
+
+- Installation overview
+
+- Links to book, cookbook, Discord, Twitter.
+
+----------------------------------------------------------------------
+
+Documentation
+
+- Nu book
+- Contributor book
+- Cookbook
+- Command reference
+
+----------------------------------------------------------------------
+
+Contribute
+
+- Links to github, contributor book, discord, twitter
+
+----------------------------------------------------------------------
+
+About
+
+- Philosophy: powershell, functional languages, pipes.
+
+- Pipelines
+
+- Opening files
+
+- Shells: A shell seems to be some combination of session and
+  directory.
+
+- Plugins
+
+- Goals:
+
+  - Cross-platform.
+  - Compatible with native executables.
+  - Structured data.
+  - (Other uninteresting goals)
+
+----------------------------------------------------------------------
+
+Blog
+
+- Mostly release announcements.
+
+- There is a user survey post:
+  https://www.nushell.sh/blog/2019/11/23/nushell-survey-results.html.
+  Interesting results: Tables are the killer feature.
+
+----------------------------------------------------------------------
+
+Install
+
+- Pre-built binaries
+
+- Docker
+
+- Local build
+
+- crates: Rust equivalent of pip?
