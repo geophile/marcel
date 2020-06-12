@@ -1078,3 +1078,12 @@ Embed the pipeline in another one:
     M-0.8.0 jao@cheese:~/git/marcel/test$ 
 
 Executing b produces no output. It should have run a.
+
+----------------------------------------------------------------------
+
+62. Don't crash if .marcel.py is not present
+
+Crash isn't on startup, but on the first command. The crash is on
+checking the file's mtime. 
+
+Create an empty .marcel.py.

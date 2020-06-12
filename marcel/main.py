@@ -74,10 +74,10 @@ class ConfigurationMonitor:
 
     def __init__(self, config_files):
         self.config_time = time.time()
-        self.config_files = config_files
+        self.config_files = [pathlib.Path(f) for f in config_files]
 
     def check_for_config_update(self):
-        max_mtime = max([os.path.getmtime(f) for f in self.config_files])
+        max_mtime = max([f.stat().st_mtime for f in self.config_files if f.exists()], default=0)
         if max_mtime > self.config_time:
             raise ReloadConfigException()
 
