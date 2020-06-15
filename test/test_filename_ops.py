@@ -71,24 +71,22 @@ def test_source_filenames():
              expected_out=sorted(['.', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
     # Glob
     TEST.run('ls -0 s? | map (f: f.render_compact())',
-             expected_out=sorted([absolute('/tmp/test', x) for x in ['sf', 'sd']]))
+             expected_out=sorted(['sf', 'sd']))
     TEST.run('ls -0 *f | map (f: f.render_compact())',
-             expected_out=sorted([absolute('/tmp/test', x) for x in ['f', 'sf', 'lf']]))
+             expected_out=sorted(['f', 'sf', 'lf']))
     # Glob in last part of path
     TEST.run('ls -0 /tmp/test/s? | map (f: f.render_compact())',
-             expected_out=sorted([absolute('/tmp/test', x) for x in ['sf', 'sd']]))
+             expected_out=sorted(['sf', 'sd']))
     TEST.run('ls -0 /tmp/test/*f | map (f: f.render_compact())',
-             expected_out=sorted([absolute('/tmp/test', x) for x in ['f', 'sf', 'lf']]))
+             expected_out=sorted(['f', 'sf', 'lf']))
     # Glob in intermediate part of path
     TEST.run('ls -0 /tmp/test/*d/*dd | map (f: f.render_compact())',
-             expected_out=sorted([absolute('/tmp/test', x) for x in [
-                 '/tmp/test/d/dd', '/tmp/test/d/sdd', '/tmp/test/sd/dd', '/tmp/test/sd/sdd',
-             ]]))
+             expected_out=sorted(['d/dd', 'd/sdd', 'sd/dd', 'sd/sdd']))
     TEST.run('ls -0 /tmp/test/*f | map (f: f.render_compact())',
-             expected_out=sorted([absolute('/tmp/test', x) for x in ['f', 'sf', 'lf']]))
+             expected_out=sorted(['f', 'sf', 'lf']))
     # Glob identifying duplicates
     TEST.run('ls -0 *f s* | map (f: f.render_compact())',
-             expected_out=sorted([absolute('/tmp/test', x) for x in ['f', 'sd', 'sf', 'lf']]))
+             expected_out=sorted(['f', 'sd', 'sf', 'lf']))
     # No such file
     TEST.run('ls -0 x | map (f: f.render_compact())',
              expected_err='No qualifying paths')
@@ -122,22 +120,16 @@ def test_ls():
                                   ]))
     # 0/1/r flags with file
     TEST.run('ls -0 f | map (f: f.render_compact())',
-             expected_out=sorted(['f'
-                                  ]))
+             expected_out=sorted(['f']))
     TEST.run('ls -1 f | map (f: f.render_compact())',
-             expected_out=sorted(['f'
-                                  ]))
+             expected_out=sorted(['f']))
     TEST.run('ls -r f | map (f: f.render_compact())',
-             expected_out=sorted(['f'
-                                  ]))
+             expected_out=sorted(['f']))
     # 0/1/r flags with directory
     TEST.run('ls -0 /tmp/test | map (f: f.render_compact())',
-             expected_out=sorted(['.'
-                                  ]))
+             expected_out=sorted(['.']))
     TEST.run('ls -1 /tmp/test | map (f: f.render_compact())',
-             expected_out=sorted(['.',
-                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-                                  ]))
+             expected_out=sorted(['.', 'f', 'sf', 'lf', 'sd', 'd']))
     TEST.run('ls -r /tmp/test | map (f: f.render_compact())',
              expected_out=sorted(['.',
                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
@@ -165,10 +157,10 @@ def test_ls():
                                   ]))
     # Duplicates
     TEST.run('ls -0 *d ? | map (f: f.render_compact())',
-             expected_out=sorted([absolute('/tmp/test', x) for x in ['d', 'sd', 'f']]))
+             expected_out=sorted(['d', 'sd', 'f']))
     # This should find d twice
-    expected = sorted([absolute('/tmp/test', x) for x in ['.', 'f', 'sf', 'lf', 'd', 'sd']])
-    expected.extend(sorted([absolute('/tmp/test', x) for x in ['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']]))
+    expected = sorted(['.', 'f', 'sf', 'lf', 'd', 'sd'])
+    expected.extend(sorted(['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']))
     TEST.run('ls -1 . d | map (f: f.render_compact())',
              expected_out=expected)
     # ls should continue past permission error
@@ -258,8 +250,8 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

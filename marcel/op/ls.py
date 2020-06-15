@@ -133,12 +133,8 @@ class Ls(marcel.core.Op):
             self.file = True
             self.dir = True
             self.symlink = True
-        if len(self.roots) == 1:
-            root = self.roots[0]
-            self.base = root if root.is_dir() else root.parent
-        else:
-            self.base = None
-            self.roots = sorted(self.roots)
+        self.roots = sorted(self.roots)
+        self.determine_base()
 
     # Op
 
@@ -170,6 +166,25 @@ class Ls(marcel.core.Op):
             file = marcel.object.file.File(path, self.base)
             self.send(file)
             self.emitted.add(path)
+
+    def determine_base(self):
+        # nca: nearest common ancestor
+        nca_parts = None
+        nca = None  # index into nearest_common_ancestor
+        for root in self.roots:
+            root_parts = root.parts
+            if nca_parts is None:
+                nca_parts = root_parts
+                nca = len(nca_parts)
+            else:
+                limit = min(len(root_parts), nca)
+                i = 0
+                while i < limit and nca_parts[i] == root_parts[i]:
+                    i += 1
+                nca = i
+        self.base = pathlib.Path('/' + '/'.join(nca_parts[1:nca]))
+        if self.base.is_file():
+            self.base = self.base.parent
 
     @staticmethod
     def normalize_paths(filenames):
