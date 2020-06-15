@@ -406,12 +406,3 @@ Pipeline args:
     - Testing, especially in situations that copy pipelines.
 
 ----------------------------------------------------------------------
-
-Profiling:
-
-Would it help to merge Op.receive and receive_input?
-
-  File "/home/jao/git/marcel/marcel/core.py", line 303, in receive
-    self.first_op.receive_input(x)
-  File "/home/jao/git/marcel/marcel/core.py", line 140, in receive_input
-    self.receive(None if x is None else

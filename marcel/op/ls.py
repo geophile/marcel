@@ -13,12 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
+import pathlib
+
 import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.object.error
 import marcel.object.file
-import marcel.op.filenames
 
 
 HELP = '''
@@ -80,7 +82,7 @@ class LsArgsParser(marcel.argsparser.ArgsParser):
         self.validate()
 
 
-class Ls(marcel.op.filenames.FilenamesOp):
+class Ls(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
@@ -90,6 +92,9 @@ class Ls(marcel.op.filenames.FilenamesOp):
         self.file = False
         self.dir = False
         self.symlink = False
+        self.filenames = None
+        self.current_dir = None
+        self.roots = None
         self.base = None
         self.emitted = None
 
@@ -113,7 +118,12 @@ class Ls(marcel.op.filenames.FilenamesOp):
     # AbstractOp
 
     def setup_1(self):
-        super().setup_1()
+        self.eval_function('filenames', str, pathlib.Path)
+        self.roots = []
+        self.current_dir = self.env().dir_state().pwd()
+        self.roots = Ls.deglob(self.current_dir, self.filenames)
+        if len(self.filenames) > 0 and len(self.roots) == 0:
+            raise marcel.exception.KillCommandException(f'No qualifying paths: {self.filenames}')
         self.emitted = set()
         if len(self.roots) == 0:
             self.roots = [self.current_dir]
@@ -132,13 +142,12 @@ class Ls(marcel.op.filenames.FilenamesOp):
 
     # Op
 
+    def receive(self, _):
+        for root in self.roots:
+            self.visit(root, 0)
+
     def must_be_first_in_pipeline(self):
         return True
-
-    # FilenamesOp
-
-    def action(self, source):
-        self.visit(source, 0)
 
     # For use by this class
 
@@ -161,3 +170,38 @@ class Ls(marcel.op.filenames.FilenamesOp):
             file = marcel.object.file.File(path, self.base)
             self.send(file)
             self.emitted.add(path)
+
+    @staticmethod
+    def normalize_paths(filenames):
+        # Resolve ~
+        # Resolve . and ..
+        # Convert to Path
+        paths = []
+        for filename in filenames:
+            # Resolve . and ..
+            filename = os.path.normpath(filename)
+            # Convert to Path and resolve ~
+            path = pathlib.Path(filename).expanduser()
+            # If path is relative, specify what it is relative to.
+            if not path.is_absolute():
+                path = pathlib.Path.cwd() / path
+            paths.append(path)
+        return paths
+
+    @staticmethod
+    def deglob(current_dir, filenames):
+        # Expand globs and eliminate duplicates
+        paths = Ls.normalize_paths(filenames)
+        roots = []
+        roots_set = set()
+        for path in paths:
+            # Proceed as if path is a glob pattern, but this works for non-globs too.
+            path_str = path.as_posix()
+            glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
+                                       if path.is_absolute() else
+                                       (current_dir, path_str))
+            for root in glob_base.glob(glob_pattern):
+                if root not in roots_set:
+                    roots_set.add(root)
+                    roots.append(root)
+        return roots

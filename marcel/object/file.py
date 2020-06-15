@@ -19,7 +19,6 @@ import stat
 import time
 
 import marcel.object.renderable
-import marcel.op.filenames
 import marcel.util
 
 DIR_MASK = 0o040000
@@ -124,9 +123,9 @@ class File(marcel.object.renderable.Renderable):
         return [
             self._mode_string(lstat.st_mode),
             ' ',
-            '{:8s}'.format(marcel.util.username(lstat.st_uid)),
-            '{:8s}'.format(marcel.util.groupname(lstat.st_gid)),
-            '{:12}'.format(lstat.st_size),
+            '{:6s}'.format(marcel.util.username(lstat.st_uid)),
+            '{:6s}'.format(marcel.util.groupname(lstat.st_gid)),
+            '{:8}'.format(lstat.st_size),
             ' ',
             self._formatted_mtime(lstat.st_mtime),
             ' ',
