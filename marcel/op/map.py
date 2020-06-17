@@ -25,7 +25,7 @@ HELP = '''
 
 {L,indent=4:28}FUNCTION                The function to be applied to each input tuple.
 
-For each tuple in the input stream, apply the given {r:FUNCTION}} and write the result to the output stream.
+For each tuple in the input stream, apply the given {r:FUNCTION} and write the result to the output stream.
 
 The components of an input tuple
 are bound to the {r:FUNCTION}'s parameters.
