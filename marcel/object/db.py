@@ -13,7 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import psycopg2
+try:
+    import psycopg2
+except ModuleNotFoundError:
+    pass
 
 import marcel.exception
 
