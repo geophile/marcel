@@ -9,7 +9,7 @@ setuptools.setup(
     name='marcel',  
     version=marcel.version.VERSION,
     author='Jack Orenstein',
-    author_email='jao@geophile.com',
+    author_email='jao@marceltheshell.org',
     description='A modern shell',
     long_description=long_description,
     long_description_content_type='text/markdown',
