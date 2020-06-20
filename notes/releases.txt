@@ -9,6 +9,9 @@
 - Bugs
   - 47
 
+- Pipeline as arg, yielding singleton or list (analogous to API gather
+  and first).
+
 ----------------------------------------------------------------------
 
 0.8
@@ -25,9 +28,6 @@
   .marcel.py or LOAD_ON_STARTUP scripts.
 
 + Pipeline with args
-
-- Pipeline as arg, yielding singleton or list (analogous to API gather
-  and first).
 
 + Comments
 

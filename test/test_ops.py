@@ -1,5 +1,6 @@
 import os
 import pathlib
+import datetime
 
 import marcel.main
 import marcel.version
@@ -609,7 +610,33 @@ def test_pipeline_args():
              expected_out=[0, 10, 20, 30, 40, 50, 60, 70])
 
 
+def test_sql():
+    TEST.run('''sql "drop table if exists t" | select (*t: False)''')
+    TEST.run('''sql "create table t(id int primary key, s varchar)" | select (*t: False)''')
+    TEST.run('''sql "insert into t values(1, 'one')"''',
+             expected_out=[1])
+    TEST.run('''sql "insert into t values(%s, %s)" (2) two''',
+             expected_out=[1])
+    TEST.run('''sql "select * from t order by id"''',
+             expected_out=[(1, 'one'), (2, 'two')])
+    TEST.run('''sql "update t set s = 'xyz'"''',
+             expected_out=[2])
+    TEST.run('''sql "select * from t order by id"''',
+             expected_out=[(1, 'xyz'), (2, 'xyz')])
+    TEST.run('''gen 3 1000 | map (x: (x, 'aaa')) | sql "insert into t values(%s, %s)"''',
+             expected_out=[1, 1, 1])
+    TEST.run('''sql "select * from t order by id"''',
+             expected_out=[(1, 'xyz'), (2, 'xyz'), (1000, 'aaa'), (1001, 'aaa'), (1002, 'aaa')])
+    TEST.run('''gen 2 1 | sql "delete from t where id = %s"''',
+             expected_out=[1, 1])
+    TEST.run('''sql "select * from t order by id"''',
+             expected_out=[(1000, 'aaa'), (1001, 'aaa'), (1002, 'aaa')])
+    TEST.run('''sql "drop table if exists t" | select (*x: False)''')
+    # TODO: sql types
+
+
 def main_stable():
+    test_no_such_op()
     test_gen()
     test_out()
     test_sort()
@@ -633,17 +660,23 @@ def main_stable():
     test_join()
     test_comment()
     test_pipeline_args()
-    test_no_such_op()
+    test_sql()
 
 
 def main_dev():
+    TEST.run('''timer 1 \
+| map (t: (t, processes())) \
+| expand 1 \
+| map (t, p: (t, p.pid, p.commandline)) \
+| sql --autocommit 'insert into process values(%s, %s, %s)'
+''')
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

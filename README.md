@@ -1,6 +1,37 @@
 What's New
 ----------
 
+Database access has been added through a new operator: `sql`. Currently,
+the only supported database is Postgres, through the `psycopg2` driver.
+Output from SQL `SELECT` statments is a stream of tuples, and these of course
+can be piped to other commands. You can also stream tuples into the `sql`
+operator, e.g. to SQL `INSERT`. For example, suppose you create a table
+to record process information:
+
+```postgresql
+create table process(time int,
+                     pid int,
+                     command varchar,
+                     primary key(time, pid)        
+``` 
+
+The following command generates a list of processes once a second,
+obtains the pid and command line for each, and inserts them into the database:
+
+```shell script
+timer 1 \
+| map (t: (t, processes())) \
+| expand 1 \
+| map (t, p: (t, p.pid, p.commandline)) \
+| sql --commit 1000 "insert into process(%s, %s, %s)"
+```
+
+* `timer 1`: Generate a timestamp every second.
+* `map (...)`: Receives timestamps, and outputs the timestamp along with a list of `Process` objects.
+* `expand 1`: Break the list (in position 1) into a sequence of (timestamp, Process) tuples.
+* `map (...)`: Map (timestamp, Process) to (timestamp, pid, command line).
+* `sql --commit 1000 ...`: Run the `insert` statement for each input tuple, and commit every 1000 inserts.
+
 You can assign a pipeline to a variable. And now, pipelines can have
 parameters. Put these together, and you have an easy way to create new
 operators. For example, you can create a filter to look for files with

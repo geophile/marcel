@@ -16,7 +16,7 @@ setuptools.setup(
     url='https://github.com/geophile/marcel',
     packages=setuptools.find_packages('.'),
     scripts=['bin/marcel', 'bin/farcel.py'],
-    install_requires=['dill'],
+    install_requires=['dill', 'pyscopg2'],
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',

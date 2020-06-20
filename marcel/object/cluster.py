@@ -17,6 +17,7 @@ import ipaddress
 import socket
 
 import marcel.exception
+import marcel.util
 
 
 class Host:
@@ -55,3 +56,21 @@ class Cluster:
     def __repr__(self):
         hosts = ', '.join([str(host) for host in self.hosts])
         return f'{self.name}[{hosts}]'
+
+
+def define_remote(name, user, identity, host, hosts):
+    if host is not None and hosts is not None:
+        raise marcel.exception.KillShellException(
+            f'Remote access to {name} requires specification of one host or a list of hosts, but not both')
+    if host is None and hosts is None:
+        raise marcel.exception.KillShellException(
+            f'Remote access to {name} requires specification of one host or a list of hosts')
+    if host is not None and marcel.util.is_sequence_except_string(host):
+        raise marcel.exception.KillShellException(
+            f'Remote access to {name}: host must not be a list. Did you mean hosts?')
+    if hosts is not None and not marcel.util.is_sequence_except_string(hosts):
+        raise marcel.exception.KillShellException(
+            f'Remote access to {name}: hosts must not be a list. Did you mean host?')
+    if host is not None:
+        hosts = [host]
+    return marcel.object.cluster.Cluster(name, user, identity, hosts)

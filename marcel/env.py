@@ -21,6 +21,7 @@ import sys
 
 import marcel.exception
 import marcel.object.cluster
+import marcel.object.db
 import marcel.object.color
 import marcel.object.file
 import marcel.object.process
@@ -122,6 +123,7 @@ class Environment:
             'BOLD': marcel.object.color.Color.BOLD,
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
+            'define_db': self.define_db,
             'define_remote': self.define_remote,
             'Color': marcel.object.color.Color,
             'File': marcel.object.file.File,
@@ -130,6 +132,7 @@ class Environment:
         if editor:
             self.namespace['EDITOR'] = editor
         self.clusters = {}
+        self.dbs = {}
         self.config_path = self.read_config(config_file)
         self.directory_state = DirectoryState(self.namespace)
         # TODO: This is a hack. Clean it up once the env handles command history
@@ -163,25 +166,17 @@ class Environment:
         return (self.prompt_string(self.getvar('PROMPT')),
                 self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
 
+    def define_remote(self, name, user, identity, host=None, hosts=None):
+        self.clusters[name] = marcel.object.cluster.define_remote(name, user, identity, host, hosts)
+
     def remote(self, name):
         return self.clusters.get(name, None)
 
-    def define_remote(self, name, user, identity, host=None, hosts=None):
-        if host is not None and hosts is not None:
-            raise marcel.exception.KillShellException(
-                f'Remote access to {name} requires specification of one host or a list of hosts, but not both')
-        if host is None and hosts is None:
-            raise marcel.exception.KillShellException(
-                f'Remote access to {name} requires specification of one host or a list of hosts')
-        if host is not None and marcel.util.is_sequence_except_string(host):
-            raise marcel.exception.KillShellException(
-                f'Remote access to {name}: host must not be a list. Did you mean hosts?')
-        if hosts is not None and not marcel.util.is_sequence_except_string(hosts):
-            raise marcel.exception.KillShellException(
-                f'Remote access to {name}: hosts must not be a list. Did you mean host?')
-        if host is not None:
-            hosts = [host]
-        self.clusters[name] = marcel.object.cluster.Cluster(name, user, identity, hosts)
+    def define_db(self, name, driver, dbname, user, password=None, host=None, port=None):
+        self.dbs[name] = marcel.object.db.define_db(name, driver, dbname, user, password, host, port)
+
+    def db(self, name):
+        return self.dbs.get(name, None)
 
     def dir_state(self):
         return self.directory_state

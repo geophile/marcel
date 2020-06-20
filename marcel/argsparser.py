@@ -168,6 +168,13 @@ class ArgsParser:
                 raise ArgsError(arg.op_name, f'{arg.name} cannot be converted to int: {x}')
         raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
 
+    def str_to_bool(self, arg, x):
+        if type(x) is bool or callable(x):
+            return x
+        if type(x) is str:
+            return x in ('T', 't', 'True', 'true')
+        raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
+
     def check_str(self, arg, x):
         if type(x) is str or callable(x):
             return x

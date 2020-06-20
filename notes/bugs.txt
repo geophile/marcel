@@ -133,4 +133,10 @@ help into an infinite loop.
 
 ----------------------------------------------------------------------
 
-63. 
+63. Wrapping of {L} tags is broken.
+
+E.g., from red.HELP:
+
+{L,indent=4:28}-i, --incremental       Output a tuple for each step of the reduction. I.e., there will be one
+output tuple for each input tuple, with the reductions showing the result of the reduction up to and including
+the most recent input.

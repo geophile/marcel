@@ -1,0 +1,114 @@
+DBAPI: https://www.python.org/dev/peps/pep-0249/
+
+pyscopg: https://www.psycopg.org/docs/usage.html
+
+Transaction behavior:
+
+- Commit in receive_complete
+
+- Offer autocommit option
+
+- NEED A WAY TO CLEANUP ON EXCEPTION: rollback transaction, close
+  connection.
+
+Basics:
+
+- pyscopg.connect(dbname, user, password, host, port)
+
+- cursor = conn.cursor()
+
+   - args?
+
+- cursor.execute(sql [, args])
+
+- cursor.fetchall()
+
+- conn.commit()
+
+- cursor.close()
+
+- conn.close()
+
+- psycopg extension, for performance on insert: cursor.mogrify, e.g.
+
+cursor.mogrify('insert into t values(%s, %s)', 
+
+----------------------------------------------------------------------
+
+sql op:
+
+    sql [-d|--db profile] [-a|--autocommit] [-b|--batch] stmt
+
+stmt can be string or expr
+
+
+SELECT:
+
+- receive runs query, sends output.
+
+OTHER:
+
+  - receive accumulates and run batches of input
+  - sql.receive_complete runs last batch
+
+
+
+Profile:
+
+From osh:
+
+    osh.sql.br.driver = 'psycopg2'
+    osh.sql.br.database = 'blackring'
+    osh.sql.br.user = 'blackring'
+    osh.sql.br.password = 'blackring'
+
+define_db(driver, db, user, password, host, port)
+
+----------------------------------------------------------------------
+
+SQL args, function args, ...
+
+Ways of doing a select:
+
+- Inline literal:
+
+       sql 'select * from t where id = 123'
+
+- Bind to a supplied value:
+
+       sql 'select * from t where id = %s' (123)
+
+- From stream
+
+       [x: sql ('select * from t where id = x')]
+
+Single insert:
+
+       sql "insert into t values(1, 'one')"
+
+       sql "insert into t values(%s, %s)" ([1, 'one'])
+
+Stream multiple values:
+
+       ... | sql "insert into t values(%s, %s)"
+
+
+psycopg2.paramstyle = pyformat, so this works:
+
+       ... | sql (x, y: 'insert into t values(%(x)s, %(y)s)')
+
+No it doesn't. The variables in the query are bound to a supplied map,
+not the function params. Also, the x and y are inside strings.
+
+----------------------------------------------------------------------
+
+Revised op design:
+
+    sql [-d|--db profile] [-a|--autocommit] [-b|--batch] stmt [args]
+
+
+- If there are args, use them. Input stream should be empty.
+
+- If there are no args, and no input (receive None): Run the query with empty args.
+
+- If there are no args and there is input: Bind each input to the query.

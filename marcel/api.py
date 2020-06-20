@@ -40,6 +40,7 @@ from marcel.op.remote import remote as _remote
 from marcel.op.reverse import reverse as _reverse
 from marcel.op.select import select as _select
 from marcel.op.sort import sort as _sort
+from marcel.op.sql import sql as _sql
 from marcel.op.squish import squish as _squish
 from marcel.op.sudo import sudo as _sudo
 from marcel.op.tail import tail as _tail
@@ -74,6 +75,7 @@ def red(*args, **kwargs): return _generate_op(_red, *args, **kwargs)
 def reverse(*args, **kwargs): return _generate_op(_reverse, *args, **kwargs)
 def select(*args, **kwargs): return _generate_op(_select, *args, **kwargs)
 def sort(*args, **kwargs): return _generate_op(_sort, *args, **kwargs)
+def sql(*args, **kwargs): return _generate_op(_sql, *args, **kwargs)
 def squish(*args, **kwargs): return _generate_op(_squish, *args, **kwargs)
 def sudo(*args, **kwargs): return _generate_op(_sudo, *args, **kwargs)
 def tail(*args, **kwargs): return _generate_op(_tail, *args, **kwargs)
