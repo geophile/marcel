@@ -572,28 +572,29 @@ def test_pipeline_args():
 
 
 def test_sql():
-    TEST.run(test=lambda: sql('''sql "drop table if exists t" | select (*t: False)'''))
-    TEST.run('''sql "create table t(id int primary key, s varchar)" | select (*t: False)''')
-    TEST.run('''sql "insert into t values(1, 'one')"''',
-             expected_out=[1])
-    TEST.run('''sql "insert into t values(%s, %s)" (2) two''',
-             expected_out=[1])
-    TEST.run('''sql "select * from t order by id"''',
-             expected_out=[(1, 'one'), (2, 'two')])
-    TEST.run('''sql "update t set s = 'xyz'"''',
-             expected_out=[2])
-    TEST.run('''sql "select * from t order by id"''',
-             expected_out=[(1, 'xyz'), (2, 'xyz')])
-    TEST.run('''gen 3 1000 | map (x: (x, 'aaa')) | sql "insert into t values(%s, %s)"''',
-             expected_out=[1, 1, 1])
-    TEST.run('''sql "select * from t order by id"''',
-             expected_out=[(1, 'xyz'), (2, 'xyz'), (1000, 'aaa'), (1001, 'aaa'), (1002, 'aaa')])
-    TEST.run('''gen 2 1 | sql "delete from t where id = %s"''',
-             expected_out=[1, 1])
-    TEST.run('''sql "select * from t order by id"''',
-             expected_out=[(1000, 'aaa'), (1001, 'aaa'), (1002, 'aaa')])
-    TEST.run('''sql "drop table if exists t" | select (*x: False)''')
+    # TEST.run(test=lambda: sql('''sql "drop table if exists t" | select (*t: False)'''))
+    # TEST.run('''sql "create table t(id int primary key, s varchar)" | select (*t: False)''')
+    # TEST.run('''sql "insert into t values(1, 'one')"''',
+    #          expected_out=[1])
+    # TEST.run('''sql "insert into t values(%s, %s)" (2) two''',
+    #          expected_out=[1])
+    # TEST.run('''sql "select * from t order by id"''',
+    #          expected_out=[(1, 'one'), (2, 'two')])
+    # TEST.run('''sql "update t set s = 'xyz'"''',
+    #          expected_out=[2])
+    # TEST.run('''sql "select * from t order by id"''',
+    #          expected_out=[(1, 'xyz'), (2, 'xyz')])
+    # TEST.run('''gen 3 1000 | map (x: (x, 'aaa')) | sql "insert into t values(%s, %s)"''',
+    #          expected_out=[1, 1, 1])
+    # TEST.run('''sql "select * from t order by id"''',
+    #          expected_out=[(1, 'xyz'), (2, 'xyz'), (1000, 'aaa'), (1001, 'aaa'), (1002, 'aaa')])
+    # TEST.run('''gen 2 1 | sql "delete from t where id = %s"''',
+    #          expected_out=[1, 1])
+    # TEST.run('''sql "select * from t order by id"''',
+    #          expected_out=[(1000, 'aaa'), (1001, 'aaa'), (1002, 'aaa')])
+    # TEST.run('''sql "drop table if exists t" | select (*x: False)''')
     # TODO: sql types
+    pass
 
 
 def test_api_run():

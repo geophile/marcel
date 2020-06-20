@@ -664,19 +664,13 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('''timer 1 \
-| map (t: (t, processes())) \
-| expand 1 \
-| map (t, p: (t, p.pid, p.commandline)) \
-| sql --autocommit 'insert into process values(%s, %s, %s)'
-''')
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
 
 
