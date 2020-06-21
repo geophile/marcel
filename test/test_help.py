@@ -28,16 +28,11 @@ color_scheme = TestColorScheme()
 formatter = marcel.helpformatter.HelpFormatter(color_scheme, colorize)
 
 text = '''
-Use the {n:help} command to get more information on the following kinds of objects:
-
-{L}- {n:color}
-{L}- {n:error}
-{L}- {n:file}
-{L}- {n:host}
-{L}- {n:process}
+{L,indent=4:28}-i, --incremental       Output a tuple for each step of the reduction. I.e., there will be one
+output tuple for each input tuple, with the reductions showing the result of the reduction up to and including
+the most recent input.
+{L,indent=4:28}FUNCTION                A reduction function.
 '''
-
-
 print(f'ORIGINAL: {text}')
 formatted = formatter.format(text)
 print('-----------------------------------------------------------------------------')

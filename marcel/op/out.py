@@ -25,9 +25,12 @@ HELP = '''
 {L,wrap=F}out [-a|--append FILENAME] [-f|--file FILENAME] [-c|--csv] [FORMAT]
 
 {L,indent=4:28}-a, --append            Append output to the file identified by FILENAME.
+
 {L,indent=4:28}-f, --file              Write output to the file identified by FILENAME, replacing an existing
 file if necessary.
+
 {L,indent=4:28}-c, --csv               Format output as comma-separated values.
+
 {L,indent=4:28}FORMAT                  The Python formatting specification to be applied to output tuples.
 
 

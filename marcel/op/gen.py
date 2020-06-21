@@ -24,7 +24,9 @@ HELP = '''
 {L,wrap=F}gen [-p|--pad PAD] [COUNT [START]]
 
 {L,indent=4:28}-p, --pad               Specifies the width of the padded output.
+
 {L,indent=4:28}COUNT                   The number of integers to be written to output. 
+
 {L,indent=4:28}START                   The first integer to be written to output. 
 
 Generates a stream of {r:COUNT} integers, starting at {r:START}.

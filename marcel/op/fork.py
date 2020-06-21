@@ -27,7 +27,9 @@ HELP = '''
 {L,wrap=F}fork N PIPELINE
 
 {L,indent=4:28}HOST                    The name of the host or set of hosts on which to run the given PIPELINE.
+
 {L,indent=4:28}N                       The number of instances of the PIPELINE to run locally (and concurrently).
+
 {L,indent=4:28}PIPELINE                The PIPELINE to be executed.
 
 Run multiple copies of a pipeline, concurrently, usually on remote hosts.

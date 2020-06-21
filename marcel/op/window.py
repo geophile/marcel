@@ -25,7 +25,9 @@ HELP = '''
 {L,wrap=F}window [-o|--overlap N] [-d|--disjoint N] [PREDICATE]
 
 {L,indent=4:28}-o, --overlap           Generate overlapping windows of size N.
+
 {L,indent=4:28}-d, --disjoint          Generate disjoint windows of size N.
+
 {L,indent=4:28}PREDICATE               Start a new window on inputs for which the predicate evaluates to True.
 
 Groups of consecutive input tuples are combined into a single tuple, which is written to

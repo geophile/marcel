@@ -197,7 +197,7 @@ class TextPointer:
         self.p -= 1
         if not self.text[self.p].isspace():
             self.nonws -= 1
-        if self.p > 0 and self.text[self.p-1] == '\\':
+        if self.p > 0 and self.text[self.p - 1] == '\\':
             self.p -= 1
         return self
 
@@ -359,7 +359,6 @@ class TextMarkup(Markup):
 
 
 class Paragraph:
-
     BLANK_LINE = ''
     DEFAULT_MARKUP = '{p}'
 
@@ -412,13 +411,14 @@ class Paragraph:
             # Trim lines. textwrap.wrap should do this (based on my understanding of the docs)
             # but doesn't seem to.
             self.trim_lines_to_be_wrapped()
-            indent = self.paragraph_markup.indent1
-            columns = self.help_formatter.help_columns - indent
-            self.wrapped = textwrap.wrap(self.plaintext,
-                                         width=columns,
-                                         break_long_words=False)
+            wrapper = textwrap.TextWrapper(width=self.help_formatter.help_columns,
+                                           break_long_words=False,
+                                           break_on_hyphens=False,
+                                           initial_indent=' ' * self.paragraph_markup.indent1,
+                                           subsequent_indent=' ' * self.paragraph_markup.indent2)
+            self.wrapped = '\n'.join(wrapper.wrap(self.plaintext))
         else:
-            self.wrapped = self.plaintext.split('\n')
+            self.wrapped = self.plaintext
 
     def trim_lines_to_be_wrapped(self):
         trimmed = []
@@ -426,23 +426,9 @@ class Paragraph:
             trimmed.append(line.strip())
         self.plaintext = ' '.join(trimmed)
 
-    def indent(self):
-        indent = self.paragraph_markup.indent1
-        if indent == 0:
-            indented_lines = self.wrapped
-        else:
-            indented_lines = []
-            padding1 = ' ' * indent
-            padding2 = ' ' * self.paragraph_markup.indent2
-            padding = padding1
-            for line in self.wrapped:
-                indented_lines.append(padding + line)
-                padding = padding2
-        self.indented = '\n'.join(indented_lines)
-
     def format(self):
         formatted = ''
-        text = self.indented
+        text = self.wrapped
         n = len(text)
         p = 0  # position in text
         format_function = self.help_formatter.format_function
@@ -481,7 +467,6 @@ class Paragraph:
 
 
 class HelpFormatter:
-
     RIGHT_MARGIN = 0.10
 
     def __init__(self, color_scheme, format_function=marcel.util.colorize):
@@ -499,7 +484,6 @@ class HelpFormatter:
         for paragraph in paragraphs:
             paragraph.remove_markup()
             paragraph.wrap()
-            paragraph.indent()
             buffer.append(paragraph.format())
         return '\n'.join(buffer)
 

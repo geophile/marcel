@@ -26,8 +26,11 @@ HELP = '''
 {L,wrap=F}ps [-u|--user [USER]] [-g|--group [GROUP]] [-p|--pid PID] [-c|--command STRING]
 
 {L,indent=4:28}-u, --user              Report only processes owned by the specified USER.
+
 {L,indent=4:28}-g, --group             Report only processes owned by the specified GROUP.
+
 {L,indent=4:28}-p, --pid               Report only the process with the specified PID.
+
 {L,indent=4:28}-c, --command           Report only the processes whose command line contains the specified STRING.
 
 Generate a stream of {n:Process} objects, representing processes. If no arguments are provided,
