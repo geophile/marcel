@@ -1,6 +1,6 @@
 0.9
 
-- DB access
++ DB access
 
 - If marcel is my default shell (in /etc/passwd), then remote
   operations fail, probably because marcel doesn't work as the shell
@@ -8,6 +8,7 @@
 
 - Bugs
   - 47
+  - 63
 
 - Pipeline as arg, yielding singleton or list (analogous to API gather
   and first).

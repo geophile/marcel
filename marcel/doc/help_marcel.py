@@ -49,7 +49,8 @@ as in other shells.
     - {n:map}         - {n:out}         - {n:popd}
     - {n:ps}          - {n:pushd}       - {n:pwd}
     - {n:red}         - {n:reverse}     - {n:run}
-    - {n:select}      - {n:sort}        - {n:squish}
-    - {n:sudo}        - {n:tail}        - {n:timer}
-    - {n:unique}      - {n:version}     - {n:window}
+    - {n:select}      - {n:sort}        - {n:sql}        
+    - {n:squish}      - {n:sudo}        - {n:tail}
+    - {n:timer}       - {n:unique}      - {n:version}
+    - {n:window}
 '''

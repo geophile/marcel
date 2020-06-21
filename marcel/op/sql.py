@@ -61,7 +61,7 @@ Note that the {r:--commit} and {r:--autocommit} flags are mutually exclusive.
 '''
 
 
-def sql(env, statement, args=None, db=None, autocommit=None, batch=None):
+def sql(env, statement, *args, db=None, autocommit=None, batch=None):
     op_args = []
     if db:
         op_args.extend(['--db', db])
@@ -71,7 +71,7 @@ def sql(env, statement, args=None, db=None, autocommit=None, batch=None):
         op_args.extend(['--batch', batch])
     op_args.append(statement)
     if args:
-        op_args.append(args)
+        op_args.extend(args)
     return Sql(env), op_args
 
 
