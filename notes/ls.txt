@@ -247,3 +247,21 @@ Multiple roots in the same dir result in absolute paths. Too verbose.
 - NCA at or below current: relative paths.
 
 - NCA above current: absolute paths
+
+----------------------------------------------------------------------
+
+ls is slow because of getting file metadata on rendering, (based on
+profiling).
+
+ls 10k files in a directory.
+
+ls | select (*t: False):        0.20 sec
+ls | out -f /dev/null:          0.59 sec
+ls | map (f: (f, 1)) | select (*t: False):        0.23 sec
+ls | map (f: (f, 1)) | out -f /dev/null:          0.29 sec
+
+Adding the map step costs 0.03-0.09 sec. It causes the file to be
+rendered by render_compact instead of render_full. Only the latter
+gets user name and group name.
+
+So caching user and group names should help.

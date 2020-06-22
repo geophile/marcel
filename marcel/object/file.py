@@ -25,12 +25,35 @@ DIR_MASK = 0o040000
 FILE_MASK = 0o100000
 LINK_MASK = 0o120000
 FILE_TYPE_MASK = DIR_MASK | FILE_MASK | LINK_MASK
+MISSING = object()
 
+
+class MetadataCache:
+    
+    def __init__(self):
+        self._username = {}
+        self._groupname = {}
+        
+    def username(self, uid):
+        username = self._username.get(uid, MISSING)
+        if username is MISSING:
+            username = marcel.util.username(uid)
+            self._username[uid] = username
+        return username
+        
+    def groupname(self, uid):
+        groupname = self._groupname.get(uid, MISSING)
+        if groupname is MISSING:
+            groupname = marcel.util.groupname(uid)
+            self._groupname[uid] = groupname
+        return groupname
+        
 
 class File(marcel.object.renderable.Renderable):
 
-    def __init__(self, path, base=None):
+    def __init__(self, path, base=None, metadata_cache=None):
         assert path is not None
+        self.metadata_cache = metadata_cache
         if not isinstance(path, pathlib.Path):
             path = pathlib.Path(path)
         self.path = path
@@ -123,8 +146,8 @@ class File(marcel.object.renderable.Renderable):
         return [
             self._mode_string(lstat.st_mode),
             ' ',
-            '{:6s}'.format(marcel.util.username(lstat.st_uid)),
-            '{:6s}'.format(marcel.util.groupname(lstat.st_gid)),
+            '{:6s}'.format(self.metadata_cache.username(lstat.st_uid)),
+            '{:6s}'.format(self.metadata_cache.groupname(lstat.st_gid)),
             '{:8}'.format(lstat.st_size),
             ' ',
             self._formatted_mtime(lstat.st_mtime),

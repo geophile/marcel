@@ -103,6 +103,7 @@ class Ls(marcel.core.Op):
         self.roots = None
         self.base = None
         self.emitted = None
+        self.metadata_cache = None
 
     def __repr__(self):
         if self.d0:
@@ -141,6 +142,7 @@ class Ls(marcel.core.Op):
             self.symlink = True
         self.roots = sorted(self.roots)
         self.determine_base()
+        self.metadata_cache = marcel.object.file.MetadataCache()
 
     # Op
 
@@ -169,7 +171,7 @@ class Ls(marcel.core.Op):
         f = path.is_file() and not s
         d = path.is_dir() and not s
         if ((self.file and f) or (self.dir and d) or (self.symlink and s)) and path not in self.emitted:
-            file = marcel.object.file.File(path, self.base)
+            file = marcel.object.file.File(path, self.base, self.metadata_cache)
             self.send(file)
             self.emitted.add(path)
 

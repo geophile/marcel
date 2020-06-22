@@ -346,3 +346,12 @@ Argument invocation from Nu: https://www.nushell.sh/blog/2020/06/09/nushell_0_15
 
 Pipeline used to provide arg value. Sort of like API gather or
 first. Functions are already allowed, so this is easy.
+
+----------------------------------------------------------------------
+
+From https://erayerdin.hashnode.dev/nushell-shell-redefined-ck9gbnphi06oucss1fvt0sgt4
+
+- Object introspection via command.
+
+- Understand textual formats, e.g. json. "open" command to open a file
+  and pipe it.

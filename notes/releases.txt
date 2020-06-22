@@ -13,6 +13,9 @@
 - Pipeline as arg, yielding singleton or list (analogous to API gather
   and first).
 
+- Be able to switch to bash shell. "bash bash" and "bash -i bash"
+  don't work.
+
 ----------------------------------------------------------------------
 
 0.8

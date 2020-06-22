@@ -13,14 +13,28 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import time
 
-from marcel.api import*
+from marcel.api import *
 
-N = 1000000
+# start = time.time()
+# run(ls('/tmp/d') | select(lambda *t: False))
+# stop = time.time()
+# print(f'ls, no output: {stop-start}')
+
 start = time.time()
-run(gen(N) | map(lambda x: x+1) | map(lambda x: x+1) | map(lambda x: x+1) | select(lambda x: False))
+run(ls('/tmp/d') | out(file='/dev/null'))
 stop = time.time()
-usec = (stop - start) * 1000000 / N
-print(f'{usec} usec per unit')
+print(f'ls, output to /dev/null: {stop-start}')
+
+# start = time.time()
+# run(ls('/tmp/d') | map(lambda f: (f, 1)) | select(lambda *t: False))
+# stop = time.time()
+# print(f'ls, output to /dev/null: {stop-start}')
+#
+# start = time.time()
+# run(ls('/tmp/d') | map(lambda f: (f, 1)) | out(file='/dev/null'))
+# stop = time.time()
+# print(f'ls, output to /dev/null: {stop-start}')
 

@@ -1,8 +1,7 @@
 from marcel.api import *
 
-negate = map(lambda x: -x)
+from marcel.api import *
 
-print('ONE NEGATE')
-run(gen(3) | negate)
-print('TWO NEGATES')
-run(gen(3) | negate | negate)
+for file in (ls(file=True, recursive=True) |
+             select(lambda file: now() - file.mtime < days(1))):
+    print(f'{file}')
