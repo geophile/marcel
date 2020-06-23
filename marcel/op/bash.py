@@ -22,7 +22,6 @@ import marcel.exception
 import marcel.object.error
 import marcel.util
 
-
 HELP = '''
 {L,wrap=F}bash [-i|--interactive] ARG ...
 
@@ -35,6 +34,7 @@ Remaining {r:ARG}s are arguments to the executable.
 It is usually possible to run an executable directly, without using the bash command.
 Use this command if the {r:--interactive} flag is needed.
 '''
+
 
 # About the use of preexec_fn in Popen:
 # See https://pymotw.com/2/subprocess/#process-groups-sessions for more information.
@@ -56,7 +56,6 @@ class BashArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Bash(marcel.core.Op):
-
     INTERACTIVE_EXECUTABLES = {
         'emacs',
         'less',
@@ -83,10 +82,11 @@ class Bash(marcel.core.Op):
         self.eval_function('args')
         self.input = []
         if len(self.args) == 0:
-            raise marcel.exception.KillCommandException('No command provided.')
-        if self.args[0] in Bash.INTERACTIVE_EXECUTABLES:
-            self.interactive = True
-        self.runner = Interactive(self) if self.interactive else NonInteractive(self)
+            self.runner = BashShell(self)
+        else:
+            if self.args[0] in Bash.INTERACTIVE_EXECUTABLES:
+                self.interactive = True
+            self.runner = Interactive(self) if self.interactive else NonInteractive(self)
 
     def receive(self, x):
         if x is not None:
@@ -100,8 +100,6 @@ class Bash(marcel.core.Op):
 
 
 class Escape:
-
-    BASH_CONTROL = ['>', '<', '>>', '&']
 
     def __init__(self, op):
         self.op = op
@@ -165,3 +163,18 @@ class Interactive(Escape):
             print(f'Escaped command failed with exit code {process.returncode}: {" ".join(self.op.args)}')
             marcel.util.print_to_stderr(process.stderr, self.op.env())
 
+
+class BashShell(Escape):
+
+    def __init__(self, op):
+        super().__init__(op)
+
+    def run(self):
+        process = subprocess.Popen('bash',
+                                   shell=True,
+                                   executable='/bin/bash',
+                                   universal_newlines=True)
+        process.wait()
+        if process.returncode != 0:
+            print(f'Escaped command failed with exit code {process.returncode}: {" ".join(self.op.args)}')
+            marcel.util.print_to_stderr(process.stderr, self.op.env())
