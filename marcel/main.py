@@ -30,7 +30,6 @@
 
 import atexit
 import multiprocessing
-import os.path
 import pathlib
 import readline
 import sys
@@ -253,4 +252,5 @@ if __name__ == '__main__':
             MAIN.run()
             break
         except ReloadConfigException:
+            MAIN.shutdown()
             pass

@@ -21,9 +21,8 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/bash.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/bash.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_ops.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -350,7 +349,7 @@
       <workItem from="1592337022673" duration="10226000" />
       <workItem from="1592491555373" duration="18344000" />
       <workItem from="1592534778868" duration="34475000" />
-      <workItem from="1592877856309" duration="9430000" />
+      <workItem from="1592877856309" duration="11429000" />
     </task>
     <servers />
   </component>
@@ -543,11 +542,11 @@
     <state x="838" y="432" width="992" height="737" key="SettingsEditor/0.27.2560.1413@0.27.2560.1413" timestamp="1591454731967" />
     <state x="1920" y="432" key="SettingsEditor/0.27.4480.1413@0.27.4480.1413" timestamp="1589659892036" />
     <state x="2759" y="413" key="SettingsEditor/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1591320664863" />
-    <state x="2342" y="486" width="961" height="524" key="StructurePopup" timestamp="1592919387274">
-      <screen x="0" y="27" width="4480" height="1413" />
+    <state x="1063" y="527" width="549" height="524" key="StructurePopup" timestamp="1592941498910">
+      <screen x="0" y="27" width="2560" height="1413" />
     </state>
     <state x="1004" y="369" width="549" height="391" key="StructurePopup/0.27.1920.1053@0.27.1920.1053" timestamp="1591994470539" />
-    <state x="1063" y="527" width="549" height="524" key="StructurePopup/0.27.2560.1413@0.27.2560.1413" timestamp="1591903049863" />
+    <state x="1063" y="527" width="549" height="524" key="StructurePopup/0.27.2560.1413@0.27.2560.1413" timestamp="1592941498910" />
     <state x="2008" y="369" width="1098" height="391" key="StructurePopup/0.27.3840.1053@0.27.3840.1053" timestamp="1592866433842" />
     <state x="2342" y="486" width="961" height="524" key="StructurePopup/0.27.4480.1413@0.27.4480.1413" timestamp="1592919387274" />
     <state x="797" y="399" width="549" height="391" key="StructurePopup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1590288360757" />
@@ -639,11 +638,11 @@
     <state x="1113" y="521" width="306" height="466" key="refactoring.ChangeSignatureDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1591380771348" />
     <state x="2875" y="447" key="refactoring.ChangeSignatureDialog/0.27.3840.1053@0.27.3840.1053" timestamp="1592851582734" />
     <state x="1948" y="521" key="refactoring.ChangeSignatureDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1590544776135" />
-    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup" timestamp="1592930980859">
-      <screen x="0" y="27" width="4480" height="1413" />
+    <state x="934" y="466" width="672" height="678" key="search.everywhere.popup" timestamp="1592941489992">
+      <screen x="0" y="27" width="2560" height="1413" />
     </state>
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1592878433281" />
-    <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1592407762290" />
+    <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1592941489992" />
     <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1592851538030" />
     <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1592930980859" />
     <state x="701" y="354" width="672" height="507" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1590286500344" />
