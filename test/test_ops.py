@@ -664,13 +664,14 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run("(File('/home/jao/git/marcel/README.md'))")
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

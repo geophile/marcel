@@ -138,7 +138,7 @@ class File(marcel.object.renderable.Renderable):
 
     def _formatted_metadata(self):
         lstat = self._lstat()  # Not stat. Don't want to follow symlinks here.
-        username, groupname = self.metadata_cache.user_and_group_names(lstat.st_uid, lstat.st_gid)
+        username, groupname = self._user_and_group_names(lstat.st_uid, lstat.st_gid)
         return [
             self._mode_string(lstat.st_mode),
             ' ',
@@ -154,6 +154,13 @@ class File(marcel.object.renderable.Renderable):
         if self.lstat is None:
             self.lstat = self.path.lstat()
         return self.lstat
+
+    def _user_and_group_names(self, uid, gid):
+        if self.metadata_cache:
+            return self.metadata_cache.user_and_group_names(uid, gid)
+        else:
+            # File not created via ls command
+            return marcel.util.username(uid), marcel.util.groupname(gid)
 
     @staticmethod
     def _mode_string(mode):
