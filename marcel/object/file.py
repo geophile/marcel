@@ -31,22 +31,17 @@ MISSING = object()
 class MetadataCache:
     
     def __init__(self):
-        self._username = {}
-        self._groupname = {}
-        
-    def username(self, uid):
-        username = self._username.get(uid, MISSING)
+        self.id_to_name = {}
+
+    def user_and_group_names(self, uid, gid):
+        key = (uid, gid)
+        username, groupname = self.id_to_name.get(key, (MISSING, MISSING))
         if username is MISSING:
+            # groupname is MISSING too
             username = marcel.util.username(uid)
-            self._username[uid] = username
-        return username
-        
-    def groupname(self, uid):
-        groupname = self._groupname.get(uid, MISSING)
-        if groupname is MISSING:
-            groupname = marcel.util.groupname(uid)
-            self._groupname[uid] = groupname
-        return groupname
+            groupname = marcel.util.groupname(gid)
+            self.id_to_name[key] = (username, groupname)
+        return username, groupname
         
 
 class File(marcel.object.renderable.Renderable):
@@ -143,11 +138,12 @@ class File(marcel.object.renderable.Renderable):
 
     def _formatted_metadata(self):
         lstat = self._lstat()  # Not stat. Don't want to follow symlinks here.
+        username, groupname = self.metadata_cache.user_and_group_names(lstat.st_uid, lstat.st_gid)
         return [
             self._mode_string(lstat.st_mode),
             ' ',
-            '{:6s}'.format(self.metadata_cache.username(lstat.st_uid)),
-            '{:6s}'.format(self.metadata_cache.groupname(lstat.st_gid)),
+            '{:6s}'.format(username),
+            '{:6s}'.format(groupname),
             '{:8}'.format(lstat.st_size),
             ' ',
             self._formatted_mtime(lstat.st_mtime),

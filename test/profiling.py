@@ -18,23 +18,23 @@ import time
 
 from marcel.api import *
 
-# start = time.time()
-# run(ls('/tmp/d') | select(lambda *t: False))
-# stop = time.time()
-# print(f'ls, no output: {stop-start}')
+start = time.time()
+run(ls('/tmp/d') | select(lambda *t: False))
+stop = time.time()
+print(f'ls, no output: {stop-start}')
 
 start = time.time()
 run(ls('/tmp/d') | out(file='/dev/null'))
 stop = time.time()
 print(f'ls, output to /dev/null: {stop-start}')
 
-# start = time.time()
-# run(ls('/tmp/d') | map(lambda f: (f, 1)) | select(lambda *t: False))
-# stop = time.time()
-# print(f'ls, output to /dev/null: {stop-start}')
-#
-# start = time.time()
-# run(ls('/tmp/d') | map(lambda f: (f, 1)) | out(file='/dev/null'))
-# stop = time.time()
-# print(f'ls, output to /dev/null: {stop-start}')
+start = time.time()
+run(ls('/tmp/d') | map(lambda f: (f, 1)) | select(lambda *t: False))
+stop = time.time()
+print(f'ls, output to /dev/null: {stop-start}')
+
+start = time.time()
+run(ls('/tmp/d') | map(lambda f: (f, 1)) | out(file='/dev/null'))
+stop = time.time()
+print(f'ls, output to /dev/null: {stop-start}')
 

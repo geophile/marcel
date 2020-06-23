@@ -265,3 +265,11 @@ rendered by render_compact instead of render_full. Only the latter
 gets user name and group name.
 
 So caching user and group names should help.
+
+
+With caching:
+
+ls | select (*t: False):        0.19 sec
+ls | out -f /dev/null:          0.35 sec
+ls | map (f: (f, 1)) | select (*t: False):        0.23 sec
+ls | map (f: (f, 1)) | out -f /dev/null:          0.30 sec
