@@ -20,10 +20,10 @@ import marcel.exception
 HELP = '''
 {L,wrap=F}sql [-d|--db DB_PROFILE] [-c|--commit UPDATE_COUNT] [-a|--autocommit] STATEMENT [ARG ...]
 
-{L,indent=4:28,wrap=T}-d, --db                Access the database whose profile is named DB_PROFILE, in {n:.marcel.py}.
-If omitted, use the default profile, specified by the environment variable {n:DB_DEFAULT}.
+{L,indent=4:28,wrap=T}-d, --db                Access the database whose profile is named {r:DB_PROFILE},
+in {n:.marcel.py}. If omitted, use the default profile, specified by the environment variable {n:DB_DEFAULT}.
 
-{L,indent=4:28}-c, --commit            Commit after UPDATE_COUNT rows have been updated, as indicated by
+{L,indent=4:28}-c, --commit            Commit after {r:UPDATE_COUNT} rows have been updated, as indicated by
 the sum of update counts returned in response to SQL statements such as INSERT, UPDATE, DELETE.
 
 {L,indent=4:28}-a, --autocommit        Run in auto-commit mode. I.e., every SQL statement runs in its own 
@@ -48,11 +48,12 @@ In other cases, the update count is written to the output stream.
 Commit is handled in one of three ways:
 
 {L}- {n:One commit}: Commit occurs at the end of the entire command. This means that for a long-running
-command that does updates, no updates are visible until the command finishes execution.
+command that does updates, no updates are visible until the command finishes execution. This is the default
+behavior, (i.e., if neither {r:--commit} nor {r:--autocommit} are specified).
 
 {L}- {n:Periodic commit}: The {r:--commit} flag specifies the commit frequency as an {r:UPDATE_COUNT}. 
-Update counts from SQL statements are totalled, and when total exceeds {r:UPDATE_COUNT}, a commit is performed,
-and the counter is reset to zero.
+Update counts from SQL statements are totalled, and when total equals or exceeds {r:UPDATE_COUNT}, 
+a commit is performed, and the counter is reset to zero.
 
 {L}- {n:Auto-commit}: If {r:--autocommit} is specified, then each SQL statement runs in its own implicit
 transaction.
@@ -61,14 +62,12 @@ Note that the {r:--commit} and {r:--autocommit} flags are mutually exclusive.
 '''
 
 
-def sql(env, statement, *args, db=None, autocommit=None, batch=None):
+def sql(env, statement, *args, db=None, autocommit=None):
     op_args = []
     if db:
         op_args.extend(['--db', db])
     if autocommit:
         op_args.extend(['--autocommit', autocommit])
-    if batch:
-        op_args.extend(['--batch', batch])
     op_args.append(statement)
     if args:
         op_args.extend(args)
@@ -81,7 +80,6 @@ class SqlArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('sql', env)
         self.add_flag_one_value('db', '-d', '--db')
         self.add_flag_no_value('autocommit', '-a', '--autocommit')
-        self.add_flag_one_value('batch', '-b', '--batch', convert=self.str_to_int)
         self.add_flag_one_value('commit', '-c', '--commit', convert=self.str_to_int)
         self.add_anon('statement')
         self.add_anon_list('args')
@@ -95,7 +93,6 @@ class Sql(marcel.core.Op):
         super().__init__(env)
         self.db = None
         self.autocommit = None
-        self.batch = None
         self.commit = None
         self.statement = None
         self.args = None
