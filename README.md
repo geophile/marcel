@@ -1,7 +1,7 @@
 What's New
 ----------
 
-There is a new operator, import. You can now import arbitrary Python modules
+There is a new operator, `import`. You can now import arbitrary Python modules
 and use the imported symbols in marcel functions. For example, if you try to compute
 something using `pi`, you will get an error message because the `math` module,
 which defines `pi`, hasn't been imported:
