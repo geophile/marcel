@@ -1,36 +1,32 @@
 What's New
 ----------
 
-Database access has been added through a new operator: `sql`. Currently,
-the only supported database is Postgres, through the `psycopg2` driver.
-Output from SQL `SELECT` statments is a stream of tuples, and these of course
-can be piped to other commands. You can also stream tuples into the `sql`
-operator, e.g. to SQL `INSERT`. For example, suppose you create a table
-to record process information:
-
-```postgresql
-create table process(time int,
-                     pid int,
-                     command varchar,
-                     primary key(time, pid)        
-``` 
-
-The following command generates a list of processes once a second,
-obtains the pid and command line for each, and inserts them into the database:
+There is a new operator, import. You can now import arbitrary Python modules
+and use the imported symbols in marcel functions. For example, if you try to compute
+something using `pi`, you will get an error message because the `math` module,
+which defines `pi`, hasn't been imported:
 
 ```shell script
-timer 1 \
-| map (t: (t, processes())) \
-| expand 1 \
-| map (t, p: (t, p.pid, p.commandline)) \
-| sql --commit 1000 "insert into process(%s, %s, %s)"
+M-0.9.11 jao@cheese:~/git/marcel/test$ (pi / 4)
+Error: Running map(lambda: pi / 4): name 'pi' is not defined
+M-0.9.11 jao@cheese:~/git/marcel/test$ (math.pi / 4)
+Error: Running map(lambda: math.pi / 4): name 'math' is not defined
+```
+You can import the `math` module and then refer to `math.pi` successfully:
+
+```shell script
+M-0.9.11 jao@cheese:~/git/marcel/test$ import math
+M-0.9.11 jao@cheese:~/git/marcel/test$ (math.pi / 4)
+0.7853981633974483
 ```
 
-* `timer 1`: Generate a timestamp every second.
-* `map (...)`: Receives timestamps, and outputs the timestamp along with a list of `Process` objects.
-* `expand 1`: Break the list (in position 1) into a sequence of (timestamp, Process) tuples.
-* `map (...)`: Map (timestamp, Process) to (timestamp, pid, command line).
-* `sql --commit 1000 ...`: Run the `insert` statement for each input tuple, and commit every 1000 inserts.
+Or, you can import `math.pi` as `pi`, e.g.
+
+```shell script
+M-0.9.11 jao@cheese:~/git/marcel/test$ import math pi
+M-0.9.11 jao@cheese:~/git/marcel/test$ (pi / 4)
+0.7853981633974483
+```
 
 Marcel
 ======
