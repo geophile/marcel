@@ -1,6 +1,7 @@
+import math
 import os
 import pathlib
-import datetime
+import sys
 
 import marcel.main
 import marcel.version
@@ -635,6 +636,20 @@ def test_sql():
     # TODO: sql types
 
 
+def test_import():
+    TEST.run('import math')
+    TEST.run('(math.pi)', expected_out=[math.pi])
+    TEST.run('(math.e)', expected_out=[math.e])
+    TEST.run('import math pi')
+    TEST.run('(pi)', expected_out=[math.pi])
+    TEST.run('import sys *')
+    TEST.run('(version)', expected_out=[sys.version])
+    TEST.run('import sys')
+    TEST.run('(version)', expected_out=[sys.version])
+    TEST.run('import os')
+    TEST.run('(os.popen)', expected_out=[os.popen])
+
+
 def main_stable():
     test_no_such_op()
     test_gen()
@@ -661,6 +676,7 @@ def main_stable():
     test_comment()
     test_pipeline_args()
     test_sql()
+    test_import()
 
 
 def main_dev():

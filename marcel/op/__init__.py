@@ -26,6 +26,7 @@ public = [
     'head',
     'help',
     'history',
+    'import',
     'jobs',
     'join',
     'ls',
