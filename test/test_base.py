@@ -16,12 +16,13 @@ class TestBase:
     start_dir = os.getcwd()
 
     def __init__(self, config_file='./.marcel.py'):
+        self.config_file = config_file
         self.main = None
         self.failures = 0
         self.reset_environment(config_file)
 
     def reset_environment(self, config_file='./.marcel.py'):
-        self.main = marcel.main.Main(config_file, same_process=True)
+        self.main = marcel.main.Main(config_file, same_process=True, old_namespace=None)
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')
         os.chdir(TestConsole.start_dir)
@@ -150,6 +151,13 @@ class TestConsole(TestBase):
             self.main.run_command(command)
         return out.getvalue(), err.getvalue()
 
+    def expect_config_change_exception(self):
+        try:
+            self.run('pwd | select (*x: False)')
+            self.fail('pwd', 'Should have triggered ReloadConfigException')
+        except marcel.main.ReloadConfigException:
+            self.reset_environment(self.config_file)
+
 
 class TestAPI(TestBase):
 
@@ -258,7 +266,7 @@ class TestTabCompletion(TestBase):
         super().__init__(config_file)
 
     def reset_environment(self, config_file='./.marcel.py'):
-        self.main = marcel.main.Main(config_file, same_process=True)
+        self.main = marcel.main.Main(config_file, same_process=True, old_namespace=None)
 
     def run(self, line, text, expected):
         print(f'TESTING: line="{line}", text="{text}"')

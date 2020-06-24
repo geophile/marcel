@@ -119,3 +119,31 @@ After the exec call:
 
 For function calls, construct globals out of locals and the rescued
 __builtins__.
+
+----------------------------------------------------------------------
+
+6/24/20
+
+The config script is loaded at startup, and it defines the initial
+marcel namespace: Imports symbols, defines symbols, also uses builtin
+functions and vars (e.g. PROMPT) to configure things. 
+
+As of a few days ago, a modification to this file causes it to be
+reloaded. This works by discarding the current Main object and
+creating a new one. But that loses any session changes,
+e.g. assignments to vars. And if there were an import op, it's changes
+would be lost too. Example:
+
+- In marcel, assign a value to a new var, e.g. a = asdf
+- touch ~/.marcel.py
+- Evaluate (a): Error: Running map(lambda: a): name 'a' is not defined
+
+Avoiding this creates a merge problem -- diverging changes in the
+session and in the modified config file. Try this:
+
+- Before redoing Main(), keep the old namespace.
+
+- Reread config, and merge it into the old namespace,
+  i.e. old_namespace.update(new_namespace). This keeps the old
+  namespace, and on conflict, the new namespace wins. Rationale: The
+  config file just changed. Why would you keep an older definition?

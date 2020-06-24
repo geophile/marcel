@@ -51,7 +51,7 @@ from marcel.op.window import window as _window
 from marcel.builtin import *
 from marcel.reduction import *
 
-_MAIN = _main.Main(None, same_process=True)
+_MAIN = _main.Main(None, same_process=True, old_namespace=None)
 # No colors for API
 _MAIN.env.set_color_scheme(None)
 

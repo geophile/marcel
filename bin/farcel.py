@@ -96,7 +96,7 @@ def main():
     def noop_error_handler(env, error):
         pass
 
-    env = marcel.env.Environment(None)
+    env = marcel.env.Environment(None, old_namespace=None)
     version = env.getvar('MARCEL_VERSION')
     TRACE.write(f'Marcel version {version}')
     # Use sys.stdin.buffer because we want binary data, not the text version

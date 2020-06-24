@@ -85,13 +85,13 @@ class Main:
 
     MAIN_SLEEP_SEC = 0.1
 
-    def __init__(self, config_file, same_process=False):
+    def __init__(self, config_file, same_process, old_namespace):
         # sys.argv sets config_path, dill
         self.dill = True
         #
         self.same_process = same_process
         try:
-            self.env = marcel.env.Environment(config_file)
+            self.env = marcel.env.Environment(config_file, old_namespace)
         except marcel.exception.KillShellException as e:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)
@@ -102,8 +102,8 @@ class Main:
         self.initialize_input()  # Sets self.reader
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_env_vars)
-        self.run_startup()
         self.config_monitor = ConfigurationMonitor([self.env.config_path])
+        self.run_startup()
         atexit.register(self.shutdown)
 
     def __getstate__(self):
@@ -169,8 +169,10 @@ class Main:
         return pathlib.Path(home) / HISTORY_FILE
 
     def shutdown(self):
+        namespace = self.env.namespace
         self.job_control.shutdown()
         self.reader.close()
+        return namespace
 
     def insert_edited_command(self):
         command = self.reader.take_edited_command()
@@ -243,14 +245,15 @@ def args():
 
 if __name__ == '__main__':
     dill, mpstart = args()
+    old_namespace = {}
     if mpstart is not None:
         multiprocessing.set_start_method(mpstart)
     while True:
-        MAIN = Main(None)
+        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
         MAIN.dill = dill
         try:
             MAIN.run()
             break
         except ReloadConfigException:
-            MAIN.shutdown()
+            old_namespace = MAIN.shutdown()
             pass

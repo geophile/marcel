@@ -355,3 +355,7 @@ From https://erayerdin.hashnode.dev/nushell-shell-redefined-ck9gbnphi06oucss1fvt
 
 - Understand textual formats, e.g. json. "open" command to open a file
   and pipe it.
+
+- Look into direnv. Nushell has some idea of location-sensitive
+  environment. A directory is a "shell", and I guess has its own
+  environment.

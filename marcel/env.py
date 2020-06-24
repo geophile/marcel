@@ -96,12 +96,11 @@ class DirectoryState:
 
 
 class Environment:
-
     CONFIG_FILENAME = '.marcel.py'
     DEFAULT_PROMPT = f'M-{marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, old_namespace):
         user = getpass.getuser()
         homedir = pathlib.Path.home().resolve()
         host = socket.gethostname()
@@ -111,7 +110,8 @@ class Environment:
         except FileNotFoundError:
             raise marcel.exception.KillShellException(
                 'Current directory does not exist! cd somewhere else and try again.')
-        self.namespace = {
+        self.namespace = {} if old_namespace is None else old_namespace
+        self.namespace.update({
             'USER': user,
             'HOME': homedir.as_posix(),
             'HOST': host,
@@ -128,7 +128,7 @@ class Environment:
             'Color': marcel.object.color.Color,
             'File': marcel.object.file.File,
             'Process': marcel.object.process.Process
-        }
+        })
         if editor:
             self.namespace['EDITOR'] = editor
         self.clusters = {}
