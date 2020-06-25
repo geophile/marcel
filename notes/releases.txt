@@ -9,6 +9,7 @@
 - Bugs
   - 47
   + 63
+  - 64
 
 - Pipeline as arg, yielding singleton or list (analogous to API gather
   and first).

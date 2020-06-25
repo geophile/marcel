@@ -55,6 +55,7 @@ class Help(marcel.core.Op):
         op_module = self.env().op_modules.get(self.topic, None)
         help_text = self.op_help(op_module) if op_module else self.topic_help()
         self.send(help_text)
+        self.send('')
 
     # Op
 

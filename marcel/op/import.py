@@ -23,8 +23,7 @@ import marcel.exception
 HELP = '''
 {L,wrap=F}import MODULE
 {L,wrap=F}import MODULE *
-{L,wrap=F}import MODULE SYMBOL
-{L,wrap=F}import MODULE SYMBOL NAME
+{L,wrap=F}import MODULE SYMBOL [NAME]
 
 {L,indent=4:28}MODULE                  Name of the module to import.
 
@@ -98,9 +97,12 @@ class Import(marcel.core.Op):
                 if not key.startswith('_'):
                     env.setvar(key, value)
         else:
-            value = module.__dict__[self.symbol]
-            name = self.name if self.name else self.symbol
-            env.setvar(name, value)
+            try:
+                value = module.__dict__[self.symbol]
+                name = self.name if self.name else self.symbol
+                env.setvar(name, value)
+            except KeyError:
+                self.non_fatal_error(message=f'{self.symbol} is not defined in {self.module}')
 
     def must_be_first_in_pipeline(self):
         return True
