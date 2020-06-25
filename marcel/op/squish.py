@@ -23,7 +23,7 @@ from marcel.reduction import r_plus
 HELP = '''
 {L,wrap=F}squish [FUNCTION]
 
-{L,indent=4:28}                        A reduction function.
+{L,indent=4:28}{r:FUNCTION}                 A reduction function.
 
 The components of each input tuple are reduced using a given function.
 

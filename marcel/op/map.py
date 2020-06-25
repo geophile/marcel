@@ -23,7 +23,7 @@ import marcel.util
 HELP = '''
 {L,wrap=F}map FUNCTION
 
-{L,indent=4:28}FUNCTION                The function to be applied to each input tuple.
+{L,indent=4:28}{r:FUNCTION}                The function to be applied to each input tuple.
 
 For each tuple in the input stream, apply the given {r:FUNCTION} and write the result to the output stream.
 

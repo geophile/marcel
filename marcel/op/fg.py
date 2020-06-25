@@ -19,7 +19,7 @@ import marcel.op.jobop
 HELP = '''
 {L,wrap=F}fg JOB
 
-{L,indent=4:28}JOB                     The number of the job to be brought into foreground.
+{L,indent=4:28}{r:JOB}                     The number of the job to be brought into foreground.
 
 Makes a specified job run in the foreground.
 The {r:JOB} number is the one

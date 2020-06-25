@@ -21,7 +21,8 @@ import marcel.util
 HELP = '''
 {L,wrap=F}expand [POSITION]
 
-{L,indent=4:28}POSITION                The position, within input tuples, of the sequence to be expanded.
+{L,indent=4:28}{r:POSITION}                The position, within input tuples, of the sequence 
+to be expanded.
 
 Flattens input tuples (or parts of them) and write the flattened result to the output stream.
 

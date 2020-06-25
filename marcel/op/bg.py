@@ -22,6 +22,8 @@ job_control = marcel.job.JobControl.only
 HELP = '''
 {L}bg JOB
 
+{L,indent=4:28}{r:JOB}                     The number of the job to be run in the background.
+
 Resumes background execution of a suspended job. The {r:JOB} number is the one
 provided by the {n:jobs} operator.
 '''

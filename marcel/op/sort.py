@@ -23,7 +23,7 @@ import marcel.functionwrapper
 HELP = '''
 {L,wrap=F}sort [KEY]
 
-{L,indent=4:28}KEY                     The function to be applied to input tuples, to get the values by which tuples 
+{L,indent=4:28}{r:KEY}                     The function to be applied to input tuples, to get the values by which tuples 
 should be ranked.
 
 The input stream is sorted and written to the output stream.

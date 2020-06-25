@@ -21,7 +21,7 @@ import marcel.util
 HELP = '''
 {L,wrap=F}unique [-c|--consecutive]
 
-{L,indent=4:28}-c, --consecutive       Only look for consecutive duplicates.
+{L,indent=4:28}{r:-c}, {r:--consecutive}       Only look for consecutive duplicates.
 
 Write to the output stream all input tuples, but without duplicates.
 

@@ -22,7 +22,7 @@ import marcel.core
 HELP = '''
 {L}cd [DIRECTORY]
 
-{L,indent=4:28}DIRECTORY               The new current directory.
+{L,indent=4:28}{r:DIRECTORY}               The new current directory.
 
 Change the current directory to the given directory.
 If {r:DIRECTORY} is omitted, then change the current directory to the home directory.

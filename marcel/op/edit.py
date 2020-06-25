@@ -27,7 +27,7 @@ import marcel.main
 HELP = '''
 {L,wrap=F}edit [COMMAND]
 
-{L,indent=4:28}COMMAND                 The number of the command to be edited.
+{L,indent=4:28}{r:COMMAND}                 The number of the command to be edited.
 
 Open an editor to edit the command identified by {r:COMMAND} in the command history,
 (obtained by running the {n:history} operator). I {r:COMMAND} is omitted, the most recently

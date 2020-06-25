@@ -25,11 +25,11 @@ HELP = '''
 {L,wrap=F}import MODULE *
 {L,wrap=F}import MODULE SYMBOL [NAME]
 
-{L,indent=4:28}MODULE                  Name of the module to import.
+{L,indent=4:28}{r:MODULE}                  Name of the module to import.
 
-{L,indent=4:28}SYMBOL                  Name of the symbol in {r:MODULE} to import.
+{L,indent=4:28}{r:SYMBOL}                  Name of the symbol in {r:MODULE} to import.
 
-{L,indent=4:28}NAME                    Name to assign to the imported symbol.
+{L,indent=4:28}{r:NAME}                    Name to assign to the imported symbol.
 
 Imports symbols into the marcel namespace, so that they can be used in marcel functions. The import operator
 provides some but not all of the capabilities of Python's {n:import} statement. In some cases, you may need
@@ -90,7 +90,6 @@ class Import(marcel.core.Op):
         env = self.env()
         module = importlib.import_module(self.module)
         if self.symbol is None:
-            # Import the module
             env.setvar(self.module, module)
         elif self.symbol == '*':
             for key, value in module.__dict__.items():

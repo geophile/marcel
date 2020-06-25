@@ -20,19 +20,21 @@ import marcel.exception
 HELP = '''
 {L,wrap=F}sql [-d|--db DB_PROFILE] [-c|--commit UPDATE_COUNT] [-a|--autocommit] STATEMENT [ARG ...]
 
-{L,indent=4:28,wrap=T}-d, --db                Access the database whose profile is named {r:DB_PROFILE},
-in {n:.marcel.py}. If omitted, use the default profile, specified by the environment variable {n:DB_DEFAULT}.
+{L,indent=4:28,wrap=T}{r:-d}, {r:--db}                Access the database whose profile is named 
+{r:DB_PROFILE}, in {n:.marcel.py}. If omitted, use the default profile, specified by the 
+environment variable {n:DB_DEFAULT}.
 
-{L,indent=4:28}-c, --commit            Commit after {r:UPDATE_COUNT} rows have been updated, as indicated by
-the sum of update counts returned in response to SQL statements such as INSERT, UPDATE, DELETE.
+{L,indent=4:28}{r:-c}, {r:--commit}            Commit after {r:UPDATE_COUNT} rows have been updated, 
+as indicated by the sum of update counts returned in response to SQL statements such as 
+INSERT, UPDATE, DELETE.
 
-{L,indent=4:28}-a, --autocommit        Run in auto-commit mode. I.e., every SQL statement runs in its own 
-implicit transaction.
+{L,indent=4:28}{r:-a}, {r:--autocommit}        Run in auto-commit mode. I.e., every SQL statement 
+runs in its own implicit transaction.
 
-{L,indent=4:28}STATEMENT               A SQL statement. Consistent with Python's DBAPI specification,
+{L,indent=4:28}{r:STATEMENT}               A SQL statement. Consistent with Python's DBAPI specification,
 parameters are indicated using %s.
 
-{L,indent=4:28}ARG                     A value to be bound to a variable in a SQL statement.
+{L,indent=4:28}{r:ARG}                     A value to be bound to a variable in a SQL statement.
 
 SQL statements may have parameters, which are indicated by %s. There are two ways in which values are bound to
 these arguments:

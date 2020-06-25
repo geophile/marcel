@@ -22,7 +22,7 @@ import marcel.core
 HELP = '''
 {L,wrap=F}select FUNCTION
 
-{L,indent=4:28}FUNCTION                The function to be applied to each input tuple.
+{L,indent=4:28}{r:FUNCTION}                The function to be applied to each input tuple.
 
 Tuples in the input stream are filtered using a predicate. 
 

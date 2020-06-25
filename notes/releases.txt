@@ -1,18 +1,22 @@
-0.9
-
-+ DB access
+0.10
 
 - If marcel is my default shell (in /etc/passwd), then remote
   operations fail, probably because marcel doesn't work as the shell
   for executing a command by ssh. May be related to bug 46.
 
+- Pipeline as arg, yielding singleton or list (analogous to API gather
+  and first).
+
+----------------------------------------------------------------------
+
+0.9
+
++ DB access
+
 - Bugs
   - 47
   + 63
   - 64
-
-- Pipeline as arg, yielding singleton or list (analogous to API gather
-  and first).
 
 + Be able to switch to bash shell. "bash bash" and "bash -i bash"
   don't work.

@@ -20,7 +20,7 @@ import marcel.core
 HELP = '''
 {L,wrap=F}head N
 
-{L,indent=4:28}N                       The number of input tuples to be written to output.
+{L,indent=4:28}{r:N}                       The number of input tuples to be written to output.
 
 Output the first {r:N} tuples of the input stream, and discard the others.  
 '''

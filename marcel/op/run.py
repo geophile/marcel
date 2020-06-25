@@ -26,7 +26,7 @@ HELP = '''
 {L,wrap=F}! COMMAND
 {L,wrap=F}!!
 
-{L,indent=4:28}COMMAND                 The command number (from history) to be rerun.
+{L,indent=4:28}{r:COMMAND}                 The command number (from history) to be rerun.
 
 Run a previous command.
 

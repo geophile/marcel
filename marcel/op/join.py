@@ -23,10 +23,10 @@ import marcel.util
 HELP = '''
 {L,wrap=F}join [-k|--keep] PIPELINE
 
-{L,indent=4:28}-k, --keep              Write an output tuple from the left input even if there is no matching
+{L,indent=4:28}{r:-k}, {r:--keep}              Write an output tuple from the left input even if there is no matching
 tuple from the right input.
 
-{L,indent=4:28}PIPELINE                The second (right) input to the join.
+{L,indent=4:28}{r:PIPELINE}                The second (right) input to the join.
 
 Computes a database-style join between the input stream, 
 and a second stream from the given {r:PIPELINE}.

@@ -23,7 +23,7 @@ import marcel.exception
 HELP = '''
 {L,wrap=F}pushd [DIRECTORY]
 
-{L,indent=4:28}DIRECTORY               The directory to be added to the directory stack.
+{L,indent=4:28}{r:DIRECTORY}               The directory to be added to the directory stack.
 
 Push The given {r:DIRECTORY} onto the directory stack, and cd to it.
 

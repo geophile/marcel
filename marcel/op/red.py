@@ -22,11 +22,11 @@ import marcel.reduction
 HELP = '''
 {L,wrap=F}red [-i|--incremental] FUNCTION ...
 
-{L,indent=4:28}-i, --incremental       Output a tuple for each step of the reduction. I.e., there will be one
+{L,indent=4:28}{r:-i}, {r:--incremental}       Output a tuple for each step of the reduction. I.e., there will be one
 output tuple for each input tuple, with the reductions showing the result of the reduction up to and including
 the most recent input.
 
-{L,indent=4:28}FUNCTION                A reduction function.
+{L,indent=4:28}{r:FUNCTION}                A reduction function.
 
 
 Reduces tuples from the input stream by repeatedly applying binary functions, such as {r:+}, {r:min}, {r:max}.

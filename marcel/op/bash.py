@@ -25,7 +25,7 @@ import marcel.util
 HELP = '''
 {L,wrap=F}bash [-i|--interactive] ARG ...
 
-{L,indent=4:28}-i, --interactive       Specifies that the executable to be run 
+{L,indent=4:28}{r:-i}, {r:--interactive}       Specifies that the executable to be run 
 is interactive. stdin, stdout, and stderr are not handled by marcel. 
 
 Runs the executable specified by the first {r:ARG}, (as opposed to a marcel command).
