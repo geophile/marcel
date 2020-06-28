@@ -597,6 +597,29 @@ def test_sql():
 
 
 def test_load_store():
+    # Load
+    x = [10, 20, 30]
+    TEST.run(test=lambda: run(load(x)),
+             expected_out=[10, 20, 30])
+    a = None
+    TEST.run(test=lambda: run(load(a)),
+             expected_err='Accumulator is undefined')
+    j = 123
+    TEST.run(test=lambda: run(load(j)),
+             expected_err='Accumulator is not iterable')
+    # Store (first to an undefined var, then to a defined one)
+    y = []
+    TEST.run(test=lambda: run(gen(count=3, start=100) | store(y)))
+    TEST.run(test=lambda: run(map(lambda: y) | expand()),
+             expected_out=[100, 101, 102])
+    TEST.run(test=lambda: run(gen(count=3, start=200) | store(y)))
+    TEST.run(test=lambda: run(map(lambda: y) | expand()),
+             expected_out=[100, 101, 102, 200, 201, 202])
+    # Store to a defined var that isn't a list
+    i = 123
+    TEST.run(test=lambda: run(gen(3) | store(i)),
+             expected_err='Accumulator is not a list')
+    # Load and store the same container, to implement a loop
     x = [(0,)]
     run(load(x) | select(lambda x: x < 5) | map(lambda x: x + 1) | store(x))
     TEST.run(test=lambda: run(map(lambda: x)),
@@ -713,7 +736,6 @@ def main_stable():
 
 
 def main_dev():
-    test_load_store()
     pass
 
 
