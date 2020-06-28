@@ -7,6 +7,14 @@
 - Pipeline as arg, yielding singleton or list (analogous to API gather
   and first).
 
+- More pipeline capabilities
+
+    - Capture output in var (as list of tuples).
+
+    - Input from captured output
+
+    - if, ifelse, ...
+
 ----------------------------------------------------------------------
 
 0.9

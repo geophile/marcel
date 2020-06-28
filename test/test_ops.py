@@ -650,6 +650,13 @@ def test_import():
     TEST.run('(os.popen)', expected_out=[os.popen])
 
 
+def test_load_store():
+    TEST.run('x = ([(0,)])')
+    TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x')
+    TEST.run('(x)',
+             expected_out=[((0,), (1,), (2,), (3,), (4,), (5,))])
+
+
 def main_stable():
     test_no_such_op()
     test_gen()
@@ -677,6 +684,7 @@ def main_stable():
     test_pipeline_args()
     test_sql()
     test_import()
+    test_load_store()
 
 
 def main_dev():

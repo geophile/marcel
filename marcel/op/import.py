@@ -79,8 +79,6 @@ class Import(marcel.core.Op):
     # AbstractOp
     
     def setup_1(self):
-        if not self.module.isidentifier():
-            raise marcel.exception.KillCommandException(f'module is not a valid identifier: {self.module}')
         if self.symbol and not (self.symbol == '*' or self.symbol.isidentifier()):
             raise marcel.exception.KillCommandException(f'symbol must be * or a valid identifier: {self.symbol}')
         if self.name and not self.name.isidentifier():
@@ -88,7 +86,10 @@ class Import(marcel.core.Op):
 
     def receive(self, _):
         env = self.env()
-        module = importlib.import_module(self.module)
+        try:
+            module = importlib.import_module(self.module)
+        except ModuleNotFoundError:
+            self.fatal_error(None, f'Module {self.module} not found.')
         if self.symbol is None:
             env.setvar(self.module, module)
         elif self.symbol == '*':

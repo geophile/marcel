@@ -142,9 +142,9 @@ class Job:
         def run_command_in_child(command, writer):
             debug(f'running: {command.source}')
             try:
-                dir_vars = command.execute()
-                debug(f'completed: {command.source} {dir_vars}')
-                writer.send(dir_vars)
+                child_namespace_changes = command.execute()
+                debug(f'completed: {command.source} {child_namespace_changes}')
+                writer.send(child_namespace_changes)
             except marcel.exception.KillCommandException as e:
                 marcel.util.print_to_stderr(e, self.env)
             except marcel.exception.KillAndResumeException as e:

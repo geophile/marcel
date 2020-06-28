@@ -1,0 +1,50 @@
+Ideas:
+
+- Accumulate tuples and store in a var.
+
+- Write into pipeline from a var.
+
+- Control operators to facilitate accumulation.
+
+----------------------------------------------------------------------
+
+To capture a pipeline's contents in variable x:
+
+    ls | ... > x
+
+Or to append:
+
+    ls | ... >> x
+
+To use it elsewhere:
+
+    x > map | ...
+
+Split a pipeline:
+
+    ... | if PREDICATE x | ...
+
+- x accumulates tuples for which predicate is true.
+
+- All inputs go to output regardless of predicate.
+
+    ... | ifelse PREDICATE | ...
+
+- x accumulates tuples for which predicate is true.
+
+- OTHER tuples go to output.
+
+
+Generalize: The 2nd if argument could be a pipeline or var. So:
+
+    ... | if PREDICATE [map ... | ...] | ...
+
+Or just pipelines. To save in a var:
+
+    ... | if PREDICATE [> x] | ...
+
+----------------------------------------------------------------------
+
+- Load and store ops
+
+- Syntax

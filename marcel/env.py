@@ -30,6 +30,7 @@ import marcel.version
 
 
 class DirectoryState:
+
     VARS = ('DIRS', 'PWD')
 
     def __init__(self, namespace):
@@ -49,7 +50,8 @@ class DirectoryState:
         new_dir = (self.pwd() / directory.expanduser()).resolve(False)  # False: due to bug 27
         try:
             if not new_dir.exists():
-                raise marcel.exception.KillCommandException(f'Cannot cd into {new_dir}. Directory does not exist.')
+                raise marcel.exception.KillCommandException(
+                    f'Cannot cd into {new_dir}. Directory does not exist.')
             new_dir = new_dir.as_posix()
             self.dir_stack()[-1] = new_dir
             self.namespace['PWD'] = new_dir
@@ -85,17 +87,12 @@ class DirectoryState:
         dirs.reverse()
         return dirs
 
-    def directory_vars(self):
-        vars = {}
-        for name in DirectoryState.VARS:
-            vars[name] = self.namespace[name]
-        return vars
-
     def dir_stack(self):
         return self.namespace['DIRS']
 
 
 class Environment:
+
     CONFIG_FILENAME = '.marcel.py'
     DEFAULT_PROMPT = f'M-{marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
@@ -139,28 +136,39 @@ class Environment:
         self.edited_command = None
         self.op_modules = None
         self.reader = None
+        self.modified_vars = None
 
     def __getstate__(self):
         return {'namespace': self.namespace,
-                'directory_state': self.directory_state}
+                'directory_state': self.directory_state,
+                'modified_vars': self.modified_vars}
 
     def __setstate__(self, state):
         self.__dict__.update(state)
 
     def getvar(self, var):
+        # If a var's value is obtained, and it contains state (like a list), then
+        # we have to allow for the possibility that the var changed.
+        if self.modified_vars is not None:
+            self.modified_vars.add(var)
         return self.namespace.get(var, None)
 
     def setvar(self, var, value):
+        if self.modified_vars:
+            self.modified_vars.add(var)
         self.namespace[var] = value
-
-    def set_locals(self, locals):
-        self.namespace.update(locals)
-
-    def clear_locals(self):
-        pass
 
     def vars(self):
         return self.namespace
+
+    def clear_changes(self):
+        self.modified_vars = set()
+
+    def changes(self):
+        changes = {}
+        for var in self.modified_vars:
+            changes[var] = self.namespace[var]
+        return changes
 
     def prompts(self):
         return (self.prompt_string(self.getvar('PROMPT')),

@@ -101,7 +101,7 @@ class Main:
         self.reader = None
         self.initialize_input()  # Sets self.reader
         self.env.reader = self.reader
-        self.job_control = marcel.job.JobControl.start(self.env, self.update_env_vars)
+        self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
         self.config_monitor = ConfigurationMonitor([self.env.config_path])
         self.run_startup()
         atexit.register(self.shutdown)
@@ -180,14 +180,15 @@ class Main:
             readline.insert_text(command)
             readline.redisplay()
 
-    def update_env_vars(self, env_vars_from_child):
-        pwd = env_vars_from_child.get('PWD', None)
-        assert pwd is not None
-        self.env.dir_state().cd(pathlib.Path(pwd))
-        dirs = env_vars_from_child.get('DIRS', None)
-        assert dirs is not None
-        environment = self.env
-        environment.setvar('DIRS', dirs)
+    def update_namespace(self, child_namespace_changes):
+        # pwd requires special handling
+        try:
+            pwd = child_namespace_changes['PWD']
+            self.env.dir_state().cd(pathlib.Path(pwd))
+        except KeyError:
+            # PWD wasn't changed
+            pass
+        self.env.namespace.update(child_namespace_changes)
 
     def run_immediate(self, pipeline):
         # Job control commands should be run in this process, not a spawned process.

@@ -345,13 +345,15 @@ class Command:
         return str(self.pipeline)
 
     def execute(self):
+        env = self.pipeline.env()
+        env.clear_changes()
         self.pipeline.setup_1()
         self.pipeline.setup_2()
         self.pipeline.receive(None)
         self.pipeline.receive_complete()
         # A Command is executed by a multiprocessing.Process. Need to transmit the Environment's vars
         # relating to the directory, to the parent process, because they may have changed.
-        return self.pipeline.env().dir_state().directory_vars()
+        return env.changes()
 
 
 class PipelineIterator:

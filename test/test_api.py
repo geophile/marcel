@@ -596,6 +596,13 @@ def test_sql():
     # TODO: sql types
 
 
+def test_load_store():
+    x = [(0,)]
+    run(load(x) | select(lambda x: x < 5) | map(lambda x: x + 1) | store(x))
+    TEST.run(test=lambda: run(map(lambda: x)),
+             expected_out=[((0,), (1,), (2,), (3,), (4,), (5,))])
+
+
 def test_api_run():
     # Error-free output, just an op
     TEST.run(test=lambda: run(gen(3)),
@@ -698,6 +705,7 @@ def main_stable():
     test_join()
     test_pipeline_args()
     test_sql()
+    test_load_store()
     test_api_run()
     test_api_gather()
     test_api_first()
@@ -705,6 +713,7 @@ def main_stable():
 
 
 def main_dev():
+    test_load_store()
     pass
 
 
