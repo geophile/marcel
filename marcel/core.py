@@ -255,12 +255,14 @@ class Pipeline(AbstractOp):
         self.kwargs = None
 
     def __repr__(self):
-        buffer = []
+        params = ', '.join(self.params) if self.params else None
+        op_buffer = []
         op = self.first_op
         while op:
-            buffer.append(str(op))
+            op_buffer.append(str(op))
             op = op.next_op
-        return f'pipeline({" | ".join(buffer)})'
+        ops = ' | '.join(op_buffer)
+        return f'[{params}: {ops}]' if params else f'[{ops}]'
 
     def env(self):
         return self.first_op.env()

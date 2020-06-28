@@ -45,6 +45,96 @@ Or just pipelines. To save in a var:
 
 ----------------------------------------------------------------------
 
-- Load and store ops
+Looping:
 
-- Syntax
+    x = ([(0,)])
+    load x | map (x: x + 1) | store x
+
+This is a loop!
+
+x contains (0,). map generates (1,) and appends it to x, which is now
+[(0,), (1,)]. load has already read the (0,), so next it read (1,) and
+the cycle repeats.
+
+This is a finite loop:
+
+    x = ([(0,)])
+    load x | select (x: x < 5) | map (x: x + 1) | store x
+
+When load generates (4,), it is less than 5, so goes through the
+pipeline and (5,) gets appended. Then load generate (5,), the select
+yields False, nothing gets appended. load then encounters the end of
+input and the loop terminates, with x = [(0,), (1,), (2,), (3,), (4,),
+(5,)].
+
+
+Avoiding accumulating data:
+
+load and store are generally useful for manipulating data. However, in
+a loop, the point is probably the side effect or output, not the
+accumulation of data in the variable (x, in the example above). 
+
+Instead of accumulating to a list, accumulate to an array of size 1,
+that keeps reusing its one slot. The loop runs exactly the same, but
+there is no accumulation of data.
+
+
+Loop generating data:
+
+Have send write to output stream AS WELL AS appending to its variable.
+
+
+Putting all this together:
+
+This:
+
+    x = INITIAL
+    load x | PIPELINE | store x
+
+could be achieved by a new operator:
+
+    loop INITIAL [PIPELINE]
+
+with the variable x being a size-1 array, allocated internally.
+
+It would also be nice if loop could be defined in marcel itself, e.g.
+
+    loop = [acc, pipeline: load acc | pipeline | store acc]
+    loop ([(0,)]) [select (x: x < 5) | map (x: x + 1)]
+
+Doesn't work:
+
+M-0.9.15 jao@cheese:~/git/marcel/test$ loop = [acc, pipeline: load acc | pipeline | store acc]
+Unknown command: pipeline
+M-0.9.15 jao@cheese:~/git/marcel/test$ loop = [acc, pipeline: load acc | (pipeline) | store acc]
+M-0.9.15 jao@cheese:~/git/marcel/test$ (loop)
+[acc, pipeline: load(acc) | map(lambda acc, pipeline: lambda: pipeline) | store(acc)]
+M-0.9.15 jao@cheese:~/git/marcel/test$ loop ([(0,)]) [select (x: x < 5) | map (x: x + 1)]
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/runpy.py", line 193, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.8/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 256, in <module>
+    MAIN.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 120, in run
+    self.run_command(line)
+  File "/home/jao/git/marcel/marcel/main.py", line 133, in run_command
+    pipeline = parser.parse()
+  File "/home/jao/git/marcel/marcel/parser.py", line 704, in parse
+    return self.command()
+  File "/home/jao/git/marcel/marcel/parser.py", line 710, in command
+    return self.pipeline(None)
+  File "/home/jao/git/marcel/marcel/parser.py", line 730, in pipeline
+    op_sequence = Parser.ensure_sequence(self.op_sequence())
+  File "/home/jao/git/marcel/marcel/parser.py", line 740, in op_sequence
+    op_args = self.op_args()
+  File "/home/jao/git/marcel/marcel/parser.py", line 761, in op_args
+    op = self.create_op(op_token, arg_tokens)
+  File "/home/jao/git/marcel/marcel/parser.py", line 826, in create_op
+    op = self.create_op_variable(op_token, arg_tokens)
+  File "/home/jao/git/marcel/marcel/parser.py", line 867, in create_op_variable
+    pipeline_args = [token.value(self) for token in arg_tokens]
+  File "/home/jao/git/marcel/marcel/parser.py", line 867, in <listcomp>
+    pipeline_args = [token.value(self) for token in arg_tokens]
+AttributeError: 'Pipeline' object has no attribute 'value'

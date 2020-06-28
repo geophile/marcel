@@ -19,6 +19,7 @@ import pathlib
 import socket
 import sys
 
+import marcel.core
 import marcel.exception
 import marcel.object.cluster
 import marcel.object.db
@@ -147,11 +148,12 @@ class Environment:
         self.__dict__.update(state)
 
     def getvar(self, var):
-        # If a var's value is obtained, and it contains state (like a list), then
+        # If a var's value is obtained, and it contains mutable state (like a list), then
         # we have to allow for the possibility that the var changed.
-        if self.modified_vars is not None:
+        value = self.namespace.get(var, None)
+        if self.modified_vars is not None and not Environment.immutable(value):
             self.modified_vars.add(var)
-        return self.namespace.get(var, None)
+        return value
 
     def setvar(self, var, value):
         if self.modified_vars:
@@ -234,3 +236,8 @@ class Environment:
         except Exception as e:
             print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)
             return Environment.DEFAULT_PROMPT
+
+    @staticmethod
+    def immutable(x):
+        return callable(x) or type(x) in (int, float, str, bool, tuple, marcel.core.Pipeline)
+

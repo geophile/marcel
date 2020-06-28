@@ -25,6 +25,7 @@
   - 47
   + 63
   - 64
+  - 65
 
 + Be able to switch to bash shell. "bash bash" and "bash -i bash"
   don't work.

@@ -537,6 +537,10 @@ def test_assign():
     TEST.run('b = [a]')
     TEST.run(test='b',
              expected_out=[0, 1, 2])
+    # Bug 65
+    TEST.run('x = [(5)]')
+    TEST.run(test='x',
+             expected_out=[5])
 
 
 def test_join():
@@ -662,10 +666,10 @@ def test_load_store():
     TEST.run('load j',
              expected_err='j is not iterable')
     # Store (first to an undefined var, then to a defined one)
-    TEST.run('gen 3 100 | store y')
+    TEST.run('gen 3 100 | store y | select (*x: False)')
     TEST.run('(y) | expand',
              expected_out=[100, 101, 102])
-    TEST.run('gen 3 200 | store y')
+    TEST.run('gen 3 200 | store y | select (*x: False)')
     TEST.run('(y) | expand',
              expected_out=[100, 101, 102, 200, 201, 202])
     # Store to a defined var that isn't a list
@@ -674,7 +678,7 @@ def test_load_store():
              expected_err='i is not a list')
     # Load and store the same container, to implement a loop
     TEST.run('x = ([(0,)])')
-    TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x')
+    TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x | select (*x: False)')
     TEST.run('(x) | expand',
              expected_out=[0, 1, 2, 3, 4, 5])
 
