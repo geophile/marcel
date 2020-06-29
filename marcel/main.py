@@ -88,6 +88,7 @@ class Main:
     def __init__(self, config_file, same_process, old_namespace):
         # sys.argv sets config_path, dill
         self.dill = True
+        self.echo = False
         #
         self.same_process = same_process
         try:
@@ -117,6 +118,8 @@ class Main:
             while True:
                 try:
                     line = self.reader.input(*self.env.prompts())
+                    if self.echo:
+                        print(line)
                     self.run_command(line)
                     while self.job_control.foreground_is_alive():
                         time.sleep(Main.MAIN_SLEEP_SEC)
@@ -223,13 +226,21 @@ def fail(message):
 
 # --dill: bool
 # --mpstart: fork/spawn/forkserver. Use fork if not specified
+# --echo: bool, indicates whether the command should be echoed. Useful when debugging scripts.
 def args():
+    flags = ('--dill', '--mpstart', '--echo')
     dill = True
     mpstart = 'fork'
+    echo = False
     flag = None
     for arg in sys.argv[1:]:
-        if arg == '--dill' or arg == '--mpstart':
+        if arg in flags:
             flag = arg
+            # For a boolean flag, set to True. A different value may be specified by a later arg.
+            if flag == '--dill':
+                dill = True
+            elif flag == '--echo':
+                echo = True
         elif arg.startswith('-'):
             fail(f'Unrecognized flag {arg}')
         else:
@@ -241,17 +252,21 @@ def args():
                     mpstart = arg
                 else:
                     fail(f'Set --mpstart to fork (default), forkserver, or spawn')
-    return dill, mpstart
+            elif flag == '--echo':
+                echo = arg.lower() in ('t', 'true')
+            flag = None
+    return dill, mpstart, echo
 
 
 if __name__ == '__main__':
-    dill, mpstart = args()
+    dill, mpstart, echo = args()
     old_namespace = {}
     if mpstart is not None:
         multiprocessing.set_start_method(mpstart)
     while True:
         MAIN = Main(None, same_process=False, old_namespace=old_namespace)
         MAIN.dill = dill
+        MAIN.echo = echo
         try:
             MAIN.run()
             break
