@@ -57,7 +57,7 @@ class Store(marcel.core.Op):
         # API: var is None, accumulator is set
         # Interactive: var is set, accumulator is None
         if self.var is not None:
-            self.accumulator = self.env().getvar(self.var)
+            self.accumulator = self.getvar(self.var)
             if self.accumulator is None:
                 self.accumulator = []
                 self.env().setvar(self.var, self.accumulator)

@@ -73,7 +73,7 @@ class AbstractOp(Pipelineable):
     def __repr__(self):
         assert False
 
-    # AbstractOp runtime
+    # AbstractOp
 
     def setup_1(self):
         pass
@@ -194,6 +194,12 @@ class Op(AbstractOp):
 
     # For use by subclasses
 
+    def getvar(self, var):
+        value = self.owner.args.get(var, None) if self.owner.args else None
+        if value is None:
+            value = self.env().getvar(var)
+        return value
+
     # Examine the named field, which is a single- or list-valued attr of self.
     # Evaluate any functions found, and then check that the resulting type is
     # one of the given types.
@@ -223,7 +229,7 @@ class Op(AbstractOp):
                     v = v()
                     if len(types) > 0 and type(v) not in types:
                         raise marcel.exception.KillCommandException(
-                            f'Type of {self.op_name()}.{field} element {x} is {type(v)}, but must be one of {types}')
+                            f'Type of {self.op_name()}.{field} element {v} is {type(v)}, but must be one of {types}')
                 evaled[k] = v
             state[field] = evaled
 
@@ -250,9 +256,11 @@ class Pipeline(AbstractOp):
         self.error_handler = None
         self.first_op = None
         self.last_op = None
+        # Parameters declared for a pipeline
         self.params = None
+        # dict containing actual values, combining positional args (getting the name from params)
+        # and kwargs.
         self.args = None
-        self.kwargs = None
 
     def __repr__(self):
         params = ', '.join(self.params) if self.params else None
@@ -318,8 +326,12 @@ class Pipeline(AbstractOp):
         return self.params
 
     def set_parameter_values(self, args, kwargs):
-        self.args = args
-        self.kwargs = kwargs
+        self.args = {}
+        if args:
+            for i in range(len(args)):
+                self.args[self.params[i]] = args[i]
+        if kwargs:
+            self.args.update(kwargs)
 
     def copy(self):
         return marcel.util.copy(self)

@@ -407,6 +407,18 @@ Pipeline args:
 
 ----------------------------------------------------------------------
 
-Doc:
+Need both remote and fork ops?
 
-- Highlight fixed-width things.
+----------------------------------------------------------------------
+
+Pipelines:
+
+- In parser, the create_op_variable check is useless. The variable
+  value could change before execution, and may even cease to
+  exist. Make create_op_variable the last resort, and then at runtime,
+  complain if the var isn't defined, or if it's value is of the wrong
+  type.
+
+- Allow [...] to delimit a pipeline, even when not necessary. (Like {
+  ... } around single statement if, in C.)
+

@@ -823,11 +823,9 @@ class Parser:
     def create_op(self, op_token, arg_tokens):
         op = self.create_op_builtin(op_token, arg_tokens)
         if op is None:
-            op = self.create_op_variable(op_token, arg_tokens)
-        if op is None:
             op = self.create_op_executable(op_token, arg_tokens)
         if op is None:
-            raise UnknownOpError(op_token.value(self))
+            op = self.create_op_variable(op_token, arg_tokens)
         return op
 
     def create_op_builtin(self, op_token, arg_tokens):
@@ -856,17 +854,18 @@ class Parser:
         return op
 
     def create_op_variable(self, op_token, arg_tokens):
-        op = None
         var = op_token.value(self)
-        value = self.env.getvar(var)
-        if value:
-            op_module = self.op_modules['runpipeline']
-            op = op_module.create_op()
-            op.var = var
-            if len(arg_tokens) > 0:
-                pipeline_args = [token.value(self) for token in arg_tokens]
-                args, kwargs = marcel.argsparser.PipelineArgsParser(var).parse_pipeline_args(pipeline_args)
-                op.set_pipeline_args(args, kwargs)
+        op_module = self.op_modules['runpipeline']
+        op = op_module.create_op()
+        op.var = var
+        if len(arg_tokens) > 0:
+            pipeline_args = []
+            for token in arg_tokens:
+                pipeline_args.append(token
+                                     if type(token) is marcel.core.Pipeline else
+                                     token.value(self))
+            args, kwargs = marcel.argsparser.PipelineArgsParser(var).parse_pipeline_args(pipeline_args)
+            op.set_pipeline_args(args, kwargs)
         return op
 
     def create_op_executable(self, op_token, arg_tokens):

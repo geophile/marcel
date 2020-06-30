@@ -35,7 +35,7 @@ class RunPipeline(marcel.core.Op):
         assert self.pipeline is None
         self.eval_function('args')
         self.eval_function('kwargs')
-        pipeline = self.env().getvar(self.var)
+        pipeline = self.getvar(self.var)
         if pipeline is None:
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is undefined.')

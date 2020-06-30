@@ -159,4 +159,31 @@ M-0.9.15 jao@cheese:~/git/marcel/test$ (sys.path) | expand 1
 
 ----------------------------------------------------------------------
 
-66. 
+66. Parsing error due to whitespace
+
+M-0.9.15 jao@cheese:~/git/marcel$ gen 3 | map(x: x+1)
+Error: Running map(lambda: f'''map{x: x+1}''') on (0,): <lambda>() takes 0 positional arguments but 1 was given
+Error: Running map(lambda: f'''map{x: x+1}''') on (1,): <lambda>() takes 0 positional arguments but 1 was given
+Error: Running map(lambda: f'''map{x: x+1}''') on (2,): <lambda>() takes 0 positional arguments but 1 was given
+
+Lexer.consolidate_tokens consolidates map and (...
+
+IS THIS A BUG?
+
+----------------------------------------------------------------------
+
+67. Pipeline syntax needs to be generalized
+
+    M-0.9.15 jao@cheese:~/git/marcel$ gen 3 | map (x: x + 5)
+    5
+    6
+    7
+    M-0.9.15 jao@cheese:~/git/marcel$ gen 3 | [x: map (x + 5)]
+    Parsing error at position 8 of "...gen 3 | [x: map (x + 5)]...": Unexpected token type: Begin([)
+
+This syntax:
+
+    ... | [ ... ]
+
+is rejected by the parser, which means we can't have pipelines with
+parameters as literals. Fix the parser.

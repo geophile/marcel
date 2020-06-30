@@ -138,3 +138,48 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/parser.py", line 867, in <listcomp>
     pipeline_args = [token.value(self) for token in arg_tokens]
 AttributeError: 'Pipeline' object has no attribute 'value'
+
+
+......................................................................
+
+Problems:
+
+- pipeline isn't recognized as a var, because pipeline params are new
+  and create_op_variable was never fixed. Check the params of current
+  and parent pipelines, as well as envvars. 
+
+- create_op_variable is kind of broken. It checks to see that the var
+  is defined, but then assumes that the value is (or will be during
+  execution) a pipeline. At runtime, the right thing happens: If the
+  variable is not bound to a pipeline, there is an appropriate error
+  message.
+
+Fixes:
+
+- The create_op_variable check is useless. The variable value could
+  change before execution, and may even cease to exist. Make
+  create_op_variable the last resort, and then at runtime, complain if
+  the var isn't defined, or if it's value is of the wrong type.
+
+----------------------------------------------------------------------
+
+Any occurrence of pipeline, (including explicit [...]) should allow
+for pipeline args. THIS IS AMBIGUOUS:
+
+      op arg [...] (123)
+
+Is the (123) an argument to the op or to the pipeline?
+
+NOT AMBIGUOUS: The number of pipeline args determines how many args
+follow the pipeline.
+
+But this doesn't work for a pipeline var, e.g. op arg PIPELINE_VAR
+(123)
+
+DECISION:
+
+  - Args can be provided only to operators, including pipeline vars
+    used as operators. Not as pipeline (vars or literal) used as args.
+
+  - This does not preclude generalizing later, but allowing args to
+    pipeline args seems like a mess right now.

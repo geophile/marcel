@@ -17,7 +17,7 @@ TEST = test_base.TestConsole()
 
 
 def test_no_such_op():
-    TEST.run('gen 5 | abc', expected_err='Unknown command')
+    TEST.run('gen 5 | abc', expected_err='The variable abc is undefined')
 
 
 def test_gen():
@@ -594,18 +594,18 @@ def test_pipeline_args():
     TEST.run('gen 3 | add -a (100)',
              expected_out=[(0, 100), (1, 101), (2, 102)])
     # Multiple anon args
-    TEST.run('ab = [a, b: map (x: (x, x * a + b))]')
-    TEST.run('gen 3 | ab (100) (10)',
+    TEST.run('f = [a, b: map (x: (x, x * a + b))]')
+    TEST.run('gen 3 | f (100) (10)',
              expected_out=[(0, 10), (1, 110), (2, 210)])
     # Multiple flag args
-    TEST.run('ab = [a, b: map (x: (x, x * a + b))]')
-    TEST.run('gen 3 | ab -a (100) -b (10)',
+    TEST.run('f = [a, b: map (x: (x, x * a + b))]')
+    TEST.run('gen 3 | f -a (100) -b (10)',
              expected_out=[(0, 10), (1, 110), (2, 210)])
-    TEST.run('gen 3 | ab -b (10) -a (100)',
+    TEST.run('gen 3 | f -b (10) -a (100)',
              expected_out=[(0, 10), (1, 110), (2, 210)])
-    TEST.run('gen 3 | ab -b (10) -a (100) -a (200)',
+    TEST.run('gen 3 | f -b (10) -a (100) -a (200)',
              expected_err='Flag a given more than once')
-    TEST.run('gen 3 | ab -b (10)',
+    TEST.run('gen 3 | f -b (10)',
              expected_out=[Error('missing'), Error('missing'), Error('missing')])
     # Long flags
     TEST.run('foobar = [foo, bar: map (x: x * foo) | select (x: x < bar)')
@@ -667,10 +667,10 @@ def test_load_store():
              expected_err='j is not iterable')
     # Store (first to an undefined var, then to a defined one)
     TEST.run('gen 3 100 | store y | select (*x: False)')
-    TEST.run('(y) | expand',
+    TEST.run('load y',
              expected_out=[100, 101, 102])
     TEST.run('gen 3 200 | store y | select (*x: False)')
-    TEST.run('(y) | expand',
+    TEST.run('load y',
              expected_out=[100, 101, 102, 200, 201, 202])
     # Store to a defined var that isn't a list
     TEST.run('i = (123)')
@@ -679,7 +679,7 @@ def test_load_store():
     # Load and store the same container, to implement a loop
     TEST.run('x = ([(0,)])')
     TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x | select (*x: False)')
-    TEST.run('(x) | expand',
+    TEST.run('load x',
              expected_out=[0, 1, 2, 3, 4, 5])
 
 
@@ -714,13 +714,15 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('loop = [acc, pipeline: load acc | pipeline | store acc]')
+    TEST.run('loop ([(0,)]) [select (x: x < 5) | map (x: x+1)]')
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
 
 
