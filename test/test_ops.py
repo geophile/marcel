@@ -675,16 +675,27 @@ def test_load_store():
     # Store to a defined var that isn't a list
     TEST.run('i = (123)')
     TEST.run('gen 3 | store i',
-             expected_err='i is not a list')
+             expected_err='i is not usable as an accumulator')
     # Load and store the same container, to implement a loop
     TEST.run('x = ([(0,)])')
     TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x | select (*x: False)')
     TEST.run('load x',
              expected_out=[0, 1, 2, 3, 4, 5])
     # Pipeline arg to a pipeline!
-    TEST.run('loop = [acc, pipeline: load acc | pipeline | store acc]')
-    TEST.run('loop ([(0,)]) [select (x: x < 5) | map (x: x+1)]',
+    TEST.run('L = [acc, pipeline: load acc | pipeline | store acc]')
+    TEST.run('L ([(0,)]) [select (x: x < 5) | map (x: x+1)]',
              expected_out=[1, 2, 3, 4, 5])
+
+
+def test_loop():
+    TEST.run('loop (0) [select (x: x < 3) | map (x: x + 1)]',
+             expected_out=[0, 1, 2, 3])
+    TEST.run('loop ((0, 1)) [select (x, y: y < 1000000) | map (x, y: (y, x + y))] | map (x, y: x)',
+             expected_out=[0, 1, 1, 2, 3, 5, 8, 13, 21,
+                           34, 55, 89, 144, 233, 377, 610,
+                           987, 1597, 2584, 4181, 6765, 10946,
+                           17711, 28657, 46368, 75025, 121393,
+                           196418, 317811, 514229, 832040])
 
 
 def main_stable():
@@ -715,6 +726,7 @@ def main_stable():
     test_sql()
     test_import()
     test_load_store()
+    test_loop()
 
 
 def main_dev():

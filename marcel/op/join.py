@@ -85,12 +85,6 @@ class JoinArgsParser(marcel.argsparser.ArgsParser):
         self.add_anon('pipeline', convert=self.check_str_or_pipeline)
         self.validate()
 
-    def check_str_or_pipeline(self, arg, x):
-        if type(x) not in (str, marcel.core.Pipeline):
-            raise marcel.argsparser.ArgsError(self.op_name,
-                                              f'{arg.name} argument must be a Pipeline: {x}')
-        return x
-
 
 class Join(marcel.core.Op):
 
@@ -98,7 +92,7 @@ class Join(marcel.core.Op):
         super().__init__(env)
         self.pipeline = None
         self.keep = None
-        self.pipeline_map = None  # Map containing contents of pipeline, keyed by join value
+        self.inner = None  # Map containing contents of pipeline, keyed by join value
 
     def __repr__(self):
         return 'join(keep)' if self.keep else 'join()'
@@ -106,37 +100,26 @@ class Join(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        def load_pipeline_map(*x):
+        def load_inner(*x):
             assert len(x) > 0
             join_value = x[0]
-            match = self.pipeline_map.get(join_value, None)
+            match = self.inner.get(join_value, None)
             if match is None:
-                self.pipeline_map[join_value] = x
+                self.inner[join_value] = x
             elif type(match) is list:
                 match.append(x)
             else:
                 # match is first value associated with join_value, x is the second. Need a list.
-                self.pipeline_map[join_value] = [match, x]
-        self.pipeline_map = {}
-        # self.pipeline is permitted to be one of:
-        #     - a pipeline literal: [ ... ]
-        #     - a var bound to a pipeline
-        #     - TODO: an expression that evaluates to a pipeline, e.g. (pipeline_var)?
-        if isinstance(self.pipeline, marcel.core.Pipelineable):
-            pipeline = self.pipeline.create_pipeline()
-        else:
-            pipeline = self.env().getvar(self.pipeline)
-            if type(pipeline) is not marcel.core.Pipeline:
-                raise marcel.exception.KillCommandException(
-                    f'The variable {self.pipeline} is not bound to a pipeline')
-        pipeline = pipeline.copy()
+                self.inner[join_value] = [match, x]
+        self.inner = {}
+        pipeline = self.pipeline_arg(self.pipeline).copy()
         pipeline.set_error_handler(self.owner.error_handler)
-        pipeline.append(marcel.opmodule.create_op(self.env(), 'map', load_pipeline_map))
+        pipeline.append(marcel.opmodule.create_op(self.env(), 'map', load_inner))
         marcel.core.Command(None, pipeline).execute()
 
     def receive(self, x):
         join_value = x[0]
-        match = self.pipeline_map.get(join_value, None)
+        match = self.inner.get(join_value, None)
         if match is None:
             if self.keep:
                 self.send(x)

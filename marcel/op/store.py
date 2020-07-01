@@ -64,9 +64,10 @@ class Store(marcel.core.Op):
         else:
             if self.accumulator is None:
                 raise marcel.exception.KillCommandException(f'Accumulator is undefined.')
-        if type(self.accumulator) is not list:
+        # Test that self.accumulator is usable as an accumulator
+        if not (hasattr(self.accumulator, 'append') and hasattr(self.accumulator, '__iter__')):
             raise marcel.exception.KillCommandException(
-                f'{self.var if self.var else "Accumulator"} is not a list')
+                f'{self.var if self.var else "Accumulator"} is not usable as an accumulator')
 
     def receive(self, x):
         self.send(x)

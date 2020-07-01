@@ -11,7 +11,7 @@ def test_op():
              expected=[])
     # Single candidate
     TEST.run(line='l', text='l',
-             expected=['ls', 'load'])
+             expected=['ls', 'load', 'loop'])
     TEST.run(line='ls', text='ls',
              expected=['ls '])
     # Multiple candidates

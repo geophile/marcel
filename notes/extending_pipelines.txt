@@ -164,7 +164,7 @@ Fixes:
 ----------------------------------------------------------------------
 
 Any occurrence of pipeline, (including explicit [...]) should allow
-for pipeline args. THIS IS AMBIGUOUS:
+ pipeline args. THIS IS AMBIGUOUS:
 
       op arg [...] (123)
 

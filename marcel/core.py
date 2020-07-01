@@ -200,6 +200,23 @@ class Op(AbstractOp):
             value = self.env().getvar(var)
         return value
 
+    # arg is a Pipeline, Pipelineable, or a var bound to a pipeline. Deal with all of these possibilities
+    # and come up with the pipeline itself.
+    def pipeline_arg(self, arg):
+        if type(arg) is marcel.core.Pipeline:
+            pipeline = arg
+        elif isinstance(arg, marcel.core.Pipelineable):
+            pipeline = arg.create_pipeline()
+        elif type(arg) is str:  # Presumably a var
+            pipeline = self.env().getvar(arg)
+            if type(pipeline) is not marcel.core.Pipeline:
+                raise marcel.exception.KillCommandException(
+                    f'The variable {arg} is not bound to a pipeline')
+        else:
+            raise marcel.exception.KillCommandException(
+                f'Not a pipeline: {arg}')
+        return pipeline
+
     # Examine the named field, which is a single- or list-valued attr of self.
     # Evaluate any functions found, and then check that the resulting type is
     # one of the given types.
@@ -284,7 +301,7 @@ class Pipeline(AbstractOp):
     # Pipelineable
 
     def create_pipeline(self):
-        return marcel.util.copy(self)
+        return self
 
     # AbstractOp
 
@@ -342,8 +359,19 @@ class Pipeline(AbstractOp):
             assert self.first_op is not None
             self.last_op.connect(op)
         else:
+            assert self.first_op is None
             self.first_op = op
         self.last_op = op
+
+    def prepend(self, op):
+        op.set_owner(self)
+        if self.first_op:
+            assert self.last_op is not None
+            op.connect(self.first_op)
+        else:
+            assert self.last_op is None
+            self.last_op = op
+        self.first_op = op
 
     def is_terminal_op(self, op_name):
         return self.last_op.op_name() == op_name
@@ -393,3 +421,22 @@ class PipelineIterator:
     @staticmethod
     def noop_error_handler(env, error):
         pass
+
+
+class LoopVar:
+
+    def __init__(self, value):
+        self.value = value
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        value = self.value
+        if value is None:
+            raise StopIteration()
+        self.value = None
+        return value
+
+    def append(self, value):
+        self.value = value

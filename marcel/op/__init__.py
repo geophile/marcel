@@ -30,6 +30,7 @@ public = [
     'jobs',
     'join',
     'load',
+    'loop',
     'ls',
     'map',
     'out',

@@ -194,6 +194,12 @@ class ArgsParser:
             return x
         raise ArgsError(arg.op_name, f'{arg.name} must be a pipeline.')
 
+    def check_str_or_pipeline(self, arg, x):
+        if type(x) not in (str, marcel.core.Pipeline):
+            raise marcel.argsparser.ArgsError(self.op_name,
+                                              f'{arg.name} argument must be a Pipeline: {x}')
+        return x
+
     # An ArgsParser subclass uses this function as the value of convert, to validate
     # Python expressions, (parser.Expression). x is function source for console usage,
     # a callable for API usage.

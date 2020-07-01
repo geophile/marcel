@@ -422,3 +422,9 @@ Pipelines:
 - Allow [...] to delimit a pipeline, even when not necessary. (Like {
   ... } around single statement if, in C.)
 
+
+Should assign allow assignment of pipeline without brackets?
+
+----------------------------------------------------------------------
+
+Should a var hide an op by the same name?

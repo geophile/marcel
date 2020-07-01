@@ -610,21 +610,34 @@ def test_load_store():
              expected_err='Accumulator is not iterable')
     # Store (first to an undefined var, then to a defined one)
     y = []
-    TEST.run(test=lambda: run(gen(count=3, start=100) | store(y)))
+    TEST.run(test=lambda: run(gen(count=3, start=100) | store(y) | select(lambda *x: False)))
     TEST.run(test=lambda: run(map(lambda: y) | expand()),
              expected_out=[100, 101, 102])
-    TEST.run(test=lambda: run(gen(count=3, start=200) | store(y)))
+    TEST.run(test=lambda: run(gen(count=3, start=200) | store(y) | select(lambda *x: False)))
     TEST.run(test=lambda: run(map(lambda: y) | expand()),
              expected_out=[100, 101, 102, 200, 201, 202])
     # Store to a defined var that isn't a list
     i = 123
-    TEST.run(test=lambda: run(gen(3) | store(i)),
-             expected_err='Accumulator is not a list')
+    TEST.run(test=lambda: run(gen(3) | store(i) | select(lambda *x: False)),
+             expected_err='Accumulator is not usable as an accumulator')
     # Load and store the same container, to implement a loop
     x = [(0,)]
-    run(load(x) | select(lambda x: x < 5) | map(lambda x: x + 1) | store(x))
+    run(load(x) | select(lambda x: x < 5) | map(lambda x: x + 1) | store(x) | select(lambda *x: False))
     TEST.run(test=lambda: run(map(lambda: x)),
              expected_out=[((0,), (1,), (2,), (3,), (4,), (5,))])
+
+
+def test_loop():
+    TEST.run(test=lambda: run(loop(0, select(lambda x: x < 3) | map(lambda x: x + 1))),
+             expected_out=[0, 1, 2, 3])
+    TEST.run(test=lambda: run(loop((0, 1),
+                                   select(lambda x, y: y < 1000000) | map(lambda x, y: (y, x + y))) |
+                              map(lambda x, y: x)),
+             expected_out=[0, 1, 1, 2, 3, 5, 8, 13, 21,
+                           34, 55, 89, 144, 233, 377, 610,
+                           987, 1597, 2584, 4181, 6765, 10946,
+                           17711, 28657, 46368, 75025, 121393,
+                           196418, 317811, 514229, 832040])
 
 
 def test_api_run():
@@ -730,6 +743,7 @@ def main_stable():
     test_pipeline_args()
     test_sql()
     test_load_store()
+    test_loop()
     test_api_run()
     test_api_gather()
     test_api_first()
