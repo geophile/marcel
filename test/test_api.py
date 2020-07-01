@@ -1,5 +1,6 @@
 import os
 import pathlib
+import sys
 from math import pi
 
 import marcel.object.error
@@ -744,6 +745,7 @@ def main():
     main_stable()
     # main_dev()
     print(f'Test failures: {TEST.failures}')
+    sys.exit(TEST.failures)
 
 
 main()

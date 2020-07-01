@@ -51,11 +51,11 @@ class FunctionWrapper:
         while p > 0:
             p -= 1
             pipeline = self._parameterized_pipelines[p]
-            if pipeline.args is not None and pipeline.kwargs is not None:
+            if pipeline.args is not None:
                 try:
-                    f = f(*pipeline.args, **pipeline.kwargs)
+                    f = f(**pipeline.args)
                 except Exception as e:
-                    self.handle_error(e, self.function_input_description(pipeline.args, pipeline.kwargs))
+                    self.handle_error(e, self.function_input_description(pipeline.args, None))
         try:
             return f(*args, **kwargs)
         except Exception as e:
@@ -86,9 +86,9 @@ class FunctionWrapper:
     @staticmethod
     def function_input_description(args, kwargs):
         function_input = []
-        if len(args) > 0:
+        if args and len(args) > 0:
             function_input.append(str(args))
-        if len(kwargs) > 0:
+        if kwargs and len(kwargs) > 0:
             function_input.append(str(kwargs))
         return None if len(function_input) == 0 else ', '.join(function_input)
 

@@ -681,6 +681,10 @@ def test_load_store():
     TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x | select (*x: False)')
     TEST.run('load x',
              expected_out=[0, 1, 2, 3, 4, 5])
+    # Pipeline arg to a pipeline!
+    TEST.run('loop = [acc, pipeline: load acc | pipeline | store acc]')
+    TEST.run('loop ([(0,)]) [select (x: x < 5) | map (x: x+1)]',
+             expected_out=[1, 2, 3, 4, 5])
 
 
 def main_stable():
@@ -714,16 +718,15 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('loop = [acc, pipeline: load acc | pipeline | store acc]')
-    TEST.run('loop ([(0,)]) [select (x: x < 5) | map (x: x+1)]')
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
+    sys.exit(TEST.failures)
 
 
 main()
