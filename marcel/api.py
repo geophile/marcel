@@ -21,6 +21,7 @@ import marcel.object.error as _error
 from marcel.op.bash import bash as _bash
 from marcel.op.cd import cd as _cd
 from marcel.op.dirs import dirs as _dirs
+from marcel.op.emit import emit as _emit
 from marcel.op.expand import expand as _expand
 from marcel.op.first import _first
 from marcel.op.fork import fork as _fork
@@ -62,6 +63,7 @@ _MAIN.env.set_color_scheme(None)
 def bash(*args, **kwargs): return _generate_op(_bash, *args, **kwargs)
 def cd(*args, **kwargs): return _generate_op(_cd, *args, **kwargs)
 def dirs(*args, **kwargs): return _generate_op(_dirs, *args, **kwargs)
+def emit(*args, **kwargs): return _generate_op(_emit, *args, **kwargs)
 def expand(*args, **kwargs): return _generate_op(_expand, *args, **kwargs)
 def fork(*args, **kwargs): return _generate_op(_fork, *args, **kwargs)
 def gen(*args, **kwargs): return _generate_op(_gen, *args, **kwargs)

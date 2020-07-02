@@ -688,16 +688,16 @@ def test_load_store():
 
 
 def test_loop():
-    # TEST.run('loop (0) [select (x: x < 3) | map (x: x + 1)]',
-    #          expected_out=[0, 1, 2, 3])
-    # TEST.run('loop ((0, 1)) [select (x, y: y < 1000000) | map (x, y: (y, x + y))] | map (x, y: x)',
-    #          expected_out=[0, 1, 1, 2, 3, 5, 8, 13, 21,
-    #                        34, 55, 89, 144, 233, 377, 610,
-    #                        987, 1597, 2584, 4181, 6765, 10946,
-    #                        17711, 28657, 46368, 75025, 121393,
-    #                        196418, 317811, 514229, 832040])
+    TEST.run('loop (0) [select (x: x < 3) | emit | map (x: x + 1)]',
+             expected_out=[0, 1, 2])
+    TEST.run('loop ((0, 1)) [select (x, y: x < 1000000) | emit | map (x, y: (y, x + y))] | map (x, y: x)',
+             expected_out=[0, 1, 1, 2, 3, 5, 8, 13, 21,
+                           34, 55, 89, 144, 233, 377, 610,
+                           987, 1597, 2584, 4181, 6765, 10946,
+                           17711, 28657, 46368, 75025, 121393,
+                           196418, 317811, 514229, 832040])
     # Repeated execution, piping in initial value
-    TEST.run('gen 3 | loop [select (n: n > 0) | map (n: n - 1)]',
+    TEST.run('gen 3 | loop [select (n: n >= 0) | emit | map (n: n - 1)]',
              expected_out=[0, 1, 0, 2, 1, 0])
 
 
@@ -733,14 +733,13 @@ def main_stable():
 
 
 def main_dev():
-    test_loop()
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

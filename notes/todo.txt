@@ -428,3 +428,15 @@ Should assign allow assignment of pipeline without brackets?
 ----------------------------------------------------------------------
 
 Should a var hide an op by the same name?
+
+----------------------------------------------------------------------
+
+Oops, [] is overloaded:
+
+M-0.9.17 jao@cheese:/tmp/csv$ ls [b-f]*.csv
+Operator ls: filenames must be a string: [runpipeline(b-f)]
+
+----------------------------------------------------------------------
+
+Need a nushell like op for importing files. E.g., csv importer should
+split on separator and convert to tuples.

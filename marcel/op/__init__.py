@@ -19,6 +19,7 @@ public = [
     'cd',
     'dirs',
     'edit',
+    'emit',
     'env',
     'expand',
     'fg',

@@ -51,7 +51,10 @@ run to completion for each initial value in the input stream.
 '''
 
 
-def loop(env, init, pipeline):
+def loop(env, init, pipeline=None):
+    if pipeline is None:
+        pipeline = init
+        init = None
     return Loop(env), [init, pipeline.create_pipeline()]
 
 
@@ -82,28 +85,24 @@ class Loop(marcel.core.Op):
     # AbstractOp
     
     def setup_1(self):
-        def emit(*x):
-            self.send(x)
-            return x
         # If there is only one arg, then it should be a pipeline.
         if self.pipeline is None:
             self.pipeline = self.init
             self.init = None
         if self.init is not None:
             self.eval_function('init')
-        # ##### Assemble a new pipeline: load | emit output | pipeline | store
-        # New ops
-        self.loopvar = marcel.core.LoopVar(None)
-        load_op = marcel.opmodule.create_op(self.env(), 'load', self.loopvar)
-        emit_op = marcel.opmodule.create_op(self.env(), 'map', emit)
-        store_op = marcel.opmodule.create_op(self.env(), 'store', self.loopvar)
-        # The new pipeline
+        # Find emit ops in the pipeline and connect them to self.
         loop_pipeline = self.pipeline_arg(self.pipeline).copy()
         loop_pipeline.set_error_handler(self.owner.error_handler)
-        # Put everything together
-        loop_pipeline.prepend(emit_op)
-        loop_pipeline.prepend(load_op)
-        loop_pipeline.append(store_op)
+        op = loop_pipeline.first_op
+        while op:
+            if op.op_name() == 'emit':
+                op.set_loop_op(self)
+            op = op.next_op
+        # Attach load and store ops to implement the actual looping.
+        self.loopvar = marcel.core.LoopVar(None)
+        loop_pipeline.prepend(marcel.opmodule.create_op(self.env(), 'load', self.loopvar))
+        loop_pipeline.append(marcel.opmodule.create_op(self.env(), 'store', self.loopvar))
         self.body = loop_pipeline
 
     def receive(self, x):

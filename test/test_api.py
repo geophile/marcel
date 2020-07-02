@@ -628,16 +628,18 @@ def test_load_store():
 
 
 def test_loop():
-    TEST.run(test=lambda: run(loop(0, select(lambda x: x < 3) | map(lambda x: x + 1))),
-             expected_out=[0, 1, 2, 3])
+    TEST.run(test=lambda: run(loop(0, select(lambda x: x < 3) | emit() | map(lambda x: x + 1))),
+             expected_out=[0, 1, 2])
     TEST.run(test=lambda: run(loop((0, 1),
-                                   select(lambda x, y: y < 1000000) | map(lambda x, y: (y, x + y))) |
+                                   select(lambda x, y: x < 1000000) | emit() | map(lambda x, y: (y, x + y))) |
                               map(lambda x, y: x)),
              expected_out=[0, 1, 1, 2, 3, 5, 8, 13, 21,
                            34, 55, 89, 144, 233, 377, 610,
                            987, 1597, 2584, 4181, 6765, 10946,
                            17711, 28657, 46368, 75025, 121393,
                            196418, 317811, 514229, 832040])
+    TEST.run(test=lambda: run(gen(3) | loop(select(lambda n: n >= 0) | emit() | map(lambda n: n - 1))),
+             expected_out=[0, 1, 0, 2, 1, 0])
 
 
 def test_api_run():
