@@ -1,32 +1,7 @@
 What's New
 ----------
 
-There is a new operator, `import`. You can now import arbitrary Python modules
-and use the imported symbols in marcel functions. For example, if you try to compute
-something using `pi`, you will get an error message because the `math` module,
-which defines `pi`, hasn't been imported:
-
-```shell script
-M-0.9.11 jao@cheese:~/git/marcel/test$ (pi / 4)
-Error: Running map(lambda: pi / 4): name 'pi' is not defined
-M-0.9.11 jao@cheese:~/git/marcel/test$ (math.pi / 4)
-Error: Running map(lambda: math.pi / 4): name 'math' is not defined
-```
-You can import the `math` module and then refer to `math.pi` successfully:
-
-```shell script
-M-0.9.11 jao@cheese:~/git/marcel/test$ import math
-M-0.9.11 jao@cheese:~/git/marcel/test$ (math.pi / 4)
-0.7853981633974483
-```
-
-Or, you can import `math.pi` as `pi`, e.g.
-
-```shell script
-M-0.9.11 jao@cheese:~/git/marcel/test$ import math pi
-M-0.9.11 jao@cheese:~/git/marcel/test$ (pi / 4)
-0.7853981633974483
-```
+Marcel now has a `loop` operator. 
 
 Marcel
 ======

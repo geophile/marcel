@@ -439,4 +439,5 @@ class LoopVar:
         return value
 
     def append(self, value):
+        assert self.value is None
         self.value = value

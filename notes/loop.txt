@@ -1,0 +1,74 @@
+    load x | select (PREDICATE) ... | store x 
+
+works as a loop:
+
+- x is a list. load reads an item, the pipeline computes a new item
+  which store appends.
+
+- When PREDICATE returns false, there is nothing to store, and the
+  iteration over x completes, ending the loop. I.e., only one item of
+  the list (at a time) is used to drive the loop.
+
+- store both appends to x, and outputs x.
+
+A general purpose loop can be defined using pipeline vars:
+
+    loop = [acc, pipeline: load x | pipeline | store x]
+
+And then to use it, e.g. to generate fibonacci numbers:
+
+    loop ([(0, 1)]) [select (x, y: x < 1000000) | map (x, y: (y, x + y)]
+
+([(0, 1)]) initializes the accumulator. Keep going as long as x <
+1000000. The map function maps a pair of successive fibonacci number
+to the next pair.
+
+It's cool that a general purpose loop can be defined in this way, but
+it isn't very good. acc (accumulator) is a list, but for control
+purposes, we only need the last item. Also, the initial value has to
+be a list of one tuple of inputs: [(0, 1)]. The list wrapper is there
+because of the implementation (store and load using a list). Ideally,
+the initial value would be just (0, 1).
+
+It's a useful construct (generating a sequence of fibonacci numbers
+isn't possible in marcel otherwise), but this is a bad
+implementation. So introduce a loop operator:
+
+    loop INIT PIPELINE
+
+The pipeline can be thought of as a function, as in the fibonacci
+example above, with two params x and y. INIT is the initial value
+passed to these params. The last operator of the loop generates new
+param values which are output AND passed to the first op for the next
+iteration.
+
+The implementation replaces the list with a singleton container. I.e.,
+imagine that load reads the value, and store replaces it. If store
+fails to replace the value (e.g. because the select predicate
+evaluates to false), then the loop terminates because load encounters
+the end of its input.
+
+......................................................................
+
+loop (0, 1) [select (i, f: i <= 10) \|
+             yield (i, f: f) \|
+             map (i, f: (i + 1, f * (i + 1)))]
+
+yield generates loop output, store (part of the loop implementation)
+does not.
+
+OR
+
+loop (0, 1) [select (i, f: i <= 10) \|
+             map (i, f: (i + 1, f * (i + 1)))]
+
+loop generates output before the first op. So output from this would
+be (0, 1) ... (10, whatever).
+
+----------------------------------------------------------------------
+
+Implementation:
+
+- Loop variable (size 1 array) for use with load and store.
+
+- loop
