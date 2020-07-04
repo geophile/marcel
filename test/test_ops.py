@@ -709,6 +709,10 @@ def test_loop():
     # Repeated execution, piping in initial value
     TEST.run('gen 3 | loop [select (n: n >= 0) | emit | map (n: n - 1)]',
              expected_out=[0, 1, 0, 2, 1, 0])
+    # Bug 70
+    TEST.run('p = [loop (0) [select (x: x < 5) | emit | map (x: x+1)]')
+    TEST.run('p',
+             expected_out=[0, 1, 2, 3, 4])
 
 
 def main_stable():

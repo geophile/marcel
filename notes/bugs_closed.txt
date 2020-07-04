@@ -1123,3 +1123,33 @@ Traceback (most recent call last):
   File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
     cls(buf, protocol).dump(obj)
 _pickle.PicklingError: Can't pickle <function <lambda> at 0x7f75c4a4b550>: attribute lookup <lambda> on __main__ failed
+
+----------------------------------------------------------------------
+
+FIXED
+
+70. Pipeline containing loop crashes when executed
+
+M-0.9.17 jao@cheese:~/git/marcel/test$ p = [loop (0) [select (x: x < 5) | emit | map (x: x+1)]]
+M-0.9.17 jao@cheese:~/git/marcel/test$ p
+Process Process-2:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 145, in run_command_in_child
+    child_namespace_changes = command.execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 392, in execute
+    self.pipeline.setup_1()
+  File "/home/jao/git/marcel/marcel/core.py", line 314, in setup_1
+    op.setup_1()
+  File "/home/jao/git/marcel/marcel/op/runpipeline.py", line 49, in setup_1
+    self.pipeline.setup_1()
+  File "/home/jao/git/marcel/marcel/core.py", line 314, in setup_1
+    op.setup_1()
+  File "/home/jao/git/marcel/marcel/op/loop.py", line 104, in setup_1
+    loop_pipeline.prepend(marcel.opmodule.create_op(self.env(), 'load', self.loopvar))
+  File "/home/jao/git/marcel/marcel/opmodule.py", line 83, in create_op
+    op_module = env.op_modules[op_name]
+AttributeError: 'Environment' object has no attribute 'op_modules'
