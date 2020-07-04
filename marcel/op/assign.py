@@ -42,10 +42,9 @@ class Assign(marcel.core.Op):
             self.value = self.pipeline
             count += 1
         if self.function is not None:
-            function = marcel.functionwrapper.FunctionWrapper(function=self.function)
-            function.check_validity()
-            function.set_op(self)
-            self.value = function()
+            assert type(self.function) is marcel.functionwrapper.FunctionWrapper
+            self.function.set_op(self)
+            self.value = self.function()
             count += 1
         assert count == 1
 

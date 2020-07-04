@@ -111,6 +111,7 @@ def print_stack(file=None):
     exception_type, exception, trace = sys.exc_info()
     print(f'Caught {exception_type}: {exception}', file=file)
     traceback.print_tb(trace, file=file)
+    file.flush()
 
 
 def colorize(s, color):

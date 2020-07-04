@@ -568,6 +568,16 @@ def test_join():
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
     TEST.run(test='gen 4 | map (x: (x, -x)) | join [x100]',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
+    # Join with pipeline var taking arg
+    TEST.run('xn = [n: gen 3 | map (x: (x, x * n))]')
+    TEST.run(test='gen 4 | map (x: (x, -x)) | join [xn (100)]',
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
+    os.system('rm -f /tmp/?.csv')
+    TEST.run('gen 3 | map (x: (x, x*10)) | out -f /tmp/a.csv')
+    TEST.run('gen 3 | map (x: (x, x*100)) | out -f /tmp/b.csv')
+    TEST.run('get = [f: (File(f).readlines()) | expand | map (x: eval(x))]')
+    TEST.run('get /tmp/a.csv | join [get /tmp/b.csv]',
+             expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200)])
 
 
 def test_comment():
