@@ -205,3 +205,67 @@ This does indent:
     {L,indent=4,wrap=T}loop ((0, 1)) [select (x, y: y < 1000000) | map (x, y: (y, x + y))] | map (x, y: x)
 
 So wrap=F causes indent to be ignored.
+
+----------------------------------------------------------------------
+
+69. Shell crashes on bad first arg to loop
+
+M-0.9.17 jao@cheese:~$ loop (10, 1) [select (x, f: x > 0) | emit | map (x, f: (x-1, f*x))]
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/runpy.py", line 193, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.8/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 271, in <module>
+    MAIN.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 123, in run
+    self.run_command(line)
+  File "/home/jao/git/marcel/marcel/main.py", line 136, in run_command
+    pipeline = parser.parse()
+  File "/home/jao/git/marcel/marcel/parser.py", line 704, in parse
+    return self.command()
+  File "/home/jao/git/marcel/marcel/parser.py", line 710, in command
+    return self.pipeline(None)
+  File "/home/jao/git/marcel/marcel/parser.py", line 730, in pipeline
+    op_sequence = Parser.ensure_sequence(self.op_sequence())
+  File "/home/jao/git/marcel/marcel/parser.py", line 740, in op_sequence
+    op_args = self.op_args()
+  File "/home/jao/git/marcel/marcel/parser.py", line 761, in op_args
+    op = self.create_op(op_token, arg_tokens)
+  File "/home/jao/git/marcel/marcel/parser.py", line 824, in create_op
+    op = self.create_op_builtin(op_token, arg_tokens)
+  File "/home/jao/git/marcel/marcel/parser.py", line 852, in create_op_builtin
+    args.append(x.value(self) if isinstance(x, Token) else x)
+  File "/home/jao/git/marcel/marcel/parser.py", line 298, in value
+    self._function = marcel.functionwrapper.FunctionWrapper(function=function,
+  File "/home/jao/git/marcel/marcel/functionwrapper.py", line 56, in __init__
+    self._globals = self._function.__globals__
+AttributeError: 'tuple' object has no attribute '__globals__'
+
+----------------------------------------------------------------------
+
+70. Pipeline containing loop crashes when executed
+
+M-0.9.17 jao@cheese:~$ a = [loop ((0, 5)) [select (i, x: i < x) | emit | map (i, x: (i+1, x))] ]
+M-0.9.17 jao@cheese:~$ a
+Process Process-18:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 145, in run_command_in_child
+    child_namespace_changes = command.execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 392, in execute
+    self.pipeline.setup_1()
+  File "/home/jao/git/marcel/marcel/core.py", line 314, in setup_1
+    op.setup_1()
+  File "/home/jao/git/marcel/marcel/op/runpipeline.py", line 49, in setup_1
+    self.pipeline.setup_1()
+  File "/home/jao/git/marcel/marcel/core.py", line 314, in setup_1
+    op.setup_1()
+  File "/home/jao/git/marcel/marcel/op/loop.py", line 104, in setup_1
+    loop_pipeline.prepend(marcel.opmodule.create_op(self.env(), 'load', self.loopvar))
+  File "/home/jao/git/marcel/marcel/opmodule.py", line 83, in create_op
+    op_module = env.op_modules[op_name]
+AttributeError: 'Environment' object has no attribute 'op_modules'
