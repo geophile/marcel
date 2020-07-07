@@ -100,16 +100,14 @@ class Loop(marcel.core.Op):
                 op.set_loop_op(self)
             op = op.next_op
         # Attach load and store ops to implement the actual looping.
-        self.loopvar = marcel.core.LoopVar(None)
+        self.loopvar = marcel.core.LoopVar(loop_pipeline)
         loop_pipeline.prepend(marcel.opmodule.create_op(self.env(), 'load', self.loopvar))
         loop_pipeline.append(marcel.opmodule.create_op(self.env(), 'store', self.loopvar))
         self.body = loop_pipeline
 
     def receive(self, x):
         if self.init is None:
-            assert x is not None
             self.loopvar.append(x)
         else:
-            assert x is None
             self.loopvar.append(self.init)
         marcel.core.Command(None, self.body).execute()

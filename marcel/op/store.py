@@ -70,5 +70,4 @@ class Store(marcel.core.Op):
                 f'{self.var if self.var else "Accumulator"} is not usable as an accumulator')
 
     def receive(self, x):
-        self.send(x)
         self.accumulator.append(x)

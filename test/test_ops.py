@@ -676,10 +676,10 @@ def test_load_store():
     TEST.run('load j',
              expected_err='j is not iterable')
     # Store (first to an undefined var, then to a defined one)
-    TEST.run('gen 3 100 | store y | select (*x: False)')
+    TEST.run('gen 3 100 | store y')
     TEST.run('load y',
              expected_out=[100, 101, 102])
-    TEST.run('gen 3 200 | store y | select (*x: False)')
+    TEST.run('gen 3 200 | store y')
     TEST.run('load y',
              expected_out=[100, 101, 102, 200, 201, 202])
     # Store to a defined var that isn't a list
@@ -688,13 +688,13 @@ def test_load_store():
              expected_err='i is not usable as an accumulator')
     # Load and store the same container, to implement a loop
     TEST.run('x = ([(0,)])')
-    TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x | select (*x: False)')
+    TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x')
     TEST.run('load x',
              expected_out=[0, 1, 2, 3, 4, 5])
-    # Pipeline arg to a pipeline!
-    TEST.run('L = [acc, pipeline: load acc | pipeline | store acc]')
-    TEST.run('L ([(0,)]) [select (x: x < 5) | map (x: x+1)]',
-             expected_out=[1, 2, 3, 4, 5])
+    # # Pipeline arg to a pipeline!
+    # TEST.run('L = [acc, pipeline: load acc | pipeline | store acc]')
+    # TEST.run('L ([(0,)]) [select (x: x < 5) | map (x: x+1)]',
+    #          expected_out=[1, 2, 3, 4, 5])
 
 
 def test_loop():
@@ -743,10 +743,20 @@ def main_stable():
     test_sql()
     test_import()
     test_load_store()
-    test_loop()
+    # test_loop()
 
 
 def main_dev():
+    test_load_store()
+    # TEST.run('loop ((0,)) [x: select (x < 3) | emit (x) | map (x + 1)]')
+    # TEST.run('loop ((0,)) [i: \
+    #               select (i < 3) | \
+    #               emit (i) | \
+    #               loop ((0,)) [j: \
+    #                   select (j < 3) | \
+    #                   emit ((i, j)) | \
+    #                   map (j + 1)] | \
+    #               map (i + 1)]')
     pass
 
 

@@ -25,14 +25,15 @@ written to the output stream of the immediately enclosing {n:loop}.
 '''
 
 
-def emit(env):
-    return Emit(env), []
+def emit(env, function):
+    return Emit(env), [function]
 
 
 class EmitArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('emit', env)
+        self.add_anon('function', convert=self.function)
         self.validate()
 
 
@@ -40,14 +41,16 @@ class Emit(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.function = None
         self.loop_op = None
+
+    def __repr__(self):
+        return f'emit({self.function})'
 
     # AbstractOp
 
     def receive(self, x):
-        # Send x outside the loop
-        self.loop_op.send(x)
-        # Send x down the pipeline inside the loop
+        self.loop_op.send(self.function(*x))
         self.send(x)
 
     # Emit

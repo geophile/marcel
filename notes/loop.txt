@@ -67,8 +67,41 @@ be (0, 1) ... (10, whatever).
 
 ----------------------------------------------------------------------
 
-Implementation:
+THIS ISN'T VERY GOOD
 
-- Loop variable (size 1 array) for use with load and store.
+Here is a loop to print 0..9:
 
-- loop
+     loop (0) [select (x: x < 10) | emit | map (x: x + 1)]
+
+It doesn't generalize to a loop that prints 0..9 x 0..9. A nested loop
+would need access to the loop variable, so there would have to be a
+function (x: ...). But we need a loop, not a function, and we can't
+put a loop inside the function.
+
+Also, the args (x in this example) have to be repeated.
+
+Try pipeline vars. So:
+
+    loop (0) [x: select (x < 10) | emit | map (x + 1)]
+
+Definitely more compact. Nesting:
+
+    loop (0) [x: select (x < 10) | loop (0) [y: select (y < 10) | emit ((x, y)) | map (y + 1)] | map (x + 1)]
+
+What does x value piped into the second loop do? DOESN'T HAVE TO BE
+HANDLED. x is still in scope in the nested pipeline. Just reaching the
+2nd loop is sufficient.
+
+
+loop ((0,)) [i: \
+    select (i < 3) | \
+    loop ((0,)) [j: \
+        select (j < 3) | \
+        emit ((i, j)) | \
+        map (j + 1)] \
+    map (i + 1)]
+
+This has problems.
+
+- emit writes output to the end of the first loop, passing input to map (i + 1)
+- Which isn't prepared to handle it.

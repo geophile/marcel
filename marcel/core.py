@@ -350,6 +350,9 @@ class Pipeline(AbstractOp):
         if kwargs:
             self.args.update(kwargs)
 
+    def clear_parameter_values(self):
+        self.args = None
+
     def copy(self):
         return marcel.util.copy(self)
 
@@ -425,19 +428,19 @@ class PipelineIterator:
 
 class LoopVar:
 
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, pipeline):
+        self.pipeline = pipeline
+        self.empty = True
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        value = self.value
-        if value is None:
+        if self.empty:
             raise StopIteration()
-        self.value = None
-        return value
+        self.empty = True
+        return ()
 
     def append(self, value):
-        assert self.value is None
-        self.value = value
+        self.pipeline.set_parameter_values(value, None)
+        self.empty = False

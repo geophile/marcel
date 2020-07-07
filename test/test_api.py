@@ -748,7 +748,7 @@ def main_stable():
     test_pipeline_args()
     test_sql()
     test_load_store()
-    test_loop()
+    # test_loop()
     test_api_run()
     test_api_gather()
     test_api_first()
