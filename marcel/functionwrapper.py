@@ -19,6 +19,20 @@ import marcel.exception
 import marcel.reduction
 
 
+SYMBOLS = {
+    '+': marcel.reduction.r_plus,
+    '*': marcel.reduction.r_times,
+    '^': marcel.reduction.r_xor,
+    '&': marcel.reduction.r_bit_and,
+    '|': marcel.reduction.r_bit_or,
+    'and': marcel.reduction.r_and,
+    'or': marcel.reduction.r_or,
+    'max': marcel.reduction.r_max,
+    'min': marcel.reduction.r_min,
+    'count': marcel.reduction.r_count,
+    '.': marcel.reduction.r_group
+}
+
 # This code works around a bug in dill: https://github.com/uqfoundation/dill/issues/377.
 # The workaround involves recompiling functions with source following unpickling. A function
 # that doesn't have source has __globals__ other than the marcel namespace, and those functions
@@ -52,7 +66,7 @@ class FunctionWrapper:
         else:  # source is not None
             self._source = source
             self._display = source
-            self._function = marcel.reduction.SYMBOLS[source]
+            self._function = SYMBOLS[source]
         self._globals = self._function.__globals__
         assert self._function
 
@@ -113,7 +127,7 @@ class FunctionWrapper:
     def function(self):
         if self._function is None:
             try:
-                self._function = marcel.reduction.SYMBOLS[self._source]
+                self._function = SYMBOLS[self._source]
             except KeyError:
                 self._function = eval(self._source, self._globals)
         return self._function
