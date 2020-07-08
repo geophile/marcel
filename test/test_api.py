@@ -610,16 +610,16 @@ def test_load_store():
              expected_err='Accumulator is not iterable')
     # Store (first to an undefined var, then to a defined one)
     y = []
-    TEST.run(test=lambda: run(gen(count=3, start=100) | store(y) | select(lambda *x: False)))
+    TEST.run(test=lambda: run(gen(count=3, start=100) | store(y)))
     TEST.run(test=lambda: run(map(lambda: y) | expand()),
              expected_out=[100, 101, 102])
-    TEST.run(test=lambda: run(gen(count=3, start=200) | store(y) | select(lambda *x: False)))
+    TEST.run(test=lambda: run(gen(count=3, start=200) | store(y)))
     TEST.run(test=lambda: run(map(lambda: y) | expand()),
              expected_out=[100, 101, 102, 200, 201, 202])
     # Store to a defined var that isn't a list
     i = 123
-    TEST.run(test=lambda: run(gen(3) | store(i) | select(lambda *x: False)),
-             expected_err='Accumulator is not usable as an accumulator')
+    TEST.run(test=lambda: run(gen(3) | store(i)),
+             expected_err='store\'s variable is not usable as an accumulator')
     # Load and store the same container, to implement a loop
     x = [(0,)]
     run(load(x) | select(lambda x: x < 5) | map(lambda x: x + 1) | store(x) | select(lambda *x: False))
@@ -643,6 +643,18 @@ def test_loop():
     p = loop(0, select(lambda x: x < 5) | emit() | map(lambda x: x+1))
     TEST.run(test=lambda: run(p),
              expected_out=[0, 1, 2, 3, 4])
+
+
+def test_if():
+    even = []
+    TEST.run(test=lambda: run(gen(10) | ifthen(lambda x: x % 2 == 0, store(even))),
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    TEST.run(test=lambda: run(load(even)),
+             expected_out=[0, 2, 4, 6, 8])
+    # TEST.run('gen 10 | ifelse (x: x % 3 == 0) [store d3]',
+    #          expected_out=[1, 2, 4, 5, 7, 8])
+    # TEST.run('load d3',
+    #          expected_out=[0, 3, 6, 9])
 
 
 def test_api_run():
@@ -749,6 +761,7 @@ def main_stable():
     test_sql()
     test_load_store()
     # test_loop()
+    # test_if()
     test_api_run()
     test_api_gather()
     test_api_first()

@@ -68,7 +68,7 @@ class ReloadConfigException(BaseException):
         super().__init__()
 
 
-# Used to reload configuration if any config files change.
+# Used to reload configuration if a config file changes.
 class ConfigurationMonitor:
 
     def __init__(self, config_files):

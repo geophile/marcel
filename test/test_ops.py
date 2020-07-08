@@ -675,22 +675,27 @@ def test_load_store():
     TEST.run('j = (123)')
     TEST.run('load j',
              expected_err='j is not iterable')
-    # Store (first to an undefined var, then to a defined one)
+    # Store to an undefined var
     TEST.run('gen 3 100 | store y')
     TEST.run('load y',
              expected_out=[100, 101, 102])
-    TEST.run('gen 3 200 | store y')
+    # Store to same far, without append option
+    TEST.run('gen 3 100 | store y')
+    TEST.run('load y',
+             expected_out=[100, 101, 102])
+    # Try appending
+    TEST.run('gen 3 200 | store -a y')
     TEST.run('load y',
              expected_out=[100, 101, 102, 200, 201, 202])
     # Store to a defined var that isn't a list
     TEST.run('i = (123)')
-    TEST.run('gen 3 | store i',
+    TEST.run('gen 3 | store --append i',
              expected_err='i is not usable as an accumulator')
-    # Load and store the same container, to implement a loop
-    TEST.run('x = ([(0,)])')
-    TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x')
-    TEST.run('load x',
-             expected_out=[0, 1, 2, 3, 4, 5])
+    # # Load and store the same container, to implement a loop
+    # TEST.run('x = ([(0,)])')
+    # TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x')
+    # TEST.run('load x',
+    #          expected_out=[0, 1, 2, 3, 4, 5])
     # # Pipeline arg to a pipeline!
     # TEST.run('L = [acc, pipeline: load acc | pipeline | store acc]')
     # TEST.run('L ([(0,)]) [select (x: x < 5) | map (x: x+1)]',
@@ -713,6 +718,17 @@ def test_loop():
     TEST.run('p = [loop (0) [select (x: x < 5) | emit | map (x: x+1)]')
     TEST.run('p',
              expected_out=[0, 1, 2, 3, 4])
+
+
+def test_if():
+    TEST.run('gen 10 | ifthen (x: x % 2 == 0) [store even]',
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    TEST.run('load even',
+             expected_out=[0, 2, 4, 6, 8])
+    TEST.run('gen 10 | ifelse (x: x % 3 == 0) [store d3]',
+             expected_out=[1, 2, 4, 5, 7, 8])
+    TEST.run('load d3',
+             expected_out=[0, 3, 6, 9])
 
 
 def main_stable():
@@ -744,19 +760,10 @@ def main_stable():
     test_import()
     test_load_store()
     # test_loop()
+    test_if()
 
 
 def main_dev():
-    test_load_store()
-    # TEST.run('loop ((0,)) [x: select (x < 3) | emit (x) | map (x + 1)]')
-    # TEST.run('loop ((0,)) [i: \
-    #               select (i < 3) | \
-    #               emit (i) | \
-    #               loop ((0,)) [j: \
-    #                   select (j < 3) | \
-    #                   emit ((i, j)) | \
-    #                   map (j + 1)] | \
-    #               map (i + 1)]')
     pass
 
 

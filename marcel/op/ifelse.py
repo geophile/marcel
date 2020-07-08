@@ -13,55 +13,38 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-public = [
-    'bash',
-    'bg',
-    'cd',
-    'dirs',
-    'edit',
-    'emit',
-    'env',
-    'expand',
-    'fg',
-    'gen',
-    'head',
-    'help',
-    'history',
-    'ifelse',
-    'ifthen',
-    'import',
-    'jobs',
-    'join',
-    'load',
-    'loop',
-    'ls',
-    'map',
-    'out',
-    'popd',
-    'ps',
-    'pushd',
-    'pwd',
-    'red',
-    'reverse',
-    'run',
-    'select',
-    'sort',
-    'squish',
-    'sql',
-    'store',
-    'sudo',
-    'tail',
-    'timer',
-    'unique',
-    'version',
-    'window'
-]
+import types
 
-all = public + [
-    'assign',
-    'first',
-    'fork',
-    'gather',
-    'remote',
-    'runpipeline'
-]
+import marcel.argsparser
+import marcel.core
+import marcel.op.ifbase
+import marcel.util
+
+
+HELP = '''
+TBD
+'''
+
+
+def ifelse(env, predicate, then):
+    return Ifelse(env), [predicate, then.create_pipeline()]
+
+
+class IfelseArgsParser(marcel.op.ifbase.IfBaseArgsParser):
+
+    def __init__(self, env):
+        super().__init__(env, 'ifelse')
+
+
+class Ifelse(marcel.op.ifbase.IfBase):
+
+    def __init__(self, env):
+        super().__init__(env)
+
+    # AbstractOp
+
+    def receive(self, x):
+        if self.predicate(*x):
+            self.then.receive(x)
+        else:
+            self.send(x)

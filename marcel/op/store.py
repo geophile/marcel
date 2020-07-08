@@ -19,11 +19,15 @@ import marcel.exception
 
 
 HELP = '''
-{L,wrap=F}store VAR
+{L,wrap=F}store [-a|--append] VAR
+
+{L,indent=4:28}{r:-a}, {r:--append}                     Append to {r:VAR}s list, instead of replacing.
 
 {L,indent=4:28}{r:VAR}                     The variable to be updated.
 
-Write the incoming tuples into a list bound to {r:VAR}.  
+Write the incoming tuples into a list bound to {r:VAR}. By default, the current value of {r:VAR}
+is replaced. If {r:--append} is specified, then it is expected that the current value
+of {r:VAR} is a list, and the incoming tuples are appended. 
 '''
 
 
@@ -37,6 +41,7 @@ class StoreArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('store', env)
+        self.add_flag_no_value('append', '-a', '--append')
         self.add_anon('var')
         self.validate()
 
@@ -47,27 +52,47 @@ class Store(marcel.core.Op):
         super().__init__(env)
         self.var = None
         self.accumulator = None
+        self.append = None
 
     def __repr__(self):
-        return f'store({self.var})'
+        return f'store({self.var}, append)' if self.append else f'store({self.var})'
 
     # AbstractOp
     
     def setup_1(self):
-        # API: var is None, accumulator is set
-        # Interactive: var is set, accumulator is None
-        if self.var is not None:
-            self.accumulator = self.getvar(self.var)
-            if self.accumulator is None:
-                self.accumulator = []
-                self.env().setvar(self.var, self.accumulator)
+        if self.var is not None and self.accumulator is None:
+            self.setup_interactive()
+        elif self.var is None and self.accumulator is not None:
+            self.setup_api()
         else:
-            if self.accumulator is None:
-                raise marcel.exception.KillCommandException(f'Accumulator is undefined.')
-        # Test that self.accumulator is usable as an accumulator
-        if not (hasattr(self.accumulator, 'append') and hasattr(self.accumulator, '__iter__')):
-            raise marcel.exception.KillCommandException(
-                f'{self.var if self.var else "Accumulator"} is not usable as an accumulator')
+            assert False
 
     def receive(self, x):
         self.accumulator.append(x)
+
+    # For use by this class
+
+    def setup_interactive(self):
+        self.accumulator = self.getvar(self.var)
+        if self.append and self.accumulator is not None:
+            if not self.accumulator_is_loop_variable():
+                raise marcel.exception.KillCommandException(
+                    f'{self.description()} is not usable as an accumulator')
+        else:
+            self.accumulator = []
+            self.env().setvar(self.var, self.accumulator)
+
+    def setup_api(self):
+        if self.accumulator is None:
+            raise marcel.exception.KillCommandException(f'Accumulator is undefined.')
+        # Test that self.accumulator is usable as an accumulator
+        if not self.accumulator_is_loop_variable():
+            raise marcel.exception.KillCommandException(
+                f'{self.description()} is not usable as an accumulator')
+
+    def description(self):
+        return self.var if self.var else 'store\'s variable'
+
+    def accumulator_is_loop_variable(self):
+        return hasattr(self.accumulator, 'append') and hasattr(self.accumulator, '__iter__')
+

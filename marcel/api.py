@@ -28,6 +28,8 @@ from marcel.op.fork import fork as _fork
 from marcel.op.gather import _gather
 from marcel.op.gen import gen as _gen
 from marcel.op.head import head as _head
+from marcel.op.ifelse import ifelse as _ifelse
+from marcel.op.ifthen import ifthen as _ifthen
 from marcel.op.join import join as _join
 from marcel.op.load import load as _load
 from marcel.op.loop import loop as _loop
@@ -68,6 +70,8 @@ def expand(*args, **kwargs): return _generate_op(_expand, *args, **kwargs)
 def fork(*args, **kwargs): return _generate_op(_fork, *args, **kwargs)
 def gen(*args, **kwargs): return _generate_op(_gen, *args, **kwargs)
 def head(*args, **kwargs): return _generate_op(_head, *args, **kwargs)
+def ifelse(*args, **kwargs): return _generate_op(_ifelse, *args, **kwargs)
+def ifthen(*args, **kwargs): return _generate_op(_ifthen, *args, **kwargs)
 def join(*args, **kwargs): return _generate_op(_join, *args, **kwargs)
 def load(*args, **kwargs): return _generate_op(_load, *args, **kwargs)
 def loop(*args, **kwargs): return _generate_op(_loop, *args, **kwargs)
