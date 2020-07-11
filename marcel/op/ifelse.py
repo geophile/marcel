@@ -13,16 +13,32 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import types
-
-import marcel.argsparser
-import marcel.core
 import marcel.op.ifbase
 import marcel.util
 
 
 HELP = '''
-TBD
+{L,wrap=F}ifelse PREDICATE [THEN_PIPELINE]
+
+{L,indent=4:28}{r:PREDICATE}               Used to determine if an input tuple is passed
+to the {r:THEN_PIPELINE}
+
+{L,indent=4:28}{r:THEN_PIPELINE}           This pipeline receives tuples for which 
+{r:PREDICATE} evaluates to True.
+
+{r:PREDICATE} is applied to each input tuple. If the {r:PREDICATE} evaluates to
+True, then the tuple is passed to the {r:THEN_PIPELINE}. Otherwise, 
+the tuple is passed downstream.
+
+{b:Example}
+
+{L,indent=4,wrap=F}gen 100 | ifthen (x: x % 2 == 0) [store even] | store odd
+
+{r:gen 100} generates a stream of integers, 0, ..., 99.
+The predicate is True for even integers. These integers are
+passed to the {r:[store even]} pipeline, which stores the numbers in the variable {r:even}.
+Odd integers only are passed downstream, to {r:store odd} which stores numbers in the {r:odd}
+variable. 
 '''
 
 

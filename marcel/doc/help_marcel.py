@@ -45,13 +45,14 @@ as in other shells.
     - {n:dirs}        - {n:edit}        - {n:emit}
     - {n:env}         - {n:expand}      - {n:fg}
     - {n:gen}         - {n:head}        - {n:help}
-    - {n:history}     - {n:import}      - {n:jobs}
-    - {n:join}        - {n:load}        - {n:ls}
-    - {n:map}         - {n:out}         - {n:popd}
-    - {n:ps}          - {n:pushd}       - {n:pwd}
-    - {n:red}         - {n:reverse}     - {n:run}
-    - {n:select}      - {n:sort}        - {n:sql}
-    - {n:squish}      - {n:store}       - {n:sudo}
-    - {n:tail}        - {n:timer}       - {n:unique}
-    - {n:version}     - {n:window}
+    - {n:history}     - {n:ifelse}      - {n:ifthen}
+    - {n:import}      - {n:jobs}        - {n:join}
+    - {n:load}        - {n:ls}          - {n:map}
+    - {n:out}         - {n:popd}        - {n:ps}
+    - {n:pushd}       - {n:pwd}         - {n:red}
+    - {n:reverse}     - {n:run}         - {n:select}
+    - {n:sort}        - {n:sql}         - {n:squish}
+    - {n:store}       - {n:sudo}        - {n:tail}
+    - {n:timer}       - {n:unique}      - {n:version}
+    - {n:window}
 '''
