@@ -60,8 +60,6 @@ from marcel.reduction import *
 _MAIN = _main.Main(None, same_process=True, old_namespace=None)
 # No colors for API
 _MAIN.env.set_color_scheme(None)
-print(f'global keys: {globals().keys()}')
-
 
 def bash(*args, **kwargs): return _generate_op(_bash, *args, **kwargs)
 def cd(*args, **kwargs): return _generate_op(_cd, *args, **kwargs)

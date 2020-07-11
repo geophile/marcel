@@ -651,10 +651,11 @@ def test_if():
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run(test=lambda: run(load(even)),
              expected_out=[0, 2, 4, 6, 8])
-    # TEST.run('gen 10 | ifelse (x: x % 3 == 0) [store d3]',
-    #          expected_out=[1, 2, 4, 5, 7, 8])
-    # TEST.run('load d3',
-    #          expected_out=[0, 3, 6, 9])
+    d3 = []
+    TEST.run(test=lambda: run(gen(10) | ifelse(lambda x: x % 3 == 0, store(d3))),
+             expected_out=[1, 2, 4, 5, 7, 8])
+    TEST.run(test=lambda: run(load(d3)),
+             expected_out=[0, 3, 6, 9])
 
 
 def test_api_run():
@@ -761,7 +762,7 @@ def main_stable():
     test_sql()
     test_load_store()
     # test_loop()
-    # test_if()
+    test_if()
     test_api_run()
     test_api_gather()
     test_api_first()

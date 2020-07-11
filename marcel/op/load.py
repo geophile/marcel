@@ -52,6 +52,15 @@ class Load(marcel.core.Op):
     def __repr__(self):
         return f'load({self.var})'
 
+    def __getstate__(self):
+        m = self.__dict__.copy()
+        m['accumulator'] = self.save(self.accumulator)
+        return m
+
+    def __setstate__(self, state):
+        state['accumulator'] = self.recall(state['accumulator'])
+        self.__dict__.update(state)
+
     # AbstractOp
 
     def setup_1(self):

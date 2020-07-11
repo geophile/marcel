@@ -84,6 +84,12 @@ class AbstractOp(Pipelineable):
 
 class Op(AbstractOp):
 
+    # Op sublcasses use Op.save and Op.recall to "hide" state that should not be deep-copied during
+    # pickling/unpickling. For example, the variables passed to the store/load ops, via the API, are
+    # bound to lists. If these lists were copied, then pipeline copies would operate on the copied lists,
+    # defeating the point of using the store/load ops to operate on the values bound to the variables.
+    shallow_copy = {}
+
     def __init__(self, env):
         super().__init__()
         self._env = env
@@ -177,6 +183,16 @@ class Op(AbstractOp):
 
     def run_in_main_process(self):
         return False
+
+    @staticmethod
+    def save(x):
+        key = id(x)
+        Op.shallow_copy[key] = x
+        return key
+
+    @staticmethod
+    def recall(id):
+        return Op.shallow_copy.pop(id)
 
     @classmethod
     def op_name(cls):
