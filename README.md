@@ -1,7 +1,7 @@
 What's New
 ----------
 
-Marcel now has a `loop` operator. 
+ifthen, ifelse: TBD
 
 Marcel
 ======

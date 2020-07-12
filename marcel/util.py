@@ -103,6 +103,7 @@ def copy(x):
     except Exception as e:
         sys.stdout.flush()
         print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__, flush=True)
+        print_stack(sys.__stderr__)
 
 
 def print_stack(file=None):

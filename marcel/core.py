@@ -82,13 +82,29 @@ class AbstractOp(Pipelineable):
         pass
 
 
+class ShallowCopyStore:
+
+    def __init__(self):
+        self.contents = {}
+        self.counter = 0
+
+    def save(self, x):
+        id = self.counter
+        self.counter += 1
+        self.contents[id] = x
+        return id
+
+    def recall(self, id):
+        return self.contents.pop(id, None)
+
+
 class Op(AbstractOp):
 
     # Op sublcasses use Op.save and Op.recall to "hide" state that should not be deep-copied during
     # pickling/unpickling. For example, the variables passed to the store/load ops, via the API, are
     # bound to lists. If these lists were copied, then pipeline copies would operate on the copied lists,
     # defeating the point of using the store/load ops to operate on the values bound to the variables.
-    shallow_copy = {}
+    shallow_copy_store = ShallowCopyStore()
 
     def __init__(self, env):
         super().__init__()
@@ -107,6 +123,19 @@ class Op(AbstractOp):
 
     def __iter__(self):
         return PipelineIterator(self.create_pipeline())
+
+    def __getstate__(self):
+        m = self.__dict__.copy()
+        m['_env_ref'] = self.save(self._env)
+        return m
+
+    def __setstate__(self, state):
+        env_ref = self.recall(state['_env_ref'])
+        if env_ref is not None:
+            # Local copy: Use the saved env
+            state['_env'] = env_ref
+        # else: Remote copy: Keep the transmitted env
+        self.__dict__.update(state)
 
     # Pipelineable
 
@@ -164,7 +193,7 @@ class Op(AbstractOp):
         return False
 
     def env(self):
-        assert self._env is not None
+        assert self._env is not None, self
         return self._env
 
     def non_fatal_error(self, input=None, message=None, error=None):
@@ -186,13 +215,11 @@ class Op(AbstractOp):
 
     @staticmethod
     def save(x):
-        key = id(x)
-        Op.shallow_copy[key] = x
-        return key
+        return Op.shallow_copy_store.save(x)
 
     @staticmethod
     def recall(id):
-        return Op.shallow_copy.pop(id)
+        return Op.shallow_copy_store.recall(id)
 
     @classmethod
     def op_name(cls):
