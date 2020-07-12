@@ -44,7 +44,6 @@ class IfBase(marcel.core.Op):
     def setup_1(self):
         # Copy in case caller depends on internal state
         self.then = self.then.copy()
-        self.then.env().clear_changes()
         self.then.set_error_handler(self.owner.error_handler)
         self.then.setup_1()
         self.then.setup_2()
@@ -54,4 +53,3 @@ class IfBase(marcel.core.Op):
 
     def receive_complete(self):
         self.then.receive_complete()
-        self.env().namespace.update(self.then.env().changes())

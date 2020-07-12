@@ -1,7 +1,8 @@
 What's New
 ----------
 
-ifthen, ifelse: TBD
+Marcel has two new operators: `ifthen` and `ifelse`. These operators
+enable more complex flow control than was possible before.
 
 Marcel
 ======

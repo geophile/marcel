@@ -140,7 +140,7 @@ class Job:
 
     def start_process(self):
         def run_command_in_child(command, writer):
-            debug(f'running: {command.source}')
+            debug(f'running: {command.source}, env namespace: ({id(self.env.namespace)}) {self.env.namespace.keys()}')
             try:
                 child_namespace_changes = command.execute()
                 debug(f'completed: {command.source} {child_namespace_changes}')
