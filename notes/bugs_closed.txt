@@ -1153,3 +1153,72 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/opmodule.py", line 83, in create_op
     op_module = env.op_modules[op_name]
 AttributeError: 'Environment' object has no attribute 'op_modules'
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+71. store not setting variable
+
+M-0.9.17 jao@cheese:~/git/marcel/test$ gen 10 | ifthen (x: x%2==0) [store d2]
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+M-0.9.17 jao@cheese:~/git/marcel/test$ (d2)
+Error: Running map(lambda: d2): name 'd2' is not defined
+
+----------------------------------------------------------------------
+
+FIXED
+
+72. Join of stored pipelines fails
+
+cd ~/git/marcel
+ls -fr marcel test \
+| ifthen (f: now() - f.mtime < days(1)) [store recent] \
+| ifelse (f: f.suffix == '.py') [store py] \
+| ifelse (f: f.suffix == '.txt') [store txt]
+load recent | join [load py]
+
+Process Process-2:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 145, in run_command_in_child
+    child_namespace_changes = command.execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 440, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/marcel/marcel/core.py", line 373, in receive
+    self.first_op.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 175, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/load.py", line 86, in receive
+    self.send(next(self.input))
+  File "/home/jao/git/marcel/marcel/core.py", line 158, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 175, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/join.py", line 130, in receive
+    self.send(x + match[1:])
+  File "/home/jao/git/marcel/marcel/core.py", line 158, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 175, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/out.py", line 115, in receive
+    out = out.render_full(self.color_scheme())
+  File "/home/jao/git/marcel/marcel/object/file.py", line 96, in render_full
+    line = self._formatted_metadata()
+  File "/home/jao/git/marcel/marcel/object/file.py", line 151, in _formatted_metadata
+    self.display_path.as_posix()]
+AttributeError: 'NoneType' object has no attribute 'as_posix'
+

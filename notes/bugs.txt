@@ -244,18 +244,4 @@ AttributeError: 'tuple' object has no attribute '__globals__'
 
 ----------------------------------------------------------------------
 
-71. store not setting variable
-
-M-0.9.17 jao@cheese:~/git/marcel/test$ gen 10 | ifthen (x: x%2==0) [store d2]
-0
-1
-2
-3
-4
-5
-6
-7
-8
-9
-M-0.9.17 jao@cheese:~/git/marcel/test$ (d2)
-Error: Running map(lambda: d2): name 'd2' is not defined
+73.

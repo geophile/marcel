@@ -1,8 +1,50 @@
 What's New
 ----------
 
-Marcel has two new operators: `ifthen` and `ifelse`. These operators
-enable more complex flow control than was possible before.
+Marcel has two new operators: `ifthen` and `ifelse`. Easiest to explain with an
+example: Suppose you want to find all the `.py` 
+files in a directory, recursively.
+You could do this:
+
+```shell script
+ls -fr | select (f: f.suffix == '.py') | store py_files
+```
+
+After this runs, the variable `py_files` stores a `File` object for each qualifying file.
+Similarly, to find all the `.txt` files:
+
+```shell script
+ls -fr | select (f: f.suffix == '.txt') | store txt_files
+```
+
+You can combine these into a single command, 
+traversing the directory structure once instead of twice:
+
+```shell script
+ls -fr \
+| ifelse (f: f.suffix == '.py') [store py_files] \
+| ifelse (f: f.suffix == '.txt') [store txt_files]
+```
+
+`ifelse` tests the current tuple from the input stream, using the given
+predicate, and if it evalautes to `True`, then the
+tuple is passed to the bracketed pipeline. If the predicate evaluates to `False`,
+then the tuple is passed downstream instead.
+
+`ifthen` is used to send qualifying tuples to the bracketed pipeline, while _all_
+tuples are passed downstream. For example, you might want to create lists of files
+that are not disjoint. The following command places `.py` files in `py_files` again,
+and places files modified in the past day in `recent_updates`. Some files may appear in
+both.
+
+```shell script
+ls -fr \
+| ifthen (f: f.suffix == '.py') [store py_files] \
+| ifthen (f: now() - f.mtime < days(1)) [store recent_updates]
+```
+
+(You can examine the contents of the resulting variables using the `load` command,
+e.g. `load py_files` will print the contained `File`s to stdout.)
 
 Marcel
 ======

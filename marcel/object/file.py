@@ -69,14 +69,15 @@ class File(marcel.object.renderable.Renderable):
         # Ensure metadata is present before transmission
         self._is_executable()
         self._lstat()
+        state = self.__dict__.copy()
         # Send strings, not paths
         if self.path is not None:
-            self.path_str = str(self.path)
-            self.path = None
+            state['path_str'] = str(self.path)
+            state['path'] = None
         if self.display_path is not None:
-            self.display_path_str = str(self.display_path)
-            self.display_path = None
-        return self.__dict__
+            state['display_path_str'] = str(self.display_path)
+            state['display_path'] = None
+        return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
