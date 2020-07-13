@@ -88,6 +88,27 @@ class File(marcel.object.renderable.Renderable):
             self.display_path = pathlib.Path(self.display_path_str)
             self.display_path_str = None
 
+    def __hash__(self):
+        return self.path.__hash__()
+
+    def __eq__(self, other):
+        return self.path == other.path
+
+    def __ne__(self, other):
+        return self.path != other.path
+
+    def __lt__(self, other):
+        return self.path < other.path
+
+    def __le__(self, other):
+        return self.path <= other.path
+
+    def __gt__(self, other):
+        return self.path > other.path
+
+    def __ge__(self, other):
+        return self.path >= other.path
+
     # Renderable
 
     def render_compact(self):
