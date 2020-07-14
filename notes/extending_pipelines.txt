@@ -1,13 +1,3 @@
-Ideas:
-
-- Accumulate tuples and store in a var.
-
-- Write into pipeline from a var.
-
-- Control operators to facilitate accumulation.
-
-----------------------------------------------------------------------
-
 To capture a pipeline's contents in variable x:
 
     ls | ... > x
@@ -42,6 +32,44 @@ Generalize: The 2nd if argument could be a pipeline or var. So:
 Or just pipelines. To save in a var:
 
     ... | if PREDICATE [> x] | ...
+
+
+----------------------------------------------------------------------
+
+Current grammar has:
+
+    pipeline:
+            op_sequence
+
+    op_sequence:
+            op_args | op_sequence
+            op_args
+
+The > and >> syntax is syntactic sugar for load and stored ops.
+
+Modified grammar:
+
+    pipeline:
+            var > [op_sequence]
+            op_sequence
+            [op_sequence] > var
+            [op_sequence] >> var
+
+    op_sequence:
+            op_args | op_sequence
+            op_args
+
+======================================================================
+
+DONE:
+
+Ideas:
+
++ Accumulate tuples and store in a var.
+
++ Write into pipeline from a var.
+
++ Control operators to facilitate accumulation.
 
 ----------------------------------------------------------------------
 

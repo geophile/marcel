@@ -729,16 +729,6 @@ def test_if():
              expected_out=[1, 2, 4, 5, 7, 8])
     TEST.run('load d3',
              expected_out=[0, 3, 6, 9])
-    # Bug 72
-    TEST.run('cd ~/git/marcel')
-    TEST.run('''
-ls -fr marcel test \
-| ifthen (f: now() - f.mtime < days(1000)) [store recent] \
-| ifelse (f: f.suffix == '.py') [store py] \
-| ifelse (f: f.suffix == '.txt') [store txt]
-| select (*x: False)
-''')
-    TEST.run('load recent | join [load py]')
 
 
 def main_stable():
@@ -774,6 +764,9 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('gen 5')
+    # TEST.run('gen 5 | store x')
+    # TEST.run('x >')
     pass
 
 

@@ -138,7 +138,9 @@ class Token(Source):
     COMMENT = '#'
     COMMA = ','
     COLON = ':'
-    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON]
+    GT = '>'
+    GTGT = '>>'
+    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON, GT, GTGT]
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position)
@@ -175,6 +177,12 @@ class Token(Source):
         return False
 
     def is_colon(self):
+        return False
+
+    def is_gt(self):
+        return False
+
+    def is_gtgt(self):
         return False
 
     def op_name(self):
@@ -501,6 +509,24 @@ class Colon(OneCharSymbol):
         return True
 
 
+class Gt(OneCharSymbol):
+
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, position, adjacent_to_previous, Token.GT)
+
+    def is_gt(self):
+        return True
+
+
+class GtGt(OneCharSymbol):
+
+    def __init__(self, text, position, adjacent_to_previous):
+        super().__init__(text, position, adjacent_to_previous, Token.GTGT)
+
+    def is_gtgt(self):
+        return True
+
+
 class ImpliedMap(Token):
 
     def __init__(self):
@@ -558,6 +584,14 @@ class Lexer(Source):
             elif c == Token.COMMENT:
                 # Ignore the rest of the line
                 return None
+            elif c == Token.GT:
+                gt = self.next_char()
+                assert gt == Token.GT
+                c = self.peek_char()
+                if c == Token.GT:
+                    token = GtGt(self.text, self.end - 1, adjacent_to_previous)
+                else:
+                    token = Gt(self.text, self.end, adjacent_to_previous)
             else:
                 token = String(self.text, self.end, adjacent_to_previous)
             self.end = token.end
@@ -727,12 +761,57 @@ class Parser:
         pipeline = marcel.core.Pipeline()
         pipeline.set_parameters(parameters)
         self.current_pipelines.push(pipeline)
-        op_sequence = Parser.ensure_sequence(self.op_sequence())
+        store_op = self.store_syntactic_sugar()
+        if store_op:
+            # The entire pipeline is "> var" or ">> var". Generate a store op.
+            op_sequence = [store_op]
+        elif self.next_token(String, Gt):
+            # Turn "var >" into "load var" at the beginning of the op sequence.
+            var = self.token
+            load_op_module = self.op_modules['load']
+            load_op = load_op_module.create_op()
+            load_op_module.args_parser().parse([var.value(self)], load_op)
+            self.next_token(Gt)
+            if self.next_token(End):
+                # The entire pipeline is: [var >]
+                op_sequence = [load_op]
+            elif self.next_token():
+                # There is a token. It must be the start of an op sequence.
+                # (The op_sequence is built up in reverse, so append the load op,
+                # and the sequence will be reversed later.)
+                op_sequence = Parser.ensure_sequence(self.op_sequence())
+                op_sequence.append(load_op)
+            else:
+                # The is no next token. The entire command line is: var >
+                op_sequence = [load_op]
+        else:
+            op_sequence = Parser.ensure_sequence(self.op_sequence())
+            store_op = self.store_syntactic_sugar()
+            if store_op:
+                # Sequence is followed by "> var" or ">> var". Prepend a store op. (The op_sequence
+                # is reversed, so prepending causes the store to show up at the end of the pipeline.)
+                op_sequence = [store_op] + op_sequence
         op_sequence.reverse()
         for op_args in op_sequence:
             pipeline.append(op_args)
         self.current_pipelines.pop()
         return pipeline
+
+    def store_syntactic_sugar(self):
+        store_op = None
+        if self.next_token(Gt) or self.next_token(GtGt):
+            # Sequence is followed by "> var" or ">> var". Create a store op.
+            store_token = self.token
+            if not self.next_token(String):
+                raise UnexpectedTokenError(self.token, f'Expected variable after {store_token}')
+            var = self.token
+            store_op_module = self.op_modules['store']
+            store_op = store_op_module.create_op()
+            args = [var.value(self)]
+            if store_token == Token.GTGT:
+                args.append('--append')
+            store_op_module.args_parser().parse(args, store_op)
+        return store_op
 
     # Accumulates ops in REVERSE order, to avoid list prepend.
     # Top-level caller needs to reverse the result..
