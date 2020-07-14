@@ -20,10 +20,27 @@ import marcel.exception
 
 HELP = '''
 {L,wrap=F}load VAR
+{L,wrap=F}VAR >
 
 {L,indent=4:28}{r:VAR}                     The variable containing data to be loaded.
 
-Write the conents of {r:VAR} to the output stream.  
+Write the conents of {r:VAR} to the output stream.
+
+There is special optional syntax for the {r:load} operator: {r:load VAR} can be written as {r:VAR >}. 
+With this alternative syntax, the {r:>} acts as a pipe ({r:|}). So, for example, the following command:
+
+{L,wrap=F}load foobar | map (x, y: (y, x))  
+
+is equivalent to:
+
+{L,wrap=F}foobar > map (x, y: (y, x))
+
+This syntax can be used in any pipeline, e.g.
+
+{L,wrap=F}abc > join [def >]
+
+This loads {r:abc} into the pipeline carrying data to the {r:join} operator. The other
+input to {r:join} comes from loading {r:def}.
 '''
 
 

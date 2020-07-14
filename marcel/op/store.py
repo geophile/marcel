@@ -20,6 +20,8 @@ import marcel.exception
 
 HELP = '''
 {L,wrap=F}store [-a|--append] VAR
+{L,wrap=F}> VAR
+{L,wrap=F}>> VAR
 
 {L,indent=4:28}{r:-a}, {r:--append}                     Append to {r:VAR}s list, instead of replacing.
 
@@ -28,6 +30,18 @@ HELP = '''
 Write the incoming tuples into a list bound to {r:VAR}. By default, the current value of {r:VAR}
 is replaced. If {r:--append} is specified, then it is expected that the current value
 of {r:VAR} is a list, and the incoming tuples are appended. 
+
+There is special optional syntax for the {r:store} operator: {r:store VAR} can be written as {r:> VAR}. 
+With this alternative syntax, the {r:>} acts as a pipe ({r:|}). So, for example, the following command:
+
+{L,wrap=F}gen 5 | store x
+
+stores the stream carrying {r:0, 1, 2, 3, 4} in variable {r:x}. This can also be written as:
+
+{L,wrap=F}gen 5 > x
+
+The symbol {r:>>} is used to append to the contents of the variable, instead of
+replacing the value, e.g. {r:gen 5 >> x}. 
 '''
 
 
