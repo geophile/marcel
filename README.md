@@ -1,50 +1,31 @@
 What's New
 ----------
 
-Marcel has two new operators: `ifthen` and `ifelse`. Easiest to explain with an
-example: Suppose you want to find all the `.py` 
-files in a directory, recursively.
-You could do this:
+Syntactic sugar has been sprinkled on top of the `store` and `load`
+operators.
+
+A stream carries tuples from one operator to another. `Store` 
+accumulates these tuples into a `list`, and `load` turns them back
+into a stream. So, for example, you can store recently updated
+files as follows:
 
 ```shell script
-ls -fr | select (f: f.suffix == '.py') | store py_files
+ls -fr | select (f: now() - f.mtime < days(1)) | store recent
 ```
 
-After this runs, the variable `py_files` stores a `File` object for each qualifying file.
-Similarly, to find all the `.txt` files:
+And then do further processing as follows:
 
 ```shell script
-ls -fr | select (f: f.suffix == '.txt') | store txt_files
-```
+load recent | select (f: f.suffix == '.py')
+``` 
 
-You can combine these into a single command, 
-traversing the directory structure once instead of twice:
-
-```shell script
-ls -fr \
-| ifelse (f: f.suffix == '.py') [store py_files] \
-| ifelse (f: f.suffix == '.txt') [store txt_files]
-```
-
-`ifelse` tests the current tuple from the input stream, using the given
-predicate, and if it evalautes to `True`, then the
-tuple is passed to the bracketed pipeline. If the predicate evaluates to `False`,
-then the tuple is passed downstream instead.
-
-`ifthen` is used to send qualifying tuples to the bracketed pipeline, while _all_
-tuples are passed downstream. For example, you might want to create lists of files
-that are not disjoint. The following command places `.py` files in `py_files` again,
-and places files modified in the past day in `recent_updates`. Some files may appear in
-both.
+You can still use this syntax. Using the newly added syntax, these commands
+can be written as:
 
 ```shell script
-ls -fr \
-| ifthen (f: f.suffix == '.py') [store py_files] \
-| ifthen (f: now() - f.mtime < days(1)) [store recent_updates]
+ls -fr | select (f: now() - f.mtime < days(1)) > recent
+recent > select (f: f.suffix == '.py')
 ```
-
-(You can examine the contents of the resulting variables using the `load` command,
-e.g. `load py_files` will print the contained `File`s to stdout.)
 
 Marcel
 ======

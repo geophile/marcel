@@ -20,8 +20,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/load.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/load.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -479,7 +479,7 @@
       <workItem from="1593807709000" duration="28786000" />
       <workItem from="1594090911400" duration="35242000" />
       <workItem from="1594334057514" duration="3786000" />
-      <workItem from="1594423291592" duration="43116000" />
+      <workItem from="1594423291592" duration="44100000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -786,12 +786,12 @@
     <state x="1113" y="521" width="306" height="466" key="refactoring.ChangeSignatureDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1591380771348" />
     <state x="2875" y="447" key="refactoring.ChangeSignatureDialog/0.27.3840.1053@0.27.3840.1053" timestamp="1592851582734" />
     <state x="1948" y="521" key="refactoring.ChangeSignatureDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1590544776135" />
-    <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup" timestamp="1594738873746">
+    <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup" timestamp="1594739419643">
       <screen x="0" y="27" width="3840" height="1053" />
     </state>
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1594431946155" />
     <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1593702967393" />
-    <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1594738873746" />
+    <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1594739419643" />
     <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1594394179448" />
     <state x="701" y="354" width="672" height="507" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1590286500344" />
     <state x="2621" y="335" width="672" height="519" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1593263681533" />
