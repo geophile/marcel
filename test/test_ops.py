@@ -702,6 +702,41 @@ def test_load_store():
     #          expected_out=[1, 2, 3, 4, 5])
 
 
+def test_load_store_sugar():
+    # Store at end of top-level pipeline
+    TEST.run(test='gen 5 > g5',
+             verification='load g5',
+             expected_out=[0, 1, 2, 3, 4])
+    # Store at end of pipeline arg
+    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [map (x: x * 10) > e10x10]',
+             verification='load e10x10',
+             expected_out=[0, 20, 40, 60, 80])
+    # Store as the entire pipeline arg
+    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [> e10]',
+             verification='load e10',
+             expected_out=[0, 2, 4, 6, 8])
+    # Append
+    TEST.run(test='gen 5 > g5g5',
+             verification='load g5g5',
+             expected_out=[0, 1, 2, 3, 4])
+    TEST.run(test='gen 5 >> g5g5',
+             verification='load g5g5',
+             expected_out=[0, 1, 2, 3, 4, 0, 1, 2, 3, 4])
+    # Load at beginning of top-level pipeline
+    TEST.run(test='gen 4 > g4',
+             verification='g4 > map (x: -x)',
+             expected_out=[0, -1, -2, -3])
+    # Load by itself at beginning of top-level pipeline
+    TEST.run(test='gen 4 > g4',
+             verification='g4 >',
+             expected_out=[0, 1, 2, 3])
+    # Load in pipeline arg
+    TEST.run('gen 4 | map (x: (x, x * 10)) > x10')
+    TEST.run('gen 4 | map (x: (x, x * 100)) > x100')
+    TEST.run('x10 > join [x100 >]',
+             expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
+
+
 def test_loop():
     TEST.run('loop (0) [select (x: x < 3) | emit | map (x: x + 1)]',
              expected_out=[0, 1, 2])
@@ -759,14 +794,13 @@ def main_stable():
     test_sql()
     test_import()
     test_load_store()
+    test_load_store_sugar()
     # test_loop()
     test_if()
 
 
 def main_dev():
-    TEST.run('gen 5')
-    # TEST.run('gen 5 | store x')
-    # TEST.run('x >')
+    test_load_store_sugar()
     pass
 
 

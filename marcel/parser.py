@@ -429,7 +429,7 @@ class Run(Token):
             self.symbol = '!'
 
 
-class OneCharSymbol(Token):
+class Symbol(Token):
 
     def __init__(self, text, position, adjacent_to_previous, symbol):
         super().__init__(text, position, adjacent_to_previous)
@@ -440,7 +440,7 @@ class OneCharSymbol(Token):
         return self.symbol
 
 
-class Pipe(OneCharSymbol):
+class Pipe(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position, adjacent_to_previous, Token.PIPE)
@@ -449,7 +449,7 @@ class Pipe(OneCharSymbol):
         return True
 
 
-class Fork(OneCharSymbol):
+class Fork(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position, adjacent_to_previous, Token.FORK)
@@ -461,7 +461,7 @@ class Fork(OneCharSymbol):
         return 'fork'
 
 
-class Begin(OneCharSymbol):
+class Begin(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position, adjacent_to_previous, Token.BEGIN)
@@ -470,7 +470,7 @@ class Begin(OneCharSymbol):
         return True
 
 
-class End(OneCharSymbol):
+class End(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position, adjacent_to_previous, Token.END)
@@ -479,7 +479,7 @@ class End(OneCharSymbol):
         return True
 
 
-class Assign(OneCharSymbol):
+class Assign(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position, adjacent_to_previous, Token.ASSIGN)
@@ -491,7 +491,7 @@ class Assign(OneCharSymbol):
         return 'assign'
 
 
-class Comma(OneCharSymbol):
+class Comma(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position, adjacent_to_previous, Token.COMMA)
@@ -500,7 +500,7 @@ class Comma(OneCharSymbol):
         return True
 
 
-class Colon(OneCharSymbol):
+class Colon(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position, adjacent_to_previous, Token.COLON)
@@ -509,7 +509,7 @@ class Colon(OneCharSymbol):
         return True
 
 
-class Gt(OneCharSymbol):
+class Gt(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position, adjacent_to_previous, Token.GT)
@@ -518,10 +518,11 @@ class Gt(OneCharSymbol):
         return True
 
 
-class GtGt(OneCharSymbol):
+class GtGt(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position, adjacent_to_previous, Token.GTGT)
+        self.end += 1
 
     def is_gtgt(self):
         return True
@@ -588,10 +589,9 @@ class Lexer(Source):
                 gt = self.next_char()
                 assert gt == Token.GT
                 c = self.peek_char()
-                if c == Token.GT:
-                    token = GtGt(self.text, self.end - 1, adjacent_to_previous)
-                else:
-                    token = Gt(self.text, self.end, adjacent_to_previous)
+                token = (GtGt(self.text, self.end - 1, adjacent_to_previous)
+                         if c == Token.GT else
+                         Gt(self.text, self.end, adjacent_to_previous))
             else:
                 token = String(self.text, self.end, adjacent_to_previous)
             self.end = token.end
@@ -775,7 +775,7 @@ class Parser:
             if self.next_token(End):
                 # The entire pipeline is: [var >]
                 op_sequence = [load_op]
-            elif self.next_token():
+            elif self.next_token_exists():
                 # There is a token. It must be the start of an op sequence.
                 # (The op_sequence is built up in reverse, so append the load op,
                 # and the sequence will be reversed later.)
@@ -807,9 +807,10 @@ class Parser:
             var = self.token
             store_op_module = self.op_modules['store']
             store_op = store_op_module.create_op()
-            args = [var.value(self)]
-            if store_token == Token.GTGT:
+            args = []
+            if store_token.value(self) == Token.GTGT:
                 args.append('--append')
+            args.append(var.value(self))
             store_op_module.args_parser().parse(args, store_op)
         return store_op
 
@@ -894,6 +895,9 @@ class Parser:
                 self.t += 1
                 return True
         return False
+
+    def next_token_exists(self):
+        return self.t < len(self.tokens)
 
     @staticmethod
     def raise_unexpected_token_error(token, message):
