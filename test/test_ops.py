@@ -766,6 +766,17 @@ def test_if():
              expected_out=[0, 3, 6, 9])
 
 
+def test_delete():
+    TEST.run(test='a = (1)',
+             verification='env | select (k, v: k == "a")',
+             expected_out=[('a', 1)])
+    TEST.run(test='delete a',
+             verification='env | select (k, v: k == "a")',
+             expected_out=[])
+    TEST.run(test='delete not_a_variable',
+             expected_err='not defined')
+
+
 def main_stable():
     test_no_such_op()
     test_gen()
@@ -797,10 +808,10 @@ def main_stable():
     test_load_store_sugar()
     # test_loop()
     test_if()
+    test_delete()
 
 
 def main_dev():
-    test_load_store_sugar()
     pass
 
 

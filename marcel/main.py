@@ -47,7 +47,7 @@ import marcel.util
 
 
 HISTORY_FILE = '.marcel_history'
-HISTORY_LENGTH = 10000
+HISTORY_LENGTH = 1000
 
 
 class Reader(marcel.multilinereader.MultiLineReader):
