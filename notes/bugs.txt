@@ -190,24 +190,6 @@ parameters as literals. Fix the parser.
 
 ----------------------------------------------------------------------
 
-68. Help formatting broken -- indent vs. wrap
-
-This indents by 4:
-
-    {L,indent=4}loop ((0, 1)) [select (x, y: y < 1000000) | map (x, y: (y, x + y))] | map (x, y: x)
-
-This does not:
-
-    {L,indent=4,wrap=F}loop ((0, 1)) [select (x, y: y < 1000000) | map (x, y: (y, x + y))] | map (x, y: x)
-
-This does indent:
-
-    {L,indent=4,wrap=T}loop ((0, 1)) [select (x, y: y < 1000000) | map (x, y: (y, x + y))] | map (x, y: x)
-
-So wrap=F causes indent to be ignored.
-
-----------------------------------------------------------------------
-
 69. Shell crashes on bad first arg to loop
 
 M-0.9.17 jao@cheese:~$ loop (10, 1) [select (x, f: x > 0) | emit | map (x, f: (x-1, f*x))]

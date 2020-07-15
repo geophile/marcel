@@ -21,12 +21,9 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/doc/help_marcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_marcel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/helpformatter.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/helpformatter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_ops.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_help.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_help.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +53,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/experiments/threadlocal/local_a.py" />
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
-  <component name="RunManager" selected="Python.test_ops">
+  <component name="RunManager" selected="Python.test_help">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -321,6 +318,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="test_help" type="PythonConfigurationType" factoryName="Python">
+      <module name="marcel" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/test_help.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="test_native_filename_ops" type="PythonConfigurationType" factoryName="Python">
       <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -417,6 +436,7 @@
       <item itemvalue="Python.test_tab_completion" />
       <item itemvalue="Python.marcel" />
       <item itemvalue="Python.test_api2" />
+      <item itemvalue="Python.test_help" />
       <item itemvalue="Python.profiling" />
       <item itemvalue="Python.threadlocal" />
       <item itemvalue="Python.stdin" />
@@ -484,7 +504,7 @@
       <workItem from="1593807709000" duration="28786000" />
       <workItem from="1594090911400" duration="35242000" />
       <workItem from="1594334057514" duration="3786000" />
-      <workItem from="1594423291592" duration="46786000" />
+      <workItem from="1594423291592" duration="52143000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -519,12 +539,12 @@
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
     <state x="116" y="506" width="732" height="644" key="#Inspections/0.27.2560.1413@0.27.2560.1413" timestamp="1592407927927" />
-    <state x="594" y="346" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1594425897487">
-      <screen x="0" y="27" width="1920" height="1053" />
+    <state x="2300" y="266" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1594767040306">
+      <screen x="0" y="27" width="3840" height="1053" />
     </state>
     <state x="594" y="346" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1594425897487" />
     <state x="792" y="455" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1591629111616" />
-    <state x="2300" y="266" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.3840.1053@0.27.3840.1053" timestamp="1593440626765" />
+    <state x="2300" y="266" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.3840.1053@0.27.3840.1053" timestamp="1594767040306" />
     <state x="1920" y="455" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1591797420480" />
     <state x="2514" y="327" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1592252959045" />
     <state x="836" y="396" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1593788498111" />
@@ -584,45 +604,45 @@
     <state x="2758" y="403" key="FileChooserDialogImpl/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1590265525590" />
     <state x="960" y="420" width="306" height="498" key="FileChooserDialogImpl/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1593788496991" />
     <state x="2341" y="641" key="FileChooserDialogImpl/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1591320628516" />
-    <state width="1375" height="278" key="GridCell.Tab.0.bottom" timestamp="1594748833229">
+    <state width="1375" height="278" key="GridCell.Tab.0.bottom" timestamp="1594823011024">
       <screen x="0" y="27" width="3840" height="1053" />
     </state>
     <state width="1591" height="278" key="GridCell.Tab.0.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1594647242550" />
     <state width="1651" height="278" key="GridCell.Tab.0.bottom/0.27.2560.1413@0.27.2560.1413" timestamp="1593702951343" />
-    <state width="1375" height="278" key="GridCell.Tab.0.bottom/0.27.3840.1053@0.27.3840.1053" timestamp="1594748833229" />
+    <state width="1375" height="278" key="GridCell.Tab.0.bottom/0.27.3840.1053@0.27.3840.1053" timestamp="1594823011024" />
     <state width="1586" height="278" key="GridCell.Tab.0.bottom/0.27.4480.1413@0.27.4480.1413" timestamp="1594400601838" />
     <state width="1526" height="295" key="GridCell.Tab.0.bottom/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1591129173160" />
     <state width="1447" height="280" key="GridCell.Tab.0.bottom/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1593220892545" />
     <state width="1586" height="278" key="GridCell.Tab.0.bottom/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1594334040614" />
     <state width="1586" height="278" key="GridCell.Tab.0.bottom/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1594316427549" />
-    <state width="1375" height="278" key="GridCell.Tab.0.center" timestamp="1594748833228">
+    <state width="1375" height="278" key="GridCell.Tab.0.center" timestamp="1594823011023">
       <screen x="0" y="27" width="3840" height="1053" />
     </state>
     <state width="1591" height="278" key="GridCell.Tab.0.center/0.27.1920.1053@0.27.1920.1053" timestamp="1594647242549" />
     <state width="1651" height="278" key="GridCell.Tab.0.center/0.27.2560.1413@0.27.2560.1413" timestamp="1593702951342" />
-    <state width="1375" height="278" key="GridCell.Tab.0.center/0.27.3840.1053@0.27.3840.1053" timestamp="1594748833228" />
+    <state width="1375" height="278" key="GridCell.Tab.0.center/0.27.3840.1053@0.27.3840.1053" timestamp="1594823011023" />
     <state width="1586" height="278" key="GridCell.Tab.0.center/0.27.4480.1413@0.27.4480.1413" timestamp="1594400601838" />
     <state width="1526" height="295" key="GridCell.Tab.0.center/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1591129173160" />
     <state width="1447" height="280" key="GridCell.Tab.0.center/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1593220892545" />
     <state width="1586" height="278" key="GridCell.Tab.0.center/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1594334040614" />
     <state width="1586" height="278" key="GridCell.Tab.0.center/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1594316427549" />
-    <state width="1375" height="278" key="GridCell.Tab.0.left" timestamp="1594748833227">
+    <state width="1375" height="278" key="GridCell.Tab.0.left" timestamp="1594823011022">
       <screen x="0" y="27" width="3840" height="1053" />
     </state>
     <state width="1591" height="278" key="GridCell.Tab.0.left/0.27.1920.1053@0.27.1920.1053" timestamp="1594647242548" />
     <state width="1651" height="278" key="GridCell.Tab.0.left/0.27.2560.1413@0.27.2560.1413" timestamp="1593702951342" />
-    <state width="1375" height="278" key="GridCell.Tab.0.left/0.27.3840.1053@0.27.3840.1053" timestamp="1594748833227" />
+    <state width="1375" height="278" key="GridCell.Tab.0.left/0.27.3840.1053@0.27.3840.1053" timestamp="1594823011022" />
     <state width="1586" height="278" key="GridCell.Tab.0.left/0.27.4480.1413@0.27.4480.1413" timestamp="1594400601837" />
     <state width="1526" height="295" key="GridCell.Tab.0.left/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1591129173160" />
     <state width="1447" height="280" key="GridCell.Tab.0.left/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1593220892545" />
     <state width="1586" height="278" key="GridCell.Tab.0.left/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1594334040614" />
     <state width="1586" height="278" key="GridCell.Tab.0.left/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1594316427549" />
-    <state width="1375" height="278" key="GridCell.Tab.0.right" timestamp="1594748833228">
+    <state width="1375" height="278" key="GridCell.Tab.0.right" timestamp="1594823011024">
       <screen x="0" y="27" width="3840" height="1053" />
     </state>
     <state width="1591" height="278" key="GridCell.Tab.0.right/0.27.1920.1053@0.27.1920.1053" timestamp="1594647242550" />
     <state width="1651" height="278" key="GridCell.Tab.0.right/0.27.2560.1413@0.27.2560.1413" timestamp="1593702951342" />
-    <state width="1375" height="278" key="GridCell.Tab.0.right/0.27.3840.1053@0.27.3840.1053" timestamp="1594748833228" />
+    <state width="1375" height="278" key="GridCell.Tab.0.right/0.27.3840.1053@0.27.3840.1053" timestamp="1594823011024" />
     <state width="1586" height="278" key="GridCell.Tab.0.right/0.27.4480.1413@0.27.4480.1413" timestamp="1594400601838" />
     <state width="1526" height="295" key="GridCell.Tab.0.right/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1591129173160" />
     <state width="1447" height="280" key="GridCell.Tab.0.right/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1593220892545" />
@@ -791,12 +811,12 @@
     <state x="1113" y="521" width="306" height="466" key="refactoring.ChangeSignatureDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1591380771348" />
     <state x="2875" y="447" key="refactoring.ChangeSignatureDialog/0.27.3840.1053@0.27.3840.1053" timestamp="1592851582734" />
     <state x="1948" y="521" key="refactoring.ChangeSignatureDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1590544776135" />
-    <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup" timestamp="1594748654357">
+    <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup" timestamp="1594820089059">
       <screen x="0" y="27" width="3840" height="1053" />
     </state>
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1594431946155" />
     <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1593702967393" />
-    <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1594748654357" />
+    <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1594820089059" />
     <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1594394179448" />
     <state x="701" y="354" width="672" height="507" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1590286500344" />
     <state x="2621" y="335" width="672" height="519" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1593263681533" />
@@ -850,11 +870,12 @@
     <SUITE FILE_PATH="coverage/marcel$test_filename_ops.coverage" NAME="test_filename_ops Coverage Results" MODIFIED="1592256180967" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$marcel.coverage" NAME="marcel Coverage Results" MODIFIED="1593377007703" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/marcel$db.coverage" NAME="db Coverage Results" MODIFIED="1592596072036" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
+    <SUITE FILE_PATH="coverage/marcel$test_help.coverage" NAME="test_help Coverage Results" MODIFIED="1594822988906" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$stdin.coverage" NAME="stdin Coverage Results" MODIFIED="1593446803908" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$test_api2.coverage" NAME="test_api2 Coverage Results" MODIFIED="1594429002535" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$locals.coverage" NAME="locals Coverage Results" MODIFIED="1591385035152" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$test_api.coverage" NAME="test_api Coverage Results" MODIFIED="1594589240012" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
-    <SUITE FILE_PATH="coverage/marcel$test_ops.coverage" NAME="test_ops Coverage Results" MODIFIED="1594748840326" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/marcel$test_ops.coverage" NAME="test_ops Coverage Results" MODIFIED="1594767012118" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$profiling.coverage" NAME="profiling Coverage Results" MODIFIED="1592923271480" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/marcel$parser.coverage" NAME="parser Coverage Results" MODIFIED="1593197865597" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/marcel$test_rdparser.coverage" NAME="test_parser Coverage Results" MODIFIED="1589840514847" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />

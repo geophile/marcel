@@ -27,13 +27,35 @@ def colorize(text, color):
 color_scheme = TestColorScheme()
 formatter = marcel.helpformatter.HelpFormatter(color_scheme, colorize)
 
-text = '''
-{L,indent=4:28}-i, --incremental       Output a tuple for each step of the reduction. I.e., there will be one
-output tuple for each input tuple, with the reductions showing the result of the reduction up to and including
-the most recent input.
-{L,indent=4:28}FUNCTION                A reduction function.
+# This indents by 4:
+
+A = '''
+{L,indent=4}loop ((0, 1)) [select (x, y: y < 1000000) | map (x, y: (y, x + y))] | map (x, y: x)
 '''
-print(f'ORIGINAL: {text}')
-formatted = formatter.format(text)
-print('-----------------------------------------------------------------------------')
-print(f'FORMATTED: {formatted}')
+
+# This does not:
+
+B = '''
+{L,indent=4,wrap=F}loop ((0, 1)) [select (x, y: y < 1000000) | map (x, y: (y, x + y))] | map (x, y: x)
+'''
+
+# This does indent:
+
+C = '''
+{L,indent=4,wrap=T}loop ((0, 1)) [select (x, y: y < 1000000) | map (x, y: (y, x + y))] | map (x, y: x)
+'''
+
+# So wrap=F causes indent to be ignored.
+
+
+def plain_and_formatted(label, text):
+    print(f'{label}: ORIGINAL')
+    print(text)
+    print(f'{label}: FORMATTED')
+    print(formatter.format(text))
+    print('-----------------------------------------------------------------------------')
+
+
+plain_and_formatted('A', A)
+plain_and_formatted('B', B)
+plain_and_formatted('C', C)
