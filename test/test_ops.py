@@ -735,6 +735,11 @@ def test_load_store_sugar():
     TEST.run('gen 4 | map (x: (x, x * 100)) > x100')
     TEST.run('x10 > join [x100 >]',
              expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
+    # Bug 73
+    TEST.run('gen 3 | map (x: (x, x*10)) > a')
+    TEST.run('gen 3 | map (x: (x, x*100)) > b')
+    TEST.run('gen 3 | map (x: (x, x*1000)) > c')
+    TEST.run('a > join [b >] | join [c >]')
 
 
 def test_loop():

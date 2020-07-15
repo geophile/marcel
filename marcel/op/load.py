@@ -35,6 +35,10 @@ is equivalent to:
 
 {L,wrap=F}foobar > map (x, y: (y, x))
 
+{r:foobar >} is valid at the end of a pipeline since it produces a stream of tuples, just like
+any other pipeline. So, for example the command line {r:foobar >} prints the contents of foobar,
+(since the {r:out} operator is applied at the end of a top-level pipeline if not explicitly provided).
+
 This syntax can be used in any pipeline, e.g.
 
 {L,wrap=F}abc > join [def >]

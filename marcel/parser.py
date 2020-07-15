@@ -100,10 +100,10 @@ class Source:
             text = self.text[self.start:self.end]
         return f'{name}({text})'
 
-    def peek_char(self):
+    def peek_char(self, n=1):
         c = None
-        if self.end < len(self.text):
-            c = self.text[self.end]
+        if self.end + n <= len(self.text):
+            c = self.text[self.end:self.end + n]
         return c
 
     def next_char(self):
@@ -586,12 +586,8 @@ class Lexer(Source):
                 # Ignore the rest of the line
                 return None
             elif c == Token.GT:
-                gt = self.next_char()
-                assert gt == Token.GT
-                c = self.peek_char()
-                token = (GtGt(self.text, self.end - 1, adjacent_to_previous)
-                         if c == Token.GT else
-                         Gt(self.text, self.end, adjacent_to_previous))
+                token_class = GtGt if self.peek_char(2) == Token.GTGT else Gt
+                token = token_class(self.text, self.end, adjacent_to_previous)
             else:
                 token = String(self.text, self.end, adjacent_to_previous)
             self.end = token.end

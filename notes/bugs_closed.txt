@@ -1242,3 +1242,23 @@ Traceback (most recent call last):
     self.display_path.as_posix()]
 AttributeError: 'NoneType' object has no attribute 'as_posix'
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+73. Parsing error involving pipe and/or pipeline args with load syntax
+
+Pipe before the last join is rejected
+
+    M-0.9.20 jao@cheese:~/git/marcel$ a > join [b>] | join [c>]
+    Parsing error at position 10 of "...join [b>] | join [c>]...": Unexpected token type: Pipe(|)
+    
+Two successive joins not piped is OK?!
+
+    M-0.9.20 jao@cheese:~/git/marcel$ a > join [b>] join [c>]
+    (0, 0, 0, 0)
+    (1, 10, 100, 1000)
+    (2, 20, 200, 2000)
+    (3, 30, 300, 3000)
+    (4, 40, 400, 4000)
