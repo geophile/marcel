@@ -441,6 +441,8 @@ Operator ls: filenames must be a string: [runpipeline(b-f)]
 Need a nushell like op for importing files. E.g., csv importer should
 split on separator and convert to tuples.
 
+There is a csv module in the standard library!
+
 ----------------------------------------------------------------------
 
 Set ops.

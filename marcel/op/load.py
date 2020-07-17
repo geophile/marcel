@@ -86,13 +86,13 @@ class Load(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        # API: var is None, accumulator is set
-        # Interactive: var is set, accumulator is None
         if self.var is not None:
+            # Interactive: var is set, accumulator is None
             self.accumulator = self.getvar(self.var)
             if self.accumulator is None:
                 raise marcel.exception.KillCommandException(f'Variable {self.var} is undefined.')
         else:
+            # API: var is None, accumulator is set
             if self.accumulator is None:
                 raise marcel.exception.KillCommandException(f'Accumulator is undefined.')
         try:

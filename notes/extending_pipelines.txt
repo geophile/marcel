@@ -45,19 +45,46 @@ Current grammar has:
             op_args | op_sequence
             op_args
 
+
 The > and >> syntax is syntactic sugar for load and stored ops.
 
-Modified grammar:
 
-    pipeline:
-            var > [op_sequence]
+Modified grammar for pipeline:
+
+    var > var
+    var > [op_sequence [> var]]
+    op_sequence [> var]
+    > var
+
+Expanded:
+
+    var > 
+    var > var
+    var > op_sequence
+    var > op_sequence > var
+    op_sequence
+    op_sequence > var
+    > var
+
+if var >:
+
+    if pipeline end: var >
+    if next is var: var > var
+    else:
+
+        if > var: > var
+        else:
+            if op_sequence
             op_sequence
-            [op_sequence] > var
-            [op_sequence] >> var
+    
+            if pipeline end: var > op_sequence
+            else: var > op_sequence > var
 
-    op_sequence:
-            op_args | op_sequence
-            op_args
+Detecting pipeline end:
+
+Pipeline is top level, or bracketed (when used as an arg). So a
+pipeline is terminated by end of input, or ].
+
 
 ======================================================================
 

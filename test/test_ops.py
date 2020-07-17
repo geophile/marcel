@@ -703,6 +703,74 @@ def test_load_store():
 
 
 def test_load_store_sugar():
+    # ------------------------ Test all the paths through Parser.pipeline()
+    # var >
+    TEST.run(test='gen 3 | store p1',
+             verification='p1 >',
+             expected_out=[0, 1, 2])
+    # var >> (error)
+    TEST.run(test='gen 3 | store p2',
+             verification='p2 >>',
+             expected_err='Append not permitted here')
+    # var > var
+    TEST.run('gen 3 | store p3')
+    TEST.run(test='p3 > p4',
+             verification='p4 >',
+             expected_out=[0, 1, 2])
+    # var >> var
+    TEST.run('gen 3 | store p5')
+    TEST.run('gen 3 | map (x: x + 100) | store p6')
+    TEST.run(test='p5 >> p7',
+             verification='p7 >',
+             expected_out=[0, 1, 2])
+    TEST.run(test='p6 >> p7',
+             verification='p7 >',
+             expected_out=[0, 1, 2, 100, 101, 102])
+    # var > op_sequence
+    TEST.run('gen 3 | store p8')
+    TEST.run(test='p8 > map (x: x + 100)',
+             expected_out=[100, 101, 102])
+    # var >> op_sequence (error)
+    TEST.run('gen 3 | store p9')
+    TEST.run(test='p9 >> map (x: x + 100)',
+             expected_err='Append not permitted here')
+    # var > op_sequence > var
+    TEST.run('gen 3 | store p10')
+    TEST.run(test='p10 > map (x: x + 100) > p11',
+             verification='p11 >',
+             expected_out=[100, 101, 102])
+    # var > op_sequence >> var
+    TEST.run('gen 3 | store p12')
+    TEST.run(test='p12 > map (x: x + 100) >> p13',
+             verification='p13 >',
+             expected_out=[100, 101, 102])
+    TEST.run(test='p12 > map (x: x + 1000) >> p13',
+             verification='p13 >',
+             expected_out=[100, 101, 102, 1000, 1001, 1002])
+    # op_sequence -- tested adequately elsewhere
+    # op_sequence > var
+    TEST.run(test='gen 3 > p14',
+             verification='p14 >',
+             expected_out=[0, 1, 2])
+    # op_sequence >> var
+    TEST.run(test='gen 3 >> p15',
+             verification='p15 >',
+             expected_out=[0, 1, 2])
+    TEST.run(test='gen 3 | map (x: x + 100) >> p15',
+             verification='p15 >',
+             expected_out=[0, 1, 2, 100, 101, 102])
+    # > var
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [> p16] | select (x: False)',
+             verification='p16 >',
+             expected_out=[0, 2, 4])
+    # >> var
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [>> p17] | select (x: False)',
+             verification='p17 >',
+             expected_out=[0, 2, 4])
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 1) [>> p17] | select (x: False)',
+             verification='p17 >',
+             expected_out=[0, 2, 4, 1, 3, 5])
+    # ---------------------------------------------------------------------
     # Store at end of top-level pipeline
     TEST.run(test='gen 5 > g5',
              verification='load g5',
@@ -739,7 +807,15 @@ def test_load_store_sugar():
     TEST.run('gen 3 | map (x: (x, x*10)) > a')
     TEST.run('gen 3 | map (x: (x, x*100)) > b')
     TEST.run('gen 3 | map (x: (x, x*1000)) > c')
-    TEST.run('a > join [b >] | join [c >]')
+    TEST.run('a > join [b >] | join [c >]',
+             expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
+    # Bug 74
+    TEST.run('gen 3 | map (x: (x, x*10)) > a')
+    TEST.run('gen 3 | map (x: (x, x*100)) > b')
+    TEST.run('gen 3 | map (x: (x, x*1000)) > c')
+    TEST.run('a > join [b >] | join [c >] > d')
+    TEST.run('d >',
+             expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
 
 
 def test_loop():

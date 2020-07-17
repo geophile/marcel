@@ -337,11 +337,12 @@ class Expression(Token):
 
 class String(Token):
 
-    def __init__(self, text, position, adjacent_to_previous):
+    def __init__(self, text, position=None, adjacent_to_previous=False):
         super().__init__(text, 0 if position is None else position, adjacent_to_previous)
         if position is None:
             # Text is fine as is.
             self.string = text
+            self.end = len(text)
         else:
             # Text is from the input being parsed. Scan it to deal with escapes and quotes.
             self.string = None
@@ -511,21 +512,15 @@ class Colon(Symbol):
 
 class Gt(Symbol):
 
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous, Token.GT)
+    def __init__(self, text, position, adjacent_to_previous, symbol):
+        super().__init__(text, position, adjacent_to_previous, symbol)
+        self.end += len(symbol) - 1  # Symbol.__init__ already added one
 
     def is_gt(self):
         return True
 
-
-class GtGt(Symbol):
-
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous, Token.GTGT)
-        self.end += 1
-
-    def is_gtgt(self):
-        return True
+    def is_append(self):
+        return self.symbol == Token.GTGT
 
 
 class ImpliedMap(Token):
@@ -586,8 +581,9 @@ class Lexer(Source):
                 # Ignore the rest of the line
                 return None
             elif c == Token.GT:
-                token_class = GtGt if self.peek_char(2) == Token.GTGT else Gt
-                token = token_class(self.text, self.end, adjacent_to_previous)
+                if self.peek_char(2) == Token.GTGT:
+                    c = Token.GTGT
+                token = Gt(self.text, self.end, adjacent_to_previous, c)
             else:
                 token = String(self.text, self.end, adjacent_to_previous)
             self.end = token.end
@@ -656,12 +652,19 @@ class Lexer(Source):
 #             var = arg
 #    
 #     pipeline:
-#             op_sequence
+#             var store var
+#             var > [op_sequence[store var]]
+#             op_sequence[store var]
+#             store var
 #
 #     op_sequence:
-#             op_args | op_sequence
+#             op_args separator op_sequence
 #             op_args
-#    
+#
+#     store:
+#             >
+#             >>
+#
 #     op_args:
 #             op arg*
 #             expr
@@ -690,6 +693,11 @@ class Lexer(Source):
 #     begin: [
 #
 #     end: ]
+#
+# Notes:
+#
+# - An op can be a str, i.e., the name of an operator. It can also be a var, but that's a str
+#   also.
 
 
 # Used mainly by TabCompleter.
@@ -699,19 +707,15 @@ class CurrentOp:
         op_name = op_token.op_name()
         op_module = parser.op_modules.get(op_name, None)
         if op_module:
-            self.op = op_module.create_op()
-            self.args_parser = op_module.args_parser()
+            self.op_name = op_name
+            self.flags = op_module.args_parser().flags()
         else:
-            self.op = None
-            self.args_parser = None
+            self.op_name = None
+            self.flags = None
         self.processing_args = False
 
     def __repr__(self):
-        return f'CurrentOp({self.op.op_name()})' if self.op else 'CurrentOp(<not builtin>)'
-
-    @property
-    def flags(self):
-        return self.args_parser.flags() if self.args_parser else None
+        return f'CurrentOp({self.op_name})' if self.op_name else 'CurrentOp(<not builtin>)'
 
 
 class Parser:
@@ -757,73 +761,76 @@ class Parser:
         pipeline = marcel.core.Pipeline()
         pipeline.set_parameters(parameters)
         self.current_pipelines.push(pipeline)
-        store_op = self.store_syntactic_sugar()
-        if store_op:
-            # The entire pipeline is "> var" or ">> var". Generate a store op.
-            op_sequence = [store_op]
-        elif self.next_token(String, Gt):
-            # Turn "var >" into "load var" at the beginning of the op sequence.
-            var = self.token
-            load_op_module = self.op_modules['load']
-            load_op = load_op_module.create_op()
-            load_op_module.args_parser().parse([var.value(self)], load_op)
-            self.next_token(Gt)
-            if self.next_token(End):
-                # The entire pipeline is: [var >]
+        if self.next_token(String, Gt):
+            load_op = self.load_op(self.token)
+            found_gt = self.next_token(Gt)
+            assert found_gt
+            gt_token = self.token
+            if self.pipeline_end():
+                # var >
+                if gt_token.is_append():
+                    raise UnexpectedTokenError(gt_token, 'Append not permitted here.')
                 op_sequence = [load_op]
-            elif self.next_token_exists():
-                # There is a token. It must be the start of an op sequence.
-                # (The op_sequence is built up in reverse, so append the load op,
-                # and the sequence will be reversed later.)
-                op_sequence = Parser.ensure_sequence(self.op_sequence())
-                op_sequence.append(load_op)
+            elif self.pipeline_end(1):
+                # var > var
+                found_string = self.next_token(String)
+                assert found_string
+                store_op = self.store_op(self.token, gt_token.is_append())
+                op_sequence = [load_op, store_op]
             else:
-                # The is no next token. The entire command line is: var >
-                op_sequence = [load_op]
+                op_sequence = [load_op] + self.op_sequence()
+                if self.next_token(Gt, String):
+                    # var > op_sequence > var
+                    gt_token = self.token
+                    found_string = self.next_token(String)
+                    assert found_string
+                    store_op = self.store_op(self.token, gt_token.is_append())
+                    op_sequence.append(store_op)
+                else:
+                    # var > op_sequence
+                    if gt_token.is_append():
+                        raise UnexpectedTokenError(gt_token, 'Append not permitted here.')
+        elif self.next_token(Gt, String):
+            # > var
+            gt_token = self.token
+            found_string = self.next_token(String)
+            assert found_string
+            store_op = self.store_op(self.token, gt_token.is_append())
+            op_sequence = [store_op]
         else:
-            op_sequence = Parser.ensure_sequence(self.op_sequence())
-            store_op = self.store_syntactic_sugar()
-            if store_op:
-                # Sequence is followed by "> var" or ">> var". Prepend a store op. (The op_sequence
-                # is reversed, so prepending causes the store to show up at the end of the pipeline.)
-                op_sequence = [store_op] + op_sequence
-        op_sequence.reverse()
+            op_sequence = self.op_sequence()
+            if self.next_token(Gt, String):
+                # op_sequence > var
+                gt_token = self.token
+                found_string = self.next_token(String)
+                assert found_string
+                store_op = self.store_op(self.token, gt_token.is_append())
+                op_sequence.append(store_op)
+            # else:  op_sequence is OK as is
         for op_args in op_sequence:
-            pipeline.append(op_args)
+            # op_args is (op_token, list of arg tokens)
+            pipeline.append(self.create_op(*op_args))
         self.current_pipelines.pop()
         return pipeline
 
-    def store_syntactic_sugar(self):
-        store_op = None
-        if self.next_token(Gt) or self.next_token(GtGt):
-            # Sequence is followed by "> var" or ">> var". Create a store op.
-            store_token = self.token
-            if not self.next_token(String):
-                raise UnexpectedTokenError(self.token, f'Expected variable after {store_token}')
-            var = self.token
-            store_op_module = self.op_modules['store']
-            store_op = store_op_module.create_op()
-            args = []
-            if store_token.value(self) == Token.GTGT:
-                args.append('--append')
-            args.append(var.value(self))
-            store_op_module.args_parser().parse(args, store_op)
-        return store_op
+    @staticmethod
+    def load_op(var):
+        return String('load'), [var]
 
-    # Accumulates ops in REVERSE order, to avoid list prepend.
-    # Top-level caller needs to reverse the result..
+    @staticmethod
+    def store_op(var, append):
+        return String('store'), ['--append', var] if append else [var]
+
     def op_sequence(self):
-        op_args = self.op_args()
-        if self.next_token(Pipe):
-            op_sequence = Parser.ensure_sequence(self.op_sequence())
-            op_sequence.append(op_args)
-            return op_sequence
-        else:
-            return op_args
+        op_args = [self.op_args()]
+        return (op_args + self.op_sequence()
+                if self.next_token(Pipe) else
+                op_args)
 
+    # Returns (op name, list of arg tokens)
     def op_args(self):
         if self.next_token(Expression):
-            return self.create_map(self.token)
+            op_args = (String('map'), [self.token])
         else:
             op_token = self.op()
             self.current_op = CurrentOp(self, op_token)
@@ -834,9 +841,9 @@ class Parser:
                 self.current_op.processing_args = True
                 arg_tokens.append(arg_token)
                 arg_token = self.arg()
-            op = self.create_op(op_token, arg_tokens)
+            op_args = (op_token, arg_tokens)
             self.current_op = self.current_ops.pop()
-            return op
+        return op_args
 
     def op(self):
         if self.next_token(String) or self.next_token(Fork) or self.next_token(Run):
@@ -892,8 +899,10 @@ class Parser:
                 return True
         return False
 
-    def next_token_exists(self):
-        return self.t < len(self.tokens)
+    # Does token t+n indicate the end of a pipeline?
+    def pipeline_end(self, n=0):
+        p = self.t + n
+        return p == len(self.tokens) or self.tokens[p].is_end()
 
     @staticmethod
     def raise_unexpected_token_error(token, message):
@@ -908,11 +917,12 @@ class Parser:
         return op
 
     def create_op_builtin(self, op_token, arg_tokens):
-        current_op = self.current_ops.top()
-        if current_op.op is None:
-            return None
-        op = current_op.op
         op_name = op_token.op_name()
+        try:
+            op_module = self.op_modules[op_name]
+        except KeyError:
+            return None
+        op = op_module.create_op()
         # Both ! and !! map to the run op.
         if op_name == 'run':
             # !: Expect a command number
@@ -929,7 +939,7 @@ class Parser:
         else:
             for x in arg_tokens:
                 args.append(x.value(self) if isinstance(x, Token) else x)
-        current_op.args_parser.parse(args, op)
+        op_module.args_parser().parse(args, op)
         return op
 
     def create_op_variable(self, op_token, arg_tokens):
@@ -975,13 +985,3 @@ class Parser:
         pipeline = marcel.core.Pipeline()
         pipeline.append(op)
         return pipeline
-
-    def create_map(self, expr):
-        assert type(expr) is Expression
-        return marcel.opmodule.create_op(self.env, 'map', expr.value(self))
-
-    @staticmethod
-    def ensure_sequence(x):
-        if not marcel.util.is_sequence_except_string(x):
-            x = [x]
-        return x

@@ -160,14 +160,14 @@ class TabCompleter:
             assert current_op is not None
             debug(f'current_op: {current_op}')
             if not current_op.processing_args:
-                op = current_op.op
-                if op is None:
+                op_name = current_op.op_name
+                if op_name is None:
                     # Could be a partial op name, an executable name (or partial), or just gibberish
                     candidates = self.complete_op(text)
-                elif op.op_name() == 'help':
+                elif op_name == 'help':
                     candidates = self.complete_help(text)
                 else:
-                    assert op.op_name() == text, text
+                    assert op_name == text, text
                     # Op is complete
                     candidates = [text + ' ']
             elif text.startswith('-'):
