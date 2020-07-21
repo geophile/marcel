@@ -160,3 +160,6 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     if isinstance(first, _error.Error):
         raise Exception(first)
     return first
+
+
+read = lambda: map(lambda f: f.readlines()) | expand()

@@ -782,13 +782,15 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run(test=lambda: run(cd('/home/jao/git/marcel/test')))
+    TEST.run(test=lambda: run(ls('profiling.py') | read()))
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
