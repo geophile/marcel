@@ -1,7 +1,7 @@
 What's New
 ----------
 
-This is the start of the 10.0 release, which will focus more on features than on 
+This is the start of the 0.10.0 release, which will focus more on features than on 
 language and fundamental capabilities (as in previous releases).
  
 First up: The `parse` operator, which turns common file formats into streams
