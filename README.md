@@ -1,31 +1,26 @@
 What's New
 ----------
 
-Syntactic sugar has been sprinkled on top of the `store` and `load`
-operators.
-
-A stream carries tuples from one operator to another. `Store` 
-accumulates these tuples into a `list`, and `load` turns them back
-into a stream. So, for example, you can store recently updated
-files as follows:
+This is the start of the 10.0 release, which will focus more on features than on 
+language and fundamental capabilities (as in previous releases).
+ 
+First up: The `parse` operator, which turns common file formats into streams
+of tuples. `parse` only supports CSV currently. Example:
 
 ```shell script
-ls -fr | select (f: now() - f.mtime < days(1)) | store recent
+ls grades.csv | read | parse --csv | map (id, name, grade: (id, name, float(grade)))
 ```
 
-And then do further processing as follows:
-
+`grades.csv` is a CSV-formatted file, containing a student's id number, name, and 
+a grade, e.g. 
 ```shell script
-load recent | select (f: f.suffix == '.py')
-``` 
-
-You can still use this syntax. Using the newly added syntax, these commands
-can be written as:
-
-```shell script
-ls -fr | select (f: now() - f.mtime < days(1)) > recent
-recent > select (f: f.suffix == '.py')
+7410563,"Basil Fawlty",73.4
 ```
+
+`read` writes the lines of that file to its output stream. `parse`
+receives that stream, and turns it into `('7410563', 'Basil Fawlty, '73.4')`.
+The map operator converts the last element of the tuple to a `float`.
+
 
 Marcel
 ======

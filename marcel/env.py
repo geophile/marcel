@@ -126,7 +126,8 @@ class Environment:
             'define_remote': self.define_remote,
             'Color': marcel.object.color.Color,
             'File': marcel.object.file.File,
-            'Process': marcel.object.process.Process
+            'Process': marcel.object.process.Process,
+            'read': '[map (f: f.readlines()) | expand]'
         })
         if editor:
             self.namespace['EDITOR'] = editor
