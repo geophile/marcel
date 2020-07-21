@@ -658,6 +658,17 @@ def test_if():
              expected_out=[0, 3, 6, 9])
 
 
+def test_parse():
+    q = '"'
+    x = []
+    TEST.run(test=lambda: run(gen(3) |
+                              map(lambda x: (x, x*1.1, f"{q}abc,{x}{q}")) |
+                              map(lambda *x: ",".join([str(y) for y in x])) |
+                              store(x)))
+    TEST.run(test=lambda: run(load(x) | parse(csv=True) | map(lambda a, b, c: (int(a), float(b), c))),
+             expected_out=[(0, 0.0, 'abc,0'), (1, 1.1, 'abc,1'), (2, 2.2, 'abc,2')])
+
+
 def test_api_run():
     # Error-free output, just an op
     TEST.run(test=lambda: run(gen(3)),
@@ -763,6 +774,7 @@ def main_stable():
     test_load_store()
     # test_loop()
     test_if()
+    test_parse()
     test_api_run()
     test_api_gather()
     test_api_first()

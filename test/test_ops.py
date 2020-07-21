@@ -858,6 +858,13 @@ def test_delete():
              expected_err='not defined')
 
 
+def test_parse():
+    TEST.run('''q = ('"')''')
+    TEST.run('gen 3 | map (x: (x, x*1.1, f"{q}abc,{x}{q}")) | map (*x: ",".join([str(y) for y in x])) | store x')
+    TEST.run('x > parse -c | map (a, b, c: (int(a), float(b), c))',
+             expected_out=[(0, 0.0, 'abc,0'), (1, 1.1, 'abc,1'), (2, 2.2, 'abc,2')])
+
+
 def main_stable():
     test_no_such_op()
     test_gen()
@@ -890,18 +897,17 @@ def main_stable():
     # test_loop()
     test_if()
     test_delete()
+    test_parse()
 
 
 def main_dev():
-    TEST.run('cd /home/jao/git/marcel/marcel/op')
-    TEST.run('ls l???.py | read')
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

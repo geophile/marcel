@@ -36,6 +36,7 @@ from marcel.op.loop import loop as _loop
 from marcel.op.ls import ls as _ls
 from marcel.op.map import map as _map
 from marcel.op.out import out as _out, Out as _Out
+from marcel.op.parse import parse as _parse
 from marcel.op.popd import popd as _popd
 from marcel.op.ps import ps as _ps
 from marcel.op.pushd import pushd as _pushd
@@ -77,6 +78,7 @@ def loop(*args, **kwargs): return _generate_op(_loop, *args, **kwargs)
 def ls(*args, **kwargs): return _generate_op(_ls, *args, **kwargs)
 def map(*args, **kwargs): return _generate_op(_map, *args, **kwargs)
 def out(*args, **kwargs): return _generate_op(_out, *args, **kwargs)
+def parse(*args, **kwargs): return _generate_op(_parse, *args, **kwargs)
 def popd(*args, **kwargs): return _generate_op(_popd, *args, **kwargs)
 def ps(*args, **kwargs): return _generate_op(_ps, *args, **kwargs)
 def pushd(*args, **kwargs): return _generate_op(_pushd, *args, **kwargs)
