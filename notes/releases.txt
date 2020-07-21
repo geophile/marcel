@@ -7,13 +7,14 @@
 - Pipeline as arg, yielding singleton or list (analogous to API gather
   and first).
 
-- More pipeline capabilities
+- csv
 
-    - Capture output in var (as list of tuples).
+- open file op
+  - replaces expand option operating on filenames, (cf bug 64).
 
-    - Input from captured output
-
-    - if, ifelse, ...
+- Bugs
+  - 47
+  - 64
 
 ----------------------------------------------------------------------
 
@@ -22,15 +23,21 @@
 + DB access
 
 - Bugs
-  - 47
   + 63
-  - 64
   + 65
 
 + Be able to switch to bash shell. "bash bash" and "bash -i bash"
   don't work.
 
 + import
+
++ More pipeline capabilities
+
+    + Capture output in var (as list of tuples).
+
+    + Input from captured output
+
+    + if, ifelse, ...
 
 ----------------------------------------------------------------------
 

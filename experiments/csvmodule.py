@@ -13,4 +13,22 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-VERSION = '0.10.0'
+import csv
+
+
+class Receiver:
+
+    def __init__(self):
+        self.contents = []
+
+    def write(self, x):
+        self.contents.append(x)
+
+
+receiver = Receiver()
+writer = csv.writer(receiver, delimiter=',', quotechar="'", quoting=csv.QUOTE_MINIMAL, lineterminator='')
+writer.writerow([123, 456.789, 'abc', 'def ghi', 'mmm, nnn'])
+writer.writerow([234, 333, None, 'def ghi', 'mmm, nnn'])
+print(receiver.contents)
+# for row in receiver.contents:
+#     print(row)

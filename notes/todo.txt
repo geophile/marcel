@@ -3,8 +3,6 @@
 - Complete shell string parsing (termination on things other than EOL
   and whiteapce).
 
-- Licensing header
-
 - Debugging & verbosity level
 
 - Should the name of map be changed? f as in osh? apply? map doesn't
@@ -25,13 +23,6 @@
   are no longer relying on out to print them. farcel's handler could
   pickle them immediately, (i.e., it doesn't have to rely on the error
   reaching the end of the pipeline).
-
-----------------------------------------------------------------------
-
-File objects
-
-- File navigation (parent, children, ...). Sort of works. Should
-  _getattr() wrap a path (if delegation returns one) into a File?
 
 ----------------------------------------------------------------------
 
@@ -96,11 +87,6 @@ Tab completion:
 
 ----------------------------------------------------------------------
 
-What happens if an arg that is supposed to be a pipeline is actually a
-string looking exactly like a pipeline ref?
-
-----------------------------------------------------------------------
-
 Job should be in marcel.object. Maybe.
 
 ----------------------------------------------------------------------
@@ -116,10 +102,6 @@ subprocess.Popen? I.e., not waiting for op to complete.
 
 Make Bash.INTERACTIVE_EXECUTABLES an environment variable, so that it
 can be customized by the user.
-
-----------------------------------------------------------------------
-
-ps flags. E.g., -a
 
 ----------------------------------------------------------------------
 
@@ -180,16 +162,6 @@ History commands
 
 - If history were in the namespace, then edited_command wouldn't need
   special handling.
-
-----------------------------------------------------------------------
-
-Cluster: Allow config of a single host
-
-----------------------------------------------------------------------
-
-Colorize help
-
-Change "object" to "type"? People hate objects.
 
 ----------------------------------------------------------------------
 
@@ -398,15 +370,6 @@ https://pymotw.com/2/subprocess/#process-groups-sessions
 
 ----------------------------------------------------------------------
 
-Pipeline args:
-    
-    - Managing args. Positional args working now. Should allow for -x to
-      bind to pipeline parameter x.
-    
-    - Testing, especially in situations that copy pipelines.
-
-----------------------------------------------------------------------
-
 Need both remote and fork ops?
 
 ----------------------------------------------------------------------
@@ -449,11 +412,8 @@ Set ops.
 
 ----------------------------------------------------------------------
 
-x > y
-x >> y
-
-should be able to copy/append x to y. 
+Can't run ssh!
 
 ----------------------------------------------------------------------
 
-Can't run ssh!
+Need to suppress prompts if running piped-in script.

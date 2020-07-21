@@ -182,9 +182,6 @@ class Token(Source):
     def is_gt(self):
         return False
 
-    def is_gtgt(self):
-        return False
-
     def op_name(self):
         return None
 
@@ -653,12 +650,12 @@ class Lexer(Source):
 #    
 #     pipeline:
 #             var store var
-#             var > [op_sequence[store var]]
-#             op_sequence[store var]
+#             var > [op_sequence [store var]]
+#             op_sequence [store var]
 #             store var
 #
 #     op_sequence:
-#             op_args separator op_sequence
+#             op_args | op_sequence
 #             op_args
 #
 #     store:
@@ -700,7 +697,7 @@ class Lexer(Source):
 #   also.
 
 
-# Used mainly by TabCompleter.
+# Used by TabCompleter.
 class CurrentOp:
 
     def __init__(self, parser, op_token):

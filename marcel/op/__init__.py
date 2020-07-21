@@ -42,6 +42,7 @@ public = [
     'ps',
     'pushd',
     'pwd',
+    'read',
     'red',
     'reverse',
     'run',

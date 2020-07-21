@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import csv
 import sys
 
 import marcel.argsparser
@@ -20,6 +21,8 @@ import marcel.core
 import marcel.exception
 import marcel.object.error
 import marcel.object.renderable
+
+Renderable = marcel.object.renderable.Renderable
 
 HELP = '''
 {L,wrap=F}out [-a|--append FILENAME] [-f|--file FILENAME] [-c|--csv] [FORMAT]
@@ -88,6 +91,7 @@ class Out(marcel.core.Op):
         self.csv = False
         self.format = None
         self.output = None
+        self.formatter = None
 
     def __repr__(self):
         return f'out(append={self.append}, file={self.file}, csv={self.csv}, format={Out.ensure_quoted(self.format)})'
@@ -98,30 +102,13 @@ class Out(marcel.core.Op):
         self.eval_function('append', str)
         self.eval_function('file', str)
         self.eval_function('format', str)
+        self.formatter = (PythonFormatter(self) if self.format else
+                          CSVFormatter(self) if self.csv else
+                          DefaultFormatter(self))
 
     def receive(self, x):
         self.ensure_output_initialized()
-        if self.format:
-            out = self.format.format(*x)
-        elif self.csv:
-            out = (', '.join([Out.ensure_quoted(y) for y in x])
-                   if type(x) in (list, tuple) else
-                   str(x))
-        else:
-            if type(x) in (list, tuple):
-                if len(x) == 1:
-                    out = x[0]
-                    if isinstance(out, marcel.object.renderable.Renderable):
-                        out = out.render_full(self.color_scheme())
-                else:
-                    buffer = []
-                    for y in x:
-                        if isinstance(y, marcel.object.renderable.Renderable):
-                            y = y.render_compact()
-                        buffer.append(Out.ensure_quoted(y))
-                    out = '(' + ', '.join(buffer) + ')'
-            else:
-                out = str(x)
+        out = self.formatter.format(x)
         try:
             print(out, file=self.output, flush=True)
         except Exception as e:  # E.g. UnicodeEncodeError
@@ -173,3 +160,61 @@ class Out(marcel.core.Op):
                 return "'{}'".format(x.replace("'", "\\'"))
         else:
             return str(x)
+
+
+class Formatter:
+
+    def __init__(self, op):
+        self.op = op
+
+    def format(self, x):
+        assert False
+
+
+class CSVFormatter(Formatter):
+
+    def __init__(self, op):
+        super().__init__(op)
+        self.writer = csv.writer(self, delimiter=',', quotechar="'", quoting=csv.QUOTE_MINIMAL, lineterminator='')
+        self.row = None
+
+    def format(self, x):
+        self.writer.writerow(x)
+        return self.row
+
+    def write(self, x):
+        self.row = x
+
+
+class PythonFormatter(Formatter):
+
+    def __init__(self, op):
+        super().__init__(op)
+
+    def format(self, x):
+        return self.op.format.format(*x)
+
+
+class DefaultFormatter(Formatter):
+
+    def __init__(self, op):
+        super().__init__(op)
+
+    def format(self, x):
+        if type(x) in (list, tuple):
+            if len(x) == 1:
+                out = x[0]
+                if isinstance(out, Renderable):
+                    out = out.render_full(self.op.color_scheme())
+            else:
+                buffer = []
+                for y in x:
+                    if isinstance(y, Renderable):
+                        y = y.render_compact()
+                    buffer.append(Out.ensure_quoted(y))
+                out = '(' + ', '.join(buffer) + ')'
+        else:
+            # TODO: I don't think we can get here.
+            assert False, type(x)
+            out = str(x)
+        return out

@@ -226,19 +226,4 @@ AttributeError: 'tuple' object has no attribute '__globals__'
 
 ----------------------------------------------------------------------
 
-74. Redirect after join fails
-
-Setup:
-
-    gen 5 | map (x: (x, x*10)) > a
-    gen 5 | map (x: (x, x*100)) > b
-    gen 5 | map (x: (x, x*1000)) > c
-    
-
-This prints the result of the join, doesn't assign to d:
-
-    a > join[b>] | join [c>] > d
-
-This works:
-
-    a > join[b>] | join [c>] | store d
+75. 

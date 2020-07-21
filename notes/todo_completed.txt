@@ -447,3 +447,22 @@ correctly on startup.
 - Allow omission of \
 - But add it if missing, at least for stored history.
 
+
+----------------------------------------------------------------------
+
+x > y
+x >> y
+
+should be able to copy/append x to y. 
+
+----------------------------------------------------------------------
+
+- Licensing header
+
+
+----------------------------------------------------------------------
+
+File objects
+
+- File navigation (parent, children, ...). Sort of works. Should
+  _getattr() wrap a path (if delegation returns one) into a File?

@@ -893,13 +893,15 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('cd /home/jao/git/marcel/marcel/op')
+    TEST.run('ls l???.py | read')
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
