@@ -1,0 +1,37 @@
+builtin.py:
+
+now (time.time0
+processes
+minutes
+hours
+days
+
+
+api.py (API):
+
+from builtin import *
+from reduction import *
+
+
+env (CLI):
+
+define_db
+define_remote
+Color
+File
+Process
+read
+
+----------------------------------------------------------------------
+
+API:
+
+- define_db/remote set state in env. Not easily movable to builting.
+
+- Color, File, Process: Add imports to builting
+
+- read: ???
+
+CLI: 
+
+- env needs the builtin symbols

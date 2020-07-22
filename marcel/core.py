@@ -43,13 +43,28 @@ class Node(Pipelineable):
 
     def create_pipeline(self):
         def visit(op):
-            assert isinstance(op, Op)
-            # The need to set the owner on the source of the copy is a bit subtle. op might be something that owns
-            # a FunctionWrapper. A FunctionWrapper points to it's op, and error handling requires the op's owner
-            # for error handling. If the owner isn't set prior to the copy, then the copy won't have its
-            # FunctionWrapper's op's owner set.
-            op.set_owner(pipeline)
-            pipeline.append(op.copy())
+            if isinstance(op, Op):
+                ops = [op]
+            elif type(op) is Pipeline:
+                # op will usually be an Op. But the op could represent a Pipeline, e.g.
+                #     recent = [select (f: now() - f.mtime < days(1))]
+                #     ls | recent
+                # In this case, through the CLI, the Pipeline would be wrapped in a runpipeline op. But
+                # through the API, op could actually be a Pipeline.
+                ops = []
+                op = op.first_op
+                while op:
+                    ops.append(op)
+                    op = op.next_op
+            else:
+                assert False, op
+            for op in ops:
+                # The need to set the owner on the source of the copy is a bit subtle. op might be something that owns
+                # a FunctionWrapper. A FunctionWrapper points to it's op, and error handling requires the op's owner
+                # for error handling. If the owner isn't set prior to the copy, then the copy won't have its
+                # FunctionWrapper's op's owner set.
+                op.set_owner(pipeline)
+                pipeline.append(op.copy())
 
         pipeline = Pipeline()
         self.traverse(visit)

@@ -1,7 +1,7 @@
 from marcel.api import *
 
-M.env.namespace = globals()
-
 even = []
-run(gen(10) | ifthen(lambda x: x % 2 == 0, store(even)) | select(lambda *x: False))
+odd = []
+run(gen(10) | ifelse(lambda x: x % 2 == 0, store(even)) | store(odd))
 run(load(even))
+run(load(odd))

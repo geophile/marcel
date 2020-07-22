@@ -59,8 +59,9 @@ from marcel.builtin import *
 from marcel.reduction import *
 
 _MAIN = _main.Main(None, same_process=True, old_namespace=None)
+env = _MAIN.env
 # No colors for API
-_MAIN.env.set_color_scheme(None)
+env.set_color_scheme(None)
 
 def bash(*args, **kwargs): return _generate_op(_bash, *args, **kwargs)
 def cd(*args, **kwargs): return _generate_op(_cd, *args, **kwargs)
@@ -104,7 +105,7 @@ remote = fork
 # Utilities
 
 def _generate_op(f, *args, **kwargs):
-    op, arglist = f(_MAIN.env, *args, **kwargs)
+    op, arglist = f(env, *args, **kwargs)
     _MAIN.op_modules[op.op_name()].args_parser().parse(arglist, op)
     return op
 
@@ -131,7 +132,7 @@ def run(x):
 def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
     pipeline = _prepare_pipeline(x)
     output = []
-    terminal_op = _gather(_MAIN.env,
+    terminal_op = _gather(env,
                           output=output,
                           unwrap_singleton=unwrap_singleton,
                           errors=errors,
@@ -145,7 +146,7 @@ def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
 def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     pipeline = _prepare_pipeline(x)
     output = []
-    terminal_op = _first(_MAIN.env,
+    terminal_op = _first(env,
                          output=output,
                          unwrap_singleton=unwrap_singleton,
                          errors=errors,
@@ -162,4 +163,5 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     return first
 
 
-read = lambda: map(lambda f: f.readlines()) | expand()
+def read():
+    return env.getvar('read')

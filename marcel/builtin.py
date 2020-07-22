@@ -15,7 +15,8 @@
 
 from time import time as now
 
-from marcel.object.process import processes
+from marcel.object.process import processes, Process
+from marcel.object.file import File
 
 
 def minutes(n):
