@@ -419,5 +419,3 @@ Can't run ssh!
 Need to suppress prompts if running piped-in script.
 
 ----------------------------------------------------------------------
-
-COmbined flags, e.g. parse -c -t is equivalent to -ct.

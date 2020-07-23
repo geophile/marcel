@@ -35,7 +35,7 @@ Input presumably consists of 1-tuples containing data in CSV format. Each input
 row is parsed, and an output tuple is generated, with each field as
 one element of the tuple.
 
-The separator is assumed to be a comma, unless {r:DELIMITER} is specified.
+The field delimiter is a comma by default, a tab if {r:--tab} is specified.
 '''
 
 
