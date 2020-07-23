@@ -667,6 +667,16 @@ def test_parse():
                               store(x)))
     TEST.run(test=lambda: run(load(x) | parse(csv=True) | map(lambda a, b, c: (int(a), float(b), c))),
              expected_out=[(0, 0.0, 'abc,0'), (1, 1.1, 'abc,1'), (2, 2.2, 'abc,2')])
+    TEST.run(test=lambda: run(gen(3)
+                              | map(lambda x: f"{x},{x+1}")
+                              | parse(csv=True)
+                              | map(lambda x, y: (int(x), int(y)))),
+             expected_out=[(0, 1), (1, 2), (2, 3)])
+    TEST.run(test=lambda: run(gen(3)
+                              | map(lambda x: f"{x}\t{x+1}")
+                              | parse(csv=True, tab=True)
+                              | map(lambda x, y: (int(x), int(y)))),
+             expected_out=[(0, 1), (1, 2), (2, 3)])
 
 
 def test_api_run():

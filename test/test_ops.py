@@ -863,6 +863,10 @@ def test_parse():
     TEST.run('gen 3 | map (x: (x, x*1.1, f"{q}abc,{x}{q}")) | map (*x: ",".join([str(y) for y in x])) | store x')
     TEST.run('x > parse -c | map (a, b, c: (int(a), float(b), c))',
              expected_out=[(0, 0.0, 'abc,0'), (1, 1.1, 'abc,1'), (2, 2.2, 'abc,2')])
+    TEST.run('gen 3 | map (x: f"{x},{x+1}") | parse -c | map (x, y: (int(x), int(y)))',
+             expected_out=[(0, 1), (1, 2), (2, 3)])
+    TEST.run('gen 3 | map (x: f"{x}\t{x+1}") | parse -c -t | map (x, y: (int(x), int(y)))',
+             expected_out=[(0, 1), (1, 2), (2, 3)])
 
 
 def main_stable():

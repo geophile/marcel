@@ -22,21 +22,30 @@ import marcel.util
 
 
 HELP = '''
-{L,wrap=F}parse -c|--csv
+{L,wrap=F}parse -c|--csv [-t|--tab]
 
 {L,indent=4:28}{r:-c}, {r:--csv}               Parse CSV-formatted data
+
+{L,indent=4:28}{r:-t}, {r:--tab}               CSV delimiter is a tab.
 
 Parse incoming data and generate output containing structured data. Currently,
 the only recognized format is CSV.
 
 Input presumably consists of 1-tuples containing data in CSV format. Each input
-row is parsed, and an output tuple is generated, with each comma-separated field as
-one element of the tuplt.
+row is parsed, and an output tuple is generated, with each field as
+one element of the tuple.
+
+The separator is assumed to be a comma, unless {r:DELIMITER} is specified.
 '''
 
 
-def parse(env, csv=False):
-    return Parse(env), ['--csv'] if csv else []
+def parse(env, csv=False, tab=False):
+    args = []
+    if csv:
+        args.append('--csv')
+    if tab:
+        args.append('--tab')
+    return Parse(env), args
 
 
 class ParseArgsParser(marcel.argsparser.ArgsParser):
@@ -44,6 +53,7 @@ class ParseArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('parse', env)
         self.add_flag_no_value('csv', '-c', '--csv')
+        self.add_flag_no_value('tab', '-t', '--tab')
         self.validate()
 
 
@@ -54,6 +64,7 @@ class Parse(marcel.core.Op):
         self.csv = None
         self.csv_input = None
         self.csv_reader = None
+        self.tab = None
 
     # AbstractOp
 
@@ -61,7 +72,7 @@ class Parse(marcel.core.Op):
         if self.csv is None:
             raise marcel.exception.KillCommandException('Format not specified, (currently only -c|--csv).')
         self.csv_input = InputIterator(self)
-        self.csv_reader = csv.reader(self.csv_input)
+        self.csv_reader = csv.reader(self.csv_input, delimiter='\t' if self.tab else ',')
 
     def receive(self, x):
         if len(x) != 1:

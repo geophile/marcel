@@ -28,9 +28,12 @@ API:
 
 - define_db/remote set state in env. Not easily movable to builting.
 
-- Color, File, Process: Add imports to builting
+- Color, File, Process: Add imports to builtin. Actually, not
+  Color. That's for CLI only.
 
 - read: ???
+
+- NEEDS ENV
 
 CLI: 
 
