@@ -19,6 +19,7 @@ import pathlib
 import socket
 import sys
 
+import marcel.builtin
 import marcel.core
 import marcel.exception
 import marcel.object.cluster
@@ -125,12 +126,12 @@ class Environment:
             'define_db': self.define_db,
             'define_remote': self.define_remote,
             'Color': marcel.object.color.Color,
-            'File': marcel.object.file.File,
-            'Process': marcel.object.process.Process,
-            'read': '[map (f: f.readlines()) | expand]'
         })
         if editor:
             self.namespace['EDITOR'] = editor
+        for key, value in marcel.builtin.__dict__.items():
+            if not key.startswith('_'):
+                self.namespace[key] = value
         self.clusters = {}
         self.dbs = {}
         self.config_path = self.read_config(config_file)

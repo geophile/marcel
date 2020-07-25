@@ -35,6 +35,7 @@ import readline
 import sys
 import time
 
+import marcel.builtin
 import marcel.core
 import marcel.env
 import marcel.exception
@@ -105,6 +106,7 @@ class Main:
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
         self.config_monitor = ConfigurationMonitor([self.env.config_path])
         self.run_startup()
+        self.run_script(marcel.builtin._COMMANDS)
         atexit.register(self.shutdown)
 
     def __getstate__(self):
@@ -202,17 +204,20 @@ class Main:
         run_on_startup = self.env.getvar('RUN_ON_STARTUP')
         if run_on_startup:
             if type(run_on_startup) is str:
-                command = ''
-                for line in run_on_startup.split('\n'):
-                    if len(line.strip()) > 0:
-                        command += line
-                        if not line.endswith('\\\n'):
-                            self.run_command(command)
-                            command = ''
-                if len(command) > 0:
-                    self.run_command(command)
+                self.run_script(run_on_startup)
             else:
                 fail(f'RUN_ON_STARTUP must be a string')
+
+    def run_script(self, script):
+        command = ''
+        for line in script.split('\n'):
+            if len(line.strip()) > 0:
+                command += line
+                if not line.endswith('\\\n'):
+                    self.run_command(command)
+                    command = ''
+        if len(command) > 0:
+            self.run_command(command)
 
     @staticmethod
     def default_error_handler(env, error):

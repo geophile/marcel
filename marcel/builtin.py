@@ -19,6 +19,11 @@ from marcel.object.process import processes, Process
 from marcel.object.file import File
 
 
+_COMMANDS = '''
+    read = [map (f: f.readlines()) | expand]
+'''
+
+
 def minutes(n):
     return 60 * n
 

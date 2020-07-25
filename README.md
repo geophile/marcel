@@ -19,7 +19,7 @@ a grade, e.g.
 
 `read` writes the lines of that file to its output stream. `parse`
 receives that stream, and turns it into `('7410563', 'Basil Fawlty', '73.4')`.
-The map operator converts the last element of the tuple to a `float`.
+The `map` operator converts the last element of the tuple to a `float`.
 
 
 Marcel
