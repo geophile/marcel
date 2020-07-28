@@ -914,6 +914,87 @@ def test_read():
                            ('f2.tsv', '2', '3.4', 'xy')])
 
 
+def test_intersect():
+    # Empty inputs
+    TEST.run('empty = ([])')
+    TEST.run('empty > intersect [empty >]',
+             expected_out=[])
+    TEST.run('gen 3 | intersect [empty >]',
+             expected_out=[])
+    TEST.run('empty > intersect [gen 3]',
+             expected_out=[])
+    # Non-empty inputs, empty intersection
+    TEST.run('gen 3 | intersect [gen 3]',
+             expected_out=[0, 1, 2])
+    TEST.run('gen 3 | intersect [gen 1 1]',
+             expected_out=[1])
+    # Duplicates
+    TEST.run('gen 5 | map (x: [x] * x) | expand > a')
+    TEST.run('gen 5 | map (x: [x] * 2) | expand > b')
+    TEST.run('a > intersect [b >] | sort',
+             expected_out=[1, 2, 2, 3, 3, 4, 4])
+    # Composite elements
+    TEST.run('gen 3 2 | '
+             'map (x: [(x, x * 100)] * x) | '
+             'expand | '
+             'intersect [gen 3 2 | '
+             '           map (x: [(x, x * 100)] * 3) | '
+             '           expand] |'
+             'sort',
+             expected_out=[(2, 200), (2, 200), 
+                           (3, 300), (3, 300), (3, 300),
+                           (4, 400), (4, 400), (4, 400)])
+
+
+def test_union():
+    # Empty inputs
+    TEST.run('empty = ([])')
+    TEST.run('empty > union [empty >]',
+             expected_out=[])
+    TEST.run('gen 3 | union [empty >] | sort',
+             expected_out=[0, 1, 2])
+    TEST.run('empty > union [gen 3] | sort',
+             expected_out=[0, 1, 2])
+    # Non-empty inputs
+    TEST.run('gen 3 | union [gen 3 100] | sort',
+             expected_out=[0, 1, 2, 100, 101, 102])
+    # Duplicates
+    TEST.run('gen 3 | union [gen 3] | sort',
+             expected_out=[0, 0, 1, 1, 2, 2])
+    # Composite elements
+    TEST.run('gen 4 | map (x: (x, x*100)) | union [gen 4 2 | map (x: (x, x*100))] | sort',
+             expected_out=[(0, 0), (1, 100), (2, 200), (2, 200), (3, 300), (3, 300), (4, 400), (5, 500)])
+
+
+def test_difference():
+    # Empty inputs
+    TEST.run('empty = ([])')
+    TEST.run('empty > difference [empty >]',
+             expected_out=[])
+    TEST.run('gen 3 | difference [empty >] | sort',
+             expected_out=[0, 1, 2])
+    TEST.run('empty > difference [gen 3]',
+             expected_out=[])
+    # Non-empty inputs
+    TEST.run('gen 6 | difference [gen 6 100] | sort',
+             expected_out=[0, 1, 2, 3, 4, 5])
+    TEST.run('gen 6 | difference [gen 6] | sort',
+             expected_out=[])
+    TEST.run('gen 6 | difference [gen 6 3] | sort',
+             expected_out=[0, 1, 2])
+    # Duplicates
+    TEST.run('gen 5 | map (x: [x] * x) | expand | difference [gen 5 | map (x: [x] * 2) | expand] | sort',
+             expected_out=[3, 4, 4])
+    # Composite elements
+    TEST.run('gen 5 2 | '
+             'map (x: [(x, x*100)] * x) | '
+             'expand | difference [gen 5 2 | '
+             '                     map (x: [(x, x*100)] * 3) | '
+             '                     expand] | '
+             'sort',
+             expected_out=[(4, 400), (5, 500), (5, 500), (6, 600), (6, 600), (6, 600)])
+
+
 def main_stable():
     test_no_such_op()
     test_gen()
@@ -947,6 +1028,9 @@ def main_stable():
     test_if()
     test_delete()
     test_read()
+    test_intersect()
+    test_union()
+    test_difference()
 
 
 def main_dev():

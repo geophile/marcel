@@ -84,7 +84,7 @@ def test_out():
              expected_out=[0, 1, 2, 0, 1, 2],
              file=output_filename)
     TEST.delete_file(output_filename)
-    TEST.run(test=lambda: run(gen(3)| out(format=lambda: '{}')),
+    TEST.run(test=lambda: run(gen(3) | out(format=lambda: '{}')),
              expected_out=[0, 1, 2])
 
 
@@ -191,15 +191,15 @@ def test_red():
                            (9, 4, 900, 4, 17, 1700)])
     # Test short input
     TEST.run(test=lambda: run(gen(4)
-                              | map(lambda x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x))
+                              | map(lambda x: (x, 10 * x) if x % 2 == 0 else (x, 10 * x, 100 * x))
                               | red(r_plus, r_plus, r_plus)),
              expected_out=[Error('too short'), Error('too short'), (4, 40, 400)])
     TEST.run(test=lambda: run(gen(4)
-                              | map(lambda x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x))
+                              | map(lambda x: (x, 10 * x) if x % 2 == 0 else (x, 10 * x, 100 * x))
                               | red(None, r_plus, r_plus)),
              expected_out=[Error('too short'), Error('too short'), (1, 10, 100), (3, 30, 300)])
     TEST.run(test=lambda: run(gen(4)
-                              | map(lambda x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x))
+                              | map(lambda x: (x, 10 * x) if x % 2 == 0 else (x, 10 * x, 100 * x))
                               | red(None, r_plus, r_plus, incremental=True)),
              expected_out=[Error('too short'), (1, 10, 100, 10, 100), Error('too short'), (3, 30, 300, 30, 300)])
 
@@ -640,7 +640,7 @@ def test_loop():
                            196418, 317811, 514229, 832040])
     TEST.run(test=lambda: run(gen(3) | loop(select(lambda n: n >= 0) | emit() | map(lambda n: n - 1))),
              expected_out=[0, 1, 0, 2, 1, 0])
-    p = loop(0, select(lambda x: x < 5) | emit() | map(lambda x: x+1))
+    p = loop(0, select(lambda x: x < 5) | emit() | map(lambda x: x + 1))
     TEST.run(test=lambda: run(p),
              expected_out=[0, 1, 2, 3, 4])
 
@@ -708,6 +708,96 @@ def test_read():
     TEST.run(lambda: run(ls('/tmp/read/f2.tsv') | read(label=True, tsv=True)),
              expected_out=[('f2.tsv', '1', '2.3', 'ab'),
                            ('f2.tsv', '2', '3.4', 'xy')])
+
+
+def test_intersect():
+    # Empty inputs
+    empty = []
+    TEST.run(lambda: run(load(empty) | intersect(load(empty))),
+             expected_out=[])
+    TEST.run(lambda: run(gen(3) | intersect(load(empty))),
+             expected_out=[])
+    TEST.run(lambda: run(load(empty) | intersect(load(gen(3)))),
+             expected_out=[])
+    # Non-empty inputs, empty intersection
+    TEST.run(lambda: run(gen(3) | intersect(gen(3))),
+             expected_out=[0, 1, 2])
+    TEST.run(lambda: run(gen(3) | intersect(gen(1, 1))),
+             expected_out=[1])
+    # Duplicates
+    a = []
+    b = []
+    TEST.run(lambda: run(gen(5) | map(lambda x: [x] * x) | expand() | store(a)))
+    TEST.run(lambda: run(gen(5) | map(lambda x: [x] * 2) | expand() | store(b)))
+    TEST.run(lambda: run(load(a) | intersect(load(b)) | sort()),
+             expected_out=[1, 2, 2, 3, 3, 4, 4])
+    # Composite elements
+    TEST.run(lambda: run(gen(3, 2) |
+                         map(lambda x: [(x, x * 100)] * x) |
+                         expand() |
+                         intersect(gen(3, 2) |
+                                   map(lambda x: [(x, x * 100)] * 3) |
+                                   expand()) |
+                         sort()),
+             expected_out=[(2, 200), (2, 200),
+                           (3, 300), (3, 300), (3, 300),
+                           (4, 400), (4, 400), (4, 400)])
+
+
+def test_union():
+    # Empty inputs
+    empty = []
+    TEST.run(lambda: run(load(empty) | union(load(empty))),
+             expected_out=[])
+    TEST.run(lambda: run(gen(3) | union(load(empty))),
+             expected_out=[0, 1, 2])
+    TEST.run(lambda: run(load(empty) | union(gen(3))),
+             expected_out=[0, 1, 2])
+    # Non-empty inputs
+    TEST.run(lambda: run(gen(3) | union(gen(3, 100)) | sort()),
+             expected_out=[0, 1, 2, 100, 101, 102])
+    # Duplicates
+    TEST.run(lambda: run(gen(3) | union(gen(3)) | sort()),
+             expected_out=[0, 0, 1, 1, 2, 2])
+    # Composite elements
+    TEST.run(
+        lambda: run(gen(4) | map(lambda x: (x, x * 100)) | union(gen(4, 2) | map(lambda x: (x, x * 100))) | sort()),
+        expected_out=[(0, 0), (1, 100), (2, 200), (2, 200), (3, 300), (3, 300), (4, 400), (5, 500)])
+
+
+def test_difference():
+    # Empty inputs
+    empty = []
+    TEST.run(lambda: run(load(empty) | difference(load(empty))),
+             expected_out=[])
+    TEST.run(lambda: run(gen(3) | difference(load(empty)) | sort()),
+             expected_out=[0, 1, 2])
+    TEST.run(lambda: run(load(empty) | difference(gen(3)) | sort()),
+             expected_out=[])
+    # Non-empty inputs
+    TEST.run(lambda: run(gen(6) | difference(gen(6, 100)) | sort()),
+             expected_out=[0, 1, 2, 3, 4, 5])
+    TEST.run(lambda: run(gen(6) | difference(gen(6)) | sort()),
+             expected_out=[])
+    TEST.run(lambda: run(gen(6) | difference(gen(6, 3)) | sort()),
+             expected_out=[0, 1, 2])
+    # Duplicates
+    TEST.run(lambda: run(gen(5) |
+                         map(lambda x: [x] * x) |
+                         expand() | difference(gen(5) |
+                                               map(lambda x: [x] * 2) |
+                                               expand()) |
+                         sort()),
+             expected_out=[3, 4, 4])
+    # Composite elements
+    TEST.run(lambda: run(gen(5, 2) |
+                         map(lambda x: [(x, x * 100)] * x) |
+                         expand() |
+                         difference(gen(5, 2) |
+                                    map(lambda x: [(x, x * 100)] * 3) |
+                                    expand()) |
+                         sort()),
+             expected_out=[(4, 400), (5, 500), (5, 500), (6, 600), (6, 600), (6, 600)])
 
 
 def test_api_run():
@@ -816,6 +906,9 @@ def main_stable():
     # test_loop()
     test_if()
     test_read()
+    test_intersect()
+    test_union()
+    test_difference()
     test_api_run()
     test_api_gather()
     test_api_first()

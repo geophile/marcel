@@ -220,13 +220,6 @@ buffer and adapt?
 
 ----------------------------------------------------------------------
 
-Check csv formatting. Should strings have ' or "? They do, not sure
-that's right. 
-
-What if an output item contains a comma?
-
-----------------------------------------------------------------------
-
 This is broken: Op.op_name() evalutes to "op".
 
     @staticmethod
@@ -398,13 +391,6 @@ Oops, [] is overloaded:
 
 M-0.9.17 jao@cheese:/tmp/csv$ ls [b-f]*.csv
 Operator ls: filenames must be a string: [runpipeline(b-f)]
-
-----------------------------------------------------------------------
-
-Need a nushell like op for importing files. E.g., csv importer should
-split on separator and convert to tuples.
-
-There is a csv module in the standard library!
 
 ----------------------------------------------------------------------
 

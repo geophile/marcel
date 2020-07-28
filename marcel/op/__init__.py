@@ -18,6 +18,7 @@ public = [
     'bg',
     'cd',
     'delete',
+    'difference',
     'dirs',
     'edit',
     'emit',
@@ -31,6 +32,7 @@ public = [
     'ifelse',
     'ifthen',
     'import',
+    'intersect',
     'jobs',
     'join',
     'load',
@@ -55,6 +57,7 @@ public = [
     'tail',
     'timer',
     'unique',
+    'union',
     'version',
     'window'
 ]

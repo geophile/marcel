@@ -20,6 +20,7 @@ import marcel.object.error as _error
 
 from marcel.op.bash import bash as _bash
 from marcel.op.cd import cd as _cd
+from marcel.op.difference import difference as _difference
 from marcel.op.dirs import dirs as _dirs
 from marcel.op.emit import emit as _emit
 from marcel.op.expand import expand as _expand
@@ -30,6 +31,7 @@ from marcel.op.gen import gen as _gen
 from marcel.op.head import head as _head
 from marcel.op.ifelse import ifelse as _ifelse
 from marcel.op.ifthen import ifthen as _ifthen
+from marcel.op.intersect import intersect as _intersect
 from marcel.op.join import join as _join
 from marcel.op.load import load as _load
 from marcel.op.loop import loop as _loop
@@ -53,6 +55,7 @@ from marcel.op.sudo import sudo as _sudo
 from marcel.op.tail import tail as _tail
 from marcel.op.timer import timer as _timer
 from marcel.op.unique import unique as _unique
+from marcel.op.union import union as _union
 from marcel.op.version import version as _version
 from marcel.op.window import window as _window
 from marcel.builtin import *
@@ -65,6 +68,7 @@ env.set_color_scheme(None)
 
 def bash(*args, **kwargs): return _generate_op(_bash, *args, **kwargs)
 def cd(*args, **kwargs): return _generate_op(_cd, *args, **kwargs)
+def difference(*args, **kwargs): return _generate_op(_difference, *args, **kwargs)
 def dirs(*args, **kwargs): return _generate_op(_dirs, *args, **kwargs)
 def emit(*args, **kwargs): return _generate_op(_emit, *args, **kwargs)
 def expand(*args, **kwargs): return _generate_op(_expand, *args, **kwargs)
@@ -73,6 +77,7 @@ def gen(*args, **kwargs): return _generate_op(_gen, *args, **kwargs)
 def head(*args, **kwargs): return _generate_op(_head, *args, **kwargs)
 def ifelse(*args, **kwargs): return _generate_op(_ifelse, *args, **kwargs)
 def ifthen(*args, **kwargs): return _generate_op(_ifthen, *args, **kwargs)
+def intersect(*args, **kwargs): return _generate_op(_intersect, *args, **kwargs)
 def join(*args, **kwargs): return _generate_op(_join, *args, **kwargs)
 def load(*args, **kwargs): return _generate_op(_load, *args, **kwargs)
 def loop(*args, **kwargs): return _generate_op(_loop, *args, **kwargs)
@@ -95,6 +100,7 @@ def sudo(*args, **kwargs): return _generate_op(_sudo, *args, **kwargs)
 def tail(*args, **kwargs): return _generate_op(_tail, *args, **kwargs)
 def timer(*args, **kwargs): return _generate_op(_timer, *args, **kwargs)
 def unique(*args, **kwargs): return _generate_op(_unique, *args, **kwargs)
+def union(*args, **kwargs): return _generate_op(_union, *args, **kwargs)
 def version(*args, **kwargs): return _generate_op(_version, *args, **kwargs)
 def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 
