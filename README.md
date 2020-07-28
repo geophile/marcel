@@ -1,26 +1,16 @@
 What's New
 ----------
 
-This is the start of the 0.10.0 release, which will focus more on features than on 
-language and fundamental capabilities (as in previous releases).
- 
-First up: The `parse` operator, which turns common file formats into streams
-of tuples. `parse` only supports CSV currently. Example:
+Replaced the parse operator by the read operator. Parse just parsed file formats,
+and the only supported format was CSV. The read had to be done separately.
+A read op with a csv option is more convenient. E.g.
 
 ```shell script
-ls grades.csv | read | parse --csv | map (id, name, grade: (id, name, float(grade)))
+ls grades.csv | read --csv
 ```
 
-`grades.csv` is a CSV-formatted file, containing a student's id number, name, and 
-a grade, e.g. 
-```shell script
-7410563,"Basil Fawlty",73.4
-```
-
-`read` writes the lines of that file to its output stream. `parse`
-receives that stream, and turns it into `('7410563', 'Basil Fawlty', '73.4')`.
-The `map` operator converts the last element of the tuple to a `float`.
-
+Assuming `grades.csv` contains comma-separated values, (e.g. student id, name, grade),
+then this command generates a stream of 3-tuples, each containing one of the fields.
 
 Marcel
 ======
