@@ -1,3 +1,4 @@
 from marcel.api import *
 
-run(ls('~/zack_disk*') | read())
+run(cd('/tmp'))
+run(ls())

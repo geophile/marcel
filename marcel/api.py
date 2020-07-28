@@ -36,11 +36,11 @@ from marcel.op.loop import loop as _loop
 from marcel.op.ls import ls as _ls
 from marcel.op.map import map as _map
 from marcel.op.out import out as _out, Out as _Out
-from marcel.op.parse import parse as _parse
 from marcel.op.popd import popd as _popd
 from marcel.op.ps import ps as _ps
 from marcel.op.pushd import pushd as _pushd
 from marcel.op.pwd import pwd as _pwd
+from marcel.op.read import read as _read
 from marcel.op.red import red as _red
 from marcel.op.remote import remote as _remote
 from marcel.op.reverse import reverse as _reverse
@@ -79,11 +79,11 @@ def loop(*args, **kwargs): return _generate_op(_loop, *args, **kwargs)
 def ls(*args, **kwargs): return _generate_op(_ls, *args, **kwargs)
 def map(*args, **kwargs): return _generate_op(_map, *args, **kwargs)
 def out(*args, **kwargs): return _generate_op(_out, *args, **kwargs)
-def parse(*args, **kwargs): return _generate_op(_parse, *args, **kwargs)
 def popd(*args, **kwargs): return _generate_op(_popd, *args, **kwargs)
 def ps(*args, **kwargs): return _generate_op(_ps, *args, **kwargs)
 def pushd(*args, **kwargs): return _generate_op(_pushd, *args, **kwargs)
 def pwd(*args, **kwargs): return _generate_op(_pwd, *args, **kwargs)
+def read(*args, **kwargs): return _generate_op(_read, *args, **kwargs)
 def red(*args, **kwargs): return _generate_op(_red, *args, **kwargs)
 def reverse(*args, **kwargs): return _generate_op(_reverse, *args, **kwargs)
 def select(*args, **kwargs): return _generate_op(_select, *args, **kwargs)
@@ -161,7 +161,3 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     if isinstance(first, _error.Error):
         raise Exception(first)
     return first
-
-
-def read():
-    return env.getvar('read')

@@ -858,15 +858,60 @@ def test_delete():
              expected_err='not defined')
 
 
-def test_parse():
-    TEST.run('''q = ('"')''')
-    TEST.run('gen 3 | map (x: (x, x*1.1, f"{q}abc,{x}{q}")) | map (*x: ",".join([str(y) for y in x])) | store x')
-    TEST.run('x > parse -c | map (a, b, c: (int(a), float(b), c))',
-             expected_out=[(0, 0.0, 'abc,0'), (1, 1.1, 'abc,1'), (2, 2.2, 'abc,2')])
-    TEST.run('gen 3 | map (x: f"{x},{x+1}") | parse -c | map (x, y: (int(x), int(y)))',
-             expected_out=[(0, 1), (1, 2), (2, 3)])
-    TEST.run('gen 3 | map (x: f"{x}\t{x+1}") | parse -c -t | map (x, y: (int(x), int(y)))',
-             expected_out=[(0, 1), (1, 2), (2, 3)])
+def test_read():
+    os.system('rm -rf /tmp/read')
+    os.system('mkdir /tmp/read')
+    file = open('/tmp/read/f1.csv', 'w')
+    file.writelines(['1,2.3,ab\n',
+                     '2,3.4,xy\n',
+                     '3,4.5,"m,n"\n'])
+    file.close()
+    file = open('/tmp/read/f2.tsv', 'w')
+    file.writelines(['1\t2.3\tab\n',
+                     '2\t3.4\txy\n'])
+    file.close()
+    file = open('/tmp/read/f3.txt', 'w')
+    file.writelines(['hello,world\n',
+                     'goodbye\n'])
+    file.close()
+    # Files
+    TEST.run('cd /tmp/read')
+    TEST.run('ls f1.csv f3.txt | read',
+             expected_out=['1,2.3,ab',
+                           '2,3.4,xy',
+                           '3,4.5,"m,n"',
+                           'hello,world',
+                           'goodbye'])
+    # Files with labels
+    TEST.run('cd /tmp/read')
+    TEST.run('ls f1.csv f3.txt | read -l | map (f, x: (str(f), x))',
+             expected_out=[('f1.csv', '1,2.3,ab'),
+                           ('f1.csv', '2,3.4,xy'),
+                           ('f1.csv', '3,4.5,"m,n"'),
+                           ('f3.txt', 'hello,world'),
+                           ('f3.txt', 'goodbye')])
+    # CSV
+    TEST.run('cd /tmp/read')
+    TEST.run('ls f1.csv | read -c',
+             expected_out=[('1', '2.3', 'ab'),
+                           ('2', '3.4', 'xy'),
+                           ('3', '4.5', 'm,n')])
+    # CSV with labels
+    TEST.run('cd /tmp/read')
+    TEST.run('ls f1.csv | read -cl',
+             expected_out=[('f1.csv', '1', '2.3', 'ab'),
+                           ('f1.csv', '2', '3.4', 'xy'),
+                           ('f1.csv', '3', '4.5', 'm,n')])
+    # TSV
+    TEST.run('cd /tmp/read')
+    TEST.run('ls f2.tsv | read -t',
+             expected_out=[('1', '2.3', 'ab'),
+                           ('2', '3.4', 'xy')])
+    # TSV with labels
+    TEST.run('cd /tmp/read')
+    TEST.run('ls f2.tsv | read -tl',
+             expected_out=[('f2.tsv', '1', '2.3', 'ab'),
+                           ('f2.tsv', '2', '3.4', 'xy')])
 
 
 def main_stable():
@@ -901,7 +946,7 @@ def main_stable():
     # test_loop()
     test_if()
     test_delete()
-    test_parse()
+    test_read()
 
 
 def main_dev():

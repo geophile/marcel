@@ -20,7 +20,7 @@ from marcel.object.file import File
 
 
 _COMMANDS = '''
-    read = [map (f: f.readlines()) | expand]
+#    read = [map (f: f.readlines()) | expand]
 '''
 
 
