@@ -48,21 +48,6 @@ owned by the current user's group are provided.
 '''
 
 
-DETAILS = '''
-By default, {r:ps} outputs a {n:Process} object for each process. The flags are all 
-concerned with filtering:
-
-{L}{r:--user}: By user.
-{L}{r:--group}: By group.
-{L}{r:--pid}: By pid.
-{L}{r:--command}: By command (select commands containing the given string).
-
-These are conveniences, as arbitrary predicates can be applied by piping {r:ps} output to 
-{n:select}.
-
-Run {n:help process} for more information on {n:Process} objects.
-'''
-
 _UNINITIALIZED = object()
 
 

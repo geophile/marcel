@@ -24,9 +24,6 @@ Pop the directory stack, and cd to the new top directory.
 '''
 
 
-DETAILS = None
-
-
 def popd(env):
     return Popd(env), []
 

@@ -27,9 +27,6 @@ Write the entries in the directory stack to the output stream, top first.
 '''
 
 
-DETAILS = None
-
-
 def dirs(env, clear=None):
     return Dirs(env), [] if clear is None else ['--clear']
 

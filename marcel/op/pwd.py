@@ -24,9 +24,6 @@ Write the current directory to the output stream.
 '''
 
 
-DETAILS = None
-
-
 def pwd(env):
     return Pwd(env), []
 
