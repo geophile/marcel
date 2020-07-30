@@ -18,7 +18,7 @@ import marcel.core
 import marcel.exception
 
 
-SUMMARY = '''
+HELP = '''
 {L,wrap=F}delete VAR ...
 
 {L,indent=4:28}{r:VAR}                     A variable to be deleted from the environment.

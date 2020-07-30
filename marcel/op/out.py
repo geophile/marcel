@@ -213,6 +213,8 @@ class DefaultFormatter(Formatter):
                         y = y.render_compact()
                     buffer.append(Out.ensure_quoted(y))
                 out = '(' + ', '.join(buffer) + ')'
+        elif x is None:
+            out = None
         else:
             # TODO: I don't think we can get here.
             assert False, type(x)

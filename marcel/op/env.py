@@ -17,7 +17,7 @@ import marcel.argsparser
 import marcel.core
 
 
-SUMMARY = '''
+HELP = '''
 {L,wrap=F}env
 
 Write the contents of the environment, (i.e., the marcel namespace), to the output stream.
