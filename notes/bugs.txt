@@ -226,4 +226,9 @@ AttributeError: 'tuple' object has no attribute '__globals__'
 
 ----------------------------------------------------------------------
 
-75. 
+75. Argument to gen should be settable as pipeline arg
+
+    M-0.10.5 jao@cheese:~$ p = [x: gen x]
+    Operator gen: count cannot be converted to int: x
+
+Survey operators for similar problems.

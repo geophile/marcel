@@ -856,6 +856,15 @@ def test_delete():
              expected_out=[])
     TEST.run(test='delete not_a_variable',
              expected_err='not defined')
+    # Multiple deletes
+    TEST.run('a = (1)')
+    TEST.run('b = two')
+    TEST.run('c = (3.0)')
+    TEST.run(test='env | select (k, v: k in ["a", "b", "c"]) | map (k, v: k) | sort',
+             expected_out=['a', 'b', 'c'])
+    TEST.run(test='delete a c',
+             verification='env | select (k, v: k in ["a", "b", "c"]) | map (k, v: k) | sort',
+             expected_out=['b'])
 
 
 def test_read():
@@ -1034,13 +1043,14 @@ def main_stable():
 
 
 def main_dev():
+    test_delete()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

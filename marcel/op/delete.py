@@ -19,23 +19,23 @@ import marcel.exception
 
 
 SUMMARY = '''
-{L,wrap=F}delete VAR
+{L,wrap=F}delete VAR ...
 
-{L,indent=4:28}{r:VAR}                     The variable to be deleted from the environment.
+{L,indent=4:28}{r:VAR}                     A variable to be deleted from the environment.
 
-Delete {r:VAR} from the environment, (i.e., from the marcel namespace). 
+Delete the named {r:VAR}s from the environment, (i.e., from the marcel namespace). 
 '''
 
 
-def delete(env, var):
-    return Delete(env), [var]
+def delete(env, *vars):
+    return Delete(env), [vars]
 
 
 class DeleteArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('delete', env)
-        self.add_anon('var')
+        self.add_anon_list('vars')
         self.validate()
 
 
@@ -43,23 +43,25 @@ class Delete(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.var = None
+        self.vars = None
 
     def __repr__(self):
-        return f'delete({self.var})'
+        return f'delete({self.vars})'
 
     # AbstractOp
 
     def setup_1(self):
-        if self.var not in self.env().namespace:
-            raise marcel.exception.KillCommandException(f'Variable {self.var} is not defined.')
+        for var in self.vars:
+            if var not in self.env().namespace:
+                raise marcel.exception.KillCommandException(f'Variable {var} is not defined.')
 
     def receive(self, _):
-        try:
-            del self.env().namespace[self.var]
-        except KeyError:
-            # Shouldn't happen, since we checked in setup_1, but why not.
-            pass
+        for var in self.vars:
+            try:
+                del self.env().namespace[var]
+            except KeyError:
+                # Shouldn't happen, since we checked in setup_1, but why not.
+                pass
 
     # Op
 
