@@ -14,6 +14,8 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import csv
+import os.path
+import pathlib
 import sys
 
 import marcel.argsparser
@@ -126,8 +128,8 @@ class Out(marcel.core.Op):
 
     def ensure_output_initialized(self):
         if self.output is None:
-            self.output = (open(self.append, mode='a') if self.append else
-                           open(self.file, mode='w') if self.file else
+            self.output = (Out.open_file(self.append, 'a') if self.append else
+                           Out.open_file(self.file, 'w') if self.file else
                            sys.stdout)
 
     def render(self, x, full):
@@ -144,6 +146,12 @@ class Out(marcel.core.Op):
         return (self.env().color_scheme()
                 if self.output == sys.__stdout__ else
                 None)
+
+    @staticmethod
+    def open_file(file, mode):
+        file = os.path.normpath(file)
+        file = pathlib.Path(file).expanduser()
+        return open(file, mode=mode)
 
     @staticmethod
     def ensure_quoted(x):

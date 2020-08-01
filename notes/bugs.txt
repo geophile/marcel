@@ -226,4 +226,4 @@ AttributeError: 'tuple' object has no attribute '__globals__'
 
 ----------------------------------------------------------------------
 
-76. ~/ doesn't work in out command.
+77. 

@@ -1291,3 +1291,9 @@ FIXED
 75. read is buggy, stops before end
 
 E.g., ls ~/git/marcel/notes/grammar.txt | read
+
+----------------------------------------------------------------------
+
+FIXED
+
+76. ~/ doesn't work in out command.

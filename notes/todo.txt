@@ -412,9 +412,7 @@ For tecmint article:
 
 - Generate minimal .marcel.py.
 
-- ~/ doesn't work in out command.
-
 - Bugs:
 
-    - 75
-    - 76
+    + 75
+    + 76
