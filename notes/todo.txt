@@ -408,5 +408,13 @@ Need to suppress prompts if running piped-in script.
 
 For tecmint article:
 
-- Run scripts, suppressing prompt
++ Run scripts, suppressing prompt
 
+- Generate minimal .marcel.py.
+
+- ~/ doesn't work in out command.
+
+- Bugs:
+
+    - 75
+    - 76

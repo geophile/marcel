@@ -105,17 +105,19 @@ class Read(marcel.core.Op):
         with open(file.path, 'r') as input:
             try:
                 if self.csv_reader:
-                    line = input.readline().rstrip('\r\n')
+                    line = input.readline()
                     while len(line) > 0:
+                        line = line.rstrip('\r\n')
                         self.csv_input.set(line)
                         out = next(self.csv_reader)
                         self.send(label + out if label else out)
-                        line = input.readline().rstrip('\r\n')
+                        line = input.readline()
                 else:
-                    line = input.readline().rstrip('\r\n')
+                    line = input.readline()
                     while len(line) > 0:
+                        line = line.rstrip('\r\n')
                         self.send(label + [line] if label else line)
-                        line = input.readline().rstrip('\r\n')
+                        line = input.readline()
             except StopIteration:
                 pass
 

@@ -1283,3 +1283,11 @@ This prints the result of the join, doesn't assign to d:
 This works:
 
     a > join[b>] | join [c>] | store d
+
+----------------------------------------------------------------------
+
+FIXED
+
+75. read is buggy, stops before end
+
+E.g., ls ~/git/marcel/notes/grammar.txt | read

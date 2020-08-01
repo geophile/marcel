@@ -1,0 +1,146 @@
+Marcel: A Modern Shell
+
+Jack Orenstein
+
+
+
+Overview
+
+Marcel is a new shell. It is similar to traditional shells in many ways, but it does a few things differently.
+
+- Piping: All shells uses pipes to send the output from one command to the input of another. It is strings that are piped, which means that the receiver has to parse the strings. Marcel pipes structured data (or objects) instead of strings.
+
+- Python: Marcel is implemented in Python, and exposes Python in a number of ways. If you need a little bit of logic in your commands, marcel allows you to write it in Python.
+
+- Scripting: Marcel takes an unusual approach to scripting. You can, of course, simply write a sequence of marcel commands in a text file and execute them. But Marcel also provides an API in the form of a Python module. You can import this module to do scripting in a far more convenient way than is possible with plain Python.
+
+Installation
+
+Marcel requires Python 3.6 or later.  It has been developed and tested on Linux, and it mostly works on Mac. (If you'd like to help port to Windows, get in touch.)
+
+You can install it for your own use as follows:
+
+python3 -m pip install marcel
+
+Or if you want to install for all users (e.g., to /usr/local):
+
+sudo python3 -m pip install --prefix /usr/local marcel
+
+You can also download source from https://github.com/geophile/marcel and then:
+
+python3 setup.py bdist_wheel
+
+
+Customization
+
+You can customize marcel in the file ~/.marcel.py, which is read on startup. As you can tell from the file's name, customization is done in Python. One thing you probably want to do is to customize the prompt. To do this, you assign a list to the PROMPT variable. For example, if you want your prompt to be the current directory, followed by '>', all printed in green:
+
+
+PROMPT = [
+    Color(0, 4, 0),
+    PWD,
+    '> '
+]
+
+(This replaces the inscrutable PS1 configuration that you would need to do in bash.)
+
+You can also import Python modules. E.g., if you want to use the functions of the math module in your marcel commands:
+
+from math import *
+
+And you can, of course, define your own symbols. For example, if you want your marcel commands to be able to
+
+Examples
+
+Find file sizes by extension:
+
+Explore the current directory recursively, group the files by their extension (e.g. .txt, .py and so on), and compute the total file size for each group. You can do this in marcel as follows:
+
+ls -fr | map (file: (file.suffix, file.size)) | red . + | sort
+
+The ls operator produces a stream of File objects, listing files only (-f), recursively (-r), in the current directory. These are piped to the next command, map. Map specifies a Python function, in the outermost parentheses, which maps each file to a tuple containing the file's extension, and it's size. (Marcel allows the lambda keyword to be omitted.)  The red (reduce) operator, groups by the first part of the tuple (extension) and then sums up the sizes within each group. The result is sorted by extension.
+
+If you want to sort by decreasing size instead, just add a function specifying the sort key:
+
+ls -fr | map (file: (file.suffix, file.size)) | red . + | sort (ext, size: -size)
+
+Host executables:
+
+In addition to using marcel's built-in operators, you can, of course, call any executable. Pipelines may contain a mixture of marcel operators and host executables. Piping between operators and executables is done via streams of strings.
+
+For example, this command combines operators and executables, and lists the usernames of users whose shell is /bin/bash. map and select are marcel operators, while cat, xargs and echo are Linux executables.
+
+cat /etc/passwd \
+| map (line: line.split(':')) \
+| select (*line: line[-1] == '/bin/bash') \
+| map (*line: line[0]) \
+| xargs echo
+
+    cat /etc/passwd: Obtain the contents of the file. Lines are piped to subsequent commands.
+
+    map (line: line.split(':')): Split the lines at the : separators, yielding 7-tuples.
+
+    select (*line: line[-1] == '/bin/bash'): select those lines in which the last field is /bin/bash.
+
+    map (*line: line[0]): Keep the username field of each input tuple.
+
+    xargs echo: Combine the incoming usernames into a single line, which is printed to stdout.
+
+Scripting
+
+While Python is sometimes called a scripting language, it doesn't work very well in that way. The problem is that running shell commands, and other executables from Python is cumbersome. You can use os.system(), which is simple but inadequate for dealing with stdin, stdout and stderr. Popen() is more powerful, but more complex to use.
+
+Marcel's approach is to provide a module that integrates marcel operators with Ptyhon's language features. For example, here is the Python code for computing the sum of file sizes by extension:
+
+from marcel.api import *
+
+for ext, size in (ls(file=True, recursive=True)
+                  | map(lambda f: (f.suffix, f.size))
+                  | red('.', '+')):
+    print(f'{ext}: {size})
+
+The shell commands are pretty much the same as before, except for syntactic conventions.  So "ls -fr" turns into "ls(file=True, recursive=True)".  The mapping and reduction commands are there too, connected with a pipe, as in the shell. The entire shell command (ls ... red) yields a Python iterator, so that the command can be used with Python's for loop.
+
+Database
+
+You can integrate database access with marcel pipelines. First, you need to configure database access in the config file, ~/.marcel.py, e.g.
+
+define_db(name='jao',
+          driver='psycopg2',
+          dbname='acme',
+          user='jao')
+
+DB_DEFAULT = 'jao'
+
+This configures access to the Postgres database named acme, using the psycopg2 driver. Connections from marcel will be made using the jao user, and the database profile is named jao. (DB_DEFAULT specifies the jao database profile as the one to be used if no profile is specified.) With this configuration done, the database can now be queried using the sql operator, e.g.
+
+sql 'select part_name, quantity from part where quantity < 10' | out --csv ~/reorder.csv
+
+This command queries a table named part, and dumps the query result into the file ~/reorder.csv, in CSV format.
+
+Remote
+
+Similarly to database access, remote access can be configured in ~/.marcel.py. For example, this configures a 4-node cluster:
+
+define_remote(name='lab',
+              user='frankenstein',
+              identity='/home/frankenstein/.ssh/id_rsa',
+              host=['10.0.0.100', '10.0.0.101', '10.0.0.102', '10.0.0.103'])
+
+The cluster can be identified as 'lab' in marcel commands. The user and identity parameters specify login information, and the hosts parameter specifies the IP addresses of the nodes on the cluster.
+
+Once the cluster is configured, all nodes can be operated on at once. For example, to get a list of process pids and commandlines across the cluster:
+
+@lab [ps | map (proc: (proc.pid, proc.commandline))]
+
+This submits the bracketed command to each node of the cluster. Output identifies each node, e.g.
+
+...
+
+
+For more information
+
+- Website
+- Github
+
+Marcel is under active development. Get in touch if you would like to help out.
