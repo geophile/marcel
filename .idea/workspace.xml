@@ -21,6 +21,9 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -532,7 +535,7 @@
       <workItem from="1595440668927" duration="14379000" />
       <workItem from="1595611531706" duration="30122000" />
       <workItem from="1596060580458" duration="655000" />
-      <workItem from="1596120491657" duration="2798000" />
+      <workItem from="1596120491657" duration="7615000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -851,8 +854,8 @@
     <state x="1113" y="521" width="306" height="466" key="refactoring.ChangeSignatureDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1591380771348" />
     <state x="2875" y="447" key="refactoring.ChangeSignatureDialog/0.27.3840.1053@0.27.3840.1053" timestamp="1592851582734" />
     <state x="1948" y="521" key="refactoring.ChangeSignatureDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1590544776135" />
-    <state x="2854" y="447" width="672" height="691" key="search.everywhere.popup" timestamp="1596125631565">
-      <screen x="1920" y="0" width="2560" height="1440" />
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup" timestamp="1596297422938">
+      <screen x="0" y="27" width="1920" height="1053" />
     </state>
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1595516024944" />
     <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1593702967393" />
@@ -860,8 +863,8 @@
     <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1595370609998" />
     <state x="701" y="354" width="672" height="507" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1596033560611" />
     <state x="2621" y="335" width="672" height="519" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1595984574375" />
-    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1594224231941" />
-    <state x="2854" y="447" width="672" height="691" key="search.everywhere.popup/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1596125631565" />
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1596297422938" />
+    <state x="2854" y="447" width="672" height="691" key="search.everywhere.popup/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1596242734682" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -405,3 +405,8 @@ Can't run ssh!
 Need to suppress prompts if running piped-in script.
 
 ----------------------------------------------------------------------
+
+For tecmint article:
+
+- Run scripts, suppressing prompt
+

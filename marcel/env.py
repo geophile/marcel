@@ -33,7 +33,6 @@ import marcel.version
 
 
 class DirectoryState:
-
     VARS = ('DIRS', 'PWD')
 
     def __init__(self, namespace):
@@ -95,7 +94,6 @@ class DirectoryState:
 
 
 class Environment:
-
     CONFIG_FILENAME = '.marcel.py'
     DEFAULT_PROMPT = f'M-{marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
@@ -177,8 +175,13 @@ class Environment:
         return changes
 
     def prompts(self):
-        return (self.prompt_string(self.getvar('PROMPT')),
-                self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
+        if os.isatty(sys.stdin.fileno()):
+            # Interactive
+            return (self.prompt_string(self.getvar('PROMPT')),
+                    self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
+        else:
+            # Piped-in script
+            return '', ''
 
     def define_remote(self, name, user, identity, host=None, hosts=None):
         self.clusters[name] = marcel.object.cluster.define_remote(name, user, identity, host, hosts)
@@ -244,4 +247,3 @@ class Environment:
     @staticmethod
     def immutable(x):
         return callable(x) or type(x) in (int, float, str, bool, tuple, marcel.core.Pipeline)
-
