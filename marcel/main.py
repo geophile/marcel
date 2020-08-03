@@ -30,6 +30,7 @@
 
 import atexit
 import multiprocessing
+import os
 import pathlib
 import readline
 import sys
@@ -149,7 +150,7 @@ class Main:
                 pass
             except marcel.exception.KillCommandException as e:
                 marcel.util.print_to_stderr(e, self.env)
-            except marcel.exception.KillAndResumeException as e:
+            except marcel.exception.KillAndResumeException:
                 # Error handler printed the error
                 pass
 
@@ -209,11 +210,14 @@ class Main:
                 fail(f'RUN_ON_STARTUP must be a string')
 
     def run_script(self, script):
+        self.same_process = True
         command = ''
         for line in script.split('\n'):
             if len(line.strip()) > 0:
-                command += line
-                if not line.endswith('\\\n'):
+                if line.endswith('\\'):
+                    command += line[:-1]
+                else:
+                    command += line
                     self.run_command(command)
                     command = ''
         if len(command) > 0:
@@ -272,9 +276,15 @@ if __name__ == '__main__':
         MAIN = Main(None, same_process=False, old_namespace=old_namespace)
         MAIN.dill = dill
         MAIN.echo = echo
-        try:
-            MAIN.run()
+        if os.isatty(sys.stdin.fileno()):
+            # Interactive
+            try:
+                MAIN.run()
+                break
+            except ReloadConfigException:
+                old_namespace = MAIN.shutdown()
+                pass
+        else:
+            script = sys.stdin.read()
+            MAIN.run_script(script)
             break
-        except ReloadConfigException:
-            old_namespace = MAIN.shutdown()
-            pass
