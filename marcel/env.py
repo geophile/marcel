@@ -175,13 +175,8 @@ class Environment:
         return changes
 
     def prompts(self):
-        if os.isatty(sys.stdin.fileno()):
-            # Interactive
-            return (self.prompt_string(self.getvar('PROMPT')),
-                    self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
-        else:
-            # Piped-in script
-            return '', ''
+        return (self.prompt_string(self.getvar('PROMPT')),
+                self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
 
     def define_remote(self, name, user, identity, host=None, hosts=None):
         self.clusters[name] = marcel.object.cluster.define_remote(name, user, identity, host, hosts)

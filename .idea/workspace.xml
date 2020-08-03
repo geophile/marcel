@@ -20,9 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/tecmint.odt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/tecmint.odt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -581,7 +579,7 @@
       <workItem from="1595611531706" duration="30122000" />
       <workItem from="1596060580458" duration="655000" />
       <workItem from="1596120491657" duration="11809000" />
-      <workItem from="1596414322800" duration="1680000" />
+      <workItem from="1596414322800" duration="2146000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
