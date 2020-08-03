@@ -410,7 +410,7 @@ For tecmint article:
 
 + Run scripts, suppressing prompt
 
-- Generate minimal .marcel.py.
++ Generate minimal .marcel.py.
 
 - Bugs:
 
