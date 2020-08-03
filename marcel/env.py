@@ -32,6 +32,13 @@ import marcel.util
 import marcel.version
 
 
+DEFAULT_CONFIG = '''from marcel.builtin import *
+
+PROMPT = [lambda: PWD, ' $ ']
+PROMPT_CONTINUATION = [lambda: PWD, ' + ']
+'''
+
+
 class DirectoryState:
     VARS = ('DIRS', 'PWD')
 
@@ -203,14 +210,16 @@ class Environment:
         config_path = (pathlib.Path(config_path)
                        if config_path else
                        pathlib.Path.home() / Environment.CONFIG_FILENAME).expanduser()
-        if config_path.exists():
-            with open(config_path.as_posix()) as config_file:
-                config_source = config_file.read()
-            locals = {}
-            # Execute the config file. Imported and newly-defined symbols go into locals, which
-            # will then be added to self.namespace, for use in the execution of op functions.
-            exec(config_source, self.namespace, locals)
-            self.namespace.update(locals)
+        if not config_path.exists():
+            with open(config_path.as_posix(), 'w') as config_file:
+                config_file.write(DEFAULT_CONFIG)
+        with open(config_path.as_posix()) as config_file:
+            config_source = config_file.read()
+        locals = {}
+        # Execute the config file. Imported and newly-defined symbols go into locals, which
+        # will then be added to self.namespace, for use in the execution of op functions.
+        exec(config_source, self.namespace, locals)
+        self.namespace.update(locals)
         return config_path
 
     def prompt_string(self, prompt_pieces):
