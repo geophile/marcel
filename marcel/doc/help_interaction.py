@@ -33,6 +33,7 @@ e.g.
 {L,indent=4:6}- Ctrl-E to go to the end of the current command.
 {L,indent=4:6}- Ctrl-K to delete everything to the end of the current command.
 {L,indent=4:6}- Ctrl-U to delete everything to the beginning of the current command.
+{L,indent=4:6}- Ctrl-W to delete the preceding word.
 {L,indent=4:6}- Ctrl-R to search the command history.
 
 For a multi-line command, type a \\\\ and then hit return. You will then see a

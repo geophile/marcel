@@ -21,8 +21,14 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/doc/help_interaction.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_interaction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/bugs_closed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs_closed.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/tecmint/tecmint.doc" beforeDir="false" afterPath="$PROJECT_DIR$/notes/tecmint/tecmint.doc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/tecmint/tecmint.odt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/tecmint/tecmint.odt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/todo_completed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo_completed.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -581,7 +587,7 @@
       <workItem from="1595611531706" duration="30122000" />
       <workItem from="1596060580458" duration="655000" />
       <workItem from="1596120491657" duration="11809000" />
-      <workItem from="1596414322800" duration="3521000" />
+      <workItem from="1596414322800" duration="11733000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -620,10 +626,14 @@
       <screen x="1920" y="0" width="2560" height="1440" />
     </state>
     <state x="2891" y="377" width="800" height="719" key="#Plugins/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1596120511843" />
-    <state x="2712" y="436" width="1084" height="708" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1596317166867">
-      <screen x="1920" y="0" width="2560" height="1440" />
+    <state x="499" y="428" width="1187" height="299" key="#SQL_Dialects" timestamp="1596484767762">
+      <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="594" y="346" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1594425897487" />
+    <state x="499" y="428" width="1187" height="299" key="#SQL_Dialects/0.27.1920.1053@0.27.1920.1053" timestamp="1596484767762" />
+    <state x="594" y="346" width="800" height="684" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1596484790095">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state x="594" y="346" width="800" height="684" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1596484790095" />
     <state x="792" y="455" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1591629111616" />
     <state x="2300" y="266" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.3840.1053@0.27.3840.1053" timestamp="1594767040306" />
     <state x="1920" y="455" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1595272315575" />
@@ -674,10 +684,10 @@
     <state x="3259" y="456" key="#xdebugger.evaluate/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1595944665503" />
     <state x="983" y="375" width="937" height="635" key="#xdebugger.evaluate/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1594152309394" />
     <state x="2017" y="275" width="860" height="500" key="#xdebugger.evaluate/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1596314431372" />
-    <state x="1967" y="180" width="2513" height="828" key="DiffContextDialog" timestamp="1595275669927">
-      <screen x="0" y="27" width="4480" height="1413" />
+    <state x="843" y="141" width="1077" height="616" key="DiffContextDialog" timestamp="1596484714222">
+      <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="843" y="141" width="1077" height="616" key="DiffContextDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1593546746527" />
+    <state x="843" y="141" width="1077" height="616" key="DiffContextDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1596484714222" />
     <state x="682" y="211" width="1435" height="805" key="DiffContextDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1591556722517" />
     <state x="1967" y="180" width="2513" height="828" key="DiffContextDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1595275669927" />
     <state x="843" y="141" width="1077" height="616" key="DiffContextDialog/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1593218993631" />
@@ -875,10 +885,10 @@
     </state>
     <state x="0" y="27" width="1119" height="885" key="dock-window-4/0.27.2560.1413@0.27.2560.1413" timestamp="1593700439958" />
     <state x="1964" y="27" width="966" height="935" key="dock-window-4/0.27.4480.1413@0.27.4480.1413" timestamp="1591801929275" />
-    <state x="2702" y="210" width="851" height="672" key="find.popup" timestamp="1595633813011">
-      <screen x="1920" y="0" width="1920" height="1080" />
+    <state x="320" y="152" width="1075" height="747" key="find.popup" timestamp="1596566807078">
+      <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="320" y="152" width="1075" height="747" key="find.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1595465366649" />
+    <state x="320" y="152" width="1075" height="747" key="find.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1596566807078" />
     <state x="1043" y="302" width="1134" height="879" key="find.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1593699116596" />
     <state x="2190" y="197" width="796" height="658" key="find.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1595554772195" />
     <state x="1969" y="422" width="1017" height="768" key="find.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1595370732996" />
@@ -900,10 +910,10 @@
     <state x="1113" y="521" width="306" height="466" key="refactoring.ChangeSignatureDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1591380771348" />
     <state x="2875" y="447" key="refactoring.ChangeSignatureDialog/0.27.3840.1053@0.27.3840.1053" timestamp="1592851582734" />
     <state x="1948" y="521" key="refactoring.ChangeSignatureDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1590544776135" />
-    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup" timestamp="1596414357738">
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup" timestamp="1596566793375">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1596414357738" />
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1596566793375" />
     <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1593702967393" />
     <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1595554895447" />
     <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1595370609998" />

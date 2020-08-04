@@ -5,12 +5,6 @@
 
 - Debugging & verbosity level
 
-- Should the name of map be changed? f as in osh? apply? map doesn't
-  really make sense when used as a generator. Could have gen handle
-  this case through a function argument mutually exclusive with other
-  args. So "gen 5" works like it always had, but "gen (5)" generates a
-  5?!
-
 - What happens to processes that disappear? E.g. ps | .... ps yields
   non-existent processes which are then used downstream. Can this even
   happen?
@@ -18,48 +12,17 @@
 - ps: If commandline blank, take contents of Name from status file
   (enclosed in [])? That's what ps appears to do.
 
-- Documentation of Errors. Revisit error handling: Since errors are
-  now handled by Op, why do they need to be sent down the pipeline? We
-  are no longer relying on out to print them. farcel's handler could
-  pickle them immediately, (i.e., it doesn't have to rely on the error
-  reaching the end of the pipeline).
-
 ----------------------------------------------------------------------
 
 Bash:
 
 - What if there is an arg that is significant to marcel parsing, e.g. [, (.
 
-- shlex.quote() usage, and wildcards need to be
-  reconsidered. Automatically quoting everything is wrong, (bug 38). So
-  maybe the problem is that bash is wrong. Need to preserve the bash
-  args exactly as written, quotes included, and pass it all to Popen. As
-  things stand, we lose the quotes during parsing, and then add them
-  back unconditionally.
-  
-  Globbing is tricky because it then requires great care to quote and
-  escape properly, e.g. a\ b*, 'a b'*, 'a b*', (the first two are the
-  same, the last has no wildcard).
-
 ----------------------------------------------------------------------
 
 - Organize internal ops -- Fork, LabelThread
 
-- out.receive does a lot of work. Precompute whatever can be.
-
 - How do exit codes fit in?
-
-----------------------------------------------------------------------
-
-Glob patterns and marcel syntax both use [].
-
-    M jao@cheese:/tmp/d$ ls [a-c]* | rm
-    Parsing error at position 4 of "ls [a-c]* | rm": Expected string or pipe
-
-Could handle the situation by being context-sensitive during the
-parse.
-
-This is going to be a problem now that pipelines can be args.
 
 ----------------------------------------------------------------------
 
@@ -87,10 +50,6 @@ Tab completion:
 
 ----------------------------------------------------------------------
 
-Job should be in marcel.object. Maybe.
-
-----------------------------------------------------------------------
-
 Add notion of current job, and then allow bg/fg ops to omit args.
 
 ----------------------------------------------------------------------
@@ -105,22 +64,7 @@ can be customized by the user.
 
 ----------------------------------------------------------------------
 
-Should expand operate on filenames? Might be better to have a separate
-command for that, e.g. cat.
-
-----------------------------------------------------------------------
-
 Import bash env?
-
-----------------------------------------------------------------------
-
-Help:
-
-- Allow for indented paragraphs. Equating indent and non-wrapping is
-  probably a bad idea. Maybe find a Python markdown implementation?
-  Still need colorizing.
-
-Use these for help.
 
 ----------------------------------------------------------------------
 
@@ -232,9 +176,8 @@ This is broken: Op.op_name() evalutes to "op".
 
 ----------------------------------------------------------------------
 
-edit command relies on bash EDITOR variable. Should use a marcel
-variable.  Import selected bash env variables? Can't see anything
-other than EDITOR right now.
+Import selected bash env variables? Can't see anything other than
+EDITOR right now.
 
 ----------------------------------------------------------------------
 
@@ -258,6 +201,8 @@ Fork.attach_thread_label. Unclear why both are needed.
 API has fork and remote, and they are bound bound to Fork. remote
 *intended* for remote execution. 
 
+Need both remote and fork ops?
+
 ----------------------------------------------------------------------
 
 Should jobs and commands be objects? That would allow for better
@@ -274,10 +219,6 @@ ls -fr ~/git/marcel/{marcel,test} \
 | expand \
 | red count
 No qualifying paths: ['~/git/marcel/{marcel,test}']
-
-----------------------------------------------------------------------
-
-# as comment
 
 ----------------------------------------------------------------------
 
@@ -316,30 +257,7 @@ Make namespace protected. Use vars() instead externally.  BTW:
 
 ----------------------------------------------------------------------
 
-    TEST.run('x100 = [gen 3 | map (x: (x, x * 100))]')
-    TEST.run(test='gen 4 | map (x: (x, -x)) | join x100',
-             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
-    TEST.run(test='gen 4 | map (x: (x, -x)) | join [x100]',
-             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
-
-Why should the last one work?
-
-Well, this should work:
-
-      gen 3 | map ... | join [x100 | ...]
-
-----------------------------------------------------------------------
-
-Get rid of argparse in main.
-
-----------------------------------------------------------------------
-
 ls API: Need to complain if depth is other than 0 or 1
-
-----------------------------------------------------------------------
-
-Revise op help. Without argparse, automatic generation of command line
-and arg docs is gone.
 
 ----------------------------------------------------------------------
 
@@ -360,10 +278,6 @@ construction into subclasses.
 Controlling Popen processes:
 
 https://pymotw.com/2/subprocess/#process-groups-sessions
-
-----------------------------------------------------------------------
-
-Need both remote and fork ops?
 
 ----------------------------------------------------------------------
 
@@ -392,27 +306,15 @@ Oops, [] is overloaded:
 M-0.9.17 jao@cheese:/tmp/csv$ ls [b-f]*.csv
 Operator ls: filenames must be a string: [runpipeline(b-f)]
 
-----------------------------------------------------------------------
+But escaping works:
 
-Set ops.
+M-0.10.6 jao@cheese:~$ ls \[p-r\]*
+-rw-rw-r--   jao    jao       36883   2020 Jul 05 19:23:14   passwords.txt
+-rw-r--r--   jao    jao       13377   2019 Jan 20 12:43:37   reality_distortion_field.md
+-rw-rw-r--   jao    jao        2415   2019 Oct 06 23:13:49   reload.txt
+
 
 ----------------------------------------------------------------------
 
 Can't run ssh!
 
-----------------------------------------------------------------------
-
-Need to suppress prompts if running piped-in script.
-
-----------------------------------------------------------------------
-
-For tecmint article:
-
-+ Run scripts, suppressing prompt
-
-+ Generate minimal .marcel.py.
-
-- Bugs:
-
-    + 75
-    + 76

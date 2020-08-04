@@ -285,6 +285,6 @@ if __name__ == '__main__':
                 old_namespace = MAIN.shutdown()
                 pass
         else:
-            script = sys.stdin.read()
-            MAIN.run_script(script)
+            # Piped-in script
+            MAIN.run_script(sys.stdin.read())
             break

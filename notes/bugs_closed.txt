@@ -937,6 +937,19 @@ marcel.parser.PrematureEndError: Command ended prematurely.
 
 FIXED
 
+52. Pickling/unpickling Environment
+
+What is the right thing to do? Parts of it make no sense for farcel:
+color scheme, PWD, probably others. HOMEDIR may or may not be right.
+Also, sometimes we copy for remote execution, sometimes for local
+execution. 
+
+Need to rethink Environment transmission.
+
+----------------------------------------------------------------------
+
+FIXED
+
 53. Stack trace on unexpected arg type to ls
 
 M-0.7.6 jao@cheese:~/git/marcel$ ls (File('bin'))

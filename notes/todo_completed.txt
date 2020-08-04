@@ -466,3 +466,70 @@ File objects
 
 - File navigation (parent, children, ...). Sort of works. Should
   _getattr() wrap a path (if delegation returns one) into a File?
+
+
+----------------------------------------------------------------------
+
+For tecmint article:
+
++ Run scripts, suppressing prompt
+
++ Generate minimal .marcel.py.
+
+- Bugs:
+
+    + 75
+    + 76
+
+
+----------------------------------------------------------------------
+
+Need to suppress prompts if running piped-in script.
+
+----------------------------------------------------------------------
+
+Set ops.
+
+----------------------------------------------------------------------
+
+- Should the name of map be changed? f as in osh? apply? map doesn't
+  really make sense when used as a generator. Could have gen handle
+  this case through a function argument mutually exclusive with other
+  args. So "gen 5" works like it always had, but "gen (5)" generates a
+  5?!
+
+----------------------------------------------------------------------
+
+- Documentation of Errors. Revisit error handling: Since errors are
+  now handled by Op, why do they need to be sent down the pipeline? We
+  are no longer relying on out to print them. farcel's handler could
+  pickle them immediately, (i.e., it doesn't have to rely on the error
+  reaching the end of the pipeline).
+
+----------------------------------------------------------------------
+
+- shlex.quote() usage, and wildcards need to be
+  reconsidered. Automatically quoting everything is wrong, (bug 38). So
+  maybe the problem is that bash is wrong. Need to preserve the bash
+  args exactly as written, quotes included, and pass it all to Popen. As
+  things stand, we lose the quotes during parsing, and then add them
+  back unconditionally.
+  
+  Globbing is tricky because it then requires great care to quote and
+  escape properly, e.g. a\ b*, 'a b'*, 'a b*', (the first two are the
+  same, the last has no wildcard).
+
+
+----------------------------------------------------------------------
+
+Should expand operate on filenames? Might be better to have a separate
+command for that, e.g. cat.
+
+
+----------------------------------------------------------------------
+
+# as comment
+
+----------------------------------------------------------------------
+
+Get rid of argparse in main.
