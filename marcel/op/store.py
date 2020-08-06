@@ -97,6 +97,8 @@ class Store(marcel.core.Op):
     # For use by this class
 
     def setup_interactive(self):
+        if not self.var.isidentifier():
+            raise marcel.exception.KillCommandException(f'{self.var} is not a valid identifier')
         self.accumulator = self.getvar(self.var)
         if self.append and self.accumulator is not None:
             if not self.accumulator_is_loop_variable():

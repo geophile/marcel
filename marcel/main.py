@@ -211,11 +211,10 @@ class Main:
         self.env.namespace.update(child_namespace_changes)
 
     def run_immediate(self, pipeline):
-        # Job control commands should be run in this process, not a spawned process.
-        # Also, if we're testing operator behavior, run in immediate mode.
-        return (# For the execution of tests and scripts
+        return (
+                # For the execution of tests and scripts
                 self.same_process or
-                # One op in pipeline ...
+                # Exactly one op in pipeline ...
                 pipeline.first_op == pipeline.last_op and
                     # ... and it should run in the main process, or
                     pipeline.first_op.run_in_main_process() or

@@ -691,6 +691,11 @@ def test_load_store():
     TEST.run('i = (123)')
     TEST.run('gen 3 | store --append i',
              expected_err='i is not usable as an accumulator')
+    # Not a var
+    TEST.run('gen 3 | store /notavar',
+             expected_err='not a valid identifier')
+    TEST.run('/x > y',
+             expected_err='not a valid identifier')
     # # Load and store the same container, to implement a loop
     # TEST.run('x = ([(0,)])')
     # TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x')
@@ -1043,7 +1048,8 @@ def main_stable():
 
 
 def main_dev():
-    test_delete()
+    test_load_store()
+    # TEST.run('ls > /tmp/x')
     pass
 
 

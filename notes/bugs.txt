@@ -224,6 +224,8 @@ Not killing gen 0.
 
 ----------------------------------------------------------------------
 
+FIXED
+
 78. vim doesn't work
 
 ----------------------------------------------------------------------
@@ -232,6 +234,16 @@ Not killing gen 0.
 
 ----------------------------------------------------------------------
 
+FIXED
+
 80. ls -fr > /tmp/x 
 
 What does this do?! Doesn't result in an error message.
+
+----------------------------------------------------------------------
+
+81. ls > x
+
+Variable ls is undefined.
+
+This is parsed as load + stored, instead of op.
