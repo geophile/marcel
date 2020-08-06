@@ -216,4 +216,22 @@ AttributeError: 'tuple' object has no attribute '__globals__'
 
 ----------------------------------------------------------------------
 
-77. 
+FIXED
+
+77. ctrl-C doesn't work!
+
+Not killing gen 0.
+
+----------------------------------------------------------------------
+
+78. vim doesn't work
+
+----------------------------------------------------------------------
+
+79. less doesn't work
+
+----------------------------------------------------------------------
+
+80. ls -fr > /tmp/x 
+
+What does this do?! Doesn't result in an error message.

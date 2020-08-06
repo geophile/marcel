@@ -70,6 +70,20 @@ class ReloadConfigException(BaseException):
         super().__init__()
 
 
+class SameProcessMode:
+
+    def __init__(self, main, same_process):
+        self.main = main
+        self.original_same_process = main.same_process
+        self.new_same_process = same_process
+
+    def __enter__(self):
+        self.main.same_process = self.new_same_process
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.main.same_process = self.original_same_process
+
+
 # Used to reload configuration if a config file changes.
 class ConfigurationMonitor:
 
@@ -210,18 +224,18 @@ class Main:
                 fail(f'RUN_ON_STARTUP must be a string')
 
     def run_script(self, script):
-        self.same_process = True
-        command = ''
-        for line in script.split('\n'):
-            if len(line.strip()) > 0:
-                if line.endswith('\\'):
-                    command += line[:-1]
-                else:
-                    command += line
-                    self.run_command(command)
-                    command = ''
-        if len(command) > 0:
-            self.run_command(command)
+        with SameProcessMode(self, True):
+            command = ''
+            for line in script.split('\n'):
+                if len(line.strip()) > 0:
+                    if line.endswith('\\'):
+                        command += line[:-1]
+                    else:
+                        command += line
+                        self.run_command(command)
+                        command = ''
+            if len(command) > 0:
+                self.run_command(command)
 
     @staticmethod
     def default_error_handler(env, error):
