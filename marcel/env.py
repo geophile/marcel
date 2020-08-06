@@ -104,6 +104,16 @@ class Environment:
     CONFIG_FILENAME = '.marcel.py'
     DEFAULT_PROMPT = f'M-{marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
+    INITIAL_INTERACTIVE_EXECUTABLES = {
+        'emacs',
+        'less',
+        'man',
+        'more',
+        'psql',
+        'top',
+        'vi',
+        'vim'
+    }
 
     def __init__(self, config_file, old_namespace):
         user = getpass.getuser()
@@ -132,6 +142,7 @@ class Environment:
             'define_remote': self.define_remote,
             'Color': marcel.object.color.Color,
         })
+        self.initialize_interactive_executables()
         if editor:
             self.namespace['EDITOR'] = editor
         for key, value in marcel.builtin.__dict__.items():
@@ -247,6 +258,13 @@ class Environment:
         except Exception as e:
             print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)
             return Environment.DEFAULT_PROMPT
+
+    def initialize_interactive_executables(self):
+        exes = []
+        for x in Environment.INITIAL_INTERACTIVE_EXECUTABLES:
+            if marcel.util.is_executable(x):
+                exes.append(x)
+        self.namespace['INTERACTIVE_EXECUTABLES'] = exes
 
     @staticmethod
     def immutable(x):

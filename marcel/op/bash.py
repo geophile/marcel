@@ -63,7 +63,8 @@ class Bash(marcel.core.Op):
         'more',
         'psql',
         'top',
-        'vi'
+        'vi',
+        'vim'
     }
 
     def __init__(self, env):
