@@ -247,3 +247,13 @@ What does this do?! Doesn't result in an error message.
 Variable ls is undefined.
 
 This is parsed as load + stored, instead of op.
+
+----------------------------------------------------------------------
+
+FIXED
+
+82. Var assignment isn't working
+
+    M-0.10.6 jao@cheese:~/git/marcel/test$ x = (1)
+    M-0.10.6 jao@cheese:~/git/marcel/test$ (x)
+    Error: Running map(lambda: x): name 'x' is not defined

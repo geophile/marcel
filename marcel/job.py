@@ -143,7 +143,7 @@ class Job:
             debug(f'running: {command.source}, env namespace: ({id(self.env.namespace)}) {self.env.namespace.keys()}')
             try:
                 child_namespace_changes = command.execute()
-                debug(f'completed: {command.source} {child_namespace_changes.keys()}')
+                debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
                 writer.send(child_namespace_changes)
             except marcel.exception.KillCommandException as e:
                 marcel.util.print_to_stderr(e, self.env)

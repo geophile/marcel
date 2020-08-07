@@ -1048,8 +1048,6 @@ def main_stable():
 
 
 def main_dev():
-    test_load_store()
-    # TEST.run('ls > /tmp/x')
     pass
 
 
