@@ -910,7 +910,7 @@ class Parser:
             pipeline = self.pipeline(pipeline_parameters)
             self.next_token(End)
             return pipeline
-        elif self.next_token(String) or self.next_token(Expression):
+        elif self.next_token(String) or self.next_token(Op) or self.next_token(Expression):
             return self.token
         else:
             return None
