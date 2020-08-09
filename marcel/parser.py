@@ -152,6 +152,9 @@ class Token(Source):
     def is_string(self):
         return False
 
+    def is_op(self):
+        return False
+
     def is_fork(self):
         return False
 
@@ -352,7 +355,6 @@ class String(Token):
         return True
 
     def op_name(self):
-        # This should only being called for the first op following START
         return self.string
 
     def scan(self):
@@ -398,6 +400,24 @@ class String(Token):
             else:
                 chars.append(c)
         self.string = ''.join(chars)
+
+
+class Op(String):
+
+    def __init__(self, text, position=None, adjacent_to_previous=False):
+        super().__init__(text, 0 if position is None else position, adjacent_to_previous)
+
+    # Op is a subclass of String, so that the implementation of String can be inherited.
+    # But for classification of tokens, they should be considered as separate things,
+    # so is_string() is overridden to return False.
+    def is_string(self):
+        return False
+
+    def is_op(self):
+        return True
+
+    def op_name(self):
+        return self.string
 
 
 class Run(Token):
@@ -453,6 +473,9 @@ class Fork(Symbol):
         super().__init__(text, position, adjacent_to_previous, Token.FORK)
 
     def is_fork(self):
+        return True
+
+    def is_op(self):
         return True
 
     def op_name(self):
@@ -536,9 +559,9 @@ class ImpliedMap(Token):
 
 class Lexer(Source):
 
-    def __init__(self, env, text):
+    def __init__(self, main, text):
         super().__init__(text)
-        self.env = env
+        self.main = main
 
     def tokens(self):
         tokens = []
@@ -583,6 +606,8 @@ class Lexer(Source):
                 token = Gt(self.text, self.end, adjacent_to_previous, c)
             else:
                 token = String(self.text, self.end, adjacent_to_previous)
+                if token.string in self.main.op_modules:
+                    token = Op(self.text, self.end, adjacent_to_previous)
             self.end = token.end
         return token
 
@@ -721,7 +746,7 @@ class Parser:
         self.text = text
         self.env = main.env
         self.op_modules = main.op_modules
-        self.tokens = Lexer(self.env, text).tokens()
+        self.tokens = Lexer(main, text).tokens()
         self.t = 0
         self.token = None  # The current token
         self.current_ops = marcel.util.Stack()
@@ -758,7 +783,26 @@ class Parser:
         pipeline = marcel.core.Pipeline()
         pipeline.set_parameters(parameters)
         self.current_pipelines.push(pipeline)
-        if self.next_token(String, Gt):
+        if self.next_token(Op, Gt):
+            op_token = self.token
+            found_gt = self.next_token(Gt)
+            assert found_gt
+            gt_token = self.token
+            if self.pipeline_end():
+                # op >
+                raise UnexpectedTokenError(self.token, f'A variable must precede {gt_token.value(self)}, '
+                                                       f'not an operator ({self.token.op_name()})')
+            elif self.pipeline_end(1):
+                if self.next_token(String):
+                    # op > var
+                    op = (op_token, [])
+                    store_op = self.store_op(self.token, gt_token.is_append())
+                    op_sequence = [op, store_op]
+                else:
+                    raise UnexpectedTokenError(gt_token, f'Incorrect use of {gt_token.value(self)}')
+            else:
+                raise UnexpectedTokenError(gt_token, f'Incorrect use of {gt_token.value(self)}')
+        elif self.next_token(String, Gt):
             load_op = self.load_op(self.token)
             found_gt = self.next_token(Gt)
             assert found_gt
@@ -769,11 +813,18 @@ class Parser:
                     raise UnexpectedTokenError(gt_token, 'Append not permitted here.')
                 op_sequence = [load_op]
             elif self.pipeline_end(1):
-                # var > var
-                found_string = self.next_token(String)
-                assert found_string
-                store_op = self.store_op(self.token, gt_token.is_append())
-                op_sequence = [load_op, store_op]
+                if self.next_token(Op):
+                    # var > op
+                    if gt_token.is_append():
+                        raise UnexpectedTokenError(gt_token, 'Append not permitted here.')
+                    op = (self.token, [])
+                    op_sequence = [load_op, op]
+                elif self.next_token(String):
+                    # var > var
+                    store_op = self.store_op(self.token, gt_token.is_append())
+                    op_sequence = [load_op, store_op]
+                else:
+                    assert False
             else:
                 op_sequence = [load_op] + self.op_sequence()
                 if self.next_token(Gt, String):
@@ -812,11 +863,11 @@ class Parser:
 
     @staticmethod
     def load_op(var):
-        return String('load'), [var]
+        return Op('load'), [var]
 
     @staticmethod
     def store_op(var, append):
-        return String('store'), ['--append', var] if append else [var]
+        return Op('store'), ['--append', var] if append else [var]
 
     def op_sequence(self):
         op_args = [self.op_args()]
@@ -827,7 +878,7 @@ class Parser:
     # Returns (op name, list of arg tokens)
     def op_args(self):
         if self.next_token(Expression):
-            op_args = (String('map'), [self.token])
+            op_args = (Op('map'), [self.token])
         else:
             op_token = self.op()
             self.current_op = CurrentOp(self, op_token)
@@ -843,10 +894,8 @@ class Parser:
         return op_args
 
     def op(self):
-        if self.next_token(String) or self.next_token(Fork) or self.next_token(Run):
+        if self.next_token(Op) or self.next_token(String) or self.next_token(Fork) or self.next_token(Run):
             return self.token
-        elif self.next_token():
-            raise UnexpectedTokenError(self.token, f'Unexpected token type: {self.token}')
         else:
             raise PrematureEndError()
 
@@ -914,29 +963,28 @@ class Parser:
         return op
 
     def create_op_builtin(self, op_token, arg_tokens):
-        op_name = op_token.op_name()
-        try:
+        op = None
+        if op_token.is_op():
+            op_name = op_token.op_name()
             op_module = self.op_modules[op_name]
-        except KeyError:
-            return None
-        op = op_module.create_op()
-        # Both ! and !! map to the run op.
-        if op_name == 'run':
-            # !: Expect a command number
-            # !!: Don't expect a command number, run the previous command
-            # else: 'run' was entered
-            op.expected_args = (1 if op_token.value(self) == '!' else
-                                0 if op_token.value(self) == '!!' else None)
-        args = []
-        if op_name == 'bash':
-            for x in arg_tokens:
-                args.append(x.raw() if type(x) is String else
-                            x.value(self) if isinstance(x, Token) else
-                            x)
-        else:
-            for x in arg_tokens:
-                args.append(x.value(self) if isinstance(x, Token) else x)
-        op_module.args_parser().parse(args, op)
+            op = op_module.create_op()
+            # Both ! and !! map to the run op.
+            if op_name == 'run':
+                # !: Expect a command number
+                # !!: Don't expect a command number, run the previous command
+                # else: 'run' was entered
+                op.expected_args = (1 if op_token.value(self) == '!' else
+                                    0 if op_token.value(self) == '!!' else None)
+            args = []
+            if op_name == 'bash':
+                for x in arg_tokens:
+                    args.append(x.raw() if type(x) is String else
+                                x.value(self) if isinstance(x, Token) else
+                                x)
+            else:
+                for x in arg_tokens:
+                    args.append(x.value(self) if isinstance(x, Token) else x)
+            op_module.args_parser().parse(args, op)
         return op
 
     def create_op_variable(self, op_token, arg_tokens):

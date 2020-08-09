@@ -113,7 +113,7 @@ class Main:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
-        self.op_modules = marcel.opmodule.import_op_modules(self.env)
+        self.op_modules = marcel.opmodule.import_op_modules(self.env)  # op name -> OpModule
         self.env.op_modules = self.op_modules
         self.reader = None
         self.initialize_input()  # Sets self.reader

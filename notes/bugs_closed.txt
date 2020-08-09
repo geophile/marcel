@@ -1310,3 +1310,45 @@ E.g., ls ~/git/marcel/notes/grammar.txt | read
 FIXED
 
 76. ~/ doesn't work in out command.
+
+----------------------------------------------------------------------
+
+FIXED
+
+77. ctrl-C doesn't work!
+
+Not killing gen 0.
+
+----------------------------------------------------------------------
+
+FIXED
+
+78. vim doesn't work
+
+----------------------------------------------------------------------
+
+FIXED
+
+80. ls -fr > /tmp/x 
+
+What does this do?! Doesn't result in an error message.
+
+----------------------------------------------------------------------
+
+FIXED
+
+81. ls > x
+
+Variable ls is undefined.
+
+This is parsed as load + store, instead of op + store.
+
+----------------------------------------------------------------------
+
+FIXED
+
+82. Var assignment isn't working
+
+    M-0.10.6 jao@cheese:~/git/marcel/test$ x = (1)
+    M-0.10.6 jao@cheese:~/git/marcel/test$ (x)
+    Error: Running map(lambda: x): name 'x' is not defined

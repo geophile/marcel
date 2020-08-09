@@ -242,11 +242,13 @@ What does this do?! Doesn't result in an error message.
 
 ----------------------------------------------------------------------
 
+FIXED
+
 81. ls > x
 
 Variable ls is undefined.
 
-This is parsed as load + stored, instead of op.
+This is parsed as load + store, instead of op + store.
 
 ----------------------------------------------------------------------
 

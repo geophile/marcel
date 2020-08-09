@@ -776,6 +776,35 @@ def test_load_store_sugar():
              verification='p17 >',
              expected_out=[0, 2, 4, 1, 3, 5])
     # ---------------------------------------------------------------------
+    # Ops that look confusingly like vars
+    # op >
+    TEST.run(test='pwd >',
+             expected_err='A variable must precede >')
+    # op >>
+    TEST.run(test='pwd >>',
+             expected_err='A variable must precede >>')
+    # op > var
+    dir = os.getcwd()
+    TEST.run(test='pwd > o1',
+             verification='o1 >',
+             expected_out=[dir])
+    # op >> var
+    dir = os.getcwd()
+    TEST.run(test='pwd >> o2',
+             verification='o2 >',
+             expected_out=[dir])
+    TEST.run(test='pwd >> o2',
+             verification='o2 >',
+             expected_out=[dir, dir])
+    # var > op
+    TEST.run('gen 3 > o3')
+    TEST.run(test='o3 > reverse',
+             expected_out=[2, 1, 0])
+    # var >> op
+    TEST.run('gen 3 > o4')
+    TEST.run(test='o4 >> reverse',
+             expected_err='Append not permitted here')
+    # ---------------------------------------------------------------------
     # Store at end of top-level pipeline
     TEST.run(test='gen 5 > g5',
              verification='load g5',
