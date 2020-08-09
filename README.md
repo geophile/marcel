@@ -1,16 +1,8 @@
 What's New
 ----------
 
-Replaced the parse operator by the read operator. Parse just parsed file formats,
-and the only supported format was CSV. The read had to be done separately.
-A read op with a csv option is more convenient. E.g.
+0.10.6 is a bugfix release, fixing issues raised by issue #1. See the discussion there for more details.
 
-```shell script
-ls grades.csv | read --csv
-```
-
-Assuming `grades.csv` contains comma-separated values, (e.g. student id, name, grade),
-then this command generates a stream of 3-tuples, each containing one of the fields.
 
 Marcel
 ======
