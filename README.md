@@ -1,7 +1,7 @@
 What's New
 ----------
 
-0.10.6 is a bugfix release, fixing issues raised by issue #1. See the discussion there for more details.
+0.10.6 is a bugfix release, fixing issues raised by issue #6. See the discussion there for more details.
 
 
 Marcel
