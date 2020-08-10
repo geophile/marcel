@@ -127,7 +127,10 @@ class NonInteractive(Escape):
                                    universal_newlines=True,
                                    preexec_fn=os.setsid)
         input = NonInteractive.to_string(self.op.input)
-        stdout, stderr = process.communicate(input=input)
+        try:
+            stdout, stderr = process.communicate(input=input)
+        except Exception as e:
+            self.op.fatal_error(None, f'Caught {e.__class__.__name__}')
         # stdout
         op = self.op
         for line in NonInteractive.normalize_output(stdout):

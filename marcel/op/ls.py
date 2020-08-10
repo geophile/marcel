@@ -172,7 +172,14 @@ class Ls(marcel.core.Op):
         d = path.is_dir() and not s
         if ((self.file and f) or (self.dir and d) or (self.symlink and s)) and path not in self.emitted:
             file = marcel.object.file.File(path, self.base, self.metadata_cache)
-            self.send(file)
+            try:
+                self.send(file)
+            except ValueError as e:
+                message = (f'Caught {e.__class__.__name__} on file with '
+                           f'device = {file.device} and '
+                           f'inode = {file.inode}, '
+                           f'(file name may not be printable).')
+                self.non_fatal_error(None, message)
             self.emitted.add(path)
 
     def determine_base(self):

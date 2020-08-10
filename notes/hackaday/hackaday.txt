@@ -1,0 +1,105 @@
+Shells and Languages: Getting it Wrong Ever Since the Epoch
+
+There are shells. sh, csh, and bash, and even earlier ones. They are
+designed for typing in commands which are executed immediately. From
+there, it's a tiny step to scripts, files containing commands. And
+once you do that, well, you have a programming language, of a
+sort. Although, as anyone who has done bash programming knows, shells
+make terrible programming languages. There are rudimentary control
+structures, less-than-primitive data structures, and syntax and
+semantics full of gotchas. Dealing with even the most basic numeric
+computations in a shell command causes many (including me) to google
+the correct incantations.
+
+Then there were "scripting languages", like Perl and Python, which are
+real programming languages, but with some of the flexibility and
+simplicity of shells. Perl is somewhat out of favor, and Python is
+quite popular now. But as nice a language as Python is, it doesn't
+really work very well for scripting. Combining program logic with
+calls to executables in the host OS is not as simple as it is in
+bash. You can use os.system(), which is not very flexible. It is now
+discouraged, in favor of subprocess.Popen(). Popen is quite flexible,
+but is even farther from bash in terms of convenient integration with
+host OS executables.
+
+And then most recently, there are modern shells, which aim to combine
+shell programming and general purpose programming languages.  Nushell
+is a shell language that pipes structured data between commands, and
+is based on a tabular view of data. Crush is similar.  Xon.sh
+approaches the shell/language divide by making Python usable in the
+shell itself, while still supporting familiar shell syntax.
+
+I think these efforts are barking up the wrong tree. Shell programming
+is for throwaway improvisations. Programming languages are for more
+carefully planned systems that are meant to be kept, shared, and
+maintained. These are very different activities, and have proven
+highly resistant to a single, unified language.
+
+My pandemic project has been to implement ideas I've had in this area,
+and the result is marcel. Like Nushell, Crush, and Powershell, marcel
+is based on the idea of piping (i.e., streaming) structured data
+between commands. Marcel is based on Python, so it is Python objects
+that are streamed.
+
+With marcel, when you need a bit of logic in your shell command, you
+write Python expressions. These snippets of Python code are always
+delimited by parentheses. For example, suppose you want to explore
+your current directory recursively, and find the files that have
+changed in the past day. The command is as follows:
+
+    ls -fr | select (file: now() - file.mtime < days(1))
+
+- ls -fr explores the current directory recursively (-r), returning
+  only files (-f), (i.e., omitting directories and symbolic
+  links). This yields a stream of File objects.
+
+- These Files are piped to the select operator, which applies a Python
+  predicate (file: ...), to each File. Files for which the predicate
+  evaluates to true are passed on and printed on the console.
+
+- The predicate has one parameter, named file. (Marcel permits
+  omission of the lambda keyword.) now() is a marcel-provided alias
+  for Python's time.time() function, which returns seconds since the
+  epoch. file.mtime is the modification time of the given file, also
+  in seconds since the epoch. days(1) is simply the number of seconds
+  in one day.
+
+So you can use Python in your shell commands.
+
+Marcel also allows you to do the inverse: you can use shell commands
+inside Python code. For example, you can implement the same command
+inside Python as follows:
+
+    from marcel.api import *
+    
+    for file in (ls(file=True, recursive=True) | 
+                 select(lambda file: now() - file.mtime < days(1)):
+        print(f'{file})
+
+marcel.api contains all of marcel's shell operators (like ls and
+select), in the form of Python functions. So the shell's "ls -fr"
+turns into the APIs ls(file=True, recursive=True). The ls function
+again yields File objects, which are piped to the select function,
+using the same syntax as in the shell: |. The predicate used on the
+command line is identical to the predicate used in the Python code.
+
+The entire shell command, ls(...) | select(...), yields a Python
+iterator, so that the results of the command can be used with the
+Python for loop.
+
+So now you can use shell commands neatly integrated into your Python
+code.
+
+To summarize: This is how I think shells and languages should be
+integrated. Pick a language. Create a shell by implementing operators
+that produce, manipulate, and consume streams of objects.  When you
+need language capabilities on the command line (e.g. a predicate, a
+transformation), expose the host language instead of inventing a new
+one. For scripting, make the same operators available in the language
+as functions. Same model, two different languages, each suited for its
+own purpose, clean integration in both directions.
+
+For more information on marcel:
+
+Website: https://marceltheshell.org
+Github: https://github.com/geophile/marcel
