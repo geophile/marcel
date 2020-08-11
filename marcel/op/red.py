@@ -189,7 +189,7 @@ class NonGroupingReducer(Reducer):
 
     def receive_complete(self):
         if not self.op.incremental:
-            self.op.send(self.accumulator)
+            self.op.send(tuple(self.accumulator))
         self.op.send_complete()
 
 
@@ -218,7 +218,7 @@ class GroupingReducer(Reducer):
     def receive_complete(self):
         if not self.op.incremental:
             for _, data in self.accumulators.items():
-                self.op.send(data)
+                self.op.send(tuple(data))
         self.op.send_complete()
 
     def group(self, x):

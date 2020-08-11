@@ -59,9 +59,6 @@ class File(marcel.object.renderable.Renderable):
         self.path_str = None
         self.display_path_str = None
 
-    def __repr__(self):
-        return self.render_compact()
-
     def __getattr__(self, attr):
         return getattr(self.path, attr)
 

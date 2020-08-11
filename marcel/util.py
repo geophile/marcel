@@ -80,8 +80,7 @@ def is_executable(x):
 def normalize_op_input(x):
     t = type(x)
     return (None if x is None else
-            x if t is tuple else
-            tuple(x) if t is list else
+            x if t is tuple or t is list else
             (x,))
 
 

@@ -23,21 +23,21 @@ class LabelThread(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.label = None
+        self.label_list = None
+        self.label_tuple = None
         global ID_COUNTER
         self.id = ID_COUNTER
         ID_COUNTER += 1
 
     def __repr__(self):
-        return (f'labelthread(#{self.id}: {self.label})'
-                if self.label is not None
+        return (f'labelthread(#{self.id}: {self.label_list})'
+                if self.label_list is not None
                 else f'labelthread(#{self.id})')
 
     # AbstractOp
 
     def receive(self, x):
-        assert self.label is not None
-        self.send(self.label + x)
+        self.send(self.label_tuple + x if type(x) is tuple else self.label_list + x)
 
     # The labelthread op only is used on a copy of the pipeline owned by fork. It runs
     # on each thread of the fork, attaching the thread label to output from that thread's
@@ -57,4 +57,5 @@ class LabelThread(marcel.core.Op):
     # LabelThread
 
     def set_label(self, label):
-        self.label = (label,)
+        self.label_list = [label]
+        self.label_tuple = (label,)

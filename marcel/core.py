@@ -188,8 +188,7 @@ class Op(AbstractOp):
         try:
             t = type(x)
             self.receive(None if x is None else
-                         x if t is tuple else
-                         tuple(x) if t is list else
+                         x if t is tuple or t is list else
                          (x,))
         except marcel.exception.KillAndResumeException as e:
             self.receive_error(e.error)

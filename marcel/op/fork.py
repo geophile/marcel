@@ -143,12 +143,12 @@ class Fork(marcel.core.Op):
         for thread in self.threads:
             e = thread.terminating_exception
             if e:
-                if isinstance(e, marcel.exception.KillCommandException) or isinstance(e, AssertionError):
-                    kill_command = e
                 if isinstance(e, marcel.exception.KillAndResumeException):
                     kill_and_resume = e
-                if isinstance(e, KeyboardInterrupt):
+                elif isinstance(e, KeyboardInterrupt):
                     ctrl_c = e
+                else:
+                    kill_command = e
         if kill_command:
             raise marcel.exception.KillCommandException(kill_command)
         if ctrl_c:

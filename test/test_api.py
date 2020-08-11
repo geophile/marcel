@@ -342,11 +342,11 @@ def test_squish():
     TEST.run(lambda: run(gen(5) | map(lambda x: (x, -x)) | squish(r_count)),
              expected_out=[2, 2, 2, 2, 2])
     TEST.run(lambda: run(gen(5) | map(lambda x: ([-x, x], [-x, x])) | squish(r_plus)),
-             expected_out=[(0, 0, 0, 0),
-                           (-1, 1, -1, 1),
-                           (-2, 2, -2, 2),
-                           (-3, 3, -3, 3),
-                           (-4, 4, -4, 4)])
+             expected_out=[[0, 0, 0, 0],
+                           [-1, 1, -1, 1],
+                           [-2, 2, -2, 2],
+                           [-3, 3, -3, 3],
+                           [-4, 4, -4, 4]])
 
 
 def test_unique():
@@ -368,29 +368,29 @@ def test_unique():
 
 def test_window():
     TEST.run(lambda: run(gen(10) | window(lambda x: False)),
-             expected_out=[((0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,))])
+             expected_out=[[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)]])
     TEST.run(lambda: run(gen(10) | window(lambda x: True)),
              expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
     TEST.run(lambda: run(gen(10) | window(overlap=1)),
              expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
     TEST.run(lambda: run(gen(10) | window(overlap=3)),
-             expected_out=[((0,), (1,), (2,)),
-                           ((1,), (2,), (3,)),
-                           ((2,), (3,), (4,)),
-                           ((3,), (4,), (5,)),
-                           ((4,), (5,), (6,)),
-                           ((5,), (6,), (7,)),
-                           ((6,), (7,), (8,)),
-                           ((7,), (8,), (9,)),
-                           ((8,), (9,), (None,)),
-                           ((9,), (None,), (None,))])
+             expected_out=[[(0,), (1,), (2,)],
+                           [(1,), (2,), (3,)],
+                           [(2,), (3,), (4,)],
+                           [(3,), (4,), (5,)],
+                           [(4,), (5,), (6,)],
+                           [(5,), (6,), (7,)],
+                           [(6,), (7,), (8,)],
+                           [(7,), (8,), (9,)],
+                           [(8,), (9,), (None,)],
+                           [(9,), (None,), (None,)]])
     TEST.run(lambda: run(gen(10) | window(disjoint=1)),
              expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
     TEST.run(lambda: run(gen(10) | window(disjoint=3)),
-             expected_out=[((0,), (1,), (2,)),
-                           ((3,), (4,), (5,)),
-                           ((6,), (7,), (8,)),
-                           ((9,), (None,), (None,))])
+             expected_out=[[(0,), (1,), (2,)],
+                           [(3,), (4,), (5,)],
+                           [(6,), (7,), (8,)],
+                           [(9,), (None,), (None,)]])
     # Negative-test args
     TEST.run(lambda: run(gen(10) | window(disjoint=33, overlap=33)),
              expected_err='Must specify exactly one')
@@ -405,16 +405,16 @@ def test_window():
     # Function-valued args
     THREE = 3
     TEST.run(lambda: run(gen(10) | window(overlap=lambda: THREE)),
-             expected_out=[((0,), (1,), (2,)),
-                           ((1,), (2,), (3,)),
-                           ((2,), (3,), (4,)),
-                           ((3,), (4,), (5,)),
-                           ((4,), (5,), (6,)),
-                           ((5,), (6,), (7,)),
-                           ((6,), (7,), (8,)),
-                           ((7,), (8,), (9,)),
-                           ((8,), (9,), (None,)),
-                           ((9,), (None,), (None,))])
+             expected_out=[[(0,), (1,), (2,)],
+                           [(1,), (2,), (3,)],
+                           [(2,), (3,), (4,)],
+                           [(3,), (4,), (5,)],
+                           [(4,), (5,), (6,)],
+                           [(5,), (6,), (7,)],
+                           [(6,), (7,), (8,)],
+                           [(7,), (8,), (9,)],
+                           [(8,), (9,), (None,)],
+                           [(9,), (None,), (None,)]])
     TEST.run(lambda: run(gen(10) | window(disjoint=lambda: THREE - 2)),
              expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
 
@@ -624,7 +624,7 @@ def test_load_store():
     x = [(0,)]
     run(load(x) | select(lambda x: x < 5) | map(lambda x: x + 1) | store(x) | select(lambda *x: False))
     TEST.run(test=lambda: run(map(lambda: x)),
-             expected_out=[((0,), (1,), (2,), (3,), (4,), (5,))])
+             expected_out=[[(0,), (1,), (2,), (3,), (4,), (5,)]])
 
 
 def test_loop():
@@ -692,20 +692,24 @@ def test_read():
                            ('f3.txt', 'goodbye')])
     # CSV
     TEST.run(lambda: run(ls('/tmp/read/f1.csv') | read(csv=True)),
-             expected_out=[('1', '2.3', 'ab'),
-                           ('2', '3.4', 'xy'),
-                           ('3', '4.5', 'm,n')])
+             expected_out=[['1', '2.3', 'ab'],
+                           ['2', '3.4', 'xy'],
+                           ['3', '4.5', 'm,n']])
     # CSV with labels
-    TEST.run(lambda: run(ls('/tmp/read/f1.csv') | read(csv=True, label=True)),
+    TEST.run(lambda: run(ls('/tmp/read/f1.csv') |
+                         read(csv=True, label=True) |
+                         map(lambda f, x, y, z: (str(f), x, y, z))),
              expected_out=[('f1.csv', '1', '2.3', 'ab'),
                            ('f1.csv', '2', '3.4', 'xy'),
                            ('f1.csv', '3', '4.5', 'm,n')])
     # TSV
     TEST.run(lambda: run(ls('/tmp/read/f2.tsv') | read(tsv=True)),
-             expected_out=[('1', '2.3', 'ab'),
-                           ('2', '3.4', 'xy')])
+             expected_out=[['1', '2.3', 'ab'],
+                           ['2', '3.4', 'xy']])
     # TSV with labels
-    TEST.run(lambda: run(ls('/tmp/read/f2.tsv') | read(label=True, tsv=True)),
+    TEST.run(lambda: run(ls('/tmp/read/f2.tsv') |
+                         read(label=True, tsv=True) |
+                         map(lambda f, x, y, z: (str(f), x, y, z))),
              expected_out=[('f2.tsv', '1', '2.3', 'ab'),
                            ('f2.tsv', '2', '3.4', 'xy')])
 

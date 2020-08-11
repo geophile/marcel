@@ -46,9 +46,6 @@ class Process(marcel.object.renderable.Renderable):
         self._cmdline = None
         self._environ = None
 
-    def __repr__(self):
-        return self.render_compact()
-
     def __getattr__(self, attr):
         self._ensure_status()
         return self._status.get(attr, None)

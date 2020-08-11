@@ -128,4 +128,22 @@ AttributeError: 'tuple' object has no attribute '__globals__'
 
 ----------------------------------------------------------------------
 
-83. ! is broken
+84. Type of list is changed to tuple
+
+    x = ([1, 2, 3])
+    (x)
+
+prints (1, 2, 3). I.e., list turns into tuple.
+
+----------------------------------------------------------------------
+
+85. Any env var can be deleted
+
+Even important ones, like PROMPT. Some of them need to be protected.
+
+----------------------------------------------------------------------
+
+86. Need to describe the color scheme 
+
+ColorScheme.__repr__? A command? There needs to be some way to let the
+use see the color scheme.

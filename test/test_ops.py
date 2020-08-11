@@ -341,11 +341,11 @@ def test_squish():
     TEST.run('gen 5 | map (x: (x, -x)) | squish count',
              expected_out=[2, 2, 2, 2, 2])
     TEST.run('gen 5 | map (x: ([-x, x], [-x, x])) | squish +',
-             expected_out=[(0, 0, 0, 0),
-                           (-1, 1, -1, 1),
-                           (-2, 2, -2, 2),
-                           (-3, 3, -3, 3),
-                           (-4, 4, -4, 4)])
+             expected_out=[[0, 0, 0, 0],
+                           [-1, 1, -1, 1],
+                           [-2, 2, -2, 2],
+                           [-3, 3, -3, 3],
+                           [-4, 4, -4, 4]])
 
 
 def test_unique():
@@ -369,29 +369,29 @@ def test_unique():
 
 def test_window():
     TEST.run('gen 10 | window (x: False)',
-             expected_out=[((0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,))])
+             expected_out=[[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)]])
     TEST.run('gen 10 | window (x: True)',
              expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
     TEST.run('gen 10 | window -o 1',
              expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
     TEST.run('gen 10 | window -o 3',
-             expected_out=[((0,), (1,), (2,)),
-                           ((1,), (2,), (3,)),
-                           ((2,), (3,), (4,)),
-                           ((3,), (4,), (5,)),
-                           ((4,), (5,), (6,)),
-                           ((5,), (6,), (7,)),
-                           ((6,), (7,), (8,)),
-                           ((7,), (8,), (9,)),
-                           ((8,), (9,), (None,)),
-                           ((9,), (None,), (None,))])
+             expected_out=[[(0,), (1,), (2,)],
+                           [(1,), (2,), (3,)],
+                           [(2,), (3,), (4,)],
+                           [(3,), (4,), (5,)],
+                           [(4,), (5,), (6,)],
+                           [(5,), (6,), (7,)],
+                           [(6,), (7,), (8,)],
+                           [(7,), (8,), (9,)],
+                           [(8,), (9,), (None,)],
+                           [(9,), (None,), (None,)]])
     TEST.run('gen 10 | window -d 1',
              expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
     TEST.run('gen 10 | window -d 3',
-             expected_out=[((0,), (1,), (2,)),
-                           ((3,), (4,), (5,)),
-                           ((6,), (7,), (8,)),
-                           ((9,), (None,), (None,))])
+             expected_out=[[(0,), (1,), (2,)],
+                           [(3,), (4,), (5,)],
+                           [(6,), (7,), (8,)],
+                           [(9,), (None,), (None,)]])
     # Negative-test args
     TEST.run('gen 10 | window -d 33 -o 22',
              expected_err='Must specify exactly one')
@@ -402,16 +402,16 @@ def test_window():
     # Function-valued args
     TEST.run('THREE = (3)')
     TEST.run('gen 10 | window -o (THREE)',
-             expected_out=[((0,), (1,), (2,)),
-                           ((1,), (2,), (3,)),
-                           ((2,), (3,), (4,)),
-                           ((3,), (4,), (5,)),
-                           ((4,), (5,), (6,)),
-                           ((5,), (6,), (7,)),
-                           ((6,), (7,), (8,)),
-                           ((7,), (8,), (9,)),
-                           ((8,), (9,), (None,)),
-                           ((9,), (None,), (None,))])
+             expected_out=[[(0,), (1,), (2,)],
+                           [(1,), (2,), (3,)],
+                           [(2,), (3,), (4,)],
+                           [(3,), (4,), (5,)],
+                           [(4,), (5,), (6,)],
+                           [(5,), (6,), (7,)],
+                           [(6,), (7,), (8,)],
+                           [(7,), (8,), (9,)],
+                           [(8,), (9,), (None,)],
+                           [(9,), (None,), (None,)]])
     TEST.run('gen 10 | window -d (THREE-2)',
              expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
 
@@ -927,34 +927,34 @@ def test_read():
                            'goodbye'])
     # Files with labels
     TEST.run('cd /tmp/read')
-    TEST.run('ls f1.csv f3.txt | read -l | map (f, x: (str(f), x))',
-             expected_out=[('f1.csv', '1,2.3,ab'),
-                           ('f1.csv', '2,3.4,xy'),
-                           ('f1.csv', '3,4.5,"m,n"'),
-                           ('f3.txt', 'hello,world'),
-                           ('f3.txt', 'goodbye')])
+    TEST.run('ls f1.csv f3.txt | read -l | map (f, x: [str(f), x])',
+             expected_out=[['f1.csv', '1,2.3,ab'],
+                           ['f1.csv', '2,3.4,xy'],
+                           ['f1.csv', '3,4.5,"m,n"'],
+                           ['f3.txt', 'hello,world'],
+                           ['f3.txt', 'goodbye']])
     # CSV
     TEST.run('cd /tmp/read')
     TEST.run('ls f1.csv | read -c',
-             expected_out=[('1', '2.3', 'ab'),
-                           ('2', '3.4', 'xy'),
-                           ('3', '4.5', 'm,n')])
+             expected_out=[['1', '2.3', 'ab'],
+                           ['2', '3.4', 'xy'],
+                           ['3', '4.5', 'm,n']])
     # CSV with labels
     TEST.run('cd /tmp/read')
-    TEST.run('ls f1.csv | read -cl',
-             expected_out=[('f1.csv', '1', '2.3', 'ab'),
-                           ('f1.csv', '2', '3.4', 'xy'),
-                           ('f1.csv', '3', '4.5', 'm,n')])
+    TEST.run('ls f1.csv | read -cl | map (f, x, y, z: [str(f), x, y, z])',
+             expected_out=[['f1.csv', '1', '2.3', 'ab'],
+                           ['f1.csv', '2', '3.4', 'xy'],
+                           ['f1.csv', '3', '4.5', 'm,n']])
     # TSV
     TEST.run('cd /tmp/read')
     TEST.run('ls f2.tsv | read -t',
-             expected_out=[('1', '2.3', 'ab'),
-                           ('2', '3.4', 'xy')])
+             expected_out=[['1', '2.3', 'ab'],
+                           ['2', '3.4', 'xy']])
     # TSV with labels
     TEST.run('cd /tmp/read')
-    TEST.run('ls f2.tsv | read -tl',
-             expected_out=[('f2.tsv', '1', '2.3', 'ab'),
-                           ('f2.tsv', '2', '3.4', 'xy')])
+    TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: [str(f), x, y, z])',
+             expected_out=[['f2.tsv', '1', '2.3', 'ab'],
+                           ['f2.tsv', '2', '3.4', 'xy']])
 
 
 def test_intersect():
@@ -1077,6 +1077,7 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('([1, 2])')
     pass
 
 

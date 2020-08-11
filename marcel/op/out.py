@@ -209,18 +209,14 @@ class DefaultFormatter(Formatter):
         super().__init__(op)
 
     def format(self, x):
-        if type(x) in (list, tuple):
+        t = type(x)
+        if t in (list, tuple):
             if len(x) == 1:
                 out = x[0]
                 if isinstance(out, Renderable):
                     out = out.render_full(self.op.color_scheme())
             else:
-                buffer = []
-                for y in x:
-                    if isinstance(y, Renderable):
-                        y = y.render_compact()
-                    buffer.append(Out.ensure_quoted(y))
-                out = '(' + ', '.join(buffer) + ')'
+                out = str(x)
         elif x is None:
             out = None
         else:

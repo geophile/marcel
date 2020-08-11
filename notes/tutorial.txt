@@ -127,14 +127,116 @@ a command printed by the history operator. As in other shells, the
 value of the EDITOR environment variable can be set to determine the
 editor to be used for editing commands.
 
+*** Command-line editing.
+
 You can also run previous commands. !! runs the most recent command,
 and !N runs command N.
 
 
-Environment and customization
+The marcel environment 
 
-- env vars
-- delete
+As with any other shell, marcel has environment variables. In Python
+terms, these variables exist in a namespace that is made available to
+marcel commands. So, for example, you can examine the value of the
+EDITOR variable as follows:
+
+    (EDITOR)
+
+The parentheses delimit the Python expression EDITOR. That symbol is
+located in marcel's namespace (the environment), and the value is
+printed.
+
+You can create or modify environment variables by using convnetional
+assignment syntax, e.g.
+
+    x = (1)
+    (x)
+
+This assigns the integer 1 to x, and then prints out the value of x. 
+By contrast, this assigns the string '1' to x: 
+
+    x = 1
+
+I.e., the marcel command-line is string-oriented. If you want to work
+with values of other types, these values need to be created as Python
+expressions, and Python expressions need to be enclosed in
+parentheses.
+
+Your environment variables can be structured types too. For example,
+you can assign a list:
+
+    x = ([1, 'two', 4-1])
+    (x)
+
+[1, 'two', 4-1] is a list, and by enclosing this expression in
+parentheses, the value of the list can be assigned to the variable x.
+
+Some Python types, like lists, can be updated, and this can be done
+through marcel. For example, to append to x's list:
+
+    (x.append(4))
+    (x)
+
+Finally, environment variables can be deleted:
+
+    delete x
+    (x)
+
+
+Configuration
+
+Marcel is customized on startup by executing ~/.marcel.py. You don't
+need to create this file, it will be created for you the first time
+you run marcel. What ~/.marcel.py does is to initialize the marcel
+namespace -- it defines symbols that are available for use in marcel
+commands, or that customize marcel's behavior.
+
+The default ~/.marcel.py begins with an import:
+
+    from marcel.builtin import *
+
+This brings in a few functions and types that are important in marcel
+usage. For example, the symbol now is defined to be time.time(),
+allowing you to call now() to obtain seconds since the epoch:
+
+    (now())
+
+The default ~/.marcel.py also provides a rudimentary definition of
+PROMPT, which controls the appearance of your shell prompt:
+
+    PROMPT = [lambda: PWD, ' $ ']
+
+PWD is the environment variable identifying your current
+directory. 'lambda: PWD' creates a function, returning the value of
+PWD each time a prompt is displayed. ' $ ' is a string printed
+following the value of PWD. This definition results in a prompt that
+looks like this:
+
+    /home/jao/git/marcel $ 
+
+Another variable, PROMPT_CONTINUATION defines the prompt to be used
+for multi-line commands.
+
+Colors and the color scheme
+
+Marcel colorizes its prompt, and the output describing some objects,
+e.g. Files and Processes. 
+
+Marcel includes a Color type, that allows you to defined your own
+colors. A Color is constructed by providing RGB (red/green/blue)
+values, in the range 0-5. So white would be Color(5, 5, 5), and pure red
+would be Color(5, 0, 0). Colors are applied to text, and you can
+include styling attributes BOLD, ITALIC or both (BOLD | ITALIC) as a
+last argument to color, e.g. Color(5, 3, 0, BOLD).
+
+Marcel relies on a ColorScheme object for colorizing output. The
+ColorScheme is a set of colors for specific purposes. 
+
+*** COMPLETE THIS ONCE BUG 86 is fixed
+
+
+
+- Colors and color scheme
 - PROMPT
 - dirs, pushd, popd, cd, pwd
 

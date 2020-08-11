@@ -1450,3 +1450,9 @@ FIXED
     M-0.10.6 jao@cheese:~/git/marcel/test$ x = (1)
     M-0.10.6 jao@cheese:~/git/marcel/test$ (x)
     Error: Running map(lambda: x): name 'x' is not defined
+
+----------------------------------------------------------------------
+
+FIXED
+
+83. ! is broken

@@ -33,12 +33,13 @@ class Color:
         self.code = 16 + r * 36 + g * 6 + b
 
     def __repr__(self):
-        style = ''
-        if self.bold() != 0:
-            style += 'b'
-        if self.italic() != 0:
-            style += 'i'
-        return f'C{self.r}{self.g}{self.b}{style}'
+        bold = self.bold() != 0
+        italic = self.italic() != 0
+        style = (', BOLD | ITALIC' if bold and italic else
+                 ', BOLD' if bold else
+                 ', ITALIC' if italic else
+                 '')
+        return f'Color({self.r}, {self.g}, {self.b}{style})'
 
     def bold(self):
         return self.style & Color.BOLD != 0
