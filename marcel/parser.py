@@ -433,6 +433,9 @@ class Run(Token):
     def is_bang(self):
         return True
 
+    def is_op(self):
+        return True
+
     def op_name(self):
         return 'run'
 

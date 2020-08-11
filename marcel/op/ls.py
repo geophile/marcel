@@ -22,6 +22,8 @@ import marcel.exception
 import marcel.object.error
 import marcel.object.file
 
+File = marcel.object.file.File
+
 
 HELP = '''
 {L,wrap=F}ls [[-01] [-r|--recursive]] [-f|--file] [-d|--dir] [-s|--symlink] [FILENAME ...]
@@ -171,7 +173,7 @@ class Ls(marcel.core.Op):
         f = path.is_file() and not s
         d = path.is_dir() and not s
         if ((self.file and f) or (self.dir and d) or (self.symlink and s)) and path not in self.emitted:
-            file = marcel.object.file.File(path, self.base, self.metadata_cache)
+            file = File(path, self.base, self.metadata_cache)
             try:
                 self.send(file)
             except ValueError as e:

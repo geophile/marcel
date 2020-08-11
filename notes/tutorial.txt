@@ -1,0 +1,184 @@
+Introduction
+
+Marcel is a shell. The main idea is to rely on piping as the primary
+means of composition, as with any Unix or Linux shell. However,
+instead of passing strings from one command to the next, marcel passes
+Python values: builtin types such as lists, tuples, strings, and
+numbers; but also objects representing files and processes.
+
+Linux has extremely powerful commands such as awk and find. Most
+people know how to do a few simple operations using these
+commands. But it is not easy to exploit their full power due to their
+reliance on extensive "sublanguages" which do:
+
+    Filtering: What data is of interest?
+    Processing: What should be done with the data?
+    Formatting: How should results be presented?
+
+Marcel has no sublanguages. If you know Python, then you already know
+the language used by marcel to exploit the full power of marcel's
+operators.  You use marcel operators combined with Python code to
+filter data, process it, and control command output.
+
+The commands and syntax supported by a shell constitute a language
+which can be used to create scripts. Of course, in creating a script,
+you rely on language features that you typically do not use
+interactively: control structures, data types, and abstraction
+mechanisms (e.g. functions), for example. Viewed as a programming
+language, shell scripting languages are notoriously bad. I didn't
+think it was wise to bring another one into the world. So marcel takes
+a different approach, using Python as a scripting language, (see below
+for more on scripting).
+
+
+Installing marcel
+
+To install marcel for your own use:
+
+python3 -m pip install marcel
+
+To install for the entire system:
+
+sudo python3 -m pip install --prefix /usr/local marcel
+
+(Or change /usr/local to whatever makes sense for your system.)
+
+Assuming marcel installs successfully, start it by running marcel:
+
+    marcel
+
+And then run the version command to see that marcel is working:
+
+    version
+
+
+Help
+
+Marcel's help facility provides reference information on all aspects
+of marcel: concepts, operators, and objects. Running "help" provides
+top-level usage information, and an initial list of topics. Running
+"help TOPIC" provides help on the given topic.
+
+
+Basic usage
+
+As with any other shell, you type in commands at the prompt.  In
+marcel terminology, an operator is a single command, built in to
+marcel. For example, the pwd operator prints the current directory:
+
+    pwd
+
+You can also run host OS executables. Marcel doesn't have a builtin
+operator named which, but you can run which (on Linux and Mac, at
+least), because which is an executable in the host operating system.
+
+    which cc
+
+In some cases, marcel and the host OS will have operators and commands
+with the same name. In these cases, the marcel operator serves the
+same general purpose as the host OS executable, but typically has
+fewer options, and its behavior may have been modified to fit into
+marcel better. An example of this is ls. Run "help ls" to see details
+of the ls operator. One obvious difference between marcel's ls
+operator, and the Linux ls executable, is that marcel's ls operator
+has no options controlling output. You always get a listing
+reminiscent of Linux's "ls -l", e.g.
+
+    cd ~/git/marcel/marcel
+    ls
+
+In general, a marcel operator outputs a stream of objects, and any
+objects at the end of the command are printed, though an implicit use
+of the out operator. Out prints each received object, one per line. ls
+generates File objects, and printing a File includes mode information,
+user and group, file size, modification time, and the file's name,
+(all this is very much like Linux "ls -l" output).
+
+Marcel maintains a set of environment variables. Like many other Linux
+shells, there are entries for USER (your username), PWD (the current
+directory), and there are other entries. You can examine the complete
+environment by running the env command:
+
+    env
+
+You can also examine one of the variables by enclosing the variable's
+name in parentheses, e.g.
+
+    (USER)
+
+In general, parentheses delimit Python expressions, so you can do
+arithmetic:
+
+    ((1 + 5 ** (1/2)) / 2)
+
+or computations involving other Python types, e.g.
+
+    ('abc' * 3)
+    (list(range(5)))
+
+The history command generates a stream containing the most recent
+commands you have entered:
+
+    history
+
+You can edit the most recent command by running the edit command.  Or
+to edit an earlier command, run "edit N", where N is the identifier of
+a command printed by the history operator. As in other shells, the
+value of the EDITOR environment variable can be set to determine the
+editor to be used for editing commands.
+
+You can also run previous commands. !! runs the most recent command,
+and !N runs command N.
+
+
+Environment and customization
+
+- env vars
+- delete
+- PROMPT
+- dirs, pushd, popd, cd, pwd
+
+
+Streams and functions
+
+- ls
+- ls | select
+- map
+- builtin functions
+- (...)
+- import
+- red
+
+
+Pipelines
+
+- Assigning pipeline
+- Pipeline with args
+- ifthen, ifelse
+- set ops
+- join
+- > and >>, store and load
+
+Escapes
+
+- bash
+- sudo
+
+Databases
+
+
+Remote
+
+
+Scripting
+
+- marcel scripts
+- marcel.api
+
+Uncategorized
+
+- ps
+- sort, unique, reverse
+- head, tail
+- window
+- version

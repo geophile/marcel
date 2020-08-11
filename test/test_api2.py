@@ -1,3 +1,8 @@
 from marcel.api import *
 
-run(gen(1000) | bash('less'))
+p = gen(5) | map(lambda x: -x)
+
+for x in p:
+    print(x)
+for x in p:
+    print(x)
