@@ -51,10 +51,6 @@ class Color:
 class ColorScheme:
 
     def __init__(self):
-        self.prompt_shell_indicator = None
-        self.prompt_who = None
-        self.prompt_dir = None
-        self.prompt_separator = None
         self.file_file = None
         self.file_dir = None
         self.file_link = None

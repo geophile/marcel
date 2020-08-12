@@ -1077,7 +1077,6 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('([1, 2])')
     pass
 
 

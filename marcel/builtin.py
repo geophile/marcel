@@ -17,6 +17,7 @@ from time import time as now
 
 from marcel.object.process import processes, Process
 from marcel.object.file import File
+from marcel.util import username, groupname
 
 
 _COMMANDS = '''

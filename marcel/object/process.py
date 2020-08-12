@@ -17,6 +17,7 @@ import os
 import os.path
 import pathlib
 
+import marcel.object.error
 import marcel.exception
 import marcel.object.renderable
 import marcel.util
@@ -45,10 +46,6 @@ class Process(marcel.object.renderable.Renderable):
         self._status = None
         self._cmdline = None
         self._environ = None
-
-    def __getattr__(self, attr):
-        self._ensure_status()
-        return self._status.get(attr, None)
 
     def __hash__(self):
         return self._pid
@@ -131,28 +128,28 @@ class Process(marcel.object.renderable.Renderable):
         return f'process({self.pid})'
 
     def render_full(self, color_scheme):
-        if not self._exists():
-            raise Exception(f'Process {self.pid} does not exist.')
-        pid = '{:6n}'.format(self.pid)
-        ppid = '{:6n}'.format(self.ppid)
-        user = '{:8s}'.format(self.user)
-        state = '{}'.format(self.state)
-        commandline = self.commandline
-        if color_scheme:
-            pid = marcel.util.colorize(pid, color_scheme.process_pid)
-            ppid = marcel.util.colorize(ppid, color_scheme.process_ppid)
-            user = marcel.util.colorize(user, color_scheme.process_user)
-            state = marcel.util.colorize(state, color_scheme.process_state)
-            commandline = marcel.util.colorize(commandline, color_scheme.process_commandline)
-        buffer = [
-            '--' if self._exists() is None else '  ',
-            pid,
-            ppid,
-            user,
-            state,
-            commandline
-        ]
-        return '  '.join(buffer)
+        if self._exists():
+            pid = '{:6n}'.format(self.pid)
+            ppid = '{:6n}'.format(self.ppid)
+            user = '{:8s}'.format(self.user)
+            state = '{}'.format(self.state)
+            commandline = self.commandline
+            if color_scheme:
+                pid = marcel.util.colorize(pid, color_scheme.process_pid)
+                ppid = marcel.util.colorize(ppid, color_scheme.process_ppid)
+                user = marcel.util.colorize(user, color_scheme.process_user)
+                state = marcel.util.colorize(state, color_scheme.process_state)
+                commandline = marcel.util.colorize(commandline, color_scheme.process_commandline)
+            buffer = [
+                pid,
+                ppid,
+                user,
+                state,
+                commandline
+            ]
+            return '  '.join(buffer)
+        else:
+            return marcel.object.error.Error(f'{self} no longer exists!').render_full(color_scheme)
 
     # For use by this class
 

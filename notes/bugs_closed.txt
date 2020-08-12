@@ -1456,3 +1456,14 @@ FIXED
 FIXED
 
 83. ! is broken
+
+----------------------------------------------------------------------
+
+FIXED
+
+84. Type of list is changed to tuple
+
+    x = ([1, 2, 3])
+    (x)
+
+prints (1, 2, 3). I.e., list turns into tuple.
