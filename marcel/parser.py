@@ -25,7 +25,7 @@ import marcel.util
 
 # Parsing errors
 
-class UnexpectedTokenError(marcel.exception.KillCommandException):
+class SyntaxError(marcel.exception.KillCommandException):
 
     SNIPPET_SIZE = 10
 
@@ -40,13 +40,13 @@ class UnexpectedTokenError(marcel.exception.KillCommandException):
         else:
             token_start = self.token.start
             token_text = self.token.text
-            snippet_start = max(token_start - UnexpectedTokenError.SNIPPET_SIZE, 0)
-            snippet_end = max(token_start + UnexpectedTokenError.SNIPPET_SIZE + 1, len(token_text))
+            snippet_start = max(token_start - SyntaxError.SNIPPET_SIZE, 0)
+            snippet_end = max(token_start + SyntaxError.SNIPPET_SIZE + 1, len(token_text))
             snippet = token_text[snippet_start:snippet_end]
             return f'Parsing error at position {token_start - snippet_start} of "...{snippet}...": {self.message}'
 
 
-class PrematureEndError(UnexpectedTokenError):
+class PrematureEndError(SyntaxError):
 
     def __init__(self):
         super().__init__(None, None)
@@ -274,39 +274,42 @@ class Expression(Token):
         self.scan()
 
     def value(self, parser):
-        if self._function is None:
-            source = self.source()
-            globals = parser.env.namespace
-            split = source.split()
-            if len(split) == 0:
-                raise marcel.exception.KillCommandException(f'Empty function definition.')
-            if split[0] in ('lambda', 'lambda:'):
-                function = eval(source, globals)
-            else:
-                try:
-                    function = eval('lambda ' + source, globals)
-                    source = 'lambda ' + source
-                except Exception:
+        try:
+            if self._function is None:
+                source = self.source()
+                globals = parser.env.namespace
+                split = source.split()
+                if len(split) == 0:
+                    raise marcel.exception.KillCommandException(f'Empty function definition.')
+                if split[0] in ('lambda', 'lambda:'):
+                    function = eval(source, globals)
+                else:
                     try:
-                        function = eval('lambda: ' + source, globals)
-                        source = 'lambda: ' + source
+                        function = eval('lambda ' + source, globals)
+                        source = 'lambda ' + source
                     except Exception:
-                        raise marcel.exception.KillCommandException(f'Invalid function syntax: {source}')
-            # Each pipeline with parameters, containing this function, introduces a layer of wrapping.
-            pipelines = parser.current_pipelines
-            parameterized_pipelines = []
-            for i in range(pipelines.size()):
-                pipeline = pipelines.top(i)
-                if pipeline.params is not None:
-                    param_list = ', '.join(pipeline.parameters())
-                    source = f'lambda {param_list}: {source}'
-                    parameterized_pipelines.append(pipeline)
-            if len(parameterized_pipelines) > 0:
-                function = eval(source, globals)
-            self._function = marcel.functionwrapper.FunctionWrapper(function=function,
-                                                                    source=source,
-                                                                    parameterized_pipelines=parameterized_pipelines)
-        return self._function
+                        try:
+                            function = eval('lambda: ' + source, globals)
+                            source = 'lambda: ' + source
+                        except Exception:
+                            raise marcel.exception.KillCommandException(f'Invalid function syntax: {source}')
+                # Each pipeline with parameters, containing this function, introduces a layer of wrapping.
+                pipelines = parser.current_pipelines
+                parameterized_pipelines = []
+                for i in range(pipelines.size()):
+                    pipeline = pipelines.top(i)
+                    if pipeline.params is not None:
+                        param_list = ', '.join(pipeline.parameters())
+                        source = f'lambda {param_list}: {source}'
+                        parameterized_pipelines.append(pipeline)
+                if len(parameterized_pipelines) > 0:
+                    function = eval(source, globals)
+                self._function = marcel.functionwrapper.FunctionWrapper(function=function,
+                                                                        source=source,
+                                                                        parameterized_pipelines=parameterized_pipelines)
+            return self._function
+        except Exception as e:
+            raise SyntaxError(self, f'Error in function: {e}')
     
     def is_expr(self):
         return True
@@ -776,7 +779,7 @@ class Parser:
         elif type(arg) is marcel.core.Pipeline:
             value = arg
         elif arg is None:
-            raise UnexpectedTokenError(self.token, 'Unexpected token type.')
+            raise SyntaxError(self.token, 'Unexpected token type.')
         else:
             assert False, arg
         op = self.create_assignment(var, value)
@@ -793,7 +796,7 @@ class Parser:
             gt_token = self.token
             if self.pipeline_end():
                 # op >
-                raise UnexpectedTokenError(self.token, f'A variable must precede {gt_token.value(self)}, '
+                raise SyntaxError(self.token, f'A variable must precede {gt_token.value(self)}, '
                                                        f'not an operator ({self.token.op_name()})')
             elif self.pipeline_end(1):
                 if self.next_token(String):
@@ -802,9 +805,9 @@ class Parser:
                     store_op = self.store_op(self.token, gt_token.is_append())
                     op_sequence = [op, store_op]
                 else:
-                    raise UnexpectedTokenError(gt_token, f'Incorrect use of {gt_token.value(self)}')
+                    raise SyntaxError(gt_token, f'Incorrect use of {gt_token.value(self)}')
             else:
-                raise UnexpectedTokenError(gt_token, f'Incorrect use of {gt_token.value(self)}')
+                raise SyntaxError(gt_token, f'Incorrect use of {gt_token.value(self)}')
         elif self.next_token(String, Gt):
             load_op = self.load_op(self.token)
             found_gt = self.next_token(Gt)
@@ -813,13 +816,13 @@ class Parser:
             if self.pipeline_end():
                 # var >
                 if gt_token.is_append():
-                    raise UnexpectedTokenError(gt_token, 'Append not permitted here.')
+                    raise SyntaxError(gt_token, 'Append not permitted here.')
                 op_sequence = [load_op]
             elif self.pipeline_end(1):
                 if self.next_token(Op):
                     # var > op
                     if gt_token.is_append():
-                        raise UnexpectedTokenError(gt_token, 'Append not permitted here.')
+                        raise SyntaxError(gt_token, 'Append not permitted here.')
                     op = (self.token, [])
                     op_sequence = [load_op, op]
                 elif self.next_token(String):
@@ -840,7 +843,7 @@ class Parser:
                 else:
                     # var > op_sequence
                     if gt_token.is_append():
-                        raise UnexpectedTokenError(gt_token, 'Append not permitted here.')
+                        raise SyntaxError(gt_token, 'Append not permitted here.')
         elif self.next_token(Gt, String):
             # > var
             gt_token = self.token
@@ -925,13 +928,13 @@ class Parser:
             if self.next_token(Comma):
                 if not self.next_token(String):
                     self.next_token()
-                    raise UnexpectedTokenError(self.token, f'Expected a var, found {self.token}')
+                    raise SyntaxError(self.token, f'Expected a var, found {self.token}')
             else:
                 self.next_token()  # Should be string or colon
         # Shouldn't have called vars() unless the token (on entry) was a string.
         assert len(vars) > 0
         if not self.token.is_colon():
-            raise UnexpectedTokenError(self.token, f'Expected comma or colon, found {self.token}')
+            raise SyntaxError(self.token, f'Expected comma or colon, found {self.token}')
         return vars
 
     # Returns True if a qualifying token was found, and sets self.token to it.
@@ -955,7 +958,7 @@ class Parser:
 
     @staticmethod
     def raise_unexpected_token_error(token, message):
-        raise UnexpectedTokenError(token, message)
+        raise SyntaxError(token, message)
 
     def create_op(self, op_token, arg_tokens):
         op = self.create_op_builtin(op_token, arg_tokens)

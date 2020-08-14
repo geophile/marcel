@@ -15,6 +15,9 @@
 
 import sys
 
+import marcel.object.renderable
+import marcel.util
+
 
 class Color:
 
@@ -48,26 +51,90 @@ class Color:
         return self.style & Color.ITALIC != 0
 
 
-class ColorScheme:
+class ColorSchemeError(Exception):
+
+        def __init__(self, message):
+            super().__init__(message)
+
+
+class ColorScheme(marcel.object.renderable.Renderable):
+
+    KEYS = sorted([
+        'color_scheme_key',
+        'color_scheme_value',
+        'file_file',
+        'file_dir',
+        'file_link',
+        'file_executable',
+        'file_extension',
+        'process_pid',
+        'process_ppid',
+        'process_state',
+        'process_user',
+        'process_commandline',
+        'error',
+        'help_reference',
+        'help_bold',
+        'help_italic',
+        'help_name',
+        'history_id',
+        'history_command'
+    ])
 
     def __init__(self):
-        self.file_file = None
-        self.file_dir = None
-        self.file_link = None
-        self.file_executable = None
-        self.file_extension = None
-        self.process_pid = None
-        self.process_ppid = None
-        self.process_state = None
-        self.process_user = None
-        self.process_commandline = None
-        self.error = None
-        self.help_reference = None
-        self.help_bold = None
-        self.help_italic = None
-        self.help_name = None
-        self.history_id = None
-        self.history_command = None
+        for key in ColorScheme.KEYS:
+            setattr(self, key, None)
+
+    def __repr__(self):
+        buffer = []
+        for k in ColorScheme.KEYS:
+            buffer.append(f'{k}: {self.__dict__[k]}')
+        return '{' + ', '.join(buffer) + '}'
+
+    def __setattr__(self, key, value):
+        if key not in ColorScheme.KEYS:
+            raise ColorSchemeError(f'{key} is not a supported color scheme attribute.')
+        if value is not None and type(value) not in (Color, dict):
+            raise ColorSchemeError(f'Can only set color scheme attribute to a Color, '
+                                   f'key: {key}, value type: {type(value)}')
+        if type(value) is dict:
+            for ext, color in value.items():
+                if type(color) is not Color:
+                    raise ColorSchemeError(f'Can only set color for an extension to a Color, '
+                                           f'extension: {ext}, value type: {type(color)}')
+        self.__dict__[key] = value
+
+    def set_color(self, key, value):
+        setattr(self, key, value)
+        return value
+
+    def set_extension_color(self, ext, value):
+        getattr(self, 'file_extension')[ext] = value
+        return value
+
+    def render_full(self, color_scheme):
+        def colorize(s, color_name):
+            return marcel.util.colorize(s, getattr(color_scheme, color_name))
+        kv = []
+        n = 0
+        for k in ColorScheme.KEYS:
+            n += 1
+            comma = ',' if n < len(self.__dict__) else ''
+            v = self.__dict__[k]
+            if type(v) is dict:
+                kv.append(f'    {colorize(k, "color_scheme_key")}: {{')
+                vn = 0
+                for vk in sorted(v):
+                    vn += 1
+                    v_comma = ',' if vn < len(v) else ''
+                    vv = v[vk]
+                    kv.append(f'        {colorize(vk, "color_scheme_key")}: {colorize(vv, "color_scheme_value")}{v_comma}')
+                kv.append(f'    }}{comma}')
+            else:
+                kv.append(f'    {colorize(k, "color_scheme_key")}: {colorize(v, "color_scheme_value")}{comma}')
+        contents = '\n'.join(kv)
+        return '{\n' + contents + '\n}'
+
 
     def color(self, r, g, b, style):
         return Color(r, g, b, style)

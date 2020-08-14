@@ -200,7 +200,7 @@ class File(marcel.object.renderable.Renderable):
     def _highlight_color(self, path, color_scheme):
         highlight = None
         if color_scheme:
-            extension = path.suffix.lower()
+            extension = path.suffix.lower()[1:]  # Get rid of the leading dot provided by Path.suffix.
             highlight = (color_scheme.file_extension.get(extension, None)
                          if type(color_scheme.file_extension) is dict else
                          None)

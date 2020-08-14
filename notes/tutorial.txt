@@ -1,35 +1,33 @@
 Introduction
 
-Marcel is a shell. The main idea is to rely on piping as the primary
-means of composition, as with any Unix or Linux shell. However,
-instead of passing strings from one command to the next, marcel passes
-Python values: builtin types such as lists, tuples, strings, and
-numbers; but also objects representing files and processes.
+Marcel is a shell. The main idea is to rely on piping as the primary means of composition, as with any Unix or Linux shell. However, instead of passing strings from one command to the next, marcel passes Python values: builtin types such as lists, tuples, strings, and numbers; but also objects representing files and processes.
 
-Linux has extremely powerful commands such as awk and find. Most
-people know how to do a few simple operations using these
-commands. But it is not easy to exploit their full power due to their
-reliance on extensive "sublanguages" which do:
+Linux has extremely powerful commands such as awk and find. Most people know how to do a few simple operations using these commands. But it is not easy to exploit their full power due to their reliance on extensive "sublanguages" which do:
 
     Filtering: What data is of interest?
     Processing: What should be done with the data?
-    Formatting: How should results be presented?
+        Formatting: How should results be presented?
 
-Marcel has no sublanguages. If you know Python, then you already know
-the language used by marcel to exploit the full power of marcel's
-operators.  You use marcel operators combined with Python code to
-filter data, process it, and control command output.
+Marcel has no sublanguages. You use marcel operators combined with Python code to filter data, process it, and control command output.
 
-The commands and syntax supported by a shell constitute a language
-which can be used to create scripts. Of course, in creating a script,
-you rely on language features that you typically do not use
-interactively: control structures, data types, and abstraction
-mechanisms (e.g. functions), for example. Viewed as a programming
-language, shell scripting languages are notoriously bad. I didn't
-think it was wise to bring another one into the world. So marcel takes
-a different approach, using Python as a scripting language, (see below
-for more on scripting).
+The commands and syntax supported by a shell constitute a language which can be used to create scripts. Of course, in creating a script, you rely on language features that you typically do not use interactively: control structures, data types, and abstraction mechanisms (e.g. functions), for example. Viewed as a programming language, shell scripting languages are notoriously bad. I didn't think it was wise to bring another one into the world. So marcel takes a different approach, using Python as a scripting language, (see below for more on scripting).
 
+Installation
+Help
+Basic usage
+The environment
+Configuration
+Colors
+Navigation
+Streams and objects
+Functions
+Pipelines
+Saving and recalling streams
+Escapes
+Scripting
+
+
+----------------------------------------------------------------------
 
 Installing marcel
 
@@ -54,50 +52,34 @@ And then run the version command to see that marcel is working:
 
 Help
 
-Marcel's help facility provides reference information on all aspects
-of marcel: concepts, operators, and objects. Running "help" provides
-top-level usage information, and an initial list of topics. Running
-"help TOPIC" provides help on the given topic.
+Marcel's help facility provides reference information on all aspects of marcel: concepts, operators, and objects. Running "help" provides top-level usage information, and an initial list of topics. Running "help TOPIC" provides help on the given topic.
 
 
 Basic usage
 
-As with any other shell, you type in commands at the prompt.  In
-marcel terminology, an operator is a single command, built in to
-marcel. For example, the pwd operator prints the current directory:
+As with any other shell, you type in commands at the prompt.  In marcel terminology, an operator is a single command, built in to marcel. For example, the pwd operator prints the current directory:
 
     pwd
 
-You can also run host OS executables. Marcel doesn't have a builtin
-operator named which, but you can run which (on Linux and Mac, at
-least), because which is an executable in the host operating system.
+You can also run host OS executables. Marcel doesn't have a builtin operator named which, but you can run which (on Linux and Mac, at least), because which is an executable in the host operating system.
 
     which cc
 
-In some cases, marcel and the host OS will have operators and commands
-with the same name. In these cases, the marcel operator serves the
-same general purpose as the host OS executable, but typically has
-fewer options, and its behavior may have been modified to fit into
-marcel better. An example of this is ls. Run "help ls" to see details
-of the ls operator. 
+In some cases, marcel and the host OS will have operators and commands with the same name. In these cases, the marcel operator serves the same general purpose as the host OS executable, but typically has fewer options, and its behavior has been designed to fit into marcel better. An example of this is ls. Example:
+
 
     cd ~/git/marcel/marcel
     ls
 
-Marcel maintains a set of environment variables. Like many other Linux
-shells, there are entries for USER (your username), PWD (the current
-directory), and there are other entries. You can examine the complete
-environment by running the env command:
+Marcel maintains a set of environment variables. Like many other Linux shells, there are entries for USER (your username), PWD (the current directory), and there are other entries. You can examine the complete environment by running the env command:
 
     env
 
-You can also examine one of the variables by enclosing the variable's
-name in parentheses, e.g.
+You can also examine one of the variables by enclosing the variable's name in parentheses, e.g.
 
     (USER)
 
-In general, parentheses delimit Python expressions, so you can do
-arithmetic:
+In general, parentheses delimit aribtrary Python expressions, so you can also do arithmetic:
 
     ((1 + 5 ** (1/2)) / 2)
 
@@ -106,63 +88,47 @@ or computations involving other Python types, e.g.
     ('abc' * 3)
     (list(range(5)))
 
-The history command generates a stream containing the most recent
-commands you have entered:
+The history command generates a stream containing the most recent commands you have entered:
 
     history
 
-You can edit the most recent command by running the edit command.  Or
-to edit an earlier command, run "edit N", where N is the identifier of
-a command printed by the history operator. As in other shells, the
-value of the EDITOR environment variable can be set to determine the
-editor to be used for editing commands.
+You can edit the most recent command by running the edit command.  Or to edit an earlier command, run "edit N", where N is the identifier of a command printed by the history operator, (one of the blue numbers above). As in other shells, the value of the EDITOR environment variable can be set to determine the editor to be used for editing commands.
 
-*** Command-line editing.
+You can also use command-line editing using familiar controls, e.g.
 
-You can also run previous commands. !! runs the most recent command,
-and !N runs command N.
+- Ctrl-A: Go to the beginning of the line.
+- Ctrl-E: Go to the end of the line.
+- Ctrl-W: Delete the previous word.
+- Ctrl-U: Delete everything before the cursor.
+- Ctrl-K: Delete everything starting at the cursor.
+- Ctrl-R: Reverse search command history.
+- Up arrow, Ctrl-P: Recall previous command in history.
+- Down arrow, Ctrl-N: Recall next command in history.
+
+You can also run previous commands. !! runs the most recent command, and !N runs command N.
 
 
 The marcel environment 
 
-As with any other shell, marcel has environment variables. In Python
-terms, these variables exist in a namespace that is made available to
-marcel commands. So, for example, you can examine the value of the
-EDITOR variable as follows:
+As with any other shell, marcel has environment variables. In Python terms, these variables exist in a namespace that is made available to marcel commands. So, for example, you can examine the value of the HOME variable as follows:
 
-    (EDITOR)
+    (HOME)
 
-The parentheses delimit the Python expression EDITOR. That symbol is
-located in marcel's namespace (the environment), and the value is
-printed.
+The parentheses delimit the Python expression HOME. That symbol is located in marcel's namespace (the environment), and the value is printed.
 
-You can create or modify environment variables by using convnetional
-assignment syntax, e.g.
+You can create or modify environment variables by using convnetional assignment syntax, e.g.
 
     x = (1)
     (x)
 
-This assigns the integer 1 to x, and then prints out the value of x. 
-By contrast, this assigns the string '1' to x: 
-
-    x = 1
-
-I.e., the marcel command-line is string-oriented. If you want to work
-with values of other types, these values need to be created as Python
-expressions, and Python expressions need to be enclosed in
-parentheses.
-
-Your environment variables can be structured types too. For example,
-you can assign a list:
+Your environment variables can store structured types too. For example, you can assign a list:
 
     x = ([1, 'two', 4-1])
     (x)
 
-[1, 'two', 4-1] is a list, and by enclosing this expression in
-parentheses, the value of the list can be assigned to the variable x.
+[1, 'two', 4-1] is a list, and by enclosing this expression in parentheses, the value of the list can be assigned to the variable x.
 
-Some Python types, like lists, can be updated, and this can be done
-through marcel. For example, to append to x's list:
+Some Python types, like lists, can be updated, and this can be done through marcel. For example, to append to x's list:
 
     (x.append(4))
     (x)
@@ -175,55 +141,65 @@ Finally, environment variables can be deleted:
 
 Configuration
 
-Marcel is customized on startup by executing ~/.marcel.py. You don't
-need to create this file, it will be created for you the first time
-you run marcel. What ~/.marcel.py does is to initialize the marcel
-namespace -- it defines symbols that are available for use in marcel
-commands, or that customize marcel's behavior.
+Marcel is customized on startup by executing ~/.marcel.py. You don't need to create this file, it will be created for you the first time you run marcel. What ~/.marcel.py does is to initialize the marcel namespace -- it defines symbols that are available for use in marcel commands, or that customize marcel's behavior.
 
 The default ~/.marcel.py begins with an import:
 
     from marcel.builtin import *
 
-This brings in a few functions and types that are important in marcel
-usage. For example, the symbol now is defined to be time.time(),
-allowing you to call now() to obtain seconds since the epoch:
+This brings in a few functions and types that are important in marcel usage. For example, the symbol now is defined to be time.time(), allowing you to call now() to obtain seconds since the epoch:
 
     (now())
 
-The default ~/.marcel.py also provides a rudimentary definition of
-PROMPT, which controls the appearance of your shell prompt:
+The default ~/.marcel.py also provides a rudimentary definition of PROMPT, which controls the appearance of your shell prompt:
 
     PROMPT = [lambda: PWD, ' $ ']
 
-PWD is the environment variable identifying your current
-directory. 'lambda: PWD' creates a function, returning the value of
-PWD each time a prompt is displayed. ' $ ' is a string printed
-following the value of PWD. This definition results in a prompt that
-looks like this:
+PWD is the environment variable identifying your current directory. 'lambda: PWD' creates a function, returning the value of PWD each time a prompt is displayed. ' $ ' is a string printed following the value of PWD. This definition results in a prompt that looks like this:
 
     /home/jao/git/marcel $ 
 
-Another variable, PROMPT_CONTINUATION defines the prompt to be used
-for multi-line commands.
+A more sophisticated prompt can be created with other environment variables, and adding colors (described below). This prompt specification:
 
-Colors and the color scheme
+PROMPT = [
+    Color(5, 0, 0, BOLD),
+    'M-',
+    MARCEL_VERSION,
+    ' ',
+    Color(2, 1, 0, BOLD),
+    USER,
+    '@',
+    HOST,
+    Color(5, 5, 5),
+    ':',
+    Color(3, 2, 0, BOLD),
+    lambda: ('~' + PWD[len(HOME):]) if PWD.startswith(HOME) else PWD,
+    '$ '
+]
+
+results in this prompt:
+
+Another variable, PROMPT_CONTINUATION defines the prompt to be used for multi-line commands.
+
+Colors 
 
 Marcel colorizes its prompt, and the output describing some objects,
-e.g. Files and Processes. 
-
-Marcel includes a Color type, that allows you to defined your own
-colors. A Color is constructed by providing RGB (red/green/blue)
-values, in the range 0-5. So white would be Color(5, 5, 5), and pure red
-would be Color(5, 0, 0). Colors are applied to text, and you can
-include styling attributes BOLD, ITALIC or both (BOLD | ITALIC) as a
-last argument to color, e.g. Color(5, 3, 0, BOLD).
+e.g. Files and Processes. To do this, marcel includes a Color type,
+that allows you to defined your own colors. A Color is constructed by
+providing RGB (red/green/blue) values, in the range 0-5. So white
+would be Color(5, 5, 5), and pure red would be Color(5, 0, 0). Colors
+are applied to text, and you can include styling attributes BOLD,
+ITALIC or both (BOLD | ITALIC) as a last argument to color,
+e.g. Color(5, 3, 0, BOLD).
 
 Marcel relies on a ColorScheme object for colorizing output. The
-ColorScheme is a set of colors for specific purposes. 
-
-*** COMPLETE THIS ONCE BUG 86 is fixed
-
+ColorScheme is a set of colors for specific purposes. The default
+configuration file, generated on startup, includes a commented-out
+color scheme definition. If you'd like, remove the # characters to see
+the effect using this color scheme, by running the ls command.  You
+can also add colors to the prompt, as shown above. In both cases, the
+changes to configuration will take effect as soon as the changes are
+saved.
 
 Navigation
 
@@ -439,36 +415,174 @@ And >> is equivalent to store --append.
 
 which is equivalent to load txt | store txt_copy.
 
-----------------------------------------------------------------------
+Pipelines can also be used as arguments to operators, as shown in this
+example:
 
-Pipelines can also be used as arguments to operators. 
+    ps | ifelse (p: username(p.uid) == 'root') [> root] > other
 
-- ifthen, ifelse
-- set ops
-- join
+The ps operator outputs a stream of Process objects, each representing
+one current process. ifelse evaluates a predicate for each input, in
+this case, checking whether the process, p, is owned by
+root. (username() is a marcel builtin function). If the predicate
+evaluates to true for a process p, then p is passed to the bracketed
+pipeline immediately following the predicate, [> root]. This pipeline,
+an argument to the ifelse operator, stores its input in the variable
+root. 
+
+If the predicate evaluates to false, then p is passed downstream, to
+be stored in the variable other.
+
+There is also an ifthen operator. It is just like ifelse except that
+*all* inputs are passed downstream. I.e., an item causing the
+predicate to evaluate to true will be passed to both pipelines, the
+pipeline argument, and downstream.
+
+Pipelines storing and loading variables are particularly useful with
+marcel's set operators. For example, suppose that we explore a
+directory recursively, once to find recently modified files, and once
+to find .py files:
+
+    ls -fr | select (f: now() - f.mtime < days(1)) > recent
+    ls -fr | select (f: f.suffix =='.py') > py
+
+We can now use set operators with these variables as inputs. For
+example, to find recently updated .py files:
+
+    recent > intersect [py >]
+
+This passes the recent files to the intersect operator. The second
+input to intersect comes from the pipeline argument, which loads the
+py files.
+
+To find python files that have not been updated recently:
+
+    py > difference [recent >]
+
+There is also a union operator.
+
+One more set-oriented operator is join, which is similar to a
+relational database join. Suppose that have CSV (comma-separated
+values) files, containing student ids and their grades on various
+assignments and exams: a1.csv, ..., a4.csv, e1.csv, e2.csv. You need
+to combine these files so that each row contains all of the scores for
+one student. For example, you might have this data on one student:
+
+a1.csv       a2.csv       a3.csv       a4.csv       e1.csv       e2.csv
+...
+7410563,99   7410563,87   7410563,55   7410563,95   7410563,78   7410563,82
+...
+
+The joined result would have one tuple for the student: (7410563, 99,
+87, 55, 95, 78, 82)
+
+The read operator reads a file, and
+with the --csv flag, parses the contents into a tuple. So the a1.csv
+and a2.csv files can be joined as follows:
+
+    (File('a1.csv')) | read --csv | join [File('a2.csv') | read --csv]
+
+(File('a1.csv')) creates a File object representing a1.csv, and
+streams that one File to the next operator. (ls a1.csv would do the
+same thing.) read --csv parses the file, mapping "7410563,99", for
+example, to ('7410563', '99'). The tuples are passed to the join
+operator, and the second input, from a2.csv is handled by join's
+pipeline argument (in brackets).
+
+So to join all of the data together:
+
+    (File('a1.csv')) | read --csv | join [File('a2.csv') | read --csv] | \
+                                    join [File('a3.csv') | read --csv] | \
+                                    join [File('a4.csv') | read --csv] | \
+                                    join [File('e1.csv') | read --csv] | \
+                                    join [File('e2.csv') | read --csv] | \
+    map (id, *scores: [id] + [int(s) for s in scores])
+
+read --csv output is all strings, so the tuples coming out of the last
+join have a string student id, followed by string scores. The last
+operator maps the string scores into integers.
+
 
 
 Escapes
 
-- bash
-- sudo
+If you try to use an operator that is not built in to marcel, then
+marcel will see if there is an executable of the same name. For
+example, there is no "cat" operator in marcel, but there is a useful
+Linux operator by that name, so this works:
 
-Databases
+    cat ~/.profile
 
+If you want to be explicit about using an executable from the OS (and
+not an operator), you can use the bash operator. So, for example, if
+you really want to use the host operating system's ls command, instead
+of marcel's ls operator, you can do so as follows:
 
-Remote
+    bash ls -l
 
+In general, mixing executables and marcel operators in the same
+pipeline works well. At the boundary between the two, strings are
+passed. Between marcel operators, Python values are passed.
+
+For example, this command, which combines operators and executables,
+lists the usernames of users whose shell is /bin/bash. map and select
+are marcel operators, while cat, xargs and echo are Linux executables.
+
+​    cat /etc/passwd \
+    | map (line: line.split(':')) \
+    | select (*line: line[-1] == '/bin/bash') \
+    | map (*line: line[0]) \
+    | xargs echo
+
+​- cat /etc/passwd: Obtain the contents of the file. Lines are piped to
+  subsequent commands.
+
+- map (line: line.split(':')): Split the lines at the : separators,
+  yielding 7-tuples.
+
+- select (*line: line[-1] == '/bin/bash'): select those lines in which
+  the last field is /bin/bash.
+
+- map (*line: line[0]): Keep the username field of each input tuple.
+
+- xargs echo: Combine the incoming usernames into a single line, which
+  is printed to stdout.
+
+Another kind of escape is the sudo operator. It works very much like
+the host operating system's sudo command, allowing you to execute some
+commands that you would otherwise not be permitted to execute. You
+configure marcel's sudo in the same way as that of the host OS,
+(e.g. editing /etc/sudoers). One difference is that marcel's sudo
+operator takes a pipeline argument, instead of a host OS command. For
+example, to identify recent changes to your postgres configuration:
+
+    sudo [ls -fr /etc/postgresql | select (f: now() - f.mtime < hours(1))]
 
 Scripting
 
-- marcel scripts
-- marcel.api
+A simple form of scripting is to just write marcel commands in a text
+file. From an ordinary shell, you can execute this script by
+redirecting it. For example, if the multi-way join, combining all the
+students assignment and exam scores is in consolidate_grades.marcel,
+you can run the script as follows:
 
-Uncategorized
+    jao@cheese:~$ marcel < consolidate_grades.marcel
 
-- ps
-- sort, unique, reverse
-- head, tail
-- window
-- version
-- red
+A more powerful form of scripting can be done from Python, using the
+marcel.api module. With this module, you have access to the operators
+of marcel, neatly integrated into Python. For example, here is the
+"recent files" example in Python:
+
+    import os
+    from marcel.api import *
+
+    for file in (ls(os.getcwd(), file=True, recursive=True) |
+                 select(lambda f: now() - f.mtime < days(1))):
+        print(file)
+
+ls(os.getcwd(), file=True, recursive=True) invokes the ls operator as
+a function, passing in the current directory, requesting only files
+(file=True), and recursive exploration of the directory
+(recursive=True). The resulting Files are passed to the select
+function, which checks for Files modified in the past day. The shell
+part of the command (ls ... | select ...) yields a Python iterator, so
+that the resulting Files can be accessed using a for loop.

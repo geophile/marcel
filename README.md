@@ -24,9 +24,9 @@ due to their reliance on extensive "sublanguages" which do:
 * __Processing__: What should be done with the data?
 * __Formatting__: How should results be presented?
 
-By contrast, if you know Python, then you already know the language
-used by marcel.  You use marcel operators combined with Python code
-to filter data, process it, and control command output.
+By contrast, marcel has no sublanguages.  You use marcel operators
+combined with Python code to filter data, process it, and control
+command output.
 
 The commands and syntax supported by a shell constitute a language
 which can be used to create scripts. Of course, in creating a script,

@@ -318,3 +318,21 @@ M-0.10.6 jao@cheese:~$ ls \[p-r\]*
 
 Can't run ssh!
 
+----------------------------------------------------------------------
+
+ls -fr | ... | cp ???
+
+Would like to copy all the incoming files somewhere. No way to do this
+natively in marcel!
+
+- Need a cp operator?
+
+- It is doable with help from xargs: ...| xargs cp -t DEST
+
+----------------------------------------------------------------------
+
+env options to print one var, or to find a var. Autocomplete.
+
+----------------------------------------------------------------------
+
+Replace now() by time(). (Code, doc)

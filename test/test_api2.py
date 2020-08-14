@@ -1,8 +1,6 @@
+import os
 from marcel.api import *
 
-p = gen(5) | map(lambda x: -x)
-
-for x in p:
-    print(x)
-for x in p:
-    print(x)
+for file in (ls(os.getcwd(), file=True, recursive=True) |
+             select(lambda f: now() - f.mtime < days(1))):
+    print(file)

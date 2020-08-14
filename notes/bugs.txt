@@ -134,13 +134,6 @@ Even important ones, like PROMPT. Some of them need to be protected.
 
 ----------------------------------------------------------------------
 
-86. Need to describe the color scheme 
-
-ColorScheme.__repr__? A command? There needs to be some way to let the
-use see the color scheme.
-
-----------------------------------------------------------------------
-
 87. Assign pipeline without brackets
 
 Should it be allowed? If not, this failure mode is pretty bad:
@@ -153,39 +146,12 @@ The string "gen" is assigned and the rest is ignored.
 
 ----------------------------------------------------------------------
 
-FIXED
+89. Be able to execute marcel script from inside marcel
 
-87. Crash on ifelse operating on processes
+Don't require use of host shell.
 
-    M-0.10.8 jao@cheese:~/git/marcel/test$ ps | ifelse (p: username(p.uid) == 'root') [> root] > others
-    Process Process-8:
-    Traceback (most recent call last):
-      File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
-        self.run()
-      File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
-        self._target(*self._args, **self._kwargs)
-      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
-        writer.send(child_namespace_changes)
-      File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
-        self._send_bytes(_ForkingPickler.dumps(obj))
-      File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
-        cls(buf, protocol).dump(obj)
-    TypeError: 'NoneType' object is not callable
+----------------------------------------------------------------------
 
+90. config file change effect delayed
 
-The problem is Processes in variables:
-
-    M-0.10.8 jao@cheese:~/git/marcel/test$ ps > p
-    Process Process-3:
-    Traceback (most recent call last):
-      File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
-        self.run()
-      File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
-        self._target(*self._args, **self._kwargs)
-      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
-        writer.send(child_namespace_changes)
-      File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
-        self._send_bytes(_ForkingPickler.dumps(obj))
-      File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
-        cls(buf, protocol).dump(obj)
-    TypeError: 'NoneType' object is not callable
+The change should take effect on the next command.
