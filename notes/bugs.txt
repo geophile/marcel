@@ -152,4 +152,17 @@ Don't require use of host shell.
 
 ----------------------------------------------------------------------
 
-91. 
+91. Failure to append fails silently
+
+    x = [gen 10]
+    ls > x
+
+ls fails to replace x, and x still has the value from its first assignment.
+
+----------------------------------------------------------------------
+
+92. Silent failure when intersect pipeline does store instead of load
+
+This should complain:
+
+    recent > intersect [> py]

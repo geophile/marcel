@@ -329,6 +329,8 @@ natively in marcel!
 
 - It is doable with help from xargs: ...| xargs cp -t DEST
 
+It would also be nice to be able to pipe files and directories into a removal operator.
+
 ----------------------------------------------------------------------
 
 env options to print one var, or to find a var. Autocomplete.

@@ -132,7 +132,8 @@ class Ls(marcel.core.Op):
         self.current_dir = self.env().dir_state().pwd()
         self.roots = Ls.deglob(self.current_dir, self.filenames)
         if len(self.filenames) > 0 and len(self.roots) == 0:
-            raise marcel.exception.KillCommandException(f'No qualifying paths: {self.filenames}')
+            raise marcel.exception.KillCommandException(f'No qualifying paths, possibly due to permission errors:'
+                                                        f' {self.filenames}')
         self.emitted = set()
         if len(self.roots) == 0:
             self.roots = [self.current_dir]
