@@ -152,6 +152,4 @@ Don't require use of host shell.
 
 ----------------------------------------------------------------------
 
-90. config file change effect delayed
-
-The change should take effect on the next command.
+91. 

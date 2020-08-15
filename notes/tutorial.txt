@@ -201,6 +201,10 @@ can also add colors to the prompt, as shown above. In both cases, the
 changes to configuration will take effect as soon as the changes are
 saved.
 
+
+(COLOR_SCHEME.KEYS) | expand
+
+
 Navigation
 
 Marcel keeps track of the current directory, and a directory stack, as

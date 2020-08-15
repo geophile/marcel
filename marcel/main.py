@@ -84,19 +84,6 @@ class SameProcessMode:
         self.main.same_process = self.original_same_process
 
 
-# Used to reload configuration if a config file changes.
-class ConfigurationMonitor:
-
-    def __init__(self, config_files):
-        self.config_time = time.time()
-        self.config_files = [pathlib.Path(f) for f in config_files]
-
-    def check_for_config_update(self):
-        max_mtime = max([f.stat().st_mtime for f in self.config_files if f.exists()], default=0)
-        if max_mtime > self.config_time:
-            raise ReloadConfigException()
-
-
 class Main:
 
     MAIN_SLEEP_SEC = 0.1
@@ -116,10 +103,11 @@ class Main:
         self.op_modules = marcel.opmodule.import_op_modules(self.env)  # op name -> OpModule
         self.env.op_modules = self.op_modules
         self.reader = None
-        self.initialize_input()  # Sets self.reader
+        self.initialize_reader()  # Sets self.reader
+        self.input = None
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
-        self.config_monitor = ConfigurationMonitor([self.env.config_path])
+        self.config_time = time.time()
         self.run_startup()
         self.run_script(marcel.builtin._COMMANDS)
         atexit.register(self.shutdown)
@@ -134,15 +122,18 @@ class Main:
         try:
             while True:
                 try:
-                    line = self.reader.input(*self.env.prompts())
-                    if self.echo:
-                        print(line)
-                    self.run_command(line)
+                    if self.input is None:
+                        self.input = self.reader.input(*self.env.prompts())
+                        if self.echo:
+                            print(self.input)
+                    # else: Restarted main, and self.line was from the previous incarnation.
+                    self.check_for_config_update()
+                    self.run_command(self.input)
+                    self.input = None
                     while self.job_control.foreground_is_alive():
                         time.sleep(Main.MAIN_SLEEP_SEC)
                 except KeyboardInterrupt:  # ctrl-C
                     print()
-                self.config_monitor.check_for_config_update()
         except EOFError:  # ctrl-D
             print()
 
@@ -178,7 +169,7 @@ class Main:
         except marcel.exception.KillCommandException as e:
             marcel.util.print_to_stderr(e, self.env)
 
-    def initialize_input(self):
+    def initialize_reader(self):
         readline.set_history_length(HISTORY_LENGTH)
         readline.parse_and_bind('tab: complete')
         readline.parse_and_bind('set editing-mode emacs')
@@ -247,6 +238,12 @@ class Main:
             if len(command) > 0:
                 self.run_command(command)
 
+    def check_for_config_update(self):
+        config_path = self.env.config_path
+        config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
+        if config_mtime > self.config_time:
+            raise ReloadConfigException()
+
     @staticmethod
     def default_error_handler(env, error):
         print(error.render_full(env.color_scheme()))
@@ -294,10 +291,12 @@ def args():
 if __name__ == '__main__':
     dill, mpstart, echo = args()
     old_namespace = {}
+    input = None
     if mpstart is not None:
         multiprocessing.set_start_method(mpstart)
     while True:
         MAIN = Main(None, same_process=False, old_namespace=old_namespace)
+        MAIN.input = input
         MAIN.dill = dill
         MAIN.echo = echo
         if os.isatty(sys.stdin.fileno()):
@@ -306,6 +305,7 @@ if __name__ == '__main__':
                 MAIN.run()
                 break
             except ReloadConfigException:
+                input = MAIN.input
                 old_namespace = MAIN.shutdown()
                 pass
         else:

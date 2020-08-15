@@ -1,6 +1,6 @@
 FIXED
 
-1: ls should render files as relative to the requested directory
+1. ls should render files as relative to the requested directory
 
 E.g. ls /tmp should show file_in_tmp, not /tmp/file_in_tmp.
 
@@ -24,7 +24,7 @@ multiple directories, list absolute paths.
 
 FIXED
 
-2: Line wrapping is broken, (when typing commands)
+2. Line wrapping is broken, (when typing commands)
 
 See GNU readline horizontal-scroll-mode.
 https://tiswww.cwru.edu/php/chet/readline/rluserman.html#SEC10
@@ -125,7 +125,7 @@ older.
 
 E.g.
 
-lrwxrwxrwx 1 root   root          31 Feb 26  2019  x-www-browser -> /etc/alternatives/x-www-browser
+lrwxrwxrwx 1 root   ro          31 Feb 26  2019  x-www-browser -> /etc/alternatives/x-www-browser
 -rwxr-xr-x 1 root   root       18712 Sep  5 07:15  xxd
 
 ----------------------------------------------------------------------
@@ -1515,3 +1515,11 @@ The problem is Processes in variables:
       File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
         cls(buf, protocol).dump(obj)
     TypeError: 'NoneType' object is not callable
+
+----------------------------------------------------------------------
+
+FIXED
+
+90. config file change effect delayed
+
+The change should take effect on the next command.

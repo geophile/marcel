@@ -21,16 +21,7 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/object/color.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/color.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/object/file.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs_closed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs_closed.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/tutorial.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/tutorial.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_api2.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_api2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -615,7 +606,7 @@
       <workItem from="1596414322800" duration="12460000" />
       <workItem from="1596669591065" duration="25645000" />
       <workItem from="1596932970749" duration="43116000" />
-      <workItem from="1597352723345" duration="9306000" />
+      <workItem from="1597352723345" duration="14808000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -834,13 +825,13 @@
       <screen x="1920" y="0" width="2560" height="1440" />
     </state>
     <state x="3104" y="469" width="529" height="340" key="SimpleOpenTaskDialog/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1594302439518" />
-    <state x="1063" y="527" width="549" height="524" key="StructurePopup" timestamp="1597431409934">
-      <screen x="0" y="27" width="2560" height="1413" />
+    <state x="2342" y="486" width="961" height="524" key="StructurePopup" timestamp="1597447570249">
+      <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="1004" y="369" width="549" height="391" key="StructurePopup/0.27.1920.1053@0.27.1920.1053" timestamp="1597155813517" />
     <state x="1063" y="527" width="549" height="524" key="StructurePopup/0.27.2560.1413@0.27.2560.1413" timestamp="1597431409934" />
     <state x="2008" y="369" width="1098" height="391" key="StructurePopup/0.27.3840.1053@0.27.3840.1053" timestamp="1595554776804" />
-    <state x="2342" y="486" width="961" height="524" key="StructurePopup/0.27.4480.1413@0.27.4480.1413" timestamp="1596900006709" />
+    <state x="2342" y="486" width="961" height="524" key="StructurePopup/0.27.4480.1413@0.27.4480.1413" timestamp="1597447570249" />
     <state x="797" y="399" width="549" height="391" key="StructurePopup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1590288360757" />
     <state x="2717" y="382" width="549" height="401" key="StructurePopup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1595945612301" />
     <state x="797" y="400" width="549" height="392" key="StructurePopup/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1594222033375" />
