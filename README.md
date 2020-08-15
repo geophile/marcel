@@ -1,8 +1,8 @@
 What's New
 ----------
 
-0.10.6 is a bugfix release, fixing issues raised by issue #6. See the discussion there for more details.
-
+Not much in the way of features or code, but there is now a tutorial on Marcel.
+Check it out [here](https://www.marceltheshell.org/tutorial).
 
 Marcel
 ======
