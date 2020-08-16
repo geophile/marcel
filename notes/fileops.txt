@@ -1,0 +1,49 @@
+Piping files to cp, rm, etc. doesn't work.
+
+- ls ... | cp TARGET: doesn't work, because cp doesn't take files to
+  be copied via stdin.
+
+- ls ... | xargs cp -t TARGET: This does work, but it would have to be
+  "xargs -0" to handle difficult filenames. And the whole thing is a
+  bit clunky.
+
+What to do about this:
+
+1) Invent cp and rm operators. 
+
+2) Invent cp and rm operators which are wrappers around cp and
+rm. They would handle piped-in files and issue cp and rm commands.
+
+#1 is of course doable with enough work. Lots of fiddly details to get
+right with respect to symlinks. #2 will get very unpleasant dealing
+with quoting and escaping to handle the corner cases.
+
+Generalizing:
+
+This is a special case of a more general problem: Using piped-in data
+as arguments, not on the command line.
+
+For example, suppose we want to generate the sequence 0, 0, 1, 0, 1,
+2, ..., 0, 1, ..., n-1, 0, .... This cannot be done by "nested gens", e.g.
+
+    gen 100 | gen N
+
+where N is from the pipe.
+
+This could solve the cp/rm problem, BUT this is basically #2, because
+whatever mechanism that gets invented to put piped-in Files on the
+command line would have to deal with the quoting and escaping issues.
+
+IDEA:
+
+If the current item in the pipeline were in the environment, then a
+command could refer to it. E.g., suppose it is bound to X (which isn't
+a good choice, but ignore that):
+
+    gen 100 | gen (*X)
+
+or 
+
+    gen 100 | gen (X[0])
+
+would work.

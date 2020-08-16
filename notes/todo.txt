@@ -14,12 +14,6 @@
 
 ----------------------------------------------------------------------
 
-Bash:
-
-- What if there is an arg that is significant to marcel parsing, e.g. [, (.
-
-----------------------------------------------------------------------
-
 - Organize internal ops -- Fork, LabelThread
 
 - How do exit codes fit in?
