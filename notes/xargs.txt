@@ -1,0 +1,166 @@
+Piping files to cp, rm, etc. doesn't work.
+
+- ls ... | cp TARGET: doesn't work, because cp doesn't take files to
+  be copied via stdin.
+
+- ls ... | xargs cp -t TARGET: This does work, but it would have to be
+  "xargs -0" to handle difficult filenames. And the whole thing is a
+  bit clunky.
+
+What to do about this:
+
+1) Invent cp and rm operators. 
+
+2) Invent cp and rm operators which are wrappers around cp and
+rm. They would handle piped-in files and issue cp and rm commands.
+
+#1 is of course doable with enough work. Lots of fiddly details to get
+right with respect to symlinks. #2 will get very unpleasant dealing
+with quoting and escaping to handle the corner cases.
+
+Generalizing:
+
+This is a special case of a more general problem: Using piped-in data
+as arguments, not on the command line.
+
+For example, suppose we want to generate the sequence 0, 0, 1, 0, 1,
+2, ..., 0, 1, ..., n-1, 0, .... This cannot be done by "nested gens", e.g.
+
+    gen 100 | gen N
+
+where N is from the pipe.
+
+This could solve the cp/rm problem, BUT this is basically #2, because
+whatever mechanism that gets invented to put piped-in Files on the
+command line would have to deal with the quoting and escaping issues.
+
+IDEA:
+
+If the current item in the pipeline were in the environment, then a
+command could refer to it. E.g., suppose it is bound to X (which isn't
+a good choice, but ignore that):
+
+    gen 100 | gen (*X)
+
+or 
+
+    gen 100 | gen (X[0])
+
+would work.
+
+NO IT DOESN'T. Op args are evaluated at setup time, and the piped-in
+values is available later. The args would need to be evaluated in
+receive(), not setup().
+
+Moving the gen.setup_1 code into receive works, but that means that
+this setup is done on every invocation of a receive function! This
+could get expensive. Profiling shows a 10% difference:
+
+import os
+import time
+
+from marcel.api import *
+
+
+def profile(xargs):
+    env.XARGS = xargs
+    N = 5000000
+    start = time.time()
+    run(gen(N) | select(lambda x: False))
+    stop = time.time()
+    usec = (stop - start) * 1000000 / N
+    print(f'xargs: {env.XARGS}  {usec} usec per unit')
+
+
+profile(True)
+profile(False)
+
+xargs true: 
+
+- Op.receive_and_send sets X in namspace to current tuple.
+- gen does setup in receive() instead of setup_1()
+
+Only some ops need to move some setup code.
+
+----------------------------------------------------------------------
+
++ Remove env.XARGS
+
++ Merge Op.eval_function/2. eval_function should return result of
+  evaluation, caller should assign to op field.
+
++ env var determines name of current pipeline var.
+
++ Time to retire must_be_first_in_pipeline?
+
++ Fix op means:
+
+    - Move arg function eval from setup_1 to receive.
+
+
++ Ops to fix:
+
+    + gen
+    - bash ???
+    - cd. No point, unless cd does something, e.g. sends the directory downstream.
+    + ls
+    + sql (args)
+
+- Tests
+
+----------------------------------------------------------------------
+
+bash is a problem
+
+    ... | bash ...
+
+is ambiguous. It could mean that a marcel stream is piped into bash's
+stdin. It could also mean that bash doesn't read stdin, and that the
+piped in stuff is going to be referenced from functions, e.g.
+
+    ... | bash cp (_[0]) target_dir
+
+The now-deleted Op.must_be_first_in_pipeline sort of described the
+distinction. gen.must_be_first_in_pipeline() returned true, indicating
+that an input stream is not present. But that function was removed,
+because gen can now receive an input stream, for specifying --count,
+for example, e.g. ... | gen (_[0]).
+
+This problem doesn't occur in bash. Piping goes only to stdin. xargs
+is a workaround to this problem.
+
+So should marcel have xargs and get rid of pipeline vars? xargs
+doesn't quite do what marcel wants. xargs gathers all input and dumps
+it all as args of the next command, (although -I and -n args provide
+some control, avoiding dumping all of stdin at once).
+
+Idea for marcel version of xargs:
+
+    xargs [p, ...: ...]
+
+xargs receives input stream. It repeatedly invokes the pipeline,
+binding the parameters to input stream items. A single item from the
+stream is bound to a parameter, even if it is an n-tuple, n > 1.
+
+This is cleaner than using the pipeline var. That's a new invention,
+requires TWO new vars, requires referencing inputs by clunky notation
+_[0]. This approach is just a new op, and introduces no new concepts.
+
+Name: Converts inputs stream to args. Call it args?
+
+
+Examples:
+
+1) Copy files, one at a time
+
+    ls -fr | args [f: cp (f) dest_dir]
+
+- Need to quote f to deal with difficult file names.
+
+
+2) Copy files, all at once
+
+    ls -fr | window (x: False) | squish | args [files: cp -t dest_dir (' '.join(files)) 
+
+- More quoting needed
+- Fix window so that it doesn't always need to be followed by squish.

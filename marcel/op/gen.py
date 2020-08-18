@@ -63,6 +63,9 @@ class Gen(Op):
         self.count = None
         self.start = None
         self.pad = None
+        self.count_val = None
+        self.start_val = None
+        self.pad_val = None
         self.format = None
 
     def __repr__(self):
@@ -71,27 +74,27 @@ class Gen(Op):
     # AbstractOp
 
     def setup_1(self):
-        self.eval_function('pad', int)
-        self.eval_function('count', int)
-        self.eval_function('start', int)
-        if self.pad is not None:
-            if self.count == 0:
-                raise marcel.exception.KillCommandException(f'Padding {self.pad} incompatible with unbounded output.')
-            if self.start < 0:
-                raise marcel.exception.KillCommandException(f'Padding incompatible with start < 0: {self.start}')
-            max_length = len(str(self.start + self.count - 1))
-            if max_length > self.pad:
-                raise marcel.exception.KillCommandException(f'Padding {self.pad} too small.')
-            self.format = '{:>0' + str(self.pad) + '}'
+        pad_val = self.eval_function2('pad', int)
+        self.count_val = self.eval_function2('count', int)
+        self.start_val = self.eval_function2('start', int)
+        if pad_val is not None:
+            if self.count_val == 0:
+                raise marcel.exception.KillCommandException(f'Padding {pad_val} incompatible with unbounded output.')
+            if self.start_val < 0:
+                raise marcel.exception.KillCommandException(f'Padding incompatible with start < 0: {self.start_val}')
+            max_length = len(str(self.start_val + self.count_val - 1))
+            if max_length > pad_val:
+                raise marcel.exception.KillCommandException(f'Padding {pad_val} too small.')
+            self.format = '{:>0' + str(pad_val) + '}'
 
     def receive(self, _):
-        if self.count is None or self.count == 0:
-            x = self.start
+        if self.count_val is None or self.count_val == 0:
+            x = self.start_val
             while True:
                 self.send(self.apply_padding(x))
                 x += 1
         else:
-            for x in range(self.start, self.start + self.count):
+            for x in range(self.start_val, self.start_val + self.count_val):
                 self.send(self.apply_padding(x))
 
     # Op

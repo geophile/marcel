@@ -77,11 +77,18 @@ def is_executable(x):
     return shutil.which(x) is not None
 
 
-def normalize_op_input(x):
+def wrap_op_input(x):
     t = type(x)
     return (None if x is None else
             x if t is tuple or t is list else
             (x,))
+
+
+def unwrap_op_output(x):
+    t = type(x)
+    return (None if x is None else
+            x[0] if (t is tuple or t is list) and len(x) == 1 else
+            x)
 
 
 def normalize_path(x):

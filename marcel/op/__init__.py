@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 public = [
+    'args',
     'bash',
     'bg',
     'cd',

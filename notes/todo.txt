@@ -332,3 +332,17 @@ env options to print one var, or to find a var. Autocomplete.
 ----------------------------------------------------------------------
 
 Replace now() by time(). (Code, doc)
+
+----------------------------------------------------------------------
+
+EDITOR set to host's EDITOR on startup. Which is convenient, but odd
+if host value changes. How to keep the two in sync? Maybe reporting
+EDITOR should always get the value of os.getenv('EDITOR')?
+
+----------------------------------------------------------------------
+
+Special syntax for pipeline args? E.g. $i for (_[i])
+
+----------------------------------------------------------------------
+
+squish is ALWAYS needed following window. Make this unnecessary.

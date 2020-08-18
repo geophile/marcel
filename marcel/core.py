@@ -182,7 +182,7 @@ class Op(AbstractOp):
             self.receiver.receive_complete()
 
     # This function is performance-critical, so the assertion is commented out,
-    # and util.normalize_op_input is inlined.
+    # and util.wrap_op_input is inlined.
     def receive_input(self, x):
         # assert not isinstance(x, Error)
         try:
@@ -306,6 +306,36 @@ class Op(AbstractOp):
                             f'Type of {self.op_name()}.{field} element {v} is {type(v)}, but must be one of {types}')
                 evaled[k] = v
             state[field] = evaled
+
+    def eval_function2(self, field, *types):
+        state = self.__dict__
+        val = state[field]
+        if callable(val):
+            val = val()
+            if len(types) > 0 and type(val) not in types:
+                raise marcel.exception.KillCommandException(
+                    f'Type of {self.op_name()}.{field} is {type(val)}, but must be one of {types}')
+        elif type(val) in (tuple, list):
+            evaled = []
+            for x in val:
+                if callable(x):
+                    x = x()
+                    if len(types) > 0 and type(x) not in types:
+                        raise marcel.exception.KillCommandException(
+                            f'Type of {self.op_name()}.{field} element {x} is {type(x)}, but must be one of {types}')
+                evaled.append(x)
+            val = evaled
+        elif type(val) is dict:
+            evaled = {}
+            for k, v in val.items():
+                if callable(v):
+                    v = v()
+                    if len(types) > 0 and type(v) not in types:
+                        raise marcel.exception.KillCommandException(
+                            f'Type of {self.op_name()}.{field} element {v} is {type(v)}, but must be one of {types}')
+                evaled[k] = v
+            val = evaled
+        return val
 
     @staticmethod
     def check_arg(ok, arg, message):

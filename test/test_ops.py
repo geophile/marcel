@@ -1077,13 +1077,15 @@ def main_stable():
 
 
 def main_dev():
+    # TEST.run('gen 5 1 | args [n: gen (n)]')
+    TEST.run('gen 6 1 | args [count, start: gen (count) (start)]')
     pass
 
 
 def main():
     TEST.reset_environment()
     main_stable()
-    # main_dev()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

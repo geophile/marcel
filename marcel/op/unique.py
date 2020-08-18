@@ -74,7 +74,7 @@ class GeneralUniquer(Uniquer):
         self.unique = set()
 
     def receive(self, x):
-        x = marcel.util.normalize_op_input(x)  # convert list to tuple
+        x = marcel.util.wrap_op_input(x)  # convert list to tuple
         if x not in self.unique:
             self.unique.add(x)
             self.op.send(x)
