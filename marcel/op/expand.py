@@ -77,7 +77,7 @@ class ExpandArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('expand', env)
-        self.add_anon('position', convert=self.str_to_int, default=None)
+        self.add_anon('position', convert=self.str_to_int, default=None, target='position_arg')
         self.validate()
 
 
@@ -85,6 +85,7 @@ class Expand(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.position_arg = None
         self.position = None
         self.expander = None
 
@@ -94,7 +95,7 @@ class Expand(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.position = self.eval_function('position', int)
+        self.position = self.eval_function('position_arg', int)
         self.expander = SequenceExpander(self) if self.position is None else ComponentExpander(self)
 
     def receive(self, x):

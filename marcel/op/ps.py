@@ -64,10 +64,10 @@ class PsArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('ps', env)
-        self.add_flag_optional_value('user', '-u', '--user', convert=self.check_str)
-        self.add_flag_optional_value('group', '-g', '--group', convert=self.check_str)
-        self.add_flag_optional_value('pid', '-p', '--pid', convert=self.check_str)
-        self.add_flag_optional_value('command', '-c', '--command', convert=self.check_str)
+        self.add_flag_optional_value('user', '-u', '--user', convert=self.check_str, target='user_arg')
+        self.add_flag_optional_value('group', '-g', '--group', convert=self.check_str, target='group_arg')
+        self.add_flag_optional_value('pid', '-p', '--pid', convert=self.check_str, target='pid_arg')
+        self.add_flag_optional_value('command', '-c', '--command', convert=self.check_str, target='command_arg')
         self.at_most_one('user', 'group', 'pid', 'command')
         self.validate()
 
@@ -76,19 +76,23 @@ class Ps(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.user = _UNINITIALIZED
-        self.group = _UNINITIALIZED
-        self.pid = _UNINITIALIZED
-        self.command = _UNINITIALIZED
+        self.user_arg = _UNINITIALIZED
+        self.user = None
+        self.group_arg = _UNINITIALIZED
+        self.group = None
+        self.pid_arg = _UNINITIALIZED
+        self.pid = None
+        self.command_arg = _UNINITIALIZED
+        self.command = None
         self.filter = None
 
     # AbstractOp
     
     def setup_1(self):
-        self.user = self.eval_function('user', int, str)
-        self.group = self.eval_function('group', int, str)
-        self.pid = self.eval_function('pid', int)
-        self.command = self.eval_function('command', str)
+        self.user = self.eval_function('user_arg', int, str)
+        self.group = self.eval_function('group_arg', int, str)
+        self.pid = self.eval_function('pid_arg', int)
+        self.command = self.eval_function('command_arg', str)
         # user, group can be name or id. A name can be numeric, and in that case, the name interpretation
         # takes priority. Convert name to uid, since that is a cheaper lookup on a Project.
         # If user or group is None, no user/group was specified, so use this user/group.

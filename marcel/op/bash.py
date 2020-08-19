@@ -51,7 +51,7 @@ class BashArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('bash', env)
         self.add_flag_no_value('interactive', '-i', '--interactive')
-        self.add_anon_list('args', convert=self.check_str)
+        self.add_anon_list('args', convert=self.check_str, target='args_arg')
         self.validate()
 
 
@@ -70,6 +70,7 @@ class Bash(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.interactive = None
+        self.args_arg = None
         self.args = None
         self.runner = None
         self.input = None
@@ -80,7 +81,7 @@ class Bash(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.args = self.eval_function('args')
+        self.args = self.eval_function('args_arg')
         self.input = []
         if len(self.args) == 0:
             self.runner = BashShell(self)

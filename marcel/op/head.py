@@ -34,7 +34,7 @@ class HeadArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('head', env)
-        self.add_anon('n', convert=self.str_to_int)
+        self.add_anon('n', convert=self.str_to_int, target='n_arg')
         self.validate()
 
 
@@ -42,6 +42,7 @@ class Head(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.n_arg = None
         self.n = None
         self.received = None
 
@@ -51,7 +52,7 @@ class Head(marcel.core.Op):
     # AbstractOp
     
     def setup_1(self):
-        self.n = self.eval_function('n', int)
+        self.n = self.eval_function('n_arg', int)
         self.received = 0
 
     def receive(self, x):

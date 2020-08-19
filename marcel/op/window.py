@@ -112,8 +112,8 @@ class WindowArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('window', env)
-        self.add_flag_one_value('overlap', '-o', '--overlap', convert=self.str_to_int)
-        self.add_flag_one_value('disjoint', '-d', '--disjoint', convert=self.str_to_int)
+        self.add_flag_one_value('overlap', '-o', '--overlap', convert=self.str_to_int, target='overlap_arg')
+        self.add_flag_one_value('disjoint', '-d', '--disjoint', convert=self.str_to_int, target='disjoint_arg')
         self.add_anon('predicate', convert=self.function, default=None)
         self.exactly_one('overlap', 'disjoint', 'predicate')
         self.validate()
@@ -124,7 +124,9 @@ class Window(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.predicate = None
+        self.overlap_arg = None
         self.overlap = None
+        self.disjoint_arg = None
         self.disjoint = None
         self.window_generator = None
         self.n = None
@@ -146,8 +148,8 @@ class Window(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.overlap = self.eval_function('overlap', int)
-        self.disjoint = self.eval_function('disjoint', int)
+        self.overlap = self.eval_function('overlap_arg', int)
+        self.disjoint = self.eval_function('disjoint_arg', int)
         if self.predicate:
             try:
                 self.predicate.check_validity()

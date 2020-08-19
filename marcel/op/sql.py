@@ -83,8 +83,8 @@ class SqlArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_one_value('db', '-d', '--db')
         self.add_flag_no_value('autocommit', '-a', '--autocommit')
         self.add_flag_one_value('commit', '-c', '--commit', convert=self.str_to_int)
-        self.add_anon('statement')
-        self.add_anon_list('args')
+        self.add_anon('statement', target='statement_arg')
+        self.add_anon_list('args', target='args_arg')
         self.at_most_one('autocommit', 'commit')
         self.validate()
 
@@ -96,7 +96,9 @@ class Sql(marcel.core.Op):
         self.db = None
         self.autocommit = None
         self.commit = None
+        self.statement_arg = None
         self.statement = None
+        self.args_arg = None
         self.args = None
         self.connection = None
         self.delegate = None
@@ -108,8 +110,8 @@ class Sql(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.statement = self.eval_function('statement', str)
-        self.args = self.eval_function('args')
+        self.statement = self.eval_function('statement_arg', str)
+        self.args = self.eval_function('args_arg')
         if self.commit is None:
             self.commit = 0  # Commit only in receive_complete
         elif self.commit <= 0:

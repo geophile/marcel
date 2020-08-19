@@ -34,7 +34,7 @@ class TailArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('tail', env)
-        self.add_anon('n', convert=self.str_to_int)
+        self.add_anon('n', convert=self.str_to_int, target='n_arg')
         self.validate()
 
 
@@ -42,6 +42,7 @@ class Tail(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.n_arg = None
         self.n = None
         self.queue = None  # Circular queue
         self.end = None  # End of the queue
@@ -52,7 +53,7 @@ class Tail(marcel.core.Op):
     # AbstractOp
     
     def setup_1(self):
-        self.n = self.eval_function('n', int)
+        self.n = self.eval_function('n_arg', int)
         self.queue = None if self.n == 0 else [None] * self.n
         self.end = 0
 

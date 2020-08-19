@@ -75,8 +75,8 @@ class OutArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('out', env)
-        self.add_flag_one_value('append', '-a', '--append', convert=self.check_str)
-        self.add_flag_one_value('file', '-f', '--file', convert=self.check_str)
+        self.add_flag_one_value('append', '-a', '--append', convert=self.check_str, target='append_arg')
+        self.add_flag_one_value('file', '-f', '--file', convert=self.check_str, target='file_arg')
         self.add_flag_no_value('csv', '-c', '--csv')
         self.add_anon('format', default=None, convert=self.check_str)
         self.at_most_one('csv', 'format')
@@ -88,7 +88,9 @@ class Out(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.append_arg = None
         self.append = None
+        self.file_arg = None
         self.file = None
         self.csv = False
         self.format = None
@@ -101,8 +103,8 @@ class Out(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.append = self.eval_function('append', str)
-        self.file = self.eval_function('file', str)
+        self.append = self.eval_function('append_arg', str)
+        self.file = self.eval_function('file_arg', str)
         self.format = self.eval_function('format', str)
         self.formatter = (PythonFormatter(self) if self.format else
                           CSVFormatter(self) if self.csv else
