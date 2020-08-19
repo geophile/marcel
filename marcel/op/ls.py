@@ -85,7 +85,7 @@ class LsArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_no_value('file', '-f', '--file')
         self.add_flag_no_value('dir', '-d', '--dir')
         self.add_flag_no_value('symlink', '-s', '--symlink')
-        self.add_anon_list('filenames', convert=self.check_str)
+        self.add_anon_list('filenames', convert=self.check_str, target='filenames_arg')
         self.at_most_one('d0', 'd1', 'dr')
         self.validate()
 
@@ -100,6 +100,7 @@ class Ls(marcel.core.Op):
         self.file = False
         self.dir = False
         self.symlink = False
+        self.filenames_arg = None
         self.filenames = None
         self.current_dir = None
         self.roots = None
@@ -127,10 +128,10 @@ class Ls(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.filenames = self.eval_function('filenames', str, pathlib.Path)
+        self.filenames = self.eval_function('filenames_arg', str, pathlib.Path, File)
         self.roots = []
         self.current_dir = self.env().dir_state().pwd()
-        self.roots = Ls.deglob(self.current_dir, self.filenames)
+        self.roots = self.deglob()
         if len(self.filenames) > 0 and len(self.roots) == 0:
             raise marcel.exception.KillCommandException(f'No qualifying paths, possibly due to permission errors:'
                                                         f' {self.filenames}')
@@ -204,13 +205,14 @@ class Ls(marcel.core.Op):
         if self.base.is_file():
             self.base = self.base.parent
 
-    @staticmethod
-    def normalize_paths(filenames):
+    def normalize_paths(self):
         # Resolve ~
         # Resolve . and ..
         # Convert to Path
         paths = []
-        for filename in filenames:
+        for filename in self.filenames:
+            if type(filename) is File:
+                filename = filename.path
             # Resolve . and ..
             filename = os.path.normpath(filename)
             # Convert to Path and resolve ~
@@ -221,10 +223,9 @@ class Ls(marcel.core.Op):
             paths.append(path)
         return paths
 
-    @staticmethod
-    def deglob(current_dir, filenames):
+    def deglob(self):
         # Expand globs and eliminate duplicates
-        paths = Ls.normalize_paths(filenames)
+        paths = self.normalize_paths()
         roots = []
         roots_set = set()
         for path in paths:
@@ -232,7 +233,7 @@ class Ls(marcel.core.Op):
             path_str = path.as_posix()
             glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
                                        if path.is_absolute() else
-                                       (current_dir, path_str))
+                                       (self.current_dir, path_str))
             for root in glob_base.glob(glob_pattern):
                 if root not in roots_set:
                     roots_set.add(root)

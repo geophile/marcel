@@ -1077,9 +1077,7 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('gen 3 | store p9')
-    TEST.run(test='p9 >> map (x: x + 100)',
-             expected_err='Append not permitted here')
+    TEST.run('ls -rd /home/jao/git/marcel/marcel | args [d: ls (d)]')
 
     # TEST.run('gen 5 1 | args [n: gen (n)]')
     # TEST.run('gen 6 1 | args [count, start: gen (count) (start)]')
@@ -1089,8 +1087,8 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
