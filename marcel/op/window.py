@@ -19,6 +19,7 @@ import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.functionwrapper
+import marcel.util
 
 
 HELP = '''
@@ -199,7 +200,7 @@ class PredicateWindow(WindowBase):
     def receive(self, x):
         if self.op.predicate(*x):
             self.flush()
-        self.window.append(x)
+        self.window.append(marcel.util.unwrap_op_output(x))
 
     def receive_complete(self):
         self.flush()
@@ -213,12 +214,12 @@ class OverlapWindow(WindowBase):
     def receive(self, x):
         if len(self.window) == self.op.n:
             self.window = self.window[1:]
-        self.window.append(x)
+        self.window.append(marcel.util.unwrap_op_output(x))
         if len(self.window) == self.op.n:
             self.op.send(self.window)
 
     def receive_complete(self):
-        padding = (None,)
+        padding = None
         if len(self.window) < self.op.n:
             while len(self.window) < self.op.n:
                 self.window.append(padding)
@@ -235,13 +236,13 @@ class DisjointWindow(WindowBase):
         super().__init__(op)
 
     def receive(self, x):
-        self.window.append(x)
+        self.window.append(marcel.util.unwrap_op_output(x))
         if len(self.window) == self.op.n:
             self.flush()
 
     def receive_complete(self):
         if len(self.window) > 0:
-            padding = (None,)
+            padding = None
             while len(self.window) < self.op.n:
                 self.window.append(padding)
             self.flush()

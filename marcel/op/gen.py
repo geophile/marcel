@@ -50,9 +50,9 @@ class GenArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('gen', env)
-        self.add_flag_one_value('pad', '-p', '--pad', convert=self.str_to_int)
-        self.add_anon('count', convert=self.str_to_int, default=0)
-        self.add_anon('start', convert=self.str_to_int, default=0)
+        self.add_flag_one_value('pad', '-p', '--pad', convert=self.str_to_int, target='pad_arg')
+        self.add_anon('count', convert=self.str_to_int, default=0, target='count_arg')
+        self.add_anon('start', convert=self.str_to_int, default=0, target='start_arg')
         self.validate()
 
 
@@ -60,41 +60,40 @@ class Gen(Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.count_arg = None
+        self.start_arg = None
+        self.pad_arg = None
         self.count = None
         self.start = None
-        self.pad = None
-        self.count_val = None
-        self.start_val = None
-        self.pad_val = None
         self.format = None
 
     def __repr__(self):
-        return f'gen(count={self.count}, start={self.start}, pad={self.pad})'
+        return f'gen(count={self.count_arg}, start={self.start_arg}, pad={self.pad_arg})'
 
     # AbstractOp
 
     def setup_1(self):
-        pad_val = self.eval_function2('pad', int)
-        self.count_val = self.eval_function2('count', int)
-        self.start_val = self.eval_function2('start', int)
+        pad_val = self.eval_function2('pad_arg', int)
+        self.count = self.eval_function2('count_arg', int)
+        self.start = self.eval_function2('start_arg', int)
         if pad_val is not None:
-            if self.count_val == 0:
+            if self.count == 0:
                 raise marcel.exception.KillCommandException(f'Padding {pad_val} incompatible with unbounded output.')
-            if self.start_val < 0:
-                raise marcel.exception.KillCommandException(f'Padding incompatible with start < 0: {self.start_val}')
-            max_length = len(str(self.start_val + self.count_val - 1))
+            if self.start < 0:
+                raise marcel.exception.KillCommandException(f'Padding incompatible with start < 0: {self.start}')
+            max_length = len(str(self.start + self.count - 1))
             if max_length > pad_val:
                 raise marcel.exception.KillCommandException(f'Padding {pad_val} too small.')
             self.format = '{:>0' + str(pad_val) + '}'
 
     def receive(self, _):
-        if self.count_val is None or self.count_val == 0:
-            x = self.start_val
+        if self.count is None or self.count == 0:
+            x = self.start
             while True:
                 self.send(self.apply_padding(x))
                 x += 1
         else:
-            for x in range(self.start_val, self.start_val + self.count_val):
+            for x in range(self.start, self.start + self.count):
                 self.send(self.apply_padding(x))
 
     # Op

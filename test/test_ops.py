@@ -369,29 +369,29 @@ def test_unique():
 
 def test_window():
     TEST.run('gen 10 | window (x: False)',
-             expected_out=[[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)]])
+             expected_out=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
     TEST.run('gen 10 | window (x: True)',
-             expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run('gen 10 | window -o 1',
-             expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run('gen 10 | window -o 3',
-             expected_out=[[(0,), (1,), (2,)],
-                           [(1,), (2,), (3,)],
-                           [(2,), (3,), (4,)],
-                           [(3,), (4,), (5,)],
-                           [(4,), (5,), (6,)],
-                           [(5,), (6,), (7,)],
-                           [(6,), (7,), (8,)],
-                           [(7,), (8,), (9,)],
-                           [(8,), (9,), (None,)],
-                           [(9,), (None,), (None,)]])
+             expected_out=[[0, 1, 2],
+                           [1, 2, 3],
+                           [2, 3, 4],
+                           [3, 4, 5],
+                           [4, 5, 6],
+                           [5, 6, 7],
+                           [6, 7, 8],
+                           [7, 8, 9],
+                           [8, 9, None],
+                           [9, None, None]])
     TEST.run('gen 10 | window -d 1',
-             expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run('gen 10 | window -d 3',
-             expected_out=[[(0,), (1,), (2,)],
-                           [(3,), (4,), (5,)],
-                           [(6,), (7,), (8,)],
-                           [(9,), (None,), (None,)]])
+             expected_out=[[0, 1, 2],
+                           [3, 4, 5],
+                           [6, 7, 8],
+                           [9, None, None]])
     # Negative-test args
     TEST.run('gen 10 | window -d 33 -o 22',
              expected_err='Must specify exactly one')
@@ -402,18 +402,18 @@ def test_window():
     # Function-valued args
     TEST.run('THREE = (3)')
     TEST.run('gen 10 | window -o (THREE)',
-             expected_out=[[(0,), (1,), (2,)],
-                           [(1,), (2,), (3,)],
-                           [(2,), (3,), (4,)],
-                           [(3,), (4,), (5,)],
-                           [(4,), (5,), (6,)],
-                           [(5,), (6,), (7,)],
-                           [(6,), (7,), (8,)],
-                           [(7,), (8,), (9,)],
-                           [(8,), (9,), (None,)],
-                           [(9,), (None,), (None,)]])
+             expected_out=[[0, 1, 2],
+                           [1, 2, 3],
+                           [2, 3, 4],
+                           [3, 4, 5],
+                           [4, 5, 6],
+                           [5, 6, 7],
+                           [6, 7, 8],
+                           [7, 8, 9],
+                           [8, 9, None],
+                           [9, None, None]])
     TEST.run('gen 10 | window -d (THREE-2)',
-             expected_out=[(0,), (1,), (2,), (3,), (4,), (5,), (6,), (7,), (8,), (9,)])
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
 
 def test_bash():
@@ -1077,15 +1077,20 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('gen 3 | store p9')
+    TEST.run(test='p9 >> map (x: x + 100)',
+             expected_err='Append not permitted here')
+
     # TEST.run('gen 5 1 | args [n: gen (n)]')
-    TEST.run('gen 6 1 | args [count, start: gen (count) (start)]')
+    # TEST.run('gen 6 1 | args [count, start: gen (count) (start)]')
+
     pass
 
 
 def main():
     TEST.reset_environment()
     main_stable()
-    main_dev()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

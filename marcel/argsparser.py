@@ -50,10 +50,11 @@ class ArgsError(marcel.exception.KillCommandException):
 
 class Arg:
 
-    def __init__(self, op_name, name, convert):
+    def __init__(self, op_name, name, convert, target):
         assert name is not None
         self.op_name = op_name
         self.name = name
+        self.target = target if target else name
         self.convert = (lambda arg, x: x) if convert is None else convert
 
     def __repr__(self):
@@ -62,8 +63,8 @@ class Arg:
 
 class Flag(Arg):
 
-    def __init__(self, op_name, name, convert, short, long, value):
-        super().__init__(op_name, name, convert)
+    def __init__(self, op_name, name, convert, short, long, value, target=None):
+        super().__init__(op_name, name, convert, target)
         assert short is not None or long is not None
         assert short is None or len(short) == 2 and short[0] == '-' and short[1] != '-'
         assert long is None or len(long) >= 3 and long[:2] == '--' and long[2] != '-'
@@ -86,15 +87,15 @@ class Flag(Arg):
 
 class Anon(Arg):
 
-    def __init__(self, op_name, name, convert, default):
-        super().__init__(op_name, name, convert)
+    def __init__(self, op_name, name, convert, default, target=None):
+        super().__init__(op_name, name, convert, target)
         self.default = default
 
 
 class AnonList(Arg):
 
-    def __init__(self, op_name, name, convert):
-        super().__init__(op_name, name, convert)
+    def __init__(self, op_name, name, convert, target=None):
+        super().__init__(op_name, name, convert, target)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -115,20 +116,20 @@ class ArgsParser:
         # A hack to sneak the op currently being validated to function()
         self.current_op = None
 
-    def add_flag_no_value(self, name, short, long):
-        self.flag_args.append(Flag(self.op_name, name, None, short, long, VALUE_NONE))
+    def add_flag_no_value(self, name, short, long, target=None):
+        self.flag_args.append(Flag(self.op_name, name, None, short, long, VALUE_NONE, target))
 
-    def add_flag_one_value(self, name, short, long, convert=None):
-        self.flag_args.append(Flag(self.op_name, name, convert, short, long, VALUE_ONE))
+    def add_flag_one_value(self, name, short, long, convert=None, target=None):
+        self.flag_args.append(Flag(self.op_name, name, convert, short, long, VALUE_ONE, target))
 
-    def add_flag_optional_value(self, name, short, long, convert=None):
-        self.flag_args.append(Flag(self.op_name, name, convert, short, long, VALUE_OPTIONAL))
+    def add_flag_optional_value(self, name, short, long, convert=None, target=None):
+        self.flag_args.append(Flag(self.op_name, name, convert, short, long, VALUE_OPTIONAL, target))
 
-    def add_anon(self, name, convert=None, default=NO_DEFAULT):
-        self.anon_args.append(Anon(self.op_name, name, convert, default))
+    def add_anon(self, name, convert=None, default=NO_DEFAULT, target=None):
+        self.anon_args.append(Anon(self.op_name, name, convert, default, target))
 
-    def add_anon_list(self, name, convert=None):
-        self.anon_list_arg = AnonList(self.op_name, name, convert)
+    def add_anon_list(self, name, convert=None, target=None):
+        self.anon_list_arg = AnonList(self.op_name, name, convert, target)
 
     def at_most_one(self, *names):
         self.at_most_one_names.append(self.name_set(names))
@@ -236,8 +237,13 @@ class ArgsParser:
         self.check_exactly_one_constraints(names)
         self.complete_anon_processing(anon, anon_list)
         # Transfer args to op
-        op.__dict__.update(flags)
-        op.__dict__.update(anon)
+        op_dict = op.__dict__
+        for k, v in flags.items():
+            arg = self.find_by_name(k)
+            op_dict[arg.target] = v
+        for k, v in anon.items():
+            arg = self.find_by_name(k)
+            op_dict[arg.target] = v
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -257,6 +263,8 @@ class ArgsParser:
         for anon in self.anon_args:
             if anon.name == name:
                 return anon
+        if self.anon_list_arg.name == name:
+            return self.anon_list_arg
         return None
 
     def name_set(self, names):

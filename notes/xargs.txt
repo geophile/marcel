@@ -164,3 +164,14 @@ Examples:
 
 - More quoting needed
 - Fix window so that it doesn't always need to be followed by squish.
+
+----------------------------------------------------------------------
+
+Implementation:
+
+- Op.eval_function looks broken. Replacing a function-valued arg by
+  its value is a one-time thing.  Doesn't work if setup_1 is run
+  multiple times. Needs to return value, and caller needs to put the
+  value elsewhere, leaving the function intact.
+
+- args is a lot like runpipeline, but it needs a loop to feed the pipeline.
