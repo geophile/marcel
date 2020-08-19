@@ -48,10 +48,10 @@ the input stream contains the integers {n:1, 2, 3, ...}, then:
 
 yields as output:
 {p,wrap=F}
-    ((1,),)
-    ((2,), (3,), (4,))
-    ((5,), (6,), (7,))
-    ((8,), (9,), (10,))
+    [1]
+    [2, 3, 4]
+    [5, 6, 7]
+    [8, 9, 10]
     ...
 
 I.e., a new tuple is started for each integer n, (after the first integer) such that n % 3 = 2.
@@ -69,16 +69,16 @@ new list containing {r:N} items. Groups may be padded with
 For input {n:0, 1, ..., 9}, {r:window -o 3} yields these
 tuples:
 {p,wrap=F}
-    ((0,), (1,), (2,))
-    ((1,), (2,), (3,))
-    ((2,), (3,), (4,))
-    ((3,), (4,), (5,))
-    ((4,), (5,), (6,))
-    ((5,), (6,), (7,))
-    ((6,), (7,), (8,))
-    ((7,), (8,), (9,))
-    ((8,), (9,), (None,))
-    ((9,), (None,), (None,))
+    [0, 1, 2]
+    [1, 2, 3]
+    [2, 3, 4]
+    [3, 4, 5]
+    [4, 5, 6]
+    [5, 6, 7]
+    [6, 7, 8]
+    [7, 8, 9]
+    [8, 9, None]
+    [9, None, None]
 
 {r:--disjoint} specifies {i:disjoint} windows, in which each input object
 appears in only one group. A new group is started every {r:N}
@@ -90,10 +90,10 @@ has {r:N} elements.
 For input {n:0, 1, ..., 9}, {r:window -d 3} yields these
 tuples:
 {p,wrap=F}
-    ((0,), (1,), (2,))
-    ((3,), (4,), (5,))
-    ((6,), (7,), (8,))
-    ((9,), (None,), (None,))
+    [0, 1, 2]
+    [3, 4, 5]
+    [6, 7, 8]
+    [9, None, None]
 '''
 
 
@@ -146,8 +146,8 @@ class Window(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.eval_function('overlap', int)
-        self.eval_function('disjoint', int)
+        self.overlap = self.eval_function('overlap', int)
+        self.disjoint = self.eval_function('disjoint', int)
         if self.predicate:
             try:
                 self.predicate.check_validity()

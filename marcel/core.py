@@ -285,36 +285,6 @@ class Op(AbstractOp):
             if len(types) > 0 and type(val) not in types:
                 raise marcel.exception.KillCommandException(
                     f'Type of {self.op_name()}.{field} is {type(val)}, but must be one of {types}')
-            state[field] = val
-        elif type(val) in (tuple, list):
-            evaled = []
-            for x in val:
-                if callable(x):
-                    x = x()
-                    if len(types) > 0 and type(x) not in types:
-                        raise marcel.exception.KillCommandException(
-                            f'Type of {self.op_name()}.{field} element {x} is {type(x)}, but must be one of {types}')
-                evaled.append(x)
-            state[field] = evaled
-        elif type(val) is dict:
-            evaled = {}
-            for k, v in val.items():
-                if callable(v):
-                    v = v()
-                    if len(types) > 0 and type(v) not in types:
-                        raise marcel.exception.KillCommandException(
-                            f'Type of {self.op_name()}.{field} element {v} is {type(v)}, but must be one of {types}')
-                evaled[k] = v
-            state[field] = evaled
-
-    def eval_function2(self, field, *types):
-        state = self.__dict__
-        val = state[field]
-        if callable(val):
-            val = val()
-            if len(types) > 0 and type(val) not in types:
-                raise marcel.exception.KillCommandException(
-                    f'Type of {self.op_name()}.{field} is {type(val)}, but must be one of {types}')
         elif type(val) in (tuple, list):
             evaled = []
             for x in val:

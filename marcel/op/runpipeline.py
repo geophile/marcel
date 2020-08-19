@@ -33,8 +33,8 @@ class RunPipeline(marcel.core.Op):
 
     def setup_1(self):
         assert self.pipeline is None
-        self.eval_function('args')
-        self.eval_function('kwargs')
+        self.args = self.eval_function('args')
+        self.kwargs = self.eval_function('kwargs')
         pipeline = self.getvar(self.var)
         if pipeline is None:
             raise marcel.exception.KillCommandException(

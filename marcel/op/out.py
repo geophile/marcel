@@ -101,9 +101,9 @@ class Out(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.eval_function('append', str)
-        self.eval_function('file', str)
-        self.eval_function('format', str)
+        self.append = self.eval_function('append', str)
+        self.file = self.eval_function('file', str)
+        self.format = self.eval_function('format', str)
         self.formatter = (PythonFormatter(self) if self.format else
                           CSVFormatter(self) if self.csv else
                           DefaultFormatter(self))

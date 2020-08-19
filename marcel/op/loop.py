@@ -90,7 +90,7 @@ class Loop(marcel.core.Op):
             self.pipeline = self.init
             self.init = None
         if self.init is not None:
-            self.eval_function('init')
+            self.init = self.eval_function('init')
         # Find emit ops in the pipeline and connect them to self.
         loop_pipeline = self.pipeline_arg(self.pipeline).copy()
         loop_pipeline.set_error_handler(self.owner.error_handler)

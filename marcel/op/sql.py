@@ -108,8 +108,8 @@ class Sql(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.eval_function('statement', str)
-        self.eval_function('args')
+        self.statement = self.eval_function('statement', str)
+        self.args = self.eval_function('args')
         if self.commit is None:
             self.commit = 0  # Commit only in receive_complete
         elif self.commit <= 0:

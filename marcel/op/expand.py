@@ -94,7 +94,7 @@ class Expand(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.eval_function('position', int)
+        self.position = self.eval_function('position', int)
         self.expander = SequenceExpander(self) if self.position is None else ComponentExpander(self)
 
     def receive(self, x):

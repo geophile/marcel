@@ -51,7 +51,7 @@ class Head(marcel.core.Op):
     # AbstractOp
     
     def setup_1(self):
-        self.eval_function('n', int)
+        self.n = self.eval_function('n', int)
         self.received = 0
 
     def receive(self, x):

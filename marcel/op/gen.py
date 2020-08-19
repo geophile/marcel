@@ -73,9 +73,9 @@ class Gen(Op):
     # AbstractOp
 
     def setup_1(self):
-        pad_val = self.eval_function2('pad_arg', int)
-        self.count = self.eval_function2('count_arg', int)
-        self.start = self.eval_function2('start_arg', int)
+        pad_val = self.eval_function('pad_arg', int)
+        self.count = self.eval_function('count_arg', int)
+        self.start = self.eval_function('start_arg', int)
         if pad_val is not None:
             if self.count == 0:
                 raise marcel.exception.KillCommandException(f'Padding {pad_val} incompatible with unbounded output.')

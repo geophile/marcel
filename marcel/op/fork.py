@@ -106,7 +106,7 @@ class Fork(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.eval_function('host', int, str)
+        self.host = self.eval_function('host', int, str)
         self.threads = []
         cluster = self.env().remote(self.host)
         if cluster:

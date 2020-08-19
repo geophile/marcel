@@ -80,7 +80,7 @@ class Bash(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
-        self.eval_function('args')
+        self.args = self.eval_function('args')
         self.input = []
         if len(self.args) == 0:
             self.runner = BashShell(self)
