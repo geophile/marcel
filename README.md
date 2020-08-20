@@ -1,8 +1,35 @@
 What's New
 ----------
 
-Not much in the way of features or code, but there is now a tutorial on Marcel.
-Check it out [here](https://www.marceltheshell.org/tutorial).
+Marcel now has a command `args`, that works something like Linux's `xargs`. 
+For example, suppose you have a directory containing log files, and you want to
+delete logs that are more than 100 days old, or more than 10GB in size. Locating
+such files is easy:
+
+```shell script
+ls -f | select (f: f.size > 10000000000 or now() - f.mtime > days(100))
+```
+
+What you would like to do is to take the `File`s in the resulting stream, and
+delete each one. The `args` operator takes items arriving on the input
+stream, and makes them available to operators. So to do the file removal:
+
+```shell script
+ls -f | select (f: f.size > 10000000000 or now() - f.mtime > days(100)) | args [f: rm (f)]
+```
+
+- `ls ... | select ...` produces a stream of `File`s.
+- These `File`s flow into the `args` input stream.
+- `args` has a pipeline with parameter `f`. Each arriving `File` is bound to `f`, and
+the pipeline is executed.
+- `rm (f)` removes `File` `f`.
+
+Actually, you can do the same cleanup by relying on the fact that `File`s implement
+the `pathlib.Path` interface, which has an `unlink` method. So this works too:
+
+```shell script
+ls -f | select (f: f.size > 10000000000 or now() - f.mtime > days(100)) | map (f: f.unlink())
+```
 
 Marcel
 ======

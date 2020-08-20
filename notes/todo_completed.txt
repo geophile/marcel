@@ -533,3 +533,7 @@ command for that, e.g. cat.
 ----------------------------------------------------------------------
 
 Get rid of argparse in main.
+
+----------------------------------------------------------------------
+
+squish is ALWAYS needed following window. Make this unnecessary.
