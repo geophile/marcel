@@ -110,7 +110,7 @@ class Escape:
         assert False
 
     def command(self):
-        return ' '.join(self.op.args)
+        return ' '.join([str(arg) for arg in self.op.args])
 
 
 class NonInteractive(Escape):

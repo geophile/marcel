@@ -18,6 +18,7 @@ import marcel.exception as _exception
 import marcel.main as _main
 import marcel.object.error as _error
 
+from marcel.op.args import args as _args
 from marcel.op.bash import bash as _bash
 from marcel.op.cd import cd as _cd
 from marcel.op.difference import difference as _difference
@@ -66,6 +67,7 @@ env = _MAIN.env
 # No colors for API
 env.set_color_scheme(None)
 
+def args(*args, **kwargs): return _generate_op(_args, *args, **kwargs)
 def bash(*args, **kwargs): return _generate_op(_bash, *args, **kwargs)
 def cd(*args, **kwargs): return _generate_op(_cd, *args, **kwargs)
 def difference(*args, **kwargs): return _generate_op(_difference, *args, **kwargs)

@@ -114,7 +114,7 @@ class Sql(marcel.core.Op):
         self.args = self.eval_function('args_arg')
         if self.commit is None:
             self.commit = 0  # Commit only in receive_complete
-        elif self.commit <= 0:
+        elif self.commit < 0:
             raise marcel.exception.KillCommandException(f'--commit value must be a positive integer: {self.commit}')
         self.commit_count = 0
         db_profile = self.env().getvar('DB_DEFAULT') if self.db is None else self.db
@@ -142,6 +142,8 @@ class Sql(marcel.core.Op):
         except Exception as e:
             self.connection.rollback()
             raise marcel.exception.KillCommandException(e)
+        finally:
+            self.connection.close()
 
     # For use by this class
 

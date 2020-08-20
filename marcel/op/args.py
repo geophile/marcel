@@ -36,7 +36,7 @@ will be bound to {n:None}.
 
 
 def args(env, pipeline):
-    assert isinstance(pipeline, marcel.core.Pipelineable)
+    # assert isinstance(pipeline, marcel.core.Pipelineable), type(pipeline)
     return Args(env), [pipeline.create_pipeline()]
 
 
@@ -66,6 +66,8 @@ class Args(marcel.core.Op):
     def setup_1(self):
         def send_pipeline_output(*x):
             self.send(x)
+        if self.pipeline.parameters() is None:
+            raise marcel.exception.KillCommandException('The args pipeline must be parameterized.')
         self.pipeline_copy = self.pipeline_arg(self.pipeline).copy()
         self.pipeline_copy.set_error_handler(self.owner.error_handler)
         self.pipeline_copy.append(marcel.opmodule.create_op(self.env(), 'map', send_pipeline_output))

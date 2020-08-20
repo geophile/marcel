@@ -984,7 +984,7 @@ def test_intersect():
              '           map (x: [(x, x * 100)] * 3) | '
              '           expand] |'
              'sort',
-             expected_out=[(2, 200), (2, 200), 
+             expected_out=[(2, 200), (2, 200),
                            (3, 300), (3, 300), (3, 300),
                            (4, 400), (4, 400), (4, 400)])
 
@@ -1038,6 +1038,59 @@ def test_difference():
              expected_out=[(4, 400), (5, 500), (5, 500), (6, 600), (6, 600), (6, 600)])
 
 
+def test_args():
+    # gen
+    TEST.run('gen 5 1 | args [n: gen (n)] | map (x: -x)',
+             expected_out=[0, 0, -1, 0, -1, -2, 0, -1, -2, -3, 0, -1, -2, -3, -4])
+    TEST.run('gen 6 1 | args [count, start: gen (count) (start)]',
+             expected_out=[2, 4, 5, 6, 6, 7, 8, 9, 10])
+    # ls
+    TEST.run('rm -rf /tmp/a')
+    TEST.run('mkdir /tmp/a')
+    TEST.run('mkdir /tmp/a/d1')
+    TEST.run('mkdir /tmp/a/d2')
+    TEST.run('mkdir /tmp/a/d3')
+    TEST.run('touch /tmp/a/d1/f1')
+    TEST.run('touch /tmp/a/d2/f2')
+    TEST.run('touch /tmp/a/d3/f3')
+    TEST.run('cd /tmp/a')
+    TEST.run('ls -d | args [d: ls -f (d)] | map (f: f.name)',
+             expected_out=['f1', 'f2', 'f3'])
+    # head
+    TEST.run('gen 4 1 | args [n: gen 10 | head (n)]',
+             expected_out=[0, 0, 1, 0, 1, 2, 0, 1, 2, 3])
+    # tail
+    TEST.run('gen 4 1 | args [n: gen 10 | tail (n+1)]',
+             expected_out=[8, 9, 7, 8, 9, 6, 7, 8, 9, 5, 6, 7, 8, 9])
+    # bash
+    TEST.run('gen 5 | args [n: echo X(n)Y]',
+             expected_out=['X0Y', 'X1Y', 'X2Y', 'X3Y', 'X4Y'])
+    # expand
+    TEST.run('gen 3 | args [x: (("ab", "cd", "ef")) | expand (x)]',
+             expected_out=[("a", "cd", "ef"), ("b", "cd", "ef"),
+                           ("ab", "c", "ef"), ("ab", "d", "ef"),
+                           ("ab", "cd", "e"), ("ab", "cd", "f")])
+    # sql
+    TEST.run('sql "drop table if exists t" | select (x: False)')
+    TEST.run('sql "create table t(x int)" | select (x: False)')
+    TEST.run(test='gen 5 | args [x: sql "insert into t values(%s)" (x)]',
+             verification='sql "select * from t order by x"',
+             expected_out=[0, 1, 2, 3, 4])
+    # window
+    TEST.run('gen 3 | args [w: gen 10 | window -d (w)',
+             expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
+                           0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                           (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)])
+    # nested args
+    TEST.run('gen 3 | args [i: gen 3 (i+100) | args [j: gen 3 (j+1000)]]',
+             expected_out=[1100, 1101, 1102, 1101, 1102, 1103, 1102, 1103, 1104,
+                           1101, 1102, 1103, 1102, 1103, 1104, 1103, 1104, 1105,
+                           1102, 1103, 1104, 1103, 1104, 1105, 1104, 1105, 1106])
+    # negative testing
+    TEST.run('gen 3 | args [gen 3]',
+             expected_err='The args pipeline must be parameterized')
+
+
 def main_stable():
     test_no_such_op()
     test_gen()
@@ -1074,15 +1127,10 @@ def main_stable():
     test_intersect()
     test_union()
     test_difference()
+    test_args()
 
 
 def main_dev():
-    # args testing: gen, ls, head, tail, bash, expand, head. sql, window
-
-
-    # TEST.run('gen 5 1 | args [n: gen (n)]')
-    # TEST.run('gen 6 1 | args [count, start: gen (count) (start)]')
-
     pass
 
 

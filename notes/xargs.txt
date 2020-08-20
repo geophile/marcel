@@ -175,3 +175,41 @@ Implementation:
   value elsewhere, leaving the function intact.
 
 - args is a lot like runpipeline, but it needs a loop to feed the pipeline.
+
+----------------------------------------------------------------------
+
+args is problematic for the API.
+
+The API does parameterized pipelines differently. Pipeline.args/params
+aren't used. Instead, it's just a Pipeline inside a lambda, e.g.
+
+    lambda n: gen(n)
+
+The args op needs to know how many parameters there are. A hack:
+
+- Suppose args(env, pipeline) is passed a function (to the pipeline
+  arg).
+
+- Invoke pipeline().
+
+    - Returns normally: Not parameterized, which is incorrect for args.
+
+    - TypeError, with the error message "... missing N required
+      positional arguments ..." N is the number of parameters. Scrape
+      N out of the error message. (Does this work in other languages?
+      Can an OS language setting change the language of error
+      messages?)
+
+    - The error message also yields argument names, e.g. 
+
+            >>> f = lambda x, y: x+y
+            >>> f()
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in <module>
+            TypeError: <lambda>() missing 2 required positional arguments: 'x' and 'y'
+
+    - Other exception, or TypeError with a different message: raise an
+      exception.
+
+So we know the number of parameters and their names. This means that a
+parameterized pipeline can be created. Things should work?
