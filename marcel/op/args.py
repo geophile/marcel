@@ -24,7 +24,7 @@ HELP = '''
 {L,wrap=F}args PIPELINE
 
 {L,indent=4:28}{r:PIPELINE}                The pipeline to be executed with arguments coming from the {r:args}
-operator's input stream.
+operator's input stream. The pipeline must be parameterized.
 
 Items in the input stream to {r:args} will be bound to the {r:PIPELINE}s parameters. 
 
