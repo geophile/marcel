@@ -259,7 +259,7 @@ class Op(AbstractOp):
 
     # arg is a Pipeline, Pipelineable, or a var bound to a pipeline. Deal with all of these possibilities
     # and come up with the pipeline itself.
-    def pipeline_arg(self, arg):
+    def pipeline_arg_value(self, arg):
         if type(arg) is marcel.core.Pipeline:
             pipeline = arg
         elif isinstance(arg, marcel.core.Pipelineable):

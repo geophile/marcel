@@ -112,7 +112,7 @@ class Join(marcel.core.Op):
                 # match is first value associated with join_value, x is the second. Need a list.
                 self.inner[join_value] = [match, x]
         self.inner = {}
-        pipeline = self.pipeline_arg(self.pipeline).copy()
+        pipeline = self.pipeline_arg_value(self.pipeline).copy()
         pipeline.set_error_handler(self.owner.error_handler)
         pipeline.append(marcel.opmodule.create_op(self.env(), 'map', load_inner))
         marcel.core.Command(None, pipeline).execute()

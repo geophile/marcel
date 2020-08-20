@@ -36,8 +36,9 @@ will be bound to {n:None}.
 
 
 def args(env, pipeline):
-    # assert isinstance(pipeline, marcel.core.Pipelineable), type(pipeline)
-    return Args(env), [pipeline.create_pipeline()]
+    assert callable(pipeline)
+    args = Args(env)
+    return args, [pipeline]
 
 
 class ArgsArgsParser(marcel.argsparser.ArgsParser):
@@ -45,7 +46,7 @@ class ArgsArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('args', env)
         # str: To accommodate var names
-        self.add_anon('pipeline', convert=self.check_str_or_pipeline)
+        self.add_anon('pipeline', convert=self.check_str_or_pipeline, target='pipeline_arg')
         self.validate()
 
 
@@ -53,10 +54,8 @@ class Args(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.pipeline = None
-        self.pipeline_copy = None
-        self.n_params = None
-        self.args = None
+        self.pipeline_arg = None
+        self.impl = None
 
     def __repr__(self):
         return 'args()'
@@ -64,26 +63,93 @@ class Args(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
+        self.impl = ArgsRunnerAPI(self) if callable(self.pipeline_arg) else ArgsRunnerInteractive(self)
+        self.impl.setup_1()
+
+    def receive(self, x):
+        self.impl.receive(x)
+
+    def receive_complete(self):
+        self.impl.receive_complete()
+
+
+class ArgsRunner:
+
+    def __init__(self, op):
+        self.op = op
+        self.n_params = None
+        self.args = None
+        self.pipeline_arg = None
+
+    def receive(self, x):
+        assert False
+
+    def receive_complete(self):
+        assert False
+
+
+class ArgsRunnerInteractive(ArgsRunner):
+
+    def __init__(self, op):
+        super().__init__(op)
+        self.pipeline = None
+
+    def setup_1(self):
         def send_pipeline_output(*x):
-            self.send(x)
-        if self.pipeline.parameters() is None:
+            self.op.send(x)
+        op = self.op
+        if op.pipeline_arg.parameters() is None:
             raise marcel.exception.KillCommandException('The args pipeline must be parameterized.')
-        self.pipeline_copy = self.pipeline_arg(self.pipeline).copy()
-        self.pipeline_copy.set_error_handler(self.owner.error_handler)
-        self.pipeline_copy.append(marcel.opmodule.create_op(self.env(), 'map', send_pipeline_output))
-        self.n_params = len(self.pipeline.parameters())
+        self.n_params = len(op.pipeline_arg.parameters())
         self.args = []
+        self.pipeline = op.pipeline_arg_value(op.pipeline_arg).copy()
+        self.pipeline.set_error_handler(op.owner.error_handler)
+        self.pipeline.append(marcel.opmodule.create_op(op.env(), 'map', send_pipeline_output))
 
     def receive(self, x):
         self.args.append(marcel.util.unwrap_op_output(x))
         if len(self.args) == self.n_params:
-            self.pipeline_copy.set_parameter_values(self.args, None)
-            marcel.core.Command(None, self.pipeline_copy).execute()
+            self.pipeline.set_parameter_values(self.args, None)
+            marcel.core.Command(None, self.pipeline).execute()
             self.args.clear()
 
     def receive_complete(self):
         if len(self.args) > 0:
             while len(self.args) < self.n_params:
                 self.args.append(None)
-            self.pipeline_copy.set_parameter_values(self.args, None)
-            marcel.core.Command(None, self.pipeline_copy).execute()
+            self.pipeline.set_parameter_values(self.args, None)
+            marcel.core.Command(None, self.pipeline).execute()
+
+
+class ArgsRunnerAPI(ArgsRunner):
+
+    def __init__(self, op):
+        super().__init__(op)
+
+    def setup_1(self):
+        self.n_params = len(self.op.pipeline_arg.__code__.co_varnames)
+        if self.n_params == 0:
+            raise marcel.exception.KillCommandException('The args pipeline must be parameterized.')
+        self.args = []
+
+    def receive(self, x):
+        self.args.append(marcel.util.unwrap_op_output(x))
+        if len(self.args) == self.n_params:
+            self.generate_and_run_pipeline()
+
+    def receive_complete(self):
+        if len(self.args) > 0:
+            while len(self.args) < self.n_params:
+                self.args.append(None)
+            self.generate_and_run_pipeline()
+
+    def send_pipeline_output(self, *x):
+        self.op.send(x)
+
+    def generate_and_run_pipeline(self):
+        op = self.op
+        pipeline = op.pipeline_arg(*self.args).create_pipeline()
+        pipeline.set_error_handler(op.owner.error_handler)
+        pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
+        marcel.core.Command(None, pipeline).execute()
+        self.args.clear()

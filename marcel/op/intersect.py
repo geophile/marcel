@@ -70,7 +70,7 @@ class Intersect(marcel.core.Op):
             count = self.right.get(x, None)
             self.right[x] = 1 if count is None else count + 1
         self.right = {}
-        pipeline = self.pipeline_arg(self.pipeline).copy()
+        pipeline = self.pipeline_arg_value(self.pipeline).copy()
         pipeline.set_error_handler(self.owner.error_handler)
         pipeline.append(marcel.opmodule.create_op(self.env(), 'map', load_right))
         marcel.core.Command(None, pipeline).execute()
