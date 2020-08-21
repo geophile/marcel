@@ -24,7 +24,17 @@ ls -f | select (f: now() - f.mtime > days(100)) | args [f: rm (f)]
 the pipeline is executed.
 - `rm (f)` removes `File` `f`.
 
-You can also pass all of the `File`s ...
+You can also pass all of the qualifying `File`s at once:
+
+```shell script
+ls -f | select (f: now() - f.mtime > days(100)) | args --all [files: rm (quote_files(files))]
+``` 
+
+Now, all of the qualifying `File`s are bound to the pipelines `files` parameter. 
+Because the args pipeline relies on the host OSs `rm` command, carefully quoting
+filenames is necessary. `quote_files` takes `files`, a `list` of `File`s, and returns
+a string containing all the `File`s names, separated by spaces, and each quoted, (e.g.
+to properly handle a filename such as `this filename has four spaces`.)
 
 Actually, you can do the same cleanup by relying on the fact that `File`s implement
 the `pathlib.Path` interface, which has an `unlink` method. So this works too:
