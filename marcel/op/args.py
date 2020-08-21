@@ -21,31 +21,35 @@ import marcel.object.error
 import marcel.util
 
 HELP = '''
-{L,wrap=F}args PIPELINE
+{L,wrap=F}args [-a|--all] PIPELINE
 
-{L,indent=4:28}{r:PIPELINE}                The pipeline to be executed with arguments coming from the {r:args}
-operator's input stream. The pipeline must be parameterized.
+{L,indent=4:28}{r:-a}, {r:--all}               Accumulate the entire input stream into a list, and bind it to a single
+pipeline parameter. 
+
+{L,indent=4:28}{r:PIPELINE}                A parameterized pipeline, to be executed with arguments coming 
+from the input stream.
 
 Items in the input stream to {r:args} will be bound to the {r:PIPELINE}s parameters. 
 
 If the {r:PIPELINE}
 has {i:n} parameters, then {i:n} items from the input stream will be used on each execution of {r:PIPELINE}.
-If the input stream is exhausted after providing at least 1 but less than {i:n} arguments, remaining arguments
+If the input stream is exhausted after providing at least 1 but less than {i:n} arguments, remaining parameters
 will be bound to {n:None}. 
 '''
 
 
-def args(env, pipeline):
+def args(env, pipeline, all=False):
     assert callable(pipeline)
-    args = Args(env)
-    return args, [pipeline]
+    op_args = ['--all'] if all else []
+    op_args.append(pipeline)
+    return (Args(env)), op_args
 
 
 class ArgsArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('args', env)
-        # str: To accommodate var names
+        self.add_flag_no_value('all', '-a', '--all')
         self.add_anon('pipeline', convert=self.check_str_or_pipeline, target='pipeline_arg')
         self.validate()
 
@@ -54,6 +58,7 @@ class Args(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.all = None
         self.pipeline_arg = None
         self.impl = None
 
@@ -77,14 +82,39 @@ class ArgsRunner:
 
     def __init__(self, op):
         self.op = op
+        self.all = op.all
         self.n_params = None
         self.args = None
         self.pipeline_arg = None
 
+    def check_args(self):
+        error = None
+        if self.n_params == 0:
+            error = 'The args pipeline must be parameterized.'
+        if self.all and self.n_params > 1:
+            error = 'With -a|--all option, the pipeline must have a single parameter.'
+        if error:
+            raise marcel.exception.KillCommandException(error)
+
+
     def receive(self, x):
-        assert False
+        self.args.append(marcel.util.unwrap_op_output(x))
+        if not self.all and len(self.args) == self.n_params:
+            self.generate_and_run_pipeline()
 
     def receive_complete(self):
+        if len(self.args) > 0:
+            if self.all:
+                self.args = [self.args]
+            else:
+                while len(self.args) < self.n_params:
+                    self.args.append(None)
+            self.generate_and_run_pipeline()
+
+    def send_pipeline_output(self, *x):
+        self.op.send(x)
+
+    def generate_and_run_pipeline(self):
         assert False
 
 
@@ -95,30 +125,20 @@ class ArgsRunnerInteractive(ArgsRunner):
         self.pipeline = None
 
     def setup_1(self):
-        def send_pipeline_output(*x):
-            self.op.send(x)
         op = self.op
         if op.pipeline_arg.parameters() is None:
             raise marcel.exception.KillCommandException('The args pipeline must be parameterized.')
         self.n_params = len(op.pipeline_arg.parameters())
+        self.check_args()
         self.args = []
         self.pipeline = op.pipeline_arg_value(op.pipeline_arg).copy()
         self.pipeline.set_error_handler(op.owner.error_handler)
-        self.pipeline.append(marcel.opmodule.create_op(op.env(), 'map', send_pipeline_output))
+        self.pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
 
-    def receive(self, x):
-        self.args.append(marcel.util.unwrap_op_output(x))
-        if len(self.args) == self.n_params:
-            self.pipeline.set_parameter_values(self.args, None)
-            marcel.core.Command(None, self.pipeline).execute()
-            self.args.clear()
-
-    def receive_complete(self):
-        if len(self.args) > 0:
-            while len(self.args) < self.n_params:
-                self.args.append(None)
-            self.pipeline.set_parameter_values(self.args, None)
-            marcel.core.Command(None, self.pipeline).execute()
+    def generate_and_run_pipeline(self):
+        self.pipeline.set_parameter_values(self.args, None)
+        marcel.core.Command(None, self.pipeline).execute()
+        self.args.clear()
 
 
 class ArgsRunnerAPI(ArgsRunner):
@@ -128,23 +148,8 @@ class ArgsRunnerAPI(ArgsRunner):
 
     def setup_1(self):
         self.n_params = len(self.op.pipeline_arg.__code__.co_varnames)
-        if self.n_params == 0:
-            raise marcel.exception.KillCommandException('The args pipeline must be parameterized.')
+        self.check_args()
         self.args = []
-
-    def receive(self, x):
-        self.args.append(marcel.util.unwrap_op_output(x))
-        if len(self.args) == self.n_params:
-            self.generate_and_run_pipeline()
-
-    def receive_complete(self):
-        if len(self.args) > 0:
-            while len(self.args) < self.n_params:
-                self.args.append(None)
-            self.generate_and_run_pipeline()
-
-    def send_pipeline_output(self, *x):
-        self.op.send(x)
 
     def generate_and_run_pipeline(self):
         op = self.op

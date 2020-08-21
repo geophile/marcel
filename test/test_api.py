@@ -821,6 +821,15 @@ def test_args():
     os.system('touch /tmp/a/d3/f3')
     TEST.run(test=lambda: run(ls('/tmp/a/*', dir=True) | args(lambda d: ls(d, file=True)) | map(lambda f: f.name)),
              expected_out=['f1', 'f2', 'f3'])
+    os.system('touch /tmp/a/a_file')
+    os.system('touch /tmp/a/"a file"')
+    os.system('touch /tmp/a/"a file with a \' mark"')
+    os.system('rm -rf /tmp/a/d')
+    os.system('mkdir /tmp/a/d')
+    TEST.run(test=lambda: run(ls('/tmp/a', file=True) |
+                              args(lambda files: bash(f'mv -t d {quote_files(files)}'), all=True)),
+             verification=lambda: run(ls('d', file=True) | map(lambda f: f.name)),
+             expected_out=['a file', "a file with a ' mark", 'a_file'])
     # head
     TEST.run(lambda: run(gen(4, 1) | args(lambda n: gen(10) | head(n))),
              expected_out=[0, 0, 1, 0, 1, 2, 0, 1, 2, 3])

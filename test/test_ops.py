@@ -1056,6 +1056,14 @@ def test_args():
     TEST.run('cd /tmp/a')
     TEST.run('ls -d | args [d: ls -f (d)] | map (f: f.name)',
              expected_out=['f1', 'f2', 'f3'])
+    TEST.run('touch a_file')
+    TEST.run('touch "a file"')
+    TEST.run('touch "a file with a \' mark"')
+    TEST.run('rm -rf d')
+    TEST.run('mkdir d')
+    TEST.run(test='ls -f | args --all [files: mv -t d (quote_files(files))]',
+             verification='ls -f d | map (f: f.name)',
+             expected_out=['a file', "a file with a ' mark", 'a_file'])
     # head
     TEST.run('gen 4 1 | args [n: gen 10 | head (n)]',
              expected_out=[0, 0, 1, 0, 1, 2, 0, 1, 2, 3])
@@ -1086,9 +1094,19 @@ def test_args():
              expected_out=[1100, 1101, 1102, 1101, 1102, 1103, 1102, 1103, 1104,
                            1101, 1102, 1103, 1102, 1103, 1104, 1103, 1104, 1105,
                            1102, 1103, 1104, 1103, 1104, 1105, 1104, 1105, 1106])
+    # --all
+    TEST.run('gen 10 | args --all [x: ("".join([str(n) for n in x]))]',
+             expected_out=['0123456789'])
+    # no input to args
+    TEST.run('gen 3 | select (x: False) | args [n: map (x: -x)]',
+             expected_out=[])
+    TEST.run('gen 3 | select (x: False) | args --all [n: map (x: -x)]',
+             expected_out=[])
     # negative testing
     TEST.run('gen 3 | args [gen 3]',
              expected_err='The args pipeline must be parameterized')
+    TEST.run('gen 10 | args --all [a, b: gen (a) (b)]',
+             expected_err='the pipeline must have a single parameter')
 
 
 def main_stable():

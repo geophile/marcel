@@ -41,7 +41,6 @@ class KillCommandException(BaseException):
     def __init__(self, cause):
         super().__init__(cause)
         self.cause = cause
-        # print_stack()
 
     def __str__(self):
         return str(self.cause)

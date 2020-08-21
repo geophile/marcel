@@ -18,6 +18,7 @@ import grp
 import io
 import pathlib
 import pwd
+import shlex
 import shutil
 import subprocess
 import sys
@@ -90,6 +91,23 @@ def unwrap_op_output(x):
             x[0] if (t is tuple or t is list) and len(x) == 1 else
             x)
 
+
+# Generate a list of filenames, suitable for use on a bash command line, (i.e., quoted to handle tricky cases
+# such as file names containing whitespace).
+def quote_files(files):
+    def quote_file(file):
+        if isinstance(file, pathlib.Path) or is_file(file):
+            file = file.as_posix()
+        return shlex.quote(file)
+    if is_file(files):
+        return quote_file(files)
+    else:
+        buffer = []
+        for file in files:
+            if isinstance(file, pathlib.Path) or is_file(file):
+                file = file.as_posix()
+            buffer.append(shlex.quote(file))
+        return ' '.join(buffer)
 
 def normalize_path(x):
     x = pathlib.Path(x)

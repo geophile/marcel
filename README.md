@@ -1,21 +1,21 @@
 What's New
 ----------
 
-Marcel now has a command `args`, that works something like Linux's `xargs`. 
+Marcel now has an operator, `args`, that works like Linux's `xargs`. 
 For example, suppose you have a directory containing log files, and you want to
-delete logs that are more than 100 days old, or more than 10GB in size. Locating
+delete logs that are more than 100 days old. Locating
 such files is easy:
 
 ```shell script
-ls -f | select (f: f.size > 10000000000 or now() - f.mtime > days(100))
+ls -f | select (f: now() - f.mtime > days(100))
 ```
 
-What you would like to do is to take the `File`s in the resulting stream, and
-delete each one. The `args` operator takes items arriving on the input
+What you would like to do is to take each `File` in the resulting stream, and
+delete it. The `args` operator takes items arriving on the input
 stream, and makes them available to operators. So to do the file removal:
 
 ```shell script
-ls -f | select (f: f.size > 10000000000 or now() - f.mtime > days(100)) | args [f: rm (f)]
+ls -f | select (f: now() - f.mtime > days(100)) | args [f: rm (f)]
 ```
 
 - `ls ... | select ...` produces a stream of `File`s.
@@ -24,11 +24,13 @@ ls -f | select (f: f.size > 10000000000 or now() - f.mtime > days(100)) | args [
 the pipeline is executed.
 - `rm (f)` removes `File` `f`.
 
+You can also pass all of the `File`s ...
+
 Actually, you can do the same cleanup by relying on the fact that `File`s implement
 the `pathlib.Path` interface, which has an `unlink` method. So this works too:
 
 ```shell script
-ls -f | select (f: f.size > 10000000000 or now() - f.mtime > days(100)) | map (f: f.unlink())
+ls -f | select (f: now() - f.mtime > days(100)) | map (f: f.unlink())
 ```
 
 Marcel
