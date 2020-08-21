@@ -172,3 +172,14 @@ This should complain:
 93. Bash is using its own list of interactive executables
 
 Should be using the one in env.
+
+----------------------------------------------------------------------
+
+94. window omitting last output
+
+    M-0.10.11 jao@cheese:~/git/marcel/test$ gen 4 1 | args [n: gen (n)] | window (x: x == 0) 
+    0
+    [0, 1]
+    [0, 1, 2]
+
+[0, 1, 2, 3] is missing.

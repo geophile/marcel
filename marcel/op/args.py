@@ -76,6 +76,7 @@ class Args(marcel.core.Op):
 
     def receive_complete(self):
         self.impl.receive_complete()
+        self.send_complete()
 
 
 class ArgsRunner:

@@ -1149,13 +1149,16 @@ def main_stable():
 
 
 def main_dev():
+    # Bug 94
+    TEST.run('gen 4 1 | args [n: gen (n)] | window (x: x == 0)',
+             expected_out=[0, [0, 1], [0, 1, 2], [0, 1, 2, 3]])
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
