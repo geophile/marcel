@@ -56,16 +56,6 @@ class BashArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Bash(marcel.core.Op):
-    INTERACTIVE_EXECUTABLES = {
-        'emacs',
-        'less',
-        'man',
-        'more',
-        'psql',
-        'top',
-        'vi',
-        'vim'
-    }
 
     def __init__(self, env):
         super().__init__(env)
@@ -86,7 +76,7 @@ class Bash(marcel.core.Op):
         if len(self.args) == 0:
             self.runner = BashShell(self)
         else:
-            if self.args[0] in Bash.INTERACTIVE_EXECUTABLES:
+            if self.args[0] in self.env().getvar('INTERACTIVE_EXECUTABLES'):
                 self.interactive = True
             self.runner = Interactive(self) if self.interactive else NonInteractive(self)
 
