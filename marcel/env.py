@@ -214,7 +214,7 @@ class Environment:
         return value
 
     def setvar(self, var, value):
-        if self.modified_vars:
+        if self.modified_vars is not None:
             self.modified_vars.add(var)
         self.namespace[var] = value
 
@@ -229,6 +229,10 @@ class Environment:
         for var in self.modified_vars:
             changes[var] = self.namespace[var]
         return changes
+
+    def mark_possibly_changed(self, var):
+        if self.modified_vars is not None:
+            self.modified_vars.add(var)
 
     def prompts(self):
         return (self.prompt_string(self.getvar('PROMPT')),

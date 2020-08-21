@@ -109,6 +109,7 @@ class Load(marcel.core.Op):
                 self.send(next(self.input))
         except StopIteration:
             pass
+        self.env().mark_possibly_changed(self.var)
 
     def must_be_first_in_pipeline(self):
         return True

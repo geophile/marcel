@@ -863,6 +863,9 @@ def test_args():
     # negative testing
     TEST.run(test=lambda: run(gen(3) | args(lambda: gen(3))),
              expected_err='The args pipeline must be parameterized')
+    # Bug 94
+    TEST.run(test=lambda: run(gen(4, 1) | args(lambda n: gen (n)) | window(lambda x: x == 0)),
+             expected_out=[0, [0, 1], [0, 1, 2], [0, 1, 2, 3]])
 
 
 def test_api_run():

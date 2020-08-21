@@ -1107,6 +1107,9 @@ def test_args():
              expected_err='The args pipeline must be parameterized')
     TEST.run('gen 10 | args --all [a, b: gen (a) (b)]',
              expected_err='the pipeline must have a single parameter')
+    # Bug 94
+    TEST.run('gen 4 1 | args [n: gen (n)] | window (x: x == 0)',
+             expected_out=[0, [0, 1], [0, 1, 2], [0, 1, 2, 3]])
 
 
 def main_stable():
@@ -1149,9 +1152,10 @@ def main_stable():
 
 
 def main_dev():
-    # Bug 94
-    TEST.run('gen 4 1 | args [n: gen (n)] | window (x: x == 0)',
-             expected_out=[0, [0, 1], [0, 1, 2], [0, 1, 2, 3]])
+    TEST.run('x = [gen 3]')
+    TEST.run('x')
+    TEST.run('ls > x')
+    TEST.run('(x)')
     pass
 
 

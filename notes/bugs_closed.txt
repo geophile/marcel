@@ -1528,6 +1528,17 @@ The change should take effect on the next command.
 
 FIXED
 
+91. Failure to append fails silently
+
+    x = [gen 10]
+    ls > x
+
+ls fails to replace x, and x still has the value from its first assignment.
+
+----------------------------------------------------------------------
+
+FIXED
+
 93. Bash is using its own list of interactive executables
 
 Should be using the one in env.

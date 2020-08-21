@@ -93,6 +93,7 @@ class Store(marcel.core.Op):
 
     def receive(self, x):
         self.accumulator.append(x)
+        self.env().mark_possibly_changed(self.var)
 
     # For use by this class
 
