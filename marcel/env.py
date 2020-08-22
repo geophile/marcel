@@ -231,7 +231,7 @@ class Environment:
         return changes
 
     def mark_possibly_changed(self, var):
-        if self.modified_vars is not None:
+        if self.modified_vars is not None and var is not None:
             self.modified_vars.add(var)
 
     def prompts(self):
