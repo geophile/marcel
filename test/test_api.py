@@ -985,13 +985,6 @@ def main_stable():
 
 
 def main_dev():
-    y = []
-    TEST.run(test=lambda: run(gen(count=3, start=100) | store(y)))
-    TEST.run(test=lambda: run(map(lambda: y) | expand()),
-             expected_out=[100, 101, 102])
-    TEST.run(test=lambda: run(gen(count=3, start=200) | store(y)))
-    TEST.run(test=lambda: run(map(lambda: y) | expand()),
-             expected_out=[100, 101, 102, 200, 201, 202])
     pass
 
 

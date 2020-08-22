@@ -11,8 +11,11 @@ ls -f | select (f: now() - f.mtime > days(100))
 ```
 
 What you would like to do is to take each `File` in the resulting stream, and
-delete it. The `args` operator takes items arriving on the input
-stream, and makes them available to operators. So to do the file removal:
+delete it. The `args` operator takes values arriving in the input
+stream, and binds them to pipeline parameters. 
+Those parameters are then just ordinary variables, and so they are available
+to operators inside the pipeline.
+So to do the file removal:
 
 ```shell script
 ls -f | select (f: now() - f.mtime > days(100)) | args [f: rm (f)]

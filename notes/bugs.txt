@@ -149,14 +149,6 @@ The string "gen" is assigned and the rest is ignored.
 89. Be able to execute marcel script from inside marcel
 
 Don't require use of host shell.
-
-----------------------------------------------------------------------
-
-92. Silent failure when intersect pipeline does store instead of load
-
-This should complain:
-
-    recent > intersect [> py]
     
 ----------------------------------------------------------------------
 

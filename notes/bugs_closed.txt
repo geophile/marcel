@@ -1537,6 +1537,19 @@ ls fails to replace x, and x still has the value from its first assignment.
 
 ----------------------------------------------------------------------
 
+NOT A BUG
+
+92. Silent failure when intersect pipeline does store instead of load
+
+This should complain:
+
+    recent > intersect [> py]
+
+This is OK. The > py doesn't make sense, but it does yield an empty
+stream, and the intersection result is correct.
+
+----------------------------------------------------------------------
+
 FIXED
 
 93. Bash is using its own list of interactive executables
