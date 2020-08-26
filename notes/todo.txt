@@ -314,19 +314,6 @@ Can't run ssh!
 
 ----------------------------------------------------------------------
 
-ls -fr | ... | cp ???
-
-Would like to copy all the incoming files somewhere. No way to do this
-natively in marcel!
-
-- Need a cp operator?
-
-- It is doable with help from xargs: ...| xargs cp -t DEST
-
-It would also be nice to be able to pipe files and directories into a removal operator.
-
-----------------------------------------------------------------------
-
 env options to print one var, or to find a var. Autocomplete.
 
 ----------------------------------------------------------------------
@@ -338,3 +325,8 @@ Replace now() by time(). (Code, doc)
 EDITOR set to host's EDITOR on startup. Which is convenient, but odd
 if host value changes. How to keep the two in sync? Maybe reporting
 EDITOR should always get the value of os.getenv('EDITOR')?
+
+----------------------------------------------------------------------
+
+Nushell uses $it for current pipeline item. Not a bad
+idea. Alternative to args (without --all).

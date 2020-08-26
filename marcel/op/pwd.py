@@ -15,12 +15,13 @@
 
 import marcel.argsparser
 import marcel.core
+import marcel.object.file
 
 
 HELP = '''
 {L,wrap=F}pwd
 
-Write the current directory to the output stream.
+Write the current directory to the output stream, as a {n:File}.
 '''
 
 
@@ -46,7 +47,7 @@ class Pwd(marcel.core.Op):
     # AbstractOp
 
     def receive(self, _):
-        self.send(self.env().dir_state().pwd())
+        self.send(marcel.object.file.File(self.env().dir_state().pwd()))
 
     # Op
 

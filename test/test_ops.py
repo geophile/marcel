@@ -786,15 +786,15 @@ def test_load_store_sugar():
     # op > var
     dir = os.getcwd()
     TEST.run(test='pwd > o1',
-             verification='o1 >',
+             verification='o1 > map (f: f.path)',
              expected_out=[dir])
     # op >> var
     dir = os.getcwd()
     TEST.run(test='pwd >> o2',
-             verification='o2 >',
+             verification='o2 > map (f: f.path)',
              expected_out=[dir])
     TEST.run(test='pwd >> o2',
-             verification='o2 >',
+             verification='o2 > map (f: f.path)',
              expected_out=[dir, dir])
     # var > op
     TEST.run('gen 3 > o3')

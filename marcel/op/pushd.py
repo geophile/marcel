@@ -18,6 +18,7 @@ import pathlib
 import marcel.argsparser
 import marcel.core
 import marcel.exception
+import marcel.object.file
 
 
 HELP = '''
@@ -64,7 +65,7 @@ class Pushd(marcel.core.Op):
     def receive(self, _):
         self.env().dir_state().pushd(self.directory)
         for dir in self.env().dir_state().dirs():
-            self.send(dir)
+            self.send(marcel.object.file.File(dir))
 
     # Op
 

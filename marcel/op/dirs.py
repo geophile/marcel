@@ -15,6 +15,7 @@
 
 import marcel.argsparser
 import marcel.core
+import marcel.object.file
 
 
 HELP = '''
@@ -54,7 +55,7 @@ class Dirs(marcel.core.Op):
         if self.clear:
             self.env().dir_state().reset_dir_stack()
         for dir in self.env().dir_state().dirs():
-            self.send(dir)
+            self.send(marcel.object.file.File(dir))
 
     # Op
 

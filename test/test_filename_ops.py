@@ -210,31 +210,31 @@ def test_ls():
 def test_dir_stack():
     filename_op_setup('/tmp/test')
     TEST.run('mkdir a b c')
-    TEST.run(test='pwd',
+    TEST.run(test='pwd | map (f: f.path)',
              expected_out=['/tmp/test'])
-    TEST.run(test='dirs',
+    TEST.run(test='dirs | map (f: f.path)',
              expected_out=['/tmp/test'])
-    TEST.run(test='pushd a',
+    TEST.run(test='pushd a | map (f: f.path)',
              expected_out=['/tmp/test/a', '/tmp/test'])
-    TEST.run(test='dirs',
+    TEST.run(test='dirs | map (f: f.path)',
              expected_out=['/tmp/test/a', '/tmp/test'])
-    TEST.run(test='pushd ../b',
+    TEST.run(test='pushd ../b | map (f: f.path)',
              expected_out=['/tmp/test/b', '/tmp/test/a', '/tmp/test'])
-    TEST.run(test='dirs',
+    TEST.run(test='dirs | map (f: f.path)',
              expected_out=['/tmp/test/b', '/tmp/test/a', '/tmp/test'])
-    TEST.run(test='pushd',
+    TEST.run(test='pushd | map (f: f.path)',
              expected_out=['/tmp/test/a', '/tmp/test/b', '/tmp/test'])
-    TEST.run(test='dirs',
+    TEST.run(test='dirs | map (f: f.path)',
              expected_out=['/tmp/test/a', '/tmp/test/b', '/tmp/test'])
-    TEST.run(test='popd',
+    TEST.run(test='popd | map (f: f.path)',
              expected_out=['/tmp/test/b', '/tmp/test'])
-    TEST.run(test='pwd',
+    TEST.run(test='pwd | map (f: f.path)',
              expected_out=['/tmp/test/b'])
-    TEST.run(test='dirs',
+    TEST.run(test='dirs | map (f: f.path)',
              expected_out=['/tmp/test/b', '/tmp/test'])
-    TEST.run(test='dirs -c',
+    TEST.run(test='dirs -c | map (f: f.path)',
              expected_out=['/tmp/test/b'])
-    TEST.run(test='pushd',
+    TEST.run(test='pushd | map (f: f.path)',
              expected_out=['/tmp/test/b'])
 
 

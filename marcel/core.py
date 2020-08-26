@@ -139,6 +139,12 @@ class Op(AbstractOp):
     def __iter__(self):
         return PipelineIterator(self.create_pipeline())
 
+    # About _env handling in __get/setstate__: A command run as a (local) job should use the identical Environment as
+    # provided by the main thread. Otherwise, Environment modifications are lost. _env_ref stores a token identifying
+    # the original Environment, which is restored in __setstate__. For remote execution (i.e., fork), we don't want
+    # changes returned -- that's a different environment, (and in fact, there are multiple environments, one for each
+    # remote host).
+
     def __getstate__(self):
         m = self.__dict__.copy()
         m['_env_ref'] = self.save(self._env)

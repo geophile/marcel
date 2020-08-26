@@ -547,3 +547,16 @@ args -a|--all: gather everything from input stream. E.g.
 Might want a builtin function for quoting a list of Files for a bash command, e.g. quote_files()
 
     ls ... | args [files: cp (quote_files(files)) dest_dir]
+
+----------------------------------------------------------------------
+
+ls -fr | ... | cp ???
+
+Would like to copy all the incoming files somewhere. No way to do this
+natively in marcel!
+
+- Need a cp operator?
+
+- It is doable with help from xargs: ...| xargs cp -t DEST
+
+It would also be nice to be able to pipe files and directories into a removal operator.

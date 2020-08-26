@@ -45,7 +45,7 @@ has the uid and gid in positions 4 and 5.
 and then figure out how to obtain the metadata of interest from an {n:os.stat_result} object.
 So the same result can be obtained as follows:
 
-{L,wrap=F}ls | map (file: (file, file.uid, file.gid)
+{L,wrap=F}ls | map (file: (file, file.uid, file.gid))
 
 The following file metadata properties are available on {n:File}s:
 

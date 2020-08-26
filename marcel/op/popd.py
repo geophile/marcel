@@ -15,6 +15,7 @@
 
 import marcel.argsparser
 import marcel.core
+import marcel.object.file
 
 
 HELP = '''
@@ -48,7 +49,7 @@ class Popd(marcel.core.Op):
     def receive(self, _):
         self.env().dir_state().popd()
         for dir in self.env().dir_state().dirs():
-            self.send(dir)
+            self.send(marcel.object.file.File(dir))
 
     # Op
 
