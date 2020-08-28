@@ -13,7 +13,7 @@ setuptools.setup(
     description='A modern shell',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/geophile/marcel',
+    url='https://www.marceltheshell.org',
     packages=setuptools.find_packages('.'),
     scripts=['bin/marcel', 'bin/farcel.py'],
     install_requires=['dill'],

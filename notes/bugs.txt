@@ -152,4 +152,13 @@ Don't require use of host shell.
     
 ----------------------------------------------------------------------
 
-95. 
+95. emacs no longer working
+
+M-0.10.13 root@cheese:/media/backup/daily/2020.08.26# emacs
+emacs: Could not open file: /dev/tty
+Escaped command failed with exit code 1: emacs
+None
+
+----------------------------------------------------------------------
+
+97. 

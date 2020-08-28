@@ -48,7 +48,11 @@ owned by the current user's group are provided.
 '''
 
 
-_UNINITIALIZED = object()
+class Uninitialized:
+    pass
+
+
+_UNINITIALIZED = Uninitialized()
 
 
 def ps(env, user=_UNINITIALIZED, group=_UNINITIALIZED, pid=_UNINITIALIZED, command=_UNINITIALIZED):
@@ -66,8 +70,8 @@ class PsArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('ps', env)
         self.add_flag_optional_value('user', '-u', '--user', convert=self.check_str, target='user_arg')
         self.add_flag_optional_value('group', '-g', '--group', convert=self.check_str, target='group_arg')
-        self.add_flag_optional_value('pid', '-p', '--pid', convert=self.check_str, target='pid_arg')
-        self.add_flag_optional_value('command', '-c', '--command', convert=self.check_str, target='command_arg')
+        self.add_flag_one_value('pid', '-p', '--pid', convert=self.check_str, target='pid_arg')
+        self.add_flag_one_value('command', '-c', '--command', convert=self.check_str, target='command_arg')
         self.at_most_one('user', 'group', 'pid', 'command')
         self.validate()
 
@@ -96,23 +100,23 @@ class Ps(marcel.core.Op):
         # user, group can be name or id. A name can be numeric, and in that case, the name interpretation
         # takes priority. Convert name to uid, since that is a cheaper lookup on a Project.
         # If user or group is None, no user/group was specified, so use this user/group.
-        # UNINITIALIZED means it wasn't specified at all.
+        # A value of type Uninitialized means it wasn't specified at all.
         #
         # user can be True if -u is specified with no value.
         self.filter = lambda p: True
-        if self.user is not _UNINITIALIZED:
+        if type(self.user) is not Uninitialized:
             self.user = os.getuid() if self.user in (None, True) else Ps.convert_to_id(self.user, marcel.util.uid)
             self.filter = lambda p: p.uid == self.user
-        if self.group is not _UNINITIALIZED:
+        if type(self.group) is not Uninitialized:
             self.group = os.getgid() if self.group in (None, True) else Ps.convert_to_id(self.group, marcel.util.gid)
             self.filter = lambda p: p.gid == self.group
-        if self.pid is not _UNINITIALIZED:
+        if type(self.pid) is not Uninitialized:
             try:
                 self.pid = int(self.pid)
                 self.filter = lambda p: p.pid == self.pid
             except ValueError:
                 raise marcel.exception.KillCommandException(f'pid must be an int: {self.pid}')
-        if self.command is not _UNINITIALIZED:
+        if type(self.command) is not Uninitialized:
             self.filter = lambda p: self.command in p.commandline
 
     def receive(self, _):

@@ -1568,3 +1568,47 @@ FIXED
     [0, 1, 2]
 
 [0, 1, 2, 3] is missing.
+
+----------------------------------------------------------------------
+
+FIXED
+
+96. ps crashing
+
+M-0.10.14 jao@cheese:~$ timer 1 | args [t: ps]
+<class 'object'>: <object object at 0x7faa0d47a550>
+Process Process-8:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 145, in run_command_in_child
+    child_namespace_changes = command.execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 460, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/marcel/marcel/core.py", line 393, in receive
+    self.first_op.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 196, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/timer.py", line 117, in receive
+    self.send(now)
+  File "/home/jao/git/marcel/marcel/core.py", line 179, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 196, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/args.py", line 75, in receive
+    self.impl.receive(x)
+  File "/home/jao/git/marcel/marcel/op/args.py", line 104, in receive
+    self.generate_and_run_pipeline()
+  File "/home/jao/git/marcel/marcel/op/args.py", line 141, in generate_and_run_pipeline
+    marcel.core.Command(None, self.pipeline).execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 458, in execute
+    self.pipeline.setup_1()
+  File "/home/jao/git/marcel/marcel/core.py", line 377, in setup_1
+    op.setup_1()
+  File "/home/jao/git/marcel/marcel/op/ps.py", line 104, in setup_1
+    self.user = os.getuid() if self.user in (None, True) else Ps.convert_to_id(self.user, marcel.util.uid)
+  File "/home/jao/git/marcel/marcel/op/ps.py", line 136, in convert_to_id
+    except ValueError:
+TypeError: int() argument must be a string, a bytes-like object or a number, not 'object'
