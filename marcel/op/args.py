@@ -97,7 +97,6 @@ class ArgsRunner:
         if error:
             raise marcel.exception.KillCommandException(error)
 
-
     def receive(self, x):
         self.args.append(marcel.util.unwrap_op_output(x))
         if not self.all and len(self.args) == self.n_params:

@@ -53,3 +53,4 @@ class IfBase(marcel.core.Op):
 
     def receive_complete(self):
         self.then.receive_complete()
+        self.send_complete()

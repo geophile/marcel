@@ -72,6 +72,7 @@ class Tail(marcel.core.Op):
                     self.send(x)
                 p = self.next_position(p)
                 count += 1
+        self.send_complete()
 
     # For use by this class
 

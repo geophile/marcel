@@ -351,3 +351,15 @@ file:
 
 What should be saved? str() is not necessarily reversible. pickling is slow.
 
+Maybe keep things as they are. Might want a --pickle option for out op.
+
+----------------------------------------------------------------------
+
+TYPE SAFETY
+
+----------------------------------------------------------------------
+
+out
+
+- -t|--tsv
+- -p|--pickle

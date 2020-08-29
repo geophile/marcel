@@ -24,7 +24,8 @@ import time
 HELP = '''
 {L,wrap=F}timer [-c|--components] INTERVAL
 
-{L,indent=4:28}{r:-c}, {r:--components}        Output timestamp as a Python {n:time.struct_time} value, instead of seconds.
+{L,indent=4:28}{r:-c}, {r:--components}        Output timestamp as a Python {n:time.struct_time} value, 
+instead of seconds.
 
 {L,indent=4:28}{r:INTERVAL}                The amount of time to wait between consecutive timestamps.
 

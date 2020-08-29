@@ -144,6 +144,7 @@ class Sql(marcel.core.Op):
             raise marcel.exception.KillCommandException(e)
         finally:
             self.connection.close()
+            self.send_complete()
 
     # For use by this class
 

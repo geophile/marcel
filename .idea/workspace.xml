@@ -21,14 +21,12 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/argsparser.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/argsparser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/ls.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/ps.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/builtin.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/builtin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/join.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/join.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/timer.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/timer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_ops.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -389,7 +387,7 @@
       <workItem from="1598030547654" duration="19051000" />
       <workItem from="1598375196494" duration="11406000" />
       <workItem from="1598549451820" duration="37000" />
-      <workItem from="1598549505516" duration="5091000" />
+      <workItem from="1598549505516" duration="12387000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -490,12 +488,12 @@
     <state x="1967" y="180" width="2513" height="828" key="DiffContextDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1596773474829" />
     <state x="843" y="141" width="1077" height="616" key="DiffContextDialog/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1593218993631" />
     <state x="3044" y="156" width="1436" height="843" key="DiffContextDialog/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1597979595084" />
-    <state x="838" y="420" width="424" height="491" key="FileChooserDialogImpl" timestamp="1597076323465">
-      <screen x="0" y="27" width="1920" height="1053" />
+    <state x="1920" y="420" width="424" height="491" key="FileChooserDialogImpl" timestamp="1598624867209">
+      <screen x="0" y="27" width="3840" height="1053" />
     </state>
     <state x="838" y="420" width="424" height="491" key="FileChooserDialogImpl/0.27.1920.1053@0.27.1920.1053" timestamp="1597076323465" />
     <state x="1117" y="555" width="424" height="491" key="FileChooserDialogImpl/0.27.2560.1413@0.27.2560.1413" timestamp="1591382497658" />
-    <state x="1920" y="420" width="424" height="491" key="FileChooserDialogImpl/0.27.3840.1053@0.27.3840.1053" timestamp="1593440625366" />
+    <state x="1920" y="420" width="424" height="491" key="FileChooserDialogImpl/0.27.3840.1053@0.27.3840.1053" timestamp="1598624867209" />
     <state x="1955" y="555" width="424" height="491" key="FileChooserDialogImpl/0.27.4480.1413@0.27.4480.1413" timestamp="1591797419614" />
     <state x="2758" y="403" key="FileChooserDialogImpl/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1590265525590" />
     <state x="960" y="420" width="306" height="498" key="FileChooserDialogImpl/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1593788496991" />
@@ -644,10 +642,10 @@
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
     <state x="1054" y="387" width="762" height="690" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1589926376019" />
-    <state x="867" y="442" width="412" height="175" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1590351221416">
+    <state x="867" y="442" width="412" height="175" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1598666055190">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="867" y="442" width="412" height="175" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.27.1920.1053@0.27.1920.1053" timestamp="1590351221416" />
+    <state x="867" y="442" width="412" height="175" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.27.1920.1053@0.27.1920.1053" timestamp="1598666055190" />
     <state x="3017" y="315" width="904" height="562" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1598375356036">
       <screen x="1920" y="0" width="2560" height="1440" />
     </state>
@@ -711,10 +709,10 @@
     <state x="1113" y="521" width="306" height="466" key="refactoring.ChangeSignatureDialog/0.27.2560.1413@0.27.2560.1413" timestamp="1591380771348" />
     <state x="2875" y="447" key="refactoring.ChangeSignatureDialog/0.27.3840.1053@0.27.3840.1053" timestamp="1592851582734" />
     <state x="1948" y="521" key="refactoring.ChangeSignatureDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1590544776135" />
-    <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup" timestamp="1598561428599">
-      <screen x="0" y="27" width="3840" height="1053" />
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup" timestamp="1598670020685">
+      <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1598555374354" />
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1598670020685" />
     <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1597593013070" />
     <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1598561428599" />
     <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1597433365102" />

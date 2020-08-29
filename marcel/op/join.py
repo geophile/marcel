@@ -102,6 +102,7 @@ class Join(marcel.core.Op):
     def setup_1(self):
         def load_inner(*x):
             assert len(x) > 0
+            x = tuple(x)
             join_value = x[0]
             match = self.inner.get(join_value, None)
             if match is None:
@@ -118,6 +119,7 @@ class Join(marcel.core.Op):
         marcel.core.Command(None, pipeline).execute()
 
     def receive(self, x):
+        x = tuple(x)
         join_value = x[0]
         match = self.inner.get(join_value, None)
         if match is None:

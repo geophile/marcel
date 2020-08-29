@@ -53,6 +53,7 @@ class RunPipeline(marcel.core.Op):
 
     def receive_complete(self):
         self.pipeline.receive_complete()
+        self.send_complete()
 
     # RunPipeline
 
