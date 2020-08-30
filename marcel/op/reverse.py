@@ -46,7 +46,9 @@ class Reverse(marcel.core.Op):
         self.contents.append(x)
 
     def receive_complete(self):
-        self.contents.reverse()
-        for x in self.contents:
-            self.send(x)
+        if self.contents is not None:
+            self.contents.reverse()
+            for x in self.contents:
+                self.send(x)
+            self.contents = None
         self.send_complete()

@@ -172,7 +172,9 @@ class Window(marcel.core.Op):
         self.window_generator.receive(x)
 
     def receive_complete(self):
-        self.window_generator.receive_complete()
+        if self.window_generator is not None:
+            self.window_generator.receive_complete()
+            self.window_generator = None
         self.send_complete()
 
 

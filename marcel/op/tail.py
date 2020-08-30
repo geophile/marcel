@@ -63,7 +63,7 @@ class Tail(marcel.core.Op):
             self.end = self.next_position(self.end)
 
     def receive_complete(self):
-        if self.queue:
+        if self.queue is not None:
             p = self.end
             count = 0
             while count < self.n:
@@ -72,6 +72,7 @@ class Tail(marcel.core.Op):
                     self.send(x)
                 p = self.next_position(p)
                 count += 1
+            self.queue = None
         self.send_complete()
 
     # For use by this class

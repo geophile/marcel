@@ -71,5 +71,7 @@ class Union(marcel.core.Op):
         self.send(x)
 
     def receive_complete(self):
-        marcel.core.Command(None, self.pipeline_copy).execute()
+        if self.pipeline_copy is not None:
+            marcel.core.Command(None, self.pipeline_copy).execute()
+            self.pipeline_copy = None
         self.send_complete()

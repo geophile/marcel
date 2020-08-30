@@ -67,10 +67,12 @@ class Sort(marcel.core.Op):
             self.contents.append(x)
     
     def receive_complete(self):
-        if self.key:
-            self.contents.sort(key=lambda t: self.key(*t))
-        else:
-            self.contents.sort()
-        for x in self.contents:
-            self.send(x)
+        if self.contents is not None:
+            if self.key:
+                self.contents.sort(key=lambda t: self.key(*t))
+            else:
+                self.contents.sort()
+            for x in self.contents:
+                self.send(x)
+            self.contents = None
         self.send_complete()
