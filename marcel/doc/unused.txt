@@ -1,2 +1,0 @@
-These commands include both Linux executables (e.g. grep),
-and marcel operators. 

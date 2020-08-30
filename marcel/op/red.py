@@ -189,8 +189,9 @@ class NonGroupingReducer(Reducer):
             self.op.send(x + tuple(accumulator))
 
     def receive_complete(self):
-        if not self.op.incremental:
+        if not self.op.incremental and self.accumulator is not None:
             self.op.send(tuple(self.accumulator))
+            self.accumulator = None
         self.op.send_complete()
 
 
@@ -217,9 +218,10 @@ class GroupingReducer(Reducer):
             self.op.send(x + tuple(self.data(accumulator)))
 
     def receive_complete(self):
-        if not self.op.incremental:
+        if not self.op.incremental and self.accumulators is not None:
             for _, data in self.accumulators.items():
                 self.op.send(tuple(data))
+                self.accumulators = None
         self.op.send_complete()
 
     def group(self, x):

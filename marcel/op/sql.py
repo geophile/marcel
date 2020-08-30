@@ -21,7 +21,7 @@ HELP = '''
 {L,wrap=F}sql [-d|--db DB_PROFILE] [-c|--commit UPDATE_COUNT] [-a|--autocommit] STATEMENT [ARG ...]
 
 {L,indent=4:28,wrap=T}{r:-d}, {r:--db}                Access the database whose profile is named 
-{r:DB_PROFILE}, in {n:.marcel.py}. If omitted, use the default profile, specified by the 
+{r:DB_PROFILE}, in {n:~/.marcel.py}. If omitted, use the default profile, specified by the 
 environment variable {n:DB_DEFAULT}.
 
 {L,indent=4:28}{r:-c}, {r:--commit}            Commit after {r:UPDATE_COUNT} rows have been updated, 
@@ -102,7 +102,7 @@ class Sql(marcel.core.Op):
         self.args = None
         self.connection = None
         self.delegate = None
-        self.commit_count = None
+        self.total_update_count = None
 
     def __repr__(self):
         return f'sql({self.statement})'
@@ -116,7 +116,7 @@ class Sql(marcel.core.Op):
             self.commit = 0  # Commit only in receive_complete
         elif self.commit < 0:
             raise marcel.exception.KillCommandException(f'--commit value must be a positive integer: {self.commit}')
-        self.commit_count = 0
+        self.total_update_count = 0
         db_profile = self.env().getvar('DB_DEFAULT') if self.db is None else self.db
         if db_profile is None:
             raise marcel.exception.KillCommandException('No database profile defined')
@@ -177,11 +177,11 @@ class SqlStatement:
 
     def commit_if_necessary(self, update_count):
         op = self.op
-        if op.autocommit is False and op.commit > 0:
-            op.commit_count += update_count
-            if op.commit_count >= op.commit:
+        if not op.autocommit and op.commit > 0:
+            op.total_update_count += update_count
+            if op.total_update_count >= op.commit:
                 op.connection.commit()
-                op.commit_count = 0
+                op.total_update_count = 0
 
 
 class SqlSelect(SqlStatement):
