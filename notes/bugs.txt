@@ -163,4 +163,6 @@ None
 
 ----------------------------------------------------------------------
 
-97. 
+97. ... | args [n: sql 'insert ... values(%s) (n)' does, essentially, autocommit
+
+The problem is that each invocation of the pipeline does sql setup, receive, receive_complete.

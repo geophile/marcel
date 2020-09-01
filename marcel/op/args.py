@@ -75,7 +75,9 @@ class Args(marcel.core.Op):
         self.impl.receive(x)
 
     def receive_complete(self):
-        self.impl.receive_complete()
+        if self.impl is not None:
+            self.impl.receive_complete()
+            self.impl = None
         self.send_complete()
 
 

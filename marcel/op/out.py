@@ -112,9 +112,11 @@ class Out(marcel.core.Op):
 
     def receive(self, x):
         self.ensure_output_initialized()
-        out = self.formatter.format(x)
         try:
+            out = self.formatter.format(x)
             print(out, file=self.output, flush=True)
+        except marcel.exception.KillAndResumeException as e:
+            self.non_fatal_error(input=x, message=str(e))
         except Exception as e:  # E.g. UnicodeEncodeError
             self.non_fatal_error(input=x, message=str(e))
         finally:

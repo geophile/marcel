@@ -18,6 +18,7 @@ import pathlib
 import stat
 import time
 
+import marcel.exception
 import marcel.object.renderable
 import marcel.util
 
@@ -171,7 +172,10 @@ class File(marcel.object.renderable.Renderable):
 
     def _lstat(self):
         if self.lstat is None:
-            self.lstat = self.path.lstat()
+            try:
+                self.lstat = self.path.lstat()
+            except FileNotFoundError:
+                raise marcel.exception.KillAndResumeException(f'{self.path} does not exist.')
         return self.lstat
 
     def _user_and_group_names(self, uid, gid):

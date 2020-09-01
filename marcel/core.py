@@ -197,7 +197,8 @@ class Op(AbstractOp):
                          x if t is tuple or t is list else
                          (x,))
         except marcel.exception.KillAndResumeException as e:
-            self.receive_error(e.error)
+            # self.receive_error(e.error)
+            self.receive_error(Error(e))
 
     def receive(self, x):
         pass

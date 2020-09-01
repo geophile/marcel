@@ -333,28 +333,6 @@ idea. Alternative to args (without --all).
 
 ----------------------------------------------------------------------
 
-Rules to allow redirection to work with files as well as variables:
-
-- If it's an identifer, assume a variable.
-- Otherwise, assume a file.
-
-So:
-
-var:
-   ... > x
-
-file:
-   ... > x/y
-
-file:
-   ... > ./x
-
-What should be saved? str() is not necessarily reversible. pickling is slow.
-
-Maybe keep things as they are. Might want a --pickle option for out op.
-
-----------------------------------------------------------------------
-
 TYPE SAFETY
 
 ----------------------------------------------------------------------
@@ -363,3 +341,13 @@ out
 
 - -t|--tsv
 - -p|--pickle
+
+----------------------------------------------------------------------
+
+Suppose that an op with a pipeline arg does a send from receive_complete, e.g. 
+
+    join [... red +] | ...
+
+Will the join be correct? The red + can do such a "late" send. The
+fact that red's receive_complete was called means that the join has
+reached receive_complete too.
