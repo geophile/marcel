@@ -126,15 +126,17 @@ class TabCompleter:
                 filenames = [p.relative_to(base).as_posix()
                              for p in pathlib.Path(base).glob(pattern_prefix + '*')]
         else:
-            filenames = ['/'] + [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
-        filenames = [f + '/' if os.path.isdir(f) else f for f in filenames]
+            filenames = [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
+        filenames = (([] if text.startswith('/') or len(text) > 0 else ['/']) +
+                     [f + '/' if os.path.isdir(f) else f for f in filenames])
         if len(filenames) == 1:
             filenames = [filenames[0] + ' ']
         debug('complete_filename candidates for {}: {}'.format(text, filenames))
         return filenames
 
     def candidates(self, line, text):
-        debug(f'complete: line={line}, text={text}')
+        candidates = None
+        debug(f'complete: line={line}, text=<{text}>')
         if len(line.strip()) == 0:
             candidates = TabCompleter.OPS
         else:
@@ -144,36 +146,40 @@ class TabCompleter:
             parser = marcel.parser.Parser(line, self.main)
             try:
                 parser.parse()
-                debug('parse succeeded')
+                debug(f'parse succeeded, context: {parser.context}')
             except Exception as e:
-                debug(f'caught ({type(e)}) {e}')
+                debug(f'caught {type(e)}: {e}')
                 # Don't do tab completion
-                return None
+                candidates = None
+                return
             except marcel.exception.KillCommandException as e:
                 # Parse may have failed because of an unrecognized op, for example. Normal continuation should
                 # do the right thing.
-                pass
+                debug(f'Caught KillCommandException: {e}')
             except BaseException as e:
                 debug(f'Something went really wrong: {e}')
                 marcel.util.print_stack()
-            current_op = parser.current_op
-            assert current_op is not None
-            debug(f'current_op: {current_op}')
-            if not current_op.processing_args:
-                op_name = current_op.op_name
-                if op_name is None:
+            context = parser.context
+            if context.is_complete_op():
+                op = context.op()
+                if op is None:
                     # Could be a partial op name, an executable name (or partial), or just gibberish
                     candidates = self.complete_op(text)
-                elif op_name == 'help':
+                elif op.op_name() == 'help':
                     candidates = self.complete_help(text)
                 else:
-                    assert op_name == text, text
-                    # Op is complete
-                    candidates = [text + ' ']
-            elif text.startswith('-'):
-                candidates = self.complete_flag(text, parser.current_op.flags)
-            else:
-                candidates = self.complete_filename(text)
+                    # Could be a partial op name, an executable name (or partial), or just gibberish
+                    candidates = self.complete_op(text)
+            elif context.is_complete_arg():
+                if len(text) == 0:
+                    candidates = self.complete_filename(text)
+                elif text[-1].isspace():
+                    text = ''
+                    candidates = self.complete_filename(text)
+                elif text.startswith('-'):
+                    candidates = self.complete_flag(text, context.flags())
+                else:
+                    candidates = self.complete_filename(text)
         return candidates
 
     @staticmethod

@@ -26,7 +26,6 @@ import marcel.util
 # Parsing errors
 
 class SyntaxError(marcel.exception.KillCommandException):
-
     SNIPPET_SIZE = 10
 
     def __init__(self, token, message):
@@ -48,8 +47,8 @@ class SyntaxError(marcel.exception.KillCommandException):
 
 class PrematureEndError(SyntaxError):
 
-    def __init__(self):
-        super().__init__(None, None)
+    def __init__(self, token=None):
+        super().__init__(token, "Premature end of input")
 
 
 class UnknownOpError(marcel.exception.KillCommandException):
@@ -60,13 +59,6 @@ class UnknownOpError(marcel.exception.KillCommandException):
 
     def __str__(self):
         return f'Unknown command: {self.op_name}'
-
-
-class MalformedStringError(marcel.exception.KillCommandException):
-
-    def __init__(self, text, message):
-        super().__init__(message)
-        self.text = text
 
 
 class ParseError(marcel.exception.KillCommandException):
@@ -185,8 +177,14 @@ class Token(Source):
     def is_gt(self):
         return False
 
+    def is_lexer_failure(self):
+        return False
+
     def op_name(self):
         return None
+
+    def is_followed_by_whitespace(self):
+        return self.end < len(self.text) and self.text[self.end].isspace()
 
 
 # PythonString isn't a top-level token that appears on a command line. An Expression is defined as
@@ -224,7 +222,7 @@ class PythonString(Token):
         while True:
             c = self.next_char()
             if c is None:
-                raise MalformedStringError(self.text, "Not a python string")
+                raise LexerException(self, "Not a python string")
             elif c in Token.QUOTES:
                 # Possible ending quoted sequence
                 if c == quote:
@@ -310,7 +308,7 @@ class Expression(Token):
             return self._function
         except Exception as e:
             raise SyntaxError(self, f'Error in function: {e}')
-    
+
     def is_expr(self):
         return True
 
@@ -334,8 +332,7 @@ class Expression(Token):
             elif c in Token.QUOTES:
                 self.end = PythonString(self.text, self.end - 1, False).end
         if self.text[self.end - 1] != Token.CLOSE:
-            raise marcel.exception.KillCommandException(
-                f'Malformed Python expression {self.text[self.start:self.end]}')
+            raise LexerException(self, 'Malformed Python expression')
 
 
 class String(Token):
@@ -398,8 +395,7 @@ class String(Token):
                         chars.append(Token.ESCAPE_CHAR)
                         chars.append(c)
                 else:
-                    raise marcel.exception.KillCommandException(
-                        f'Malformed string: {self.text[self.start:self.end]}')
+                    raise LexerException(self, 'Malformed string')
             else:
                 chars.append(c)
         self.string = ''.join(chars)
@@ -558,9 +554,25 @@ class ImpliedMap(Token):
         return 'map'
 
 
+class LexerFailure(Token):
+
+    def __init__(self, exception):
+        super().__init__(None, None, None)
+        self.exception = exception
+
+    def is_lexer_failure(self):
+        return True
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Lexing
+
+
+class LexerException(Exception):
+
+    def __init__(self, token, message):
+        super().__init__(token.text[token.start:token.end], message)
 
 
 class Lexer(Source):
@@ -571,10 +583,13 @@ class Lexer(Source):
 
     def tokens(self):
         tokens = []
-        token = self.next_token()
-        while token is not None:
-            tokens.append(token)
+        try:
             token = self.next_token()
+            while token is not None:
+                tokens.append(token)
+                token = self.next_token()
+        except LexerException as e:
+            tokens.append(LexerFailure(e))
         return self.consolidate_adjacent(tokens)
 
     def next_token(self):
@@ -666,6 +681,7 @@ class Lexer(Source):
             start = end
         return consolidated
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Parsing
@@ -728,22 +744,53 @@ class Lexer(Source):
 #   also.
 
 
-# Used by TabCompleter.
-class CurrentOp:
+# For use by TablCompleter
+class Context:
+    COMPLETE_OP = 'COMPLETE_OP'
+    COMPLETE_ARG = 'COMPLETE_ARG'
+    COMPLETE_DISABLED = 'COMPLETE_DISABLED'
 
-    def __init__(self, parser, op_token):
-        op_name = op_token.op_name()
-        op_module = parser.op_modules.get(op_name, None)
-        if op_module:
-            self.op_name = op_name
-            self.flags = op_module.args_parser().flags()
-        else:
-            self.op_name = None
-            self.flags = None
-        self.processing_args = False
+    def __init__(self):
+        self._complete = Context.COMPLETE_OP
+        self._op_token = None
+        self._op = None
+        self._flags = None
 
     def __repr__(self):
-        return f'CurrentOp({self.op_name})' if self.op_name else 'CurrentOp(<not builtin>)'
+        return ('op' if self._complete == Context.COMPLETE_OP else
+                f'arg({self._op_token})' if self._complete == Context.COMPLETE_ARG else
+                f'disabled')
+
+    def complete_op(self):
+        self._complete = Context.COMPLETE_OP
+        self._op_token = None
+
+    def complete_arg(self, op_token):
+        self._complete = Context.COMPLETE_ARG
+        self._op_token = op_token
+
+    def complete_disabled(self):
+        self._complete = Context.COMPLETE_DISABLED
+        self._op_token = None
+
+    def is_complete_op(self):
+        return self._complete is Context.COMPLETE_OP
+
+    def is_complete_arg(self):
+        return self._complete is Context.COMPLETE_ARG
+
+    def is_complete_disabled(self):
+        return self._complete is Context.COMPLETE_DISABLED
+
+    def set_op(self, op, flags):
+        self._op = op
+        self._flags = flags
+
+    def op(self):
+        return self._op
+
+    def flags(self):
+        return self._flags
 
 
 class Parser:
@@ -755,10 +802,8 @@ class Parser:
         self.tokens = Lexer(main, text).tokens()
         self.t = 0
         self.token = None  # The current token
-        self.current_ops = marcel.util.Stack()
         self.current_pipelines = marcel.util.Stack()
-        # For use by TabCompleter
-        self.current_op = None
+        self.context = Context()
 
     def parse(self):
         if len(self.tokens) == 0:
@@ -767,8 +812,10 @@ class Parser:
 
     def command(self):
         if self.next_token(String, Assign):
+            self.context.complete_disabled()
             return self.assignment(self.token.value(self))
         else:
+            self.context.complete_op()
             return self.pipeline(None)
 
     def assignment(self, var):
@@ -791,13 +838,14 @@ class Parser:
         self.current_pipelines.push(pipeline)
         if self.next_token(Op, Gt):
             op_token = self.token
+            self.context.complete_disabled()
             found_gt = self.next_token(Gt)
             assert found_gt
             gt_token = self.token
             if self.pipeline_end():
                 # op >
                 raise SyntaxError(self.token, f'A variable must precede {gt_token.value(self)}, '
-                                                       f'not an operator ({self.token.op_name()})')
+                                              f'not an operator ({self.token.op_name()})')
             elif self.pipeline_end(1):
                 if self.next_token(String):
                     # op > var
@@ -809,9 +857,11 @@ class Parser:
             else:
                 raise SyntaxError(gt_token, f'Incorrect use of {gt_token.value(self)}')
         elif self.next_token(String, Gt):
+            self.context.complete_disabled()
             load_op = self.load_op(self.token)
             found_gt = self.next_token(Gt)
             assert found_gt
+            self.context.complete_disabled()
             gt_token = self.token
             if self.pipeline_end():
                 # var >
@@ -845,6 +895,7 @@ class Parser:
                     if gt_token.is_append():
                         raise SyntaxError(gt_token, 'Append not permitted here.')
         elif self.next_token(Gt, String):
+            self.context.complete_disabled()
             # > var
             gt_token = self.token
             found_string = self.next_token(String)
@@ -877,36 +928,39 @@ class Parser:
 
     def op_sequence(self):
         op_args = [self.op_args()]
-        return (op_args + self.op_sequence()
-                if self.next_token(Pipe) else
-                op_args)
+        if self.next_token(Pipe):
+            self.context.complete_disabled()
+            return op_args + self.op_sequence()
+        else:
+            return op_args
 
     # Returns (op name, list of arg tokens)
     def op_args(self):
+        self.context.complete_op()
         if self.next_token(Expression):
             op_args = (Op('map'), [self.token])
         else:
             op_token = self.op()
-            self.current_op = CurrentOp(self, op_token)
-            self.current_ops.push(self.current_op)
             arg_tokens = []
-            arg_token = self.arg()
-            while arg_token is not None:
-                self.current_op.processing_args = True
-                arg_tokens.append(arg_token)
+            if op_token.is_followed_by_whitespace():
+                self.context.complete_arg(op_token)
+            if not self.at_end():
                 arg_token = self.arg()
+                while arg_token is not None:
+                    arg_tokens.append(arg_token)
+                    arg_token = self.arg()
             op_args = (op_token, arg_tokens)
-            self.current_op = self.current_ops.pop()
         return op_args
 
     def op(self):
         if self.next_token(Op) or self.next_token(String) or self.next_token(Fork) or self.next_token(Run):
             return self.token
         else:
-            raise PrematureEndError()
+            raise PrematureEndError(self.token)
 
     def arg(self):
         if self.next_token(Begin):
+            self.context.complete_disabled()
             # If the next tokens are var comma, or var colon, then we have
             # pipeline variables being declared.
             if self.next_token(String, Comma) or self.next_token(String, Colon):
@@ -914,8 +968,10 @@ class Parser:
             else:
                 pipeline_parameters = None
             pipeline = self.pipeline(pipeline_parameters)
-            self.next_token(End)
-            return pipeline
+            if self.next_token(End):
+                return pipeline
+            else:
+                raise PrematureEndError(self.token)
         elif self.next_token(String) or self.next_token(Op) or self.next_token(Expression):
             return self.token
         else:
@@ -940,6 +996,8 @@ class Parser:
     # Returns True if a qualifying token was found, and sets self.token to it.
     # Returns False if a qualifying token was not found, and leaves self.token unchanged.
     def next_token(self, *expected_token_types):
+        if self.t < len(self.tokens) and self.tokens[self.t].is_lexer_failure():
+            raise self.tokens[self.t].exception
         n = len(expected_token_types)
         if self.t + n <= len(self.tokens):
             for i in range(n):
@@ -955,6 +1013,9 @@ class Parser:
     def pipeline_end(self, n=0):
         p = self.t + n
         return p == len(self.tokens) or self.tokens[p].is_end()
+
+    def at_end(self):
+        return self.t >= len(self.tokens)
 
     @staticmethod
     def raise_unexpected_token_error(token, message):
@@ -990,6 +1051,7 @@ class Parser:
             else:
                 for x in arg_tokens:
                     args.append(x.value(self) if isinstance(x, Token) else x)
+                self.context.set_op(op, op_module.args_parser().flags())
             op_module.args_parser().parse(args, op)
         return op
 

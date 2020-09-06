@@ -342,6 +342,10 @@ out
 - -t|--tsv
 - -p|--pickle
 
+read would need -p also.
+
+About the names: read/out are inconsistent. Should be read/write, or in/out.
+
 ----------------------------------------------------------------------
 
 Suppose that an op with a pipeline arg does a send from receive_complete, e.g. 
@@ -351,3 +355,16 @@ Suppose that an op with a pipeline arg does a send from receive_complete, e.g.
 Will the join be correct? The red + can do such a "late" send. The
 fact that red's receive_complete was called means that the join has
 reached receive_complete too.
+
+----------------------------------------------------------------------
+
+ls args of type pathlib.Path should work.
+
+----------------------------------------------------------------------
+
+Tab completion:
+
+- We often know when an op ends. Can tab-complete for |, >, >>, [, ], Enter.
+
+- We sometimes know when an arg is not a flag. Can prompt for var, (, [.
+

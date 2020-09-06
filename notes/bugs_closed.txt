@@ -1612,3 +1612,26 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/op/ps.py", line 136, in convert_to_id
     except ValueError:
 TypeError: int() argument must be a string, a bytes-like object or a number, not 'object'
+
+----------------------------------------------------------------------
+
+FIXED
+
+98. Autocomplete doesn't work in pipeline
+
+    l<tab>
+    load  loop  ls 
+
+    ls | args [l<tab>
+
+doesn't show any options.
+
+Don't forget to add a test to test_tab_completion
+
+Notes:
+
+- End of Parser.op_args does self.current_ops.pop(), restoring args as
+  current op, instead of "l".
+
+- Parser.arg calls self.next_token(End) but doesn't check that it's there. Allows 
+  things like this to work: "sudo [ls". FIXED

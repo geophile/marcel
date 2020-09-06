@@ -268,12 +268,15 @@ class TestTabCompletion(TestBase):
     def reset_environment(self, config_file='./.marcel.py'):
         self.main = marcel.main.Main(config_file, same_process=True, old_namespace=None)
 
-    def run(self, line, text, expected):
-        print(f'TESTING: line="{line}", text="{text}"')
-        actual = self.main.tab_completer.candidates(line, text)
-        if actual is None:
-            actual = []
-        if sorted(expected) != sorted(actual):
-            print(f'    Expected: {sorted(expected)}')
-            print(f'    Actual:   {sorted(actual)}')
-            self.failures += 1
+    def run(self, line, text=None, expected=None):
+        if text is None:
+            self.main.run_command(line)
+        else:
+            print(f'TESTING: line="{line}", text="{text}"')
+            actual = self.main.tab_completer.candidates(line, text)
+            if actual is None:
+                actual = []
+            if sorted(expected) != sorted(actual):
+                print(f'    Expected: {sorted(expected)}')
+                print(f'    Actual:   {sorted(actual)}')
+                self.failures += 1

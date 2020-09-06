@@ -39,3 +39,81 @@ After op:
       other: for an op expecting filenames: Contents of pwd, and /
 
 Parser state and op are needed.
+
+----------------------------------------------------------------------
+
+Bug 98: Autocomplete doesn't work in pipeline
+
+    l<tab>
+    load  loop  ls 
+
+    ls | args [l<tab>
+
+doesn't show any options.
+
+Time for an overhaul of tab completion. The tracking of the last token
+(CurrentOp class) by parsing for tab completion was only accidentally
+working for non-nested pipelines, and broken for nested ones. And not
+readily fixable. The problem is that once the parse is past a token,
+the relevant CurrentOp is popped and no longer available. So in the
+case of l<tab>, the CurrentOp is args (because we're completely done
+with "l"). In the first case above that "worked", (no nested pipeline)
+there was a bug in which "l" was on the stack after popping "l" from
+the stack!
+
+Parser state:
+
+- tokens: List of Token
+- t: index into tokens, next token to process.
+- token: The current token, tokens[t-1] 
+- current_pipelines: Stack of Pipelines
+
+Tab completion sees tokens, a token may be:
+
+- an op: ls
+- a partially-typed op: l
+- a flag or any prefix: -, --, -x, --xy, -xyz
+- A string arg: abc, 'abc', "abc", a\ bc
+- an expression: (...)
+- punctuation: |, >, >>, !, !!, [, ], (, ), @, =, #, <comma>, :
+
+It CANNOT be:
+
+- a partial expression: (.... An exception should be thrown if we run
+  out of text before the expression is complete.
+
+Parse can also end with an exception
+
+
+Tab completion needs to know:
+
+- context: is text an op or partial op? arg? 
+
+- whether text is current token or previous one (e.g. expr that
+  couldn't be parsed).
+
+Observations:
+
+l<tab>:         text=<l>, token=String(l)
+
+ls<tab>:        text=<ls>, token=Op(ls)
+
+ls <tab>:       text=<>, token=Op(ls)
+
+ls (<tab>:      text=<>, token=
+
+   Parser() blows up in Lexer, and is uncaught by TabCompleter.candidates!
+
+ls -<tab>:      text=<->, token=String(-)
+
+ls |<tab>:      text=<>, token=Pipe(|), KCE (premature end)
+
+ls | args [<tab>:        text=<>, token=Begin([), KCE (premature end)
+
+......................................................................
+
+ls<tab>:        Do op completion.
+ls <tab>:       Op is complete. Do filename completion.
+
+The problem is that the parse doesn't see whitespace. Lexer can help,
+adding info to Tokens, e.g. Token.adjacent_to_previous.

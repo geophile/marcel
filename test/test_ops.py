@@ -618,7 +618,7 @@ def test_pipeline_args():
     TEST.run('gen 3 | f -b (10)',
              expected_out=[Error('missing'), Error('missing'), Error('missing')])
     # Long flags
-    TEST.run('foobar = [foo, bar: map (x: x * foo) | select (x: x < bar)')
+    TEST.run('foobar = [foo, bar: map (x: x * foo) | select (x: x < bar)]')
     TEST.run('gen 10 | foobar --foo (10) --bar (45)',
              expected_out=[0, 10, 20, 30, 40])
     TEST.run('gen 10 | foobar --bar (73) --foo (10)',
@@ -1085,7 +1085,7 @@ def test_args():
              verification='sql "select * from t order by x"',
              expected_out=[0, 1, 2, 3, 4])
     # window
-    TEST.run('gen 3 | args [w: gen 10 | window -d (w)',
+    TEST.run('gen 3 | args [w: gen 10 | window -d (w)]',
              expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
                            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
                            (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)])

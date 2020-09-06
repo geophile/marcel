@@ -166,3 +166,25 @@ None
 97. ... | args [n: sql 'insert ... values(%s) (n)' does, essentially, autocommit
 
 The problem is that each invocation of the pipeline does sql setup, receive, receive_complete.
+
+----------------------------------------------------------------------
+
+99. Redirection doesn't work for executables
+
+This works, putting a list of Files into x:
+
+    ls > x
+
+This does not work:
+
+    date > x
+
+Error message: Variable date is undefined.
+
+----------------------------------------------------------------------
+
+100. Space after tab-completed flag is missing
+
+ls --r<tab>
+
+should produce '--recursive '. The space is omitted.
