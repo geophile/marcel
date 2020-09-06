@@ -127,8 +127,7 @@ class TabCompleter:
                              for p in pathlib.Path(base).glob(pattern_prefix + '*')]
         else:
             filenames = [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
-        filenames = (([] if text.startswith('/') or len(text) > 0 else ['/']) +
-                     [f + '/' if os.path.isdir(f) else f for f in filenames])
+        filenames = [f + '/' if os.path.isdir(f) else f for f in filenames]
         if len(filenames) == 1:
             filenames = [filenames[0] + ' ']
         debug('complete_filename candidates for {}: {}'.format(text, filenames))

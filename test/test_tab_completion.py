@@ -69,7 +69,7 @@ def test_filenames():
 
 def test_pipeline_args():
     # Try (almost) every prefix of: ls --recursive -d | args [d: ls -fs (d)]
-    all_files = ['/', 'a', 'b', 'c']
+    all_files = ['a', 'b', 'c']
     TEST.run('rm -rf /tmp/test_pipeline_args')
     TEST.run('mkdir /tmp/test_pipeline_args')
     TEST.run('touch /tmp/test_pipeline_args/a')
