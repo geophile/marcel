@@ -99,15 +99,10 @@ def quote_files(files):
         if isinstance(file, pathlib.Path) or is_file(file):
             file = file.as_posix()
         return shlex.quote(file)
-    if is_file(files):
-        return quote_file(files)
-    else:
-        buffer = []
-        for file in files:
-            if isinstance(file, pathlib.Path) or is_file(file):
-                file = file.as_posix()
-            buffer.append(shlex.quote(file))
-        return ' '.join(buffer)
+    return (' '.join([quote_file(file) for file in files])
+            if type(files) in (tuple, list) else
+            quote_file(files))
+
 
 def normalize_path(x):
     x = pathlib.Path(x)
@@ -118,12 +113,7 @@ def normalize_path(x):
 
 def copy(x):
     try:
-        buffer = io.BytesIO()
-        pickler = dill.Pickler(buffer)
-        pickler.dump(x)
-        buffer.seek(0)
-        unpickler = dill.Unpickler(buffer)
-        return unpickler.load()
+        return dill.loads(dill.dumps(x))
     except Exception as e:
         sys.stdout.flush()
         print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__, flush=True)
