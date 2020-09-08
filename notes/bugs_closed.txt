@@ -1635,3 +1635,51 @@ Notes:
 
 - Parser.arg calls self.next_token(End) but doesn't check that it's there. Allows 
   things like this to work: "sudo [ls". FIXED
+
+----------------------------------------------------------------------
+
+FIXED
+
+101. EOF in the middle of an Expression produces a stack dump and crash
+
+M-0.10.16 jao@cheese:~/git/marcel$ ls -fr marcel test | ext py | map (f: f.read.count('\n'
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/runpy.py", line 193, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.8/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 305, in <module>
+    MAIN.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 131, in run
+    self.run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 144, in run_command
+    pipeline = parser.parse()
+  File "/home/jao/git/marcel/marcel/parser.py", line 811, in parse
+    return self.command()
+  File "/home/jao/git/marcel/marcel/parser.py", line 819, in command
+    return self.pipeline(None)
+  File "/home/jao/git/marcel/marcel/parser.py", line 906, in pipeline
+    op_sequence = self.op_sequence()
+  File "/home/jao/git/marcel/marcel/parser.py", line 933, in op_sequence
+    return op_args + self.op_sequence()
+  File "/home/jao/git/marcel/marcel/parser.py", line 933, in op_sequence
+    return op_args + self.op_sequence()
+  File "/home/jao/git/marcel/marcel/parser.py", line 930, in op_sequence
+    op_args = [self.op_args()]
+  File "/home/jao/git/marcel/marcel/parser.py", line 948, in op_args
+    arg_token = self.arg()
+  File "/home/jao/git/marcel/marcel/parser.py", line 962, in arg
+    if self.next_token(Begin):
+  File "/home/jao/git/marcel/marcel/parser.py", line 1000, in next_token
+    raise self.tokens[self.t].exception
+  File "/home/jao/git/marcel/marcel/parser.py", line 590, in tokens
+    token = self.next_token()
+  File "/home/jao/git/marcel/marcel/parser.py", line 602, in next_token
+    token = Expression(self.text, self.end, adjacent_to_previous)
+  File "/home/jao/git/marcel/marcel/parser.py", line 272, in __init__
+    self.scan()
+  File "/home/jao/git/marcel/marcel/parser.py", line 335, in scan
+    raise LexerException(self, 'Malformed Python expression')
+marcel.parser.LexerException: ("(f: f.read.count('\\n'", 'Malformed Python expression')
+jao@cheese:~/git/marcel$ 
+

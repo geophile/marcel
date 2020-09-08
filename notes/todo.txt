@@ -359,13 +359,16 @@ reached receive_complete too.
 
 ----------------------------------------------------------------------
 
-ls args of type pathlib.Path should work.
-
-----------------------------------------------------------------------
-
 Tab completion:
 
 - We often know when an op ends. Can tab-complete for |, >, >>, [, ], Enter.
 
 - We sometimes know when an arg is not a flag. Can prompt for var, (, [.
 
+----------------------------------------------------------------------
+
+env is hard to read. Make it easier:
+
+- Formatting of ColorScheme.
+
+- make functions more presentable.

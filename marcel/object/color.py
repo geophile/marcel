@@ -135,7 +135,6 @@ class ColorScheme(marcel.object.renderable.Renderable):
         contents = '\n'.join(kv)
         return '{\n' + contents + '\n}'
 
-
     def color(self, r, g, b, style):
         return Color(r, g, b, style)
 

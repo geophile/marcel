@@ -1,5 +1,3 @@
-from time import time as now
-
 from marcel.builtin import *
 
 

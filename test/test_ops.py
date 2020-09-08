@@ -15,7 +15,6 @@ Error = marcel.object.error.Error
 start_dir = os.getcwd()
 TEST = test_base.TestConsole()
 
-
 def test_no_such_op():
     TEST.run('gen 5 | abc', expected_err='The variable abc is undefined')
 
@@ -1115,6 +1114,32 @@ def test_args():
              expected_out=[0, [0, 1], [0, 1, 2], [0, 1, 2, 3]])
 
 
+def test_env():
+    TEST.cd(start_dir)
+    TEST.reset_environment()
+    TEST.run('ko = [map (k, v: k)]')  # key only
+    TEST.run('env | ko')
+    TEST.run(test='env | ko > env_keys',
+             verification='env_keys > red count',
+             expected_out=[29])  # 2 of them were just defined: ko, env_keys
+    TEST.run('env -a | ko | difference [env_keys >]',
+             expected_out=[])
+    TEST.run('env_keys > difference [env -a | ko]',
+             expected_out=[])
+    TEST.run('env -b | red count',
+             expected_out=[26])
+    TEST.run('env -c | ko',
+             expected_out=['DB_DEFAULT'])
+    TEST.run('env -s | ko',
+             expected_out=['env_keys', 'ko'])
+    TEST.run('env -bc | red count',
+             expected_out=[27])
+    TEST.run('env -bs | red count',
+             expected_out=[28])
+    TEST.run('env -bcs | red count',
+             expected_out=[29])
+
+
 def main_stable():
     test_no_such_op()
     test_gen()
@@ -1152,6 +1177,7 @@ def main_stable():
     test_union()
     test_difference()
     test_args()
+    test_env()
 
 
 def main_dev():

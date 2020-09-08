@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-from time import time
-now = time
+from time import time as now
 
 from marcel.object.process import processes, Process
 from marcel.object.file import File
