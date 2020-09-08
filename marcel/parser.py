@@ -569,10 +569,10 @@ class LexerFailure(Token):
 # Lexing
 
 
-class LexerException(Exception):
+class LexerException(marcel.exception.KillCommandException):
 
     def __init__(self, token, message):
-        super().__init__(token.text[token.start:token.end], message)
+        super().__init__(f'{token.text[token.start:token.end]}: {message}')
 
 
 class Lexer(Source):
