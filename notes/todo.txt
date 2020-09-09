@@ -347,6 +347,8 @@ read would need -p also.
 About the names: read/out are inconsistent. Should be read/write, or in/out.
 But in is a reserved word, so that creates problems for the API.
 
+Maybe use read/write, and allow "out" as an alternative to write?
+
 ----------------------------------------------------------------------
 
 Suppose that an op with a pipeline arg does a send from receive_complete, e.g. 
@@ -372,3 +374,8 @@ env is hard to read. Make it easier:
 - Formatting of ColorScheme.
 
 - make functions more presentable.
+
+----------------------------------------------------------------------
+
+sql option to suppress printing of update counts.
+

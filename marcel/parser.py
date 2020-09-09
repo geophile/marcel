@@ -744,43 +744,42 @@ class Lexer(Source):
 #   also.
 
 
-# For use by TablCompleter
-class Context:
+class TabCompleterContext:
     COMPLETE_OP = 'COMPLETE_OP'
     COMPLETE_ARG = 'COMPLETE_ARG'
     COMPLETE_DISABLED = 'COMPLETE_DISABLED'
 
     def __init__(self):
-        self._complete = Context.COMPLETE_OP
+        self._complete = TabCompleterContext.COMPLETE_OP
         self._op_token = None
         self._op = None
         self._flags = None
 
     def __repr__(self):
-        return ('op' if self._complete == Context.COMPLETE_OP else
-                f'arg({self._op_token})' if self._complete == Context.COMPLETE_ARG else
+        return ('op' if self._complete == TabCompleterContext.COMPLETE_OP else
+                f'arg({self._op_token})' if self._complete == TabCompleterContext.COMPLETE_ARG else
                 f'disabled')
 
     def complete_op(self):
-        self._complete = Context.COMPLETE_OP
+        self._complete = TabCompleterContext.COMPLETE_OP
         self._op_token = None
 
     def complete_arg(self, op_token):
-        self._complete = Context.COMPLETE_ARG
+        self._complete = TabCompleterContext.COMPLETE_ARG
         self._op_token = op_token
 
     def complete_disabled(self):
-        self._complete = Context.COMPLETE_DISABLED
+        self._complete = TabCompleterContext.COMPLETE_DISABLED
         self._op_token = None
 
     def is_complete_op(self):
-        return self._complete is Context.COMPLETE_OP
+        return self._complete is TabCompleterContext.COMPLETE_OP
 
     def is_complete_arg(self):
-        return self._complete is Context.COMPLETE_ARG
+        return self._complete is TabCompleterContext.COMPLETE_ARG
 
     def is_complete_disabled(self):
-        return self._complete is Context.COMPLETE_DISABLED
+        return self._complete is TabCompleterContext.COMPLETE_DISABLED
 
     def set_op(self, op, flags):
         self._op = op
@@ -803,7 +802,7 @@ class Parser:
         self.t = 0
         self.token = None  # The current token
         self.current_pipelines = marcel.util.Stack()
-        self.context = Context()
+        self.tab_completer_context = TabCompleterContext()
 
     def parse(self):
         if len(self.tokens) == 0:
@@ -812,10 +811,10 @@ class Parser:
 
     def command(self):
         if self.next_token(String, Assign):
-            self.context.complete_disabled()
+            self.tab_completer_context.complete_disabled()
             return self.assignment(self.token.value(self))
         else:
-            self.context.complete_op()
+            self.tab_completer_context.complete_op()
             return self.pipeline(None)
 
     def assignment(self, var):
@@ -838,7 +837,7 @@ class Parser:
         self.current_pipelines.push(pipeline)
         if self.next_token(Op, Gt):
             op_token = self.token
-            self.context.complete_disabled()
+            self.tab_completer_context.complete_disabled()
             found_gt = self.next_token(Gt)
             assert found_gt
             gt_token = self.token
@@ -857,11 +856,11 @@ class Parser:
             else:
                 raise SyntaxError(gt_token, f'Incorrect use of {gt_token.value(self)}')
         elif self.next_token(String, Gt):
-            self.context.complete_disabled()
+            self.tab_completer_context.complete_disabled()
             load_op = self.load_op(self.token)
             found_gt = self.next_token(Gt)
             assert found_gt
-            self.context.complete_disabled()
+            self.tab_completer_context.complete_disabled()
             gt_token = self.token
             if self.pipeline_end():
                 # var >
@@ -895,7 +894,7 @@ class Parser:
                     if gt_token.is_append():
                         raise SyntaxError(gt_token, 'Append not permitted here.')
         elif self.next_token(Gt, String):
-            self.context.complete_disabled()
+            self.tab_completer_context.complete_disabled()
             # > var
             gt_token = self.token
             found_string = self.next_token(String)
@@ -929,21 +928,21 @@ class Parser:
     def op_sequence(self):
         op_args = [self.op_args()]
         if self.next_token(Pipe):
-            self.context.complete_disabled()
+            self.tab_completer_context.complete_disabled()
             return op_args + self.op_sequence()
         else:
             return op_args
 
     # Returns (op name, list of arg tokens)
     def op_args(self):
-        self.context.complete_op()
+        self.tab_completer_context.complete_op()
         if self.next_token(Expression):
             op_args = (Op('map'), [self.token])
         else:
             op_token = self.op()
             arg_tokens = []
             if op_token.is_followed_by_whitespace():
-                self.context.complete_arg(op_token)
+                self.tab_completer_context.complete_arg(op_token)
             if not self.at_end():
                 arg_token = self.arg()
                 while arg_token is not None:
@@ -960,7 +959,7 @@ class Parser:
 
     def arg(self):
         if self.next_token(Begin):
-            self.context.complete_disabled()
+            self.tab_completer_context.complete_disabled()
             # If the next tokens are var comma, or var colon, then we have
             # pipeline variables being declared.
             if self.next_token(String, Comma) or self.next_token(String, Colon):
@@ -1051,7 +1050,7 @@ class Parser:
             else:
                 for x in arg_tokens:
                     args.append(x.value(self) if isinstance(x, Token) else x)
-                self.context.set_op(op, op_module.args_parser().flags())
+                self.tab_completer_context.set_op(op, op_module.args_parser().flags())
             op_module.args_parser().parse(args, op)
         return op
 
