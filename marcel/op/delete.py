@@ -35,7 +35,7 @@ class DeleteArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('delete', env)
-        self.add_anon_list('vars')
+        self.add_anon_list('vars', target='vars_arg')
         self.validate()
 
 
@@ -43,6 +43,7 @@ class Delete(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.vars_arg = None
         self.vars = None
 
     def __repr__(self):
@@ -51,6 +52,7 @@ class Delete(marcel.core.Op):
     # AbstractOp
 
     def setup_1(self):
+        self.vars = self.eval_function('vars_arg', str)
         for var in self.vars:
             if var not in self.env().namespace:
                 raise marcel.exception.KillCommandException(f'Variable {var} is not defined.')

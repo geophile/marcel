@@ -73,18 +73,18 @@ class Gen(Op):
     # AbstractOp
 
     def setup_1(self):
-        pad_val = self.eval_function('pad_arg', int)
+        pad = self.eval_function('pad_arg', int)
         self.count = self.eval_function('count_arg', int)
         self.start = self.eval_function('start_arg', int)
-        if pad_val is not None:
+        if pad is not None:
             if self.count == 0:
-                raise marcel.exception.KillCommandException(f'Padding {pad_val} incompatible with unbounded output.')
+                raise marcel.exception.KillCommandException(f'Padding {pad} incompatible with unbounded output.')
             if self.start < 0:
                 raise marcel.exception.KillCommandException(f'Padding incompatible with start < 0: {self.start}')
             max_length = len(str(self.start + self.count - 1))
-            if max_length > pad_val:
-                raise marcel.exception.KillCommandException(f'Padding {pad_val} too small.')
-            self.format = '{:>0' + str(pad_val) + '}'
+            if max_length > pad:
+                raise marcel.exception.KillCommandException(f'Padding {pad} too small.')
+            self.format = '{:>0' + str(pad) + '}'
 
     def receive(self, _):
         if self.count is None or self.count == 0:
