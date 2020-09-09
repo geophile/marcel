@@ -1683,3 +1683,12 @@ Traceback (most recent call last):
 marcel.parser.LexerException: ("(f: f.read.count('\\n'", 'Malformed Python expression')
 jao@cheese:~/git/marcel$ 
 
+
+----------------------------------------------------------------------
+
+103. RUN_ON_STARTUP symbols should count toward config symbols, not session symbols
+
+ext is defined in ~/.marcel.py, in RUN_ON_STARTUP.
+
+M-0.10.16 jao@cheese:~/git/marcel/test$ env -s
+('ext', [e: select(lambda e: lambda f: f.suffix == '.' + e)])

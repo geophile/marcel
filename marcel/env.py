@@ -188,12 +188,9 @@ class Environment:
                 self.namespace[key] = value
         self.clusters = {}
         self.dbs = {}
-        # Keep track of builtin and config'ed namespace, for use by env op.
         self.builtin_symbols = set(self.namespace.keys())
+        self.config_symbols = None  # Set by compute_config_symbols() after startup script is run
         self.config_path = self.read_config(config_file)
-        self.config_symbols = set(self.namespace.keys())
-        self.config_symbols = self.config_symbols.difference(self.builtin_symbols)
-        #
         self.directory_state = DirectoryState(self.namespace)
         # TODO: This is a hack. Clean it up once the env handles command history
         self.edited_command = None
@@ -279,6 +276,10 @@ class Environment:
         exec(config_source, self.namespace, locals)
         self.namespace.update(locals)
         return config_path
+
+    def compute_config_symbols(self):
+        self.config_symbols = set(self.namespace.keys())
+        self.config_symbols = self.config_symbols.difference(self.builtin_symbols)
 
     def prompt_string(self, prompt_pieces):
         try:

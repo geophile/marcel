@@ -209,12 +209,12 @@ class Main:
                 # For the execution of tests and scripts
                 self.same_process or
                 # Exactly one op in pipeline ...
-                pipeline.first_op == pipeline.last_op and
+                pipeline.first_op == pipeline.last_op and (
                     # ... and it should run in the main process, or
                     pipeline.first_op.run_in_main_process() or
                     # ... the op is map. I.e. (python expression). This takes care of
                     # side effects we want to keep, e.g. (INTERACTIVE_EXECUTABLES.append(...))
-                    pipeline.first_op.op_name() == 'map')
+                    pipeline.first_op.op_name() == 'map'))
 
     def run_startup(self):
         run_on_startup = self.env.getvar('RUN_ON_STARTUP')
@@ -223,6 +223,7 @@ class Main:
                 self.run_script(run_on_startup)
             else:
                 fail(f'RUN_ON_STARTUP must be a string')
+        self.env.compute_config_symbols()
 
     def run_script(self, script):
         with SameProcessMode(self, True):
