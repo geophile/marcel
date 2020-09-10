@@ -145,7 +145,7 @@ class TabCompleter:
             parser = marcel.parser.Parser(line, self.main)
             try:
                 parser.parse()
-                debug(f'parse succeeded, context: {parser.tab_completer_context}')
+                debug(f'parse succeeded, context: {parser.tab_completion_context}')
             except Exception as e:
                 debug(f'caught {type(e)}: {e}')
                 # Don't do tab completion
@@ -158,7 +158,7 @@ class TabCompleter:
             except BaseException as e:
                 debug(f'Something went really wrong: {e}')
                 marcel.util.print_stack()
-            context = parser.tab_completer_context
+            context = parser.tab_completion_context
             if context.is_complete_op():
                 op = context.op()
                 if op is None:
