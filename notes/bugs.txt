@@ -208,5 +208,32 @@ Hmm.
 
 ----------------------------------------------------------------------
 
-104. 
+104. Control over run immediate vs. in job needs work
+
+env runs in same process, and works:
+
+    M-0.10.17 jao@cheese:~/git/marcel$ env 
+    ('BOLD', 1)
+    ('COLOR_EXT_IMAGE', Color(3, 0, 2, BOLD))
+    ...
+
+env > e does fails:
+
+    M-0.10.17 jao@cheese:~/git/marcel$ env > e
+    Process Process-15:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+        writer.send(child_namespace_changes)
+      File "/usr/lib/python3.8/multiprocessing/connection.py", line 206, in send
+        self._send_bytes(_ForkingPickler.dumps(obj))
+      File "/usr/lib/python3.8/multiprocessing/reduction.py", line 51, in dumps
+        cls(buf, protocol).dump(obj)
+    _pickle.PicklingError: Can't pickle <function <lambda> at 0x7fc5361bd820>: attribute lookup <lambda> on __main__ failed
+    M-0.10.17 jao@cheese:~/git/marcel$ 
+    
+The pipeline has two ops, so Main.run_immediate returns false.
 

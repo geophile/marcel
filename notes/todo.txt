@@ -379,3 +379,9 @@ env is hard to read. Make it easier:
 
 sql option to suppress printing of update counts.
 
+----------------------------------------------------------------------
+
+Help needs to discuss >, >>, pipeline params.
+
+help pipeline, examples summing filesizes are inconsistent. Unclear
+that early ones compute local sum of sizes, and later ones are global.

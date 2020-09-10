@@ -43,3 +43,39 @@ Op design:
 - Kill: Take signal with -s|--signal flag, or as negative number.
 
 - Job output: Exclude pid for dead process.
+
+----------------------------------------------------------------------
+
+Jobs reconsidered
+
+There is a main process. There are jobs, which run in processes
+created by the multiprocessing module. A command runs in a job, unless
+the conditions for Main.run_immediate are met.  The main loop (which
+reads from the console) waits until the current job completes before
+issuing the next prompt.  This has some problems:
+
+- Capturing environment changes
+
+- Jobs rely on the multiprocessing module, which uses standard
+  pickling. And not everything can be pickled.
+
+- run_immediate is only a heuristic (see bug 104).
+
+A command run immediately avoids these problems, but cannot be
+suspended or run in background. That's OK for something that finished
+"quickly". Things that don't finish quickly:
+
+- gen 0 | ...
+
+- timer 1 | ...
+
+- ls -fr | ..., for a sufficiently large directory
+
+- set ops, depending on the size of the inputs. More generally,
+  anything that gathers all input, e.g. sort.
+
+Idea: Never run immediately, and fix job problems. But the pickling
+problem is unfixable. And capturing environment changes is another bag
+of heuristics.
+
+Idea: Use threading instead of multiprocessing.
