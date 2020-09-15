@@ -1159,8 +1159,8 @@ def main_stable():
     test_bash()
     test_fork()
     test_namespace()
-    # test_remote()
-    # test_sudo()
+    test_remote()
+    test_sudo()
     test_version()
     test_assign()
     test_join()
@@ -1182,14 +1182,13 @@ def main_stable():
 
 
 def main_dev():
-    test_remote()
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

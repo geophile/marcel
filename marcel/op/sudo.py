@@ -95,9 +95,11 @@ class Sudo(marcel.core.Op):
                                         stderr=subprocess.PIPE,
                                         shell=True,
                                         universal_newlines=False)
-        # Pickle the pipeline so that it can be sent to the remote process
+        # The pipeline's environment will be set remotely.
+        # Send the environment and pipeline
         buffer = io.BytesIO()
         pickler = dill.Pickler(buffer)
+        pickler.dump(self.env())
         pickler.dump(self.pipeline)
         buffer.seek(0)
         stdout, stderr = self.process.communicate(input=buffer.getvalue())
