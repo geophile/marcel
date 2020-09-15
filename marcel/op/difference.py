@@ -70,15 +70,16 @@ class Difference(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
         def load_right(*x):
             count = self.right.get(x, None)
             self.right[x] = 1 if count is None else count + 1
+        super().setup_1(env)
         self.right = {}
-        pipeline = self.pipeline_arg_value(self.pipeline).copy()
+        pipeline = self.pipeline_arg_value(env, self.pipeline).copy()
         pipeline.set_error_handler(self.owner.error_handler)
-        pipeline.append(marcel.opmodule.create_op(self.env(), 'map', load_right))
-        marcel.core.Command(None, pipeline).execute()
+        pipeline.append(marcel.opmodule.create_op(env, 'map', load_right))
+        marcel.core.Command(None, pipeline).execute(env)
 
     def receive(self, x):
         count = self.right.get(x, None)

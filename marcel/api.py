@@ -140,8 +140,7 @@ def run(x):
 def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
     pipeline = _prepare_pipeline(x)
     output = []
-    terminal_op = _gather(env,
-                          output=output,
+    terminal_op = _gather(output=output,
                           unwrap_singleton=unwrap_singleton,
                           errors=errors,
                           error_handler=error_handler)
@@ -154,8 +153,7 @@ def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
 def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     pipeline = _prepare_pipeline(x)
     output = []
-    terminal_op = _first(env,
-                         output=output,
+    terminal_op = _first(output=output,
                          unwrap_singleton=unwrap_singleton,
                          errors=errors,
                          error_handler=error_handler)

@@ -109,7 +109,8 @@ class Sql(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         self.statement = self.eval_function('statement_arg', str)
         self.args = self.eval_function('args_arg')
         if self.commit is None:
@@ -117,10 +118,10 @@ class Sql(marcel.core.Op):
         elif self.commit < 0:
             raise marcel.exception.KillCommandException(f'--commit value must be a positive integer: {self.commit}')
         self.total_update_count = 0
-        db_profile = self.env().getvar('DB_DEFAULT') if self.db is None else self.db
+        db_profile = env.getvar('DB_DEFAULT') if self.db is None else self.db
         if db_profile is None:
             raise marcel.exception.KillCommandException('No database profile defined')
-        db = self.env().db(db_profile)
+        db = env.db(db_profile)
         self.connection = db.connection()
         if self.autocommit:
             self.connection.set_autocommit(True)

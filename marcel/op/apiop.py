@@ -19,8 +19,8 @@ import marcel.exception
 
 class APIOp(marcel.core.Op):
 
-    def __init__(self, env, output, unwrap_singleton, errors, error_handler, stop_after_first):
-        super().__init__(env)
+    def __init__(self, output, unwrap_singleton, errors, error_handler, stop_after_first):
+        super().__init__(None)
         self.unwrap_singleton = unwrap_singleton
         self.stop_after_first = stop_after_first
         self.output = output
@@ -35,7 +35,8 @@ class APIOp(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         self.check_arg(self.error_handler is not None,
                        None,
                        'Specify at most one of the errors and error_handler arguments.')

@@ -52,7 +52,8 @@ class Cd(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         self.directory = pathlib.Path(self.directory)
 
     def receive(self, _):

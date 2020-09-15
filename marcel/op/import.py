@@ -78,7 +78,8 @@ class Import(marcel.core.Op):
 
     # AbstractOp
     
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         if self.symbol and not (self.symbol == '*' or self.symbol.isidentifier()):
             raise marcel.exception.KillCommandException(f'symbol must be * or a valid identifier: {self.symbol}')
         if self.name and not self.name.isidentifier():

@@ -72,7 +72,8 @@ class Gen(Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         pad = self.eval_function('pad_arg', int)
         self.count = self.eval_function('count_arg', int)
         self.start = self.eval_function('start_arg', int)

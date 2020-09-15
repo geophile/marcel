@@ -102,7 +102,8 @@ class Out(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         self.append = self.eval_function('append_arg', str)
         self.file = self.eval_function('file_arg', str)
         self.format = self.eval_function('format', str)

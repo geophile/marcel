@@ -127,10 +127,11 @@ class Ls(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         self.filenames = self.eval_function('filenames_arg', str, pathlib.Path, pathlib.PosixPath, File)
         self.roots = []
-        self.current_dir = self.env().dir_state().pwd()
+        self.current_dir = env.dir_state().pwd()
         self.roots = self.deglob()
         if len(self.filenames) > 0 and len(self.roots) == 0:
             raise marcel.exception.KillCommandException(f'No qualifying paths, possibly due to permission errors:'

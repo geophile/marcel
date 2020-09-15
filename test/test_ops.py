@@ -15,6 +15,7 @@ Error = marcel.object.error.Error
 start_dir = os.getcwd()
 TEST = test_base.TestConsole()
 
+
 def test_no_such_op():
     TEST.run('gen 5 | abc', expected_err='The variable abc is undefined')
 
@@ -1156,28 +1157,28 @@ def main_stable():
     test_unique()
     test_window()
     test_bash()
-    test_fork()
+    # test_fork()
     test_namespace()
-    test_remote()
-    test_sudo()
+    # test_remote()
+    # test_sudo()
     test_version()
     test_assign()
     test_join()
     test_comment()
     test_pipeline_args()
-    test_sql()
+    # test_sql()
     test_import()
     test_load_store()
     test_load_store_sugar()
     # test_loop()
     test_if()
-    test_delete()
+    # test_delete()
     test_read()
     test_intersect()
     test_union()
     test_difference()
-    test_args()
-    test_env()
+    # test_args()
+    # test_env()
 
 
 def main_dev():

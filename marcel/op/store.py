@@ -83,9 +83,10 @@ class Store(marcel.core.Op):
 
     # AbstractOp
     
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         if self.var is not None and self.accumulator is None:
-            self.setup_interactive()
+            self.setup_interactive(env)
         elif self.var is None and self.accumulator is not None:
             self.setup_api()
         else:
@@ -97,17 +98,17 @@ class Store(marcel.core.Op):
 
     # For use by this class
 
-    def setup_interactive(self):
+    def setup_interactive(self, env):
         if not self.var.isidentifier():
             raise marcel.exception.KillCommandException(f'{self.var} is not a valid identifier')
-        self.accumulator = self.getvar(self.var)
+        self.accumulator = self.getvar(env, self.var)
         if self.append and self.accumulator is not None:
             if not self.accumulator_is_loop_variable():
                 raise marcel.exception.KillCommandException(
                     f'{self.description()} is not usable as an accumulator')
         else:
             self.accumulator = []
-            self.env().setvar(self.var, self.accumulator)
+            env.setvar(self.var, self.accumulator)
 
     def setup_api(self):
         if self.accumulator is None:

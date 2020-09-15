@@ -16,11 +16,11 @@
 import marcel.op.apiop
 
 
-def _first(env, output, unwrap_singleton, errors, error_handler):
-    return First(env, output, unwrap_singleton, errors, error_handler)
+def _first(output, unwrap_singleton, errors, error_handler):
+    return First(output, unwrap_singleton, errors, error_handler)
 
 
 class First(marcel.op.apiop.APIOp):
 
-    def __init__(self, env, output, unwrap_singleton, errors, error_handler):
-        super().__init__(env, output, unwrap_singleton, errors, error_handler, True)
+    def __init__(self, output, unwrap_singleton, errors, error_handler):
+        super().__init__(output, unwrap_singleton, errors, error_handler, True)

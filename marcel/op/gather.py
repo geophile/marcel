@@ -16,11 +16,11 @@
 import marcel.op.apiop
 
 
-def _gather(env, output, unwrap_singleton=True, errors=None, error_handler=None):
-    return Gather(env, output, unwrap_singleton, errors, error_handler)
+def _gather(output, unwrap_singleton=True, errors=None, error_handler=None):
+    return Gather(output, unwrap_singleton, errors, error_handler)
 
 
 class Gather(marcel.op.apiop.APIOp):
 
-    def __init__(self, env, output, unwrap_singleton, errors, error_handler):
-        super().__init__(env, output, unwrap_singleton, errors, error_handler, False)
+    def __init__(self, output, unwrap_singleton, errors, error_handler):
+        super().__init__(output, unwrap_singleton, errors, error_handler, False)

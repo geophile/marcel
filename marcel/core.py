@@ -29,15 +29,18 @@ class Pipelineable:
 
 class Node(Pipelineable):
 
-    def __init__(self, left, right):
+    def __init__(self, left, right, env):
+        assert env is not None
         self.left = left
         self.right = right
+        self.env = env
 
     def __or__(self, other):
-        return Node(self, other)
+        assert isinstance(other, Op) or type(other) is Pipeline, type(other)
+        return Node(self, other, self.env)
 
     def __iter__(self):
-        return PipelineIterator(self.create_pipeline())
+        return PipelineIterator(self.create_pipeline(), self.env)
 
     # Pipelineable
 
@@ -90,7 +93,7 @@ class AbstractOp(Pipelineable):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
         pass
 
     def setup_2(self):
@@ -136,9 +139,6 @@ class Op(AbstractOp):
     def __repr__(self):
         assert False, self.op_name()
 
-    def __iter__(self):
-        return PipelineIterator(self.create_pipeline())
-
     # About _env handling in __get/setstate__: A command run as a (local) job should use the identical Environment as
     # provided by the main thread. Otherwise, Environment modifications are lost. _env_ref stores a token identifying
     # the original Environment, which is restored in __setstate__. For remote execution (i.e., fork), we don't want
@@ -166,6 +166,9 @@ class Op(AbstractOp):
         return pipeline
 
     # Op
+
+    def set_env(self, env):
+        self._env = env
 
     def set_owner(self, pipeline):
         self.owner = pipeline
@@ -197,7 +200,6 @@ class Op(AbstractOp):
                          x if t is tuple or t is list else
                          (x,))
         except marcel.exception.KillAndResumeException as e:
-            # self.receive_error(e.error)
             self.receive_error(Error(e))
 
     def receive(self, x):
@@ -249,30 +251,37 @@ class Op(AbstractOp):
     # API
 
     def __or__(self, other):
-        return Node(self, other)
+        env = self._env
+        self._env = None
+        return Node(self, other, env)
+
+    def __iter__(self):
+        env = self._env
+        self._env = None
+        return PipelineIterator(self.create_pipeline(), env)
 
     def copy(self):
-        copy = self.__class__(self.env())
+        copy = self.__class__(None)
         copy.__dict__.update(self.__dict__)
         return copy
 
     # For use by subclasses
 
-    def getvar(self, var):
+    def getvar(self, env, var):
         value = self.owner.args.get(var, None) if self.owner.args else None
         if value is None:
-            value = self.env().getvar(var)
+            value = env.getvar(var)
         return value
 
     # arg is a Pipeline, Pipelineable, or a var bound to a pipeline. Deal with all of these possibilities
     # and come up with the pipeline itself.
-    def pipeline_arg_value(self, arg):
+    def pipeline_arg_value(self, env, arg):
         if type(arg) is marcel.core.Pipeline:
             pipeline = arg
         elif isinstance(arg, marcel.core.Pipelineable):
             pipeline = arg.create_pipeline()
         elif type(arg) is str:  # Presumably a var
-            pipeline = self.env().getvar(arg)
+            pipeline = env.getvar(arg)
             if type(pipeline) is not marcel.core.Pipeline:
                 raise marcel.exception.KillCommandException(
                     f'The variable {arg} is not bound to a pipeline')
@@ -369,13 +378,13 @@ class Pipeline(AbstractOp):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
         assert self.error_handler is not None, f'{self} has no error handler'
         op = self.first_op
         while op:
             if op.receiver is None:
                 op.receiver = op.next_op
-            op.setup_1()
+            op.setup_1(env)
             op = op.next_op
             if isinstance(op, Op):
                 if op.must_be_first_in_pipeline():
@@ -388,6 +397,14 @@ class Pipeline(AbstractOp):
             if op.receiver is None:
                 op.receiver = op.next_op
             op.setup_2()
+            op = op.next_op
+
+    def set_env(self, env):
+        op = self.first_op
+        while op:
+            if op.receiver is None:
+                op.receiver = op.next_op
+            op.set_env(env)
             op = op.next_op
 
     def receive(self, x):
@@ -453,11 +470,11 @@ class Command:
     def __repr__(self):
         return str(self.pipeline)
 
-    def execute(self):
-        env = self.pipeline.env()
+    def execute(self, env):
         env.clear_changes()
-        self.pipeline.setup_1()
+        self.pipeline.setup_1(env)
         self.pipeline.setup_2()
+        self.pipeline.set_env(env)
         self.pipeline.receive(None)
         self.pipeline.receive_complete()
         # A Command is executed by a multiprocessing.Process. Need to transmit the Environment's vars
@@ -467,16 +484,15 @@ class Command:
 
 class PipelineIterator:
 
-    def __init__(self, pipeline):
+    def __init__(self, pipeline, env):
         # Errors go to output, so no other error handling is needed
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
         output = []
-        env = pipeline.env()
-        gather_op = env.op_modules['gather'].api_function()(env, output)
+        gather_op = env.op_modules['gather'].api_function()(output)
         pipeline.append(gather_op)
         command = Command(None, pipeline)
         try:
-            command.execute()
+            command.execute(env)
         except marcel.exception.KillCommandException as e:
             marcel.util.print_to_stderr(e, env)
         finally:

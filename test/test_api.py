@@ -721,7 +721,7 @@ def test_intersect():
              expected_out=[])
     TEST.run(lambda: run(gen(3) | intersect(load(empty))),
              expected_out=[])
-    TEST.run(lambda: run(load(empty) | intersect(load(gen(3)))),
+    TEST.run(lambda: run(load(empty) | intersect(gen(3))),
              expected_out=[])
     # Non-empty inputs, empty intersection
     TEST.run(lambda: run(gen(3) | intersect(gen(3))),
@@ -961,15 +961,15 @@ def main_stable():
     test_unique()
     test_window()
     test_bash()
-    test_fork()
+    # test_fork()
     # test_namespace()
-    test_remote()
-    test_sudo()
+    # test_remote()
+    # test_sudo()
     test_version()
     test_assign()
     test_join()
     test_pipeline_args()
-    test_sql()
+    # test_sql()
     test_load_store()
     # test_loop()
     test_if()
@@ -977,7 +977,7 @@ def main_stable():
     test_intersect()
     test_union()
     test_difference()
-    test_args()
+    # test_args()
     test_api_run()
     test_api_gather()
     test_api_first()

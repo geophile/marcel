@@ -151,7 +151,7 @@ class Main:
                     pipeline.append(marcel.opmodule.create_op(self.env, 'out'))
                 command = marcel.core.Command(line, pipeline)
                 if run_immediate:
-                    command.execute()
+                    command.execute(self.env)
                 else:
                     self.job_control.create_job(command)
             except marcel.parser.EmptyCommand:
@@ -165,7 +165,7 @@ class Main:
     def run_api(self, pipeline):
         command = marcel.core.Command(None, pipeline)
         try:
-            command.execute()
+            command.execute(self.env)
         except marcel.exception.KillCommandException as e:
             marcel.util.print_to_stderr(e, self.env)
 
@@ -205,16 +205,17 @@ class Main:
         self.env.namespace.update(child_namespace_changes)
 
     def run_immediate(self, pipeline):
-        return (
-                # For the execution of tests and scripts
-                self.same_process or
-                # Exactly one op in pipeline ...
-                pipeline.first_op == pipeline.last_op and (
-                    # ... and it should run in the main process, or
-                    pipeline.first_op.run_in_main_process() or
-                    # ... the op is map. I.e. (python expression). This takes care of
-                    # side effects we want to keep, e.g. (INTERACTIVE_EXECUTABLES.append(...))
-                    pipeline.first_op.op_name() == 'map'))
+        return self.same_process
+        # return (
+        #         # For the execution of tests and scripts
+        #         self.same_process or
+        #         # Exactly one op in pipeline ...
+        #         pipeline.first_op == pipeline.last_op and (
+        #             # ... and it should run in the main process, or
+        #             pipeline.first_op.run_in_main_process() or
+        #             # ... the op is map. I.e. (python expression). This takes care of
+        #             # side effects we want to keep, e.g. (INTERACTIVE_EXECUTABLES.append(...))
+        #             pipeline.first_op.op_name() == 'map'))
 
     def run_startup(self):
         run_on_startup = self.env.getvar('RUN_ON_STARTUP')

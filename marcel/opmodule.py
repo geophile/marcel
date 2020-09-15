@@ -59,7 +59,7 @@ class OpModule:
         return self._api
 
     def create_op(self):
-        return self._op_constructor(self._env)
+        return self._op_constructor(None)
 
     def args_parser(self):
         if self._args_parser is None:
@@ -81,6 +81,6 @@ def import_op_modules(env):
 
 def create_op(env, op_name, *op_args):
     op_module = env.op_modules[op_name]
-    op, args = op_module.api_function()(env, *op_args)
+    op, args = op_module.api_function()(None, *op_args)
     op_module.args_parser().parse(args, op)
     return op

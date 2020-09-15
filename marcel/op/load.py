@@ -85,12 +85,13 @@ class Load(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         if self.var is not None:
             # Interactive: var is set, accumulator is None
             if not self.var.isidentifier():
                 raise marcel.exception.KillCommandException(f'{self.var} is not a valid identifier')
-            self.accumulator = self.getvar(self.var)
+            self.accumulator = self.getvar(env, self.var)
             if self.accumulator is None:
                 raise marcel.exception.KillCommandException(f'Variable {self.var} is undefined.')
         else:

@@ -60,18 +60,19 @@ class Union(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
         def send_right(*x):
             self.send(x)
-        self.pipeline_copy = self.pipeline_arg_value(self.pipeline).copy()
+        super().setup_1(env)
+        self.pipeline_copy = self.pipeline_arg_value(env, self.pipeline).copy()
         self.pipeline_copy.set_error_handler(self.owner.error_handler)
-        self.pipeline_copy.append(marcel.opmodule.create_op(self.env(), 'map', send_right))
+        self.pipeline_copy.append(marcel.opmodule.create_op(env, 'map', send_right))
 
     def receive(self, x):
         self.send(x)
 
     def receive_complete(self):
         if self.pipeline_copy is not None:
-            marcel.core.Command(None, self.pipeline_copy).execute()
+            marcel.core.Command(self.env(), self.pipeline_copy).execute(self.env())
             self.pipeline_copy = None
         self.send_complete()

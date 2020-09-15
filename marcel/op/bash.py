@@ -70,13 +70,14 @@ class Bash(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         self.args = self.eval_function('args_arg')
         self.input = []
         if len(self.args) == 0:
             self.runner = BashShell(self)
         else:
-            if self.args[0] in self.env().getvar('INTERACTIVE_EXECUTABLES'):
+            if self.args[0] in env.getvar('INTERACTIVE_EXECUTABLES'):
                 self.interactive = True
             self.runner = Interactive(self) if self.interactive else NonInteractive(self)
 

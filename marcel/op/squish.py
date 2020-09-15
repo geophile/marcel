@@ -63,7 +63,8 @@ class Squish(marcel.core.Op):
 
     # AbstractOp
     
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         if self.function is None:
             self.function = marcel.functionwrapper.FunctionWrapper(function=r_plus)
         self.function.set_op(self)

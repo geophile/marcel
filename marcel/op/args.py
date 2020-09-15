@@ -133,7 +133,7 @@ class ArgsRunnerInteractive(ArgsRunner):
         self.n_params = len(op.pipeline_arg.parameters())
         self.check_args()
         self.args = []
-        self.pipeline = op.pipeline_arg_value(op.pipeline_arg).copy()
+        self.pipeline = op.pipeline_arg_value(env, op.pipeline_arg).copy()
         self.pipeline.set_error_handler(op.owner.error_handler)
         self.pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
 
