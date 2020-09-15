@@ -140,7 +140,7 @@ class Job:
 
     def start_process(self):
         def run_command_in_child(command, writer):
-            debug(f'running: {command.source}, env namespace: ({id(self.env.namespace)}) {self.env.namespace.keys()}')
+            debug(f'running: {command.source}, env {id(self.env)}')
             try:
                 child_namespace_changes = command.execute(self.env)
                 # debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
@@ -157,6 +157,7 @@ class Job:
         debug(f'About to spawn process for {self.command.source}')
         reader, writer = mp.Pipe(duplex=False)
         JobControl.only.child_listener.add_listener(reader)
+        debug(f'Job.start_process: env {id(self.env)}')
         self.process = mp.Process(target=run_command_in_child, args=(self.command, writer))
         self.process.daemon = True
         try:

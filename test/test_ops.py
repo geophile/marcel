@@ -1047,7 +1047,7 @@ def test_args():
              expected_out=[0, 0, -1, 0, -1, -2, 0, -1, -2, -3, 0, -1, -2, -3, -4])
     TEST.run('gen 6 1 | args [count, start: gen (count) (start)]',
              expected_out=[2, 4, 5, 6, 6, 7, 8, 9, 10])
-    # ls
+    # # ls
     TEST.run('rm -rf /tmp/a')
     TEST.run('mkdir /tmp/a')
     TEST.run('mkdir /tmp/a/d1')
@@ -1166,7 +1166,7 @@ def main_stable():
     test_join()
     test_comment()
     test_pipeline_args()
-    # test_sql()
+    test_sql()
     test_import()
     test_load_store()
     test_load_store_sugar()
@@ -1177,11 +1177,12 @@ def main_stable():
     test_intersect()
     test_union()
     test_difference()
-    # test_args()
+    test_args()
     # test_env()
 
 
 def main_dev():
+    # test_args()
     pass
 
 

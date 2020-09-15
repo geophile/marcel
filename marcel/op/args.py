@@ -67,9 +67,10 @@ class Args(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         self.impl = ArgsRunnerAPI(self) if callable(self.pipeline_arg) else ArgsRunnerInteractive(self)
-        self.impl.setup_1()
+        self.impl.setup_1(env)
 
     def receive(self, x):
         self.impl.receive(x)
@@ -126,7 +127,7 @@ class ArgsRunnerInteractive(ArgsRunner):
         super().__init__(op)
         self.pipeline = None
 
-    def setup_1(self):
+    def setup_1(self, env):
         op = self.op
         if op.pipeline_arg.parameters() is None:
             raise marcel.exception.KillCommandException('The args pipeline must be parameterized.')
@@ -135,11 +136,11 @@ class ArgsRunnerInteractive(ArgsRunner):
         self.args = []
         self.pipeline = op.pipeline_arg_value(env, op.pipeline_arg).copy()
         self.pipeline.set_error_handler(op.owner.error_handler)
-        self.pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
+        self.pipeline.append(marcel.opmodule.create_op(env, 'map', self.send_pipeline_output))
 
     def generate_and_run_pipeline(self):
         self.pipeline.set_parameter_values(self.args, None)
-        marcel.core.Command(None, self.pipeline).execute()
+        marcel.core.Command(None, self.pipeline).execute(self.op.env())
         self.args.clear()
 
 
@@ -148,7 +149,7 @@ class ArgsRunnerAPI(ArgsRunner):
     def __init__(self, op):
         super().__init__(op)
 
-    def setup_1(self):
+    def setup_1(self, env):
         self.n_params = len(self.op.pipeline_arg.__code__.co_varnames)
         self.check_args()
         self.args = []
@@ -158,5 +159,5 @@ class ArgsRunnerAPI(ArgsRunner):
         pipeline = op.pipeline_arg(*self.args).create_pipeline()
         pipeline.set_error_handler(op.owner.error_handler)
         pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
-        marcel.core.Command(None, pipeline).execute()
+        marcel.core.Command(None, pipeline).execute(op.env())
         self.args.clear()
