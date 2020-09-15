@@ -1157,7 +1157,7 @@ def main_stable():
     test_unique()
     test_window()
     test_bash()
-    # test_fork()
+    test_fork()
     test_namespace()
     # test_remote()
     # test_sudo()
@@ -1182,14 +1182,14 @@ def main_stable():
 
 
 def main_dev():
-    # test_args()
+    test_remote()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

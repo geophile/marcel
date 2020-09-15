@@ -13,6 +13,7 @@ import marcel.object.process
 import marcel.util
 
 # stdin carries the following from the client process:
+#   - The client's environment
 #   - The pipeline to be executed
 #   - Possibly a kill signal
 # The kill signal may be delayed and may never arrive. Pipeline execution takes place
@@ -31,7 +32,7 @@ class PickleOutput(marcel.core.Op):
     def __repr__(self):
         return 'pickleoutput()'
 
-    def setup_1(self):
+    def setup_1(self, env):
         pass
 
     def receive(self, x):
@@ -52,6 +53,7 @@ class PipelineRunner(threading.Thread):
 
     def __init__(self, env, pipeline):
         super().__init__()
+        self.env = env
         self.pickler = PickleOutput(env)
         pipeline.append(self.pickler)
         self.pipeline = pipeline
@@ -59,9 +61,10 @@ class PipelineRunner(threading.Thread):
     def run(self):
         try:
             TRACE.write(f'PipelineRunner: About to setup_1 {self.pipeline}')
-            self.pipeline.setup_1()
             # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
             # supporting more than one level of nesting.
+            self.pipeline.setup_1(self.env)
+            self.pipeline.set_env(self.env)
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
             self.pipeline.first_op.receive_input(None)
         except BaseException as e:
@@ -95,17 +98,21 @@ def kill_descendents(signal_id):
 def main():
     def noop_error_handler(env, error):
         pass
-
-    env = marcel.env.Environment(None, old_namespace=None)
-    version = env.getvar('MARCEL_VERSION')
-    TRACE.write(f'Marcel version {version}')
-    # Use sys.stdin.buffer because we want binary data, not the text version
-    input = dill.Unpickler(sys.stdin.buffer)
-    pipeline = input.load()
-    pipeline.set_error_handler(noop_error_handler)
-    TRACE.write(f'pipeline: {pipeline}')
-    pipeline_runner = PipelineRunner(env, pipeline)
-    pipeline_runner.start()
+    try:
+        # Use sys.stdin.buffer because we want binary data, not the text version
+        input = dill.Unpickler(sys.stdin.buffer)
+        TRACE.write('About to load input')
+        env = input.load()
+        version = env.getvar('MARCEL_VERSION')
+        TRACE.write(f'Marcel version {version}')
+        TRACE.write(f'env {env}')
+        pipeline = input.load()
+        pipeline.set_error_handler(noop_error_handler)
+        TRACE.write(f'pipeline: {pipeline}')
+        pipeline_runner = PipelineRunner(env, pipeline)
+        pipeline_runner.start()
+    except Exception as e:
+        TRACE.write(f'Caught {type(e)}: {e}')
     try:
         signal_id = input.load()
         TRACE.write(f'Received signal {signal_id}')

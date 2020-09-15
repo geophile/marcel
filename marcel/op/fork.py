@@ -105,10 +105,11 @@ class Fork(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         self.host = self.eval_function('host', int, str)
         self.threads = []
-        cluster = self.env().remote(self.host)
+        cluster = env.remote(self.host)
         if cluster:
             self.impl = Remote(self)
         elif isinstance(self.host, int):
@@ -121,10 +122,13 @@ class Fork(marcel.core.Op):
         else:
             raise marcel.exception.KillCommandException(f'Invalid fork specification: {self.host}')
         self.impl = Remote(self) if cluster else Local(self)
-        self.impl.setup_1()
+        self.impl.setup_1(env)
 
-    def setup_2(self):
-        self.impl.setup_2()
+    def setup_2(self, env):
+        self.impl.setup_2(env)
+
+    def set_env(self, env):
+        self.impl.set_env(env)
 
     def receive(self, _):
         for thread in self.threads:
@@ -176,13 +180,17 @@ class ForkImplementation:
     def __init__(self, op):
         self.op = op
         
-    def setup_1(self):
-        self.generate_thread_labels()
+    def setup_1(self, env):
+        self.generate_thread_labels(env)
 
-    def setup_2(self):
+    def setup_2(self, env):
         assert False
-        
-    def generate_thread_labels(self):
+
+    def set_env(self, env):
+        for thread in self.op.threads:
+            thread.set_env(env)
+
+    def generate_thread_labels(self, env):
         assert False
 
 
@@ -193,17 +201,17 @@ class Remote(ForkImplementation):
 
     # AbstractOp
 
-    def setup_1(self):
-        super().setup_1()
+    def setup_1(self, env):
+        super().setup_1(env)
         op = self.op
         remote_pipeline = marcel.core.Pipeline()
-        remote_pipeline.append(marcel.opmodule.create_op(self.op.env(), 'remote', self.op.pipeline))
-        remote_pipeline.append(marcel.op.labelthread.LabelThread(self.op.env()))
+        remote_pipeline.append(marcel.opmodule.create_op(env, 'remote', self.op.pipeline))
+        remote_pipeline.append(marcel.op.labelthread.LabelThread(env))
         op.pipeline = remote_pipeline
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
 
-    def setup_2(self):
+    def setup_2(self, env):
         op = self.op
         for thread_label in op.thread_labels:
             # Copy the pipeline. Env is set here, not in op.pipeline. Env cloning preserves
@@ -227,9 +235,9 @@ class Remote(ForkImplementation):
 
     # Subclass
 
-    def generate_thread_labels(self):
+    def generate_thread_labels(self, env):
         op = self.op
-        cluster = op.env().remote(op.host)
+        cluster = env.remote(op.host)
         if cluster:
             op.thread_labels = [host for host in cluster.hosts]
         else:
@@ -243,14 +251,14 @@ class Local(ForkImplementation):
 
     # AbstractOp
 
-    def setup_1(self):
-        super().setup_1()
+    def setup_1(self, env):
+        super().setup_1(env)
         op = self.op
-        op.pipeline.append(marcel.op.labelthread.LabelThread(self.op.env()))
+        op.pipeline.append(marcel.op.labelthread.LabelThread(env))
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
 
-    def setup_2(self):
+    def setup_2(self, env):
         op = self.op
         for thread_label in op.thread_labels:
             # Copy the pipeline
@@ -260,7 +268,7 @@ class Local(ForkImplementation):
             label_thread_op = pipeline_copy.last_op
             assert isinstance(label_thread_op, marcel.op.labelthread.LabelThread)
             label_thread_op.set_label(thread_label)
-            pipeline_copy.setup_1()
+            pipeline_copy.setup_1(env)
             # Connect LabelThread op to receiver
             label_thread_op.receiver = op.receiver
             # Create a thread to run the pipeline copy
@@ -268,7 +276,7 @@ class Local(ForkImplementation):
 
     # Subclass
 
-    def generate_thread_labels(self):
+    def generate_thread_labels(self, env):
         op = self.op
         if type(op.host) is int:
             op.thread_labels = [x for x in range(op.host)]
@@ -286,6 +294,9 @@ class PipelineThread(threading.Thread):
 
     def __repr__(self):
         return f'PipelineThread({self.thread_label})'
+
+    def set_env(self, env):
+        self.pipeline.set_env(env)
 
     def run(self):
         try:

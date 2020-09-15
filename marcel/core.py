@@ -96,7 +96,7 @@ class AbstractOp(Pipelineable):
     def setup_1(self, env):
         pass
 
-    def setup_2(self):
+    def setup_2(self, env):
         pass
 
 
@@ -391,12 +391,12 @@ class Pipeline(AbstractOp):
                     raise marcel.exception.KillCommandException(
                         '%s cannot receive input from a pipe' % op.op_name())
 
-    def setup_2(self):
+    def setup_2(self, env):
         op = self.first_op
         while op:
             if op.receiver is None:
                 op.receiver = op.next_op
-            op.setup_2()
+            op.setup_2(env)
             op = op.next_op
 
     def set_env(self, env):
@@ -473,7 +473,7 @@ class Command:
     def execute(self, env):
         env.clear_changes()
         self.pipeline.setup_1(env)
-        self.pipeline.setup_2()
+        self.pipeline.setup_2(env)
         self.pipeline.set_env(env)
         self.pipeline.receive(None)
         self.pipeline.receive_complete()

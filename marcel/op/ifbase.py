@@ -47,7 +47,7 @@ class IfBase(marcel.core.Op):
         self.then = self.then.copy()
         self.then.set_error_handler(self.owner.error_handler)
         self.then.setup_1(env)
-        self.then.setup_2()
+        self.then.setup_2(env)
 
     def set_env(self, env):
         super().set_env(env)

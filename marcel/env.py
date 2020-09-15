@@ -177,7 +177,7 @@ class Environment:
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
             'define_db': self.define_db,
-            # 'define_remote': self.define_remote,
+            'define_remote': self.define_remote,
             'Color': marcel.object.color.Color,
         })
         self.initialize_interactive_executables()
