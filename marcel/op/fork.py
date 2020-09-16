@@ -206,7 +206,7 @@ class Remote(ForkImplementation):
         op = self.op
         remote_pipeline = marcel.core.Pipeline()
         remote_pipeline.append(marcel.opmodule.create_op(env, 'remote', self.op.pipeline))
-        remote_pipeline.append(marcel.op.labelthread.LabelThread(env))
+        remote_pipeline.append(marcel.op.labelthread.LabelThread(None))
         op.pipeline = remote_pipeline
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
@@ -254,7 +254,7 @@ class Local(ForkImplementation):
     def setup_1(self, env):
         super().setup_1(env)
         op = self.op
-        op.pipeline.append(marcel.op.labelthread.LabelThread(env))
+        op.pipeline.append(marcel.op.labelthread.LabelThread(None))
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
 
