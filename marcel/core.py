@@ -479,7 +479,7 @@ class Command:
         self.pipeline.receive_complete()
         # A Command is executed by a multiprocessing.Process. Need to transmit the Environment's vars
         # relating to the directory, to the parent process, because they may have changed.
-        return env.changes()
+        return []  # env.changes()
 
 
 class PipelineIterator:

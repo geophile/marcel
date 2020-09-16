@@ -15,8 +15,9 @@
 
 from time import time as now
 
-from marcel.object.process import processes, Process
+from marcel.object.cluster import Cluster
 from marcel.object.file import File
+from marcel.object.process import Process
 from marcel.util import username, groupname, quote_files
 
 
@@ -35,3 +36,7 @@ def hours(n):
 
 def days(n):
     return 24 * 3600 * n
+
+
+def remote(user, identity, host=None, hosts=None):
+    return Cluster(user, identity, host, hosts)

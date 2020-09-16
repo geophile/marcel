@@ -19,6 +19,7 @@ import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.opmodule
+import marcel.object.cluster
 import marcel.op.labelthread
 import marcel.op.remote
 
@@ -94,7 +95,7 @@ class Fork(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.host = None
+        self.host = None  # TODO: Actually a fork spec. Improve terminology.
         self.pipeline = None
         self.thread_labels = None
         self.threads = None
@@ -109,19 +110,17 @@ class Fork(marcel.core.Op):
         super().setup_1(env)
         self.host = self.eval_function('host', int, str)
         self.threads = []
-        cluster = env.remote(self.host)
+        cluster = self.host if type(self.host) is marcel.object.cluster.Cluster else env.cluster(self.host)
         if cluster:
-            self.impl = Remote(self)
+            self.impl = Remote(self, cluster)
         elif isinstance(self.host, int):
             # Number of threads, from API
-            self.impl = Local(self)
+            self.impl = Local(self, self.host)
         elif self.host.isdigit():
             # Number of threads, from console
-            self.host = int(self.host)
-            self.impl = Local(self)
+            self.impl = Local(self, int(self.host))
         else:
             raise marcel.exception.KillCommandException(f'Invalid fork specification: {self.host}')
-        self.impl = Remote(self) if cluster else Local(self)
         self.impl.setup_1(env)
 
     def setup_2(self, env):
@@ -196,8 +195,9 @@ class ForkImplementation:
 
 class Remote(ForkImplementation):
 
-    def __init__(self, op):
+    def __init__(self, op, cluster):
         super().__init__(op)
+        self.cluster = cluster
 
     # AbstractOp
 
@@ -236,18 +236,14 @@ class Remote(ForkImplementation):
     # Subclass
 
     def generate_thread_labels(self, env):
-        op = self.op
-        cluster = env.remote(op.host)
-        if cluster:
-            op.thread_labels = [host for host in cluster.hosts]
-        else:
-            raise marcel.exception.KillCommandException(f'Invalid fork spec @{op.host}')
+        self.op.thread_labels = [host for host in self.cluster.hosts]
 
 
 class Local(ForkImplementation):
 
-    def __init__(self, op):
+    def __init__(self, op, n):
         super().__init__(op)
+        self.n = n
 
     # AbstractOp
 
@@ -277,11 +273,7 @@ class Local(ForkImplementation):
     # Subclass
 
     def generate_thread_labels(self, env):
-        op = self.op
-        if type(op.host) is int:
-            op.thread_labels = [x for x in range(op.host)]
-        else:
-            raise marcel.exception.KillCommandException(f'Invalid fork spec @{op.host}')
+        self.op.thread_labels = [x for x in range(self.n)]
 
 
 class PipelineThread(threading.Thread):

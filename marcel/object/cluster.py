@@ -47,30 +47,22 @@ class Host:
 
 class Cluster:
 
-    def __init__(self, name, user, identity, hosts):
-        self.name = name
+    def __init__(self, user, identity=None, host=None, hosts=None):
+        if (host is None) == (hosts is None):
+            raise marcel.exception.KillShellException(
+                'Remote configuration requires the specification of host, or hosts, but not both.')
+        if host is not None and type(host) in (tuple, list):
+            raise marcel.exception.KillShellException(
+                'host specification must be single-valued. Did you mean hosts?')
+        if hosts is not None and type(hosts) not in (tuple, list):
+            raise marcel.exception.KillShellException(
+                'host specification must not be single-valued. Did you mean host?')
+        if host is not None:
+            hosts = [host]
         self.hosts = [Host(host, self) for host in hosts]
         self.user = user
         self.identity = identity
 
     def __repr__(self):
         hosts = ', '.join([str(host) for host in self.hosts])
-        return f'{self.name}[{hosts}]'
-
-
-def define_remote(name, user, identity, host, hosts):
-    if host is not None and hosts is not None:
-        raise marcel.exception.KillShellException(
-            f'Remote access to {name} requires specification of one host or a list of hosts, but not both')
-    if host is None and hosts is None:
-        raise marcel.exception.KillShellException(
-            f'Remote access to {name} requires specification of one host or a list of hosts')
-    if host is not None and marcel.util.is_sequence_except_string(host):
-        raise marcel.exception.KillShellException(
-            f'Remote access to {name}: host must not be a list. Did you mean hosts?')
-    if hosts is not None and not marcel.util.is_sequence_except_string(hosts):
-        raise marcel.exception.KillShellException(
-            f'Remote access to {name}: hosts must not be a list. Did you mean host?')
-    if host is not None:
-        hosts = [host]
-    return marcel.object.cluster.Cluster(name, user, identity, hosts)
+        return f'Cluster({self.user}, {hosts})'

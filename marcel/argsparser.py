@@ -17,6 +17,7 @@
 import marcel.core
 import marcel.exception
 import marcel.functionwrapper
+import marcel.object.cluster
 import marcel.object.file
 import marcel.util
 
@@ -197,6 +198,8 @@ class ArgsParser:
                 raise ArgsError(arg.op_name, f'{arg.name} must be a positive int: {x}')
             return x
         if type(x) is str or callable(x):
+            return x
+        if type(x) is marcel.object.cluster.Cluster:
             return x
         raise ArgsError(arg.op_name, f'{arg.name} must be an int or cluster name: {x}')
 

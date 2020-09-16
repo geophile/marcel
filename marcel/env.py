@@ -177,7 +177,6 @@ class Environment:
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
             'define_db': self.define_db,
-            'define_remote': self.define_remote,
             'Color': marcel.object.color.Color,
         })
         self.initialize_interactive_executables()
@@ -240,11 +239,13 @@ class Environment:
         return (self.prompt_string(self.getvar('PROMPT')),
                 self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
 
-    def define_remote(self, name, user, identity, host=None, hosts=None):
-        self.clusters[name] = marcel.object.cluster.define_remote(name, user, identity, host, hosts)
-
-    def remote(self, name):
-        return self.clusters.get(name, None)
+    def cluster(self, name):
+        cluster = None
+        if type(name) is str:
+            x = self.getvar(name)
+            if type(x) is marcel.object.cluster.Cluster:
+                cluster = x
+        return cluster
 
     def define_db(self, name, driver, dbname, user, password=None, host=None, port=None):
         self.dbs[name] = marcel.object.db.define_db(name, driver, dbname, user, password, host, port)
