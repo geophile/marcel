@@ -56,7 +56,8 @@ class Pushd(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
+        super().setup_1(env)
         if self.directory is not None:
             self.directory = pathlib.Path(self.directory).expanduser()
             if not self.directory.is_dir():
