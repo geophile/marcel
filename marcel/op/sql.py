@@ -80,7 +80,7 @@ class SqlArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('sql', env)
-        self.add_flag_one_value('db', '-d', '--db')
+        self.add_flag_one_value('db', '-d', '--db', target='dbvar')
         self.add_flag_no_value('autocommit', '-a', '--autocommit')
         self.add_flag_one_value('commit', '-c', '--commit', convert=self.str_to_int)
         self.add_anon('statement', target='statement_arg')
@@ -93,6 +93,7 @@ class Sql(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.dbvar = None
         self.db = None
         self.autocommit = None
         self.commit = None
@@ -118,15 +119,12 @@ class Sql(marcel.core.Op):
         elif self.commit < 0:
             raise marcel.exception.KillCommandException(f'--commit value must be a positive integer: {self.commit}')
         self.total_update_count = 0
-        db_profile = env.getvar('DB_DEFAULT') if self.db is None else self.db
-        if db_profile is None:
+        self.db = env.db(self.dbvar) if self.dbvar is not None else env.getvar('DB_DEFAULT')
+        if self.db is None:
             raise marcel.exception.KillCommandException('No database profile defined')
-        db = env.db(db_profile)
-        self.connection = db.connection()
+        self.connection = self.db.connection()
         if self.autocommit:
             self.connection.set_autocommit(True)
-        if db is None:
-            raise marcel.exception.KillCommandException(f'No database profile named {db_profile}')
         self.delegate = self.classify_statement()(self.connection, self)
 
     def receive(self, x):

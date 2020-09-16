@@ -16,6 +16,7 @@
 from time import time as now
 
 from marcel.object.cluster import Cluster
+from marcel.object.db import Database
 from marcel.object.file import File
 from marcel.object.process import Process
 from marcel.util import username, groupname, quote_files
@@ -40,3 +41,7 @@ def days(n):
 
 def remote(user, identity, host=None, hosts=None):
     return Cluster(user, identity, host, hosts)
+
+
+def database(driver, dbname, user, password=None, host=None, port=None):
+    return Database(driver, dbname, user, password, host, port)

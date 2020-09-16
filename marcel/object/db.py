@@ -23,9 +23,10 @@ import marcel.exception
 
 class Database:
 
-    def __init__(self, name, connection_class, dbname, user, password, host, port):
-        self.name = name
-        self.connection_class = connection_class
+    def __init__(self, driver, dbname, user, password=None, host=None, port=None):
+        if driver not in ('psycopg2'):
+            raise marcel.exception.KillCommandException(f'Unsupported database driver: {driver}')
+        self.connection_class = Psycopg2Connection
         self.dbname = dbname
         self.user = user
         self.password = password
@@ -82,10 +83,3 @@ class Psycopg2Connection(Connection):
     # def insert(self, sql, args):
     #     # TODO: Use cursor.mogrify
     #     assert False
-
-
-def define_db(name, driver, dbname, user, password=None, host=None, port=None):
-    if driver == 'psycopg2':
-        return Database(name, Psycopg2Connection, dbname, user, password, host, port)
-    else:
-        raise marcel.exception.KillCommandException(f'Unsupported database driver: {driver}')

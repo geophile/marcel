@@ -176,7 +176,6 @@ class Environment:
             'BOLD': marcel.object.color.Color.BOLD,
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-            'define_db': self.define_db,
             'Color': marcel.object.color.Color,
         })
         self.initialize_interactive_executables()
@@ -185,8 +184,6 @@ class Environment:
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 self.namespace[key] = value
-        self.clusters = {}
-        self.dbs = {}
         self.builtin_symbols = set(self.namespace.keys())
         self.config_symbols = None  # Set by compute_config_symbols() after startup script is run
         self.config_path = self.read_config(config_file)
@@ -247,11 +244,12 @@ class Environment:
                 cluster = x
         return cluster
 
-    def define_db(self, name, driver, dbname, user, password=None, host=None, port=None):
-        self.dbs[name] = marcel.object.db.define_db(name, driver, dbname, user, password, host, port)
-
     def db(self, name):
-        return self.dbs.get(name, None)
+        db = None
+        x = self.getvar(name)
+        if type(x) is marcel.object.db.Database:
+            db = x
+        return db
 
     def dir_state(self):
         return self.directory_state
