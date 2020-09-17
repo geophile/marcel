@@ -80,17 +80,17 @@ PROMPT_CONTINUATION = [lambda: PWD, ' + ']
 class DirectoryState:
     VARS = ('DIRS', 'PWD')
 
-    def __init__(self, namespace):
-        self.namespace = namespace
+    def __init__(self, env):
+        self.env = env
 
     def __repr__(self):
         buffer = []
         for name in DirectoryState.VARS:
-            buffer.append(f'{name}: {self.namespace[name]}')
+            buffer.append(f'{name}: {self.env.getvar(name)}')
         return f'DirectoryState({", ".join(buffer)})'
 
     def pwd(self):
-        return pathlib.Path(self.namespace['PWD'])
+        return pathlib.Path(self.env.getvar('PWD'))
 
     def cd(self, directory):
         assert isinstance(directory, pathlib.Path), directory
@@ -101,7 +101,7 @@ class DirectoryState:
                     f'Cannot cd into {new_dir}. Directory does not exist.')
             new_dir = new_dir.as_posix()
             self.dir_stack()[-1] = new_dir
-            self.namespace['PWD'] = new_dir
+            self.env.setvar('PWD', new_dir)
             # So that executables have the same view of the current directory.
             os.chdir(new_dir)
         except FileNotFoundError:
@@ -135,7 +135,7 @@ class DirectoryState:
         return dirs
 
     def dir_stack(self):
-        return self.namespace['DIRS']
+        return self.env.getvar('DIRS')
 
 
 class Environment:
@@ -187,12 +187,12 @@ class Environment:
         self.builtin_symbols = set(self.namespace.keys())
         self.config_symbols = None  # Set by compute_config_symbols() after startup script is run
         self.config_path = self.read_config(config_file)
-        self.directory_state = DirectoryState(self.namespace)
+        self.directory_state = DirectoryState(self)
         # TODO: This is a hack. Clean it up once the env handles command history
         self.edited_command = None
         self.op_modules = None
         self.reader = None
-        self.modified_vars = None
+        self.modified_vars = set()
 
     def __getstate__(self):
         return {'namespace': self.namespace,
@@ -203,17 +203,16 @@ class Environment:
         self.__dict__.update(state)
 
     def getvar(self, var):
-        # If a var's value is obtained, and it contains mutable state (like a list), then
-        # we have to allow for the possibility that the var changed.
-        value = self.namespace.get(var, None)
-        if self.modified_vars is not None and not Environment.immutable(value):
+        try:
+            value = self.namespace[var]
             self.modified_vars.add(var)
+        except KeyError:
+            value = None
         return value
 
     def setvar(self, var, value):
-        if self.modified_vars is not None:
-            self.modified_vars.add(var)
         self.namespace[var] = value
+        self.modified_vars.add(var)
 
     def vars(self):
         return self.namespace

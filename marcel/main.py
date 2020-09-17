@@ -145,7 +145,7 @@ class Main:
                 pipeline.set_error_handler(Main.default_error_handler)
                 # self.run_immediate(pipeline) depends on whether the pipeline has a single op.
                 # So check this before tacking on the out op.
-                run_immediate = self.run_immediate(pipeline)
+                run_immediate = self.same_process
                 # Append an out op at the end of pipeline, if there is no output op there already.
                 if not pipeline.is_terminal_op('out'):
                     pipeline.append(marcel.opmodule.create_op(self.env, 'out'))
@@ -203,19 +203,6 @@ class Main:
             # PWD wasn't changed
             pass
         self.env.namespace.update(child_namespace_changes)
-
-    def run_immediate(self, pipeline):
-        return self.same_process
-        # return (
-        #         # For the execution of tests and scripts
-        #         self.same_process or
-        #         # Exactly one op in pipeline ...
-        #         pipeline.first_op == pipeline.last_op and (
-        #             # ... and it should run in the main process, or
-        #             pipeline.first_op.run_in_main_process() or
-        #             # ... the op is map. I.e. (python expression). This takes care of
-        #             # side effects we want to keep, e.g. (INTERACTIVE_EXECUTABLES.append(...))
-        #             pipeline.first_op.op_name() == 'map'))
 
     def run_startup(self):
         run_on_startup = self.env.getvar('RUN_ON_STARTUP')
