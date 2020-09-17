@@ -92,7 +92,7 @@ class Ps(marcel.core.Op):
 
     # AbstractOp
     
-    def setup_1(self):
+    def setup_1(self, env):
         self.user = self.eval_function('user_arg', int, str)
         self.group = self.eval_function('group_arg', int, str)
         self.pid = self.eval_function('pid_arg', int)

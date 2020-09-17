@@ -51,10 +51,10 @@ class Delete(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup_1(self, env):
         self.vars = self.eval_function('vars_arg', str)
         for var in self.vars:
-            if var not in self.env().namespace:
+            if var not in env.namespace:
                 raise marcel.exception.KillCommandException(f'Variable {var} is not defined.')
 
     def receive(self, _):
