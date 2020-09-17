@@ -64,7 +64,7 @@ class Union(marcel.core.Op):
         def send_right(*x):
             self.send(x)
         super().setup_1(env)
-        self.pipeline_copy = self.pipeline_arg_value(env, self.pipeline).copy()
+        self.pipeline_copy = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
         self.pipeline_copy.set_error_handler(self.owner.error_handler)
         self.pipeline_copy.append(marcel.opmodule.create_op(env, 'map', send_right))
 

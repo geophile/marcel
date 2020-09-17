@@ -20,6 +20,8 @@ import marcel.opmodule
 import marcel.object.error
 import marcel.util
 
+unwrap_op_output = marcel.util.unwrap_op_output
+
 HELP = '''
 {L,wrap=F}args [-a|--all] PIPELINE
 
@@ -69,7 +71,7 @@ class Args(marcel.core.Op):
 
     def setup_1(self, env):
         super().setup_1(env)
-        self.impl = ArgsRunnerAPI(self) if callable(self.pipeline_arg) else ArgsRunnerInteractive(self)
+        self.impl = ArgsAPI(self) if callable(self.pipeline_arg) else ArgsInteractive(self)
         self.impl.setup_1(env)
 
     def receive(self, x):
@@ -82,7 +84,7 @@ class Args(marcel.core.Op):
         self.send_complete()
 
 
-class ArgsRunner:
+class ArgsImpl:
 
     def __init__(self, op):
         self.op = op
@@ -101,7 +103,7 @@ class ArgsRunner:
             raise marcel.exception.KillCommandException(error)
 
     def receive(self, x):
-        self.args.append(marcel.util.unwrap_op_output(x))
+        self.args.append(unwrap_op_output(x))
         if not self.all and len(self.args) == self.n_params:
             self.generate_and_run_pipeline()
 
@@ -121,7 +123,7 @@ class ArgsRunner:
         assert False
 
 
-class ArgsRunnerInteractive(ArgsRunner):
+class ArgsInteractive(ArgsImpl):
 
     def __init__(self, op):
         super().__init__(op)
@@ -144,7 +146,7 @@ class ArgsRunnerInteractive(ArgsRunner):
         self.args.clear()
 
 
-class ArgsRunnerAPI(ArgsRunner):
+class ArgsAPI(ArgsImpl):
 
     def __init__(self, op):
         super().__init__(op)

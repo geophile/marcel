@@ -1182,6 +1182,7 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('@jao [ gen 3 ]')
     pass
 
 

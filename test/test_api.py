@@ -597,6 +597,11 @@ def test_sql():
              expected_out=[1, 1])
     TEST.run(test=lambda: run(sql("select * from t order by id")),
              expected_out=[(1000, 'aaa'), (1001, 'aaa'), (1002, 'aaa')])
+    # Define database directly (not in .marcel.py)
+    jdb_too = database('psycopg2', 'jao', 'jao')
+    TEST.run(test=lambda: run(sql("select * from t order by id", '-d', jdb_too)),
+             expected_out=[(1000, 'aaa'), (1001, 'aaa'), (1002, 'aaa')])
+    # Cleanup
     TEST.run(test=lambda: run(sql("drop table if exists t") | select(lambda *x: False)))
     # TODO: sql types
 

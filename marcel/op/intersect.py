@@ -71,7 +71,7 @@ class Intersect(marcel.core.Op):
             self.right[x] = 1 if count is None else count + 1
         super().setup_1(env)
         self.right = {}
-        pipeline = self.pipeline_arg_value(env, self.pipeline).copy()
+        pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
         pipeline.set_error_handler(self.owner.error_handler)
         pipeline.append(marcel.opmodule.create_op(env, 'map', load_right))
         marcel.core.Command(env, pipeline).execute(env)

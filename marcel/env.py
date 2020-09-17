@@ -201,7 +201,6 @@ class Environment:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        marcel.opmodule.import_op_modules(self)  # Sets self.op_modules
 
     def getvar(self, var):
         # If a var's value is obtained, and it contains mutable state (like a list), then

@@ -84,7 +84,7 @@ class Loop(marcel.core.Op):
 
     # AbstractOp
     
-    def setup_1(self):
+    def setup_1(self, env):
         # If there is only one arg, then it should be a pipeline.
         if self.pipeline is None:
             self.pipeline = self.init
@@ -92,7 +92,7 @@ class Loop(marcel.core.Op):
         if self.init is not None:
             self.init = self.eval_function('init')
         # Find emit ops in the pipeline and connect them to self.
-        loop_pipeline = self.pipeline_arg_value(env, self.pipeline).copy()
+        loop_pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
         loop_pipeline.set_error_handler(self.owner.error_handler)
         op = loop_pipeline.first_op
         while op:
@@ -101,8 +101,8 @@ class Loop(marcel.core.Op):
             op = op.next_op
         # Attach load and store ops to implement the actual looping.
         self.loopvar = marcel.core.LoopVar(loop_pipeline)
-        loop_pipeline.prepend(marcel.opmodule.create_op(self.env(), 'load', self.loopvar))
-        loop_pipeline.append(marcel.opmodule.create_op(self.env(), 'store', self.loopvar))
+        loop_pipeline.prepend(marcel.opmodule.create_op(env, 'load', self.loopvar))
+        loop_pipeline.append(marcel.opmodule.create_op(env, 'store', self.loopvar))
         self.body = loop_pipeline
 
     def receive(self, x):

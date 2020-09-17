@@ -146,16 +146,15 @@ class Op(AbstractOp):
     # remote host).
 
     def __getstate__(self):
+        # It would be nice to assert self._env is None, but it is sometimes set. The args op does
+        # setup of its pipeline repeatedly, while receiving input from upstream. If there are FunctionWrappers
+        # in the pipeline arg, then these can refer to outer pipelines (via _parameterized_pipelines) in which
+        # the env has been set.
         m = self.__dict__.copy()
-        m['_env_ref'] = self.save(self._env)
+        m['_env'] = None
         return m
 
     def __setstate__(self, state):
-        env_ref = self.recall(state['_env_ref'])
-        if env_ref is not None:
-            # Local copy: Use the saved env
-            state['_env'] = env_ref
-        # else: Remote copy: Keep the transmitted env
         self.__dict__.update(state)
 
     # Pipelineable
@@ -275,7 +274,8 @@ class Op(AbstractOp):
 
     # arg is a Pipeline, Pipelineable, or a var bound to a pipeline. Deal with all of these possibilities
     # and come up with the pipeline itself.
-    def pipeline_arg_value(self, env, arg):
+    @staticmethod
+    def pipeline_arg_value(env, arg):
         if type(arg) is marcel.core.Pipeline:
             pipeline = arg
         elif isinstance(arg, marcel.core.Pipelineable):
@@ -477,6 +477,7 @@ class Command:
         self.pipeline.set_env(env)
         self.pipeline.receive(None)
         self.pipeline.receive_complete()
+        self.pipeline.set_env(None)
         # A Command is executed by a multiprocessing.Process. Need to transmit the Environment's vars
         # relating to the directory, to the parent process, because they may have changed.
         return []  # env.changes()
