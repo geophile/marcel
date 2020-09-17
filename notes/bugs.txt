@@ -268,6 +268,8 @@ Traceback (most recent call last):
     if self.function(*x):
 TypeError: FunctionWrapper object argument after * must be an iterable, not NoneType
 
+This appears to depend on the fact that ext is defined in RUN_ON_STARTUP.
+
 ----------------------------------------------------------------------
 
 106. 

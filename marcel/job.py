@@ -20,6 +20,8 @@ import signal
 import sys
 import threading
 
+import dill
+
 import marcel.object.error
 import marcel.exception
 import marcel.util
@@ -49,7 +51,7 @@ import marcel.util
 #   - Main process SIGTSTP handler reawakens children that are supposed to be running by sending SIGCONT.
 
 
-DEBUG = False
+DEBUG = True
 
 
 def debug(message):
@@ -144,7 +146,7 @@ class Job:
             try:
                 child_namespace_changes = command.execute(self.env)
                 debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
-                writer.send(child_namespace_changes)
+                writer.send(dill.dumps(child_namespace_changes))
             except marcel.exception.KillCommandException as e:
                 marcel.util.print_to_stderr(e, self.env)
             except marcel.exception.KillAndResumeException as e:
@@ -210,7 +212,7 @@ class ChildListener(threading.Thread):
             # Process the listeners that are ready
             for listener in mpc.wait(listeners, 0.1):
                 try:
-                    self.child_completion_handler(listener.recv())
+                    self.child_completion_handler(dill.loads(listener.recv()))
                 except EOFError:
                     to_remove.append(listener)
 
