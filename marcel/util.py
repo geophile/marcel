@@ -167,6 +167,15 @@ def print_to_stderr(s, env):
     print(s, file=sys.stderr, flush=True)
 
 
+def namespace_description(namespace):
+    description = []
+    for k, v in namespace.items():
+        if k != '__builtins__':
+            description.append(f'{k}: {v}')
+    return '\n'.join(description)
+
+
+
 class Stack:
 
     def __init__(self):

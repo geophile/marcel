@@ -15,6 +15,7 @@
 
 from time import time as now
 
+from marcel.object.color import Color
 from marcel.object.cluster import Cluster
 from marcel.object.db import Database
 from marcel.object.file import File

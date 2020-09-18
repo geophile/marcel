@@ -26,12 +26,16 @@ class Database:
     def __init__(self, driver, dbname, user, password=None, host=None, port=None):
         if driver not in ('psycopg2'):
             raise marcel.exception.KillCommandException(f'Unsupported database driver: {driver}')
+        self.driver = driver
         self.connection_class = Psycopg2Connection
         self.dbname = dbname
         self.user = user
         self.password = password
         self.host = host
         self.port = port
+
+    def __repr__(self):
+        return f'Database({self.driver}, {self.dbname}, {self.user})'
 
     def connection(self):
         return self.connection_class(self)

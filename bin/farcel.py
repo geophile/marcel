@@ -1,10 +1,14 @@
 #!/usr/bin/python3
 
+import getpass
 import os
-import dill
-import threading
+import pathlib
 import signal
+import socket
 import sys
+import threading
+
+import dill
 
 import marcel.core
 import marcel.env
@@ -20,6 +24,7 @@ import marcel.util
 # on a thread so that stdin can be monitored for the kill signal and then acted upon.
 
 
+CONFIG_FILENAME = '.marcel.py'
 TRACE = marcel.util.Trace('/tmp/farcel.log')
 
 
@@ -95,24 +100,51 @@ def kill_descendents(signal_id):
         marcel.util.print_stack(TRACE.file)
 
 
+# Adapted from Environment.read_config
+def read_config(config_path=None):
+    current_dir = pathlib.Path.cwd().resolve()
+    namespace = {
+        'USER': getpass.getuser(),
+        'HOME': pathlib.Path.home().resolve().as_posix(),
+        'HOST': socket.gethostname(),
+        'PWD': current_dir.as_posix(),
+        'DIRS': [current_dir.as_posix()]
+    }
+    config_path = (pathlib.Path(config_path)
+                   if config_path else
+                   pathlib.Path.home() / CONFIG_FILENAME).expanduser()
+    if config_path.exists():
+        with open(config_path.as_posix()) as config_file:
+            config_source = config_file.read()
+        locals = {}
+        # Execute the config file. Imported and newly-defined symbols go into locals, which
+        # will then be added to self.namespace, for use in the execution of op functions.
+        exec(config_source, namespace, locals)
+        namespace.update(locals)
+    return namespace
+
+
 def main():
     def noop_error_handler(env, error):
         pass
     try:
+        namespace = read_config()
         # Use sys.stdin.buffer because we want binary data, not the text version
         input = dill.Unpickler(sys.stdin.buffer)
-        TRACE.write('About to load input')
         env = input.load()
+        namespace.update(env.namespace)
+        env.namespace = namespace
+        pipeline = input.load()
         version = env.getvar('MARCEL_VERSION')
         TRACE.write(f'Marcel version {version}')
-        TRACE.write(f'env {env}')
-        pipeline = input.load()
-        pipeline.set_error_handler(noop_error_handler)
+        TRACE.write(f'env: {marcel.util.namespace_description(env.vars())}')
         TRACE.write(f'pipeline: {pipeline}')
+        pipeline.set_error_handler(noop_error_handler)
         pipeline_runner = PipelineRunner(env, pipeline)
         pipeline_runner.start()
     except Exception as e:
         TRACE.write(f'Caught {type(e)}: {e}')
+        marcel.util.print_stack(TRACE.file)
     try:
         signal_id = input.load()
         TRACE.write(f'Received signal {signal_id}')
