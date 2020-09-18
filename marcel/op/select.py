@@ -55,5 +55,6 @@ class Select(marcel.core.Op):
     # AbstractOp
     
     def receive(self, x):
-        if self.function(*x):
+        fx = self.function() if x is None else self.function(*x)
+        if fx:
             self.send(x)
