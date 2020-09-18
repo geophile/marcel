@@ -256,4 +256,27 @@ I think.
  
 ----------------------------------------------------------------------
 
-107. 
+107. Stack trace on db authentication failure
+
+M-0.10.18 jao@cheese:~/git/marcel$ sql -d jdb 'select * from t'
+Process Process-7:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 477, in execute
+    self.pipeline.setup_1(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 387, in setup_1
+    op.setup_1(env)
+  File "/home/jao/git/marcel/marcel/op/sql.py", line 125, in setup_1
+    self.connection = self.db.connection()
+  File "/home/jao/git/marcel/marcel/object/db.py", line 41, in connection
+    return self.connection_class(self)
+  File "/home/jao/git/marcel/marcel/object/db.py", line 80, in __init__
+    connection = psycopg2.connect(dbname=db.dbname,
+  File "/usr/local/lib/python3.8/dist-packages/psycopg2/__init__.py", line 127, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: fe_sendauth: no password supplied

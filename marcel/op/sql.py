@@ -122,7 +122,11 @@ class Sql(marcel.core.Op):
         self.db = env.db(self.dbvar) if self.dbvar is not None else env.getvar('DB_DEFAULT')
         if self.db is None:
             raise marcel.exception.KillCommandException('No database profile defined')
-        self.connection = self.db.connection()
+        try:
+            self.connection = self.db.connection()
+        except Exception as e:
+            raise marcel.exception.KillCommandException(
+                f'Unable to connect to database {self.db.dbname} as {self.db.user}: {e}')
         if self.autocommit:
             self.connection.set_autocommit(True)
         self.delegate = self.classify_statement()(self.connection, self)
