@@ -619,13 +619,17 @@ def test_pipeline_args():
     TEST.run('gen 3 | f -b (10) -a (100) -a (200)',
              expected_err='Flag a given more than once')
     TEST.run('gen 3 | f -b (10)',
-             expected_out=[Error('missing'), Error('missing'), Error('missing')])
+             expected_err='Unbound pipeline parameters')
     # Long flags
     TEST.run('foobar = [foo, bar: map (x: x * foo) | select (x: x < bar)]')
     TEST.run('gen 10 | foobar --foo (10) --bar (45)',
              expected_out=[0, 10, 20, 30, 40])
     TEST.run('gen 10 | foobar --bar (73) --foo (10)',
              expected_out=[0, 10, 20, 30, 40, 50, 60, 70])
+    # Insufficient args
+    # Bug 105 --  # Depends on ext being defined in .marcel.py
+    TEST.run('ext',
+             expected_err='Unbound pipeline parameters')
 
 
 def test_sql():

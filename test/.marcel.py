@@ -10,3 +10,7 @@ jdb = database(driver='psycopg2',
                user='jao')
 
 DB_DEFAULT = jdb
+
+RUN_ON_STARTUP = '''
+ext = [e: select (f: f.suffix == '.' + e)]
+'''

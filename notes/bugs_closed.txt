@@ -1692,3 +1692,40 @@ ext is defined in ~/.marcel.py, in RUN_ON_STARTUP.
 
 M-0.10.16 jao@cheese:~/git/marcel/test$ env -s
 ('ext', [e: select(lambda e: lambda f: f.suffix == '.' + e)])
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+105. Stack dump printed if pipeline requiring args is run without pipeline
+
+M-0.10.17 jao@cheese:~/git/marcel/experiments$ (ext)
+[e: select(lambda e: lambda f: f.suffix == '.' + e)]
+M-0.10.17 jao@cheese:~/git/marcel/experiments$ ext
+Process Process-4:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 145, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 478, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/marcel/marcel/core.py", line 411, in receive
+    self.first_op.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 199, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/runpipeline.py", line 57, in receive
+    self.pipeline.receive(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 411, in receive
+    self.first_op.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 199, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/select.py", line 58, in receive
+    if self.function(*x):
+TypeError: FunctionWrapper object argument after * must be an iterable, not NoneType
+
+This appears to depend on the fact that ext is defined in RUN_ON_STARTUP.
+

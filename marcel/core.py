@@ -408,6 +408,8 @@ class Pipeline(AbstractOp):
             op = op.next_op
 
     def receive(self, x):
+        if self.params is not None and len(self.args) < len(self.params):
+            raise marcel.exception.KillCommandException(f'Unbound pipeline parameters for {self}')
         self.first_op.receive_input(x)
 
     def receive_complete(self):
