@@ -12,9 +12,11 @@ import dill
 
 import marcel.core
 import marcel.env
+import marcel.object.color
 import marcel.object.error
 import marcel.object.process
 import marcel.util
+import marcel.version
 
 # stdin carries the following from the client process:
 #   - The client's environment
@@ -99,7 +101,6 @@ def kill_descendents(signal_id):
         TRACE.write(f'Caught {type(e)} in kill_self_and_descendents: {e}')
         marcel.util.print_stack(TRACE.file)
 
-
 # Adapted from Environment.read_config
 def read_config(config_path=None):
     current_dir = pathlib.Path.cwd().resolve()
@@ -107,8 +108,13 @@ def read_config(config_path=None):
         'USER': getpass.getuser(),
         'HOME': pathlib.Path.home().resolve().as_posix(),
         'HOST': socket.gethostname(),
+        'MARCEL_VERSION': marcel.version.VERSION,
         'PWD': current_dir.as_posix(),
-        'DIRS': [current_dir.as_posix()]
+        'DIRS': [current_dir.as_posix()],
+        'BOLD': marcel.object.color.Color.BOLD,
+        'ITALIC': marcel.object.color.Color.ITALIC,
+        'COLOR_SCHEME': marcel.object.color.ColorScheme(),
+        'Color': marcel.object.color.Color,
     }
     config_path = (pathlib.Path(config_path)
                    if config_path else
