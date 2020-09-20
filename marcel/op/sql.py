@@ -18,7 +18,8 @@ import marcel.core
 import marcel.exception
 
 HELP = '''
-{L,wrap=F}sql [-d|--db DB_PROFILE] [-c|--commit UPDATE_COUNT] [-a|--autocommit] STATEMENT [ARG ...]
+{L,wrap=F}sql [-d|--db DB_PROFILE] [-c|--commit UPDATE_COUNT] [-a|--autocommit] 
+[-u|--update-counts] STATEMENT [ARG ...]
 
 {L,indent=4:28,wrap=T}{r:-d}, {r:--db}                Access the database whose profile is named 
 {r:DB_PROFILE}, in {n:~/.marcel.py}. If omitted, use the default profile, specified by the 
@@ -30,6 +31,9 @@ INSERT, UPDATE, DELETE.
 
 {L,indent=4:28}{r:-a}, {r:--autocommit}        Run in auto-commit mode. I.e., every SQL statement 
 runs in its own implicit transaction.
+
+{L,indent=4:28}{r:-u}, {r:--update-counts}     Write update counts to output stream. 
+(Default behavior is to not write update counts.)
 
 {L,indent=4:28}{r:STATEMENT}               A SQL statement. Consistent with Python's DBAPI specification,
 parameters are indicated using %s.
@@ -82,6 +86,7 @@ class SqlArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('sql', env)
         self.add_flag_one_value('db', '-d', '--db', target='dbvar')
         self.add_flag_no_value('autocommit', '-a', '--autocommit')
+        self.add_flag_no_value('update_counts', '-u', '--update-counts')
         self.add_flag_one_value('commit', '-c', '--commit', convert=self.str_to_int)
         self.add_anon('statement', target='statement_arg')
         self.add_anon_list('args', target='args_arg')
@@ -96,6 +101,7 @@ class Sql(marcel.core.Op):
         self.dbvar = None
         self.db = None
         self.autocommit = None
+        self.update_counts = None
         self.commit = None
         self.statement_arg = None
         self.statement = None
@@ -209,7 +215,8 @@ class SqlInsert(SqlStatement):
         args = op.args if x is None else x
         update_count = self.connection.insert(op.statement, args)
         self.commit_if_necessary(update_count)
-        op.send(update_count)
+        if op.update_counts:
+            op.send(update_count)
 
 
 class SqlOther(SqlStatement):
@@ -222,4 +229,5 @@ class SqlOther(SqlStatement):
         args = op.args if x is None else x
         update_count = self.connection.execute(op.statement, args)
         self.commit_if_necessary(update_count)
-        op.send(update_count)
+        if op.update_counts:
+            op.send(update_count)
