@@ -68,12 +68,18 @@ Note that the {r:--commit} and {r:--autocommit} flags are mutually exclusive.
 '''
 
 
-def sql(env, statement, *args, db=None, autocommit=None):
+def sql(env, *args, db=None, autocommit=None, update_counts=None, commit=None):
+    if len(args) == 0:
+        raise marcel.exception.KillCommandException('No sql statement provided')
+    statement = args[0]
+    args = args[1:]
     op_args = []
     if db:
         op_args.extend(['--db', db])
     if autocommit:
-        op_args.extend(['--autocommit', autocommit])
+        op_args.append('--autocommit')
+    if update_counts:
+        op_args.append('--update-counts')
     op_args.append(statement)
     if args:
         op_args.extend(args)

@@ -7,7 +7,8 @@ jao = remote(user='jao',
 
 jdb = database(driver='psycopg2',
                dbname='jao',
-               user='jao')
+               user='jao',
+               password='jao')
 
 DB_DEFAULT = jdb
 

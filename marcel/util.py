@@ -175,6 +175,13 @@ def namespace_description(namespace):
     return '\n'.join(description)
 
 
+def time_sec(f, *args, **kwargs):
+    start = time.time()
+    output = f(*args, **kwargs)
+    stop = time.time()
+    return stop - start, output
+
+
 
 class Stack:
 

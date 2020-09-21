@@ -31,7 +31,6 @@ import marcel.opmodule
 import marcel.util
 import marcel.version
 
-
 DEFAULT_CONFIG = '''from marcel.builtin import *
 
 # COLOR_EXT_IMAGE = Color(3, 0, 2, BOLD)

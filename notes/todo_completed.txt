@@ -574,3 +574,7 @@ env is hard to read. Make it easier:
     - builtin symbols
     - symbols defined in config file
     - symbols defined via interaction 
+
+----------------------------------------------------------------------
+
+sql option to suppress printing of update counts.
