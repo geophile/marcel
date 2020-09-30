@@ -16,6 +16,7 @@
 import marcel.argsparser
 import marcel.core
 import marcel.exception
+import marcel.reservoir
 
 
 HELP = '''
@@ -48,9 +49,9 @@ input to {r:join} comes from loading {r:def}.
 '''
 
 
-def load(env, accumulator):
+def load(env, reservoir):
     load = Load(env)
-    load.accumulator = accumulator
+    load.reservoir = reservoir
     return load, [None]
 
 
@@ -67,21 +68,11 @@ class Load(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.var = None
-        self.accumulator = None
-        self.input = None
+        self.reservoir = None
+        self.reader = None
 
     def __repr__(self):
         return f'load({self.var})'
-
-    def __getstate__(self):
-        m = super().__getstate__()
-        m['accumulator'] = self.save(self.accumulator)
-        return m
-
-    def __setstate__(self, state):
-        super().__setstate__(state)
-        state['accumulator'] = self.recall(state['accumulator'])
-        self.__dict__.update(state)
 
     # AbstractOp
 
@@ -91,26 +82,29 @@ class Load(marcel.core.Op):
             # Interactive: var is set, accumulator is None
             if not self.var.isidentifier():
                 raise marcel.exception.KillCommandException(f'{self.var} is not a valid identifier')
-            self.accumulator = self.getvar(env, self.var)
-            if self.accumulator is None:
+            self.reservoir = self.getvar(env, self.var)
+            if self.reservoir is None:
                 raise marcel.exception.KillCommandException(f'Variable {self.var} is undefined.')
+            if type(self.reservoir) is not marcel.reservoir.Reservoir:
+                raise marcel.exception.KillCommandException(f'Variable {self.var} is not a Reservoir.')
         else:
             # API: var is None, accumulator is set
-            if self.accumulator is None:
-                raise marcel.exception.KillCommandException(f'Accumulator is undefined.')
-        try:
-            self.input = iter(self.accumulator)
-        except:
-            raise marcel.exception.KillCommandException(
-                f'{self.var if self.var else "Accumulator"} is not iterable.')
+            if self.reservoir is None:
+                raise marcel.exception.KillCommandException(f'Reservoir is undefined.')
+            if type(self.reservoir) is not marcel.reservoir.Reservoir:
+                raise marcel.exception.KillCommandException(f'{self.reservoir} is not a Reservoir.')
+        env.mark_possibly_changed(self.var)
+        self.reader = iter(self.reservoir)
 
     def receive(self, _):
         try:
             while True:
-                self.send(next(self.input))
+                self.send(next(self.reader))
         except StopIteration:
-            pass
-        self.env().mark_possibly_changed(self.var)
+            self.reader.close()
+        except:
+            self.readaer.close()
+            raise
 
     def must_be_first_in_pipeline(self):
         return True

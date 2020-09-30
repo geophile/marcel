@@ -16,6 +16,7 @@
 import marcel.exception
 import marcel.helpformatter
 import marcel.object.error
+import marcel.pickler
 import marcel.util
 
 Error = marcel.object.error.Error
@@ -117,12 +118,6 @@ class ShallowCopyStore:
 
 
 class Op(AbstractOp):
-
-    # Op sublcasses use Op.save and Op.recall to "hide" state that should not be deep-copied during
-    # pickling/unpickling. For example, the variables passed to the store/load ops, via the API, are
-    # bound to lists. If these lists were copied, then pipeline copies would operate on the copied lists,
-    # defeating the point of using the store/load ops to operate on the values bound to the variables.
-    shallow_copy_store = ShallowCopyStore()
 
     def __init__(self, env):
         super().__init__()
@@ -234,14 +229,6 @@ class Op(AbstractOp):
 
     def run_in_main_process(self):
         return False
-
-    @staticmethod
-    def save(x):
-        return Op.shallow_copy_store.save(x)
-
-    @staticmethod
-    def recall(id):
-        return Op.shallow_copy_store.recall(id)
 
     @classmethod
     def op_name(cls):
@@ -437,7 +424,7 @@ class Pipeline(AbstractOp):
         self.args = None
 
     def copy(self):
-        return marcel.util.copy(self)
+        return marcel.pickler.copy(self)
 
     def append(self, op):
         op.set_owner(self)

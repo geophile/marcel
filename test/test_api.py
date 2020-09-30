@@ -598,7 +598,7 @@ def test_sql():
     TEST.run(test=lambda: run(sql("select * from t order by id")),
              expected_out=[(1000, 'aaa'), (1001, 'aaa'), (1002, 'aaa')])
     # Define database directly (not in .marcel.py)
-    jdb_too = database('psycopg2', 'jao', 'jao')
+    jdb_too = database('psycopg2', 'jao', 'jao', 'jao')
     TEST.run(test=lambda: run(sql("select * from t order by id", db=jdb_too)),
              expected_out=[(1000, 'aaa'), (1001, 'aaa'), (1002, 'aaa')])
     # Cleanup
@@ -608,32 +608,34 @@ def test_sql():
 
 def test_load_store():
     # Load
-    x = [10, 20, 30]
-    TEST.run(test=lambda: run(load(x)),
+    x = reservoir('x')
+    TEST.run(test=lambda: run(gen(3, 1) | map(lambda x: x * 10) | store(x)),
+             verification=lambda: run(load(x)),
              expected_out=[10, 20, 30])
     a = None
     TEST.run(test=lambda: run(load(a)),
-             expected_err='Accumulator is undefined')
+             expected_err='Reservoir is undefined')
     j = 123
     TEST.run(test=lambda: run(load(j)),
-             expected_err='Accumulator is not iterable')
+             expected_err='is not a Reservoir')
     # Store (first to an undefined var, then to a defined one)
-    y = []
-    TEST.run(test=lambda: run(gen(count=3, start=100) | store(y)))
-    TEST.run(test=lambda: run(map(lambda: y) | expand()),
+    y = reservoir('y')
+    TEST.run(test=lambda: run(gen(count=3, start=100) | store(y)),
+             verification=lambda: run(load(y)),
              expected_out=[100, 101, 102])
-    TEST.run(test=lambda: run(gen(count=3, start=200) | store(y)))
-    TEST.run(test=lambda: run(map(lambda: y) | expand()),
+    TEST.run(test=lambda: run(gen(count=3, start=200) | store(y, append=True)),
+             verification=lambda: run(load(y)),
              expected_out=[100, 101, 102, 200, 201, 202])
     # Store to a defined var that isn't a list
     i = 123
     TEST.run(test=lambda: run(gen(3) | store(i)),
-             expected_err='store\'s variable is not usable as an accumulator')
-    # Load and store the same container, to implement a loop
-    x = [(0,)]
-    run(load(x) | select(lambda x: x < 5) | map(lambda x: x + 1) | store(x) | select(lambda *x: False))
-    TEST.run(test=lambda: run(map(lambda: x)),
-             expected_out=[[(0,), (1,), (2,), (3,), (4,), (5,)]])
+             expected_err='store\'s variable is not usable as a reservoir')
+    # TODO: Get rid of this?
+    # # Load and store the same container, to implement a loop
+    # x = [(0,)]
+    # run(load(x) | select(lambda x: x < 5) | map(lambda x: x + 1) | store(x) | select(lambda *x: False))
+    # TEST.run(test=lambda: run(map(lambda: x)),
+    #          expected_out=[[(0,), (1,), (2,), (3,), (4,), (5,)]])
 
 
 def test_loop():

@@ -1792,3 +1792,49 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.8/dist-packages/psycopg2/__init__.py", line 127, in connect
     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
 psycopg2.OperationalError: fe_sendauth: no password supplied
+
+----------------------------------------------------------------------
+
+FIXED
+
+109. Slow command after storing large sequence
+
+If the env is large, then every command is slow because copying the
+env from one process to another is slow. E.g. 
+
+    cd ~/git
+    ls -fr > x
+    gen 40 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]
+
+To be fair, this is a lot of env copying, once per iteration through
+args.
+
+Hmm. That's not it. gen 1 1 | args ... is also slow. I don't
+understand why this particular command is slow but others are not,
+after ls -fr > x.
+
+The problem is copying FunctionWrapper._globals, which contains x. And
+_globals isn't really the problem, since the function's code would
+have to have the env too, (__globals__)
+
+Can a function's closure be discovered? If it can, then do that, and
+limit the namespace to just the closure. (Might require two evals, one
+to get the closure, one to create the function with the reduced
+namespace).
+
+OR: 
+
+- Create the function with an empty namespace.
+- inspect.getclosurevars(f).unbound is the set of unbound vars
+- Create the function again, with a namespace based on those unbound vars.
+
+
+This doesn't fix the problem. pipeline.copy() still copies the entire
+env.  This approach would require computing the reduced set of globals
+for the entire pipeline.
+
+And of course, this approach is not foolproof, as an environment var
+can be referred to indirectly, e.g. "globals()['x']" instead of "x".
+
+ACCUMULATING ARBITRARILY LARGE RESULTS IN MEMORY MAY BE A BAD IDEA.
+

@@ -20,10 +20,9 @@ import signal
 import sys
 import threading
 
-import dill
-
-import marcel.object.error
 import marcel.exception
+import marcel.object.error
+import marcel.pickler
 import marcel.util
 
 # The code for processing child input from multiple processes is adapted from here:
@@ -143,10 +142,12 @@ class Job:
     def start_process(self):
         def run_command_in_child(command, writer):
             debug(f'running: {command.source}, env {id(self.env)}')
+            pickler = marcel.pickler.MarcelPickler()
             try:
                 child_namespace_changes = command.execute(self.env)
                 debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
-                writer.send(dill.dumps(child_namespace_changes))
+                pickler.dump(child_namespace_changes)
+                writer.send(pickler.buffer)
             except marcel.exception.KillCommandException as e:
                 marcel.util.print_to_stderr(e, self.env)
             except marcel.exception.KillAndResumeException as e:
@@ -212,7 +213,10 @@ class ChildListener(threading.Thread):
             # Process the listeners that are ready
             for listener in mpc.wait(listeners, 0.1):
                 try:
-                    self.child_completion_handler(dill.loads(listener.recv()))
+                    input = listener.recv()
+                    if input is not None:
+                        unpickler = marcel.pickler.MarcelUnpickler(input)
+                        self.child_completion_handler(unpickler.load())
                 except EOFError:
                     to_remove.append(listener)
 
@@ -260,9 +264,10 @@ class JobControl:
                 return job
         return None
 
-    def foreground_is_alive(self):
-        foreground = self.foreground()
-        return foreground and foreground.state != Job.DEAD
+    def wait_for_idle_foreground(self):
+        while (foreground := self.foreground()) and foreground.state != Job.DEAD:
+            foreground.process.join(0.1)
+        debug(f'idle')
 
     def ctrl_c_handler(self, signum, frame):
         debug(f'ctrl c handler')

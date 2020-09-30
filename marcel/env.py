@@ -28,6 +28,7 @@ import marcel.object.color
 import marcel.object.file
 import marcel.object.process
 import marcel.opmodule
+import marcel.reservoir
 import marcel.util
 import marcel.version
 

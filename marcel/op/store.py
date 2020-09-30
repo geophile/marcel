@@ -16,6 +16,7 @@
 import marcel.argsparser
 import marcel.core
 import marcel.exception
+import marcel.reservoir
 
 
 HELP = '''
@@ -45,10 +46,14 @@ replacing the value, e.g. {r:gen 5 >> x}.
 '''
 
 
-def store(env, accumulator):
+def store(env, reservoir, append=False):
     store = Store(env)
-    store.accumulator = accumulator
-    return store, [None]
+    store.reservoir = reservoir
+    args = []
+    if append:
+        args.append('--append')
+    args.append(None)  # var
+    return store, args
 
 
 class StoreArgsParser(marcel.argsparser.ArgsParser):
@@ -65,62 +70,58 @@ class Store(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.var = None
-        self.accumulator = None
         self.append = None
+        self.reservoir = None
+        self.writer = None
 
     def __repr__(self):
         return f'store({self.var}, append)' if self.append else f'store({self.var})'
-
-    def __getstate__(self):
-        m = super().__getstate__()
-        m['accumulator'] = self.save(self.accumulator)
-        return m
-
-    def __setstate__(self, state):
-        super().__setstate__(state)
-        state['accumulator'] = self.recall(state['accumulator'])
-        self.__dict__.update(state)
 
     # AbstractOp
     
     def setup_1(self, env):
         super().setup_1(env)
-        if self.var is not None and self.accumulator is None:
+        if self.var is not None and self.reservoir is None:
             self.setup_interactive(env)
-        elif self.var is None and self.accumulator is not None:
+        elif self.var is None and self.reservoir is not None:
             self.setup_api()
         else:
             assert False
+        env.mark_possibly_changed(self.var)
 
     def receive(self, x):
-        self.accumulator.append(x)
-        self.env().mark_possibly_changed(self.var)
+        try:
+            self.writer.write(x)
+        except:
+            self.writer.close()
+            raise
+
+    def receive_complete(self):
+        self.writer.close()
+        self.send_complete()
 
     # For use by this class
 
     def setup_interactive(self, env):
         if not self.var.isidentifier():
             raise marcel.exception.KillCommandException(f'{self.var} is not a valid identifier')
-        self.accumulator = self.getvar(env, self.var)
-        if self.append and self.accumulator is not None:
-            if not self.accumulator_is_loop_variable():
-                raise marcel.exception.KillCommandException(
-                    f'{self.description()} is not usable as an accumulator')
-        else:
-            self.accumulator = []
-            env.setvar(self.var, self.accumulator)
+        self.reservoir = self.getvar(env, self.var)
+        self.prepare_reservoir(env)
 
     def setup_api(self):
-        if self.accumulator is None:
+        if self.reservoir is None:
             raise marcel.exception.KillCommandException(f'Accumulator is undefined.')
-        # Test that self.accumulator is usable as an accumulator
-        if not self.accumulator_is_loop_variable():
-            raise marcel.exception.KillCommandException(
-                f'{self.description()} is not usable as an accumulator')
+        self.prepare_reservoir(None)
 
     def description(self):
         return self.var if self.var else 'store\'s variable'
 
-    def accumulator_is_loop_variable(self):
-        return hasattr(self.accumulator, 'append') and hasattr(self.accumulator, '__iter__')
-
+    def prepare_reservoir(self, env):
+        if self.reservoir is None:
+            self.reservoir = marcel.reservoir.Reservoir(self.var)
+            env.setvar(self.var, self.reservoir)
+        elif type(self.reservoir) is not marcel.reservoir.Reservoir:
+            raise marcel.exception.KillCommandException(
+                f'{self.description()} is not usable as a reservoir, '
+                f'it stores a value of type {type(self.reservoir)}.')
+        self.writer = self.reservoir.writer(self.append)

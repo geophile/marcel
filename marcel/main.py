@@ -44,6 +44,7 @@ import marcel.job
 import marcel.multilinereader
 import marcel.opmodule
 import marcel.parser
+import marcel.reservoir
 import marcel.tabcompleter
 import marcel.util
 
@@ -128,8 +129,7 @@ class Main:
                     self.check_for_config_update()
                     self.run_command(self.input)
                     self.input = None
-                    while self.job_control.foreground_is_alive():
-                        time.sleep(Main.MAIN_SLEEP_SEC)
+                    self.job_control.wait_for_idle_foreground()
                 except KeyboardInterrupt:  # ctrl-C
                     print()
         except EOFError:  # ctrl-D
@@ -180,8 +180,12 @@ class Main:
         home = environment.getvar('HOME')
         return pathlib.Path(home) / HISTORY_FILE
 
-    def shutdown(self):
+    def shutdown(self, restart=False):
         namespace = self.env.namespace
+        if not restart:
+            for v in namespace.values():
+                if type(v) is marcel.reservoir.Reservoir:
+                    v.ensure_deleted()
         self.job_control.shutdown()
         self.reader.close()
         return namespace
@@ -305,7 +309,7 @@ if __name__ == '__main__':
                 break
             except ReloadConfigException:
                 input = MAIN.input
-                old_namespace = MAIN.shutdown()
+                old_namespace = MAIN.shutdown(restart=True)
                 pass
         else:
             # Piped-in script

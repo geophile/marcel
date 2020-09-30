@@ -16,6 +16,7 @@
 import marcel.argsparser
 import marcel.core
 import marcel.exception
+import marcel.object.db
 
 HELP = '''
 {L,wrap=F}sql [-d|--db DB_PROFILE] [-c|--commit UPDATE_COUNT] [-a|--autocommit] 
@@ -74,15 +75,17 @@ def sql(env, *args, db=None, autocommit=None, update_counts=None, commit=None):
     statement = args[0]
     args = args[1:]
     op_args = []
-    if db:
-        op_args.extend(['--db', db])
     if autocommit:
         op_args.append('--autocommit')
     if update_counts:
         op_args.append('--update-counts')
+    if commit is not None:
+        op_args.extend(['--commit', commit])
     op_args.append(statement)
     if args:
         op_args.extend(args)
+    op = Sql(env)
+    op.db = db
     return Sql(env), op_args
 
 
@@ -131,9 +134,12 @@ class Sql(marcel.core.Op):
         elif self.commit < 0:
             raise marcel.exception.KillCommandException(f'--commit value must be a positive integer: {self.commit}')
         self.total_update_count = 0
-        self.db = env.db(self.dbvar) if self.dbvar is not None else env.getvar('DB_DEFAULT')
-        if self.db is None:
-            raise marcel.exception.KillCommandException('No database profile defined')
+        if type(self.db) is not marcel.object.db.Database:
+            # Interactive usage
+            self.db = env.db(self.dbvar) if self.dbvar is not None else env.getvar('DB_DEFAULT')
+            if self.db is None:
+                raise marcel.exception.KillCommandException('No database profile defined')
+        # else: API usage
         try:
             self.connection = self.db.connection()
         except Exception as e:

@@ -671,38 +671,32 @@ def test_import():
     TEST.run('(os.popen)', expected_out=[os.popen])
 
 
-def test_load_store():
+def test_store_load():
     TEST.reset_environment()
-    # Load
-    TEST.run('x = ([10, 20, 30])')
-    TEST.run('load x',
-             expected_out=[10, 20, 30])
-    TEST.run('load a',
-             expected_err='Variable a is undefined')
-    TEST.run('j = (123)')
-    TEST.run('load j',
-             expected_err='j is not iterable')
-    # Store to an undefined var
-    TEST.run('gen 3 100 | store y')
-    TEST.run('load y',
+    # Basics
+    TEST.run(test='gen 3 | store x',
+             verification='load x',
+             expected_out=[0, 1, 2])
+    TEST.run('env | map (k, v: k) | select (k: k == "x")',
+             expected_out=['x'])
+    # Overwrite
+    TEST.run(test='gen 3 100 | store x',
+             verification='load x',
              expected_out=[100, 101, 102])
-    # Store to same far, without append option
-    TEST.run('gen 3 100 | store y')
-    TEST.run('load y',
-             expected_out=[100, 101, 102])
-    # Try appending
-    TEST.run('gen 3 200 | store -a y')
-    TEST.run('load y',
+    # Append
+    TEST.run(test='gen 3 200 | store -a x',
+             verification='load x',
              expected_out=[100, 101, 102, 200, 201, 202])
-    # Store to a defined var that isn't a list
-    TEST.run('i = (123)')
-    TEST.run('gen 3 | store --append i',
-             expected_err='i is not usable as an accumulator')
-    # Not a var
-    TEST.run('gen 3 | store /notavar',
-             expected_err='not a valid identifier')
-    TEST.run('/x > y',
-             expected_err='not a valid identifier')
+    # Append to undefined var
+    TEST.run(test='gen 3 300 | store -a y',
+             verification='load y',
+             expected_out=[300, 301, 302])
+    # Bind the variable to something other than a reservoir and then append
+    TEST.run('x = (123)')
+    TEST.run(test='gen 3 200 | store -a x',
+             verification='load x',
+             expected_err='not a Reservoir')
+    # TODO: Get rid of this?
     # # Load and store the same container, to implement a loop
     # TEST.run('x = ([(0,)])')
     # TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x')
@@ -965,8 +959,9 @@ def test_read():
 
 
 def test_intersect():
+    TEST.reset_environment()
     # Empty inputs
-    TEST.run('empty = ([])')
+    TEST.run('gen 1 | select (*x: False) > empty')
     TEST.run('empty > intersect [empty >]',
              expected_out=[])
     TEST.run('gen 3 | intersect [empty >]',
@@ -997,8 +992,9 @@ def test_intersect():
 
 
 def test_union():
+    TEST.reset_environment()
     # Empty inputs
-    TEST.run('empty = ([])')
+    TEST.run('gen 1 | select (*x: False) > empty')
     TEST.run('empty > union [empty >]',
              expected_out=[])
     TEST.run('gen 3 | union [empty >] | sort',
@@ -1017,8 +1013,9 @@ def test_union():
 
 
 def test_difference():
+    TEST.reset_environment()
     # Empty inputs
-    TEST.run('empty = ([])')
+    TEST.run('gen 1 | select (*x: False) > empty')
     TEST.run('empty > difference [empty >]',
              expected_out=[])
     TEST.run('gen 3 | difference [empty >] | sort',
@@ -1046,6 +1043,7 @@ def test_difference():
 
 
 def test_args():
+    TEST.reset_environment()
     # gen
     TEST.run('gen 5 1 | args [n: gen (n)] | map (x: -x)',
              expected_out=[0, 0, -1, 0, -1, -2, 0, -1, -2, -3, 0, -1, -2, -3, -4])
@@ -1172,7 +1170,7 @@ def main_stable():
     test_pipeline_args()
     test_sql()
     test_import()
-    test_load_store()
+    test_store_load()
     test_load_store_sugar()
     # test_loop()
     test_if()

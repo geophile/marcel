@@ -17,6 +17,7 @@ import marcel.core as _core
 import marcel.exception as _exception
 import marcel.main as _main
 import marcel.object.error as _error
+import marcel.reservoir as _reservoir
 
 from marcel.op.args import args as _args
 from marcel.op.bash import bash as _bash
@@ -66,6 +67,7 @@ _MAIN = _main.Main(None, same_process=True, old_namespace=None)
 env = _MAIN.env
 # No colors for API
 env.set_color_scheme(None)
+_reservoir_counter = 0
 
 def args(*args, **kwargs): return _generate_op(_args, *args, **kwargs)
 def bash(*args, **kwargs): return _generate_op(_bash, *args, **kwargs)
@@ -167,3 +169,11 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     if isinstance(first, _error.Error):
         raise Exception(first)
     return first
+
+
+def reservoir(name=None):
+    global _reservoir_counter
+    if name is None:
+        name = f'r{_reservoir_counter}'
+        _reservoir_counter += 1
+    return _reservoir.Reservoir(name)

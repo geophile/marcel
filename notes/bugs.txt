@@ -243,33 +243,11 @@ The equivalent test in test_ops succeeds!?!?!?!
 
 ----------------------------------------------------------------------
 
-109. Slow command after storing large sequence
+110. API doesn't clean up reservoirs
 
-If the env is large, then every command is slow because copying the
-env from one process to another is slow. E.g. 
+----------------------------------------------------------------------
 
-    cd ~/git
-    ls -fr > x
-    gen 40 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]
+111. Improve serialization of Reservoirs for remote execution
 
-To be fair, this is a lot of env copying, once per iteration through
-args.
-
-Hmm. That's not it. gen 1 1 | args ... is also slow. I don't
-understand why this particular command is slow but others are not,
-after ls -fr > x.
-
-The problem is copying FunctionWrapper._globals, which contains x. And
-_globals isn't really the problem, since the function's code would
-have to have the env too, (__globals__)
-
-Can a function's closure be discovered? If it can, then do that, and
-limit the namespace to just the closure. (Might require two evals, one
-to get the closure, one to create the function with the reduced
-namespace).
-
-OR: 
-
-- Create the function with an empty namespace.
-- inspect.getclosurevars(f).unbound is the set of unbound vars
-- Create the function again, with a namespace based on those unbound vars.
+Currently, the reservoir's file name is transmitted, which won't work
+(except for localhost, under some conditions).
