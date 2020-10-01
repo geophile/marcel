@@ -16,3 +16,18 @@ From https://erayerdin.hashnode.dev/nushell-shell-redefined-ck9gbnphi06oucss1fvt
 - Look into direnv. Nushell has some idea of location-sensitive
   environment. A directory is a "shell", and I guess has its own
   environment.
+
+----------------------------------------------------------------------
+
+From shell-collab discussion:
+
+
+Nushell and crush introduce metadata where the metadata is
+created. Marcel does at the point of use.  Due to this discussion, I'm
+now thinking of a generalized approach. If metadata were dervied for
+tuple positions, or attached, then those names could substitute for
+the named arguments later. In the a+b+c example, the pipeline would
+look like this: ...| map (a, b, c: a+b+c)|... (you can omit
+"lambda"). If the metadata were already there, it would be ...| map
+(a+b+c)|...  How about deriving, or allowing attaching of, "column
+names"?

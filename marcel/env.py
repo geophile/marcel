@@ -214,6 +214,11 @@ class Environment:
         self.namespace[var] = value
         self.modified_vars.add(var)
 
+    def delvar(self, var):
+        value = self.namespace.pop(var, None)
+        if type(value) is marcel.reservoir.Reservoir:
+            value.ensure_deleted()
+
     def vars(self):
         return self.namespace
 

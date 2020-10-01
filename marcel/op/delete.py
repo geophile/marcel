@@ -59,11 +59,7 @@ class Delete(marcel.core.Op):
 
     def receive(self, _):
         for var in self.vars:
-            try:
-                del self.env().namespace[var]
-            except KeyError:
-                # Shouldn't happen, since we checked in setup_1, but why not.
-                pass
+            self.env().delvar(var)
 
     # Op
 
