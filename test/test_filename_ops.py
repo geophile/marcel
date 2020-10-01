@@ -204,6 +204,9 @@ def test_ls():
                                   'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
                                   'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
                                   ]))
+    # No such file
+    TEST.run('ls /nosuchfile',
+             expected_err='No qualifying paths')
 
 
 # pushd, popd, dirs
