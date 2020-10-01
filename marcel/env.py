@@ -211,6 +211,9 @@ class Environment:
         return value
 
     def setvar(self, var, value):
+        current_value = self.namespace.get(var, None)
+        if type(current_value) is marcel.reservoir.Reservoir:
+            current_value.ensure_deleted()
         self.namespace[var] = value
         self.modified_vars.add(var)
 

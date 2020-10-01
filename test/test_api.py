@@ -657,12 +657,12 @@ def test_loop():
 
 
 def test_if():
-    even = []
+    even = reservoir('even')
     TEST.run(test=lambda: run(gen(10) | ifthen(lambda x: x % 2 == 0, store(even))),
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run(test=lambda: run(load(even)),
              expected_out=[0, 2, 4, 6, 8])
-    d3 = []
+    d3 = reservoir('d3')
     TEST.run(test=lambda: run(gen(10) | ifelse(lambda x: x % 3 == 0, store(d3))),
              expected_out=[1, 2, 4, 5, 7, 8])
     TEST.run(test=lambda: run(load(d3)),
@@ -727,7 +727,7 @@ def test_read():
 
 def test_intersect():
     # Empty inputs
-    empty = []
+    empty = reservoir('empty')
     TEST.run(lambda: run(load(empty) | intersect(load(empty))),
              expected_out=[])
     TEST.run(lambda: run(gen(3) | intersect(load(empty))),
@@ -740,8 +740,8 @@ def test_intersect():
     TEST.run(lambda: run(gen(3) | intersect(gen(1, 1))),
              expected_out=[1])
     # Duplicates
-    a = []
-    b = []
+    a = reservoir('a')
+    b = reservoir('b')
     TEST.run(lambda: run(gen(5) | map(lambda x: [x] * x) | expand() | store(a)))
     TEST.run(lambda: run(gen(5) | map(lambda x: [x] * 2) | expand() | store(b)))
     TEST.run(lambda: run(load(a) | intersect(load(b)) | sort()),
@@ -761,7 +761,7 @@ def test_intersect():
 
 def test_union():
     # Empty inputs
-    empty = []
+    empty = reservoir('empty')
     TEST.run(lambda: run(load(empty) | union(load(empty))),
              expected_out=[])
     TEST.run(lambda: run(gen(3) | union(load(empty))),
@@ -782,7 +782,7 @@ def test_union():
 
 def test_difference():
     # Empty inputs
-    empty = []
+    empty = reservoir('empty')
     TEST.run(lambda: run(load(empty) | difference(load(empty))),
              expected_out=[])
     TEST.run(lambda: run(gen(3) | difference(load(empty)) | sort()),
