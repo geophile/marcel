@@ -42,6 +42,9 @@ class Reservoir(marcel.pickler.Cached):
         self.debug(f'init {self.path}')
         self.mode = Reservoir.CLOSED
 
+    def __del__(self):
+        self.ensure_deleted()
+
     def __repr__(self):
         return f'Reservoir({self.name})'
 
@@ -63,7 +66,6 @@ class Reservoir(marcel.pickler.Cached):
         return Writer(self, append)
 
     def ensure_deleted(self):
-        assert self.mode == Reservoir.CLOSED, self.mode
         try:
             os.unlink(self.path)
         except FileNotFoundError:
