@@ -31,3 +31,22 @@ look like this: ...| map (a, b, c: a+b+c)|... (you can omit
 "lambda"). If the metadata were already there, it would be ...| map
 (a+b+c)|...  How about deriving, or allowing attaching of, "column
 names"?
+
+Now:
+
+    ps | map (p: (p.pid, p.commandline))
+
+With metadata:
+
+    ps | map ((pid, commandline))
+
+But map gets a 1-tuple, so shouldn't it be:
+
+    ps | map (p: (pid, commandline))
+
+Could allow omission of the param list.
+
+This works because ps yields Process objects, which have
+properties. (Need to establish the criterion for deciding what things
+in the dict turn into variables.)
+

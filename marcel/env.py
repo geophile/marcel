@@ -28,6 +28,7 @@ import marcel.object.color
 import marcel.object.file
 import marcel.object.process
 import marcel.opmodule
+import marcel.pickler
 import marcel.reservoir
 import marcel.util
 import marcel.version
@@ -265,6 +266,14 @@ class Environment:
 
     def set_color_scheme(self, color_scheme):
         self.setvar('COLOR_SCHEME', color_scheme)
+
+    # Remove Reservoirs, which can be arbitrarily large.
+    def remotify(self):
+        remote_env = marcel.pickler.copy(self)
+        for var, value in self.namespace.items():
+            if type(value) is marcel.reservoir.Reservoir:
+                del remote_env.namespace[var]
+        return remote_env
 
     def read_config(self, config_path):
         config_path = (pathlib.Path(config_path)

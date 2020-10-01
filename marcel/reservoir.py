@@ -42,9 +42,6 @@ class Reservoir(marcel.pickler.Cached):
         self.debug(f'init {self.path}')
         self.mode = Reservoir.CLOSED
 
-    def __del__(self):
-        self.ensure_deleted()
-
     def __repr__(self):
         return f'Reservoir({self.name})'
 

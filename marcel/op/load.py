@@ -103,7 +103,7 @@ class Load(marcel.core.Op):
         except StopIteration:
             self.reader.close()
         except:
-            self.readaer.close()
+            self.reader.close()
             raise
 
     def must_be_first_in_pipeline(self):

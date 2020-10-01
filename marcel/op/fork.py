@@ -214,8 +214,6 @@ class Remote(ForkImplementation):
     def setup_2(self, env):
         op = self.op
         for thread_label in op.thread_labels:
-            # Copy the pipeline. Env is set here, not in op.pipeline. Env cloning preserves
-            # only minimal state, so it has to be set in the clone.
             pipeline_copy = op.pipeline.copy()
             pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to Remote op.
