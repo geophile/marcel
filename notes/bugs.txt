@@ -254,81 +254,22 @@ Currently, the reservoir's file name is transmitted, which won't work
 
 ----------------------------------------------------------------------
 
-112. Use of Reservoir remotely deletes the underlying file
-
-    M-0.10.20 jao@cheese:~/git/marcel/test$ ls > x
-    M-0.10.20 jao@cheese:~/git/marcel/test$ @jao [x>]
-    (localhost, .)
-    (localhost, .marcel.py)
-    (localhost, .marcel_bug29.py)
-    (localhost, __init__.py)
-    (localhost, __pycache__)
-    (localhost, bug_28.py)
-    (localhost, bug_29.py)
-    (localhost, bug_30.py)
-    (localhost, bug_31.py)
-    (localhost, bug_33.py)
-    (localhost, bug_38.py)
-    (localhost, bug_39.py)
-    (localhost, bug_75.py)
-    (localhost, bug_76.py)
-    (localhost, profiling.py)
-    (localhost, test_api.py)
-    (localhost, test_api2.py)
-    (localhost, test_base.py)
-    (localhost, test_embedded_python.txt)
-    (localhost, test_filename_ops.py)
-    (localhost, test_help.py)
-    (localhost, test_native_filename_ops.py)
-    (localhost, test_ops.py)
-    (localhost, test_parser.py)
-    (localhost, test_python_string.txt)
-    (localhost, test_shell_string.txt)
-    (localhost, test_tab_completion.py)
-    (localhost, testall)
-
-The tmp file is now gone.
-
-    M-0.10.20 jao@cheese:~/git/marcel/test$ @jao [x>]
-    Exception in thread Thread-1:
-    Traceback (most recent call last):
-      File "/usr/local/bin/farcel.py", line 73, in run
-        self.pipeline.setup_1(self.env)
-      File "/home/jao/git/marcel/marcel/core.py", line 374, in setup_1
-        op.setup_1(env)
-      File "/home/jao/git/marcel/marcel/op/load.py", line 97, in setup_1
-        self.reader = iter(self.reservoir)
-      File "/home/jao/git/marcel/marcel/reservoir.py", line 52, in __iter__
-        return self.reader()
-      File "/home/jao/git/marcel/marcel/reservoir.py", line 63, in reader
-        return Reader(self)
-      File "/home/jao/git/marcel/marcel/reservoir.py", line 82, in __init__
-        self.file = open(reservoir.path, 'r+b')
-    FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp2cuvz2em'
-    
-    During handling of the above exception, another exception occurred:
-    
-    Traceback (most recent call last):
-      File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
-        self.run()
-      File "/usr/local/bin/farcel.py", line 80, in run
-        self.pickler.receive_error(e)
-      File "/usr/local/bin/farcel.py", line 52, in receive_error
-        super().receive_error(error)
-      File "/home/jao/git/marcel/marcel/core.py", line 203, in receive_error
-        assert isinstance(error, Error)
-    AssertionError
-    (localhost, FileNotFoundError(2, 'No such file or directory'))
-    M-0.10.20 jao@cheese:~/git/marcel/test$ 
-
-The second command (@jao[x>]) only works because @jao is localhost,
-and so the tmp file is present.
-
-----------------------------------------------------------------------
-
 113. Farcel error reporting is broken
 
 ls /nosuchfile: Generates an error
 @jao [ls /nosuchfile]: Error message shows up as output (see test_api test_remote)
 
 Need to review how errors and exceptions are reported from farcel.
+
+----------------------------------------------------------------------
+
+114. Ctrl-C doesn't clean up temp file
+
+- gen 10000000 > x
+- ctrl-c while it's running
+
+The env var isn't there, but the temp file is.
+
+----------------------------------------------------------------------
+
+116. 

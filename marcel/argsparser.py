@@ -19,6 +19,7 @@ import marcel.exception
 import marcel.functionwrapper
 import marcel.object.cluster
 import marcel.object.file
+import marcel.reservoir
 import marcel.util
 
 FunctionWrapper = marcel.functionwrapper.FunctionWrapper
@@ -213,6 +214,11 @@ class ArgsParser:
             return x
         raise marcel.argsparser.ArgsError(self.op_name,
                                           f'{arg.name} argument must be a Pipeline: {x}')
+
+    def init_reservoir(self, arg, x):
+        if not self.env.hasvar(x):
+            self.env.setvar(x, marcel.reservoir.Reservoir(x))
+        return x
 
     # An ArgsParser subclass uses this function as the value of convert, to validate
     # Python expressions, (parser.Expression). x is function source for console usage,

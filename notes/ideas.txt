@@ -50,3 +50,37 @@ This works because ps yields Process objects, which have
 properties. (Need to establish the criterion for deciding what things
 in the dict turn into variables.)
 
+Add metadata:
+
+    gen 5 | map (x: (x, -x)) | label a b | select (a > 1) | map (a+b) | map (-a)
+
+- First map issues 2-tuples.
+
+- label op labels the columns, a and b.
+
+- labels available to the select
+
+- and to the 2nd map, which generates a 1-tuple. The label a
+  applies. I.e., the labels apply to all downstream tuples.
+
+What about branches?
+
+   ... | label a b | ifelse (...) [map (a+b)] | map (a-b)
+
+- a, b apply to the ifelse pipeline, and to the main pipeline.
+
+What about this? In the ifelse pipeline, are references to a and b
+legal? I.e., do c/d replace a/b?
+
+   ... | label a b | ifelse (...) [label c d | map (a+b)] | map (a-b)
+
+What about ps | map ((pid, commandline))? This is actually different!
+It implies some intermediate stuff, i.e.
+
+    ps | map (p: (p.pid, p.commandline, p.foobar)) | label pid commandline foobar | ...
+
+----------------------------------------------------------------------
+
+Now that reservoirs go to disk, it is feasible to have bg run quietly,
+dumping to a reservoir. Of course, that is already possible by just
+starting the command to store results.

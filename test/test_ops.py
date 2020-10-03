@@ -708,7 +708,7 @@ def test_store_load():
     #          expected_out=[1, 2, 3, 4, 5])
 
 
-def test_load_store_sugar():
+def test_store_load_sugar():
     # ------------------------ Test all the paths through Parser.pipeline()
     # var >
     TEST.run(test='gen 3 | store p1',
@@ -1171,7 +1171,7 @@ def main_stable():
     test_sql()
     test_import()
     test_store_load()
-    test_load_store_sugar()
+    test_store_load_sugar()
     # test_loop()
     test_if()
     test_delete()

@@ -78,9 +78,9 @@ class Job:
         self.start_process()
 
     def __repr__(self):
-        return (f'job({self.process.pid}({self.state_symbol()}): {self.command.source})'
+        return (f'job({self.process.pid}({self.state_symbol()}): {self.command.source}'
                 if self.process else
-                f'job(-----({self.state_symbol()}): {self.command.source})')
+                f'job(-----({self.state_symbol()}): {self.command.source}')
 
     def kill(self):
         if self.state != Job.DEAD:

@@ -381,16 +381,12 @@ class Pipeline(AbstractOp):
     def setup_2(self, env):
         op = self.first_op
         while op:
-            if op.receiver is None:
-                op.receiver = op.next_op
             op.setup_2(env)
             op = op.next_op
 
     def set_env(self, env):
         op = self.first_op
         while op:
-            if op.receiver is None:
-                op.receiver = op.next_op
             op.set_env(env)
             op = op.next_op
 

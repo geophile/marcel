@@ -1838,3 +1838,21 @@ can be referred to indirectly, e.g. "globals()['x']" instead of "x".
 
 ACCUMULATING ARBITRARILY LARGE RESULTS IN MEMORY MAY BE A BAD IDEA.
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+115. store op should flush occasionally
+
+E.g., in situations like this:
+
+      timer 1 > x
+
+Could flush after each dill.dump(). Is that guaranteed to produce a
+readable result? That could get expensive. Flush periodically? How
+would this be specified/controlled?
+
+Flushing isn't the entire problem. x doesn't show up in env until the
+pipeline finishes execution. Before execution, need to analyze
+pipeline for new variables.

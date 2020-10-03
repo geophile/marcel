@@ -203,6 +203,9 @@ class Environment:
     def __setstate__(self, state):
         self.__dict__.update(state)
 
+    def hasvar(self, var):
+        return var in self.namespace
+
     def getvar(self, var):
         try:
             value = self.namespace[var]

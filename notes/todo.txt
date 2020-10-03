@@ -385,3 +385,7 @@ that early ones compute local sum of sizes, and later ones are global.
 ----------------------------------------------------------------------
 
 In api functions, why [None] instead of []? E.g., in store()
+
+----------------------------------------------------------------------
+
+File.unlink()

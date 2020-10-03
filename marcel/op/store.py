@@ -61,7 +61,7 @@ class StoreArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('store', env)
         self.add_flag_no_value('append', '-a', '--append')
-        self.add_anon('var')
+        self.add_anon('var', convert=self.init_reservoir)
         self.validate()
 
 

@@ -15,6 +15,7 @@
 
 import os
 import tempfile
+import time
 
 import dill
 
@@ -84,6 +85,9 @@ class Reader:
         except EOFError:
             self.close()
             raise StopIteration()
+        except:
+            self.close()
+            raise
 
     def read(self):
         return dill.load(self.file)
@@ -94,11 +98,22 @@ class Reader:
 
 class Writer:
 
+    FLUSH_INTERVAL_SEC = 1
+
     def __init__(self, reservoir, append):
         self.file = open(reservoir.path, 'a+b' if append else 'w+b')
+        self.last_flush = time.time()
 
     def write(self, x):
-        dill.dump(x, self.file)
+        try:
+            dill.dump(x, self.file)
+            t = time.time()
+            if t - self.last_flush > Writer.FLUSH_INTERVAL_SEC:
+                self.file.flush()
+                self.last_flush = t
+        except:
+            self.close()
+            raise
 
     def close(self):
         self.file.close()
