@@ -1,50 +1,49 @@
 What's New
 ----------
 
-Marcel now has an operator, `args`, that works like Linux's `xargs`. 
-For example, suppose you have a directory containing log files, and you want to
-delete logs that are more than 100 days old. Locating
-such files is easy:
+Lots of work on the saving and recalling of streams. Suppose you run this command, to
+locate all files under your current directory, recursively.
 
 ```shell script
-ls -f | select (f: now() - f.mtime > days(100))
+ls -fr
 ```
 
-What you would like to do is to take each `File` in the resulting stream, and
-delete it. The `args` operator takes values arriving in the input
-stream, and binds them to pipeline parameters. 
-Those parameters are just ordinary variables, in scope for
-operators inside the pipeline.
-So to do the file removal:
+This can take a while, and the output can be quite large, so you can put the 
+command in the background, as you would in bash: hit `ctrl-z` to suspend the
+command, and then use the `bg` 
+command to have the command resume in the background. 
+
+But if you do this, then the output continues to go to the console. To fix this
+problem, you can redirect the output to an environment variable:
 
 ```shell script
-ls -f | select (f: now() - f.mtime > days(100)) | args [f: rm (f)]
+ls -fr > allfiles
 ```
 
-- `ls ... | select ...` produces a stream of `File`s.
-- These `File`s flow into the `args` input stream.
-- `args` has a pipeline with parameter `f`. Each arriving `File` is bound to `f`, and
-the pipeline is executed.
-- `rm (f)` removes `File` `f`.
-
-You can also pass all of the qualifying `File`s at once:
+This puts the output of the `ls -fr` command in the environment variable `allfiles`. This
+is not a file, it is an environment variable storing the contents of a stream. After you
+put this command in the background, you can check on progress, e.g.
 
 ```shell script
-ls -f | select (f: now() - f.mtime > days(100)) | args --all [files: rm (quote_files(files))]
-``` 
-
-Now, all of the qualifying `File`s are bound to the pipelines `files` parameter. 
-Because the args pipeline relies on the host OSs `rm` command, carefully quoting
-filenames is necessary. `quote_files` takes `files`, a `list` of `File`s, and returns
-a string containing all the `File`s names, separated by spaces, and each quoted, (e.g.
-to properly handle a filename such as `this filename has four spaces`.)
-
-Actually, you can do the same cleanup by relying on the fact that `File`s implement
-the `pathlib.Path` interface, which has an `unlink` method. So this works too:
-
-```shell script
-ls -f | select (f: now() - f.mtime > days(100)) | map (f: f.unlink())
+allfiles > tail -5
 ```
+
+to see the last 5 `File`'s listed, or to count them:
+
+```shell script
+allfiles | red count
+```
+
+If what you really want to do is to store the result in a file, you can do that too:
+
+```shell script
+ls -fr | out -f /tmp/allfiles.txt
+```
+
+There are two differences. First, the environment variable is bound to your 
+marcel session, and disappears when you exit marcel. Second, the environment
+variable stores actual `File` objects. If you store command output in a file,
+then that file stores paths only, not `File` objects.
 
 Marcel
 ======
