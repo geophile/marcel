@@ -31,7 +31,7 @@ allfiles > tail -5
 to see the last 5 `File`'s listed, or to count them:
 
 ```shell script
-allfiles | red count
+allfiles > red count
 ```
 
 If what you really want to do is to store the result in a file, you can do that too:
