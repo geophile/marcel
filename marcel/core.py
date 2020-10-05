@@ -455,7 +455,7 @@ class Command:
     def __repr__(self):
         return str(self.pipeline)
 
-    def execute(self, env):
+    def execute(self, env, api=False):
         env.clear_changes()
         self.pipeline.setup_1(env)
         self.pipeline.setup_2(env)
@@ -463,9 +463,11 @@ class Command:
         self.pipeline.receive(None)
         self.pipeline.receive_complete()
         self.pipeline.set_env(None)
-        # A Command is executed by a multiprocessing.Process. Need to transmit the Environment's vars
-        # relating to the directory, to the parent process, because they may have changed.
-        return env.changes()
+        if api:
+            # An interactive Command is executed by a multiprocessing.Process.
+            # Need to transmit the Environment's vars relating to the directory, to the parent
+            # process, because they may have changed. This doesn't apply to API usage.
+            return env.changes()
 
 
 class PipelineIterator:

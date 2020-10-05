@@ -22,7 +22,13 @@ import dill
 import marcel.pickler
 
 
-DEBUG = False
+RESERVOIRS = []
+
+
+def shutdown(main_pid):
+    if os.getpid() == main_pid:
+        for reservoir in RESERVOIRS:
+            reservoir.ensure_deleted()
 
 
 # A Reservoir collects and feeds streams.
@@ -40,8 +46,8 @@ class Reservoir(marcel.pickler.Cached):
             self.path = path
         else:
             _, self.path = tempfile.mkstemp()
-        self.debug(f'init {self.path}')
         self.mode = Reservoir.CLOSED
+        RESERVOIRS.append(self)
 
     def __repr__(self):
         return f'Reservoir({self.name})'
@@ -68,10 +74,6 @@ class Reservoir(marcel.pickler.Cached):
             os.unlink(self.path)
         except FileNotFoundError:
             pass
-
-    def debug(self, message):
-        if DEBUG:
-            print(f'{os.getpid()} {self}: {message}')
 
 
 class Reader:

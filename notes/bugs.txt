@@ -243,17 +243,6 @@ The equivalent test in test_ops succeeds!?!?!?!
 
 ----------------------------------------------------------------------
 
-110. API doesn't clean up reservoirs
-
-----------------------------------------------------------------------
-
-111. Improve serialization of Reservoirs for remote execution
-
-Currently, the reservoir's file name is transmitted, which won't work
-(except for localhost, under some conditions).
-
-----------------------------------------------------------------------
-
 113. Farcel error reporting is broken
 
 ls /nosuchfile: Generates an error

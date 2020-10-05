@@ -18,7 +18,6 @@ import marcel.core
 import marcel.exception
 import marcel.reservoir
 
-
 HELP = '''
 {L,wrap=F}store [-a|--append] VAR
 {L,wrap=F}> VAR
@@ -46,13 +45,21 @@ replacing the value, e.g. {r:gen 5 >> x}.
 '''
 
 
+def raise_not_a_reservoir(reservoir_description, type):
+    raise marcel.exception.KillCommandException(
+        f'{reservoir_description} is not usable as a reservoir, it stores a value of type {type}.')
+
+
 def store(env, reservoir, append=False):
     store = Store(env)
+    store.api = True
     store.reservoir = reservoir
     args = []
     if append:
         args.append('--append')
-    args.append(None)  # var
+    if type(reservoir) is not marcel.reservoir.Reservoir:
+        raise_not_a_reservoir(str(reservoir), type(reservoir))
+    args.append(reservoir.name)
     return store, args
 
 
@@ -61,6 +68,10 @@ class StoreArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('store', env)
         self.add_flag_no_value('append', '-a', '--append')
+        # init_reservoir actually creates the Reservoir if it doesn't exist. This would normally be done by
+        # setup_1. However, for commands that don't terminate for a while, (e.g. ls / > x), we want the
+        # variable available immediately. This allows the long-running command to be run in background,
+        # monitoring progress, e.g. x > tail 5.
         self.add_anon('var', convert=self.init_reservoir)
         self.validate()
 
@@ -73,20 +84,19 @@ class Store(marcel.core.Op):
         self.append = None
         self.reservoir = None
         self.writer = None
+        self.api = False
 
     def __repr__(self):
         return f'store({self.var}, append)' if self.append else f'store({self.var})'
 
     # AbstractOp
-    
+
     def setup_1(self, env):
         super().setup_1(env)
-        if self.var is not None and self.reservoir is None:
-            self.setup_interactive(env)
-        elif self.var is None and self.reservoir is not None:
+        if self.api:
             self.setup_api()
         else:
-            assert False
+            self.setup_interactive(env)
         env.mark_possibly_changed(self.var)
 
     def receive(self, x):
@@ -106,22 +116,21 @@ class Store(marcel.core.Op):
         if not self.var.isidentifier():
             raise marcel.exception.KillCommandException(f'{self.var} is not a valid identifier')
         self.reservoir = self.getvar(env, self.var)
+        assert self.reservoir is not None  # See comment on StoreArgsParser.
         self.prepare_reservoir(env)
 
     def setup_api(self):
         if self.reservoir is None:
-            raise marcel.exception.KillCommandException(f'Accumulator is undefined.')
+            raise marcel.exception.KillCommandException(f'Reservoir is undefined.')
+        if type(self.reservoir) is not marcel.reservoir.Reservoir:
+            raise_not_a_reservoir(self.description(), type(self.reservoir))
         self.prepare_reservoir(None)
 
     def description(self):
         return self.var if self.var else 'store\'s variable'
 
     def prepare_reservoir(self, env):
-        if self.reservoir is None:
-            self.reservoir = marcel.reservoir.Reservoir(self.var)
-            env.setvar(self.var, self.reservoir)
-        elif type(self.reservoir) is not marcel.reservoir.Reservoir:
-            raise marcel.exception.KillCommandException(
-                f'{self.description()} is not usable as a reservoir, '
-                f'it stores a value of type {type(self.reservoir)}.')
+        if self.append and type(self.reservoir) is not marcel.reservoir.Reservoir:
+            raise_not_a_reservoir(self.description(), type(self.reservoir))
         self.writer = self.reservoir.writer(self.append)
+

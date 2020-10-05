@@ -216,8 +216,9 @@ class ArgsParser:
                                           f'{arg.name} argument must be a Pipeline: {x}')
 
     def init_reservoir(self, arg, x):
-        if not self.env.hasvar(x):
-            self.env.setvar(x, marcel.reservoir.Reservoir(x))
+        if not self.current_op.api:
+            if self.env.getvar(x) is None:
+                self.env.setvar(x, marcel.reservoir.Reservoir(x))
         return x
 
     # An ArgsParser subclass uses this function as the value of convert, to validate

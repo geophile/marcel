@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import atexit
 import getpass
 import os
 import pathlib
@@ -133,6 +134,10 @@ def read_config(config_path=None):
     return namespace
 
 
+def shutdown():
+    pass
+
+
 def main():
     def noop_error_handler(env, error):
         pass
@@ -143,11 +148,13 @@ def main():
         env = input.load()
         namespace.update(env.namespace)
         env.namespace = namespace
+        env.main_pid = os.getpid()
         pipeline = input.load()
         version = env.getvar('MARCEL_VERSION')
         TRACE.write(f'Marcel version {version}')
         TRACE.write(f'env: {marcel.util.namespace_description(env.vars())}')
         TRACE.write(f'pipeline: {pipeline}')
+        atexit.register(shutdown)
         pipeline.set_error_handler(noop_error_handler)
         pipeline_runner = PipelineRunner(env, pipeline)
         pipeline_runner.start()

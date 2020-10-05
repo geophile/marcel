@@ -91,6 +91,7 @@ class Main:
         # sys.argv sets config_path, dill
         self.dill = True
         self.echo = False
+        self.main_pid = os.getpid()
         #
         self.same_process = same_process
         try:
@@ -182,12 +183,10 @@ class Main:
 
     def shutdown(self, restart=False):
         namespace = self.env.namespace
-        if not restart:
-            for v in namespace.values():
-                if type(v) is marcel.reservoir.Reservoir:
-                    v.ensure_deleted()
         self.job_control.shutdown()
         self.reader.close()
+        if not restart:
+            marcel.reservoir.shutdown(self.main_pid)
         return namespace
 
     def insert_edited_command(self):

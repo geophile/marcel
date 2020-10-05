@@ -1838,6 +1838,20 @@ can be referred to indirectly, e.g. "globals()['x']" instead of "x".
 
 ACCUMULATING ARBITRARILY LARGE RESULTS IN MEMORY MAY BE A BAD IDEA.
 
+----------------------------------------------------------------------
+
+FIXED
+
+110. API doesn't clean up reservoirs
+
+----------------------------------------------------------------------
+
+NOT A BUG: Sending reservoirs to remote hosts is dumb
+
+111. Improve serialization of Reservoirs for remote execution
+
+Currently, the reservoir's file name is transmitted, which won't work
+(except for localhost, under some conditions).
 
 ----------------------------------------------------------------------
 

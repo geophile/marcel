@@ -630,7 +630,7 @@ def test_load_store():
     # Store to a defined var that isn't a list
     i = 123
     TEST.run(test=lambda: run(gen(3) | store(i)),
-             expected_err='store\'s variable is not usable as a reservoir')
+             expected_err='not usable as a reservoir')
     # TODO: Get rid of this?
     # # Load and store the same container, to implement a loop
     # x = [(0,)]

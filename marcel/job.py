@@ -145,9 +145,10 @@ class Job:
             pickler = marcel.pickler.MarcelPickler()
             try:
                 child_namespace_changes = command.execute(self.env)
-                debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
-                pickler.dump(child_namespace_changes)
-                writer.send(pickler.buffer)
+                if child_namespace_changes is not None:
+                    debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
+                    pickler.dump(child_namespace_changes)
+                    writer.send(pickler.buffer)
             except marcel.exception.KillCommandException as e:
                 marcel.util.print_to_stderr(e, self.env)
             except marcel.exception.KillAndResumeException as e:
