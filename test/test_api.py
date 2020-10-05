@@ -879,6 +879,10 @@ def test_args():
     # Bug 94
     TEST.run(test=lambda: run(gen(4, 1) | args(lambda n: gen (n)) | window(lambda x: x == 0)),
              expected_out=[0, [0, 1], [0, 1, 2], [0, 1, 2, 3]])
+    # Bug 116
+    g = lambda n: gen (n)
+    TEST.run(test=lambda: run(gen(3, 1) | args(lambda n: g(n))),
+             expected_out=[0, 0, 1, 0, 1, 2])
 
 
 def test_api_run():
@@ -998,14 +1002,13 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run(test=lambda: run(gen(5, 1) | args(lambda n: gen(n)) | map(lambda x: -x)))
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

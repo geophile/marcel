@@ -1115,6 +1115,10 @@ def test_args():
     # Bug 94
     TEST.run('gen 4 1 | args [n: gen (n)] | window (x: x == 0)',
              expected_out=[0, [0, 1], [0, 1, 2], [0, 1, 2, 3]])
+    # Bug 116
+    TEST.run('g = [n: gen (n)]')
+    TEST.run('gen 3 1 | args [n: g (n)]',
+             expected_out=[0, 0, 1, 0, 1, 2])
 
 
 def test_env():
@@ -1184,9 +1188,6 @@ def main_stable():
 
 
 def main_dev():
-    # Bug 116
-    TEST.run('g = [n: gen (n)]')
-    TEST.run('gen 3 1 | args [n: g (n)]')
     pass
 
 
