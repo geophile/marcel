@@ -998,13 +998,14 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run(test=lambda: run(gen(5, 1) | args(lambda n: gen(n)) | map(lambda x: -x)))
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

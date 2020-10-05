@@ -33,7 +33,7 @@ class RunPipeline(marcel.core.Op):
 
     def setup_1(self, env):
         super().setup_1(env)
-        assert self.pipeline is None
+        # assert self.pipeline is None
         self.args = self.eval_function('args')
         self.kwargs = self.eval_function('kwargs')
         pipeline = self.getvar(env, self.var)

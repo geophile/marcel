@@ -1184,6 +1184,9 @@ def main_stable():
 
 
 def main_dev():
+    # Bug 116
+    TEST.run('g = [n: gen (n)]')
+    TEST.run('gen 3 1 | args [n: g (n)]')
     pass
 
 
