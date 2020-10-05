@@ -24,7 +24,6 @@ import marcel.object.file
 
 File = marcel.object.file.File
 
-
 HELP = '''
 {L,wrap=F}ls [[-01] [-r|--recursive]] [-f|--file] [-d|--dir] [-s|--symlink] [FILENAME ...]
 
@@ -235,7 +234,9 @@ class Ls(marcel.core.Op):
             glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
                                        if path.is_absolute() else
                                        (self.current_dir, path_str))
-            for root in glob_base.glob(glob_pattern):
+            for root in (glob_base.glob(glob_pattern)
+                         if len(glob_pattern) > 0 else
+                         glob_base.iterdir()):
                 if root not in roots_set:
                     roots_set.add(root)
                     roots.append(root)

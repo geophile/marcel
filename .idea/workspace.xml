@@ -21,17 +21,8 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/farcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/bin/farcel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/argsparser.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/argsparser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/store.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/store.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/reservoir.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/reservoir.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/ls.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs_closed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs_closed.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_api2.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_api2.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -456,7 +447,7 @@
       <workItem from="1601295274524" duration="10449000" />
       <workItem from="1601312874480" duration="49144000" />
       <workItem from="1601674407778" duration="19532000" />
-      <workItem from="1601847862755" duration="4396000" />
+      <workItem from="1601847862755" duration="7361000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -743,11 +734,11 @@
       <screen x="1920" y="0" width="2560" height="1440" />
     </state>
     <state x="3837" y="574" width="306" height="687" key="refactoring.ChangeSignatureDialog/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1600204877299" />
-    <state x="934" y="466" width="672" height="678" key="search.everywhere.popup" timestamp="1601914133381">
+    <state x="934" y="466" width="672" height="678" key="search.everywhere.popup" timestamp="1601921366111">
       <screen x="0" y="27" width="2560" height="1413" />
     </state>
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1601822354839" />
-    <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1601914133381" />
+    <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1601921366111" />
     <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1599329664953" />
     <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1601308334292" />
     <state x="701" y="354" width="672" height="507" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1596033560611" />
@@ -805,16 +796,6 @@
           <url>file://$PROJECT_DIR$/marcel/argsparser.py</url>
           <line>50</line>
           <option name="timeStamp" value="193" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/marcel/argsparser.py</url>
-          <line>218</line>
-          <option name="timeStamp" value="207" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/marcel/op/store.py</url>
-          <line>53</line>
-          <option name="timeStamp" value="209" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
