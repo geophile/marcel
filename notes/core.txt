@@ -1,0 +1,27 @@
+The marcel core needs an overhaul
+
+It is basically the same as in osh, and has lots of problems:
+
+- Pipeline copying: User creates a pipeline. Modifications are
+  occasionally needed, e.g. (Fork, RunPipeline). A copy is made to
+  avoid modifying the original.
+
+  Pipeline copying requires copying of nested pipelines and functions,
+  and all of the Environments and namespaces associated with
+  them. It's been very difficult to get this right, and there is
+  currently a bizarre bug (related to 116) in which copying a pipeline
+  repeatedly causes the ORIGINAL to bloat. Must be a loop of some kind
+  (pipeline contains env pointing to pipeline), but I haven't been
+  able to figure it out.
+
+- Setup phases: setup_1, setup_2, now set_env. The Args op makes
+  things complicated, requiring a pipeline to be regenerated at
+  runtime.
+
+- Overhead (send -> receive_input -> receive). Not clear a lot can be
+  done here, but maybe combine send and receive_input.
+
+Constraints on redesigned core:
+
+- No pipeline copying for local execution. Jobs are implemented by
+  forking the process, which is OK, but otherwise, no copying.

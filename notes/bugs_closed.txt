@@ -1875,79 +1875,24 @@ pipeline for new variables.
 
 FIXED
 
-116. Why is this crashing?
-
-M-0.10.24 jao@cheese:~/git/marcel$ ls marcel test | out | args [d: ls -fr (d) | ext py | map (f: (f, f.read().count('\n'))) | sort (f, n: n) | tail 10]
-drwxr-xr-x   jao    jao        4096   2020 Oct 05 14:09:31   marcel
-(op/sql.py, 245)
-(op/window.py, 254)
-(op/fork.py, 296)
-(job.py, 305)
-(main.py, 316)
-(env.py, 336)
-(argsparser.py, 493)
-(core.py, 514)
-(helpformatter.py, 568)
-(parser.py, 1099)
--rw-r--r--   jao    jao         652   2020 May 10 15:41:11   marcel/__init__.py
-Process Process-11:
-Traceback (most recent call last):
-  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
-    child_namespace_changes = command.execute(self.env)
-  File "/home/jao/git/marcel/marcel/core.py", line 463, in execute
-    self.pipeline.receive(None)
-  File "/home/jao/git/marcel/marcel/core.py", line 396, in receive
-    self.first_op.receive_input(x)
-  File "/home/jao/git/marcel/marcel/core.py", line 193, in receive_input
-    self.receive(None if x is None else
-  File "/home/jao/git/marcel/marcel/op/ls.py", line 155, in receive
-    self.visit(root, 0)
-  File "/home/jao/git/marcel/marcel/op/ls.py", line 167, in visit
-    self.visit(file, level + 1)
-  File "/home/jao/git/marcel/marcel/op/ls.py", line 163, in visit
-    self.send_path(root)
-  File "/home/jao/git/marcel/marcel/op/ls.py", line 180, in send_path
-    self.send(file)
-  File "/home/jao/git/marcel/marcel/core.py", line 176, in send
-    receiver.receive_input(x)
-  File "/home/jao/git/marcel/marcel/core.py", line 193, in receive_input
-    self.receive(None if x is None else
-  File "/home/jao/git/marcel/marcel/op/out.py", line 124, in receive
-    self.send(x)
-  File "/home/jao/git/marcel/marcel/core.py", line 176, in send
-    receiver.receive_input(x)
-  File "/home/jao/git/marcel/marcel/core.py", line 193, in receive_input
-    self.receive(None if x is None else
-  File "/home/jao/git/marcel/marcel/op/args.py", line 78, in receive
-    self.impl.receive(x)
-  File "/home/jao/git/marcel/marcel/op/args.py", line 108, in receive
-    self.generate_and_run_pipeline()
-  File "/home/jao/git/marcel/marcel/op/args.py", line 145, in generate_and_run_pipeline
-    marcel.core.Command(None, self.pipeline).execute(self.op.env())
-  File "/home/jao/git/marcel/marcel/core.py", line 460, in execute
-    self.pipeline.setup_1(env)
-  File "/home/jao/git/marcel/marcel/core.py", line 374, in setup_1
-    op.setup_1(env)
-  File "/home/jao/git/marcel/marcel/op/runpipeline.py", line 36, in setup_1
-    assert self.pipeline is None
-AssertionError
+117. Heuristic for determining whether out should be appended is wrong
 
 
-Simplifying: This causes the crash too:
+    f = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))] | out '{}: {}']
+    f (5)
 
-    ls marcel | args [d: ls -fr (d) | ext py ]
+output:
 
-But this does not:
+    1: 1
+    (1, 1)
+    2: 2
+    (2, 2)
+    3: 6
+    (3, 6)
+    4: 24
+    (4, 24)
+    5: 120
+    (5, 120)
 
-    ls marcel | args [d: ls -fr (d) ]
+Because out is not terminal in the topmost pipeline.
 
-Even simpler:
-
-    g = [n: gen (n)]
-    gen 3 1 | args [n: g (n)]
-
-The problem seems to be a pipeline var inside args.
