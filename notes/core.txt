@@ -23,5 +23,125 @@ It is basically the same as in osh, and has lots of problems:
 
 Constraints on redesigned core:
 
-- No pipeline copying for local execution. Jobs are implemented by
-  forking the process, which is OK, but otherwise, no copying.
+- No pipeline copying (using pickle) for local execution. Jobs are
+  implemented by forking the process, which is different. (Still need
+  to report back on symbols defined by the job.)
+
+
+
+----------------------------------------------------------------------
+
+Parameterized pipelines:
+
+- Current approach is to wrap functions by an additional lambda, with
+  an arg for each pipeline param. Complicates FunctionWrapper, and
+  function invocation, (see FW.__call__).
+
+- Alternative: don't wrap. Instead, maintain the marcel namespace with
+  entries for currently active pipeline params.
+
+----------------------------------------------------------------------
+
+setup_1: 
+
+- Set op receivers
+
+- eval function args
+
+- any arg checking not done by ArgsParser
+
+- Initialize local state (e.g. Ls.roots, metadata_cache)
+
+- Create objects to handle special cases (e.g. Window)
+
+setup_2:
+
+- Do any setup dependent on having the pipeline being partially set
+  up. Main use is Fork. setup_1 adds the LabelThread operator, setup_2
+  then copies the pipeline for each thread, and assigns the thread's
+  label.
+
+  If LabelThread were added at parse time, setup_2 might not be necessary.
+
+Special cases:
+
+args: 
+
+- receive() calls generate_and_run_pipeline, which copies the pipeline
+  (so that an op can be appended), and then does Command.execute,
+  which does setup_1, setup_2, execute, on the copy. AT
+  RUNTIME. Shouldn't be
+
+- This shouldn't be necessary. It should be possible to simply rebind
+  pipeline args, and execute the pipeline on each call to receive.
+
+fork:
+
+- remote:
+
+    - Use multiprocessing instead of threads.
+    
+    - Have each process assign its own label (remote host, labelthread).
+
+- discontinue local? Has @n ever been useful?
+
+----------------------------------------------------------------------
+
+Pipeline redesign:
+
+Currently, a pipeline points to the first and last op. These are
+linked by:
+
+- next_op: next op in the pipeline
+
+- receiver: op receiving output. Usually == next_op, but for the last
+  op in a nested pipeline, the receiver is in the parent pipeline,
+  (Fork, RunPipeline)
+
+Alternative: Don't link the ops. A Pipeline contains a list of
+them. To extend a pipeline, create a copy -- NOT via pickling, just
+copy the list. Then add the additional ops. This should be a lot
+faster than pickling anyway.
+
+op.send then sends via the pipeline, i.e. self.pipeline().send().  But
+if an op can be shared among pipelines, how does op.pipeline() work?
+
+- Maintain a stack of pipelines in Environment? (Every op references the
+  Environment.)
+
+- Or: Define op.pipeline, but it is transient, valid only for the
+  execution of the pipeline. 
+
+    def (self):
+        pass
+
+======================================================================
+
+Implementation plan (commits)
+
+
+1. Pipeline internals: state and copy()
+
+- Start version 11
+
+- Disable fork, runpipeline, args testing
+
+
+2. Command lifecycle (setup_1, setup_2, env)
+
+
+3. fork
+
+- Drop @n support
+
+- Re-enable fork testing
+
+
+4. runpipeline
+
+- Re-enable runpipeline testing
+
+
+5. args
+
+- Re-enable args testing
