@@ -76,13 +76,12 @@ class Load(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self, env):
-        super().setup_1(env)
+    def setup_1(self):
         if self.var is not None:
             # Interactive: var is set, accumulator is None
             if not self.var.isidentifier():
                 raise marcel.exception.KillCommandException(f'{self.var} is not a valid identifier')
-            self.reservoir = self.getvar(env, self.var)
+            self.reservoir = self.getvar(self.var)
             if self.reservoir is None:
                 raise marcel.exception.KillCommandException(f'Variable {self.var} is undefined.')
             if type(self.reservoir) is not marcel.reservoir.Reservoir:
@@ -93,7 +92,7 @@ class Load(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'Reservoir is undefined.')
             if type(self.reservoir) is not marcel.reservoir.Reservoir:
                 raise marcel.exception.KillCommandException(f'{self.reservoir} is not a Reservoir.')
-        env.mark_possibly_changed(self.var)
+        self.env().mark_possibly_changed(self.var)
         self.reader = iter(self.reservoir)
 
     def receive(self, _):

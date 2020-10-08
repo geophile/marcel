@@ -129,7 +129,7 @@ class ArgsInteractive(ArgsImpl):
         super().__init__(op)
         self.pipeline = None
 
-    def setup_1(self, env):
+    def setup_1(self):
         op = self.op
         if op.pipeline_arg.parameters() is None:
             raise marcel.exception.KillCommandException('The args pipeline must be parameterized.')
@@ -143,7 +143,7 @@ class ArgsInteractive(ArgsImpl):
         self.pipeline.set_error_handler(op.owner.error_handler)
         self.pipeline.append(marcel.opmodule.create_op(env, 'map', self.send_pipeline_output))
         self.pipeline.set_parameter_values(self.args, None)
-        marcel.core.Command(None, self.pipeline).execute(self.op.env())
+        marcel.core.Command(env, None, self.pipeline).execute()
         self.args.clear()
 
 
@@ -162,5 +162,5 @@ class ArgsAPI(ArgsImpl):
         pipeline = op.pipeline_arg(*self.args).create_pipeline()
         pipeline.set_error_handler(op.owner.error_handler)
         pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
-        marcel.core.Command(None, pipeline).execute(op.env())
+        marcel.core.Command(env, None, pipeline).execute()
         self.args.clear()

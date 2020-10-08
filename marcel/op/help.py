@@ -48,7 +48,7 @@ class Help(marcel.core.Op):
 
     # AbstractOp
     
-    def setup_1(self, env):
+    def setup_1(self):
         self.topic = self.topic.lower()
 
     def receive(self, _):

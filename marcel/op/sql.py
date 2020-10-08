@@ -125,8 +125,7 @@ class Sql(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self, env):
-        super().setup_1(env)
+    def setup_1(self):
         self.statement = self.eval_function('statement_arg', str)
         self.args = self.eval_function('args_arg')
         if self.commit is None:
@@ -134,6 +133,7 @@ class Sql(marcel.core.Op):
         elif self.commit < 0:
             raise marcel.exception.KillCommandException(f'--commit value must be a positive integer: {self.commit}')
         self.total_update_count = 0
+        env = self.env()
         if type(self.db) is not marcel.object.db.Database:
             # Interactive usage
             self.db = env.db(self.dbvar) if self.dbvar is not None else env.getvar('DB_DEFAULT')

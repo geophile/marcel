@@ -148,9 +148,9 @@ class Main:
                 # Append an out op at the end of pipeline, if there is no output op there already.
                 if not pipeline.last_op().op_name() == 'out':
                     pipeline.append(marcel.opmodule.create_op(self.env, 'out'))
-                command = marcel.core.Command(line, pipeline)
+                command = marcel.core.Command(self.env, line, pipeline)
                 if run_immediate:
-                    command.execute(self.env)
+                    command.execute()
                 else:
                     self.job_control.create_job(command)
             except marcel.parser.EmptyCommand:
@@ -162,9 +162,9 @@ class Main:
                 pass
 
     def run_api(self, pipeline):
-        command = marcel.core.Command(None, pipeline)
+        command = marcel.core.Command(self.env, None, pipeline)
         try:
-            command.execute(self.env)
+            command.execute()
         except marcel.exception.KillCommandException as e:
             marcel.util.print_to_stderr(e, self.env)
 

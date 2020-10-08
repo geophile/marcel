@@ -35,8 +35,7 @@ class APIOp(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self, env):
-        super().setup_1(env)
+    def setup_1(self):
         self.check_arg(self.error_handler is not None,
                        None,
                        'Specify at most one of the errors and error_handler arguments.')

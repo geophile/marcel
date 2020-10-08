@@ -41,7 +41,7 @@ class JobOp(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self, env):
+    def setup_1(self):
         job_control = marcel.job.JobControl.only
         if self.job_id is not None:
             self.jid = self.job_id

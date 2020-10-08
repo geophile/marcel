@@ -123,11 +123,8 @@ class Fork(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'Invalid fork specification: {self.host}')
         self.impl.setup_1(env)
 
-    def setup_2(self, env):
-        self.impl.setup_2(env)
-
-    def set_env(self, env):
-        self.impl.set_env(env)
+    def setup_2(self):
+        self.impl.setup_2()
 
     def receive(self, _):
         for thread in self.threads:
@@ -179,17 +176,13 @@ class ForkImplementation:
     def __init__(self, op):
         self.op = op
         
-    def setup_1(self, env):
-        self.generate_thread_labels(env)
+    def setup_1(self):
+        self.generate_thread_labels()
 
-    def setup_2(self, env):
+    def setup_2(self):
         assert False
 
-    def set_env(self, env):
-        for thread in self.op.threads:
-            thread.set_env(env)
-
-    def generate_thread_labels(self, env):
+    def generate_thread_labels(self):
         assert False
 
 
@@ -201,17 +194,17 @@ class Remote(ForkImplementation):
 
     # AbstractOp
 
-    def setup_1(self, env):
-        super().setup_1(env)
+    def setup_1(self):
+        super().setup_1()
         op = self.op
         remote_pipeline = marcel.core.Pipeline()
-        remote_pipeline.append(marcel.opmodule.create_op(env, 'remote', self.op.pipeline))
+        remote_pipeline.append(marcel.opmodule.create_op(op.env(), 'remote', self.op.pipeline))
         remote_pipeline.append(marcel.op.labelthread.LabelThread(None))
         op.pipeline = remote_pipeline
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
 
-    def setup_2(self, env):
+    def setup_2(self):
         op = self.op
         for thread_label in op.thread_labels:
             pipeline_copy = op.pipeline.copy()
@@ -233,8 +226,8 @@ class Remote(ForkImplementation):
 
     # Subclass
 
-    def generate_thread_labels(self, env):
-        self.op.thread_labels = [host for host in self.cluster.hosts]
+    def generate_thread_labels(self):
+        self.op.thread_labels = [host for host in self.op.cluster.hosts]
 
 
 class Local(ForkImplementation):
@@ -245,14 +238,14 @@ class Local(ForkImplementation):
 
     # AbstractOp
 
-    def setup_1(self, env):
-        super().setup_1(env)
+    def setup_1(self):
+        super().setup_1()
         op = self.op
         op.pipeline.append(marcel.op.labelthread.LabelThread(None))
         # Don't set the LabelThread receiver here. We don't want the receiver cloned,
         # we want all the cloned pipelines connected to the same receiver.
 
-    def setup_2(self, env):
+    def setup_2(self):
         op = self.op
         for thread_label in op.thread_labels:
             # Copy the pipeline
@@ -262,7 +255,7 @@ class Local(ForkImplementation):
             label_thread_op = pipeline_copy.last_op()
             assert isinstance(label_thread_op, marcel.op.labelthread.LabelThread)
             label_thread_op.set_label(thread_label)
-            pipeline_copy.setup_1(env)
+            pipeline_copy.setup_1(op.env())
             # Connect LabelThread op to receiver
             label_thread_op.receiver = op.receiver
             # Create a thread to run the pipeline copy
@@ -270,7 +263,7 @@ class Local(ForkImplementation):
 
     # Subclass
 
-    def generate_thread_labels(self, env):
+    def generate_thread_labels(self):
         self.op.thread_labels = [x for x in range(self.n)]
 
 
@@ -284,9 +277,6 @@ class PipelineThread(threading.Thread):
 
     def __repr__(self):
         return f'PipelineThread({self.thread_label})'
-
-    def set_env(self, env):
-        self.pipeline.set_env(env)
 
     def run(self):
         try:

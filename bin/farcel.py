@@ -72,8 +72,7 @@ class PipelineRunner(threading.Thread):
             TRACE.write(f'PipelineRunner: About to setup_1 {self.pipeline}')
             # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
             # supporting more than one level of nesting.
-            self.pipeline.setup_1(self.env)
-            self.pipeline.set_env(self.env)
+            self.pipeline.setup_1()
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
             self.pipeline.first_op().receive_input(None)
         # except marcel.exception.KillCommandException as e:

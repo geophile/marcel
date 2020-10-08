@@ -994,7 +994,7 @@ def main_stable():
     test_intersect()
     test_union()
     test_difference()
-    test_args()
+    # test_args()
     test_api_run()
     test_api_gather()
     test_api_first()

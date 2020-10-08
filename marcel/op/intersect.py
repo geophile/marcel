@@ -65,16 +65,16 @@ class Intersect(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self, env):
+    def setup_1(self):
         def load_right(*x):
             count = self.right.get(x, None)
             self.right[x] = 1 if count is None else count + 1
-        super().setup_1(env)
+        env = self.env()
         self.right = {}
         pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
         pipeline.set_error_handler(self.owner.error_handler)
         pipeline.append(marcel.opmodule.create_op(env, 'map', load_right))
-        marcel.core.Command(env, pipeline).execute(env)
+        marcel.core.Command(env, None, pipeline).execute()
 
     def receive(self, x):
         count = self.right.get(x, None)

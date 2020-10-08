@@ -52,8 +52,7 @@ class Tail(marcel.core.Op):
 
     # AbstractOp
     
-    def setup_1(self, env):
-        super().setup_1(env)
+    def setup_1(self):
         self.n = self.eval_function('n_arg', int)
         self.queue = None if self.n == 0 else [None] * self.n
         self.end = 0

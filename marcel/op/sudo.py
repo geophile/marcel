@@ -78,8 +78,7 @@ class Sudo(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self, env):
-        super().setup_1(env)
+    def setup_1(self):
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('Missing pipeline')
         self.pipeline = self.args.pop()

@@ -31,12 +31,11 @@ class RunPipeline(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self, env):
-        super().setup_1(env)
+    def setup_1(self):
         # assert self.pipeline is None
         self.args = self.eval_function('args')
         self.kwargs = self.eval_function('kwargs')
-        pipeline = self.getvar(env, self.var)
+        pipeline = self.getvar(self.var)
         if pipeline is None:
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is undefined.')
@@ -47,11 +46,7 @@ class RunPipeline(marcel.core.Op):
         self.pipeline.set_error_handler(self.owner.error_handler)
         self.pipeline.last_op().receiver = self.receiver
         self.pipeline.set_parameter_values(self.args, self.kwargs)
-        self.pipeline.setup_1(env)
-
-    def set_env(self, env):
-        super().set_env(env)
-        self.pipeline.set_env(env)
+        self.pipeline.setup_1()
 
     def receive(self, x):
         self.pipeline.receive(x)

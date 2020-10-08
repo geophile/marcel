@@ -91,13 +91,12 @@ class Store(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self, env):
-        super().setup_1(env)
+    def setup_1(self):
         if self.api:
             self.setup_api()
         else:
-            self.setup_interactive(env)
-        env.mark_possibly_changed(self.var)
+            self.setup_interactive()
+        self.env().mark_possibly_changed(self.var)
 
     def receive(self, x):
         try:
@@ -112,12 +111,12 @@ class Store(marcel.core.Op):
 
     # For use by this class
 
-    def setup_interactive(self, env):
+    def setup_interactive(self):
         if not self.var.isidentifier():
             raise marcel.exception.KillCommandException(f'{self.var} is not a valid identifier')
-        self.reservoir = self.getvar(env, self.var)
+        self.reservoir = self.getvar(self.var)
         assert self.reservoir is not None  # See comment on StoreArgsParser.
-        self.prepare_reservoir(env)
+        self.prepare_reservoir(self.env())
 
     def setup_api(self):
         if self.reservoir is None:

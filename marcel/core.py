@@ -29,18 +29,17 @@ class Pipelineable:
 
 class Node(Pipelineable):
 
-    def __init__(self, left, right, env):
-        assert env is not None
+    def __init__(self, left, right):
         self.left = left
         self.right = right
-        self.env = env
 
     def __or__(self, other):
         assert isinstance(other, Op) or type(other) is Pipeline, type(other)
-        return Node(self, other, self.env)
+        return Node(self, other)
 
     def __iter__(self):
-        return PipelineIterator(self.create_pipeline(), self.env)
+        pipeline = self.create_pipeline()
+        return PipelineIterator(pipeline, pipeline.env())
 
     # Pipelineable
 
@@ -90,10 +89,10 @@ class AbstractOp(Pipelineable):
 
     # AbstractOp
 
-    def setup_1(self, env):
+    def setup_1(self):
         pass
 
-    def setup_2(self, env):
+    def setup_2(self):
         pass
 
 
@@ -138,9 +137,6 @@ class Op(AbstractOp):
         return pipeline
 
     # Op
-
-    def set_env(self, env):
-        self._env = env
 
     def send(self, x):
         receiver = self.receiver
@@ -208,21 +204,17 @@ class Op(AbstractOp):
     # API
 
     def __or__(self, other):
-        env = self._env
-        self._env = None
-        return Node(self, other, env)
+        return Node(self, other)
 
     def __iter__(self):
-        env = self._env
-        self._env = None
-        return PipelineIterator(self.create_pipeline(), env)
+        return PipelineIterator(self.create_pipeline(), self._env)
 
     # For use by subclasses
 
-    def getvar(self, env, var):
+    def getvar(self, var):
         value = self.owner.args.get(var, None) if self.owner.args else None
         if value is None:
-            value = env.getvar(var)
+            value = self._env.getvar(var)
         return value
 
     # arg is a Pipeline, Pipelineable, or a var bound to a pipeline. Deal with all of these possibilities
@@ -328,25 +320,21 @@ class Pipeline(AbstractOp):
 
     # AbstractOp
 
-    def setup_1(self, env):
+    def setup_1(self):
         assert self.error_handler is not None, f'{self} has no error handler'
         prev_op = None
         for op in self.ops:
             if isinstance(op, Op) and op is not self.ops[0] and op.must_be_first_in_pipeline():
                 raise marcel.exception.KillCommandException('%s cannot receive input from a pipe' % op.op_name())
             op.owner = self
-            op.setup_1(env)
+            op.setup_1()
             if prev_op:
                 prev_op.receiver = op
             prev_op = op
 
-    def setup_2(self, env):
+    def setup_2(self):
         for op in self.ops:
-            op.setup_2(env)
-
-    def set_env(self, env):
-        for op in self.ops:
-            op.set_env(env)
+            op.setup_2()
 
     def receive(self, x):
         if self.params is not None and len(self.args) < len(self.params):
@@ -398,26 +386,24 @@ class Pipeline(AbstractOp):
 
 class Command:
 
-    def __init__(self, source, pipeline):
+    def __init__(self, env, source, pipeline):
+        self.env = env
         self.source = source
         self.pipeline = pipeline
 
     def __repr__(self):
         return str(self.pipeline)
 
-    def execute(self, env, api=False):
-        env.clear_changes()
-        self.pipeline.setup_1(env)
-        self.pipeline.setup_2(env)
-        self.pipeline.set_env(env)
+    def execute(self, api=False):
+        self.env.clear_changes()
+        self.pipeline.setup_1()
+        self.pipeline.setup_2()
         self.pipeline.receive(None)
         self.pipeline.receive_complete()
-        self.pipeline.set_env(None)
-        if api:
-            # An interactive Command is executed by a multiprocessing.Process.
-            # Need to transmit the Environment's vars relating to the directory, to the parent
-            # process, because they may have changed. This doesn't apply to API usage.
-            return env.changes()
+        # An interactive Command is executed by a multiprocessing.Process.
+        # Need to transmit the Environment's vars relating to the directory, to the parent
+        # process, because they may have changed. This doesn't apply to API usage.
+        return self.env.changes() if api else None
 
 
 class PipelineIterator:
@@ -428,9 +414,9 @@ class PipelineIterator:
         output = []
         gather_op = env.op_modules['gather'].api_function()(output)
         pipeline.append(gather_op)
-        command = Command(None, pipeline)
+        command = Command(env, None, pipeline)
         try:
-            command.execute(env)
+            command.execute()
         except marcel.exception.KillCommandException as e:
             marcel.util.print_to_stderr(e, env)
         finally:
