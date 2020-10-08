@@ -39,7 +39,7 @@ class Node(Pipelineable):
 
     def __iter__(self):
         pipeline = self.create_pipeline()
-        return PipelineIterator(pipeline, pipeline.env())
+        return PipelineIterator(pipeline)
 
     # Pipelineable
 
@@ -207,7 +207,7 @@ class Op(AbstractOp):
         return Node(self, other)
 
     def __iter__(self):
-        return PipelineIterator(self.create_pipeline(), self._env)
+        return PipelineIterator(self.create_pipeline())
 
     # For use by subclasses
 
@@ -327,10 +327,12 @@ class Pipeline(AbstractOp):
             if isinstance(op, Op) and op is not self.ops[0] and op.must_be_first_in_pipeline():
                 raise marcel.exception.KillCommandException('%s cannot receive input from a pipe' % op.op_name())
             op.owner = self
-            op.setup_1()
             if prev_op:
                 prev_op.receiver = op
             prev_op = op
+        # TODO: Do op setup_1 after the above initialization. This should render setup_2 obsolete.
+        for op in self.ops:
+            op.setup_1()
 
     def setup_2(self):
         for op in self.ops:
@@ -408,7 +410,8 @@ class Command:
 
 class PipelineIterator:
 
-    def __init__(self, pipeline, env):
+    def __init__(self, pipeline):
+        env = pipeline.env()
         # Errors go to output, so no other error handling is needed
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
         output = []

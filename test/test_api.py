@@ -522,9 +522,9 @@ def test_assign():
     a = 3
     TEST.run(test=lambda: run(map(lambda: a)),
              expected_out=[3])
-    # a = map(lambda x: (x, -x))
-    # TEST.run(test=lambda: run(gen(3) | a),
-    #          expected_out=[(0, 0), (1, -1), (2, -2)])
+    a = map(lambda x: (x, -x))
+    TEST.run(test=lambda: run(gen(3) | a),
+             expected_out=[(0, 0), (1, -1), (2, -2)])
 
 
 def test_join():

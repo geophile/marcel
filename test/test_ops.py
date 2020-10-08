@@ -527,23 +527,23 @@ def test_assign():
     TEST.run(test='a = (5+6)',
              verification='(a)',
              expected_out=[11])
-    # TEST.run(test='a = [(419)]',
-    #          verification='a',
-    #          expected_out=[419])
-    # TEST.run(test='a = [ map (x: (x, -x)) ]',
-    #          verification='gen 3 | a',
-    #          expected_out=[(0, 0), (1, -1), (2, -2)])
-    # # Bug 61
-    # TEST.run('a = [gen 3]')
-    # TEST.run(test='a',
-    #          expected_out=[0, 1, 2])
-    # TEST.run('b = [a]')
-    # TEST.run(test='b',
-    #          expected_out=[0, 1, 2])
-    # # Bug 65
-    # TEST.run('x = [(5)]')
-    # TEST.run(test='x',
-    #          expected_out=[5])
+    TEST.run(test='a = [(419)]',
+             verification='a',
+             expected_out=[419])
+    TEST.run(test='a = [ map (x: (x, -x)) ]',
+             verification='gen 3 | a',
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    # Bug 61
+    TEST.run('a = [gen 3]')
+    TEST.run(test='a',
+             expected_out=[0, 1, 2])
+    TEST.run('b = [a]')
+    TEST.run(test='b',
+             expected_out=[0, 1, 2])
+    # Bug 65
+    TEST.run('x = [(5)]')
+    TEST.run(test='x',
+             expected_out=[5])
 
 
 def test_join():
@@ -596,40 +596,40 @@ def test_comment():
 
 def test_pipeline_args():
     TEST.run('add = [a: map (x: (x, x + a))]')
-    TEST.run('gen 3 | add (100)',
-             expected_out=[(0, 100), (1, 101), (2, 102)])
-    # Multiple functions
-    TEST.run('add = [a: map (x: (x, x + a)) | map (x, y: (x + a, y - a))]')
-    TEST.run('gen 3 | add (100)',
-             expected_out=[(100, 0), (101, 1), (102, 2)])
-    # Flag instead of anon arg
-    TEST.run('add = [a: map (x: (x, x + a))]')
-    TEST.run('gen 3 | add -a (100)',
-             expected_out=[(0, 100), (1, 101), (2, 102)])
-    # Multiple anon args
-    TEST.run('f = [a, b: map (x: (x, x * a + b))]')
-    TEST.run('gen 3 | f (100) (10)',
-             expected_out=[(0, 10), (1, 110), (2, 210)])
-    # Multiple flag args
-    TEST.run('f = [a, b: map (x: (x, x * a + b))]')
-    TEST.run('gen 3 | f -a (100) -b (10)',
-             expected_out=[(0, 10), (1, 110), (2, 210)])
-    TEST.run('gen 3 | f -b (10) -a (100)',
-             expected_out=[(0, 10), (1, 110), (2, 210)])
-    TEST.run('gen 3 | f -b (10) -a (100) -a (200)',
-             expected_err='Flag a given more than once')
-    TEST.run('gen 3 | f -b (10)',
-             expected_err='Unbound pipeline parameters')
-    # Long flags
-    TEST.run('foobar = [foo, bar: map (x: x * foo) | select (x: x < bar)]')
-    TEST.run('gen 10 | foobar --foo (10) --bar (45)',
-             expected_out=[0, 10, 20, 30, 40])
-    TEST.run('gen 10 | foobar --bar (73) --foo (10)',
-             expected_out=[0, 10, 20, 30, 40, 50, 60, 70])
-    # Insufficient args
-    # Bug 105 --  # Depends on ext being defined in .marcel.py
-    TEST.run('ext',
-             expected_err='Unbound pipeline parameters')
+    # TEST.run('gen 3 | add (100)',
+    #          expected_out=[(0, 100), (1, 101), (2, 102)])
+    # # Multiple functions
+    # TEST.run('add = [a: map (x: (x, x + a)) | map (x, y: (x + a, y - a))]')
+    # TEST.run('gen 3 | add (100)',
+    #          expected_out=[(100, 0), (101, 1), (102, 2)])
+    # # Flag instead of anon arg
+    # TEST.run('add = [a: map (x: (x, x + a))]')
+    # TEST.run('gen 3 | add -a (100)',
+    #          expected_out=[(0, 100), (1, 101), (2, 102)])
+    # # Multiple anon args
+    # TEST.run('f = [a, b: map (x: (x, x * a + b))]')
+    # TEST.run('gen 3 | f (100) (10)',
+    #          expected_out=[(0, 10), (1, 110), (2, 210)])
+    # # Multiple flag args
+    # TEST.run('f = [a, b: map (x: (x, x * a + b))]')
+    # TEST.run('gen 3 | f -a (100) -b (10)',
+    #          expected_out=[(0, 10), (1, 110), (2, 210)])
+    # TEST.run('gen 3 | f -b (10) -a (100)',
+    #          expected_out=[(0, 10), (1, 110), (2, 210)])
+    # TEST.run('gen 3 | f -b (10) -a (100) -a (200)',
+    #          expected_err='Flag a given more than once')
+    # TEST.run('gen 3 | f -b (10)',
+    #          expected_err='Unbound pipeline parameters')
+    # # Long flags
+    # TEST.run('foobar = [foo, bar: map (x: x * foo) | select (x: x < bar)]')
+    # TEST.run('gen 10 | foobar --foo (10) --bar (45)',
+    #          expected_out=[0, 10, 20, 30, 40])
+    # TEST.run('gen 10 | foobar --bar (73) --foo (10)',
+    #          expected_out=[0, 10, 20, 30, 40, 50, 60, 70])
+    # # Insufficient args
+    # # Bug 105 --  # Depends on ext being defined in .marcel.py
+    # TEST.run('ext',
+    #          expected_err='Unbound pipeline parameters')
 
 
 def test_sql():
