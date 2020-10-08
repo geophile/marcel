@@ -146,7 +146,7 @@ class Main:
                 # So check this before tacking on the out op.
                 run_immediate = self.run_immediate(pipeline)
                 # Append an out op at the end of pipeline, if there is no output op there already.
-                if not pipeline.is_terminal_op('out'):
+                if not pipeline.last_op().op_name() == 'out':
                     pipeline.append(marcel.opmodule.create_op(self.env, 'out'))
                 command = marcel.core.Command(line, pipeline)
                 if run_immediate:
@@ -243,12 +243,12 @@ class Main:
                 # For the execution of tests and scripts
                 self.same_process or
                 # Exactly one op in pipeline ...
-                pipeline.first_op == pipeline.last_op and (
+                pipeline.first_op() is pipeline.last_op() and (
                     # ... and it should run in the main process, or
-                    pipeline.first_op.run_in_main_process() or
+                    pipeline.first_op().run_in_main_process() or
                     # ... the op is map. I.e. (python expression). This takes care of
                     # side effects we want to keep, e.g. (INTERACTIVE_EXECUTABLES.append(...))
-                    pipeline.first_op.op_name() == 'map'))
+                    pipeline.first_op().op_name() == 'map'))
 
 
 def fail(message):

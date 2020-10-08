@@ -94,7 +94,7 @@ class Loop(marcel.core.Op):
         # Find emit ops in the pipeline and connect them to self.
         loop_pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
         loop_pipeline.set_error_handler(self.owner.error_handler)
-        op = loop_pipeline.first_op
+        op = loop_pipeline.first_op()
         while op:
             if op.op_name() == 'emit':
                 op.set_loop_op(self)

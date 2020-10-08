@@ -61,7 +61,7 @@ class Intersect(marcel.core.Op):
         self.right = None  # Right input, tuple -> count
 
     def __repr__(self):
-        return 'intersect()'
+        return f'intersect({self.pipeline})'
 
     # AbstractOp
 

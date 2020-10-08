@@ -124,24 +124,37 @@ Implementation plan (commits)
 
 - Start version 11
 
-- Disable fork, runpipeline, args testing
+- Disable fork, runpipeline, pipeline args, args testing
+    - Partially disabled:
+        - test_assign
+        - test_join
+
 
 
 2. Command lifecycle (setup_1, setup_2, env)
 
 
-3. fork
+3. Redo pipeline args
+
+
+4. fork
 
 - Drop @n support
 
 - Re-enable fork testing
 
 
-4. runpipeline
+5. runpipeline
 
 - Re-enable runpipeline testing
 
 
-5. args
+6. args
 
 - Re-enable args testing
+
+
+7. Cleanup
+
+- Get rid of loop, LoopVar, its tests, and anything it uniquely relies
+  on.

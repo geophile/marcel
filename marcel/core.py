@@ -16,7 +16,6 @@
 import marcel.exception
 import marcel.helpformatter
 import marcel.object.error
-import marcel.pickler
 import marcel.util
 
 Error = marcel.object.error.Error
@@ -55,20 +54,17 @@ class Node(Pipelineable):
                 #     ls | recent
                 # In this case, through the CLI, the Pipeline would be wrapped in a runpipeline op. But
                 # through the API, op could actually be a Pipeline.
-                ops = []
-                op = op.first_op
-                while op:
-                    ops.append(op)
-                    op = op.next_op
+                ops = list(op.ops)
             else:
                 assert False, op
             for op in ops:
-                # The need to set the owner on the source of the copy is a bit subtle. op might be something that owns
-                # a FunctionWrapper. A FunctionWrapper points to it's op, and error handling requires the op's owner
-                # for error handling. If the owner isn't set prior to the copy, then the copy won't have its
-                # FunctionWrapper's op's owner set.
-                op.set_owner(pipeline)
-                pipeline.append(op.copy())
+                # # TODO: Obsolete?
+                # # The need to set the owner on the source of the copy is a bit subtle. op might be something that owns
+                # # a FunctionWrapper. A FunctionWrapper points to it's op, and error handling requires the op's owner
+                # # for error handling. If the owner isn't set prior to the copy, then the copy won't have its
+                # # FunctionWrapper's op's owner set.
+                # op.set_owner(pipeline)
+                pipeline.append(op)
 
         pipeline = Pipeline()
         self.traverse(visit)
@@ -101,32 +97,14 @@ class AbstractOp(Pipelineable):
         pass
 
 
-class ShallowCopyStore:
-
-    def __init__(self):
-        self.contents = {}
-        self.counter = 0
-
-    def save(self, x):
-        id = self.counter
-        self.counter += 1
-        self.contents[id] = x
-        return id
-
-    def recall(self, id):
-        return self.contents.pop(id, None)
-
-
 class Op(AbstractOp):
 
     def __init__(self, env):
         super().__init__()
         self._env = env
-        # The next op in the pipeline, or None if this is the last op in the pipeline.
-        self.next_op = None
-        # receiver is where op output is sent. Same as next_op unless this is the last
-        # op in the pipeline. In which case, the receiver is that of the pipeline containing
-        # this one.
+        # The following fields are set and have defined values only during the execution of a pipeline
+        # containing this op.
+        # The op receiving this op's output
         self.receiver = None
         # The pipeline to which this op belongs
         self.owner = None
@@ -156,19 +134,13 @@ class Op(AbstractOp):
 
     def create_pipeline(self):
         pipeline = Pipeline()
-        pipeline.append(self.copy())
+        pipeline.append(self)
         return pipeline
 
     # Op
 
     def set_env(self, env):
         self._env = env
-
-    def set_owner(self, pipeline):
-        self.owner = pipeline
-
-    def connect(self, new_op):
-        self.next_op = new_op
 
     def send(self, x):
         receiver = self.receiver
@@ -210,7 +182,6 @@ class Op(AbstractOp):
         return False
 
     def env(self):
-        assert self._env is not None, self
         return self._env
 
     def non_fatal_error(self, input=None, message=None, error=None):
@@ -245,11 +216,6 @@ class Op(AbstractOp):
         env = self._env
         self._env = None
         return PipelineIterator(self.create_pipeline(), env)
-
-    def copy(self):
-        copy = self.__class__(None)
-        copy.__dict__.update(self.__dict__)
-        return copy
 
     # For use by subclasses
 
@@ -329,10 +295,9 @@ class Op(AbstractOp):
 class Pipeline(AbstractOp):
 
     def __init__(self):
-        AbstractOp.__init__(self)
+        super().__init__()
         self.error_handler = None
-        self.first_op = None
-        self.last_op = None
+        self.ops = []
         # Parameters declared for a pipeline
         self.params = None
         # dict containing actual values, combining positional args (getting the name from params)
@@ -342,15 +307,13 @@ class Pipeline(AbstractOp):
     def __repr__(self):
         params = ', '.join(self.params) if self.params else None
         op_buffer = []
-        op = self.first_op
-        while op:
+        for op in self.ops:
             op_buffer.append(str(op))
-            op = op.next_op
         ops = ' | '.join(op_buffer)
         return f'[{params}: {ops}]' if params else f'[{ops}]'
 
     def env(self):
-        return self.first_op.env()
+        return self.ops[0].env()
 
     def set_error_handler(self, error_handler):
         self.error_handler = error_handler
@@ -367,36 +330,31 @@ class Pipeline(AbstractOp):
 
     def setup_1(self, env):
         assert self.error_handler is not None, f'{self} has no error handler'
-        op = self.first_op
-        while op:
-            if op.receiver is None:
-                op.receiver = op.next_op
+        prev_op = None
+        for op in self.ops:
+            if isinstance(op, Op) and op is not self.ops[0] and op.must_be_first_in_pipeline():
+                raise marcel.exception.KillCommandException('%s cannot receive input from a pipe' % op.op_name())
+            op.owner = self
             op.setup_1(env)
-            op = op.next_op
-            if isinstance(op, Op):
-                if op.must_be_first_in_pipeline():
-                    raise marcel.exception.KillCommandException(
-                        '%s cannot receive input from a pipe' % op.op_name())
+            if prev_op:
+                prev_op.receiver = op
+            prev_op = op
 
     def setup_2(self, env):
-        op = self.first_op
-        while op:
+        for op in self.ops:
             op.setup_2(env)
-            op = op.next_op
 
     def set_env(self, env):
-        op = self.first_op
-        while op:
+        for op in self.ops:
             op.set_env(env)
-            op = op.next_op
 
     def receive(self, x):
         if self.params is not None and len(self.args) < len(self.params):
             raise marcel.exception.KillCommandException(f'Unbound pipeline parameters for {self}')
-        self.first_op.receive_input(x)
+        self.ops[0].receive_input(x)
 
     def receive_complete(self):
-        self.first_op.receive_complete()
+        self.ops[0].receive_complete()
 
     # Pipeline
 
@@ -420,30 +378,22 @@ class Pipeline(AbstractOp):
         self.args = None
 
     def copy(self):
-        return marcel.pickler.copy(self)
+        copy = Pipeline()
+        copy.error_handler = self.error_handler
+        copy.ops = list(self.ops)
+        return copy
 
     def append(self, op):
-        op.set_owner(self)
-        if self.last_op:
-            assert self.first_op is not None
-            self.last_op.connect(op)
-        else:
-            assert self.first_op is None
-            self.first_op = op
-        self.last_op = op
+        self.ops.append(op)
 
     def prepend(self, op):
-        op.set_owner(self)
-        if self.first_op:
-            assert self.last_op is not None
-            op.connect(self.first_op)
-        else:
-            assert self.last_op is None
-            self.last_op = op
-        self.first_op = op
+        self.ops = [op] + self.ops
 
-    def is_terminal_op(self, op_name):
-        return self.last_op.op_name() == op_name
+    def first_op(self):
+        return self.ops[0]
+
+    def last_op(self):
+        return self.ops[-1]
 
 
 class Command:

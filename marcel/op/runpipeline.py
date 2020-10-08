@@ -45,7 +45,7 @@ class RunPipeline(marcel.core.Op):
                 f'The variable {self.var} is not bound to anything executable.')
         self.pipeline = pipeline.copy()
         self.pipeline.set_error_handler(self.owner.error_handler)
-        self.pipeline.last_op.receiver = self.receiver
+        self.pipeline.last_op().receiver = self.receiver
         self.pipeline.set_parameter_values(self.args, self.kwargs)
         self.pipeline.setup_1(env)
 

@@ -221,7 +221,7 @@ class Remote(ForkImplementation):
             assert isinstance(remote_op, marcel.op.remote.Remote)
             remote_op.set_host(thread_label)
             # Attach thread label to LabelThread op.
-            label_thread_op = pipeline_copy.last_op
+            label_thread_op = pipeline_copy.last_op()
             assert isinstance(label_thread_op, marcel.op.labelthread.LabelThread)
             label_thread_op.set_label(thread_label)
             # DON'T do setup_1 here. The pipeline is going to run remotely, so setup is done remotely.
@@ -259,7 +259,7 @@ class Local(ForkImplementation):
             pipeline_copy = op.pipeline.copy()
             pipeline_copy.set_error_handler(op.owner.error_handler)
             # Attach thread label to LabelThread op.
-            label_thread_op = pipeline_copy.last_op
+            label_thread_op = pipeline_copy.last_op()
             assert isinstance(label_thread_op, marcel.op.labelthread.LabelThread)
             label_thread_op.set_label(thread_label)
             pipeline_copy.setup_1(env)

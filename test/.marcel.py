@@ -1,9 +1,8 @@
 from marcel.builtin import *
 
-
-jao = remote(user='jao',
-             identity='/home/jao/.ssh/id_rsa',
-             host='localhost')
+# jao = remote(user='jao',
+#              identity='/home/jao/.ssh/id_rsa',
+#              host='localhost')
 
 jdb = database(driver='psycopg2',
                dbname='jao',
@@ -12,6 +11,6 @@ jdb = database(driver='psycopg2',
 
 DB_DEFAULT = jdb
 
-RUN_ON_STARTUP = '''
-ext = [e: select (f: f.suffix == '.' + e)]
-'''
+# RUN_ON_STARTUP = '''
+# ext = [e: select (f: f.suffix == '.' + e)]
+# '''

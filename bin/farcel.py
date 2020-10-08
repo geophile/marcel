@@ -75,7 +75,7 @@ class PipelineRunner(threading.Thread):
             self.pipeline.setup_1(self.env)
             self.pipeline.set_env(self.env)
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
-            self.pipeline.first_op.receive_input(None)
+            self.pipeline.first_op().receive_input(None)
         # except marcel.exception.KillCommandException as e:
         #     self.pickler.receive_error(marcel.object.error.Error(e))
         except BaseException as e:

@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
+
 import marcel.core as _core
 import marcel.exception as _exception
 import marcel.main as _main
@@ -63,7 +65,9 @@ from marcel.op.window import window as _window
 from marcel.builtin import *
 from marcel.reduction import *
 
-_MAIN = _main.Main(None, same_process=True, old_namespace=None)
+_MAIN = _main.Main(os.getenv('MARCEL_CONFIG', default=None),
+                   same_process=True,
+                   old_namespace=None)
 env = _MAIN.env
 # No colors for API
 env.set_color_scheme(None)
@@ -133,7 +137,7 @@ def _prepare_pipeline(x):
 
 def run(x):
     pipeline = _prepare_pipeline(x)
-    if not isinstance(pipeline.last_op, _Out):
+    if not isinstance(pipeline.last_op(), _Out):
         pipeline.append(out())
     pipeline.set_error_handler(_MAIN.default_error_handler)
     _MAIN.run_api(pipeline)
