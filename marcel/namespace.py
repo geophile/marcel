@@ -80,6 +80,9 @@ class Namespace(dict):
         self.innermost = NamespaceFrame(map, None)
 
     def __repr__(self, *args, **kwargs):
+        if self.innermost is None:
+            return 'Namespace(None -- BROKEN)'
+        assert self.innermost is not None
         buffer = []
         f = self.innermost
         i = 0
@@ -90,15 +93,19 @@ class Namespace(dict):
         return '\n'.join(buffer)
 
     def __getitem__(self, key):
+        assert self.innermost is not None
         return self.innermost.getitem(key)
 
     def __setitem__(self, key, value):
+        assert self.innermost is not None
         return self.innermost.setitem(key, value)
 
     def __delitem__(self, key):
+        assert self.innermost is not None
         return self.innermost.delitem(key)
 
     def __contains__(self, key):
+        assert self.innermost is not None
         try:
             self.innermost.getitem(key)
             return True
@@ -106,33 +113,41 @@ class Namespace(dict):
             return False
 
     def get(self, key, default=None):
+        assert self.innermost is not None
         try:
             return self.innermost.getitem(key)
         except KeyError:
             return default
 
     def __eq__(self, other):
+        assert self.innermost is not None
         return self.innermost.flattened() == other if self.innermost is not None else len(other) == 0
 
     def __ne__(self, other):
+        assert self.innermost is not None
         return not self.__eq__(other)
 
     def keys(self):
+        assert self.innermost is not None
         return self.innermost.flattened().keys()
 
     def update(self, map=None, **kwargs):
+        assert self.innermost is not None
         if map is None:
             map = kwargs
         for key, value in map.items():
             self.innermost.setitem(key, value)
 
     def values(self):
+        assert self.innermost is not None
         return self.innermost.flattened().values()
 
     def items(self):
+        assert self.innermost is not None
         return self.innermost.flattened().items()
 
     def pop(self, key, default=NOT_PROVIDED):
+        assert self.innermost is not None
         try:
             return self.innermost.delitem(key)
         except KeyError:
@@ -217,14 +232,22 @@ class Namespace(dict):
 
     # Namespace
 
-    def add_frame(self, keys):
-        map = {}
-        for key in keys:
-            map[key] = None
+    def frames(self):
+        assert self.innermost is not None
+        n = 0
+        frame = self.innermost
+        while frame:
+            n += 1
+            frame = frame.outer
+        return n
+
+    def push_frame(self, map):
+        assert type(map) is dict
         self.innermost = NamespaceFrame(map, self.innermost)
 
-    def remove_frame(self):
+    def pop_frame(self):
         assert self.innermost is not None
+        assert self.innermost.outer is not None
         self.innermost = self.innermost.outer
 
     def flattened(self):

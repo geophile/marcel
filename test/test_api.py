@@ -985,7 +985,7 @@ def main_stable():
     test_version()
     test_assign()
     test_join()
-    # test_pipeline_args()
+    test_pipeline_args()
     test_sql()
     test_load_store()
     # test_loop()

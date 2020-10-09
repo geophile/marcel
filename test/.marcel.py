@@ -11,6 +11,6 @@ jdb = database(driver='psycopg2',
 
 DB_DEFAULT = jdb
 
-# RUN_ON_STARTUP = '''
-# ext = [e: select (f: f.suffix == '.' + e)]
-# '''
+RUN_ON_STARTUP = '''
+ext = [e: select (f: f.suffix == '.' + e)]
+'''

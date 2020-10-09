@@ -212,10 +212,7 @@ class Op(AbstractOp):
     # For use by subclasses
 
     def getvar(self, var):
-        value = self.owner.args.get(var, None) if self.owner.args else None
-        if value is None:
-            value = self._env.getvar(var)
-        return value
+        return self._env.getvar(var)
 
     # arg is a Pipeline, Pipelineable, or a var bound to a pipeline. Deal with all of these possibilities
     # and come up with the pipeline itself.
@@ -292,9 +289,6 @@ class Pipeline(AbstractOp):
         self.ops = []
         # Parameters declared for a pipeline
         self.params = None
-        # dict containing actual values, combining positional args (getting the name from params)
-        # and kwargs.
-        self.args = None
 
     def __repr__(self):
         params = ', '.join(self.params) if self.params else None
@@ -338,8 +332,6 @@ class Pipeline(AbstractOp):
             op.setup_2()
 
     def receive(self, x):
-        if self.params is not None and len(self.args) < len(self.params):
-            raise marcel.exception.KillCommandException(f'Unbound pipeline parameters for {self}')
         self.ops[0].receive_input(x)
 
     def receive_complete(self):
@@ -355,21 +347,11 @@ class Pipeline(AbstractOp):
     def parameters(self):
         return self.params
 
-    def set_parameter_values(self, args, kwargs):
-        self.args = {}
-        if args:
-            for i in range(len(args)):
-                self.args[self.params[i]] = args[i]
-        if kwargs:
-            self.args.update(kwargs)
-
-    def clear_parameter_values(self):
-        self.args = None
-
     def copy(self):
         copy = Pipeline()
         copy.error_handler = self.error_handler
         copy.ops = list(self.ops)
+        copy.params = self.params
         return copy
 
     def append(self, op):
@@ -396,6 +378,7 @@ class Command:
         return str(self.pipeline)
 
     def execute(self, api=False):
+        assert self.env.namespace.frames() == 1, self.env.namespace
         self.env.clear_changes()
         self.pipeline.setup_1()
         self.pipeline.setup_2()
