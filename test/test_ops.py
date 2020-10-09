@@ -596,8 +596,8 @@ def test_comment():
 
 def test_pipeline_args():
     TEST.run('add = [a: map (x: (x, x + a))]')
-    # TEST.run('gen 3 | add (100)',
-    #          expected_out=[(0, 100), (1, 101), (2, 102)])
+    TEST.run('gen 3 | add (100)',
+             expected_out=[(0, 100), (1, 101), (2, 102)])
     # # Multiple functions
     # TEST.run('add = [a: map (x: (x, x + a)) | map (x, y: (x + a, y - a))]')
     # TEST.run('gen 3 | add (100)',
@@ -1166,7 +1166,7 @@ def main_stable():
     # # test_fork()
     test_namespace()
     # test_remote()
-    test_sudo()
+    # test_sudo()
     test_version()
     test_assign()
     test_join()
@@ -1188,6 +1188,7 @@ def main_stable():
 
 
 def main_dev():
+    test_pipeline_args()
     pass
 
 

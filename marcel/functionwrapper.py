@@ -33,6 +33,7 @@ SYMBOLS = {
     '.': marcel.reduction.r_group
 }
 
+# TODO: This comment is probably obsolete:
 # This code works around a bug in dill: https://github.com/uqfoundation/dill/issues/377.
 # The workaround involves recompiling functions with source following unpickling. A function
 # that doesn't have source has __globals__ other than the marcel namespace, and those functions
@@ -48,8 +49,7 @@ class FunctionWrapper:
 
     # For creating a Function from source, we need source and globals. If the function itself (i.e., lambda)
     # is provided, then the globals aren't needed, since we don't need to use eval.
-    def __init__(self, function=None, source=None, parameterized_pipelines=None):
-        self._parameterized_pipelines = [] if parameterized_pipelines is None else parameterized_pipelines
+    def __init__(self, function=None, source=None):
         self._op = None
         if function and source:
             self._function = function
@@ -85,20 +85,8 @@ class FunctionWrapper:
         self.__dict__.update(state)
 
     def __call__(self, *args, **kwargs):
-        # The function may be nested lambdas, with each level of nesting corresponding to a pipeline with
-        # parameters. Apply the pipeline parameters, from outermost to innermost.
-        p = len(self._parameterized_pipelines)
-        f = self.function()
-        while p > 0:
-            p -= 1
-            pipeline = self._parameterized_pipelines[p]
-            if pipeline.args is not None:
-                try:
-                    f = f(**pipeline.args)
-                except Exception as e:
-                    self.handle_error(e, self.function_input_description(pipeline.args, None))
         try:
-            return f(*args, **kwargs)
+            return self.function()(*args, **kwargs)
         except Exception as e:
             self.handle_error(e, self.function_input_description(args, kwargs))
 

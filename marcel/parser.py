@@ -291,20 +291,7 @@ class Expression(Token):
                             source = 'lambda: ' + source
                         except Exception:
                             raise marcel.exception.KillCommandException(f'Invalid function syntax: {source}')
-                # Each pipeline with parameters, containing this function, introduces a layer of wrapping.
-                pipelines = parser.current_pipelines
-                parameterized_pipelines = []
-                for i in range(pipelines.size()):
-                    pipeline = pipelines.top(i)
-                    if pipeline.params is not None:
-                        param_list = ', '.join(pipeline.parameters())
-                        source = f'lambda {param_list}: {source}'
-                        parameterized_pipelines.append(pipeline)
-                if len(parameterized_pipelines) > 0:
-                    function = eval(source, globals)
-                self._function = marcel.functionwrapper.FunctionWrapper(function=function,
-                                                                        source=source,
-                                                                        parameterized_pipelines=parameterized_pipelines)
+                self._function = marcel.functionwrapper.FunctionWrapper(function=function, source=source)
             return self._function
         except Exception as e:
             raise SyntaxError(self, f'Error in function: {e}')

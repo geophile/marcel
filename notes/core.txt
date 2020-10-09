@@ -134,19 +134,33 @@ Implementation plan (commits)
 2. Command lifecycle (setup_1, setup_2, env)
 
 
-3. Redo pipeline args
+3. runpipeline
+
+- Re-enable runpipeline testing
 
 
-4. fork
+4. Redo pipeline args
+
+- dict wrapper to accommodate nesting. See experiments/functionglobals
+    - __getitem__ used during function eval
+    - __setitem__ implements assigning value to key
+    - __delitem__ implements del
+
+- Maintain namespace during parsing.
+
+- Maintain namespace during execution.
+
+- Simplify FunctionWrapper.
+
+
+5. sudo
+
+
+6. fork
 
 - Drop @n support
 
 - Re-enable fork testing
-
-
-5. runpipeline
-
-- Re-enable runpipeline testing
 
 
 6. args

@@ -145,8 +145,8 @@ def main():
         # Use sys.stdin.buffer because we want binary data, not the text version
         input = dill.Unpickler(sys.stdin.buffer)
         env = input.load()
-        namespace.update(env.namespace)
-        env.namespace = namespace
+        namespace.update(env.map)
+        env.map = namespace
         env.main_pid = os.getpid()
         pipeline = input.load()
         version = env.getvar('MARCEL_VERSION')

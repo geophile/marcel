@@ -22,6 +22,7 @@ import sys
 import marcel.builtin
 import marcel.core
 import marcel.exception
+import marcel.namespace
 import marcel.object.cluster
 import marcel.object.db
 import marcel.object.color
@@ -164,8 +165,8 @@ class Environment:
         except FileNotFoundError:
             raise marcel.exception.KillShellException(
                 'Current directory does not exist! cd somewhere else and try again.')
-        self.namespace = {} if old_namespace is None else old_namespace
-        self.namespace.update({
+        initial_namespace = {} if old_namespace is None else old_namespace
+        initial_namespace.update({
             'USER': user,
             'HOME': homedir.as_posix(),
             'HOST': host,
@@ -179,12 +180,13 @@ class Environment:
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
             'Color': marcel.object.color.Color,
         })
-        self.initialize_interactive_executables()
+        self.initialize_interactive_executables(initial_namespace)
         if editor:
-            self.namespace['EDITOR'] = editor
+            initial_namespace['EDITOR'] = editor
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
-                self.namespace[key] = value
+                initial_namespace[key] = value
+        self.namespace = marcel.namespace.Namespace(initial_namespace)
         self.builtin_symbols = set(self.namespace.keys())
         self.config_symbols = None  # Set by compute_config_symbols() after startup script is run
         self.config_path = self.read_config(config_file)
@@ -290,7 +292,8 @@ class Environment:
         locals = {}
         # Execute the config file. Imported and newly-defined symbols go into locals, which
         # will then be added to self.namespace, for use in the execution of op functions.
-        exec(config_source, self.namespace, locals)
+        # TODO: Why does this fail without flattening? BOLD is undefined, for example.
+        exec(config_source, self.namespace.flattened(), locals)
         self.namespace.update(locals)
         return config_path
 
@@ -324,12 +327,12 @@ class Environment:
             print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)
             return Environment.DEFAULT_PROMPT
 
-    def initialize_interactive_executables(self):
+    def initialize_interactive_executables(self, initial_namespace):
         exes = []
         for x in Environment.INITIAL_INTERACTIVE_EXECUTABLES:
             if marcel.util.is_executable(x):
                 exes.append(x)
-        self.namespace['INTERACTIVE_EXECUTABLES'] = exes
+        initial_namespace['INTERACTIVE_EXECUTABLES'] = exes
 
     @staticmethod
     def immutable(x):

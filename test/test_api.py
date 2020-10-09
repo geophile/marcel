@@ -981,7 +981,7 @@ def main_stable():
     # test_fork()
     # test_namespace()
     # test_remote()
-    test_sudo()
+    # test_sudo()
     test_version()
     test_assign()
     test_join()

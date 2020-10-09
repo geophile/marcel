@@ -330,7 +330,6 @@ class Pipeline(AbstractOp):
             if prev_op:
                 prev_op.receiver = op
             prev_op = op
-        # TODO: Do op setup_1 after the above initialization. This should render setup_2 obsolete.
         for op in self.ops:
             op.setup_1()
 
