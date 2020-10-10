@@ -153,22 +153,25 @@ Implementation plan (commits)
 - Simplify FunctionWrapper.
 
 
-5. sudo
+5. Review __get/setstate__. These should go away or be much simpler.
 
 
-6. fork
+6. sudo
+
+
+7. fork
 
 - Drop @n support
 
 - Re-enable fork testing
 
 
-6. args
+8. args
 
 - Re-enable args testing
 
 
-7. Cleanup
+9. Cleanup
 
 - Get rid of loop, LoopVar, its tests, and anything it uniquely relies
   on.

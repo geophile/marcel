@@ -17,6 +17,7 @@ import marcel.exception
 import marcel.object.color
 import marcel.object.error
 import marcel.object.process
+import marcel.namespace
 import marcel.util
 import marcel.version
 
@@ -41,7 +42,7 @@ class PickleOutput(marcel.core.Op):
     def __repr__(self):
         return 'pickleoutput()'
 
-    def setup_1(self, env):
+    def setup_1(self):
         pass
 
     def receive(self, x):
@@ -141,12 +142,12 @@ def main():
     def noop_error_handler(env, error):
         pass
     try:
-        namespace = read_config()
+        namespace = marcel.namespace.Namespace(read_config())
         # Use sys.stdin.buffer because we want binary data, not the text version
         input = dill.Unpickler(sys.stdin.buffer)
         env = input.load()
-        namespace.update(env.map)
-        env.map = namespace
+        namespace.update(env.namespace)
+        env.namespace = namespace
         env.main_pid = os.getpid()
         pipeline = input.load()
         version = env.getvar('MARCEL_VERSION')
