@@ -17,7 +17,7 @@ import marcel.exception
 import marcel.object.color
 import marcel.object.error
 import marcel.object.process
-import marcel.namespace
+import marcel.nestednamespace
 import marcel.util
 import marcel.version
 
@@ -142,7 +142,7 @@ def main():
     def noop_error_handler(env, error):
         pass
     try:
-        namespace = marcel.namespace.Namespace(read_config())
+        namespace = marcel.nestednamespace.NestedNamespace(read_config())
         # Use sys.stdin.buffer because we want binary data, not the text version
         input = dill.Unpickler(sys.stdin.buffer)
         env = input.load()

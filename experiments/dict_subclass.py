@@ -14,7 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 
-class FunctionGlobals(dict):
+class DictSubclass(dict):
 
     # def __class__(self, *args, **kwargs):
     #     print(f'__class__, args={args}, kwargs={kwargs}')
@@ -181,13 +181,16 @@ class FunctionGlobals(dict):
         return super().values(*args, **kwargs)
 
 
+print('DEFINE FUNCTION')
 source = 'lambda x: x + y'
-namespace = FunctionGlobals()
+namespace = DictSubclass()
 namespace['y'] = 100
 f = eval(source, namespace)
+print('RUN FUNCTION')
 print(f(5))
 namespace['y'] = 200
 print(f(5))
+print('GLOBALS')
 m = f.__globals__.copy()
 del m['__builtins__']
 print(m)

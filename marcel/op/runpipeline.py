@@ -53,7 +53,7 @@ class RunPipeline(marcel.core.Op):
     def receive_complete(self):
         self.pipeline.receive_complete()
         if self.pipeline.parameters() is not None:
-            self.env().namespace.pop_frame()
+            self.env().namespace.pop_scope()
         self.send_complete()
 
     # RunPipeline
@@ -82,4 +82,4 @@ class RunPipeline(marcel.core.Op):
                 map.update(self.kwargs)
             if len(map) != len(params):
                 raise marcel.exception.KillCommandException(f'Expected arguments: {len(params)}, given: {len(map)}')
-            self.env().namespace.push_frame(map)
+            self.env().namespace.push_scope(map)

@@ -378,7 +378,7 @@ class Command:
         return str(self.pipeline)
 
     def execute(self, api=False):
-        assert self.env.namespace.frames() == 1, self.env.namespace
+        assert self.env.namespace.n_frames() == 1, self.env.namespace
         self.env.clear_changes()
         self.pipeline.setup_1()
         self.pipeline.setup_2()

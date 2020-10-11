@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import marcel.namespace
+import marcel.nestednamespace
 
 
 def fail():
@@ -25,25 +25,24 @@ def check_match(actual, expected):
 
 
 def test_namespace():
-    ns = marcel.namespace.Namespace({'a': 1, 'b': 2})
+    ns = marcel.nestednamespace.NestedNamespace({'a': 1, 'b': 2})
     try:
         del ns['c']
         fail()
     except KeyError:
         pass
-    check_match(ns, {'a': 1, 'b': 2})
-    ns.push_frame({'a': None, 'd': None, 'e': None})
-    check_match(ns, {'a': None, 'b': 2, 'd': None, 'e': None})
+    check_match(ns.flattened(), {'a': 1, 'b': 2})
+    ns.push_scope({'a': None, 'd': None, 'e': None})
+    check_match(ns.flattened(), {'a': None, 'b': 2, 'd': None, 'e': None})
     ns['a'] = 10
     ns['b'] = 20
     ns['d'] = 30
-    check_match(ns, {'a': 10, 'b': 20, 'd': 30, 'e': None})
-    ns.pop_frame()
-    check_match(ns, {'a': 1, 'b': 20})
-    ns.pop_frame()
-    check_match(ns, {})
+    check_match(ns.flattened(), {'a': 10, 'b': 20, 'd': 30, 'e': None})
+    ns.pop_scope()
+    check_match(ns.flattened(), {'a': 1, 'b': 20})
+    # Shouldn't be able to pop the only frame
     try:
-        ns.pop_frame()
+        ns.pop_scope()
         fail()
     except AssertionError:
         pass
@@ -52,11 +51,11 @@ def test_namespace():
 def test_function():
     # Does a namespace work for function definition?
     source = 'lambda a: a + b + c'
-    ns = marcel.namespace.Namespace({'b': 1, 'c': 2})
-    ns.push_frame({'b': 10, 'c': 20})
+    ns = marcel.nestednamespace.NestedNamespace({'b': 1, 'c': 2})
+    ns.push_scope({'b': 10, 'c': 20})
     f = eval(source, ns)
     check_match(f(1), 31)
-    ns.pop_frame()
+    ns.pop_scope()
     check_match(f(100), 103)
     ns['c'] = 5
     check_match(f(100), 106)

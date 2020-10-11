@@ -22,7 +22,7 @@ import sys
 import marcel.builtin
 import marcel.core
 import marcel.exception
-import marcel.namespace
+import marcel.nestednamespace
 import marcel.object.cluster
 import marcel.object.db
 import marcel.object.color
@@ -186,7 +186,7 @@ class Environment:
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 initial_namespace[key] = value
-        self.namespace = marcel.namespace.Namespace(initial_namespace)
+        self.namespace = marcel.nestednamespace.NestedNamespace(initial_namespace)
         self.builtin_symbols = set(self.namespace.keys())
         self.config_symbols = None  # Set by compute_config_symbols() after startup script is run
         self.config_path = self.read_config(config_file)
