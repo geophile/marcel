@@ -50,10 +50,15 @@ class Select(marcel.core.Op):
         self.function = None
 
     def __repr__(self):
-        return f'select({self.function.source()})'
+        return f'select({self.function.snippet()})'
 
     # AbstractOp
-    
+
+    def set_env(self, env):
+        self.function.set_globals(env.vars())
+
+    # Op
+
     def receive(self, x):
         fx = self.function() if x is None else self.function(*x)
         if fx:

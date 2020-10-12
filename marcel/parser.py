@@ -16,7 +16,7 @@
 import marcel.argsparser
 import marcel.core
 import marcel.exception
-import marcel.functionwrapper
+import marcel.function
 import marcel.opmodule
 import marcel.util
 
@@ -291,7 +291,7 @@ class Expression(Token):
                             source = 'lambda: ' + source
                         except Exception:
                             raise marcel.exception.KillCommandException(f'Invalid function syntax: {source}')
-                self._function = marcel.functionwrapper.FunctionWrapper(function=function, source=source)
+                self._function = marcel.function.SourceFunction(function=function, source=source)
             return self._function
         except Exception as e:
             raise SyntaxError(self, f'Error in function: {e}')

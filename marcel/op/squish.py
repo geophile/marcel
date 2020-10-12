@@ -17,7 +17,7 @@ import functools
 
 import marcel.argsparser
 import marcel.core
-import marcel.functionwrapper
+import marcel.function
 from marcel.reduction import r_plus
 
 HELP = '''
@@ -59,14 +59,20 @@ class Squish(marcel.core.Op):
         self.function = None
 
     def __repr__(self):
-        return f'squish({self.function.source()})' if self.function else 'squish()'
+        return f'squish({self.function.snippet()})' if self.function else 'squish()'
 
     # AbstractOp
     
     def setup_1(self):
         if self.function is None:
-            self.function = marcel.functionwrapper.FunctionWrapper(function=r_plus)
+            self.function = marcel.function.SymbolFunction('+')
         self.function.set_op(self)
+
+    def set_env(self, env):
+        super().set_env(env)
+        self.function.set_globals(env.vars())
+
+    # Op
 
     def receive(self, x):
         self.send(functools.reduce(self.function, x, None))

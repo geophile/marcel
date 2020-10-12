@@ -17,6 +17,7 @@ import types
 
 import marcel.argsparser
 import marcel.core
+import marcel.function
 import marcel.reduction
 
 HELP = '''
@@ -131,7 +132,7 @@ class Red(marcel.core.Op):
         self.reducer = None
 
     def __repr__(self):
-        sources = [None if f is None else f.source() for f in self.functions]
+        sources = [None if f is None else f.snippet() for f in self.functions]
         return f'red(incremental={self.incremental}, functions={sources})'
 
     # AbstractOp
@@ -150,6 +151,14 @@ class Red(marcel.core.Op):
             self.reducer = NonGroupingReducer(self)
         else:
             self.reducer = GroupingReducer(self, grouping_positions, data_positions)
+
+    def set_env(self, env):
+        super().set_env(env)
+        for function in self.functions:
+            if isinstance(function, marcel.function.Function):
+                function.set_globals(env.vars())
+
+    # Op
 
     def receive(self, x):
         self.reducer.receive(x)

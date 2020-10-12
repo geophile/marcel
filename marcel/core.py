@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import marcel.exception
+import marcel.function
 import marcel.helpformatter
 import marcel.object.error
 import marcel.util
@@ -84,15 +85,13 @@ class Node(Pipelineable):
 
 class AbstractOp(Pipelineable):
 
-    def __repr__(self):
-        assert False
-
-    # AbstractOp
-
     def setup_1(self):
         pass
 
     def setup_2(self):
+        pass
+
+    def setup_env(self, env):
         pass
 
 
@@ -111,30 +110,17 @@ class Op(AbstractOp):
     def __repr__(self):
         assert False, self.op_name()
 
-    # About _env handling in __get/setstate__: A command run as a (local) job should use the identical Environment as
-    # provided by the main thread. Otherwise, Environment modifications are lost. _env_ref stores a token identifying
-    # the original Environment, which is restored in __setstate__. For remote execution (i.e., fork), we don't want
-    # changes returned -- that's a different environment, (and in fact, there are multiple environments, one for each
-    # remote host).
-
-    def __getstate__(self):
-        # It would be nice to assert self._env is None, but it is sometimes set. The args op does
-        # setup of its pipeline repeatedly, while receiving input from upstream. If there are FunctionWrappers
-        # in the pipeline arg, then these can refer to outer pipelines (via _parameterized_pipelines) in which
-        # the env has been set.
-        m = self.__dict__.copy()
-        m['_env'] = None
-        return m
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-
     # Pipelineable
 
     def create_pipeline(self):
         pipeline = Pipeline()
         pipeline.append(self)
         return pipeline
+
+    # AbstractOp
+
+    def set_env(self, env):
+        self._env = env
 
     # Op
 
@@ -236,31 +222,34 @@ class Op(AbstractOp):
     # Evaluate any functions found, and then check that the resulting type is
     # one of the given types.
     def eval_function(self, field, *types):
+        def call(x):
+            if isinstance(x, marcel.function.Function):
+                x.set_op(self)
+            try:
+                x = x()
+            except marcel.exception.KillAndResumeException as e:
+                # We are doing setup. Resuming isn't a possibility
+                raise marcel.exception.KillCommandException(e)
+            if len(types) > 0 and type(x) not in types:
+                raise marcel.exception.KillCommandException(
+                    f'Type of {self.op_name()}.{field} is {type(x)}, but must be one of {types}')
+            return x
         state = self.__dict__
         val = state[field]
         if callable(val):
-            val = val()
-            if len(types) > 0 and type(val) not in types:
-                raise marcel.exception.KillCommandException(
-                    f'Type of {self.op_name()}.{field} is {type(val)}, but must be one of {types}')
+            val = call(val)
         elif type(val) in (tuple, list):
             evaled = []
             for x in val:
                 if callable(x):
-                    x = x()
-                    if len(types) > 0 and type(x) not in types:
-                        raise marcel.exception.KillCommandException(
-                            f'Type of {self.op_name()}.{field} element {x} is {type(x)}, but must be one of {types}')
+                    x = call(x)
                 evaled.append(x)
             val = evaled
         elif type(val) is dict:
             evaled = {}
             for k, v in val.items():
                 if callable(v):
-                    v = v()
-                    if len(types) > 0 and type(v) not in types:
-                        raise marcel.exception.KillCommandException(
-                            f'Type of {self.op_name()}.{field} element {v} is {type(v)}, but must be one of {types}')
+                    v = call(v)
                 evaled[k] = v
             val = evaled
         return val
@@ -331,13 +320,17 @@ class Pipeline(AbstractOp):
         for op in self.ops:
             op.setup_2()
 
+    def set_env(self, env):
+        for op in self.ops:
+            op.set_env(env)
+
+    # Pipeline
+
     def receive(self, x):
         self.ops[0].receive_input(x)
 
     def receive_complete(self):
         self.ops[0].receive_complete()
-
-    # Pipeline
 
     def set_parameters(self, parameters):
         if parameters is not None:
@@ -378,10 +371,11 @@ class Command:
         return str(self.pipeline)
 
     def execute(self, api=False):
-        assert self.env.namespace.n_frames() == 1, self.env.namespace
+        assert self.env.namespace.n_scopes() == 1, self.env.namespace
         self.env.clear_changes()
         self.pipeline.setup_1()
         self.pipeline.setup_2()
+        self.pipeline.set_env(self.env)
         self.pipeline.receive(None)
         self.pipeline.receive_complete()
         # An interactive Command is executed by a multiprocessing.Process.

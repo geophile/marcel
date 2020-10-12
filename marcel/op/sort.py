@@ -17,7 +17,6 @@ import types
 
 import marcel.argsparser
 import marcel.core
-import marcel.functionwrapper
 
 
 HELP = '''
@@ -59,6 +58,13 @@ class Sort(marcel.core.Op):
     
     def setup_1(self):
         self.contents = []
+
+    def set_env(self, env):
+        super().set_env(env)
+        if self.key:
+            self.key.set_globals(env.vars())
+
+    # Op
 
     def receive(self, x):
         # x is None occurs only for the first op in a pipeline. Sort shouldn't be used there, but whatever.

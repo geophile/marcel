@@ -155,6 +155,7 @@ def main():
         TRACE.write(f'env: {marcel.util.namespace_description(env.vars())}')
         TRACE.write(f'pipeline: {pipeline}')
         atexit.register(shutdown)
+        pipeline.set_env(env)
         pipeline.set_error_handler(noop_error_handler)
         pipeline_runner = PipelineRunner(env, pipeline)
         pipeline_runner.start()

@@ -106,8 +106,7 @@ class Fork(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self, env):
-        super().setup_1(env)
+    def setup_1(self):
         self.host = self.eval_function('host', int, str)
         self.threads = []
         cluster = self.host if type(self.host) is marcel.object.cluster.Cluster else env.cluster(self.host)
@@ -121,7 +120,7 @@ class Fork(marcel.core.Op):
             self.impl = Local(self, int(self.host))
         else:
             raise marcel.exception.KillCommandException(f'Invalid fork specification: {self.host}')
-        self.impl.setup_1(env)
+        self.impl.setup_1()
 
     def setup_2(self):
         self.impl.setup_2()

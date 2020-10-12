@@ -1896,3 +1896,66 @@ output:
 
 Because out is not terminal in the topmost pipeline.
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+119.
+
+M-0.11.0 jao@cheese:~/git/marcel$ ls -fr marcel test | ext py 
+Process Process-8:
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/marcel/functionwrapper.py", line 89, in __call__
+    return self.function()(*args, **kwargs)
+  File "<string>", line 1, in <lambda>
+NameError: name 'e' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 389, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/marcel/marcel/core.py", line 339, in receive
+    self.ops[0].receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 161, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/ls.py", line 154, in receive
+    self.visit(root, 0)
+  File "/home/jao/git/marcel/marcel/op/ls.py", line 166, in visit
+    self.visit(file, level + 1)
+  File "/home/jao/git/marcel/marcel/op/ls.py", line 162, in visit
+    self.send_path(root)
+  File "/home/jao/git/marcel/marcel/op/ls.py", line 179, in send_path
+    self.send(file)
+  File "/home/jao/git/marcel/marcel/core.py", line 144, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 161, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/runpipeline.py", line 51, in receive
+    self.pipeline.receive(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 339, in receive
+    self.ops[0].receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 161, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/select.py", line 58, in receive
+    fx = self.function() if x is None else self.function(*x)
+  File "/home/jao/git/marcel/marcel/functionwrapper.py", line 91, in __call__
+    self.handle_error(e, self.function_input_description(args, kwargs))
+  File "/home/jao/git/marcel/marcel/functionwrapper.py", line 111, in handle_error
+    self._op.fatal_error(function_input_string, str(e))
+  File "/home/jao/git/marcel/marcel/core.py", line 191, in fatal_error
+    self.owner.handle_error(error)
+  File "/home/jao/git/marcel/marcel/core.py", line 308, in handle_error
+    self.error_handler(self.env(), error)
+  File "/home/jao/git/marcel/marcel/main.py", line 239, in default_error_handler
+    print(error.render_full(env.color_scheme()))
+AttributeError: 'NoneType' object has no attribute 'color_scheme'
+M-0.11.0 jao@cheese:~/git/marcel$ 
+

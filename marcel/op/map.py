@@ -54,6 +54,12 @@ class Map(marcel.core.Op):
         return f'map({self.function.snippet()})'
 
     # AbstractOp
+
+    def set_env(self, env):
+        super().set_env(env)
+        self.function.set_globals(env.vars())
+
+    # Op
     
     def receive(self, x):
         output = self.function() if x is None else self.function(*x)

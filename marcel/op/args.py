@@ -69,10 +69,9 @@ class Args(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self, env):
-        super().setup_1(env)
+    def setup_1(self):
         self.impl = ArgsAPI(self) if callable(self.pipeline_arg) else ArgsInteractive(self)
-        self.impl.setup_1(env)
+        self.impl.setup_1()
 
     def receive(self, x):
         self.impl.receive(x)
@@ -152,7 +151,7 @@ class ArgsAPI(ArgsImpl):
     def __init__(self, op):
         super().__init__(op)
 
-    def setup_1(self, env):
+    def setup_1(self):
         self.n_params = len(self.op.pipeline_arg.__code__.co_varnames)
         self.check_args()
         self.args = []

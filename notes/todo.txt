@@ -389,3 +389,34 @@ In api functions, why [None] instead of []? E.g., in store()
 ----------------------------------------------------------------------
 
 File.unlink()
+
+----------------------------------------------------------------------
+
+ls gets COLOR_SCHEME on each File:
+
+M-0.11.0 jao@cheese:~/git/marcel/marcel$ ls | ext py 
+getvar 139884242926800: PWD -> 139884242937296
+getvar 139884242926800: ext -> 139884241896976
+runpipeline.setup_1 ext: 139884241896976 [e: select(lambda f: f.suffix == '.' + e)]
+runpipeline.setup_1 pipeline env: <marcel.env.Environment object at 0x7f39569bfcd0>
+getvar 139884242926800: COLOR_SCHEME -> 139884242927472
+-rw-r--r--   jao    jao         652   2020 May 10 15:41:11   __init__.py
+getvar 139884242926800: COLOR_SCHEME -> 139884242927472
+-rw-rw-r--   jao    jao        7591   2020 Oct 08 14:28:17   api.py
+getvar 139884242926800: COLOR_SCHEME -> 139884242927472
+-rw-rw-r--   jao    jao       18875   2020 Oct 05 12:02:02   argsparser.py
+getvar 139884242926800: COLOR_SCHEME -> 139884242927472
+-rw-rw-r--   jao    jao        1356   2020 Oct 09 11:24:21   builtin.py
+getvar 139884242926800: COLOR_SCHEME -> 139884242927472
+-rw-rw-r--   jao    jao       12925   2020 Oct 11 13:22:27   core.py
+getvar 139884242926800: COLOR_SCHEME -> 139884242927472
+-rw-rw-r--   jao    jao       11985   2020 Oct 11 13:26:13   env.py
+getvar 139884242926800: COLOR_SCHEME -> 139884242927472
+-rw-r--r--   jao    jao        4506   2020 Aug 21 09:20:16   exception.py
+getvar 139884242926800: COLOR_SCHEME -> 139884242927472
+
+----------------------------------------------------------------------
+
+For remote execution, is it still necessary to transmit env
+separately? Just send the pipeline as is, don't detach/retach env
+(which is vestigial anyway).

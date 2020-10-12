@@ -18,7 +18,6 @@ import types
 import marcel.argsparser
 import marcel.core
 import marcel.exception
-import marcel.functionwrapper
 import marcel.util
 
 
@@ -151,10 +150,6 @@ class Window(marcel.core.Op):
         self.overlap = self.eval_function('overlap_arg', int)
         self.disjoint = self.eval_function('disjoint_arg', int)
         if self.predicate:
-            try:
-                self.predicate.check_validity()
-            except marcel.exception.KillCommandException:
-                super().check_arg(False, 'predicate', 'Function either missing or invalid.')
             self.window_generator = PredicateWindow(self)
             self.predicate.set_op(self)
         elif self.overlap:
@@ -167,6 +162,13 @@ class Window(marcel.core.Op):
                               'disjoint', 'must be a non-negative int')
             self.window_generator = DisjointWindow(self)
             self.n = self.disjoint
+
+    def set_env(self, env):
+        super().set_env(env)
+        if self.predicate:
+            self.predicate.set_globals(env.vars())
+
+    # Op
 
     def receive(self, x):
         self.window_generator.receive(x)

@@ -68,6 +68,8 @@ class Union(marcel.core.Op):
         self.pipeline_copy.set_error_handler(self.owner.error_handler)
         self.pipeline_copy.append(marcel.opmodule.create_op(env, 'map', send_right))
 
+    # Op
+
     def receive(self, x):
         self.send(x)
 

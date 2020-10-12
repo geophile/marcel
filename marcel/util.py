@@ -159,11 +159,12 @@ def print_to_stderr(s, env):
 
 
 def namespace_description(namespace):
-    description = []
+    buffer = []
     for k, v in namespace.items():
         if k != '__builtins__':
-            description.append(f'{k}: {v}')
-    return '\n'.join(description)
+            buffer.append(f'{k}: {v}')
+    vars = '\n'.join(buffer)
+    return f'{id(namespace)}\n{vars}'
 
 
 def time_sec(f, *args, **kwargs):

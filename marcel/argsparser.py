@@ -16,13 +16,11 @@
 
 import marcel.core
 import marcel.exception
-import marcel.functionwrapper
+import marcel.function
 import marcel.object.cluster
 import marcel.object.file
 import marcel.reservoir
 import marcel.util
-
-FunctionWrapper = marcel.functionwrapper.FunctionWrapper
 
 # A marcel op has arguments. An argument is one of:
 #    - An optional flag with no value
@@ -225,16 +223,15 @@ class ArgsParser:
     # Python expressions, (parser.Expression). x is function source for console usage,
     # a callable for API usage.
     def function(self, arg, x):
-        if type(x) is FunctionWrapper:
+        if isinstance(x, marcel.function.Function):
             f = x
         elif callable(x):
-            f = FunctionWrapper(function=x)
+            f = marcel.function.NativeFunction(function=x)
         elif type(x) is str:
-            f = FunctionWrapper(source=x)
+            f = marcel.function.SymbolFunction(x)
         else:
             raise ArgsError(arg.op_name, f'{arg.name} argument must be a function.')
         f.set_op(self.current_op)
-        f.check_validity()
         return f
 
     # ------------------------------------------------------------------------------------------------------------------

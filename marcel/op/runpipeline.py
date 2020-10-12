@@ -47,6 +47,12 @@ class RunPipeline(marcel.core.Op):
         self.pipeline.setup_1()
         self.set_args()
 
+    def set_env(self, env):
+        super().set_env(env)
+        self.pipeline.set_env(env)
+
+    # Op
+
     def receive(self, x):
         self.pipeline.receive(x)
 

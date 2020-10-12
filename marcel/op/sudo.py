@@ -85,6 +85,12 @@ class Sudo(marcel.core.Op):
         if not isinstance(self.pipeline, marcel.core.Pipeline):
             raise marcel.exception.KillCommandException('Last argument to sudo must be a pipeline')
 
+    def set_env(self, env):
+        super().set_env(env)
+        self.pipeline.set_env(env)
+
+    # Op
+
     def receive(self, _):
         # Start the remote process
         command = ' '.join(['sudo'] + self.args + ['farcel.py'])

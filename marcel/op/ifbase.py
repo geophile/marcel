@@ -48,6 +48,10 @@ class IfBase(marcel.core.Op):
         self.then.setup_1()
         self.then.setup_2()
 
+    def set_env(self, env):
+        super().set_env(env)
+        self.then.set_env(env)
+
     def receive(self, x):
         assert False
 

@@ -36,7 +36,10 @@ class NestedNamespace(dict):
             assert False, type(map)
         self.params = set(map.keys())
 
-    def n_frames(self):
+    def __repr__(self):
+        return str(self.flattened())
+
+    def n_scopes(self):
         return len(self.scopes) + 1
 
     def push_scope(self, map):

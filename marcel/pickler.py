@@ -74,8 +74,7 @@ def copy(x):
         pickler = MarcelPickler()
         unpickler = MarcelUnpickler(pickler.buffer)
         pickler.dump(x)
-        copy = unpickler.load()
-        return copy
+        return unpickler.load()
     except Exception as e:
         sys.stdout.flush()
         print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__, flush=True)
