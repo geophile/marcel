@@ -52,7 +52,7 @@ class Cd(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self,):
+    def setup(self,):
         self.directory = pathlib.Path(self.directory)
 
     def receive(self, _):

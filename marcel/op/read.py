@@ -90,7 +90,7 @@ class Read(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         if self.csv or self.tsv:
             self.csv_input = InputIterator(self)
             self.csv_reader = csv.reader(self.csv_input, delimiter=(',' if self.csv else '\t'))

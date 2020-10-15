@@ -137,7 +137,7 @@ class Red(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         grouping_positions = []
         data_positions = []
         for i in range(len(self.functions)):

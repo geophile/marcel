@@ -31,7 +31,7 @@ class RunPipeline(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         self.args = self.eval_function('args')
         self.kwargs = self.eval_function('kwargs')
         pipeline = self.getvar(self.var)
@@ -44,7 +44,7 @@ class RunPipeline(marcel.core.Op):
         self.pipeline = pipeline.copy()
         self.pipeline.set_error_handler(self.owner.error_handler)
         self.pipeline.last_op().receiver = self.receiver
-        self.pipeline.setup_1()
+        self.pipeline.setup()
         self.set_args()
 
     def set_env(self, env):

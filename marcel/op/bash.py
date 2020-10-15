@@ -70,7 +70,7 @@ class Bash(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         self.args = self.eval_function('args_arg')
         self.input = []
         if len(self.args) == 0:

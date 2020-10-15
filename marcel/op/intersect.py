@@ -65,7 +65,7 @@ class Intersect(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         def load_right(*x):
             count = self.right.get(x, None)
             self.right[x] = 1 if count is None else count + 1

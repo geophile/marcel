@@ -8,7 +8,6 @@ import signal
 import socket
 import sys
 import threading
-import time
 
 import dill
 
@@ -43,7 +42,7 @@ class PickleOutput(marcel.core.Op):
     def __repr__(self):
         return 'pickleoutput()'
 
-    def setup_1(self):
+    def setup(self):
         pass
 
     def receive(self, x):
@@ -71,10 +70,8 @@ class PipelineRunner(threading.Thread):
 
     def run(self):
         try:
-            TRACE.write(f'PipelineRunner: About to setup_1 {self.pipeline}')
-            # Don't need setup_2, which is for nested pipelines. This is a nested pipeline, and we aren't
-            # supporting more than one level of nesting.
-            self.pipeline.setup_1()
+            TRACE.write(f'PipelineRunner: About to setup {self.pipeline}')
+            self.pipeline.setup()
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
             self.pipeline.first_op().receive_input(None)
         # except marcel.exception.KillCommandException as e:

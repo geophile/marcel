@@ -69,7 +69,7 @@ class StoreArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('store', env)
         self.add_flag_no_value('append', '-a', '--append')
         # init_reservoir actually creates the Reservoir if it doesn't exist. This would normally be done by
-        # setup_1. However, for commands that don't terminate for a while, (e.g. ls / > x), we want the
+        # setup. However, for commands that don't terminate for a while, (e.g. ls / > x), we want the
         # variable available immediately. This allows the long-running command to be run in background,
         # monitoring progress, e.g. x > tail 5.
         self.add_anon('var', convert=self.init_reservoir)
@@ -91,7 +91,7 @@ class Store(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         if self.api:
             self.setup_api()
         else:

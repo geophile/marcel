@@ -99,7 +99,7 @@ class Join(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         def load_inner(*x):
             assert len(x) > 0
             x = tuple(x)
@@ -113,7 +113,7 @@ class Join(marcel.core.Op):
                 # match is first value associated with join_value, x is the second. Need a list.
                 self.inner[join_value] = [match, x]
         env = self.env()
-        super().setup_1()
+        super().setup()
         self.inner = {}
         pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
         pipeline.set_error_handler(self.owner.error_handler)

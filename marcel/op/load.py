@@ -76,7 +76,7 @@ class Load(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         if self.var is not None:
             # Interactive: var is set, accumulator is None
             if not self.var.isidentifier():

@@ -33,7 +33,7 @@ class Assign(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         count = 0
         if self.string is not None:
             assert type(self.string) is str, type(self.string)

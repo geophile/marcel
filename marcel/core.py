@@ -85,10 +85,7 @@ class Node(Pipelineable):
 
 class AbstractOp(Pipelineable):
 
-    def setup_1(self):
-        pass
-
-    def setup_2(self):
+    def setup(self):
         pass
 
     def setup_env(self, env):
@@ -303,7 +300,7 @@ class Pipeline(AbstractOp):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         assert self.error_handler is not None, f'{self} has no error handler'
         prev_op = None
         for op in self.ops:
@@ -314,11 +311,7 @@ class Pipeline(AbstractOp):
                 prev_op.receiver = op
             prev_op = op
         for op in self.ops:
-            op.setup_1()
-
-    def setup_2(self):
-        for op in self.ops:
-            op.setup_2()
+            op.setup()
 
     def set_env(self, env):
         for op in self.ops:
@@ -373,8 +366,7 @@ class Command:
     def execute(self, api=False):
         depth = self.env.vars().n_scopes()
         self.env.clear_changes()
-        self.pipeline.setup_1()
-        self.pipeline.setup_2()
+        self.pipeline.setup()
         self.pipeline.set_env(self.env)
         self.pipeline.receive(None)
         self.pipeline.receive_complete()

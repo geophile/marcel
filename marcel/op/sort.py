@@ -56,7 +56,7 @@ class Sort(marcel.core.Op):
 
     # AbstractOp
     
-    def setup_1(self):
+    def setup(self):
         self.contents = []
 
     def set_env(self, env):

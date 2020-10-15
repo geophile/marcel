@@ -50,7 +50,7 @@ def sudo(env, pipeline, *args):
 # There are a lot of flags, and it might not be a great idea to model them all. How much do those flags
 # differ across distros? And since the flags aren't being modeled by the arg parser, we can't say that the
 # last arg is, specifically, a pipeline. So just get all the args, and assume the last one is a pipeline.
-# This means that setup_1 has to convert the pipeline ref to a pipeline.
+# This means that setup has to convert the pipeline ref to a pipeline.
 class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
@@ -78,7 +78,7 @@ class Sudo(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('Missing pipeline')
         self.pipeline = self.args.pop()

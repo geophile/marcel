@@ -66,7 +66,7 @@ class Run(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         if self.expected_args == 1 and self.n is None:
             raise marcel.exception.KillCommandException('History command number required following !')
         elif self.expected_args == 0 and self.n is not None:

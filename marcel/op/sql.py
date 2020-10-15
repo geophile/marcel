@@ -125,7 +125,7 @@ class Sql(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         self.statement = self.eval_function('statement_arg', str)
         self.args = self.eval_function('args_arg')
         if self.commit is None:

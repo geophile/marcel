@@ -90,7 +90,7 @@ class Env(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         if not(self.all or self.builtin or self.config or self.session):
             # No flags specified. Default behiavor is all.
             self.all = True

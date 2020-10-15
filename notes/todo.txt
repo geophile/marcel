@@ -436,3 +436,7 @@ for API pipelines containing native functions.
 ----------------------------------------------------------------------
 
 Allow read op to specify files as args?
+
+----------------------------------------------------------------------
+
+Cleanup setup_1/setup_2/set_env.

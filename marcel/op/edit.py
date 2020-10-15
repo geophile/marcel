@@ -62,7 +62,7 @@ class Edit(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         self.editor = self.env().getvar('EDITOR')
         if self.editor is None:
             raise marcel.exception.KillCommandException(

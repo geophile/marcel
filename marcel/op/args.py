@@ -69,9 +69,9 @@ class Args(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         self.impl = ArgsAPI(self) if callable(self.pipeline_arg) else ArgsInteractive(self)
-        self.impl.setup_1()
+        self.impl.setup()
 
     def receive(self, x):
         self.impl.receive(x)
@@ -101,7 +101,7 @@ class ArgsImpl:
         if error:
             raise marcel.exception.KillCommandException(error)
 
-    def setup_1(self):
+    def setup(self):
         assert False
 
     def receive(self, x):
@@ -133,7 +133,7 @@ class ArgsInteractive(ArgsImpl):
         self.params = None
         self.scope = {}
 
-    def setup_1(self):
+    def setup(self):
         op = self.op
         self.params = op.pipeline_arg.parameters()
         if self.params is None:
@@ -167,7 +167,7 @@ class ArgsAPI(ArgsImpl):
     def __init__(self, op):
         super().__init__(op)
 
-    def setup_1(self):
+    def setup(self):
         self.n_params = len(self.op.pipeline_arg.__code__.co_varnames)
         self.check_args()
         self.args = []

@@ -60,7 +60,7 @@ class Union(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         def send_right(*x):
             self.send(x)
         env = self.env()

@@ -51,7 +51,7 @@ class Delete(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         self.vars = self.eval_function('vars_arg', str)
         for var in self.vars:
             if var not in self.env().namespace:

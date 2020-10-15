@@ -146,7 +146,7 @@ class Window(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         self.overlap = self.eval_function('overlap_arg', int)
         self.disjoint = self.eval_function('disjoint_arg', int)
         if self.predicate:

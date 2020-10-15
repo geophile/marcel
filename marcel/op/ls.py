@@ -126,7 +126,7 @@ class Ls(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         self.filenames = self.eval_function('filenames_arg', str, pathlib.Path, pathlib.PosixPath, File)
         self.roots = []
         self.current_dir = self.env().dir_state().pwd()

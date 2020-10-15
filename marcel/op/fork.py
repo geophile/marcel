@@ -54,7 +54,7 @@ class Fork(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         self.cluster = self.env().cluster(self.cluster_name)
         self.workers = []
         for host in self.cluster.hosts:
@@ -119,7 +119,7 @@ class ForkWorker:
         def run_pipeline_in_child():
             try:
                 self.pipeline.set_error_handler(self.op.owner.error_handler)
-                self.pipeline.setup_1()
+                self.pipeline.setup()
                 self.pipeline.set_env(self.op.env())
                 self.pipeline.receive(None)
                 self.pipeline.receive_complete()

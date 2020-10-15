@@ -53,7 +53,7 @@ class Remote(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         self.host = self.eval_function('host', str)
 
     def receive(self, _):

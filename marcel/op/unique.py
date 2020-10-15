@@ -54,7 +54,7 @@ class Unique(marcel.core.Op):
 
     # AbstractOp
 
-    def setup_1(self):
+    def setup(self):
         self.uniquer = ConsecutiveUniquer(self) if self.consecutive else GeneralUniquer(self)
 
     def receive(self, x):
