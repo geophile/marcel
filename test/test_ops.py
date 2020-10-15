@@ -497,9 +497,6 @@ def test_remote():
     # Implied map
     TEST.run('@jao[(419)]',
              expected_out=[(localhost, 419)])
-    # Function-valued args
-    TEST.run('@("jao")[(419)]',
-             expected_out=[(localhost, 419)])
 
 
 def test_sudo():
@@ -1165,7 +1162,7 @@ def main_stable():
     test_bash()
     # # test_fork()
     test_namespace()
-    # test_remote()
+    test_remote()
     test_sudo()
     test_version()
     test_assign()

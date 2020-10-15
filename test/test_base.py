@@ -78,12 +78,12 @@ class TestBase:
             while ok and i < n:
                 e = expected[i]
                 a = actual[i]
-                e_error = e.startswith('Error:')
-                a_error = a.startswith('Error:')
+                e_error = e.startswith('Error')
+                a_error = a.startswith('Error')
                 if e_error and a_error:
                     # Check that e message is a substring of a message
-                    e_message = e[6:]
-                    a_message = a[6:]
+                    e_message = e[e.find(': ')+2:]
+                    a_message = a[e.find(': ')+2:]
                     ok = e_message in a_message
                 elif e_error or a_error:
                     ok = False

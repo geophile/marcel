@@ -20,6 +20,7 @@ import marcel.util
 class Error(marcel.object.renderable.Renderable):
 
     def __init__(self, cause):
+        assert type(cause) is not Error
         self.message = str(cause)
         self.label = None  # Thread label, for forked execution
 

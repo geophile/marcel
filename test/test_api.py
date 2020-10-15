@@ -491,13 +491,6 @@ def test_remote():
              expected_out=[(localhost, 3)])
     TEST.run(lambda: run(fork('jao', gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
-    # Function-valued args
-    TEST.run(lambda: run(fork(lambda: 'jao', map(lambda: 419))),
-             expected_out=[(localhost, 419)])
-    # Specify cluster directly (not in .marcel.py)
-    also_jao = Cluster('jao', '~/.ssh/id_rsa.pub', 'localhost')
-    TEST.run(lambda: run(fork(also_jao, gen(3))),
-             expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
 
 
 def test_sudo():
@@ -980,7 +973,7 @@ def main_stable():
     test_bash()
     # test_fork()
     # test_namespace()
-    # test_remote()
+    test_remote()
     test_sudo()
     test_version()
     test_assign()

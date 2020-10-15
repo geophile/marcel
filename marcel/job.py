@@ -141,7 +141,7 @@ class Job:
 
     def start_process(self):
         def run_command_in_child(command, writer):
-            debug(f'running: {command.source}, env {id(self.env)}')
+            debug(f'running: {command.source}')
             pickler = marcel.pickler.MarcelPickler()
             try:
                 child_namespace_changes = command.execute(self.env)
@@ -163,7 +163,7 @@ class Job:
         JobControl.only.child_listener.add_listener(reader)
         debug(f'Job.start_process: env {id(self.env)}')
         self.process = mp.Process(target=run_command_in_child, args=(self.command, writer))
-        self.process.daemon = True
+        self.process.daemon = False
         try:
             # Set up process handling as it should exist in the child process. Ignore ctrl-c (since that
             # should only kill the foreground process), and default handling for ctrl-z (pause).
@@ -267,7 +267,9 @@ class JobControl:
 
     def wait_for_idle_foreground(self):
         while (foreground := self.foreground()) and foreground.state != Job.DEAD:
+            debug(f'before join')
             foreground.process.join(0.1)
+            debug(f'after join, exit code {foreground.process.exitcode}')
         debug(f'idle')
 
     def ctrl_c_handler(self, signum, frame):

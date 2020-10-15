@@ -40,6 +40,12 @@ class Host:
     def __repr__(self):
         return self.addr if self.name is None else self.name
 
+    def __hash__(self):
+        return hash(self.host)
+
+    def __eq__(self, other):
+        return self.host == other.host
+
     @property
     def user(self):
         return self.cluster.user

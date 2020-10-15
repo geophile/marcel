@@ -175,7 +175,7 @@ class Op(AbstractOp):
     def fatal_error(self, input, message):
         error = self.error(input=input, message=message)
         self.owner.handle_error(error)
-        raise marcel.exception.KillAndResumeException(error)
+        raise marcel.exception.KillAndResumeException(message)
 
     def must_be_first_in_pipeline(self):
         return False

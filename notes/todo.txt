@@ -420,3 +420,19 @@ getvar 139884242926800: COLOR_SCHEME -> 139884242927472
 For remote execution, is it still necessary to transmit env
 separately? Just send the pipeline as is, don't detach/retach env
 (which is vestigial anyway).
+
+----------------------------------------------------------------------
+
+Replace /proc usage by OS calls?
+
+See psutil
+
+----------------------------------------------------------------------
+
+Instead of serializing Pipelines, how about serializing pipeline
+strings, and them parse them on the other side? This is doable except
+for API pipelines containing native functions.
+
+----------------------------------------------------------------------
+
+Allow read op to specify files as args?

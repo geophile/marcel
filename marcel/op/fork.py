@@ -13,67 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import threading
+import multiprocessing as mp
+import os
+
+import dill
 
 import marcel.argsparser
 import marcel.core
-import marcel.exception
 import marcel.opmodule
-import marcel.object.cluster
 import marcel.op.labelthread
-import marcel.op.remote
-
-HELP = '''
-{L,wrap=F}fork HOST PIPELINE
-{L,wrap=F}fork N PIPELINE
-
-{L,indent=4:28}HOST                    The name of the host or set of hosts on which to run the given PIPELINE.
-
-{L,indent=4:28}N                       The number of instances of the PIPELINE to run locally (and concurrently).
-
-{L,indent=4:28}PIPELINE                The PIPELINE to be executed.
-
-Run multiple copies of a pipeline, concurrently, usually on remote hosts.
-
-If the first argument is a {r:HOST}, then the 
-{r:PIPELINE} is run on the specified {r:HOST}. The {r:HOST} must have been configured in
-the marcel configuration file. (Note that {r:HOST} may identify one or more hosts.)
-
-If the first argument is {r:N}, then the {r:PIPELINE} is run the specified
-number of times, concurrently.
-
-The output will contain the tuples obtained by running the command. The first
-element of each tuple will either identify the host, or be a number between
-0 and {r:N}-1.
-For example, if the cluster named {n:lab} contains hosts {n:192.168.0.100},
-and {n:198.169.0.101}, then this command:
-
-{L}@lab [ gen 3 ]
-
-will generate this output (possibly reordered):
-
-{p,indent=4,wrap=F}
-('192.168.0.100', 0)
-('192.168.0.100', 1)
-('192.168.0.100', 2)
-('192.168.0.101', 0)
-('192.168.0.101', 1)
-('192.168.0.101', 2)
-
-This command:
-
-{L}@2 [ gen 3 ]
-
-will generate this output (possibly reordered):
-
-{p,indent=4,wrap=F}
-(0, 0)
-(0, 1)
-(0, 2)
-(1, 0)
-(1, 1)
-(1, 2)
-'''
 
 
 def fork(env, host, pipelineable):
@@ -86,7 +34,7 @@ class ForkArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('fork', env)
-        self.add_anon('host', convert=self.fork_spec)
+        self.add_anon('cluster', convert=self.fork_spec, target='cluster_name')
         self.add_anon('pipeline', convert=self.check_pipeline)
         self.validate()
 
@@ -95,191 +43,101 @@ class Fork(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.host = None  # TODO: Actually a fork spec. Improve terminology.
+        self.cluster_name = None
+        self.cluster = None
         self.pipeline = None
-        self.thread_labels = None
-        self.threads = None
-        self.impl = None
+        self.remote_pipeline = None
+        self.workers = None
 
     def __repr__(self):
-        return f'fork({self.host}, {self.pipeline})'
+        return f'@{self.cluster_name} {self.pipeline}'
 
     # AbstractOp
 
     def setup_1(self):
-        self.host = self.eval_function('host', int, str)
-        self.threads = []
-        cluster = self.host if type(self.host) is marcel.object.cluster.Cluster else env.cluster(self.host)
-        if cluster:
-            self.impl = Remote(self, cluster)
-        elif isinstance(self.host, int):
-            # Number of threads, from API
-            self.impl = Local(self, self.host)
-        elif self.host.isdigit():
-            # Number of threads, from console
-            self.impl = Local(self, int(self.host))
-        else:
-            raise marcel.exception.KillCommandException(f'Invalid fork specification: {self.host}')
-        self.impl.setup_1()
-
-    def setup_2(self):
-        self.impl.setup_2()
-
-    def receive(self, _):
-        for thread in self.threads:
-            thread.start()
-        for thread in self.threads:
-            while thread.isAlive():
-                try:
-                    thread.join(0.1)
-                except BaseException as e:
-                    thread.terminating_exception = e
-        # Threads may complete normally or fail with a variety of exceptions. Merge them into a single action
-        # for the termination of the fork op.
-        kill_command = None
-        kill_and_resume = None
-        ctrl_c = None
-        for thread in self.threads:
-            e = thread.terminating_exception
-            if e:
-                if isinstance(e, marcel.exception.KillAndResumeException):
-                    kill_and_resume = e
-                elif isinstance(e, KeyboardInterrupt):
-                    ctrl_c = e
-                else:
-                    kill_command = e
-        if kill_command:
-            raise marcel.exception.KillCommandException(kill_command)
-        if ctrl_c:
-            raise KeyboardInterrupt()
-        if kill_and_resume:
-            self.fatal_error(None, str(kill_and_resume))
+        self.cluster = self.env().cluster(self.cluster_name)
+        self.workers = []
+        for host in self.cluster.hosts:
+            self.workers.append(ForkWorker(host, self))
 
     # Op
+
+    def receive(self, _):
+        for worker in self.workers:
+            worker.start_process()
+        for worker in self.workers:
+            worker.wait()
 
     def must_be_first_in_pipeline(self):
         return True
 
-    # For use by this class
+    # Fork
 
     @staticmethod
-    def attach_thread_label(op, thread_label):
-        if isinstance(op, marcel.op.labelthread.LabelThread):
-            op.set_label(thread_label)
-        elif isinstance(op, marcel.op.remote.Remote):
-            op.set_host(thread_label)
+    def return_remote_output(writer):
+        def f(x):
+            writer.send(dill.dumps(x))
+        return f
 
 
-class ForkImplementation:
-    
-    def __init__(self, op):
+class ForkWorker:
+
+    class SendToParent(marcel.core.Op):
+
+        def __init__(self, env, parent):
+            super().__init__(env)
+            self.parent = parent
+
+        def __repr__(self):
+            return 'sendtoparent()'
+
+        def receive(self, x):
+            self.parent.send(dill.dumps(x))
+
+        def receive_error(self, error):
+            self.parent.send(dill.dumps(error))
+
+    def __init__(self, host, op):
+        self.host = host
         self.op = op
-        
-    def setup_1(self):
-        self.generate_thread_labels()
+        self.process = None
+        # duplex=False: child writes to parent when function completes execution. No need to communicate in the
+        # other direction
+        self.reader, self.writer = mp.Pipe(duplex=False)
+        self.pipeline = marcel.core.Pipeline()
+        remote = marcel.opmodule.create_op(op.env(), 'remote', op.pipeline)
+        remote.set_host(host)
+        label_thread = marcel.op.labelthread.LabelThread(op.env())
+        label_thread.set_label(host)
+        send_to_parent = ForkWorker.SendToParent(self.op.env(), self.writer)
+        self.pipeline.append(remote)
+        self.pipeline.append(label_thread)
+        self.pipeline.append(send_to_parent)
+        label_thread.receiver = op.receiver
 
-    def setup_2(self):
-        assert False
+    def start_process(self):
+        def run_pipeline_in_child():
+            try:
+                self.pipeline.set_error_handler(self.op.owner.error_handler)
+                self.pipeline.setup_1()
+                self.pipeline.set_env(self.op.env())
+                self.pipeline.receive(None)
+                self.pipeline.receive_complete()
+            except BaseException as e:
+                self.writer.send(dill.dumps(e))
+            self.writer.close()
+        self.process = mp.Process(target=run_pipeline_in_child, args=tuple())
+        self.process.daemon = True
+        self.process.start()
+        self.writer.close()
 
-    def generate_thread_labels(self):
-        assert False
-
-
-class Remote(ForkImplementation):
-
-    def __init__(self, op, cluster):
-        super().__init__(op)
-        self.cluster = cluster
-
-    # AbstractOp
-
-    def setup_1(self):
-        super().setup_1()
-        op = self.op
-        remote_pipeline = marcel.core.Pipeline()
-        remote_pipeline.append(marcel.opmodule.create_op(op.env(), 'remote', self.op.pipeline))
-        remote_pipeline.append(marcel.op.labelthread.LabelThread(None))
-        op.pipeline = remote_pipeline
-        # Don't set the LabelThread receiver here. We don't want the receiver cloned,
-        # we want all the cloned pipelines connected to the same receiver.
-
-    def setup_2(self):
-        op = self.op
-        for thread_label in op.thread_labels:
-            pipeline_copy = op.pipeline.copy()
-            pipeline_copy.set_error_handler(op.owner.error_handler)
-            # Attach thread label to Remote op.
-            remote_op = pipeline_copy.first_op
-            assert isinstance(remote_op, marcel.op.remote.Remote)
-            remote_op.set_host(thread_label)
-            # Attach thread label to LabelThread op.
-            label_thread_op = pipeline_copy.last_op()
-            assert isinstance(label_thread_op, marcel.op.labelthread.LabelThread)
-            label_thread_op.set_label(thread_label)
-            # DON'T do setup_1 here. The pipeline is going to run remotely, so setup is done remotely.
-            # Connect receivers
-            remote_op.receiver = label_thread_op
-            label_thread_op.receiver = op.receiver
-            # Create a thread to run the pipeline copy
-            op.threads.append(PipelineThread(thread_label, pipeline_copy))
-
-    # Subclass
-
-    def generate_thread_labels(self):
-        self.op.thread_labels = [host for host in self.op.cluster.hosts]
-
-
-class Local(ForkImplementation):
-
-    def __init__(self, op, n):
-        super().__init__(op)
-        self.n = n
-
-    # AbstractOp
-
-    def setup_1(self):
-        super().setup_1()
-        op = self.op
-        op.pipeline.append(marcel.op.labelthread.LabelThread(None))
-        # Don't set the LabelThread receiver here. We don't want the receiver cloned,
-        # we want all the cloned pipelines connected to the same receiver.
-
-    def setup_2(self):
-        op = self.op
-        for thread_label in op.thread_labels:
-            # Copy the pipeline
-            pipeline_copy = op.pipeline.copy()
-            pipeline_copy.set_error_handler(op.owner.error_handler)
-            # Attach thread label to LabelThread op.
-            label_thread_op = pipeline_copy.last_op()
-            assert isinstance(label_thread_op, marcel.op.labelthread.LabelThread)
-            label_thread_op.set_label(thread_label)
-            pipeline_copy.setup_1(op.env())
-            # Connect LabelThread op to receiver
-            label_thread_op.receiver = op.receiver
-            # Create a thread to run the pipeline copy
-            op.threads.append(PipelineThread(thread_label, pipeline_copy))
-
-    # Subclass
-
-    def generate_thread_labels(self):
-        self.op.thread_labels = [x for x in range(self.n)]
-
-
-class PipelineThread(threading.Thread):
-
-    def __init__(self, thread_label, pipeline_copy):
-        super().__init__()
-        self.thread_label = thread_label
-        self.pipeline = pipeline_copy
-        self.terminating_exception = None
-
-    def __repr__(self):
-        return f'PipelineThread({self.thread_label})'
-
-    def run(self):
+    def wait(self):
         try:
-            self.pipeline.receive(None)
-            self.pipeline.receive_complete()
-        except BaseException as e:
-            self.terminating_exception = e
+            while True:
+                input = self.reader.recv()
+                x = dill.loads(input)
+                self.op.send(x)
+        except EOFError:
+            pass
+        while self.process.is_alive():
+            self.process.join(0.1)

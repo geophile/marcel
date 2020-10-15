@@ -8,6 +8,7 @@ import signal
 import socket
 import sys
 import threading
+import time
 
 import dill
 
@@ -46,7 +47,7 @@ class PickleOutput(marcel.core.Op):
         pass
 
     def receive(self, x):
-        # TRACE.write(f'Pickling: ({type(x)}) {x}')
+        TRACE.write(f'Pickling: ({type(x)}) {x}')
         self.pickler.dump(x)
 
     def receive_error(self, error):
@@ -152,7 +153,6 @@ def main():
         pipeline = input.load()
         version = env.getvar('MARCEL_VERSION')
         TRACE.write(f'Marcel version {version}')
-        TRACE.write(f'env: {marcel.util.namespace_description(env.vars())}')
         TRACE.write(f'pipeline: {pipeline}')
         atexit.register(shutdown)
         pipeline.set_env(env)

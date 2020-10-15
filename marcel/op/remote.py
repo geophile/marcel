@@ -14,13 +14,16 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import io
-import dill
+import os
 import subprocess
 import sys
+
+import dill
 
 import marcel.argsparser
 import marcel.core
 import marcel.object.error
+import marcel.util
 
 
 def remote(env, pipeline):
@@ -73,27 +76,28 @@ class Remote(marcel.core.Op):
         pickler.dump(self.env().remotify())
         pickler.dump(self.pipeline)
         buffer.seek(0)
-        stdout, stderr = self.process.communicate(input=buffer.getvalue())
-        # Wait for completion (already guaranteed by communicate returning?)
-        self.process.wait()
-        # Handle results
-        stderr_lines = stderr.decode('utf-8').split('\n')
-        if len(stderr_lines[-1]) == 0:
-            del stderr_lines[-1]
-        sys.stdout.flush()
-        for line in stderr_lines:
-            print(line, file=sys.stderr)
-        sys.stderr.flush()
-        input = dill.Unpickler(io.BytesIO(stdout))
         try:
-            while True:
-                x = input.load()
-                if isinstance(x, marcel.object.error.Error):
-                    self.non_fatal_error(error=x)
-                else:
-                    self.send(x)
-        except EOFError as e:
-            self.send_complete()
+            stdout, stderr = self.process.communicate(input=buffer.getvalue())
+            stderr_lines = stderr.decode('utf-8').split('\n')
+            if len(stderr_lines[-1]) == 0:
+                del stderr_lines[-1]
+            sys.stdout.flush()
+            for line in stderr_lines:
+                print(line, file=sys.stderr)
+            sys.stderr.flush()
+            input = dill.Unpickler(io.BytesIO(stdout))
+            try:
+                while True:
+                    x = input.load()
+                    if isinstance(x, marcel.object.error.Error):
+                        self.send_error(x)
+                    else:
+                        self.send(x)
+            except EOFError as e:
+                self.send_complete()
+        except BaseException as e:
+            marcel.util.print_stack()
+            print(e)
 
     # Op
 
