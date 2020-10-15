@@ -5,13 +5,13 @@ import test_base
 TEST = test_base.TestTabCompletion()
 
 ALL_OPS = [
-    'args', 'emit', 'ifelse', 'ls', 'red', 'sudo', 'bash',
+    'args', 'ifelse', 'ls', 'red', 'sudo', 'bash',
     'env', 'ifthen', 'map', 'reverse', 'tail', 'bg', 'expand',
     'import', 'out', 'run', 'timer', 'cd', 'fg', 'intersect',
     'popd', 'select', 'union', 'delete', 'gen', 'jobs', 'ps',
     'sort', 'unique', 'difference', 'head', 'join', 'pushd',
     'sql', 'version', 'dirs', 'help', 'load', 'pwd', 'squish',
-    'window', 'edit', 'history', 'loop', 'read', 'store'
+    'window', 'edit', 'history', 'read', 'store'
 ]
 
 
@@ -21,7 +21,7 @@ def test_op():
              expected=[])
     # Single candidate
     TEST.run(line='l', text='l',
-             expected=['ls', 'load', 'loop'])
+             expected=['ls', 'load'])
     TEST.run(line='ls', text='ls',
              expected=['ls '])
     # Multiple candidates
@@ -35,7 +35,7 @@ def test_op():
              expected=['head '])
     # Pipeline command
     TEST.run(line='ls | args [ l', text='l',
-             expected=['ls', 'load', 'loop'])
+             expected=['ls', 'load'])
 
 
 def test_executables():
@@ -77,7 +77,7 @@ def test_pipeline_args():
     TEST.run('touch /tmp/test_pipeline_args/c')
     TEST.run('cd /tmp/test_pipeline_args')
     TEST.run(line='l', text='l',
-             expected=['ls', 'load', 'loop'])
+             expected=['ls', 'load'])
     TEST.run(line='ls', text='ls',
              expected=['ls '])
     TEST.run(line='ls ', text='',
@@ -120,7 +120,7 @@ def test_pipeline_args():
     TEST.run(line='ls --recursive -d | args [d: ', text='',
              expected=ALL_OPS)
     TEST.run(line='ls --recursive -d | args [d: l', text='l',
-             expected=['load', 'loop', 'ls'])
+             expected=['load', 'ls'])
     TEST.run(line='ls --recursive -d | args [d: ls', text='ls',
              expected=['ls '])
     TEST.run(line='ls --recursive -d | args [d: ls ', text='',

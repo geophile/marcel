@@ -1,49 +1,26 @@
 What's New
 ----------
 
-Lots of work on the saving and recalling of streams. Suppose you run this command, to
-locate all files under your current directory, recursively.
+The core of marcel has been overhauled in this release. The old implementation was reyling
+too much on copying pipelines by pickling. This was slow because pickling is slow.
+It was also slow because the deep copying of namespaces and functions is very tricky
+to get right, due to cycles, (e.g. the marcel namespace contains a pipeline which contains 
+a function, whose globals is the marcel namespace). This was exacerbated by what
+I think was a bug in dill in which cycles like this were not handled correctly. In
+any case, part of the trickiness here involved the cycles resulting in more and more
+"expansion", in which a deep copy of x is made instead of sharing x (either through
+my bugs or the possible dill bug). This flaky copying/sharing was also the source
+of bugs when a function's globals were not quite in sync with the marcel namespace.
 
-```shell script
-ls -fr
-```
+So all that is gone. Pipeline copying is greatly reduced, due to a simple change
+in the Pipeline and Op data structures. There is still a Pipeline.copy() function,
+but it does not rely on pickling. Pickling is only used when data needs to cross
+process boundaries, (jobs, remote execution). Function globals are kept in sync with
+the marcel namespace far more reliably now.
 
-This can take a while, and the output can be quite large, so you can put the 
-command in the background, as you would in bash: hit `ctrl-z` to suspend the
-command, and then use the `bg` 
-command to have the command resume in the background. 
-
-But if you do this, then the output continues to go to the console. To fix this
-problem, you can redirect the output to an environment variable:
-
-```shell script
-ls -fr > allfiles
-```
-
-This puts the output of the `ls -fr` command in the environment variable `allfiles`. This
-is not a file, it is an environment variable storing the contents of a stream. After you
-put this command in the background, you can check on progress, e.g.
-
-```shell script
-allfiles > tail -5
-```
-
-to see the last 5 `File`'s listed, or to count them:
-
-```shell script
-allfiles > red count
-```
-
-If what you really want to do is to store the result in a file, you can do that too:
-
-```shell script
-ls -fr | out -f /tmp/allfiles.txt
-```
-
-There are two differences. First, the environment variable is bound to your 
-marcel session, and disappears when you exit marcel. Second, the environment
-variable stores actual `File` objects. If you store command output in a file,
-then that file stores paths only, not `File` objects.
+So there aren't any visible changes, except: 1) things should generally be running
+faster due to far less use of pickling; and 2) subtle bugs due caused by the
+older code, e.g. bug 116.
 
 Marcel
 ======

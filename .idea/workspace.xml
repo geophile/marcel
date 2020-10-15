@@ -20,13 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/doc/help_marcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_marcel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/emit.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/loop.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -501,7 +495,7 @@
       <workItem from="1601847862755" duration="10027000" />
       <workItem from="1602014722244" duration="14599000" />
       <workItem from="1602112844253" duration="118952000" />
-      <workItem from="1602618327405" duration="35445000" />
+      <workItem from="1602618327405" duration="35966000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
