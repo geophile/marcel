@@ -41,8 +41,6 @@ class Assign(marcel.core.Op):
             count += 1
         if self.pipeline is not None:
             assert type(self.pipeline) is marcel.core.Pipeline, type(self.pipeline)
-            self.pipeline.set_error_handler(self.owner.error_handler)
-            self.pipeline.setup_1()
             self.value = self.pipeline
             count += 1
         if self.function is not None:
@@ -50,13 +48,11 @@ class Assign(marcel.core.Op):
             self.function.set_op(self)
             self.value = self.function()
             count += 1
-        assert count == 1
+        assert count == 1, count
 
     def set_env(self, env):
         super().set_env(env)
-        if type(self.value) is marcel.core.Pipeline:
-            self.value.set_env(env)
-        elif isinstance(self.value, marcel.function.Function):
+        if isinstance(self.value, marcel.function.Function):
             self.value.set_globals(env.vars())
 
     def receive(self, _):

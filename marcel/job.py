@@ -266,10 +266,12 @@ class JobControl:
         return None
 
     def wait_for_idle_foreground(self):
-        while (foreground := self.foreground()) and foreground.state != Job.DEAD:
-            debug(f'before join')
+        # TODO: It would be nice to write: while (foreground := self.foreground) and ...
+        # TODO: but that would preclude Python 3.6.
+        foreground = self.foreground()
+        while foreground and foreground.state != Job.DEAD:
             foreground.process.join(0.1)
-            debug(f'after join, exit code {foreground.process.exitcode}')
+            foreground = self.foreground()
         debug(f'idle')
 
     def ctrl_c_handler(self, signum, frame):

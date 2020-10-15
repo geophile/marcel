@@ -371,13 +371,14 @@ class Command:
         return str(self.pipeline)
 
     def execute(self, api=False):
-        assert self.env.namespace.n_scopes() == 1, self.env.namespace
+        depth = self.env.vars().n_scopes()
         self.env.clear_changes()
         self.pipeline.setup_1()
         self.pipeline.setup_2()
         self.pipeline.set_env(self.env)
         self.pipeline.receive(None)
         self.pipeline.receive_complete()
+        assert self.env.vars().n_scopes() == depth, self.env.vars().n_scopes()
         # An interactive Command is executed by a multiprocessing.Process.
         # Need to transmit the Environment's vars relating to the directory, to the parent
         # process, because they may have changed. This doesn't apply to API usage.

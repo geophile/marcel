@@ -176,5 +176,6 @@ Implementation plan (commits)
 - Get rid of loop, LoopVar, its tests, and anything it uniquely relies
   on.
 
+-  Cleanup fork
 
 Is set_env really needed? Set env in setup_1?
