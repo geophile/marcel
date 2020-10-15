@@ -408,23 +408,3 @@ class PipelineIterator:
     @staticmethod
     def noop_error_handler(env, error):
         pass
-
-
-class LoopVar:
-
-    def __init__(self, pipeline):
-        self.pipeline = pipeline
-        self.empty = True
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self.empty:
-            raise StopIteration()
-        self.empty = True
-        return ()
-
-    def append(self, value):
-        self.pipeline.set_parameter_values(value, None)
-        self.empty = False
