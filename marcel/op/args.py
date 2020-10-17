@@ -131,35 +131,42 @@ class ArgsInteractive(ArgsImpl):
         super().__init__(op)
         self.pipeline = None
         self.params = None
-        self.scope = {}
 
     def setup(self):
         op = self.op
+        env = op.env()
         self.params = op.pipeline_arg.parameters()
         if self.params is None:
             raise marcel.exception.KillCommandException('The args pipeline must be parameterized.')
         self.n_params = len(self.params)
         self.check_args()
-        self.pipeline = op.pipeline_arg_value(op.env(), op.pipeline_arg)
+        self.pipeline = op.pipeline_arg_value(env, op.pipeline_arg)
         self.pipeline.set_error_handler(op.owner.error_handler)
         self.pipeline.last_op().receiver = op.receiver
+        scope = {}
         for param in self.params:
-            self.scope[param] = None
+            scope[param] = None
+        env.vars().push_scope(scope)
         self.args = []
+
+    def receive_complete(self):
+        try:
+            super().receive_complete()
+        finally:
+            self.op.env().vars().pop_scope()
 
     def run_pipeline(self, env):
         op = self.op
         env = op.env()
         a = 0
+        map = {}
         for param in self.params:
-            self.scope[param] = self.args[a]
+            env.setvar(param, self.args[a])
+            map[param] = self.args[a]
             a += 1
-        env.vars().push_scope(self.scope)
-        try:
-            marcel.core.Command(env, None, self.pipeline).execute()
-        finally:
-            env.vars().pop_scope()
-            self.args.clear()
+        self.args.clear()
+        import sys
+        marcel.core.Command(env, None, self.pipeline).execute()
 
 
 class ArgsAPI(ArgsImpl):

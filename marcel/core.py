@@ -163,6 +163,11 @@ class Op(AbstractOp):
     def env(self):
         return self._env
 
+    def copy(self):
+        copy = self.__class__(self.env())
+        copy.__dict__.update(self.__dict__)
+        return copy
+
     def non_fatal_error(self, input=None, message=None, error=None):
         assert (message is None) != (error is None)
         if error is None:
@@ -284,6 +289,11 @@ class Pipeline(AbstractOp):
         ops = ' | '.join(op_buffer)
         return f'[{params}: {ops}]' if params else f'[{ops}]'
 
+    def dump(self, label):
+        print(f'{label}: {id(self)}  {self}')
+        for op in self.ops:
+            print(f'    {id(op)}  {op}')
+
     def env(self):
         return self.ops[0].env()
 
@@ -334,9 +344,13 @@ class Pipeline(AbstractOp):
         return self.params
 
     def copy(self):
+        # A pipeline copy contains shallow copies of the ops. This allows an op to make a copy of the pipeline
+        # and be sure that the copy doesn't share state or structure (i.e. Op.receiver) with other uses of the
+        # "same" pipeline within the same command.
         copy = Pipeline()
         copy.error_handler = self.error_handler
-        copy.ops = list(self.ops)
+        for op in self.ops:
+            copy.append(op.copy())
         copy.params = self.params
         return copy
 

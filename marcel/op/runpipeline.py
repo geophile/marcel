@@ -22,7 +22,9 @@ class RunPipeline(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.var = None
+        self.args_arg = None
         self.args = None
+        self.kwargs_arg = None
         self.kwargs = None
         self.pipeline = None
 
@@ -32,43 +34,54 @@ class RunPipeline(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
-        self.args = self.eval_function('args')
-        self.kwargs = self.eval_function('kwargs')
-        pipeline = self.getvar(self.var)
-        if pipeline is None:
+        self.args = self.eval_function('args_arg')
+        self.kwargs = self.eval_function('kwargs_arg')
+        self.pipeline = self.getvar(self.var)
+        if self.pipeline is None:
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is undefined.')
-        if not isinstance(pipeline, marcel.core.Pipeline):
+        if not isinstance(self.pipeline, marcel.core.Pipeline):
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is not bound to anything executable.')
-        self.pipeline = pipeline.copy()
+        # Why copy: A pipeline can be used twice in a command, e.g.
+        #    x = [a: ... ]
+        #    x (1) | join [x (2)]
+        # Without copying the identical ops comprising x would be used twice in the same
+        # command. This potentially breaks the use of Op state during execution, and also
+        # breaks the structure of the pipeline, e.g. Op.receiver.
+        self.pipeline = self.pipeline.copy()
         self.pipeline.set_error_handler(self.owner.error_handler)
         self.pipeline.last_op().receiver = self.receiver
-        self.pipeline.setup()
-        self.set_args()
 
     def set_env(self, env):
         super().set_env(env)
-        self.pipeline.set_env(env)
 
     # Op
 
     def receive(self, x):
-        self.pipeline.receive(x)
+        pipeline_args = self.pipeline_args()
+        if pipeline_args:
+            self.env().vars().push_scope(pipeline_args)
+        try:
+            self.pipeline.setup()
+            self.pipeline.set_env(self.env())
+            self.pipeline.receive(x)
+        finally:
+            if pipeline_args:
+                self.env().vars().pop_scope()
 
     def receive_complete(self):
         self.pipeline.receive_complete()
-        if self.pipeline.parameters() is not None:
-            self.env().namespace.pop_scope()
         self.send_complete()
 
     # RunPipeline
 
     def set_pipeline_args(self, args, kwargs):
-        self.args = args
-        self.kwargs = kwargs
+        self.args_arg = args
+        self.kwargs_arg = kwargs
 
-    def set_args(self):
+    def pipeline_args(self):
+        map = None
         params = self.pipeline.parameters()
         if params is not None:
             map = {}
@@ -88,4 +101,4 @@ class RunPipeline(marcel.core.Op):
                 map.update(self.kwargs)
             if len(map) != len(params):
                 raise marcel.exception.KillCommandException(f'Expected arguments: {len(params)}, given: {len(map)}')
-            self.env().namespace.push_scope(map)
+        return map

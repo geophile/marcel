@@ -43,7 +43,7 @@ class NestedNamespace(dict):
         return len(self.scopes) + 1
 
     def push_scope(self, map):
-        assert type(map) is dict
+        assert type(map) is dict, type(map)
         copy = NestedNamespace(self)
         self.params = set(map.keys())
         self.update(map)

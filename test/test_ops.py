@@ -562,22 +562,22 @@ def test_join():
                   '        | map (x: (x, (x * 100, x * 100 + 1))) '
                   '        | expand 1]',
              expected_out=[(0, 0, 0), (0, 0, 1), (1, -1, 100), (1, -1, 101), (2, -2, 200), (2, -2, 201)])
-    # # Right argument in variable
-    # TEST.run('x100 = [gen 3 | map (x: (x, x * 100))]')
-    # TEST.run(test='gen 4 | map (x: (x, -x)) | join x100',
-    #          expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
-    # TEST.run(test='gen 4 | map (x: (x, -x)) | join [x100]',
-    #          expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
+    # Right argument in variable
+    TEST.run('x100 = [gen 3 | map (x: (x, x * 100))]')
+    TEST.run(test='gen 4 | map (x: (x, -x)) | join x100',
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
+    TEST.run(test='gen 4 | map (x: (x, -x)) | join [x100]',
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
     # Join with pipeline var taking arg
-    # TEST.run('xn = [n: gen 3 | map (x: (x, x * n))]')
-    # TEST.run(test='gen 4 | map (x: (x, -x)) | join [xn (100)]',
-    #          expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
-    # os.system('rm -f /tmp/?.csv')
-    # TEST.run('gen 3 | map (x: (x, x*10)) | out -f /tmp/a.csv')
-    # TEST.run('gen 3 | map (x: (x, x*100)) | out -f /tmp/b.csv')
-    # TEST.run('get = [f: (File(f).readlines()) | expand | map (x: eval(x))]')
-    # TEST.run('get /tmp/a.csv | join [get /tmp/b.csv]',
-    #          expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200)])
+    TEST.run('xn = [n: gen 3 | map (x: (x, x * n))]')
+    TEST.run(test='gen 4 | map (x: (x, -x)) | join [xn (100)]',
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
+    os.system('rm -f /tmp/?.csv')
+    TEST.run('gen 3 | map (x: (x, x*10)) | out -f /tmp/a.csv')
+    TEST.run('gen 3 | map (x: (x, x*100)) | out -f /tmp/b.csv')
+    TEST.run('get = [f: (File(f).readlines()) | expand | map (x: eval(x))]')
+    TEST.run('get /tmp/a.csv | join [get /tmp/b.csv]',
+             expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200)])
 
 
 def test_comment():
@@ -693,16 +693,6 @@ def test_store_load():
     TEST.run(test='gen 3 200 | store -a x',
              verification='load x',
              expected_err='not a Reservoir')
-    # TODO: Get rid of this?
-    # # Load and store the same container, to implement a loop
-    # TEST.run('x = ([(0,)])')
-    # TEST.run('load x | select (x: x < 5) | map (x: x + 1) | store x')
-    # TEST.run('load x',
-    #          expected_out=[0, 1, 2, 3, 4, 5])
-    # # Pipeline arg to a pipeline!
-    # TEST.run('L = [acc, pipeline: load acc | pipeline | store acc]')
-    # TEST.run('L ([(0,)]) [select (x: x < 5) | map (x: x+1)]',
-    #          expected_out=[1, 2, 3, 4, 5])
 
 
 def test_store_load_sugar():
@@ -998,7 +988,7 @@ def test_union():
              expected_out=[0, 1, 2])
     TEST.run('empty > union [gen 3] | sort',
              expected_out=[0, 1, 2])
-    # Non-empty inputs
+    # Non-empty inputs4
     TEST.run('gen 3 | union [gen 3 100] | sort',
              expected_out=[0, 1, 2, 100, 101, 102])
     # Duplicates

@@ -179,3 +179,16 @@ Implementation plan (commits)
 -  Cleanup fork
 
 Is set_env really needed? Set env in setup_1?
+
+----------------------------------------------------------------------
+
+runpipeline is still problematic. set_env is running over
+self.pipeline = None. Setup/execution steps are still off. E.g., 
+
+- Does runpipeline's pipeline get setup when the top-level pipeline is
+setup?  Or when the pipeline is run?
+
+- If an op has function-valued args, e.g. gen (n), when does the
+  function get evaluated? Currently in setup, so if gen (n) is part of
+  a pipeline that is run by runpipeline, gen's owner must be setup at
+  runtime?!

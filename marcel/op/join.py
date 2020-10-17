@@ -117,7 +117,8 @@ class Join(marcel.core.Op):
         self.inner = {}
         pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
         pipeline.set_error_handler(self.owner.error_handler)
-        pipeline.append(marcel.opmodule.create_op(env, 'map', load_inner))
+        map = marcel.opmodule.create_op(env, 'map', load_inner)
+        pipeline.append(map)
         marcel.core.Command(env, None, pipeline).execute()
 
     def receive(self, x):
