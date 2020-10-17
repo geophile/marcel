@@ -483,9 +483,10 @@ def test_remote():
     TEST.run(lambda: run(fork('jao', gen(3, -1) | map(lambda x: 5 / x))),
              expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
     # Handling of remote error in setup
-    # TODO: Bug
+    # TODO: Bug - should be expected_err
     TEST.run(lambda: run(fork('jao', ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
+             # expected_err='No qualifying paths')
     # Bug 4
     TEST.run(lambda: run(fork('jao', gen(3)) | red(None, r_plus)),
              expected_out=[(localhost, 3)])
