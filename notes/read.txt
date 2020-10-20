@@ -40,6 +40,7 @@ A few loosely related issues around reading and writing files
         ls ->> x
         x -> map (...) | ...
 
+
 Unbundle out:
 
 - Formatting not essential, can be done by map.
@@ -118,16 +119,14 @@ Syntax
 
 Implementation
 
-1. Fix syntactic sugar, / and // instead of > and >>.
+1. Fix syntactic sugar, -> and ->> instead of > and >>.
 
-2. Allow map to be optional.
+2. read: support filename args
 
-3. read: support filename args
-
-4. write:
+3. write:
    - Rename out
    - --append is boolean. I.e., to append: --file xxx --append
    - If no file, write to stdout
 
-5. Syntactic sugar: >, >>
+4. Syntactic sugar: >, >>
 

@@ -21,6 +21,7 @@ import marcel.core
 import marcel.exception
 import marcel.object.error
 import marcel.object.file
+import marcel.op.filenamesop
 
 File = marcel.object.file.File
 
@@ -74,38 +75,20 @@ def ls(env, *paths, depth=None, recursive=False, file=False, dir=False, symlink=
     return Ls(env), args
 
 
-class LsArgsParser(marcel.argsparser.ArgsParser):
+class LsArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
 
     def __init__(self, env):
         super().__init__('ls', env)
-        self.add_flag_no_value('d0', '-0', None)
-        self.add_flag_no_value('d1', '-1', None)
-        self.add_flag_no_value('dr', '-r', '--recursive')
         self.add_flag_no_value('file', '-f', '--file')
         self.add_flag_no_value('dir', '-d', '--dir')
         self.add_flag_no_value('symlink', '-s', '--symlink')
-        self.add_anon_list('filenames', convert=self.check_str_or_file, target='filenames_arg')
-        self.at_most_one('d0', 'd1', 'dr')
         self.validate()
 
 
-class Ls(marcel.core.Op):
+class Ls(marcel.op.filenamesop.FilenamesOp):
 
     def __init__(self, env):
-        super().__init__(env)
-        self.d0 = False
-        self.d1 = False
-        self.dr = False
-        self.file = False
-        self.dir = False
-        self.symlink = False
-        self.filenames_arg = None
-        self.filenames = None
-        self.current_dir = None
-        self.roots = None
-        self.base = None
-        self.emitted = None
-        self.metadata_cache = None
+        super().__init__(env, self.send_path)
 
     def __repr__(self):
         if self.d0:
@@ -124,50 +107,12 @@ class Ls(marcel.core.Op):
         filenames = [str(p) for p in self.filenames] if self.filenames else '?'
         return f'ls(depth={depth}, include={include}, filename={filenames})'
 
-    # AbstractOp
-
-    def setup(self):
-        self.filenames = self.eval_function('filenames_arg', str, pathlib.Path, pathlib.PosixPath, File)
-        self.roots = []
-        self.current_dir = self.env().dir_state().pwd()
-        self.roots = self.deglob()
-        if len(self.filenames) > 0 and len(self.roots) == 0:
-            raise marcel.exception.KillCommandException(f'No qualifying paths, possibly due to permission errors:'
-                                                        f' {self.filenames}')
-        self.emitted = set()
-        if len(self.roots) == 0:
-            self.roots = [self.current_dir]
-        if not (self.d0 or self.d1 or self.dr):
-            self.d1 = True
-        if not (self.file or self.dir or self.symlink):
-            self.file = True
-            self.dir = True
-            self.symlink = True
-        self.roots = sorted(self.roots)
-        self.determine_base()
-        self.metadata_cache = marcel.object.file.MetadataCache()
-
     # Op
-
-    def receive(self, _):
-        for root in self.roots:
-            self.visit(root, 0)
 
     def must_be_first_in_pipeline(self):
         return True
 
     # For use by this class
-
-    def visit(self, root, level):
-        self.send_path(root)
-        if root.is_dir() and ((level == 0 and (self.d1 or self.dr)) or self.dr):
-            try:
-                for file in sorted(root.iterdir()):
-                    self.visit(file, level + 1)
-            except PermissionError:
-                self.non_fatal_error(input=root, message='Permission denied')
-            except FileNotFoundError:
-                self.non_fatal_error(input=root, message='No such file or directory')
 
     def send_path(self, path):
         s = path.is_symlink()
@@ -184,59 +129,3 @@ class Ls(marcel.core.Op):
                            f'(file name may not be printable).')
                 self.non_fatal_error(None, message)
             self.emitted.add(path)
-
-    def determine_base(self):
-        # nca: nearest common ancestor
-        nca_parts = None
-        nca = None  # index into nearest_common_ancestor
-        for root in self.roots:
-            root_parts = root.parts
-            if nca_parts is None:
-                nca_parts = root_parts
-                nca = len(nca_parts)
-            else:
-                limit = min(len(root_parts), nca)
-                i = 0
-                while i < limit and nca_parts[i] == root_parts[i]:
-                    i += 1
-                nca = i
-        self.base = pathlib.Path('/' + '/'.join(nca_parts[1:nca]))
-        if self.base.is_file():
-            self.base = self.base.parent
-
-    def normalize_paths(self):
-        # Resolve ~
-        # Resolve . and ..
-        # Convert to Path
-        paths = []
-        for filename in self.filenames:
-            if type(filename) is File:
-                filename = filename.path
-            # Resolve . and ..
-            filename = os.path.normpath(filename)
-            # Convert to Path and resolve ~
-            path = pathlib.Path(filename).expanduser()
-            # If path is relative, specify what it is relative to.
-            if not path.is_absolute():
-                path = pathlib.Path.cwd() / path
-            paths.append(path)
-        return paths
-
-    def deglob(self):
-        # Expand globs and eliminate duplicates
-        paths = self.normalize_paths()
-        roots = []
-        roots_set = set()
-        for path in paths:
-            # Proceed as if path is a glob pattern, but this works for non-globs too.
-            path_str = path.as_posix()
-            glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
-                                       if path.is_absolute() else
-                                       (self.current_dir, path_str))
-            for root in (glob_base.glob(glob_pattern)
-                         if len(glob_pattern) > 0 else
-                         glob_base.iterdir()):
-                if root not in roots_set:
-                    roots_set.add(root)
-                    roots.append(root)
-        return roots
