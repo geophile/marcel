@@ -301,3 +301,79 @@ AttributeError: 'NoneType' object has no attribute 'hosts'
 M-0.11.1 jao@cheese:~/git/marcel$ p = gen n | args [n: echo (n)]
 M-0.11.1 jao@cheese:~/git/marcel$ (p)
 gen
+
+----------------------------------------------------------------------
+
+126. Reservoirs broken?
+
+M-0.11.3 jao@cheese:~$ fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]
+M-0.11.3 jao@cheese:~$ fact (100) > f
+Process Process-4:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 385, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/marcel/marcel/core.py", line 333, in receive
+    self.ops[0].receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/runpipeline.py", line 68, in receive
+    self.pipeline.receive(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 333, in receive
+    self.ops[0].receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/gen.py", line 98, in receive
+    self.send(self.apply_padding(x))
+  File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/args.py", line 77, in receive
+    self.impl.receive(x)
+  File "/home/jao/git/marcel/marcel/op/args.py", line 110, in receive
+    self.run_pipeline(self.op.env())
+  File "/home/jao/git/marcel/marcel/op/args.py", line 169, in run_pipeline
+    marcel.core.Command(env, None, self.pipeline).execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 386, in execute
+    self.pipeline.receive_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 336, in receive_complete
+    self.ops[0].receive_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 158, in receive_complete
+    self.send_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 136, in send_complete
+    self.receiver.receive_complete()
+  File "/home/jao/git/marcel/marcel/op/red.py", line 167, in receive_complete
+    self.reducer.receive_complete()
+  File "/home/jao/git/marcel/marcel/op/red.py", line 202, in receive_complete
+    self.op.send(tuple(self.accumulator))
+  File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/map.py", line 66, in receive
+    self.send(output)
+  File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/store.py", line 103, in receive
+    self.writer.write(x)
+  File "/home/jao/git/marcel/marcel/reservoir.py", line 111, in write
+    dill.dump(x, self.file)
+  File "/usr/local/lib/python3.8/dist-packages/dill/_dill.py", line 259, in dump
+    Pickler(file, protocol, **_kwds).dump(obj)
+  File "/usr/local/lib/python3.8/dist-packages/dill/_dill.py", line 445, in dump
+    StockPickler.dump(self, obj)
+  File "/usr/lib/python3.8/pickle.py", line 482, in dump
+    self.write(PROTO + pack("<B", self.proto))
+  File "/usr/lib/python3.8/pickle.py", line 245, in write
+    return self.file_write(data)
+ValueError: write to closed file
+M-0.11.3 jao@cheese:~$ 
+

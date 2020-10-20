@@ -625,30 +625,6 @@ def test_load_store():
     i = 123
     TEST.run(test=lambda: run(gen(3) | store(i)),
              expected_err='not usable as a reservoir')
-    # TODO: Get rid of this?
-    # # Load and store the same container, to implement a loop
-    # x = [(0,)]
-    # run(load(x) | select(lambda x: x < 5) | map(lambda x: x + 1) | store(x) | select(lambda *x: False))
-    # TEST.run(test=lambda: run(map(lambda: x)),
-    #          expected_out=[[(0,), (1,), (2,), (3,), (4,), (5,)]])
-
-
-def test_loop():
-    TEST.run(test=lambda: run(loop(0, select(lambda x: x < 3) | emit() | map(lambda x: x + 1))),
-             expected_out=[0, 1, 2])
-    TEST.run(test=lambda: run(loop((0, 1),
-                                   select(lambda x, y: x < 1000000) | emit() | map(lambda x, y: (y, x + y))) |
-                              map(lambda x, y: x)),
-             expected_out=[0, 1, 1, 2, 3, 5, 8, 13, 21,
-                           34, 55, 89, 144, 233, 377, 610,
-                           987, 1597, 2584, 4181, 6765, 10946,
-                           17711, 28657, 46368, 75025, 121393,
-                           196418, 317811, 514229, 832040])
-    TEST.run(test=lambda: run(gen(3) | loop(select(lambda n: n >= 0) | emit() | map(lambda n: n - 1))),
-             expected_out=[0, 1, 0, 2, 1, 0])
-    p = loop(0, select(lambda x: x < 5) | emit() | map(lambda x: x + 1))
-    TEST.run(test=lambda: run(p),
-             expected_out=[0, 1, 2, 3, 4])
 
 
 def test_if():
@@ -982,7 +958,6 @@ def main_stable():
     test_pipeline_args()
     test_sql()
     test_load_store()
-    # test_loop()
     test_if()
     test_read()
     test_intersect()

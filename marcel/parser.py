@@ -130,9 +130,11 @@ class Token(Source):
     COMMENT = '#'
     COMMA = ','
     COLON = ':'
-    GT = '>'
-    GTGT = '>>'
-    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON, GT, GTGT]
+    SHORT_ARROW = '>'
+    SHORT_ARROW_2 = '>>'
+    LONG_ARROW = '->'
+    LONG_ARROW_2 = '->>'
+    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON, SHORT_ARROW, SHORT_ARROW_2]
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position)
@@ -174,7 +176,10 @@ class Token(Source):
     def is_colon(self):
         return False
 
-    def is_gt(self):
+    def is_short_arrow(self):
+        return False
+
+    def is_long_arrow(self):
         return False
 
     def is_lexer_failure(self):
@@ -519,17 +524,18 @@ class Colon(Symbol):
         return True
 
 
-class Gt(Symbol):
+class Arrow(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous, symbol):
         super().__init__(text, position, adjacent_to_previous, symbol)
+        assert symbol in (Token.SHORT_ARROW, Token.SHORT_ARROW_2)
         self.end += len(symbol) - 1  # Symbol.__init__ already added one
 
-    def is_gt(self):
+    def is_short_arrow(self):
         return True
 
     def is_append(self):
-        return self.symbol == Token.GTGT
+        return self.symbol == Token.SHORT_ARROW_2
 
 
 class ImpliedMap(Token):
@@ -585,39 +591,41 @@ class Lexer(Source):
         c = self.peek_char()
         if c is not None:
             adjacent_to_previous = self.end > 0 and skipped == 0
-            if c == Token.OPEN:
+            if self.match(c, Token.OPEN):
                 token = Expression(self.text, self.end, adjacent_to_previous)
-            elif c == Token.CLOSE:
+            elif self.match(c, Token.CLOSE):
                 raise ParseError('Unmatched )')
-            elif c == Token.PIPE:
+            elif self.match(c, Token.PIPE):
                 token = Pipe(self.text, self.end, adjacent_to_previous)
-            elif c == Token.BEGIN:
+            elif self.match(c, Token.BEGIN):
                 token = Begin(self.text, self.end, adjacent_to_previous)
-            elif c == Token.END:
+            elif self.match(c, Token.END):
                 token = End(self.text, self.end, adjacent_to_previous)
-            elif c == Token.FORK:
+            elif self.match(c, Token.FORK):
                 token = Fork(self.text, self.end, adjacent_to_previous)
-            elif c == Token.BANG:
+            elif self.match(c, Token.BANG):
                 token = Run(self.text, self.end, adjacent_to_previous)
-            elif c == Token.ASSIGN:
+            elif self.match(c, Token.ASSIGN):
                 token = Assign(self.text, self.end, adjacent_to_previous)
-            elif c == Token.COMMA:
+            elif self.match(c, Token.COMMA):
                 token = Comma(self.text, self.end, adjacent_to_previous)
-            elif c == Token.COLON:
+            elif self.match(c, Token.COLON):
                 token = Colon(self.text, self.end, adjacent_to_previous)
-            elif c == Token.COMMENT:
-                # Ignore the rest of the line
-                return None
-            elif c == Token.GT:
-                if self.peek_char(2) == Token.GTGT:
-                    c = Token.GTGT
-                token = Gt(self.text, self.end, adjacent_to_previous, c)
+            elif self.match(c, Token.COMMENT):
+                return None  # Ignore the rest of the line
+            elif self.match(c, Token.SHORT_ARROW_2):
+                token = Arrow(self.text, self.end, adjacent_to_previous, Token.SHORT_ARROW_2)
+            elif self.match(c, Token.SHORT_ARROW):
+                token = Arrow(self.text, self.end, adjacent_to_previous, Token.SHORT_ARROW)
             else:
                 token = String(self.text, self.end, adjacent_to_previous)
                 if token.string in self.main.op_modules:
                     token = Op(self.text, self.end, adjacent_to_previous)
             self.end = token.end
         return token
+
+    def match(self, c, symbol):
+        return self.peek_char(len(symbol)) == symbol
 
     def skip_whitespace(self):
         before = self.end
@@ -822,80 +830,80 @@ class Parser:
         pipeline = marcel.core.Pipeline()
         pipeline.set_parameters(parameters)
         self.current_pipelines.push(pipeline)
-        if self.next_token(Op, Gt):
+        if self.next_token(Op, Arrow):
             op_token = self.token
             self.tab_completion_context.complete_disabled()
-            found_gt = self.next_token(Gt)
-            assert found_gt
-            gt_token = self.token
+            found_arrow = self.next_token(Arrow)
+            assert found_arrow
+            arrow_token = self.token
             if self.pipeline_end():
                 # op >
-                raise SyntaxError(self.token, f'A variable must precede {gt_token.value(self)}, '
+                raise SyntaxError(self.token, f'A variable must precede {arrow_token.value(self)}, '
                                               f'not an operator ({self.token.op_name()})')
             elif self.pipeline_end(1):
                 if self.next_token(String):
                     # op > var
                     op = (op_token, [])
-                    store_op = self.store_op(self.token, gt_token.is_append())
+                    store_op = self.store_op(self.token, arrow_token.is_append())
                     op_sequence = [op, store_op]
                 else:
-                    raise SyntaxError(gt_token, f'Incorrect use of {gt_token.value(self)}')
+                    raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value(self)}')
             else:
-                raise SyntaxError(gt_token, f'Incorrect use of {gt_token.value(self)}')
-        elif self.next_token(String, Gt):
+                raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value(self)}')
+        elif self.next_token(String, Arrow):
             self.tab_completion_context.complete_disabled()
             load_op = self.load_op(self.token)
-            found_gt = self.next_token(Gt)
-            assert found_gt
+            found_arrow = self.next_token(Arrow)
+            assert found_arrow
             self.tab_completion_context.complete_disabled()
-            gt_token = self.token
+            arrow_token = self.token
             if self.pipeline_end():
                 # var >
-                if gt_token.is_append():
-                    raise SyntaxError(gt_token, 'Append not permitted here.')
+                if arrow_token.is_append():
+                    raise SyntaxError(arrow_token, 'Append not permitted here.')
                 op_sequence = [load_op]
             elif self.pipeline_end(1):
                 if self.next_token(Op):
                     # var > op
-                    if gt_token.is_append():
-                        raise SyntaxError(gt_token, 'Append not permitted here.')
+                    if arrow_token.is_append():
+                        raise SyntaxError(arrow_token, 'Append not permitted here.')
                     op = (self.token, [])
                     op_sequence = [load_op, op]
                 elif self.next_token(String):
                     # var > var
-                    store_op = self.store_op(self.token, gt_token.is_append())
+                    store_op = self.store_op(self.token, arrow_token.is_append())
                     op_sequence = [load_op, store_op]
                 else:
                     assert False
             else:
                 op_sequence = [load_op] + self.op_sequence()
-                if self.next_token(Gt, String):
+                if self.next_token(Arrow, String):
                     # var > op_sequence > var
-                    gt_token = self.token
+                    arrow_token = self.token
                     found_string = self.next_token(String)
                     assert found_string
-                    store_op = self.store_op(self.token, gt_token.is_append())
+                    store_op = self.store_op(self.token, arrow_token.is_append())
                     op_sequence.append(store_op)
                 else:
                     # var > op_sequence
-                    if gt_token.is_append():
-                        raise SyntaxError(gt_token, 'Append not permitted here.')
-        elif self.next_token(Gt, String):
+                    if arrow_token.is_append():
+                        raise SyntaxError(arrow_token, 'Append not permitted here.')
+        elif self.next_token(Arrow, String):
             self.tab_completion_context.complete_disabled()
             # > var
-            gt_token = self.token
+            arrow_token = self.token
             found_string = self.next_token(String)
             assert found_string
-            store_op = self.store_op(self.token, gt_token.is_append())
+            store_op = self.store_op(self.token, arrow_token.is_append())
             op_sequence = [store_op]
         else:
             op_sequence = self.op_sequence()
-            if self.next_token(Gt, String):
+            if self.next_token(Arrow, String):
                 # op_sequence > var
-                gt_token = self.token
+                arrow_token = self.token
                 found_string = self.next_token(String)
                 assert found_string
-                store_op = self.store_op(self.token, gt_token.is_append())
+                store_op = self.store_op(self.token, arrow_token.is_append())
                 op_sequence.append(store_op)
             # else:  op_sequence is OK as is
         for op_args in op_sequence:

@@ -1,0 +1,133 @@
+A few loosely related issues around reading and writing files
+
+- Names are inconsistent: read/out. in/out would be better, but in is
+  a keyword, so it's off limits for the API.
+
+- "ls abc.def | read" is a pain. It would be nice to support "read abc.def".
+
+- ... > var is weird for everyone, used to ... > file from bash. Maybe
+  use > for files and something else for vars. The two cases could
+  almost be distinguished by the target, except that identifiers work
+  as filenames in the current directory.
+
+  Maybe resolve ambiguity in favor of identifier? Use ./foobar if you
+  mean a file? Probably a bad idea. ...>local_file is pretty common
+  usage.
+
+- How about another symbol for reservoirs, e.g. ~
+
+  ls ~ x
+  ls /tmp ~~ x
+
+    - But it can't be ~, because that means home directory. 
+
+    - Can't be : because it's already used (pipeline args). Probably
+      easily parsable, but visually confusing.
+
+    - ^: Points in the wrong direction. Looks like the direction
+      should mean something, but it wouldn't.
+
+    - /: Maybe
+
+        ls / x
+        ls // x
+        x / map (...) | ...
+
+      No, / is significant in filenames.
+
+    - ->
+        ls -> x
+        ls ->> x
+        x -> map (...) | ...
+
+Unbundle out:
+
+- Formatting not essential, can be done by map.
+
+- CSV could be done by a formatting command, or a function called by
+  map.
+
+----------------------------------------------------------------------
+
+Another idea: A reservoir is just a temp file tied to an env var. Make
+it a real file, and just use out/write. Then pickling is just one more
+output format.
+
+But that still leaves the problem for syntactic sugar: how to specify
+the format? Should > be for default text formatting, or pickling? We
+still want convenient syntax for each.
+
+ON THE OTHER HAND: Pickling should get the special syntactic
+support. In bash, redirection works symmterically for input and for
+output. In marcel, pickle format does that, text does not, or at least
+it requires matching formatting/parsing.
+
+----------------------------------------------------------------------
+
+Operators
+
+- read: file -> stream
+
+  - Pipe in files to read, or take files as args
+  - --label to include File in output.
+  - --csv, --tsv parsing options
+
+- write: stream -> file
+  - file arg
+  - --append option
+  - --csv, --tsv formatting options
+  ? python formatting option?
+  ? Omit file => write to stdout?
+
+- in: stdin -> stream, (useful for scripts)
+  - ???
+
+- out: stream -> stdout
+  ? Is this necessary
+
+- store: stream -> var
+  - OK as is
+
+- load: var -> stream
+  - OK as is
+
+- to/from csv: functions or operators?
+
+- stdin, stdout are, of course, files. How would these files be identified?
+
+- "in" is useful in a marcel script. In a python script its just stdin. 
+
+
+Syntax
+
+- store: ... / var, ... // var
+
+- load: var / ...
+
+- read: file > ...
+
+- write: ... > file, ... >> file
+
+- out:
+
+    - Terminal out is implied, as usual
+
+    - Intermediate: a | out | b -> a ^ b
+
+----------------------------------------------------------------------
+
+Implementation
+
+1. Fix syntactic sugar, / and // instead of > and >>.
+
+2. Allow map to be optional.
+
+3. read: support filename args
+
+4. write:
+   - Rename out
+   - --append is boolean. I.e., to append: --file xxx --append
+   - If no file, write to stdout
+
+5. Syntactic sugar: >, >>
+
