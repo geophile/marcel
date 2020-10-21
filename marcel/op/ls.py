@@ -13,12 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
-import pathlib
-
-import marcel.argsparser
-import marcel.core
-import marcel.exception
 import marcel.object.error
 import marcel.object.file
 import marcel.op.filenamesop
@@ -88,7 +82,7 @@ class LsArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
 class Ls(marcel.op.filenamesop.FilenamesOp):
 
     def __init__(self, env):
-        super().__init__(env, self.send_path)
+        super().__init__(env, Ls.send_path)
 
     def __repr__(self):
         if self.d0:
@@ -114,18 +108,21 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
 
     # For use by this class
 
-    def send_path(self, path):
+    @staticmethod
+    def send_path(op, path):
+        import pathlib
+        assert isinstance(path, pathlib.Path), f'{type(path)} {path}'
         s = path.is_symlink()
         f = path.is_file() and not s
         d = path.is_dir() and not s
-        if ((self.file and f) or (self.dir and d) or (self.symlink and s)) and path not in self.emitted:
-            file = File(path, self.base, self.metadata_cache)
+        if ((op.file and f) or (op.dir and d) or (op.symlink and s)) and path not in op.emitted:
+            file = File(path, op.base, op.metadata_cache)
             try:
-                self.send(file)
+                op.send(file)
             except ValueError as e:
                 message = (f'Caught {e.__class__.__name__} on file with '
                            f'device = {file.device} and '
                            f'inode = {file.inode}, '
                            f'(file name may not be printable).')
-                self.non_fatal_error(None, message)
-            self.emitted.add(path)
+                op.non_fatal_error(None, message)
+            op.emitted.add(path)

@@ -112,8 +112,8 @@ class Join(marcel.core.Op):
             else:
                 # match is first value associated with join_value, x is the second. Need a list.
                 self.inner[join_value] = [match, x]
-        env = self.env()
         super().setup()
+        env = self.env()
         self.inner = {}
         pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
         pipeline.set_error_handler(self.owner.error_handler)

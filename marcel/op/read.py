@@ -14,17 +14,17 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import csv
+import pathlib
 
-import marcel.argsparser
-import marcel.core
 import marcel.object.file
+import marcel.op.filenamesop
 import marcel.util
 
 File = marcel.object.file.File
 
 
 HELP = '''
-{L,wrap=F}read [-c|--csv] [-t|--tsv] [-l|--label]
+{L,wrap=F}read [[-01] [-r|--recursive]] [-c|--csv] [-t|--tsv] [-l|--label] [FILENAME ...]
 
 {L,indent=4:28}{r:-c}, {r:--csv}               Parse CSV-formatted lines with comma separator.
 
@@ -45,21 +45,28 @@ position of the output tuple.
 '''
 
 
-def read(env, csv=False, tsv=False, label=False):
+def read(env, *paths, depth=None, recursive=False, csv=False, tsv=False, label=False):
     args = []
+    if depth == 0:
+        args.append('-0')
+    elif depth == 1:
+        args.append('-1')
+    if recursive:
+        args.append('--recursive')
     if csv:
         args.append('--csv')
     if tsv:
         args.append('--tsv')
     if label:
         args.append('--label')
+    args.extend(paths)
     return Read(env), args
 
 
-class ReadArgsParser(marcel.argsparser.ArgsParser):
+class ReadArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
 
     def __init__(self, env):
-        super().__init__('parse', env)
+        super().__init__('read', env)
         self.add_flag_no_value('csv', '-c', '--csv')
         self.add_flag_no_value('tsv', '-t', '--tsv')
         self.add_flag_no_value('label', '-l', '--label')
@@ -67,16 +74,15 @@ class ReadArgsParser(marcel.argsparser.ArgsParser):
         self.validate()
 
 
-class Read(marcel.core.Op):
+class Read(marcel.op.filenamesop.FilenamesOp):
 
     def __init__(self, env):
-        super().__init__(env)
+        super().__init__(env, Read.read_file)
         self.csv = None
         self.tsv = None
         self.label = None
         self.csv_input = None
         self.csv_reader = None
-        self.file = None
 
     def __repr__(self):
         options = []
@@ -91,32 +97,46 @@ class Read(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
+        self.file = True
+        super().setup()
         if self.csv or self.tsv:
             self.csv_input = InputIterator(self)
             self.csv_reader = csv.reader(self.csv_input, delimiter=(',' if self.csv else '\t'))
 
+    # Op
+
     def receive(self, x):
-        if len(x) != 1:
-            self.fatal_error(x, 'Input to read must be a single value.')
-        file = x[0]
-        if type(file) is not File:
-            self.fatal_error(x, 'Input to read must be a File.')
-        label = [file] if self.label else None
-        with open(file.path, 'r') as input:
+        if x is None:
+            super().receive(None)
+        else:
+            if len(x) != 1:
+                self.fatal_error(x, 'Input to read must be a single value.')
+            x = x[0]
+            if type(x) is not File:
+                self.fatal_error(x, 'Input to read must be a File.')
+            Read.read_file(self, x.path)
+
+    # FilenamesOp
+
+    @staticmethod
+    def read_file(op, path):
+        assert isinstance(path, pathlib.Path), f'({type(path)}) {path}'
+        label = [path] if op.label else None
+        with open(path, 'r') as input:
             try:
-                if self.csv_reader:
+                if op.csv_reader:
                     line = input.readline()
                     while len(line) > 0:
                         line = line.rstrip('\r\n')
-                        self.csv_input.set(line)
-                        out = next(self.csv_reader)
-                        self.send(label + out if label else out)
+                        op.csv_input.set(line)
+                        out = next(op.csv_reader)
+                        op.send(label + out if label else out)
                         line = input.readline()
                 else:
                     line = input.readline()
                     while len(line) > 0:
                         line = line.rstrip('\r\n')
-                        self.send(label + [line] if label else line)
+                        op.send(label + [line] if label else line)
                         line = input.readline()
             except StopIteration:
                 pass

@@ -915,12 +915,12 @@ def test_read():
                            'goodbye'])
     # Files with labels
     TEST.run('cd /tmp/read')
-    TEST.run('ls f1.csv f3.txt | read -l | map (f, x: [str(f), x])',
-             expected_out=[['f1.csv', '1,2.3,ab'],
-                           ['f1.csv', '2,3.4,xy'],
-                           ['f1.csv', '3,4.5,"m,n"'],
-                           ['f3.txt', 'hello,world'],
-                           ['f3.txt', 'goodbye']])
+    TEST.run('ls f1.csv f3.txt | read -l | map (path, line: (str(path), line))',
+             expected_out=[('/tmp/read/f1.csv', '1,2.3,ab'),
+                           ('/tmp/read/f1.csv', '2,3.4,xy'),
+                           ('/tmp/read/f1.csv', '3,4.5,"m,n"'),
+                           ('/tmp/read/f3.txt', 'hello,world'),
+                           ('/tmp/read/f3.txt', 'goodbye')])
     # CSV
     TEST.run('cd /tmp/read')
     TEST.run('ls f1.csv | read -c',
@@ -930,9 +930,9 @@ def test_read():
     # CSV with labels
     TEST.run('cd /tmp/read')
     TEST.run('ls f1.csv | read -cl | map (f, x, y, z: [str(f), x, y, z])',
-             expected_out=[['f1.csv', '1', '2.3', 'ab'],
-                           ['f1.csv', '2', '3.4', 'xy'],
-                           ['f1.csv', '3', '4.5', 'm,n']])
+             expected_out=[['/tmp/read/f1.csv', '1', '2.3', 'ab'],
+                           ['/tmp/read/f1.csv', '2', '3.4', 'xy'],
+                           ['/tmp/read/f1.csv', '3', '4.5', 'm,n']])
     # TSV
     TEST.run('cd /tmp/read')
     TEST.run('ls f2.tsv | read -t',
@@ -941,8 +941,16 @@ def test_read():
     # TSV with labels
     TEST.run('cd /tmp/read')
     TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: [str(f), x, y, z])',
-             expected_out=[['f2.tsv', '1', '2.3', 'ab'],
-                           ['f2.tsv', '2', '3.4', 'xy']])
+             expected_out=[['/tmp/read/f2.tsv', '1', '2.3', 'ab'],
+                           ['/tmp/read/f2.tsv', '2', '3.4', 'xy']])
+    # Filenames on commandline
+    TEST.run('cd /tmp/read')
+    TEST.run('read f1.csv',
+             expected_out=['1,2.3,ab', '2,3.4,xy', '3,4.5,"m,n"'])
+    TEST.run('read f?.*',
+             expected_out=['1,2.3,ab', '2,3.4,xy', '3,4.5,"m,n"',
+                           '1\t2.3\tab', '2\t3.4\txy',
+                           'hello,world', 'goodbye'])
 
 
 def test_intersect():

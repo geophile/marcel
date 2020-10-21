@@ -53,12 +53,13 @@ class File(marcel.object.renderable.Renderable):
         if not isinstance(path, pathlib.Path):
             path = pathlib.Path(path)
         self.path = path
-        self.display_path = path.relative_to(base) if base else path
+        # Compact path is relative if the base if there is one, the full path otherwise.
+        self.compact_path = path.relative_to(base) if base else path
         self.lstat = None
         self.executable = None
         # Used only to survive pickling
         self.path_str = None
-        self.display_path_str = None
+        self.compact_path_str = None
 
     def __getattr__(self, attr):
         return getattr(self.path, attr)
@@ -72,9 +73,9 @@ class File(marcel.object.renderable.Renderable):
         if self.path is not None:
             state['path_str'] = str(self.path)
             state['path'] = None
-        if self.display_path is not None:
-            state['display_path_str'] = str(self.display_path)
-            state['display_path'] = None
+        if self.compact_path is not None:
+            state['compact_path_str'] = str(self.compact_path)
+            state['compact_path'] = None
         return state
 
     def __setstate__(self, state):
@@ -82,9 +83,9 @@ class File(marcel.object.renderable.Renderable):
         if self.path_str:
             self.path = pathlib.Path(self.path_str)
             self.path_str = None
-        if self.display_path_str:
-            self.display_path = pathlib.Path(self.display_path_str)
-            self.display_path_str = None
+        if self.compact_path_str:
+            self.compact_path = pathlib.Path(self.compact_path_str)
+            self.compact_path_str = None
 
     def __hash__(self):
         return self.path.__hash__()
@@ -110,7 +111,7 @@ class File(marcel.object.renderable.Renderable):
     # Renderable
 
     def render_compact(self):
-        return str(self.display_path)
+        return str(self.compact_path)
 
     def render_full(self, color_scheme):
         line = self._formatted_metadata()
@@ -176,7 +177,7 @@ class File(marcel.object.renderable.Renderable):
             ' ',
             self._formatted_mtime(lstat.st_mtime),
             ' ',
-            self.display_path.as_posix()]
+            self.compact_path.as_posix()]
 
     def _lstat(self):
         if self.lstat is None:

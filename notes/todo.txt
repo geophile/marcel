@@ -448,3 +448,9 @@ Allow omitting of map in all contexts? E.g.
       ls | (f: f.size)
 
 It already works! It's not a bug, it's a feature! As it turns out.
+
+----------------------------------------------------------------------
+
+File constructor is expensive. Not sure about pathlib.Path(), but
+path.relative_to() must cost something. ls might be faster if this
+were optimized. Measure & fix.

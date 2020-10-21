@@ -93,7 +93,7 @@ class FilenamesOp(marcel.core.Op):
     # For use by this class
 
     def visit(self, root, level):
-        self.action(root)
+        self.action(self, root)
         if root.is_dir() and ((level == 0 and (self.d1 or self.dr)) or self.dr):
             try:
                 for file in sorted(root.iterdir()):
