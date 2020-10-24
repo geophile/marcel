@@ -17,106 +17,35 @@ import os
 import tempfile
 import time
 
-import dill
-
-import marcel.pickler
+import marcel.picklefile
 
 
-RESERVOIRS = []
+RESERVOIRS = set()
 
 
 def shutdown(main_pid):
     if os.getpid() == main_pid:
         for reservoir in RESERVOIRS:
+            reservoir.close()
             reservoir.ensure_deleted()
+        RESERVOIRS.clear()
 
 
 # A Reservoir collects and feeds streams.
 
-class Reservoir(marcel.pickler.Cached):
-
-    CLOSED = -1
-    READING = -2
-    WRITING = -3
-
-    def __init__(self, name, path=None):
-        super().__init__()
-        self.name = name
-        if path:
-            self.path = path
-        else:
-            _, self.path = tempfile.mkstemp()
-        self.mode = Reservoir.CLOSED
-        RESERVOIRS.append(self)
-
-    def __repr__(self):
-        return f'Reservoir({self.name})'
-
-    def __iter__(self):
-        return self.reader()
-
-    def id(self):
-        return self.name, self.path
-
-    @classmethod
-    def reconstitute(cls, id):
-        name, path = id
-        return Reservoir(name, path)
-
-    def reader(self):
-        return Reader(self)
-
-    def writer(self, append):
-        return Writer(self, append)
-
-    def ensure_deleted(self):
-        try:
-            os.unlink(self.path)
-        except FileNotFoundError:
-            pass
-
-
-class Reader:
-
-    def __init__(self, reservoir):
-        self.file = open(reservoir.path, 'r+b')
-
-    def __next__(self):
-        try:
-            return self.read()
-        except EOFError:
-            self.close()
-            raise StopIteration()
-        except:
-            self.close()
-            raise
-
-    def read(self):
-        return dill.load(self.file)
-
-    def close(self):
-        self.file.close()
-
-
-class Writer:
+class Reservoir(marcel.picklefile.PickleFile):
 
     FLUSH_INTERVAL_SEC = 1
 
-    def __init__(self, reservoir, append):
-        self.file = open(reservoir.path, 'a+b' if append else 'w+b')
-        self.last_flush = time.time()
+    def __init__(self, name, path=None):
+        super().__init__(tempfile.mkstemp()[1] if path is None else path)
+        self.name = name
+        self.last_flush = 0
+        RESERVOIRS.add(self)
 
-    def write(self, x):
-        try:
-            dill.dump(x, self.file)
-            t = time.time()
-            if t - self.last_flush > Writer.FLUSH_INTERVAL_SEC:
-                self.file.flush()
-                self.last_flush = t
-        except:
-            self.close()
-            raise
-
-    def close(self):
-        self.file.close()
-
+    # def write(self, x):
+    #     super().write(x)
+    #     now = time.time()
+    #     if now - self.last_flush > Reservoir.FLUSH_INTERVAL_SEC:
+    #         self.flush()
+    #         self.last_flush = now

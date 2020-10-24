@@ -245,6 +245,24 @@ The env var isn't there, but the temp file is.
 
 ----------------------------------------------------------------------
 
+REOPENED
+
+115. store op should flush occasionally
+
+E.g., in situations like this:
+
+      timer 1 > x
+
+Could flush after each dill.dump(). Is that guaranteed to produce a
+readable result? That could get expensive. Flush periodically? How
+would this be specified/controlled?
+
+Flushing isn't the entire problem. x doesn't show up in env until the
+pipeline finishes execution. Before execution, need to analyze
+pipeline for new variables.
+
+----------------------------------------------------------------------
+
 120. cd into a non-directory crashes
 
 M-0.11.0 jao@cheese:~/git/geophile$ cd sjt
@@ -377,3 +395,8 @@ Traceback (most recent call last):
 ValueError: write to closed file
 M-0.11.3 jao@cheese:~$ 
 
+----------------------------------------------------------------------
+
+127. API env missing symbols
+
+E.g. USER, HOME.

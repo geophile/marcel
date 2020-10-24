@@ -1875,24 +1875,6 @@ Currently, the reservoir's file name is transmitted, which won't work
 
 FIXED
 
-115. store op should flush occasionally
-
-E.g., in situations like this:
-
-      timer 1 > x
-
-Could flush after each dill.dump(). Is that guaranteed to produce a
-readable result? That could get expensive. Flush periodically? How
-would this be specified/controlled?
-
-Flushing isn't the entire problem. x doesn't show up in env until the
-pipeline finishes execution. Before execution, need to analyze
-pipeline for new variables.
-
-----------------------------------------------------------------------
-
-FIXED
-
 116. Why is this crashing?
 
 M-0.10.24 jao@cheese:~/git/marcel$ ls marcel test | out | args [d: ls -fr (d) | ext py | map (f: (f, f.read().count('\n'))) | sort (f, n: n) | tail 10]

@@ -1171,7 +1171,6 @@ def main_stable():
     test_import()
     test_store_load()
     test_store_load_sugar()
-    # test_loop()
     test_if()
     test_delete()
     test_read()

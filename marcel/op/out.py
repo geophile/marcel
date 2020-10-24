@@ -27,7 +27,7 @@ import marcel.object.renderable
 Renderable = marcel.object.renderable.Renderable
 
 HELP = '''
-{L,wrap=F}out [-a|--append FILENAME] [-f|--file FILENAME] [-c|--csv] [FORMAT]
+{L,wrap=F}out [-a|--append FILENAME] [-f|--file FILENAME] [-c|--csv] [-p|--pickle] [FORMAT]
 
 {L,indent=4:28}{r:-a}, {r:--append}            Append output to the file identified by FILENAME.
 
@@ -36,29 +36,34 @@ file if necessary.
 
 {L,indent=4:28}{r:-c}, {r:--csv}               Format output as comma-separated values.
 
+{L,indent=4:28}{r:-p}, {r:--pickle}            Pickle the output.
+
 {L,indent=4:28}{r:FORMAT}                  The Python formatting specification to be applied to output tuples.
 
 
-Prints tuples received on the input stream.
+Tuples arriving on the input stream are formatted and written out to a file (or stdout). 
 
 Tuples received on the input stream are passed to the output stream. As a side-effect, input
-tuples are printed to stdout or to the specified {r:FILENAME}. If the {r:FILENAME} is specified
+tuples are formatted and written to stdout or to the specified {r:FILENAME}. 
+If the {r:FILENAME} is specified
 by {r:--file}, then an existing file is replaced. If the {r:FILENAME} is specified
 by {r:--append}, then output is appended to an existing file.
 
 The {r:--append} and {r:--file} options are mutually exclusive.
 
-The {r:--csv} and {r:FORMAT} options are mutually exclusive.
+The formatting options: {r:--csv}, {r:--pickle}, and {r:FORMAT} options are mutually exclusive.
 If no formatting options are specified, then the default rendering is used, except
 that 1-tuples are unwrapped. (Note that for certain objects, including
 {r:File} and {r:Process}, the default rendering is specified by the {n:render_compact()}
 or {n:render_full()} methods. Run {n:help object} for more information.)
+If the {r:--pickle} formatting option is specified, then output must go to a file, i.e.
+{r:--file} or (r:--append} must be specified.
 
 {n:Error} objects are not subject to formatting specifications, and are not passed on as output.
 '''
 
 
-def out(env, append=None, file=None, csv=False, format=None):
+def out(env, append=None, file=None, csv=False, pickle=None, format=None):
     args = []
     if append:
         args.extend(['--append', append])
@@ -66,6 +71,8 @@ def out(env, append=None, file=None, csv=False, format=None):
         args.extend(['--file', file])
     if csv:
         args.append('--csv')
+    if pickle:
+        args.append('--pickle')
     if format:
         args.append(format)
     return Out(env), args
@@ -78,9 +85,10 @@ class OutArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_one_value('append', '-a', '--append', convert=self.check_str, target='append_arg')
         self.add_flag_one_value('file', '-f', '--file', convert=self.check_str, target='file_arg')
         self.add_flag_no_value('csv', '-c', '--csv')
+        self.add_flag_no_value('pickle', '-p', '--pickle')
         self.add_anon('format', default=None, convert=self.check_str)
-        self.at_most_one('csv', 'format')
         self.at_most_one('file', 'append')
+        self.at_most_one('csv', 'pickle', 'format')
         self.validate()
 
 
@@ -93,12 +101,25 @@ class Out(marcel.core.Op):
         self.file_arg = None
         self.file = None
         self.csv = False
+        self.pickle = False
         self.format = None
         self.output = None
         self.formatter = None
 
     def __repr__(self):
-        return f'out(append={self.append}, file={self.file}, csv={self.csv}, format={Out.ensure_quoted(self.format)})'
+        buffer = []
+        if self.file:
+            buffer.append(f'file={self.file}')
+        if self.append:
+            buffer.append(f'append={self.append}')
+        if self.csv:
+            buffer.append('csv')
+        if self.pickle:
+            buffer.append('pickle')
+        if self.format:
+            buffer.append(f'format={Out.ensure_quoted(self.format)}')
+        options = ', '.join(buffer)
+        return f'out({options})'
 
     # AbstractOp
 
@@ -108,6 +129,7 @@ class Out(marcel.core.Op):
         self.format = self.eval_function('format', str)
         self.formatter = (PythonFormatter(self) if self.format else
                           CSVFormatter(self) if self.csv else
+                          PickleFormatter(self) if self.pickle else
                           DefaultFormatter(self))
 
     def receive(self, x):
@@ -196,6 +218,15 @@ class CSVFormatter(Formatter):
 
     def write(self, x):
         self.row = x
+
+
+class PickleFormatter(Formatter):
+
+    def __init__(self, op):
+        super().__init__(op)
+
+    def format(self, x):
+        pass
 
 
 class PythonFormatter(Formatter):

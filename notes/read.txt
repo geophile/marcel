@@ -126,6 +126,7 @@ Implementation
 3. write:
    - Rename out
    - --append is boolean. I.e., to append: --file xxx --append
+   - --pickle output option, should require file. prohibit append?
    - If no file, write to stdout
 
 4. Syntactic sugar: >, >>

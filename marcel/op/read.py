@@ -32,7 +32,13 @@ HELP = '''
 
 {L,indent=4:28}{r:-l}, {r:--label}             Include the input {n:File} in the output.
 
-Input tuples are assumed to be 1-tuples containing {n:File}s. Each file is read, and each
+{L,indent=4:28}{r:FILENAME}                A filename or glob pattern.
+
+Reads the contents of the specified files. Input files can be specified on
+the command line, (the {r:FILENAME} arguments), or piped in from an upstream command,
+typically {r:ls}. In the latter case, input tuples are assumed to be 1-tuples containing {n:File}s. 
+
+Each file is read, and each
 line is written to the output stream, with end-of-line characters ({r:\\\\r}, {r:\\\\n}) removed.
 
 If {r:--csv} is specified, then input lines are assumed to be in the CSV format, using a comma
