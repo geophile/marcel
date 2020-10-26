@@ -58,7 +58,7 @@ that 1-tuples are unwrapped. (Note that for certain objects, including
 {r:File} and {r:Process}, the default rendering is specified by the {n:render_compact()}
 or {n:render_full()} methods. Run {n:help object} for more information.)
 If the {r:--pickle} formatting option is specified, then output must go to a file, i.e.
-{r:--file} or (r:--append} must be specified.
+{r:--file} or {r:--append} must be specified.
 
 {n:Error} objects are not subject to formatting specifications, and are not passed on as output.
 '''

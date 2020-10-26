@@ -23,7 +23,7 @@ HELP = '''
 {L,wrap=F}> VAR
 {L,wrap=F}>> VAR
 
-{L,indent=4:28}{r:-a}, {r:--append}                     Append to {r:VAR}s list, instead of replacing.
+{L,indent=4:28}{r:-a}, {r:--append}            Append to {r:VAR}s list, instead of replacing.
 
 {L,indent=4:28}{r:VAR}                     The variable to be updated.
 
