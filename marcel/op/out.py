@@ -23,6 +23,7 @@ import marcel.core
 import marcel.exception
 import marcel.object.error
 import marcel.object.renderable
+import marcel.picklefile
 
 Renderable = marcel.object.renderable.Renderable
 
@@ -31,8 +32,8 @@ HELP = '''
 
 {L,indent=4:28}{r:-a}, {r:--append}            Append output to the file identified by FILENAME.
 
-{L,indent=4:28}{r:-f}, {r:--file}              Write output to the file identified by FILENAME, replacing an existing
-file if necessary.
+{L,indent=4:28}{r:-f}, {r:--file}              Write output to the file identified by FILENAME, 
+replacing an existing file if necessary.
 
 {L,indent=4:28}{r:-c}, {r:--csv}               Format output as comma-separated values.
 
@@ -104,7 +105,7 @@ class Out(marcel.core.Op):
         self.pickle = False
         self.format = None
         self.output = None
-        self.formatter = None
+        self.writer = None
 
     def __repr__(self):
         buffer = []
@@ -127,16 +128,17 @@ class Out(marcel.core.Op):
         self.append = self.eval_function('append_arg', str)
         self.file = self.eval_function('file_arg', str)
         self.format = self.eval_function('format', str)
-        self.formatter = (PythonFormatter(self) if self.format else
-                          CSVFormatter(self) if self.csv else
-                          PickleFormatter(self) if self.pickle else
-                          DefaultFormatter(self))
+        if self.append is None and self.file is None and self.pickle:
+            raise marcel.exception.KillCommandException(
+                'Must specify either --file or --append with --pickle.')
+        self.writer = (PythonWriter(self) if self.format else
+                       CSVWriter(self) if self.csv else
+                       PickleWriter(self) if self.pickle else
+                       DefaultWriter(self))
 
     def receive(self, x):
-        self.ensure_output_initialized()
         try:
-            out = self.formatter.format(x)
-            print(out, file=self.output, flush=True)
+            self.writer.receive(x)
         except marcel.exception.KillAndResumeException as e:
             self.non_fatal_error(input=x, message=str(e))
         except Exception as e:  # E.g. UnicodeEncodeError
@@ -145,39 +147,10 @@ class Out(marcel.core.Op):
             self.send(x)
 
     def receive_complete(self):
-        self.ensure_output_initialized()
-        if self.output != sys.stdout and self.output is not None:
-            self.output.close()
+        self.writer.receive_complete()
         self.send_complete()
 
     # For use by this class
-
-    def ensure_output_initialized(self):
-        if self.output is None:
-            self.output = (Out.open_file(self.append, 'a') if self.append else
-                           Out.open_file(self.file, 'w') if self.file else
-                           sys.stdout)
-
-    def render(self, x, full):
-        if x is None:
-            return None
-        elif isinstance(x, marcel.object.renderable.Renderable):
-            return (x.render_full(self.color_scheme())
-                    if full else
-                    x.render_compact())
-        else:
-            return str(x)
-
-    def color_scheme(self):
-        return (self.env().color_scheme()
-                if self.output == sys.__stdout__ else
-                None)
-
-    @staticmethod
-    def open_file(file, mode):
-        file = os.path.normpath(file)
-        file = pathlib.Path(file).expanduser()
-        return open(file, mode=mode)
 
     @staticmethod
     def ensure_quoted(x):
@@ -196,66 +169,101 @@ class Out(marcel.core.Op):
             return str(x)
 
 
-class Formatter:
+class Writer:
 
     def __init__(self, op):
         self.op = op
 
-    def format(self, x):
+    def receive(self, x):
+        assert False
+
+    def receive_complete(self):
         assert False
 
 
-class CSVFormatter(Formatter):
+class TextWriter(Writer):
 
     def __init__(self, op):
         super().__init__(op)
-        self.writer = csv.writer(self, delimiter=',', quotechar="'", quoting=csv.QUOTE_MINIMAL, lineterminator='')
+        if op.append or op.file:
+            path, mode = (op.append, 'a') if op.append else (op.file, 'w')
+            path = os.path.normpath(path)
+            path = pathlib.Path(path).expanduser()
+            self.output = open(path, mode=mode)
+        else:
+            self.output = sys.stdout
+
+    def receive_complete(self):
+        if self.output != sys.stdout:
+            self.output.close()
+
+    def write_line(self, x):
+        print(x, file=self.output, flush=True)
+
+
+class CSVWriter(TextWriter):
+
+    def __init__(self, op):
+        super().__init__(op)
+        self.writer = csv.writer(self,
+                                 delimiter=',',
+                                 quotechar="'",
+                                 quoting=csv.QUOTE_MINIMAL,
+                                 lineterminator='')
         self.row = None
 
-    def format(self, x):
+    def receive(self, x):
         self.writer.writerow(x)
-        return self.row
+        self.write_line(self.row)
 
     def write(self, x):
         self.row = x
 
 
-class PickleFormatter(Formatter):
+class PythonWriter(TextWriter):
 
     def __init__(self, op):
         super().__init__(op)
+        self.format = op.format
 
-    def format(self, x):
-        pass
-
-
-class PythonFormatter(Formatter):
-
-    def __init__(self, op):
-        super().__init__(op)
-
-    def format(self, x):
-        return self.op.format.format(*x)
+    def receive(self, x):
+        self.write_line(self.format.format(*x))
 
 
-class DefaultFormatter(Formatter):
+class DefaultWriter(TextWriter):
 
     def __init__(self, op):
         super().__init__(op)
+        self.color_scheme = (op.env().color_scheme()
+                             if op.output == sys.__stdout__ else
+                             None)
 
-    def format(self, x):
+    def receive(self, x):
         t = type(x)
         if t in (list, tuple):
             if len(x) == 1:
                 out = x[0]
                 if isinstance(out, Renderable):
-                    out = out.render_full(self.op.color_scheme())
+                    out = out.render_full(self.color_scheme)
             else:
                 out = str(x)
         elif x is None:
             out = None
         else:
-            # TODO: I don't think we can get here.
             assert False, type(x)
-            out = str(x)
-        return out
+        self.write_line(out)
+        
+
+class PickleWriter(Writer):
+
+    def __init__(self, op):
+        super().__init__(op)
+        self.writer = (marcel.picklefile.PickleFile(op.append).writer(True)
+                       if op.append else
+                       marcel.picklefile.PickleFile(op.file).writer(False))
+
+    def receive(self, x):
+        self.writer.write(x)
+
+    def receive_complete(self):
+        self.writer.close()

@@ -96,6 +96,15 @@ def test_out():
     TEST.delete_file(output_filename)
     TEST.run('gen 3 | out ("{}")',
              expected_out=[0, 1, 2])
+    # Pickle output
+    TEST.run('gen 3 | out --pickle',
+             expected_err='Must specify either --file or --append with --pickle')
+    TEST.run(test='gen 3 | (x: [x] * x) | out --file /tmp/pickle.txt --pickle',
+             verification='read --pickle /tmp/pickle.txt',
+             expected_out=[[], 1, [2, 2]])
+    TEST.run(test='gen 3 3 | (x: [x] * x) | out --append /tmp/pickle.txt --pickle',
+             verification='read --pickle /tmp/pickle.txt',
+             expected_out=[[], 1, [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5, 5, 5]])
 
 
 def test_sort():
@@ -951,6 +960,7 @@ def test_read():
              expected_out=['1,2.3,ab', '2,3.4,xy', '3,4.5,"m,n"',
                            '1\t2.3\tab', '2\t3.4\txy',
                            'hello,world', 'goodbye'])
+    # --pickle testing is done in test_out()
 
 
 def test_intersect():

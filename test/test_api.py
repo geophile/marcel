@@ -86,6 +86,15 @@ def test_out():
     TEST.delete_file(output_filename)
     TEST.run(test=lambda: run(gen(3) | out(format=lambda: '{}')),
              expected_out=[0, 1, 2])
+    # Pickle output
+    TEST.run(test=lambda: run(gen(3) | out(pickle=True)),
+             expected_err='Must specify either --file or --append with --pickle')
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: [x] * x) | out(file='/tmp/pickle.txt', pickle=True)),
+             verification=lambda: run(read('/tmp/pickle.txt', pickle=True)),
+             expected_out=[[], 1, [2, 2]])
+    TEST.run(test=lambda: run(gen(3, 3) | map(lambda x: [x] * x) | out(append='/tmp/pickle.txt', pickle=True)),
+             verification=lambda: run(read('/tmp/pickle.txt', pickle=True)),
+             expected_out=[[], 1, [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5, 5, 5]])
 
 
 def test_sort():

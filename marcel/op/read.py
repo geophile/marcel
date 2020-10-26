@@ -18,6 +18,7 @@ import pathlib
 
 import marcel.object.file
 import marcel.op.filenamesop
+import marcel.picklefile
 import marcel.util
 
 File = marcel.object.file.File
@@ -29,6 +30,8 @@ HELP = '''
 {L,indent=4:28}{r:-c}, {r:--csv}               Parse CSV-formatted lines with comma separator.
 
 {L,indent=4:28}{r:-t}, {r:--tsv}               Parse CSV-formatted lines with tab separator.
+
+{L,indent=4:28}{r:-p}, {r:--pickle}            Parse pickle format
 
 {L,indent=4:28}{r:-l}, {r:--label}             Include the input {n:File} in the output.
 
@@ -47,11 +50,11 @@ parsed, and a tuple of fields is output. Similarly, if {r:--tsv} is specified, i
 lines are assumed to be in the CSV format with a tab separator.
 
 If {r:--label} is specified, then the input {n:File} is included in the output, in the first
-position of the output tuple. 
+position of each output tuple.
 '''
 
 
-def read(env, *paths, depth=None, recursive=False, csv=False, tsv=False, label=False):
+def read(env, *paths, depth=None, recursive=False, csv=False, tsv=False, pickle=False, label=False):
     args = []
     if depth == 0:
         args.append('-0')
@@ -63,6 +66,8 @@ def read(env, *paths, depth=None, recursive=False, csv=False, tsv=False, label=F
         args.append('--csv')
     if tsv:
         args.append('--tsv')
+    if pickle:
+        args.append('--pickle')
     if label:
         args.append('--label')
     args.extend(paths)
@@ -75,6 +80,7 @@ class ReadArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
         super().__init__('read', env)
         self.add_flag_no_value('csv', '-c', '--csv')
         self.add_flag_no_value('tsv', '-t', '--tsv')
+        self.add_flag_no_value('pickle', '-p', '--pickle')
         self.add_flag_no_value('label', '-l', '--label')
         self.at_most_one('csv', 'tsv')
         self.validate()
@@ -86,9 +92,9 @@ class Read(marcel.op.filenamesop.FilenamesOp):
         super().__init__(env, Read.read_file)
         self.csv = None
         self.tsv = None
+        self.pickle = None
         self.label = None
-        self.csv_input = None
-        self.csv_reader = None
+        self.reader = None
 
     def __repr__(self):
         options = []
@@ -98,6 +104,8 @@ class Read(marcel.op.filenamesop.FilenamesOp):
             options.append('csv')
         if self.tsv:
             options.append('tsv')
+        if self.pickle:
+            options.append('pickle')
         return f'read({",".join(options)})'
 
     # AbstractOp
@@ -105,9 +113,10 @@ class Read(marcel.op.filenamesop.FilenamesOp):
     def setup(self):
         self.file = True
         super().setup()
-        if self.csv or self.tsv:
-            self.csv_input = InputIterator(self)
-            self.csv_reader = csv.reader(self.csv_input, delimiter=(',' if self.csv else '\t'))
+        self.reader = ()
+        self.reader = (CSVReader(self) if self.csv or self.tsv else
+                       PickleReader(self) if self.pickle else
+                       TextReader(self))
 
     # Op
 
@@ -127,23 +136,67 @@ class Read(marcel.op.filenamesop.FilenamesOp):
     @staticmethod
     def read_file(op, path):
         assert isinstance(path, pathlib.Path), f'({type(path)}) {path}'
-        label = [path] if op.label else None
+        op.reader.read_file(op, path, [path] if op.label else None)
+
+
+class Reader:
+    
+    def __init__(self, op):
+        self.op = op
+        
+    def read_file(self, op, path, label):
+        assert False
+
+
+class TextReader(Reader):
+
+    def __init__(self, op):
+        super().__init__(op)
+
+    def read_file(self, op, path, label):
         with open(path, 'r') as input:
             try:
-                if op.csv_reader:
+                line = input.readline()
+                while len(line) > 0:
+                    line = line.rstrip('\r\n')
+                    op.send(label + [line] if label else line)
                     line = input.readline()
-                    while len(line) > 0:
-                        line = line.rstrip('\r\n')
-                        op.csv_input.set(line)
-                        out = next(op.csv_reader)
-                        op.send(label + out if label else out)
-                        line = input.readline()
-                else:
+            except StopIteration:
+                pass
+
+
+class PickleReader(Reader):
+
+    def __init__(self, op):
+        super().__init__(op)
+
+    def read_file(self, op, path, label):
+        with marcel.picklefile.PickleFile(path).reader() as input:
+            try:
+                while True:
+                    x = input.read()
+                    op.send((label, x) if label else x)
+            except EOFError:
+                pass
+
+
+class CSVReader(Reader):
+    
+    def __init__(self, op):
+        super().__init__(op)
+        self.input = InputIterator(self)
+        self.reader = csv.reader(self.input, delimiter=(',' if op.csv else '\t'))
+
+    def read_file(self, op, path, label):
+        with open(path, 'r') as input:
+            try:
+                line = input.readline()
+                while len(line) > 0:
+                    line = line.rstrip('\r\n')
+                    self.input.set_current(line)
+                    out = next(self.reader)
+                    op.send(label + out if label else out)
                     line = input.readline()
-                    while len(line) > 0:
-                        line = line.rstrip('\r\n')
-                        op.send(label + [line] if label else line)
-                        line = input.readline()
             except StopIteration:
                 pass
 
@@ -165,5 +218,5 @@ class InputIterator:
         else:
             raise StopIteration()
 
-    def set(self, x):
+    def set_current(self, x):
         self.current = x

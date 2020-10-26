@@ -35,6 +35,13 @@ class PickleFile:
     def __iter__(self):
         return self.reader()
 
+    def __enter__(self):
+        return self.reader()
+
+    def __exit__(self):
+        self.close()
+        return self
+
     def reader(self):
         reader = Reader(self)
         self.readers[id(self)] = reader
@@ -93,6 +100,12 @@ class Reader(Access):
         except:
             self.close()
             raise
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
 
     def read(self):
         return dill.load(self.file)
