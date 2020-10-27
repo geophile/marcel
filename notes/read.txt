@@ -135,3 +135,66 @@ Implementation
 
 10/26/20
 
+- out and read now have --pickle options.
+
+- We want > to work for vars and files. But what format for each?
+
+    - pickle format is better for vars
+    
+    - Text is better for files, due to expectations. At least if the output is all strings.
+
+What should the rules be?
+
+Crush just does binary reading/writing, and then requires "filters"
+(not sure if that's their term) for specifying conversion, even for
+text. But that will get really tedious.
+
+......................................................................
+
+Save pickled to var:
+
+     ls ... > var
+
+Save pickled to file:
+
+     ls ... > ./file
+
+Save text to file:
+
+     ls ... | format --text > ./file
+
+  but this just pickles the text.
+
+Read text
+
+    ./file > parse --text | ...
+
+......................................................................
+
+If files are raw bits:
+
+Save pickled to var:
+
+    ls ... | pickle > var
+
+Save pickled to file:
+
+    ls ... | pickle > ./file
+
+Save text to file:
+
+    ls ... | format --text > ./file
+
+Read text:
+
+    ./file > parse --text | ...
+
+......................................................................
+
+Possible design:
+
+- Always use pickle format for store, e.g. ls > var, ls > ./file.
+
+- Use out op with format specification for file, stdout. 
+
+Basically, what we have now, but with load/store handling files.

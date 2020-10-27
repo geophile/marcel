@@ -102,7 +102,7 @@ class Env(marcel.core.Op):
     def receive(self, _):
         builtin_symbols = self.env().builtin_symbols
         config_symbols = self.env().config_symbols
-        for key, value in sorted(self.env().namespace.items()):
+        for key, value in sorted(self.env().vars().items()):
             if key not in Env.OMITTED:
                 key_builtin = key in builtin_symbols
                 key_config = key in config_symbols

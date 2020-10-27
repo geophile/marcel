@@ -610,7 +610,7 @@ def test_sql():
     # TODO: sql types
 
 
-def test_load_store():
+def test_store_load():
     # Load
     x = reservoir('x')
     TEST.run(test=lambda: run(gen(3, 1) | map(lambda x: x * 10) | store(x)),
@@ -618,7 +618,7 @@ def test_load_store():
              expected_out=[10, 20, 30])
     a = None
     TEST.run(test=lambda: run(load(a)),
-             expected_err='Reservoir is undefined')
+             expected_err='is not a Reservoir')
     j = 123
     TEST.run(test=lambda: run(load(j)),
              expected_err='is not a Reservoir')
@@ -634,6 +634,11 @@ def test_load_store():
     i = 123
     TEST.run(test=lambda: run(gen(3) | store(i)),
              expected_err='not usable as a reservoir')
+    # Files
+    os.system('rm -rf /tmp/storeload.test')
+    TEST.run(test=lambda: run(gen(3) | store('/tmp/storeload.test')),
+             verification=lambda: run(load('/tmp/storeload.test')),
+             expected_out=[0, 1, 2])
 
 
 def test_if():
@@ -973,7 +978,7 @@ def main_stable():
     test_join()
     test_pipeline_args()
     test_sql()
-    test_load_store()
+    test_store_load()
     test_if()
     test_read()
     test_intersect()

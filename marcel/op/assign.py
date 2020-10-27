@@ -34,6 +34,7 @@ class Assign(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
+        assert self.var is not None
         count = 0
         if self.string is not None:
             assert type(self.string) is str, type(self.string)

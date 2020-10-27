@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import pathlib
 
 import marcel.core
 import marcel.exception
@@ -213,10 +214,17 @@ class ArgsParser:
         raise marcel.argsparser.ArgsError(self.op_name,
                                           f'{arg.name} argument must be a Pipeline: {x}')
 
-    def init_reservoir(self, arg, x):
-        if not self.current_op.api:
+    def init_target(self, arg, x):
+        if x.isidentifier():
+            # Target is an environment variable
             if self.env.getvar(x) is None:
                 self.env.setvar(x, marcel.reservoir.Reservoir(x))
+        else:
+            # Target is a filename. Create it if it doesn't exist.
+            path = pathlib.Path(x)
+            if not path.exists():
+                # It could exist if it is created between path.exists() and path.touch(). In that case, bail out.
+                path.touch(exist_ok=False)
         return x
 
     # An ArgsParser subclass uses this function as the value of convert, to validate

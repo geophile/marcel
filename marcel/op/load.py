@@ -13,21 +13,28 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import pathlib
+
 import marcel.argsparser
 import marcel.core
 import marcel.exception
+import marcel.picklefile
 import marcel.reservoir
 
 
 HELP = '''
-{L,wrap=F}load VAR
-{L,wrap=F}VAR >
+{L,wrap=F}load TARGET
+{L,wrap=F}TARGET >
 
-{L,indent=4:28}{r:VAR}                     The variable containing data to be loaded.
+{L,indent=4:28}{r:TARGET}                     An environment variable or file.
 
-Write the conents of {r:VAR} to the output stream.
+Write the contents of {r:TARGET} to the output stream.
 
-There is special optional syntax for the {r:load} operator: {r:load VAR} can be written as {r:VAR >}. 
+A {r:TARGET} is either an environment variable
+or a file. A variable is indicated by a Python identifier, and any other string identifies a file.
+(So {n:abc} is an identifier, while {n:./abc} is a file in the current directory.) 
+
+There is special optional syntax for the {r:load} operator: {r:load TARGET} can be written as {r:TARGET >}. 
 With this alternative syntax, the {r:>} acts as a pipe ({r:|}). So, for example, the following command:
 
 {L,wrap=F}load foobar | map (x, y: (y, x))  
@@ -36,7 +43,7 @@ is equivalent to:
 
 {L,wrap=F}foobar > map (x, y: (y, x))
 
-{r:foobar >} is valid at the end of a pipeline since it produces a stream of tuples, just like
+{r:foobar >} is valid at the beginning of a pipeline since it produces a stream of tuples, just like
 any other pipeline. So, for example the command line {r:foobar >} prints the contents of foobar,
 (since the {r:out} operator is applied at the end of a top-level pipeline if not explicitly provided).
 
@@ -49,17 +56,22 @@ input to {r:join} comes from loading {r:def}.
 '''
 
 
-def load(env, reservoir):
+def load(env, target):
     load = Load(env)
-    load.reservoir = reservoir
-    return load, [None]
+    if type(target) is marcel.reservoir.Reservoir:
+        args = [target.name]
+    elif type(target) is str:
+        args = [target]
+    else:
+        raise marcel.exception.KillCommandException(f'{target} is not a Reservoir.')
+    return load, args
 
 
 class LoadArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('load', env)
-        self.add_anon('var')
+        self.add_anon('target')
         self.validate()
 
 
@@ -67,33 +79,39 @@ class Load(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.var = None
-        self.reservoir = None
+        self.target = None
+        self.picklefile = None
         self.reader = None
 
     def __repr__(self):
-        return f'load({self.var})'
+        return f'load({self.target})'
 
     # AbstractOp
 
     def setup(self):
-        if self.var is not None:
-            # Interactive: var is set, accumulator is None
-            if not self.var.isidentifier():
-                raise marcel.exception.KillCommandException(f'{self.var} is not a valid identifier')
-            self.reservoir = self.getvar(self.var)
-            if self.reservoir is None:
-                raise marcel.exception.KillCommandException(f'Variable {self.var} is undefined.')
-            if type(self.reservoir) is not marcel.reservoir.Reservoir:
-                raise marcel.exception.KillCommandException(f'Variable {self.var} is not a Reservoir.')
+        if type(self.target) is marcel.reservoir.Reservoir:
+            # API
+            self.picklefile = self.target
+        elif type(self.target) is str:
+            # API: string is a filename.
+            # Interactive: string is a filename or environment variable name.
+            if self.target.isidentifier():
+                self.picklefile = self.getvar(self.target)
+                if self.picklefile is None:
+                    raise marcel.exception.KillCommandException(f'Variable {self.target} is undefined.')
+                if type(self.picklefile) is not marcel.reservoir.Reservoir:
+                    raise marcel.exception.KillCommandException(f'Variable {self.target} is not a Reservoir.')
+                self.env().mark_possibly_changed(self.target)
+            else:
+                if pathlib.Path(self.target).exists():
+                    self.picklefile = marcel.picklefile.PickleFile(self.target)
+                else:
+                    raise marcel.exception.KillCommandException(f'{self.target} does not exist.')
+        elif self.target is not None:
+            raise marcel.exception.KillCommandException(f'Reservoir is undefined.')
         else:
-            # API: var is None, accumulator is set
-            if self.reservoir is None:
-                raise marcel.exception.KillCommandException(f'Reservoir is undefined.')
-            if type(self.reservoir) is not marcel.reservoir.Reservoir:
-                raise marcel.exception.KillCommandException(f'{self.reservoir} is not a Reservoir.')
-        self.env().mark_possibly_changed(self.var)
-        self.reader = iter(self.reservoir)
+            raise marcel.exception.KillCommandException(f'{self.picklefile} is not a Reservoir.')
+        self.reader = iter(self.picklefile)
 
     def receive(self, _):
         try:

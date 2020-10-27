@@ -165,7 +165,6 @@ class ArgsInteractive(ArgsImpl):
             map[param] = self.args[a]
             a += 1
         self.args.clear()
-        import sys
         marcel.core.Command(env, None, self.pipeline).execute()
 
 

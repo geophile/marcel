@@ -16,22 +16,30 @@
 import marcel.argsparser
 import marcel.core
 import marcel.exception
+import marcel.picklefile
 import marcel.reservoir
 
 HELP = '''
-{L,wrap=F}store [-a|--append] VAR
-{L,wrap=F}> VAR
-{L,wrap=F}>> VAR
+{L,wrap=F}store [-a|--append] TARGET
+{L,wrap=F}> TARGET
+{L,wrap=F}>> TARGET
 
-{L,indent=4:28}{r:-a}, {r:--append}            Append to {r:VAR}s list, instead of replacing.
+{L,indent=4:28}{r:-a}, {r:--append}            Append to {r:TARGET}s list, instead of replacing.
 
-{L,indent=4:28}{r:VAR}                     The variable to be updated.
+{L,indent=4:28}{r:TARGET}                  An environment variable or a file.
 
-Write the incoming tuples into a list bound to {r:VAR}. By default, the current value of {r:VAR}
-is replaced. If {r:--append} is specified, then it is expected that the current value
-of {r:VAR} is a list, and the incoming tuples are appended. 
+Write the incoming tuples to the {r:TARGET}. 
 
-There is special optional syntax for the {r:store} operator: {r:store VAR} can be written as {r:> VAR}. 
+A {r:TARGET} is either an environment variable
+or a file. A variable is indicated by a Python identifier, and any other string identifies a file.
+(So {n:abc} is an identifier, while {n:./abc} is a file in the current directory.) 
+
+By default, the current value of {r:TARGET} is replaced. 
+If {r:--append} is specified, then the incoming tuples are appended. (And,
+in case the {r:TARGET} is an environment variable, that the variable's value must have previously
+been assigned tuples from a stream.)
+
+There is special syntax for the {r:store} operator: {r:store TARGET} can be written as {r:> TARGET}. 
 With this alternative syntax, the {r:>} acts as a pipe ({r:|}). So, for example, the following command:
 
 {L,wrap=F}gen 5 | store x
@@ -40,26 +48,23 @@ stores the stream carrying {r:0, 1, 2, 3, 4} in variable {r:x}. This can also be
 
 {L,wrap=F}gen 5 > x
 
-The symbol {r:>>} is used to append to the contents of the variable, instead of
+The symbol {r:>>} is used to append to the contents of the {r:TARGET}, instead of
 replacing the value, e.g. {r:gen 5 >> x}. 
 '''
 
 
-def raise_not_a_reservoir(reservoir_description, type):
-    raise marcel.exception.KillCommandException(
-        f'{reservoir_description} is not usable as a reservoir, it stores a value of type {type}.')
-
-
-def store(env, reservoir, append=False):
+def store(env, target, append=False):
     store = Store(env)
-    store.api = True
-    store.reservoir = reservoir
     args = []
     if append:
         args.append('--append')
-    if type(reservoir) is not marcel.reservoir.Reservoir:
-        raise_not_a_reservoir(str(reservoir), type(reservoir))
-    args.append(reservoir.name)
+    if type(target) is marcel.reservoir.Reservoir:
+        args.append(target.name)
+    elif type(target) is str:
+        args.append(target)
+    else:
+        raise marcel.exception.KillCommandException(
+            f'{target} is not usable as a reservoir, it stores a value of type {type(target)}.')
     return store, args
 
 
@@ -68,11 +73,11 @@ class StoreArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('store', env)
         self.add_flag_no_value('append', '-a', '--append')
-        # init_reservoir actually creates the Reservoir if it doesn't exist. This would normally be done by
-        # setup. However, for commands that don't terminate for a while, (e.g. ls / > x), we want the
-        # variable available immediately. This allows the long-running command to be run in background,
+        # init_target actually creates the target file or reservoir if it doesn't exist. This would 
+        # normally be done by setup. However, for commands that don't terminate for a while, (e.g. ls -r / > x),
+        # we want the variable available immediately. This allows the long-running command to be run in background,
         # monitoring progress, e.g. x > tail 5.
-        self.add_anon('var', convert=self.init_reservoir)
+        self.add_anon('target', convert=self.init_target)
         self.validate()
 
 
@@ -80,23 +85,37 @@ class Store(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.var = None
+        self.target = None
         self.append = None
-        self.reservoir = None
+        self.picklefile = None
         self.writer = None
-        self.api = False
 
     def __repr__(self):
-        return f'store({self.var}, append)' if self.append else f'store({self.var})'
+        return f'store({self.target}, append)' if self.append else f'store({self.target})'
 
     # AbstractOp
 
     def setup(self):
-        if self.api:
-            self.setup_api()
+        if type(self.target) is marcel.reservoir.Reservoir:
+            # API
+            self.picklefile = self.target
+        elif type(self.target) is str:
+            # API: string is a filename.
+            # Interactive: string is a filename or environment variable name.
+            if self.target.isidentifier():
+                self.picklefile = self.getvar(self.target)
+                if self.append and type(self.picklefile) is not marcel.reservoir.Reservoir:
+                    raise marcel.exception.KillCommandException(
+                        f'{self.target} is not usable as a reservoir, it stores a value of type {type(self.picklefile)}.')
+                self.env().mark_possibly_changed(self.target)
+            else:
+                self.picklefile = marcel.picklefile.PickleFile(self.target)
+        elif self.target is None:
+            raise marcel.exception.KillCommandException(f'Reservoir is undefined.')
         else:
-            self.setup_interactive()
-        self.env().mark_possibly_changed(self.var)
+            raise marcel.exception.KillCommandException(
+                f'{self.target} is not usable as a reservoir, it stores a value of type {type(self.picklefile)}.')
+        self.writer = self.picklefile.writer(self.append)
 
     def receive(self, x):
         try:
@@ -109,27 +128,4 @@ class Store(marcel.core.Op):
         self.writer.close()
         self.send_complete()
 
-    # For use by this class
-
-    def setup_interactive(self):
-        if not self.var.isidentifier():
-            raise marcel.exception.KillCommandException(f'{self.var} is not a valid identifier')
-        self.reservoir = self.getvar(self.var)
-        assert self.reservoir is not None  # See comment on StoreArgsParser.
-        self.prepare_reservoir(self.env())
-
-    def setup_api(self):
-        if self.reservoir is None:
-            raise marcel.exception.KillCommandException(f'Reservoir is undefined.')
-        if type(self.reservoir) is not marcel.reservoir.Reservoir:
-            raise_not_a_reservoir(self.description(), type(self.reservoir))
-        self.prepare_reservoir(None)
-
-    def description(self):
-        return self.var if self.var else 'store\'s variable'
-
-    def prepare_reservoir(self, env):
-        if self.append and type(self.reservoir) is not marcel.reservoir.Reservoir:
-            raise_not_a_reservoir(self.description(), type(self.reservoir))
-        self.writer = self.reservoir.writer(self.append)
 

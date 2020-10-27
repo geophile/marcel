@@ -400,3 +400,10 @@ M-0.11.3 jao@cheese:~$
 127. API env missing symbols
 
 E.g. USER, HOME.
+
+----------------------------------------------------------------------
+
+128. Tab completion vs. syntactic sugar
+
+For "var > ..." or "./file > ...", tab completion doesn't work. Tab
+completion for first symbol expects executable.

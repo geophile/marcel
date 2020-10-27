@@ -702,6 +702,11 @@ def test_store_load():
     TEST.run(test='gen 3 200 | store -a x',
              verification='load x',
              expected_err='not a Reservoir')
+    # Files
+    os.system('rm -rf /tmp/storeload.test')
+    TEST.run(test='gen 3 | store /tmp/storeload.test',
+             verification='load /tmp/storeload.test',
+             expected_out=[0, 1, 2])
 
 
 def test_store_load_sugar():

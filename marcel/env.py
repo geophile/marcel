@@ -209,6 +209,7 @@ class Environment:
         return var in self.namespace
 
     def getvar(self, var):
+        assert var is not None
         try:
             value = self.namespace[var]
             self.modified_vars.add(var)
@@ -217,6 +218,7 @@ class Environment:
         return value
 
     def setvar(self, var, value):
+        assert var is not None
         current_value = self.namespace.get(var, None)
         if type(current_value) is marcel.reservoir.Reservoir:
             current_value.ensure_deleted()
@@ -224,6 +226,7 @@ class Environment:
         self.modified_vars.add(var)
 
     def delvar(self, var):
+        assert var is not None
         value = self.namespace.pop(var, None)
         if type(value) is marcel.reservoir.Reservoir:
             value.ensure_deleted()
