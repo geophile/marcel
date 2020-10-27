@@ -241,7 +241,7 @@ class DefaultWriter(TextWriter):
     def __init__(self, op):
         super().__init__(op)
         self.color_scheme = (op.env().color_scheme()
-                             if op.output == sys.__stdout__ else
+                             if self.output == sys.__stdout__ else
                              None)
 
     def receive(self, x):
