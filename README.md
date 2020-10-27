@@ -1,7 +1,7 @@
 What's New
 ----------
 
-Streams can now be stored to and loaded from myfiles, as well as environment variables.
+Streams can now be stored to and loaded from files, as well as environment variables.
 For example, to store the stream resulting from ls in variable `myfiles`:
 
 ```shell script
