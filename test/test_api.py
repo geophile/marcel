@@ -441,21 +441,6 @@ def test_bash():
              expected_out=['hello  world'])
 
 
-def test_fork():
-    TEST.run(lambda: run(fork(1, gen(3, 100))),
-             expected_out=[(0, 100), (0, 101), (0, 102)])
-    TEST.run(lambda: run(fork(3, gen(3, 100)) | sort()),
-             expected_out=[(0, 100), (0, 101), (0, 102),
-                           (1, 100), (1, 101), (1, 102),
-                           (2, 100), (2, 101), (2, 102)])
-    # Bug 40
-    TEST.run(lambda: run(fork('notacluster', gen(5))),
-             expected_err='Invalid fork specification')
-    # Function-valued args
-    TEST.run(lambda: run(fork(lambda: 1, gen(lambda: 3, 100))),
-             expected_out=[(0, 100), (0, 101), (0, 102)])
-
-
 def test_namespace():
     config_file = '/tmp/.marcel.py'
     config_path = pathlib.Path(config_file)
@@ -501,6 +486,9 @@ def test_remote():
              expected_out=[(localhost, 3)])
     TEST.run(lambda: run(fork('jao', gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
+    # Bug 121
+    TEST.run(test=lambda: run(fork('notacluster', gen(3))),
+             expected_err='There is no cluster named')
 
 
 def test_sudo():
@@ -969,7 +957,6 @@ def main_stable():
     test_unique()
     test_window()
     test_bash()
-    # test_fork()
     # test_namespace()
     test_remote()
     test_sudo()

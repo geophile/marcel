@@ -449,21 +449,6 @@ def test_bash():
              expected_out=['hello  world'])
 
 
-def test_fork():
-    TEST.run('@1 [ gen 3 100 ]',
-             expected_out=[(0, 100), (0, 101), (0, 102)])
-    TEST.run('@3 [ gen 3 100 ] | sort',
-             expected_out=[(0, 100), (0, 101), (0, 102),
-                           (1, 100), (1, 101), (1, 102),
-                           (2, 100), (2, 101), (2, 102)])
-    # Bug 40
-    TEST.run(test='@notacluster [ gen 5 ]',
-             expected_err='Invalid fork specification')
-    # Function-valued args
-    TEST.run('@(1) [ gen (3) 100 ]',
-             expected_out=[(0, 100), (0, 101), (0, 102)])
-
-
 def test_namespace():
     config_file = '/tmp/.marcel.py'
     config_path = pathlib.Path(config_file)
@@ -506,7 +491,9 @@ def test_remote():
     # Implied map
     TEST.run('@jao[(419)]',
              expected_out=[(localhost, 419)])
-
+    # Bug 121
+    TEST.run('@notacluster [ gen 3]',
+             expected_err='There is no cluster named')
 
 def test_sudo():
     TEST.run(test='sudo [ gen 3 ]',
@@ -1164,6 +1151,7 @@ def test_bug_126():
              expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
 
 
+# For bugs that aren't specific to a single op.
 def test_bugs():
     test_bug_126()
 
@@ -1184,7 +1172,6 @@ def main_stable():
     test_unique()
     test_window()
     test_bash()
-    # # test_fork()
     test_namespace()
     test_remote()
     test_sudo()

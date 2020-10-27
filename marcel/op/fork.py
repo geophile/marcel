@@ -14,12 +14,12 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import multiprocessing as mp
-import os
 
 import dill
 
 import marcel.argsparser
 import marcel.core
+import marcel.exception
 import marcel.opmodule
 import marcel.op.labelthread
 
@@ -56,6 +56,8 @@ class Fork(marcel.core.Op):
 
     def setup(self):
         self.cluster = self.env().cluster(self.cluster_name)
+        if self.cluster is None:
+            raise marcel.exception.KillCommandException(f'There is no cluster named {self.cluster_name}')
         self.workers = []
         for host in self.cluster.hosts:
             self.workers.append(ForkWorker(host, self))
