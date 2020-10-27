@@ -148,7 +148,6 @@ class Out(marcel.core.Op):
 
     def receive_complete(self):
         self.writer.receive_complete()
-        self.send_complete()
 
     # For use by this class
 
@@ -196,6 +195,7 @@ class TextWriter(Writer):
     def receive_complete(self):
         if self.output != sys.stdout:
             self.output.close()
+        self.op.send_complete()
 
     def write_line(self, x):
         print(x, file=self.output, flush=True)
@@ -216,6 +216,9 @@ class CSVWriter(TextWriter):
         self.writer.writerow(x)
         self.write_line(self.row)
 
+    def receive_complete(self):
+        self.op.send_complete()
+
     def write(self, x):
         self.row = x
 
@@ -228,6 +231,9 @@ class PythonWriter(TextWriter):
 
     def receive(self, x):
         self.write_line(self.format.format(*x))
+
+    def receive_complete(self):
+        self.op.send_complete()
 
 
 class DefaultWriter(TextWriter):
@@ -252,7 +258,10 @@ class DefaultWriter(TextWriter):
         else:
             assert False, type(x)
         self.write_line(out)
-        
+
+    def receive_complete(self):
+        self.op.send_complete()
+
 
 class PickleWriter(Writer):
 
@@ -267,3 +276,4 @@ class PickleWriter(Writer):
 
     def receive_complete(self):
         self.writer.close()
+        self.op.send_complete()

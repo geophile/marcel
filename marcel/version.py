@@ -13,4 +13,4 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-VERSION = '0.11.3'
+VERSION = '0.11.4'

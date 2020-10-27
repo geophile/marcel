@@ -1157,6 +1157,17 @@ def test_env():
              expected_out=[29])
 
 
+def test_bug_126():
+    TEST.run('fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]')
+    TEST.run(test='fact (5) > f',
+             verification='f >',
+             expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
+
+
+def test_bugs():
+    test_bug_126()
+
+
 def main_stable():
     test_no_such_op()
     test_gen()
@@ -1194,6 +1205,7 @@ def main_stable():
     test_difference()
     test_args()
     # test_env()
+    test_bugs()
 
 
 def main_dev():

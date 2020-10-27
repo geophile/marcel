@@ -59,16 +59,13 @@ class RunPipeline(marcel.core.Op):
     # Op
 
     def receive(self, x):
-        pipeline_args = self.pipeline_args()
-        if pipeline_args:
-            self.env().vars().push_scope(pipeline_args)
+        self.env().vars().push_scope(self.pipeline_args())
         try:
             self.pipeline.setup()
             self.pipeline.set_env(self.env())
             self.pipeline.receive(x)
         finally:
-            if pipeline_args:
-                self.env().vars().pop_scope()
+            self.env().vars().pop_scope()
 
     def receive_complete(self):
         self.pipeline.receive_complete()

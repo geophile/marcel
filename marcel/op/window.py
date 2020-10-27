@@ -176,7 +176,6 @@ class Window(marcel.core.Op):
     def receive_complete(self):
         if self.window_generator is not None:
             self.window_generator.receive_complete()
-        self.send_complete()
 
 
 class WindowBase:
@@ -209,6 +208,7 @@ class PredicateWindow(WindowBase):
 
     def receive_complete(self):
         self.flush()
+        self.op.send_complete()
 
 
 class OverlapWindow(WindowBase):
@@ -233,6 +233,7 @@ class OverlapWindow(WindowBase):
             self.window = self.window[1:]
             self.window.append(padding)
             self.op.send(self.window)
+        self.op.send_complete()
 
 
 class DisjointWindow(WindowBase):
@@ -251,4 +252,5 @@ class DisjointWindow(WindowBase):
             while len(self.window) < self.op.n:
                 self.window.append(padding)
             self.flush()
+        self.op.send_complete()
 

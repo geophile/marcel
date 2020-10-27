@@ -165,7 +165,6 @@ class Red(marcel.core.Op):
 
     def receive_complete(self):
         self.reducer.receive_complete()
-        self.send_complete()
 
 
 class Reducer:

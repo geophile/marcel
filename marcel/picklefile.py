@@ -83,6 +83,7 @@ class Access:
 
     def close_file(self):
         self.file.close()
+        self.file = None
 
 
 class Reader(Access):
@@ -118,9 +119,11 @@ class Writer(Access):
         self.file = open(owner.path, 'a+b' if append else 'w+b')
 
     def flush(self):
+        assert self.file is not None
         self.file.flush()
 
     def write(self, x):
+        assert self.file is not None
         try:
             dill.dump(x, self.file)
         except:
