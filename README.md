@@ -1,26 +1,40 @@
 What's New
 ----------
 
-The core of marcel has been overhauled in this release. The old implementation was reyling
-too much on copying pipelines by pickling. This was slow because pickling is slow.
-It was also slow because the deep copying of namespaces and functions is very tricky
-to get right, due to cycles, (e.g. the marcel namespace contains a pipeline which contains 
-a function, whose globals is the marcel namespace). This was exacerbated by what
-I think was a bug in dill in which cycles like this were not handled correctly. In
-any case, part of the trickiness here involved the cycles resulting in more and more
-"expansion", in which a deep copy of x is made instead of sharing x (either through
-my bugs or the possible dill bug). This flaky copying/sharing was also the source
-of bugs when a function's globals were not quite in sync with the marcel namespace.
+Streams can now be stored to and loaded from myfiles, as well as environment variables.
+For example, to store the stream resulting from ls in variable `myfiles`:
 
-So all that is gone. Pipeline copying is greatly reduced, due to a simple change
-in the Pipeline and Op data structures. There is still a Pipeline.copy() function,
-but it does not rely on pickling. Pickling is only used when data needs to cross
-process boundaries, (jobs, remote execution). Function globals are kept in sync with
-the marcel namespace far more reliably now.
+```shell script
+ls > myfiles
+```
 
-So there aren't any visible changes, except: 1) things should generally be running
-faster due to far less use of pickling; and 2) subtle bugs due caused by the
-older code, e.g. bug 116.
+`myfiles` is now a variable in the environment. The command `env -s` shows this:
+
+```shell script
+('myfiles', Reservoir(/tmp/tmpojj8jfv1))
+```
+
+The contents of `myfiles` can be loaded into a stream like this:
+
+```shell script
+myfiles > ...
+``` 
+
+To store in a file instead:
+
+```shell script
+ls > /tmp/myfiles
+```
+
+Now, `/tmp/myfiles` exists and stores the stream, pickled. It can be loaded back
+into marcel too:
+
+```shell script
+/tmp/myfiles > ...
+```
+
+As in other shells, environment variables last for the duration of your session,
+while files exist until you delete them. 
 
 Marcel
 ======
