@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import time
 
 import dill
 
@@ -23,6 +24,8 @@ class PickleFile:
     def __init__(self, path):
         self.path = path
         self.readers = {}  # id(PickleFile) -> Reader
+        # There should never be more than one writer. A map is a convenient way to record the writer's id and
+        # the writer object.
         self.writers = {}  # id(PickleFile) -> Writer
 
     def __repr__(self):
@@ -43,11 +46,13 @@ class PickleFile:
         return self
 
     def reader(self):
+        assert len(self.writers) == 0, self
         reader = Reader(self)
         self.readers[id(self)] = reader
         return reader
 
     def writer(self, append):
+        assert len(self.readers) == 0 and len(self.writers) == 0, self
         writer = Writer(self, append)
         self.writers[id(self)] = writer
         return writer
@@ -114,9 +119,12 @@ class Reader(Access):
 
 class Writer(Access):
 
+    FLUSH_INTERVAL_SEC = 1.0
+
     def __init__(self, owner, append):
         super().__init__(owner)
         self.file = open(owner.path, 'a+b' if append else 'w+b')
+        self.last_flush = time.time()
 
     def flush(self):
         assert self.file is not None
@@ -126,6 +134,10 @@ class Writer(Access):
         assert self.file is not None
         try:
             dill.dump(x, self.file)
+            now = time.time()
+            if now - self.last_flush > Writer.FLUSH_INTERVAL_SEC:
+                self.flush()
+                self.last_flush = now
         except:
             self.close()
             raise

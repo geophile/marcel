@@ -1875,6 +1875,24 @@ Currently, the reservoir's file name is transmitted, which won't work
 
 FIXED
 
+115. store op should flush occasionally
+
+E.g., in situations like this:
+
+      timer 1 > x
+
+Could flush after each dill.dump(). Is that guaranteed to produce a
+readable result? That could get expensive. Flush periodically? How
+would this be specified/controlled?
+
+Flushing isn't the entire problem. x doesn't show up in env until the
+pipeline finishes execution. Before execution, need to analyze
+pipeline for new variables.
+
+----------------------------------------------------------------------
+
+FIXED
+
 116. Why is this crashing?
 
 M-0.10.24 jao@cheese:~/git/marcel$ ls marcel test | out | args [d: ls -fr (d) | ext py | map (f: (f, f.read().count('\n'))) | sort (f, n: n) | tail 10]
@@ -2070,6 +2088,37 @@ Traceback (most recent call last):
 AttributeError: 'NoneType' object has no attribute 'color_scheme'
 M-0.11.0 jao@cheese:~/git/marcel$ 
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+120. cd into a non-directory crashes
+
+M-0.11.0 jao@cheese:~/git/geophile$ cd sjt
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/runpy.py", line 193, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.8/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 307, in <module>
+    MAIN.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 131, in run
+    self.run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 153, in run_command
+    command.execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 379, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/marcel/marcel/core.py", line 330, in receive
+    self.ops[0].receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 147, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/cd.py", line 59, in receive
+    self.env().dir_state().cd(self.directory)
+  File "/home/jao/git/marcel/marcel/env.py", line 108, in cd
+    os.chdir(new_dir)
+NotADirectoryError: [Errno 20] Not a directory: '/home/jao/git/geophile/sjt'
+jao@cheese:~/git/geophile$ ls
 
 ----------------------------------------------------------------------
 

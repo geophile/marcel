@@ -15,7 +15,6 @@
 
 import os
 import tempfile
-import time
 
 import marcel.picklefile
 
@@ -40,12 +39,4 @@ class Reservoir(marcel.picklefile.PickleFile):
     def __init__(self, name, path=None):
         super().__init__(tempfile.mkstemp()[1] if path is None else path)
         self.name = name
-        self.last_flush = 0
         RESERVOIRS.add(self)
-
-    # def write(self, x):
-    #     super().write(x)
-    #     now = time.time()
-    #     if now - self.last_flush > Reservoir.FLUSH_INTERVAL_SEC:
-    #         self.flush()
-    #         self.last_flush = now
