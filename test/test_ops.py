@@ -313,21 +313,24 @@ def test_head():
 
 
 def test_tail():
-    TEST.run('gen 100 | tail 0',
-             expected_out=[])
-    TEST.run('gen 100 | tail 1',
-             expected_out=[99])
-    TEST.run('gen 100 | tail 2',
-             expected_out=[98, 99])
-    TEST.run('gen 100 | tail 3',
-             expected_out=[97, 98, 99])
-    TEST.run('gen 3 | tail 3',
-             expected_out=[0, 1, 2])
-    TEST.run('gen 3 | tail 4',
-             expected_out=[0, 1, 2])
+    # TEST.run('gen 100 | tail 0',
+    #          expected_out=[])
+    # TEST.run('gen 100 | tail 1',
+    #          expected_out=[99])
+    # TEST.run('gen 100 | tail 2',
+    #          expected_out=[98, 99])
+    # TEST.run('gen 100 | tail 3',
+    #          expected_out=[97, 98, 99])
+    # TEST.run('gen 3 | tail 3',
+    #          expected_out=[0, 1, 2])
+    # TEST.run('gen 3 | tail 4',
+    #          expected_out=[0, 1, 2])
     # Function-valued args
     TEST.run('gen 3 | tail (4)',
              expected_out=[0, 1, 2])
+    # Errors
+    TEST.run('gen 3 | tail -1',
+             expected_err='must be positive')
 
 
 def test_reverse():
@@ -1196,13 +1199,14 @@ def main_stable():
 
 
 def main_dev():
+    test_tail()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

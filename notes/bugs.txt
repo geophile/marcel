@@ -263,3 +263,26 @@ E.g. USER, HOME.
 
 For "var > ..." or "./file > ...", tab completion doesn't work. Tab
 completion for first symbol expects executable.
+
+----------------------------------------------------------------------
+
+129. tail shouldn't allow negative args
+
+Other ops likely have the same problem.
+
+----------------------------------------------------------------------
+
+130. File.base incorrect?
+
+These are all in the same directory, should be rendered without the directory info.
+
+M-0.11.6 jao@cheese:~/git/marcel/marcel/op$ ls *.py | read -l | select (f, x: 'str_to_int' in x) | (f, x: f) | unique | sort
+/home/jao/git/marcel/marcel/op/edit.py
+/home/jao/git/marcel/marcel/op/expand.py
+/home/jao/git/marcel/marcel/op/gen.py
+/home/jao/git/marcel/marcel/op/head.py
+/home/jao/git/marcel/marcel/op/jobop.py
+/home/jao/git/marcel/marcel/op/run.py
+/home/jao/git/marcel/marcel/op/sql.py
+/home/jao/git/marcel/marcel/op/tail.py
+/home/jao/git/marcel/marcel/op/window.py

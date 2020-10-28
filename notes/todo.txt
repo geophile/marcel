@@ -423,57 +423,45 @@ separately? Just send the pipeline as is, don't detach/retach env
 
 ----------------------------------------------------------------------
 
-Replace /proc usage by OS calls?
-
-See psutil
-
-----------------------------------------------------------------------
-
 Instead of serializing Pipelines, how about serializing pipeline
 strings, and them parse them on the other side? This is doable except
 for API pipelines containing native functions.
 
 ----------------------------------------------------------------------
 
-File constructor is expensive. Not sure about pathlib.Path(), but
-path.relative_to() must cost something. ls might be faster if this
-were optimized. Measure & fix.
+Replace /proc usage by OS calls?
 
-Profiling:
+See psutil
 
-    import os
-    import time
-    
-    from marcel.api import *
-    
-    start = time.time()
-    run(ls('/home/jao/git', recursive=True, file=True) | select(lambda f: False))
-    stop = time.time()
-    msec = (stop - start) * 1000
-    print(f'{msec} msec')
+----------------------------------------------------------------------
 
-1808 msec
-1790
-1824
-----
-average: 1807
+history:
 
-- Optimize File.__init__
+Add flags:
 
-    - store base, compute compact_path lazily
+    -n: n is int, list last n
 
-1417
-1399
-1403
-----
-average: 1406
+    -c x: list items containg x
 
-- Optimize ls.send_path. 
+----------------------------------------------------------------------
 
-    - path methods is_symlink, is_file, is_dir each involve a stat call.
+Start this command: ls -r ~ > ./x, and put it in the background.
 
-1057
-1082
-1076
-----
-average: 1072
+Monitoring progress is problematic.
+
+- Checking the file size works.
+
+- Running tail occasionally: It executes but
+  shouldn't. PickleFile.reader() asserts that there are no writers,
+  and that's not firing.
+
+- Ignoring that, tail usually fails: _pickle.UnpicklingError: pickle
+  data was truncated. I'm guessing that dill.dump() flushes to disk on
+  buffer boundaries, not object boundaries, so reading a file while
+  it's being written can't work.
+
+BUT: 
+
+- pickle seems to avoid this problem. Or at least it's much rarer.
+
+- pickle is also a lot faster, 20x. See experiments/dill_vs_pickle.py

@@ -13,4 +13,40 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-VERSION = '0.11.6'
+import io
+import pickle
+import time
+
+import dill
+
+N = 10000
+
+
+def thing(x):
+    return [x, str(x), (x, x, x)]
+
+start = time.time()
+buffer = io.BytesIO()
+for i in range(N):
+    pickle.dump(thing(i), buffer)
+buffer.seek(0)
+try:
+    while True:
+        pickle.load(buffer)
+except EOFError:
+    pass
+stop = time.time()
+print(f'pickle: {stop - start}')
+
+start = time.time()
+buffer = io.BytesIO()
+for i in range(N):
+    dill.dump(thing(i), buffer)
+buffer.seek(0)
+try:
+    while True:
+        dill.load(buffer)
+except EOFError:
+    pass
+stop = time.time()
+print(f'dill: {stop - start}')

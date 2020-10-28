@@ -150,8 +150,8 @@ class File(marcel.object.renderable.Renderable):
             return [line.rstrip('\r\n') for line in file.readlines()]
 
     def unlink(self):
+        # unlink(missing_ok=True) requires Python >= 3.8
         try:
-            # unlink(missing_ok=True) requires Python >= 3.8
             self.path.unlink()
         except FileNotFoundError:
             pass
