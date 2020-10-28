@@ -18,9 +18,8 @@ import time
 
 from marcel.api import *
 
-N = 1000000
 start = time.time()
-run(gen(N) | map(lambda x: x+1) | map(lambda x: x+1) | map(lambda x: x+1) | select(lambda x: False))
+run(ls('/home/jao/git', recursive=True, file=True) | select(lambda f: False))
 stop = time.time()
-usec = (stop - start) * 1000000 / N
-print(f'{usec} usec per unit')
+msec = (stop - start) * 1000
+print(f'{msec} msec')

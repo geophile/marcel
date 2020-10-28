@@ -13,6 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import pathlib
+import stat
+
 import marcel.object.error
 import marcel.object.file
 import marcel.op.filenamesop
@@ -110,11 +113,11 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
 
     @staticmethod
     def send_path(op, path):
-        import pathlib
         assert isinstance(path, pathlib.Path), f'{type(path)} {path}'
-        s = path.is_symlink()
-        f = path.is_file() and not s
-        d = path.is_dir() and not s
+        mode = path.lstat().st_mode
+        s = stat.S_ISLNK(mode)
+        f = stat.S_ISREG(mode) and not s
+        d = stat.S_ISDIR(mode) and not s
         if ((op.file and f) or (op.dir and d) or (op.symlink and s)) and path not in op.emitted:
             file = File(path, op.base, op.metadata_cache)
             try:

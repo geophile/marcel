@@ -53,13 +53,13 @@ class File(marcel.object.renderable.Renderable):
         if not isinstance(path, pathlib.Path):
             path = pathlib.Path(path)
         self.path = path
-        # Compact path is relative if the base if there is one, the full path otherwise.
-        self.compact_path = path.relative_to(base) if base else path
+        self.base = base
+        self.compact_path = None
         self.lstat = None
         self.executable = None
         # Used only to survive pickling
         self.path_str = None
-        self.compact_path_str = None
+        self.base_str = None
 
     def __getattr__(self, attr):
         return getattr(self.path, attr)
@@ -69,13 +69,14 @@ class File(marcel.object.renderable.Renderable):
         self._is_executable()
         self._lstat()
         state = self.__dict__.copy()
+        state['compact_path'] = None
         # Send strings, not paths
         if self.path is not None:
             state['path_str'] = str(self.path)
             state['path'] = None
-        if self.compact_path is not None:
-            state['compact_path_str'] = str(self.compact_path)
-            state['compact_path'] = None
+        if self.base is not None:
+            state['base_str'] = str(self.base)
+            state['base'] = None
         return state
 
     def __setstate__(self, state):
@@ -83,9 +84,9 @@ class File(marcel.object.renderable.Renderable):
         if self.path_str:
             self.path = pathlib.Path(self.path_str)
             self.path_str = None
-        if self.compact_path_str:
-            self.compact_path = pathlib.Path(self.compact_path_str)
-            self.compact_path_str = None
+        if self.base_str:
+            self.base = pathlib.Path(self.base_str)
+            self.base_str = None
 
     def __hash__(self):
         return self.path.__hash__()
@@ -111,7 +112,7 @@ class File(marcel.object.renderable.Renderable):
     # Renderable
 
     def render_compact(self):
-        return str(self.compact_path)
+        return str(self._compact_path())
 
     def render_full(self, color_scheme):
         line = self._formatted_metadata()
@@ -177,7 +178,7 @@ class File(marcel.object.renderable.Renderable):
             ' ',
             self._formatted_mtime(lstat.st_mtime),
             ' ',
-            self.compact_path.as_posix()]
+            self._compact_path().as_posix()]
 
     def _lstat(self):
         if self.lstat is None:
@@ -193,6 +194,11 @@ class File(marcel.object.renderable.Renderable):
         else:
             # File not created via ls command
             return marcel.util.username(uid), marcel.util.groupname(gid)
+
+    def _compact_path(self):
+        if self.compact_path is None:
+            self.compact_path = self.path.relative_to(self.base) if self.base else self.path
+        return self.compact_path
 
     @staticmethod
     def _mode_string(mode):

@@ -578,3 +578,19 @@ env is hard to read. Make it easier:
 ----------------------------------------------------------------------
 
 sql option to suppress printing of update counts.
+
+----------------------------------------------------------------------
+
+Allow read op to specify files as args?
+
+----------------------------------------------------------------------
+
+Cleanup setup_1/setup_2/set_env.
+
+----------------------------------------------------------------------
+
+Allow omitting of map in all contexts? E.g.
+
+      ls | (f: f.size)
+
+It already works! It's not a bug, it's a feature! As it turns out.
