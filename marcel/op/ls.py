@@ -112,20 +112,21 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
     # For use by this class
 
     @staticmethod
-    def send_path(op, path):
-        assert isinstance(path, pathlib.Path), f'{type(path)} {path}'
-        mode = path.lstat().st_mode
+    def send_path(op, file):
+        assert type(file) is File, f'{type(file)} {file}'
+        mode = file.path.lstat().st_mode
         s = stat.S_ISLNK(mode)
         f = stat.S_ISREG(mode) and not s
         d = stat.S_ISDIR(mode) and not s
-        if ((op.file and f) or (op.dir and d) or (op.symlink and s)) and path not in op.emitted:
-            file = File(path, op.base, op.metadata_cache)
+        if ((op.file and f) or (op.dir and d) or (op.symlink and s)) and file.path not in op.emitted:
             try:
                 op.send(file)
             except ValueError as e:
+                import marcel.util
+                marcel.util.print_stack()
                 message = (f'Caught {e.__class__.__name__} on file with '
                            f'device = {file.device} and '
                            f'inode = {file.inode}, '
                            f'(file name may not be printable).')
                 op.non_fatal_error(None, message)
-            op.emitted.add(path)
+            op.emitted.add(file.path)

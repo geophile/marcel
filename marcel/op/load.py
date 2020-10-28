@@ -58,13 +58,9 @@ input to {r:join} comes from loading {r:def}.
 
 def load(env, target):
     load = Load(env)
-    if type(target) is marcel.reservoir.Reservoir:
-        args = [target.name]
-    elif type(target) is str:
-        args = [target]
-    else:
-        raise marcel.exception.KillCommandException(f'{target} is not a Reservoir.')
-    return load, args
+    if type(target) not in (str, marcel.reservoir.Reservoir):
+        raise marcel.exception.KillCommandException(f'{target} is not a Reservoir: {type(target)}')
+    return load, [target]
 
 
 class LoadArgsParser(marcel.argsparser.ArgsParser):

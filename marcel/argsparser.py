@@ -215,7 +215,10 @@ class ArgsParser:
                                           f'{arg.name} argument must be a Pipeline: {x}')
 
     def init_target(self, arg, x):
-        if x.isidentifier():
+        if type(x) is marcel.reservoir.Reservoir:
+            # API set the arg to a Reservoir already
+            pass
+        elif x.isidentifier():
             # Target is an environment variable
             if self.env.getvar(x) is None:
                 self.env.setvar(x, marcel.reservoir.Reservoir(x))

@@ -84,16 +84,11 @@ class FilenamesOp(marcel.core.Op):
         for root in self.roots:
             self.visit(root, 0)
 
-    # FilenamesOp
-
-    # Implementation should send.send() something
-    def action(self, x):
-        assert False
-
     # For use by this class
 
     def visit(self, root, level):
-        self.action(self, root)
+        file = File(root, self.base, self.metadata_cache)
+        self.action(self, file)
         if root.is_dir() and ((level == 0 and (self.d1 or self.dr)) or self.dr):
             try:
                 for file in sorted(root.iterdir()):

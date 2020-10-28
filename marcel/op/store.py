@@ -58,13 +58,10 @@ def store(env, target, append=False):
     args = []
     if append:
         args.append('--append')
-    if type(target) is marcel.reservoir.Reservoir:
-        args.append(target.name)
-    elif type(target) is str:
+    if type(target) in (str, marcel.reservoir.Reservoir):
         args.append(target)
     else:
-        raise marcel.exception.KillCommandException(
-            f'{target} is not usable as a reservoir, it stores a value of type {type(target)}.')
+        raise marcel.exception.KillCommandException(f'{target} is not a Reservoir: {type(target)}')
     return store, args
 
 

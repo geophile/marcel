@@ -126,17 +126,17 @@ class Read(marcel.op.filenamesop.FilenamesOp):
         else:
             if len(x) != 1:
                 self.fatal_error(x, 'Input to read must be a single value.')
-            x = x[0]
-            if type(x) is not File:
+            file = x[0]
+            if type(file) is not File:
                 self.fatal_error(x, 'Input to read must be a File.')
-            Read.read_file(self, x.path)
+            Read.read_file(self, file)
 
     # FilenamesOp
 
     @staticmethod
-    def read_file(op, path):
-        assert isinstance(path, pathlib.Path), f'({type(path)}) {path}'
-        op.reader.read_file(op, path, [path] if op.label else None)
+    def read_file(op, file):
+        assert type(file) is File, f'{type(file)} {file}'
+        op.reader.read_file(op, file, [file] if op.label else None)
 
 
 class Reader:
@@ -144,7 +144,7 @@ class Reader:
     def __init__(self, op):
         self.op = op
         
-    def read_file(self, op, path, label):
+    def read_file(self, op, file, label):
         assert False
 
 
@@ -153,8 +153,8 @@ class TextReader(Reader):
     def __init__(self, op):
         super().__init__(op)
 
-    def read_file(self, op, path, label):
-        with open(path, 'r') as input:
+    def read_file(self, op, file, label):
+        with open(file.path, 'r') as input:
             try:
                 line = input.readline()
                 while len(line) > 0:
@@ -170,8 +170,8 @@ class PickleReader(Reader):
     def __init__(self, op):
         super().__init__(op)
 
-    def read_file(self, op, path, label):
-        with marcel.picklefile.PickleFile(path).reader() as input:
+    def read_file(self, op, file, label):
+        with marcel.picklefile.PickleFile(file.path).reader() as input:
             try:
                 while True:
                     x = input.read()
@@ -187,8 +187,8 @@ class CSVReader(Reader):
         self.input = InputIterator(self)
         self.reader = csv.reader(self.input, delimiter=(',' if op.csv else '\t'))
 
-    def read_file(self, op, path, label):
-        with open(path, 'r') as input:
+    def read_file(self, op, file, label):
+        with open(file.path, 'r') as input:
             try:
                 line = input.readline()
                 while len(line) > 0:

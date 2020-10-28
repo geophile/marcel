@@ -286,3 +286,7 @@ M-0.11.6 jao@cheese:~/git/marcel/marcel/op$ ls *.py | read -l | select (f, x: 's
 /home/jao/git/marcel/marcel/op/sql.py
 /home/jao/git/marcel/marcel/op/tail.py
 /home/jao/git/marcel/marcel/op/window.py
+
+read changes the base of the file. Because it extends FilenameOps
+which passes pathlib.Paths to subclasses, losing the base informatino
+from ls.
