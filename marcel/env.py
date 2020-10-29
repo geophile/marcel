@@ -22,6 +22,7 @@ import sys
 import marcel.builtin
 import marcel.core
 import marcel.exception
+import marcel.function
 import marcel.nestednamespace
 import marcel.object.cluster
 import marcel.object.db
@@ -212,7 +213,7 @@ class Environment:
         assert var is not None
         try:
             value = self.namespace[var]
-            self.modified_vars.add(var)
+            self.note_var_access(var, value)
         except KeyError:
             value = None
         return value
@@ -336,6 +337,10 @@ class Environment:
             if marcel.util.is_executable(x):
                 exes.append(x)
         initial_namespace['INTERACTIVE_EXECUTABLES'] = exes
+
+    def note_var_access(self, var, value):
+        if type(value) not in (marcel.function.Function, marcel.core.Pipeline):
+            self.modified_vars.add(var)
 
     @staticmethod
     def immutable(x):

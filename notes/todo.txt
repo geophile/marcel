@@ -465,3 +465,29 @@ BUT:
 - pickle seems to avoid this problem. Or at least it's much rarer.
 
 - pickle is also a lot faster, 20x. See experiments/dill_vs_pickle.py
+
+----------------------------------------------------------------------
+
+Honestly, the marcel equivalent to grep is kind of a pain.
+
+    grep foo *.txt
+
+->
+
+    read -l *.txt | select (file, line: 'foo' in line) | map (file, line: file)
+
+Can grep (at least, this simplified usage) be expressed as a pipeline?
+
+grep = [pattern, files: read -l (files) | select (f, l: pattern in l) | map (f, l: f) | unique]
+
+Yes! except that "grep" is understood to be an executable. Need to
+work out order of resolution (e.g., want vars before executables).
+
+----------------------------------------------------------------------
+
+Operator and pipeline logging, easily controllable, is needed. Can
+this be done avoiding runtime penalty when logging not in use?
+
+----------------------------------------------------------------------
+
+Review pickler. Probably too complicated, may not be needed.

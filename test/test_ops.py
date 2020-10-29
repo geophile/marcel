@@ -117,7 +117,6 @@ def test_sort():
     TEST.run('(', expected_err='Malformed Python expression')
 
 
-
 def test_map():
     TEST.run('gen 5 | map (x: -x)',
              expected_out=[0, -1, -2, -3, -4])
@@ -494,6 +493,7 @@ def test_remote():
     # Bug 121
     TEST.run('@notacluster [ gen 3]',
              expected_err='There is no cluster named')
+
 
 def test_sudo():
     TEST.run(test='sudo [ gen 3 ]',
@@ -952,6 +952,15 @@ def test_read():
              expected_out=['1,2.3,ab', '2,3.4,xy', '3,4.5,"m,n"',
                            '1\t2.3\tab', '2\t3.4\txy',
                            'hello,world', 'goodbye'])
+    # Flags inherited from FilenamesOp
+    TEST.run(test='read -lr /tmp/read/* | (f, l: (str(f), l))',
+             expected_out=[('f1.csv', '1,2.3,ab'),
+                           ('f1.csv', '2,3.4,xy'),
+                           ('f1.csv', '3,4.5,"m,n"'),
+                           ('f2.tsv', '1\t2.3\tab'),
+                           ('f2.tsv', '2\t3.4\txy'),
+                           ('f3.txt', 'hello,world'),
+                           ('f3.txt', 'goodbye')])
     # --pickle testing is done in test_out()
 
 

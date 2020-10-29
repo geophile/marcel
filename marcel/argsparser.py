@@ -77,10 +77,8 @@ class Flag(Arg):
 
     def __repr__(self):
         return (f'{self.short}|{self.long}' if self.short and self.long else
-                {self.short} if self.short else
-                {self.long})
-
-        return self.short if self.short else self.long
+                self.short if self.short else
+                self.long)
 
     @staticmethod
     def plausible(x):

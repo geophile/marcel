@@ -13,4 +13,5 @@ DB_DEFAULT = jdb
 
 RUN_ON_STARTUP = '''
 ext = [e: select (f: f.suffix == '.' + e)]
+grem = [pattern, files: read -l (files) | select (f, l: pattern in l) | map (f, l: f) | unique]
 '''

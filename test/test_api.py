@@ -703,6 +703,16 @@ def test_read():
              expected_out=['1,2.3,ab', '2,3.4,xy', '3,4.5,"m,n"',
                            '1\t2.3\tab', '2\t3.4\txy',
                            'hello,world', 'goodbye'])
+    # Flags inherited from FilenamesOp
+    TEST.run(lambda: run(read('tmp/read/*', label=True, recursive=True) | map(lambda f, l: (str(f), l))),
+             expected_out=[('f1.csv', '1,2.3,ab'),
+                           ('f1.csv', '2,3.4,xy'),
+                           ('f1.csv', '3,4.5,"m,n"'),
+                           ('f2.tsv', '1\t2.3\tab'),
+                           ('f2.tsv', '2\t3.4\txy'),
+                           ('f3.txt', 'hello,world'),
+                           ('f3.txt', 'goodbye')])
+    # --pickle testing is done in test_out()
 
 
 def test_intersect():

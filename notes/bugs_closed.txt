@@ -2404,3 +2404,46 @@ Traceback (most recent call last):
 ValueError: write to closed file
 M-0.11.3 jao@cheese:~$ 
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+130. File.base incorrect?
+
+These are all in the same directory, should be rendered without the directory info.
+
+M-0.11.6 jao@cheese:~/git/marcel/marcel/op$ ls *.py | read -l | select (f, x: 'str_to_int' in x) | (f, x: f) | unique | sort
+/home/jao/git/marcel/marcel/op/edit.py
+/home/jao/git/marcel/marcel/op/expand.py
+/home/jao/git/marcel/marcel/op/gen.py
+/home/jao/git/marcel/marcel/op/head.py
+/home/jao/git/marcel/marcel/op/jobop.py
+/home/jao/git/marcel/marcel/op/run.py
+/home/jao/git/marcel/marcel/op/sql.py
+/home/jao/git/marcel/marcel/op/tail.py
+/home/jao/git/marcel/marcel/op/window.py
+
+read changes the base of the file. Because it extends FilenameOps
+which passes pathlib.Paths to subclasses, losing the base informatino
+from ls.
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+133. Command works the first time it is used, but not after that
+
+grem is defined in .marcel.py:
+
+    grem = [pattern, files: read -l (files) | select (f, l: pattern in l) | map (f, l: f) | unique]
+
+M-0.11.6 jao@cheese:~$ cd git/marcel/marcel/op
+
+M-0.11.6 jao@cheese:~/git/marcel/marcel/op$ ls *.py | args [f: grem Disjoint (f)]
+-rw-rw-r--   jao    jao        7331   2020 Oct 27 16:18:32   window.py
+
+M-0.11.6 jao@cheese:~/git/marcel/marcel/op$ ls *.py | args [f: grem Disjoint (f)]
+Error: Running read(label=True): 'NoneType' object is not callable
+'NoneType' object is not callable

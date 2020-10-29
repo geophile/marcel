@@ -52,6 +52,9 @@ class Unique(marcel.core.Op):
         self.consecutive = None
         self.uniquer = None
 
+    def __repr__(self):
+        return 'unique()'
+
     # AbstractOp
 
     def setup(self):

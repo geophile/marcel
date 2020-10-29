@@ -159,10 +159,8 @@ class ArgsInteractive(ArgsImpl):
         op = self.op
         env = op.env()
         a = 0
-        map = {}
         for param in self.params:
             env.setvar(param, self.args[a])
-            map[param] = self.args[a]
             a += 1
         self.args.clear()
         marcel.core.Command(env, None, self.pipeline).execute()
