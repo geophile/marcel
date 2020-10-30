@@ -712,6 +712,18 @@ def test_read():
                            ('f2.tsv', '2\t3.4\txy'),
                            ('f3.txt', 'hello,world'),
                            ('f3.txt', 'goodbye')])
+    # File does not exist
+    TEST.run(lambda: run(read('/tmp/read/nosuchfile')),
+             expected_err='No qualifying paths')
+    # directory
+    TEST.run(lambda: run(read('/tmp/read')),
+             expected_out=[Error('Not a file')])
+    # symlink
+    os.system('ln -s /tmp/read/f1.csv /tmp/read/symlink_f1.csv')
+    TEST.run(lambda: run(read('/tmp/read/symlink_f1.csv')),
+             expected_out=['1,2.3,ab',
+                           '2,3.4,xy',
+                           '3,4.5,"m,n"'])
     # --pickle testing is done in test_out()
 
 

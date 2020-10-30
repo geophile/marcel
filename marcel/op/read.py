@@ -14,8 +14,8 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import csv
-import pathlib
 
+import marcel.exception
 import marcel.object.file
 import marcel.op.filenamesop
 import marcel.picklefile
@@ -136,6 +136,8 @@ class Read(marcel.op.filenamesop.FilenamesOp):
     @staticmethod
     def read_file(op, file):
         assert type(file) is File, f'{type(file)} {file}'
+        if not file.is_file():
+            op.fatal_error(file, 'Not a file')
         op.reader.read_file(op, file, (file,) if op.label else None)
 
 
