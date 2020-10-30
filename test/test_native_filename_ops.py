@@ -25,7 +25,7 @@ def absolute(base, x):
 
 def test_setup():
     TEST.cd(test_dir + '/..')
-    shutil.rmtree(test_dir, ignore_errors=True)
+    os.system(f'rm -rf {test_dir}')
     os.system(f'mkdir {test_dir}')
     TEST.cd(test_dir)
 

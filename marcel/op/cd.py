@@ -61,6 +61,8 @@ class Cd(marcel.core.Op):
             self.env().dir_state().cd(self.directory)
         except PermissionError as e:
             raise marcel.exception.KillCommandException(e)
+        except FileNotFoundError as e:
+            raise marcel.exception.KillCommandException(e)
 
     # Op
 

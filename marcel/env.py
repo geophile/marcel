@@ -15,6 +15,7 @@
 
 import getpass
 import os
+import os.path
 import pathlib
 import socket
 import sys
@@ -98,21 +99,17 @@ class DirectoryState:
     def cd(self, directory):
         assert isinstance(directory, pathlib.Path), directory
         new_dir = (self.pwd() / directory.expanduser()).resolve(False)  # False: due to bug 27
-        try:
-            if not new_dir.exists():
-                raise marcel.exception.KillCommandException(
-                    f'Cannot cd into {new_dir}. Directory does not exist.')
-            new_dir = new_dir.as_posix()
-            self.dir_stack()[-1] = new_dir
-            self.env.setvar('PWD', new_dir)
-            # So that executables have the same view of the current directory.
-            os.chdir(new_dir)
-        except FileNotFoundError:
-            # Fix for bug 27
-            pass
+        new_dir = new_dir.as_posix()
+        # So that executables have the same view of the current directory.
+        os.chdir(new_dir)
+        self.dir_stack()[-1] = new_dir
+        self.env.setvar('PWD', new_dir)
 
     def pushd(self, directory):
-        dir_stack = self.dir_stack()
+        self.clean_dir_stack()
+        # Operate on a copy of the directory stack. Don't want to change the
+        # actual stack until the cd succeeds (bug 133).
+        dir_stack = list(self.dir_stack())
         if directory is None:
             if len(dir_stack) > 1:
                 dir_stack[-2:] = [dir_stack[-1], dir_stack[-2]]
@@ -120,12 +117,14 @@ class DirectoryState:
             assert isinstance(directory, pathlib.Path)
             dir_stack.append(directory.resolve().as_posix())
         self.cd(pathlib.Path(dir_stack[-1]))
+        self.env.setvar('DIRS', dir_stack)
 
     def popd(self):
+        self.clean_dir_stack()
         dir_stack = self.dir_stack()
         if len(dir_stack) > 1:
+            self.cd(pathlib.Path(dir_stack[-2]))
             dir_stack.pop()
-            self.cd(pathlib.Path(dir_stack[-1]))
 
     def reset_dir_stack(self):
         dir_stack = self.dir_stack()
@@ -133,12 +132,30 @@ class DirectoryState:
         dir_stack.append(self.pwd())
 
     def dirs(self):
+        self.clean_dir_stack()
         dirs = list(self.dir_stack())
         dirs.reverse()
         return dirs
 
     def dir_stack(self):
         return self.env.getvar('DIRS')
+
+    # Remove entries that are not files, and not accessible, (presumably due to changes since they entered the stack).
+    def clean_dir_stack(self):
+        clean = []
+        removed = []
+        dirs = self.dir_stack()
+        for dir in dirs:
+            if os.path.exists(dir) and os.access(dir, mode=os.X_OK, follow_symlinks=True):
+                clean.append(dir)
+            else:
+                removed.append(dir)
+        if len(clean) < len(dirs):
+            self.env.setvar('DIRS', clean)
+            buffer = ['The following directories have been removed from the directory stack because',
+                      'they are no longer accessible:']
+            buffer.extend(removed)
+            raise marcel.exception.KillCommandException('\n'.join(buffer))
 
 
 class Environment:

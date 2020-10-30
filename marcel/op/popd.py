@@ -15,13 +15,14 @@
 
 import marcel.argsparser
 import marcel.core
+import marcel.exception
 import marcel.object.file
 
 
 HELP = '''
 {L,wrap=F}popd
 
-Pop the directory stack, and cd to the new top directory.
+Pop the directory stack, and cd to the new top directory. The current directory stack is written to output.
 '''
 
 
@@ -47,7 +48,12 @@ class Popd(marcel.core.Op):
     # AbstractOp
 
     def receive(self, _):
-        self.env().dir_state().popd()
+        try:
+            self.env().dir_state().popd()
+        except PermissionError as e:
+            raise marcel.exception.KillCommandException(e)
+        except FileNotFoundError as e:
+            raise marcel.exception.KillCommandException(e)
         for dir in self.env().dir_state().dirs():
             self.send(marcel.object.file.File(dir))
 

@@ -36,6 +36,7 @@ def filename_op_setup(dir):
     #         sdd (symlink to dd)
     #             ddf (file)
     setup_script = [
+        'rm -rf /tmp/test',
         'mkdir /tmp/test',
         'mkdir /tmp/test/d',
         'echo f > /tmp/test/f',
@@ -213,6 +214,9 @@ def test_ls():
 def test_dir_stack():
     filename_op_setup('/tmp/test')
     TEST.run('mkdir a b c')
+    TEST.run('rm -rf p')
+    TEST.run('mkdir p')
+    TEST.run('chmod 000 p')
     TEST.run(test='pwd | map (f: f.path)',
              expected_out=['/tmp/test'])
     TEST.run(test='dirs | map (f: f.path)',
@@ -239,6 +243,37 @@ def test_dir_stack():
              expected_out=['/tmp/test/b'])
     TEST.run(test='pushd | map (f: f.path)',
              expected_out=['/tmp/test/b'])
+    # Dir operations when the destination cd does not exist or cannot be entered due to permissions
+    # cd
+    TEST.run('cd /tmp/test')
+    TEST.run(test='cd /tmp/test/doesnotexist',
+             expected_err='No such file or directory')
+    TEST.run(test='pwd | (f: str(f))',
+             expected_out='/tmp/test')
+    TEST.run(test='cd /tmp/test/p',
+             expected_err='Permission denied')
+    TEST.run(test='pwd | (f: str(f))',
+             expected_out='/tmp/test')
+    # pushd
+    TEST.run(test='pushd /tmp/test/doesnotexist',
+             expected_err='No such file or directory')
+    TEST.run(test='pwd | (f: str(f))',
+             expected_out='/tmp/test')
+    TEST.run(test='pushd /tmp/test/p',
+             expected_err='Permission denied')
+    TEST.run(test='pwd | (f: str(f))',
+             expected_out='/tmp/test')
+    # popd: Arrange for a deleted dir on the stack and try popding into it.
+    TEST.run('rm -rf x y')
+    TEST.run('mkdir x y')
+    TEST.run('cd x')
+    TEST.run('pushd ../y | (f: str(f))',
+             expected_out=['/tmp/test/y', '/tmp/test/x'])
+    TEST.run('rm -rf /tmp/test/x')
+    TEST.run('popd',
+             expected_err='directories have been removed')
+    TEST.run('dirs | (f: str(f))',
+             expected_out=['/tmp/test/y'])
 
 
 def main_stable():

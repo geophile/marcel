@@ -59,11 +59,14 @@ class Pushd(marcel.core.Op):
     def setup(self):
         if self.directory is not None:
             self.directory = pathlib.Path(self.directory).expanduser()
-            if not self.directory.is_dir():
-                raise marcel.exception.KillCommandException(f'{self.directory} is not a directory')
 
     def receive(self, _):
-        self.env().dir_state().pushd(self.directory)
+        try:
+            self.env().dir_state().pushd(self.directory)
+        except PermissionError as e:
+            raise marcel.exception.KillCommandException(e)
+        except FileNotFoundError as e:
+            raise marcel.exception.KillCommandException(e)
         for dir in self.env().dir_state().dirs():
             self.send(marcel.object.file.File(dir))
 
