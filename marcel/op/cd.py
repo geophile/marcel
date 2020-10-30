@@ -17,6 +17,7 @@ import pathlib
 
 import marcel.argsparser
 import marcel.core
+import marcel.exception
 
 
 HELP = '''
@@ -56,7 +57,10 @@ class Cd(marcel.core.Op):
         self.directory = pathlib.Path(self.directory)
 
     def receive(self, _):
-        self.env().dir_state().cd(self.directory)
+        try:
+            self.env().dir_state().cd(self.directory)
+        except PermissionError as e:
+            raise marcel.exception.KillCommandException(e)
 
     # Op
 
