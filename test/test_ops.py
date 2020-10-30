@@ -944,6 +944,7 @@ def test_read():
     TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: [str(f), x, y, z])',
              expected_out=[['f2.tsv', '1', '2.3', 'ab'],
                            ['f2.tsv', '2', '3.4', 'xy']])
+    # --pickle testing is done in test_out()
     # Filenames on commandline
     TEST.run('cd /tmp/read')
     TEST.run('read f1.csv',
@@ -973,7 +974,6 @@ def test_read():
              expected_out=['1,2.3,ab',
                            '2,3.4,xy',
                            '3,4.5,"m,n"'])
-    # --pickle testing is done in test_out()
 
 
 def test_intersect():

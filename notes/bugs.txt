@@ -287,36 +287,6 @@ ArgsParser, but there are some dependencies:
 
 ----------------------------------------------------------------------
 
-130. Crash on odd arg to read
-
-M-0.11.6 jao@cheese:~/git/marcel/marcel/op$ read =l *.py
-Process Process-30:
-Traceback (most recent call last):
-  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
-    child_namespace_changes = command.execute(self.env)
-  File "/home/jao/git/marcel/marcel/core.py", line 385, in execute
-    self.pipeline.receive(None)
-  File "/home/jao/git/marcel/marcel/core.py", line 333, in receive
-    self.ops[0].receive_input(x)
-  File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
-    self.receive(None if x is None else
-  File "/home/jao/git/marcel/marcel/op/read.py", line 125, in receive
-    super().receive(None)
-  File "/home/jao/git/marcel/marcel/op/filenamesop.py", line 85, in receive
-    self.visit(root, 0)
-  File "/home/jao/git/marcel/marcel/op/filenamesop.py", line 90, in visit
-    file = File(root, self.base, self.metadata_cache)
-  File "/home/jao/git/marcel/marcel/op/read.py", line 140, in read_file
-  File "/home/jao/git/marcel/marcel/op/read.py", line 158, in read_file
-    try:
-IsADirectoryError: [Errno 21] Is a directory: '/home/jao/git/marcel/marcel/op'
-
-----------------------------------------------------------------------
-
 131. help read is incomplete
 
 Doesn't include args inherited from FilenamesOp. Related: __repr__

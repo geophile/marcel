@@ -807,10 +807,14 @@ class Parser:
     def command(self):
         if self.next_token(String, Assign):
             self.tab_completion_context.complete_disabled()
-            return self.assignment(self.token.value(self))
+            command = self.assignment(self.token.value(self))
         else:
             self.tab_completion_context.complete_op()
-            return self.pipeline(None)
+            command = self.pipeline(None)
+        if not self.at_end():
+            excess = ', '.join([str(t) for t in self.tokens[self.t:]])
+            raise ParseError(f'{command} followed by excess tokens: {excess}')
+        return command
 
     def assignment(self, var):
         self.next_token(Assign)

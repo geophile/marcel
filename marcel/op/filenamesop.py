@@ -63,7 +63,7 @@ class FilenamesOp(marcel.core.Op):
         self.current_dir = self.env().dir_state().pwd()
         self.roots = self.deglob()
         if len(self.filenames) > 0 and len(self.roots) == 0:
-            raise marcel.exception.KillCommandException(f'No qualifying paths, possibly due to permission errors:'
+            raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
         self.emitted = set()
         if len(self.roots) == 0:
