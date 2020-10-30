@@ -136,7 +136,7 @@ class Read(marcel.op.filenamesop.FilenamesOp):
     @staticmethod
     def read_file(op, file):
         assert type(file) is File, f'{type(file)} {file}'
-        op.reader.read_file(op, file, [file] if op.label else None)
+        op.reader.read_file(op, file, (file,) if op.label else None)
 
 
 class Reader:
@@ -159,7 +159,7 @@ class TextReader(Reader):
                 line = input.readline()
                 while len(line) > 0:
                     line = line.rstrip('\r\n')
-                    op.send(label + [line] if label else line)
+                    op.send(label + (line,) if label else line)
                     line = input.readline()
             except StopIteration:
                 pass
@@ -195,7 +195,7 @@ class CSVReader(Reader):
                     line = line.rstrip('\r\n')
                     self.input.set_current(line)
                     out = next(self.reader)
-                    op.send(label + out if label else out)
+                    op.send(label + tuple(out) if label else out)
                     line = input.readline()
             except StopIteration:
                 pass
