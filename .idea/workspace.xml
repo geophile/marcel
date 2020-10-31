@@ -20,21 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/argsparser.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/argsparser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/core.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/function.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/function.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/assign.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/assign.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/ifelse.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ifelse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/ifthen.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ifthen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/map.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/map.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/red.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/red.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/select.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/select.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/sort.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/sort.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/squish.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/squish.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/window.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/window.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -592,7 +578,7 @@
       <workItem from="1603561330304" duration="1864000" />
       <workItem from="1603575302688" duration="5775000" />
       <workItem from="1603637060993" duration="5870000" />
-      <workItem from="1603679712366" duration="111759000" />
+      <workItem from="1603679712366" duration="112284000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

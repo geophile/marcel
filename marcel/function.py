@@ -45,7 +45,7 @@ class Function:
         try:
             return self.function(*args, **kwargs)
         except Exception as e:
-            self.handle_error(e, op, self.function_input(args, kwargs))
+            op.fatal_error(self.function_input(args, kwargs), str(e))
 
     def set_globals(self, globals):
         assert False
@@ -55,12 +55,6 @@ class Function:
 
     def is_grouping(self):
         return False
-
-    def handle_error(self, e, op, function_input):
-        if op:
-            op.fatal_error(function_input, str(e))
-        else:
-            raise marcel.exception.KillCommandException(f'Error evaluating {self} on {function_input}: {e}')
 
     @staticmethod
     def function_input(args, kwargs):
