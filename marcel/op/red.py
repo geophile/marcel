@@ -187,20 +187,22 @@ class NonGroupingReducer(Reducer):
         self.accumulator = [None] * self.n
 
     def receive(self, x):
+        op = self.op
         if len(x) < self.n:
-            self.op.fatal_error(x, 'Input too short.')
+            op.fatal_error(x, 'Input too short.')
         accumulator = self.accumulator
-        function = self.op.functions
+        functions = op.functions
         for i in range(self.n):
-            accumulator[i] = function[i](accumulator[i], x[i])
-        if self.op.incremental:
-            self.op.send(x + tuple(accumulator))
+            accumulator[i] = op.call(functions[i], accumulator[i], x[i])
+        if op.incremental:
+            op.send(x + tuple(accumulator))
 
     def receive_complete(self):
-        if not self.op.incremental and self.accumulator is not None:
-            self.op.send(tuple(self.accumulator))
+        op = self.op
+        if not op.incremental and self.accumulator is not None:
+            op.send(tuple(self.accumulator))
             self.accumulator = None
-        self.op.send_complete()
+        op.send_complete()
 
 
 class GroupingReducer(Reducer):
@@ -212,25 +214,27 @@ class GroupingReducer(Reducer):
         self.accumulators = {}  # group -> accumulator
 
     def receive(self, x):
+        op = self.op
         if len(x) < self.n:
-            self.op.fatal_error(x, 'Input too short.')
+            op.fatal_error(x, 'Input too short.')
         group = tuple(self.group(x))
         accumulator = self.accumulators.get(group, None)
         if accumulator is None:
             accumulator = [None] * self.n
             self.accumulators[group] = accumulator
         for i in range(self.n):
-            reducer = self.op.functions[i]
-            accumulator[i] = reducer(accumulator[i], x[i]) if reducer else x[i]
-        if self.op.incremental:
-            self.op.send(x + tuple(self.data(accumulator)))
+            reducer = op.functions[i]
+            accumulator[i] = op.call(reducer, accumulator[i], x[i]) if reducer else x[i]
+        if op.incremental:
+            op.send(x + tuple(self.data(accumulator)))
 
     def receive_complete(self):
-        if not self.op.incremental and self.accumulators is not None:
+        op = self.op
+        if not op.incremental and self.accumulators is not None:
             for _, data in self.accumulators.items():
-                self.op.send(tuple(data))
+                op.send(tuple(data))
                 self.accumulators = None
-        self.op.send_complete()
+        op.send_complete()
 
     def group(self, x):
         group = []

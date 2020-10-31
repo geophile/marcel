@@ -135,6 +135,9 @@ class Op(AbstractOp):
         if self.receiver:
             self.receiver.receive_complete()
 
+    def call(self, function, *args, **kwargs):
+        return function.call(self, *args, **kwargs)
+
     # This function is performance-critical, so the assertion is commented out,
     # and util.wrap_op_input is inlined.
     def receive_input(self, x):
@@ -225,10 +228,11 @@ class Op(AbstractOp):
     # one of the given types.
     def eval_function(self, field, *types):
         def call(x):
-            if isinstance(x, marcel.function.Function):
-                x.set_op(self)
             try:
-                x = x()
+                if isinstance(x, marcel.function.Function):
+                    x = self.call(x)
+                else:
+                    x = x()
             except marcel.exception.KillAndResumeException as e:
                 # We are doing setup. Resuming isn't a possibility
                 raise marcel.exception.KillCommandException(e)

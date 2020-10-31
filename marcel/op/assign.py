@@ -46,8 +46,7 @@ class Assign(marcel.core.Op):
             count += 1
         if self.function is not None:
             assert isinstance(self.function, marcel.function.Function), type(self.function)
-            self.function.set_op(self)
-            self.value = self.function()
+            self.value = self.call(self.function)
             count += 1
         assert count == 1, count
 

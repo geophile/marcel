@@ -62,5 +62,7 @@ class Map(marcel.core.Op):
     # Op
     
     def receive(self, x):
-        output = self.function() if x is None else self.function(*x)
+        output = (self.call(self.function)
+                  if x is None else
+                  self.call(self.function, *x))
         self.send(output)

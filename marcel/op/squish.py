@@ -66,7 +66,6 @@ class Squish(marcel.core.Op):
     def setup(self):
         if self.function is None:
             self.function = marcel.function.SymbolFunction('+')
-        self.function.set_op(self)
 
     def set_env(self, env):
         super().set_env(env)
@@ -75,4 +74,4 @@ class Squish(marcel.core.Op):
     # Op
 
     def receive(self, x):
-        self.send(functools.reduce(self.function, x, None))
+        self.send(functools.reduce(lambda *args, **kwargs: self.call(self.function, *args, **kwargs), x, None))

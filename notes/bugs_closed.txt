@@ -2510,3 +2510,126 @@ M-0.11.6 jao@cheese:~/git/marcel/marcel/op$ ls *.py | args [f: grem Disjoint (f)
 M-0.11.6 jao@cheese:~/git/marcel/marcel/op$ ls *.py | args [f: grem Disjoint (f)]
 Error: Running read(label=True): 'NoneType' object is not callable
 'NoneType' object is not callable
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+135. Crash on AttributeError in function
+
+M-0.11.8 jao@cheese:~/git/marcel/marcel/op$ grep window * | ext py | (f, l: f) | unique
+Process Process-8:
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/marcel/function.py", line 41, in __call__
+    return self.function(*args, **kwargs)
+  File "<string>", line 1, in <lambda>
+AttributeError: 'str' object has no attribute 'suffix'
+
+During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+        child_namespace_changes = command.execute(self.env)
+      File "/home/jao/git/marcel/marcel/core.py", line 386, in execute
+        self.pipeline.receive_complete()
+      File "/home/jao/git/marcel/marcel/core.py", line 336, in receive_complete
+        self.ops[0].receive_complete()
+      File "/home/jao/git/marcel/marcel/op/bash.py", line 90, in receive_complete
+        self.runner.run()
+      File "/home/jao/git/marcel/marcel/op/bash.py", line 128, in run
+        op.send(line)
+      File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+        receiver.receive_input(x)
+      File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+        self.receive(None if x is None else
+      File "/home/jao/git/marcel/marcel/op/runpipeline.py", line 66, in receive
+        self.pipeline.receive(x)
+      File "/home/jao/git/marcel/marcel/core.py", line 333, in receive
+        self.ops[0].receive_input(x)
+      File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+        self.receive(None if x is None else
+      File "/home/jao/git/marcel/marcel/op/select.py", line 63, in receive
+        fx = self.function() if x is None else self.function(*x)
+      File "/home/jao/git/marcel/marcel/function.py", line 43, in __call__
+        self.handle_error(e, self.function_input(args, kwargs))
+      File "/home/jao/git/marcel/marcel/function.py", line 59, in handle_error
+        self.op.fatal_error(function_input, str(e))
+      File "/home/jao/git/marcel/marcel/core.py", line 179, in fatal_error
+        self.owner.handle_error(error)
+    AttributeError: 'NoneType' object has no attribute 'handle_error'
+
+
+The problem is error handling inside runpipeline. E.g.
+
+Error in map's function handled correctly:
+
+    M-0.11.8 jao@cheese:~/git/marcel/marcel/op$ gen 3 | map (x: (x, x)) | select (x: x % 2 == 0)
+    Error: Running select(lambda x: x % 2 == 0) on (0, 0): <lambda>() takes 1 positional argument but 2 were given
+    Error: Running select(lambda x: x % 2 == 0) on (1, 1): <lambda>() takes 1 positional argument but 2 were given
+    Error: Running select(lambda x: x % 2 == 0) on (2, 2): <lambda>() takes 1 positional argument but 2 were given
+
+But if the same error occurs inside runpipeline:
+
+    M-0.11.8 jao@cheese:~/git/marcel/marcel/op$ s = [select (x: (x % 2 == 0))]
+    M-0.11.8 jao@cheese:~/git/marcel/marcel/op$ gen 3 | (x: (x, x)) | s
+    Process Process-21:
+    Traceback (most recent call last):
+      File "/home/jao/git/marcel/marcel/function.py", line 41, in __call__
+        return self.function(*args, **kwargs)
+    TypeError: <lambda>() takes 1 positional argument but 2 were given
+    
+    During handling of the above exception, another exception occurred:
+    
+    Traceback (most recent call last):
+      File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+        child_namespace_changes = command.execute(self.env)
+      File "/home/jao/git/marcel/marcel/core.py", line 385, in execute
+        self.pipeline.receive(None)
+      File "/home/jao/git/marcel/marcel/core.py", line 333, in receive
+        self.ops[0].receive_input(x)
+      File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+        self.receive(None if x is None else
+      File "/home/jao/git/marcel/marcel/op/gen.py", line 97, in receive
+        self.send(self.apply_padding(x))
+      File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+        receiver.receive_input(x)
+      File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+        self.receive(None if x is None else
+      File "/home/jao/git/marcel/marcel/op/map.py", line 66, in receive
+        self.send(output)
+      File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+        receiver.receive_input(x)
+      File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+        self.receive(None if x is None else
+      File "/home/jao/git/marcel/marcel/op/runpipeline.py", line 66, in receive
+        self.pipeline.receive(x)
+      File "/home/jao/git/marcel/marcel/core.py", line 333, in receive
+        self.ops[0].receive_input(x)
+      File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+        self.receive(None if x is None else
+      File "/home/jao/git/marcel/marcel/op/select.py", line 63, in receive
+        fx = self.function() if x is None else self.function(*x)
+      File "/home/jao/git/marcel/marcel/function.py", line 43, in __call__
+        self.handle_error(e, self.function_input(args, kwargs))
+      File "/home/jao/git/marcel/marcel/function.py", line 59, in handle_error
+        self.op.fatal_error(function_input, str(e))
+      File "/home/jao/git/marcel/marcel/core.py", line 179, in fatal_error
+        self.owner.handle_error(error)
+    AttributeError: 'NoneType' object has no attribute 'handle_error'
+    M-0.11.8 jao@cheese:~/git/marcel/marcel/op$ 
+
+The problem is that runpipeline creates a copy of the pipeline. The
+copy is then set up. The function inside the copy has an op from the
+ORIGINAL pipeline, which was not set up.
+
+Fix: Function.op is a lot of trouble. Get rid of it, pass in op at
+point of call.

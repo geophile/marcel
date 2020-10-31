@@ -36,14 +36,16 @@ class Function:
     def __setstate__(self, state):
         self.__dict__.update(state)
 
+    # Even though we don't rely on actually calling a Function with conventional function call syntax,
+    # it is convenient for callable(Function) to return True.
     def __call__(self, *args, **kwargs):
+        assert False
+
+    def call(self, op, *args, **kwargs):
         try:
             return self.function(*args, **kwargs)
         except Exception as e:
-            self.handle_error(e, self.function_input(args, kwargs))
-
-    def set_op(self, op):
-        self.op = op
+            self.handle_error(e, op, self.function_input(args, kwargs))
 
     def set_globals(self, globals):
         assert False
@@ -54,9 +56,9 @@ class Function:
     def is_grouping(self):
         return False
 
-    def handle_error(self, e, function_input):
-        if self.op:
-            self.op.fatal_error(function_input, str(e))
+    def handle_error(self, e, op, function_input):
+        if op:
+            op.fatal_error(function_input, str(e))
         else:
             raise marcel.exception.KillCommandException(f'Error evaluating {self} on {function_input}: {e}')
 

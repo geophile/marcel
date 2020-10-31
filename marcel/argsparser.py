@@ -240,7 +240,6 @@ class ArgsParser:
             f = marcel.function.SymbolFunction(x)
         else:
             raise ArgsError(arg.op_name, f'{arg.name} argument must be a function.')
-        f.set_op(self.current_op)
         return f
 
     # ------------------------------------------------------------------------------------------------------------------

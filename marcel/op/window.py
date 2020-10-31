@@ -151,7 +151,6 @@ class Window(marcel.core.Op):
         self.disjoint = self.eval_function('disjoint_arg', int)
         if self.predicate:
             self.window_generator = PredicateWindow(self)
-            self.predicate.set_op(self)
         elif self.overlap:
             super().check_arg(type(self.overlap) is int and self.overlap >= 0,
                               'overlap', 'must be a non-negative int')
@@ -202,7 +201,7 @@ class PredicateWindow(WindowBase):
         super().__init__(op)
 
     def receive(self, x):
-        if self.op.predicate(*x):
+        if self.op.call(self.op.predicate, *x):
             self.flush()
         self.window.append(marcel.util.unwrap_op_output(x))
 

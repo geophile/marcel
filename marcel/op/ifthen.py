@@ -59,6 +59,6 @@ class Ifthen(marcel.op.ifbase.IfBase):
     # AbstractOp
 
     def receive(self, x):
-        if self.predicate(*x):
+        if self.call(self.predicate, *x):
             self.then.receive(x)
         self.send(x)
