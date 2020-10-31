@@ -2511,6 +2511,14 @@ M-0.11.6 jao@cheese:~/git/marcel/marcel/op$ ls *.py | args [f: grem Disjoint (f)
 Error: Running read(label=True): 'NoneType' object is not callable
 'NoneType' object is not callable
 
+----------------------------------------------------------------------
+
+FIXED
+
+134. help read is incomplete
+
+Doesn't include args inherited from FilenamesOp. Related: __repr__
+omits inherited args too.
 
 ----------------------------------------------------------------------
 

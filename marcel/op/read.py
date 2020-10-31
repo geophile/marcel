@@ -27,6 +27,14 @@ File = marcel.object.file.File
 HELP = '''
 {L,wrap=F}read [[-01] [-r|--recursive]] [-c|--csv] [-t|--tsv] [-l|--label] [FILENAME ...]
 
+{L,indent=4:28}{r:-0}                      Include only files matching the specified FILENAMEs, (i.e., depth 0).
+
+{L,indent=4:28}{r:-1}                      Include files matching the specified FILENAMEs, and in any directories
+among the FILENAMEs, (i.e., depth 1).
+
+{L,indent=4:28}{r:-r}, {r:--recursive}         Include all files contained in the identified FILENAMEs, recursively,
+to any depth.
+
 {L,indent=4:28}{r:-c}, {r:--csv}               Parse CSV-formatted lines with comma separator.
 
 {L,indent=4:28}{r:-t}, {r:--tsv}               Parse CSV-formatted lines with tab separator.
@@ -97,7 +105,10 @@ class Read(marcel.op.filenamesop.FilenamesOp):
         self.reader = None
 
     def __repr__(self):
-        options = []
+        depth = ('0' if self.d0 else
+                 '1' if self.d1 else
+                 'recursive')
+        options = [f'depth={depth}']
         if self.label:
             options.append(f'label={self.label}')
         if self.csv:
@@ -106,7 +117,8 @@ class Read(marcel.op.filenamesop.FilenamesOp):
             options.append('tsv')
         if self.pickle:
             options.append('pickle')
-        return f'read({",".join(options)})'
+        filenames = [str(p) for p in self.filenames] if self.filenames else '?'
+        return f'read({",".join(options)}, filename={filenames})'
 
     # AbstractOp
 
