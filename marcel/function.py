@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import marcel.exception
 import marcel.reduction
 
 import dill
@@ -36,16 +35,8 @@ class Function:
     def __setstate__(self, state):
         self.__dict__.update(state)
 
-    # Even though we don't rely on actually calling a Function with conventional function call syntax,
-    # it is convenient for callable(Function) to return True.
     def __call__(self, *args, **kwargs):
-        assert False
-
-    def call(self, op, *args, **kwargs):
-        try:
-            return self.function(*args, **kwargs)
-        except Exception as e:
-            op.fatal_error(self.function_input(args, kwargs), str(e))
+        return self.function(*args, **kwargs)
 
     def set_globals(self, globals):
         assert False
@@ -55,15 +46,6 @@ class Function:
 
     def is_grouping(self):
         return False
-
-    @staticmethod
-    def function_input(args, kwargs):
-        function_input = []
-        if args and len(args) > 0:
-            function_input.append(str(args))
-        if kwargs and len(kwargs) > 0:
-            function_input.append(str(kwargs))
-        return None if len(function_input) == 0 else ', '.join(function_input)
 
 
 class NativeFunction(Function):

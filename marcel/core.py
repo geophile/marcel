@@ -136,7 +136,16 @@ class Op(AbstractOp):
             self.receiver.receive_complete()
 
     def call(self, function, *args, **kwargs):
-        return function.call(self, *args, **kwargs)
+        try:
+            return function(*args, **kwargs)
+        except Exception as e:
+            function_input = []
+            if args and len(args) > 0:
+                function_input.append(str(args))
+            if kwargs and len(kwargs) > 0:
+                function_input.append(str(kwargs))
+            args_description = None if len(function_input) == 0 else ', '.join(function_input)
+            self.fatal_error(args_description, str(e))
 
     # This function is performance-critical, so the assertion is commented out,
     # and util.wrap_op_input is inlined.
