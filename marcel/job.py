@@ -20,9 +20,10 @@ import signal
 import sys
 import threading
 
+import dill
+
 import marcel.exception
 import marcel.object.error
-import marcel.pickler
 import marcel.util
 
 # The code for processing child input from multiple processes is adapted from here:
@@ -142,13 +143,11 @@ class Job:
     def start_process(self):
         def run_command_in_child(command, writer):
             debug(f'running: {command.source}')
-            pickler = marcel.pickler.MarcelPickler()
             try:
                 child_namespace_changes = command.execute(self.env)
                 if child_namespace_changes is not None:
                     debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
-                    pickler.dump(child_namespace_changes)
-                    writer.send(pickler.buffer)
+                    writer.send(dill.dumps(child_namespace_changes))
             except marcel.exception.KillCommandException as e:
                 marcel.util.print_to_stderr(e, self.env)
             except marcel.exception.KillAndResumeException as e:
@@ -216,8 +215,7 @@ class ChildListener(threading.Thread):
                 try:
                     input = listener.recv()
                     if input is not None:
-                        unpickler = marcel.pickler.MarcelUnpickler(input)
-                        self.child_completion_handler(unpickler.load())
+                        self.child_completion_handler(dill.loads(input))
                 except EOFError:
                     to_remove.append(listener)
 

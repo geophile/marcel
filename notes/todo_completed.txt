@@ -639,3 +639,10 @@ average: 1406
 1076
 ----
 average: 1072
+
+
+----------------------------------------------------------------------
+
+Review pickler. Probably too complicated, may not be needed.
+
+- Can Environment.remotify do a shallow copy?

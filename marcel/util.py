@@ -16,7 +16,6 @@
 import collections.abc
 import grp
 import pathlib
-import pickle
 import pwd
 import shlex
 import shutil
@@ -109,6 +108,15 @@ def normalize_path(x):
     if x.as_posix().startswith('~'):
         x = x.expanduser()
     return x
+
+
+def copy(x):
+    try:
+        return dill.loads(dill.dumps(x))
+    except Exception as e:
+        sys.stdout.flush()
+        print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__, flush=True)
+        print_stack(sys.__stderr__)
 
 
 def print_stack(file=None):

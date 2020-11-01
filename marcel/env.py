@@ -31,7 +31,6 @@ import marcel.object.color
 import marcel.object.file
 import marcel.object.process
 import marcel.opmodule
-import marcel.pickler
 import marcel.reservoir
 import marcel.util
 import marcel.version
@@ -173,47 +172,18 @@ class Environment:
         'vim'
     }
 
-    def __init__(self, config_file, old_namespace):
-        user = getpass.getuser()
-        homedir = pathlib.Path.home().resolve()
-        host = socket.gethostname()
-        editor = os.getenv('EDITOR')
-        try:
-            current_dir = pathlib.Path.cwd().resolve()
-        except FileNotFoundError:
-            raise marcel.exception.KillShellException(
-                'Current directory does not exist! cd somewhere else and try again.')
-        initial_namespace = {} if old_namespace is None else old_namespace
-        initial_namespace.update({
-            'USER': user,
-            'HOME': homedir.as_posix(),
-            'HOST': host,
-            'MARCEL_VERSION': marcel.version.VERSION,
-            'PWD': current_dir.as_posix(),
-            'DIRS': [current_dir.as_posix()],
-            'PROMPT': [Environment.DEFAULT_PROMPT],
-            'PROMPT_CONTINUATION': [Environment.DEFAULT_PROMPT_CONTINUATION],
-            'BOLD': marcel.object.color.Color.BOLD,
-            'ITALIC': marcel.object.color.Color.ITALIC,
-            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-            'Color': marcel.object.color.Color,
-        })
-        self.initialize_interactive_executables(initial_namespace)
-        if editor:
-            initial_namespace['EDITOR'] = editor
-        for key, value in marcel.builtin.__dict__.items():
-            if not key.startswith('_'):
-                initial_namespace[key] = value
-        self.namespace = marcel.nestednamespace.NestedNamespace(initial_namespace)
-        self.builtin_symbols = set(self.namespace.keys())
-        self.config_symbols = None  # Set by compute_config_symbols() after startup script is run
-        self.config_path = self.read_config(config_file)
-        self.directory_state = DirectoryState(self)
-        # TODO: This is a hack. Clean it up once the env handles command history
+    def __init__(self, config_file=None, old_namespace=None):
+        self.namespace = None
+        self.builtin_symbols = None
+        self.config_symbols = None
+        self.config_path = None
+        self.directory_state = None
         self.edited_command = None
         self.op_modules = None
         self.reader = None
-        self.modified_vars = set()
+        self.modified_vars = None
+        if config_file:
+            self.setup(config_file, old_namespace)
 
     def __getstate__(self):
         return {'namespace': self.namespace,
@@ -295,7 +265,9 @@ class Environment:
 
     # Remove Reservoirs, which can be arbitrarily large.
     def remotify(self):
-        remote_env = marcel.pickler.copy(self)
+        # Shallow copy suffices, except for the namespace which must be modified.
+        remote_env = self.shallow_copy()
+        remote_env.namespace = remote_env.namespace.copy()
         for var, value in self.namespace.items():
             if type(value) is marcel.reservoir.Reservoir:
                 del remote_env.namespace[var]
@@ -358,6 +330,53 @@ class Environment:
     def note_var_access(self, var, value):
         if type(value) not in (marcel.function.Function, marcel.core.Pipeline):
             self.modified_vars.add(var)
+
+    def setup(self, config_file, old_namespace):
+        user = getpass.getuser()
+        homedir = pathlib.Path.home().resolve()
+        host = socket.gethostname()
+        editor = os.getenv('EDITOR')
+        try:
+            current_dir = pathlib.Path.cwd().resolve()
+        except FileNotFoundError:
+            raise marcel.exception.KillShellException(
+                'Current directory does not exist! cd somewhere else and try again.')
+        initial_namespace = {} if old_namespace is None else old_namespace
+        initial_namespace.update({
+            'USER': user,
+            'HOME': homedir.as_posix(),
+            'HOST': host,
+            'MARCEL_VERSION': marcel.version.VERSION,
+            'PWD': current_dir.as_posix(),
+            'DIRS': [current_dir.as_posix()],
+            'PROMPT': [Environment.DEFAULT_PROMPT],
+            'PROMPT_CONTINUATION': [Environment.DEFAULT_PROMPT_CONTINUATION],
+            'BOLD': marcel.object.color.Color.BOLD,
+            'ITALIC': marcel.object.color.Color.ITALIC,
+            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
+            'Color': marcel.object.color.Color,
+        })
+        self.initialize_interactive_executables(initial_namespace)
+        if editor:
+            initial_namespace['EDITOR'] = editor
+        for key, value in marcel.builtin.__dict__.items():
+            if not key.startswith('_'):
+                initial_namespace[key] = value
+        self.namespace = marcel.nestednamespace.NestedNamespace(initial_namespace)
+        self.builtin_symbols = set(self.namespace.keys())
+        self.config_symbols = None  # Set by compute_config_symbols() after startup script is run
+        self.config_path = self.read_config(config_file)
+        self.directory_state = DirectoryState(self)
+        # TODO: This is a hack. Clean it up once the env handles command history
+        self.edited_command = None
+        self.op_modules = None
+        self.reader = None
+        self.modified_vars = set()
+
+    def shallow_copy(self):
+        copy = Environment()
+        copy.__dict__.update(self.__dict__)
+        return copy
 
     @staticmethod
     def immutable(x):

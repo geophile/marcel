@@ -90,7 +90,7 @@ class ReadArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
         self.add_flag_no_value('tsv', '-t', '--tsv')
         self.add_flag_no_value('pickle', '-p', '--pickle')
         self.add_flag_no_value('label', '-l', '--label')
-        self.at_most_one('csv', 'tsv')
+        self.at_most_one('csv', 'tsv', 'pickle')
         self.validate()
 
 

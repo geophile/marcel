@@ -490,4 +490,4 @@ this be done avoiding runtime penalty when logging not in use?
 
 ----------------------------------------------------------------------
 
-Review pickler. Probably too complicated, may not be needed.
+Error handling needs to be revisited.
