@@ -372,7 +372,7 @@ class Environment:
         initial_namespace['INTERACTIVE_EXECUTABLES'] = exes
 
     def note_var_access(self, var, value):
-        if type(value) not in (marcel.function.Function, marcel.core.Pipeline):
+        if not Environment.immutable(value):
             self.modified_vars.add(var)
 
     def shallow_copy(self):

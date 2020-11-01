@@ -2641,3 +2641,29 @@ ORIGINAL pipeline, which was not set up.
 
 Fix: Function.op is a lot of trouble. Get rid of it, pass in op at
 point of call.
+
+----------------------------------------------------------------------
+
+FIXED
+
+138. Handling changed .marcel.py crashes
+
+This is after defining loc in RUN_ON_STARTUP:
+
+    M-0.11.8 jao@cheese:~/git/marcel/test$ (loc)
+    Traceback (most recent call last):
+      File "/usr/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+        return _run_code(code, main_globals, None,
+      File "/usr/lib/python3.8/runpy.py", line 87, in _run_code
+        exec(code, run_globals)
+      File "/home/jao/git/marcel/marcel/main.py", line 300, in <module>
+        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
+      File "/home/jao/git/marcel/marcel/main.py", line 98, in __init__
+        self.env = marcel.env.Environment.new(config_file, old_namespace)
+      File "/home/jao/git/marcel/marcel/env.py", line 211, in new
+        env.config_path = env.read_config(config_file)
+      File "/home/jao/git/marcel/marcel/env.py", line 333, in read_config
+        exec(config_source, self.namespace.flattened(), locals)
+      File "/home/jao/git/marcel/marcel/nestednamespace.py", line 72, in flattened
+        for map in self.scopes:
+    TypeError: 'NoneType' object is not iterable

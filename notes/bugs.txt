@@ -373,3 +373,12 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/op/red.py", line 196, in receive
     accumulator[i] = op.call(functions[i], accumulator[i], x[i])
 TypeError: 'NoneType' object is not subscriptable
+
+----------------------------------------------------------------------
+
+137. Why are there excess tokens?
+
+ls *.{py,txt}
+[ls(depth=recursive, include=, filename=?)] followed by excess tokens: Comma(,), String(txt})
+
+{} should be part of the FILENAME

@@ -26,14 +26,7 @@ class NestedNamespace(dict):
 
     def __init__(self, map):
         super().__init__(map)
-        if type(map) is dict:
-            # self is the marcel namespace
-            self.scopes = []
-        elif type(map) is NestedNamespace:
-            # Copying an existing NestedNamespace
-            self.scopes = None
-        else:
-            assert False, type(map)
+        self.scopes = []
         self.params = set(map.keys())
 
     def __repr__(self):
@@ -47,6 +40,7 @@ class NestedNamespace(dict):
             map = {}
         assert type(map) is dict, type(map)
         copy = NestedNamespace(self)
+        copy.scopes = None
         self.params = set(map.keys())
         self.update(map)
         self.scopes.append(copy)
