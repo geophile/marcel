@@ -190,7 +190,10 @@ class ArgsAPI(ArgsImpl):
 
 # This operator relays receive from arg's pipeline to the arg's downstream op, but not
 # receive_complete. Arg's pipeline can be run multiple times, each time terminating with
-# receive_complete. We don't want all of these terminating arg's downstream ops. See bug 136.
+# receive_complete. We don't want these receive_complete calls terminating arg's downstream ops.
+# See bug 136.
+#
+# receive_complete is sent downstream by arg.receive_complete.
 
 class NestedPipelineTerminator(marcel.core.Op):
 
