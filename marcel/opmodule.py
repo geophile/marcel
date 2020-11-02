@@ -44,8 +44,10 @@ class OpModule:
                 if isclass:
                     parents = inspect.getmro(v)
                     if isclass and marcel.core.Op in parents:
-                        # The op class, e.g. Ls
-                        self._op_constructor = v
+                        # The op class, e.g.
+                        if op_name == v.__name__.lower():
+                            self._op_constructor = v
+                        # else: Another class in the same source
                     elif isclass and marcel.argsparser.ArgsParser in parents:
                         # E.g. LsArgsParser
                         self._args_parser_constructor = v

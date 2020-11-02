@@ -964,6 +964,25 @@ def test_api_iterator():
              expected_return=[-1.0, Error('division by zero'), 1.0])
 
 
+def test_bug_126():
+    f = reservoir('f')
+    fact = lambda x: gen(x, 1) | args(lambda n: gen(n, 1) | red(r_times) | map(lambda f: (n, f)))
+    TEST.run(test=lambda: run(fact(5) | store(f)),
+             verification=lambda: run(load(f)),
+             expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
+
+
+def test_bug_136():
+    TEST.run(lambda: run(gen(3, 1) | args(lambda n: gen(2, 100) | map(lambda x: x+n)) | red(r_plus)),
+             expected_out=[615])
+
+
+# For bugs that aren't specific to a single op.
+def test_bugs():
+    test_bug_126()
+    test_bug_136()
+
+
 def main_stable():
     test_gen()
     test_out()
@@ -998,6 +1017,7 @@ def main_stable():
     test_api_gather()
     test_api_first()
     test_api_iterator()
+    test_bugs()
 
 
 def main_dev():

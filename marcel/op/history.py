@@ -19,11 +19,13 @@ import marcel.object.historyrecord
 
 
 HELP = '''
-{L,wrap=F}history
+{L,wrap=F}history [N]
 
 Generates a stream containing the history of commands executed, in chronological order (newest last).
 The number identifying each command can be used in conjunction with the {r:edit}, {r:run}, 
 and {r:!} operators.
+
+If {r:N} is provided, it must be a positive integer. The most recent {r:N} commands will be output.
 '''
 
 
@@ -35,6 +37,7 @@ class HistoryArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('history', env)
+        self.add_anon('n', convert=self.str_to_int, default=None)
         self.validate()
 
 
@@ -42,15 +45,17 @@ class History(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.n = None
 
     def __repr__(self):
-        return 'history()'
+        return 'history()' if self.n is None else f'history({self.n})'
 
     # AbstractOp
 
     def receive(self, _):
         history = self.env().reader.history()
-        for i in range(len(history)):
+        start = 0 if self.n is None else len(history) - self.n
+        for i in range(start, len(history)):
             self.send(marcel.object.historyrecord.HistoryRecord(i, history[i]))
 
     # Op

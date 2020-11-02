@@ -142,6 +142,7 @@ class ArgsInteractive(ArgsImpl):
         self.check_args()
         self.pipeline = op.pipeline_arg_value(env, op.pipeline_arg)
         self.pipeline.set_error_handler(op.owner.error_handler)
+        self.pipeline.append(NestedPipelineTerminator(op.env()))
         self.pipeline.last_op().receiver = op.receiver
         scope = {}
         for param in self.params:
@@ -180,6 +181,30 @@ class ArgsAPI(ArgsImpl):
         op = self.op
         pipeline = op.pipeline_arg(*self.args).create_pipeline()
         pipeline.set_error_handler(op.owner.error_handler)
+        # TODO: Is this necessary? connecting receiver does the same.
         pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
+        pipeline.append(NestedPipelineTerminator(op.env()))
         marcel.core.Command(env, None, pipeline).execute()
         self.args.clear()
+
+
+# This operator relays receive from arg's pipeline to the arg's downstream op, but not
+# receive_complete. Arg's pipeline can be run multiple times, each time terminating with
+# receive_complete. We don't want all of these terminating arg's downstream ops. See bug 136.
+
+class NestedPipelineTerminator(marcel.core.Op):
+
+    def __init__(self, env):
+        super().__init__(env)
+
+    def __repr__(self):
+        return 'nested_pipeline_terminator'
+
+    def setup(self):
+        pass
+
+    def receive(self, x):
+        self.send(x)
+
+    def receive_complete(self):
+        pass

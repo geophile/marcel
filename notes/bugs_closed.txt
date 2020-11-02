@@ -2646,6 +2646,107 @@ point of call.
 
 FIXED
 
+136. red after args crashes
+
+M-0.11.8 jao@cheese:~/git/marcel$ ls -0 marcel test \
+| args [d: ls -fr (d) \
+           | ext py \
+           | (f: f.read().count('\n')) \
+           | red + \
+           | (n: (d, n))] \
+| map (d, n: n) \
+| red +
+13358
+Process Process-9:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 389, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/marcel/marcel/core.py", line 337, in receive
+    self.ops[0].receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 147, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/filenamesop.py", line 85, in receive
+    self.visit(root, 0)
+  File "/home/jao/git/marcel/marcel/op/filenamesop.py", line 91, in visit
+    self.action(self, file)
+  File "/home/jao/git/marcel/marcel/op/ls.py", line 123, in send_path
+    op.send(file)
+  File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 147, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/args.py", line 77, in receive
+    self.impl.receive(x)
+  File "/home/jao/git/marcel/marcel/op/args.py", line 110, in receive
+    self.run_pipeline(self.op.env())
+  File "/home/jao/git/marcel/marcel/op/args.py", line 166, in run_pipeline
+    marcel.core.Command(env, None, self.pipeline).execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 390, in execute
+    self.pipeline.receive_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 340, in receive_complete
+    self.ops[0].receive_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 161, in receive_complete
+    self.send_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 136, in send_complete
+    self.receiver.receive_complete()
+  File "/home/jao/git/marcel/marcel/op/runpipeline.py", line 71, in receive_complete
+    self.pipeline.receive_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 340, in receive_complete
+    self.ops[0].receive_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 161, in receive_complete
+    self.send_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 136, in send_complete
+    self.receiver.receive_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 161, in receive_complete
+    self.send_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 136, in send_complete
+    self.receiver.receive_complete()
+  File "/home/jao/git/marcel/marcel/op/red.py", line 167, in receive_complete
+    self.reducer.receive_complete()
+  File "/home/jao/git/marcel/marcel/op/red.py", line 203, in receive_complete
+    op.send(tuple(self.accumulator))
+  File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 147, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/map.py", line 68, in receive
+    self.send(output)
+  File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 147, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/map.py", line 68, in receive
+    self.send(output)
+  File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 147, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/red.py", line 164, in receive
+    self.reducer.receive(x)
+  File "/home/jao/git/marcel/marcel/op/red.py", line 196, in receive
+    accumulator[i] = op.call(functions[i], accumulator[i], x[i])
+TypeError: 'NoneType' object is not subscriptable
+
+
+args pipeline's receive_complete propagates after the pipeline.
+
+Last op of args pipeline should not propagate r_c to op after args. E.g.
+
+     ... args [... map (...)] | red ...
+
+map's r_c should not propagate to red's r_c. Red's r_c should be
+invoked by args r_c.
+
+----------------------------------------------------------------------
+
+FIXED
+
 138. Handling changed .marcel.py crashes
 
 This is after defining loc in RUN_ON_STARTUP:

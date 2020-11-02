@@ -491,3 +491,15 @@ this be done avoiding runtime penalty when logging not in use?
 ----------------------------------------------------------------------
 
 Error handling needs to be revisited.
+
+----------------------------------------------------------------------
+
+ls abc.{x,y}
+
+is not parsed properly, because the comma is its own token.
+
+Could fix this by recognizing COMMA only in the right context. (Lexer
+would need to know Parser state.)
+
+OR: in the context that a comma is used, look for string instead, and
+check that it is a comma.

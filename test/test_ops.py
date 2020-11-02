@@ -1172,9 +1172,15 @@ def test_bug_126():
              expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
 
 
+def test_bug_136():
+    TEST.run('gen 3 1 | args [n: gen 2 100 | (x: x+n)] | red +',
+             expected_out=[615])
+
+
 # For bugs that aren't specific to a single op.
 def test_bugs():
     test_bug_126()
+    test_bug_136()
 
 
 def main_stable():
