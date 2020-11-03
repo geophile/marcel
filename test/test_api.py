@@ -717,8 +717,8 @@ def test_read():
     TEST.run(lambda: run(read('/tmp/read/nosuchfile')),
              expected_err='No qualifying paths')
     # directory
-    TEST.run(lambda: run(read('/tmp/read')),
-             expected_out=[Error('Not a file')])
+    TEST.run(lambda: run(read('/tmp/read', depth=0)),
+             expected_out=[])
     # symlink
     os.system('ln -s /tmp/read/f1.csv /tmp/read/symlink_f1.csv')
     TEST.run(lambda: run(read('/tmp/read/symlink_f1.csv')),

@@ -125,7 +125,6 @@ class Read(marcel.op.filenamesop.FilenamesOp):
     def setup(self):
         self.file = True
         super().setup()
-        self.reader = ()
         self.reader = (CSVReader(self) if self.csv or self.tsv else
                        PickleReader(self) if self.pickle else
                        TextReader(self))
