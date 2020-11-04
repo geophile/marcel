@@ -20,7 +20,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/marcel/op/args.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/args.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/history.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/history.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/todo_completed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo_completed.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -586,7 +589,7 @@
       <workItem from="1604338345063" duration="1222000" />
       <workItem from="1604351175074" duration="1329000" />
       <workItem from="1604425374798" duration="7677000" />
-      <workItem from="1604507044068" duration="1113000" />
+      <workItem from="1604507044068" duration="2643000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -912,10 +915,10 @@
       <screen x="1920" y="0" width="2560" height="1440" />
     </state>
     <state x="3837" y="574" width="306" height="687" key="refactoring.ChangeSignatureDialog/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1600204877299" />
-    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup" timestamp="1604507981394">
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup" timestamp="1604509778173">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1604507981394" />
+    <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1604509778173" />
     <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1604200554920" />
     <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1599329664953" />
     <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1604092947241" />

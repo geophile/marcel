@@ -646,3 +646,27 @@ average: 1072
 Review pickler. Probably too complicated, may not be needed.
 
 - Can Environment.remotify do a shallow copy?
+
+----------------------------------------------------------------------
+
+Start this command: ls -r ~ > ./x, and put it in the background.
+
+Monitoring progress is problematic.
+
+- Checking the file size works.
+
+- Running tail occasionally: It executes but
+  shouldn't. PickleFile.reader() asserts that there are no writers,
+  and that's not firing.
+
+- Ignoring that, tail usually fails: _pickle.UnpicklingError: pickle
+  data was truncated. I'm guessing that dill.dump() flushes to disk on
+  buffer boundaries, not object boundaries, so reading a file while
+  it's being written can't work.
+
+BUT: 
+
+- pickle seems to avoid this problem. Or at least it's much rarer.
+
+- pickle is also a lot faster, 20x. See experiments/dill_vs_pickle.py
+
