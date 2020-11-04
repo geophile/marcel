@@ -1109,9 +1109,9 @@ def test_args():
              expected_out=[0, 1, 2, 3, 4])
     # window
     TEST.run('gen 3 | args [w: gen 10 | window -d (w)]',
-             expected_out=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+             expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
                            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                           [0, 1], [2, 3], [4, 5], [6, 7], [8, 9]])
+                           (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)])
     # nested args
     TEST.run('gen 3 | args [i: gen 3 (i+100) | args [j: gen 3 (j+1000)]]',
              expected_out=[1100, 1101, 1102, 1101, 1102, 1103, 1102, 1103, 1104,

@@ -140,10 +140,12 @@ class ArgsInteractive(ArgsImpl):
             raise marcel.exception.KillCommandException('The args pipeline must be parameterized.')
         self.n_params = len(self.params)
         self.check_args()
-        self.pipeline = op.pipeline_arg_value(env, op.pipeline_arg)
+        self.pipeline = op.pipeline_arg_value(env, op.pipeline_arg).copy()
         self.pipeline.set_error_handler(op.owner.error_handler)
-        self.pipeline.append(NestedPipelineTerminator(op.env()))
-        self.pipeline.last_op().receiver = op.receiver
+        # By appending map(self.send_pipeline_output) to the pipeline, we relay pipeline output
+        # to arg's downstream operator. But receive_complete is a dead end, it doesn't propagate
+        # to arg's downstream, which was the issue in bug 136.
+        self.pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
         scope = {}
         for param in self.params:
             scope[param] = None
@@ -179,35 +181,11 @@ class ArgsAPI(ArgsImpl):
 
     def run_pipeline(self, env):
         op = self.op
+        # An API pipeline is a Python function which, when evaluated, yields a pipeline composed of op.core.Nodes.
+        # This function is the value of the op's pipeline_arg field. So op.pipeline_arg(*self.args) evaluates
+        # the function (using the current value of the args), and yields the pipeline to execute.
         pipeline = op.pipeline_arg(*self.args).create_pipeline()
         pipeline.set_error_handler(op.owner.error_handler)
-        # TODO: Is this necessary? connecting receiver does the same.
         pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
-        pipeline.append(NestedPipelineTerminator(op.env()))
         marcel.core.Command(env, None, pipeline).execute()
         self.args.clear()
-
-
-# This operator relays receive from arg's pipeline to the arg's downstream op, but not
-# receive_complete. Arg's pipeline can be run multiple times, each time terminating with
-# receive_complete. We don't want these receive_complete calls terminating arg's downstream ops.
-# See bug 136.
-#
-# receive_complete is sent downstream by arg.receive_complete.
-
-class NestedPipelineTerminator(marcel.core.Op):
-
-    def __init__(self, env):
-        super().__init__(env)
-
-    def __repr__(self):
-        return 'nested_pipeline_terminator'
-
-    def setup(self):
-        pass
-
-    def receive(self, x):
-        self.send(x)
-
-    def receive_complete(self):
-        pass
