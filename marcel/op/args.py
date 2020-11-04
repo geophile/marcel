@@ -181,8 +181,9 @@ class ArgsAPI(ArgsImpl):
 
     def run_pipeline(self, env):
         op = self.op
-        # An API pipeline is a Python function which, when evaluated, yields a pipeline composed of op.core.Nodes.
-        # This function is the value of the op's pipeline_arg field. So op.pipeline_arg(*self.args) evaluates
+        # Through the API, a pipeline is expressed as a Python function which, when evaluated,
+        # yields a pipeline composed of op.core.Nodes. This function is the value of the op's
+        # pipeline_arg field. So op.pipeline_arg(*self.args) evaluates
         # the function (using the current value of the args), and yields the pipeline to execute.
         pipeline = op.pipeline_arg(*self.args).create_pipeline()
         pipeline.set_error_handler(op.owner.error_handler)
