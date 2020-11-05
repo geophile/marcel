@@ -21,6 +21,13 @@ import marcel.function
 class Assign(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the pipeline.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.var = None
         self.string = None
@@ -29,11 +36,23 @@ class Assign(marcel.core.Op):
         self.value = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'assign({self.var}, {self.value})'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Implemented variables.
+
+        Args:
+            self: (todo): write your description
+        """
         assert self.var is not None
         count = 0
         if self.string is not None:
@@ -51,17 +70,43 @@ class Assign(marcel.core.Op):
         assert count == 1, count
 
     def set_env(self, env):
+        """
+        Set the environment variable.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().set_env(env)
         if isinstance(self.value, marcel.function.Function):
             self.value.set_globals(env.vars())
 
     def receive(self, _):
+        """
+        Receive a variable.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         self.env().setvar(self.var, self.value)
 
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

@@ -23,6 +23,14 @@ import marcel.util
 class Host:
 
     def __init__(self, host, cluster):
+        """
+        Initialize a host.
+
+        Args:
+            self: (todo): write your description
+            host: (str): write your description
+            cluster: (str): write your description
+        """
         self.host = host
         self.cluster = cluster
         try:
@@ -38,22 +46,57 @@ class Host:
                     f'Cannot understand {host} as a host name or as an IP address.')
 
     def __repr__(self):
+        """
+        Return the repr representation of this instruction.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.addr if self.name is None else self.name
 
     def __hash__(self):
+        """
+        Return the hash of the host.
+
+        Args:
+            self: (todo): write your description
+        """
         return hash(self.host)
 
     def __eq__(self, other):
+        """
+        Return true if other is equal false otherwise false.
+
+        Args:
+            self: (todo): write your description
+            other: (todo): write your description
+        """
         return self.host == other.host
 
     @property
     def user(self):
+        """
+        Return a user s user.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.cluster.user
 
 
 class Cluster:
 
     def __init__(self, user, identity=None, host=None, hosts=None):
+        """
+        Initialize the connection.
+
+        Args:
+            self: (todo): write your description
+            user: (str): write your description
+            identity: (todo): write your description
+            host: (str): write your description
+            hosts: (str): write your description
+        """
         if (host is None) == (hosts is None):
             raise marcel.exception.KillShellException(
                 'Remote configuration requires the specification of host, or hosts, but not both.')
@@ -70,5 +113,11 @@ class Cluster:
         self.identity = identity
 
     def __repr__(self):
+        """
+        Return a human - readable string.
+
+        Args:
+            self: (todo): write your description
+        """
         hosts = ', '.join([str(host) for host in self.hosts])
         return f'Cluster({self.user}, {hosts})'

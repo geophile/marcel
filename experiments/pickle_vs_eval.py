@@ -17,6 +17,12 @@ import marcel.util
 
 
 def ab(namespace):
+    """
+    Get a dictionary of all the attributes of a namespace.
+
+    Args:
+        namespace: (str): write your description
+    """
     m = {}
     for key in ('a', 'b'):
         m[key] = namespace.get(key, None)

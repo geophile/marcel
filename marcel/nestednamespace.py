@@ -25,17 +25,43 @@
 class NestedNamespace(dict):
 
     def __init__(self, map):
+        """
+        Initialize the map.
+
+        Args:
+            self: (todo): write your description
+            map: (callable): write your description
+        """
         super().__init__(map)
         self.scopes = []
         self.params = set(map.keys())
 
     def __repr__(self):
+        """
+        Return a representation of this object.
+
+        Args:
+            self: (todo): write your description
+        """
         return str(self.flattened())
 
     def n_scopes(self):
+        """
+        Return the number of the scopes.
+
+        Args:
+            self: (todo): write your description
+        """
         return len(self.scopes) + 1
 
     def push_scope(self, map):
+        """
+        Push a new scope to the scope.
+
+        Args:
+            self: (todo): write your description
+            map: (array): write your description
+        """
         if map is None:
             map = {}
         assert type(map) is dict, type(map)
@@ -46,6 +72,12 @@ class NestedNamespace(dict):
         self.scopes.append(copy)
 
     def pop_scope(self):
+        """
+        Removes the current scopes.
+
+        Args:
+            self: (todo): write your description
+        """
         assert len(self.scopes) > 0
         # Remove keys from this scope
         for key in self.params:
@@ -62,6 +94,12 @@ class NestedNamespace(dict):
         self.params = scope.params
 
     def flattened(self):
+        """
+        Returns a copy of this : class.
+
+        Args:
+            self: (array): write your description
+        """
         flattened = self.copy()
         for map in self.scopes:
             flattened.update(map)

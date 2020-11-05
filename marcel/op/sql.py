@@ -70,6 +70,16 @@ Note that the {r:--commit} and {r:--autocommit} flags are mutually exclusive.
 
 
 def sql(env, *args, db=None, autocommit=None, update_counts=None, commit=None):
+    """
+    Execute a sql statement.
+
+    Args:
+        env: (todo): write your description
+        db: (todo): write your description
+        autocommit: (array): write your description
+        update_counts: (bool): write your description
+        commit: (array): write your description
+    """
     if len(args) == 0:
         raise marcel.exception.KillCommandException('No sql statement provided')
     statement = args[0]
@@ -92,6 +102,13 @@ def sql(env, *args, db=None, autocommit=None, update_counts=None, commit=None):
 class SqlArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize a list of files.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('sql', env)
         self.add_flag_one_value('db', '-d', '--db', target='dbvar')
         self.add_flag_no_value('autocommit', '-a', '--autocommit')
@@ -106,6 +123,13 @@ class SqlArgsParser(marcel.argsparser.ArgsParser):
 class Sql(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the sql statement.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.dbvar = None
         self.db = None
@@ -121,11 +145,23 @@ class Sql(marcel.core.Op):
         self.total_update_count = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'sql({self.statement})'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Initialize the database.
+
+        Args:
+            self: (todo): write your description
+        """
         self.statement = self.eval_function('statement_arg', str)
         self.args = self.eval_function('args_arg')
         if self.commit is None:
@@ -150,6 +186,13 @@ class Sql(marcel.core.Op):
         self.delegate = self.classify_statement()(self.connection, self)
 
     def receive(self, x):
+        """
+        Receive a reply. x.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         try:
             self.delegate.receive(x)
         except Exception as e:
@@ -157,6 +200,12 @@ class Sql(marcel.core.Op):
             raise marcel.exception.KillCommandException(e)
 
     def receive_complete(self):
+        """
+        Receive the next chunk.
+
+        Args:
+            self: (todo): write your description
+        """
         try:
             self.delegate.receive_complete()
             self.connection.commit()
@@ -170,6 +219,12 @@ class Sql(marcel.core.Op):
     # For use by this class
 
     def classify_statement(self):
+        """
+        Classify a statement.
+
+        Args:
+            self: (todo): write your description
+        """
         verb_start = 0
         while self.statement[verb_start].isspace():
             verb_start += 1
@@ -186,17 +241,45 @@ class Sql(marcel.core.Op):
 class SqlStatement:
 
     def __init__(self, connection, op):
+        """
+        Initialize a connection.
+
+        Args:
+            self: (todo): write your description
+            connection: (todo): write your description
+            op: (todo): write your description
+        """
         self.connection = connection
         self.op = op
 
     def receive(self, x):
+        """
+        Receive the callback function.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         pass
 
     def receive_complete(self):
+        """
+        Receive the command is received.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.op.autocommit is False:
             self.connection.commit()
 
     def commit_if_necessary(self, update_count):
+        """
+        Commit the changes to the commit
+
+        Args:
+            self: (todo): write your description
+            update_count: (str): write your description
+        """
         op = self.op
         if not op.autocommit and op.commit > 0:
             op.total_update_count += update_count
@@ -208,9 +291,24 @@ class SqlStatement:
 class SqlSelect(SqlStatement):
 
     def __init__(self, connection, op):
+        """
+        Initialize a connection.
+
+        Args:
+            self: (todo): write your description
+            connection: (todo): write your description
+            op: (todo): write your description
+        """
         super().__init__(connection, op)
 
     def receive(self, x):
+        """
+        Receive a query.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         op = self.op
         args = op.args if x is None else x
         for row in self.connection.query(op.statement, args):
@@ -220,9 +318,24 @@ class SqlSelect(SqlStatement):
 class SqlInsert(SqlStatement):
 
     def __init__(self, connection, op):
+        """
+        Initialize a connection.
+
+        Args:
+            self: (todo): write your description
+            connection: (todo): write your description
+            op: (todo): write your description
+        """
         super().__init__(connection, op)
 
     def receive(self, x):
+        """
+        Receive a new operation.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         op = self.op
         args = op.args if x is None else x
         update_count = self.connection.insert(op.statement, args)
@@ -234,9 +347,24 @@ class SqlInsert(SqlStatement):
 class SqlOther(SqlStatement):
 
     def __init__(self, connection, op):
+        """
+        Initialize a connection.
+
+        Args:
+            self: (todo): write your description
+            connection: (todo): write your description
+            op: (todo): write your description
+        """
         super().__init__(connection, op)
 
     def receive(self, x):
+        """
+        Receive a new transaction.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         op = self.op
         args = op.args if x is None else x
         update_count = self.connection.execute(op.statement, args)

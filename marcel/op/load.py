@@ -57,6 +57,13 @@ input to {r:join} comes from loading {r:def}.
 
 
 def load(env, target):
+    """
+    Load a marcel.
+
+    Args:
+        env: (todo): write your description
+        target: (str): write your description
+    """
     load = Load(env)
     if type(target) not in (str, marcel.reservoir.Reservoir):
         raise marcel.exception.KillCommandException(f'{target} is not a Reservoir: {type(target)}')
@@ -66,6 +73,13 @@ def load(env, target):
 class LoadArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('load', env)
         self.add_anon('target')
         self.validate()
@@ -74,17 +88,36 @@ class LoadArgsParser(marcel.argsparser.ArgsParser):
 class Load(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.target = None
         self.picklefile = None
         self.reader = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'load({self.target})'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Initialize the marcel.
+
+        Args:
+            self: (todo): write your description
+        """
         if type(self.target) is marcel.reservoir.Reservoir:
             # API
             self.picklefile = self.target
@@ -110,6 +143,13 @@ class Load(marcel.core.Op):
         self.reader = iter(self.picklefile)
 
     def receive(self, _):
+        """
+        Receive a message from the socket.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         try:
             while True:
                 self.send(next(self.reader))
@@ -120,4 +160,10 @@ class Load(marcel.core.Op):
             raise
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

@@ -36,25 +36,64 @@ TRACE = marcel.util.Trace('/tmp/farcel.log')
 class PickleOutput(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.pickler = dill.Pickler(sys.stdout.buffer)
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return 'pickleoutput()'
 
     def setup(self):
+        """
+        Set up a new setup.
+
+        Args:
+            self: (todo): write your description
+        """
         pass
 
     def receive(self, x):
+        """
+        Receive a pickler.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         TRACE.write(f'Pickling: ({type(x)}) {x}')
         self.pickler.dump(x)
 
     def receive_error(self, error):
+        """
+        Receive the error message.
+
+        Args:
+            self: (todo): write your description
+            error: (todo): write your description
+        """
         TRACE.write(f'Pickling error: ({type(error)}) {error}')
         self.pickler.dump(error)
         super().receive_error(error)
 
     def receive_complete(self):
+        """
+        Receive the next complete.
+
+        Args:
+            self: (todo): write your description
+        """
         TRACE.write('Closing stdout')
         sys.stdout.buffer.close()
 
@@ -62,6 +101,14 @@ class PickleOutput(marcel.core.Op):
 class PipelineRunner(threading.Thread):
 
     def __init__(self, env, pipeline):
+        """
+        Initialize the pipeline.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+            pipeline: (str): write your description
+        """
         super().__init__()
         self.env = env
         self.pickler = PickleOutput(env)
@@ -69,6 +116,12 @@ class PipelineRunner(threading.Thread):
         self.pipeline = pipeline
 
     def run(self):
+        """
+        Run the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         try:
             TRACE.write(f'PipelineRunner: About to setup {self.pipeline}')
             self.pipeline.setup()
@@ -85,6 +138,12 @@ class PipelineRunner(threading.Thread):
 
 
 def kill_descendents(signal_id):
+    """
+    Kill the pid of the current process.
+
+    Args:
+        signal_id: (str): write your description
+    """
     TRACE.write('In kill_self_and_descendents')
     try:
         pid = os.getpid()
@@ -105,6 +164,12 @@ def kill_descendents(signal_id):
 
 # Adapted from Environment.read_config
 def read_config(config_path=None):
+    """
+    Read configuration file.
+
+    Args:
+        config_path: (str): write your description
+    """
     current_dir = pathlib.Path.cwd().resolve()
     namespace = {
         'USER': getpass.getuser(),
@@ -133,11 +198,28 @@ def read_config(config_path=None):
 
 
 def shutdown():
+    """
+    Shutdown a shutdown.
+
+    Args:
+    """
     pass
 
 
 def main():
+    """
+    Main entry point.
+
+    Args:
+    """
     def noop_error_handler(env, error):
+        """
+        Handler for error handler.
+
+        Args:
+            env: (todo): write your description
+            error: (todo): write your description
+        """
         pass
     try:
         namespace = marcel.nestednamespace.NestedNamespace(read_config())

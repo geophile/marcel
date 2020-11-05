@@ -23,6 +23,12 @@ tl.x = None
 class Env:
     
     def __init__(self):
+        """
+        Initialize the thread.
+
+        Args:
+            self: (todo): write your description
+        """
         self.thread_local = threading.local()
         self.thread_local.x = None
 
@@ -34,10 +40,23 @@ env = Env()
 class Thread(threading.Thread):
 
     def __init__(self, x):
+        """
+        Initialize the internal state.
+
+        Args:
+            self: (todo): write your description
+            x: (int): write your description
+        """
         super().__init__()
         self.x = x
 
     def run(self):
+        """
+        Runs the thread
+
+        Args:
+            self: (todo): write your description
+        """
         env.thread_local.x = self.x
         for i in range(10):
             print(f'{self.x}: {env.thread_local.x}')

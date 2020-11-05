@@ -23,6 +23,12 @@ RESERVOIRS = set()
 
 
 def shutdown(main_pid):
+    """
+    Shutdown the main process.
+
+    Args:
+        main_pid: (int): write your description
+    """
     if os.getpid() == main_pid:
         for reservoir in RESERVOIRS:
             reservoir.close()
@@ -37,6 +43,14 @@ class Reservoir(marcel.picklefile.PickleFile):
     FLUSH_INTERVAL_SEC = 1
 
     def __init__(self, name, path=None):
+        """
+        Initialize a new directory.
+
+        Args:
+            self: (todo): write your description
+            name: (str): write your description
+            path: (str): write your description
+        """
         super().__init__(tempfile.mkstemp()[1] if path is None else path)
         self.name = name
         RESERVOIRS.add(self)

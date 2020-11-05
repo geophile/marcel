@@ -52,6 +52,13 @@ I.e., it is like running {n:from MODULE import SYMBOL as NAME}.
 class ImportArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('head', env)
         self.add_anon('module')
         self.add_anon('symbol', default=None)
@@ -62,12 +69,25 @@ class ImportArgsParser(marcel.argsparser.ArgsParser):
 class Import(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.module = None
         self.symbol = None
         self.name = None
 
     def __repr__(self):
+        """
+        Return a human - readable representation of this object.
+
+        Args:
+            self: (todo): write your description
+        """
         buffer = [f'import({self.module}']
         if self.symbol:
             buffer.append(f', {self.symbol}')
@@ -79,12 +99,25 @@ class Import(marcel.core.Op):
     # AbstractOp
     
     def setup(self):
+        """
+        Initialize the marcel.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.symbol and not (self.symbol == '*' or self.symbol.isidentifier()):
             raise marcel.exception.KillCommandException(f'symbol must be * or a valid identifier: {self.symbol}')
         if self.name and not self.name.isidentifier():
             raise marcel.exception.KillCommandException(f'name is not a valid identifier: {self.name}')
 
     def receive(self, _):
+        """
+        Receive a symbol.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         env = self.env()
         try:
             module = importlib.import_module(self.module)
@@ -105,7 +138,19 @@ class Import(marcel.core.Op):
                 self.non_fatal_error(message=f'{self.symbol} is not defined in {self.module}')
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

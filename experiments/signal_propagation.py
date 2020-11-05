@@ -27,20 +27,45 @@ PID = os.getpid()
 class Counter:
 
     def __init__(self, path):
+        """
+        Initialize the specified path.
+
+        Args:
+            self: (todo): write your description
+            path: (str): write your description
+        """
         self.path = path
         if not pathlib.Path(path).exists():
             self.write(0)
 
     def read(self):
+        """
+        Return the number of the file.
+
+        Args:
+            self: (todo): write your description
+        """
         with open(self.path, 'r') as count_file:
             return int(count_file.readlines()[0].strip())
 
     def write(self, x):
+        """
+        Writes the file.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         with open(self.path, 'w') as count_file:
             count_file.writelines([str(x)])
 
 
 def spawn():
+    """
+    Spawn a new child process.
+
+    Args:
+    """
     process = subprocess.Popen('python3 signal_propagation.py',
                                shell=True,
                                executable='/bin/bash',
@@ -56,6 +81,11 @@ def spawn():
 
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     counter = Counter(COUNTER_FILE)
     n = counter.read() + 1  # + 1: this process
     print(f'process {PID}: counter = {n}')

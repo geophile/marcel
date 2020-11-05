@@ -17,14 +17,31 @@ import marcel.nestednamespace
 
 
 def fail():
+    """
+    Check if the failure failure failure.
+
+    Args:
+    """
     assert False
 
 
 def check_match(actual, expected):
+    """
+    Check that the expected match matches.
+
+    Args:
+        actual: (todo): write your description
+        expected: (todo): write your description
+    """
     assert actual == expected, f'actual: {actual}\nexpected: {expected}'
 
 
 def test_namespace():
+    """
+    Test if a namespace is valid.
+
+    Args:
+    """
     ns = marcel.nestednamespace.NestedNamespace({'a': 1, 'b': 2})
     try:
         del ns['c']
@@ -49,6 +66,11 @@ def test_namespace():
 
 
 def test_function():
+    """
+    Test if a function in the function.
+
+    Args:
+    """
     # Does a namespace work for function definition?
     source = 'lambda a: a + b + c'
     ns = marcel.nestednamespace.NestedNamespace({'b': 1, 'c': 2})
@@ -68,6 +90,11 @@ def test_function():
 
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     test_namespace()
     test_function()
 

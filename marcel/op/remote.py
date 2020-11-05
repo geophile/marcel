@@ -27,6 +27,13 @@ import marcel.util
 
 
 def remote(env, pipeline):
+    """
+    Create a new pipeline.
+
+    Args:
+        env: (todo): write your description
+        pipeline: (todo): write your description
+    """
     assert isinstance(pipeline, marcel.core.Pipelineable)
     pipeline = pipeline.create_pipeline()
     return Remote(env), [pipeline]
@@ -35,6 +42,13 @@ def remote(env, pipeline):
 class RemoteArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('remote', env)
         self.add_anon('pipeline', convert=self.check_pipeline)
         self.validate()
@@ -43,20 +57,46 @@ class RemoteArgsParser(marcel.argsparser.ArgsParser):
 class Remote(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the pipeline.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.host = None
         self.pipeline = None
         self.process = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'remote({self.host}, {self.pipeline})'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Sets the host.
+
+        Args:
+            self: (todo): write your description
+        """
         self.host = self.eval_function('host', str)
 
     def receive(self, _):
+        """
+        Receive data from the socket.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         # Start the remote process
         command = ' '.join([
             'ssh',
@@ -102,9 +142,22 @@ class Remote(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     # Remote
 
     def set_host(self, host):
+        """
+        Set the host s host.
+
+        Args:
+            self: (todo): write your description
+            host: (str): write your description
+        """
         self.host = host

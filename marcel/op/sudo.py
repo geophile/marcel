@@ -41,6 +41,13 @@ Running the command via {r:sudo} would work:
 
 
 def sudo(env, pipeline, *args):
+    """
+    Create a new environment.
+
+    Args:
+        env: (todo): write your description
+        pipeline: (todo): write your description
+    """
     args = list(args)
     args.append(pipeline.create_pipeline())
     return Sudo(env), args
@@ -54,11 +61,26 @@ def sudo(env, pipeline, *args):
 class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('sudo', env)
         self.add_anon_list('args', convert=self.check_str_and_pipeline)
         self.validate()
 
     def check_str_and_pipeline(self, arg, x):
+        """
+        Check if arg is a string.
+
+        Args:
+            self: (todo): write your description
+            arg: (todo): write your description
+            x: (todo): write your description
+        """
         # This isn't really accurate. The last arg must be a pipeline. The preceding ones must be str.
         if type(x) not in (str, marcel.core.Pipeline):
             raise marcel.argsparser.ArgsError(self.op_name,
@@ -69,16 +91,35 @@ class SudoArgsParser(marcel.argsparser.ArgsParser):
 class Sudo(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.args = None
         self.pipeline = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'sudo({self.pipeline})'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Sets up the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('Missing pipeline')
         self.pipeline = self.args.pop()
@@ -86,12 +127,26 @@ class Sudo(marcel.core.Op):
             raise marcel.exception.KillCommandException('Last argument to sudo must be a pipeline')
 
     def set_env(self, env):
+        """
+        Sets the environment variable.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().set_env(env)
         self.pipeline.set_env(env)
 
     # Op
 
     def receive(self, _):
+        """
+        Receive data from the socket.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         # Start the remote process
         command = ' '.join(['sudo'] + self.args + ['farcel.py'])
         self.process = subprocess.Popen(command,
@@ -128,4 +183,10 @@ class Sudo(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

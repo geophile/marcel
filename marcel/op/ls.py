@@ -55,6 +55,18 @@ Run {n:help file} for more information on {n:File} objects.
 
 
 def ls(env, *paths, depth=None, recursive=False, file=False, dir=False, symlink=False):
+    """
+    List files. dirs folder.
+
+    Args:
+        env: (todo): write your description
+        paths: (str): write your description
+        depth: (int): write your description
+        recursive: (bool): write your description
+        file: (str): write your description
+        dir: (str): write your description
+        symlink: (array): write your description
+    """
     args = []
     if depth == 0:
         args.append('-0')
@@ -75,6 +87,13 @@ def ls(env, *paths, depth=None, recursive=False, file=False, dir=False, symlink=
 class LsArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
 
     def __init__(self, env):
+        """
+        Initializes the env.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('ls', env)
         self.add_flag_no_value('file', '-f', '--file')
         self.add_flag_no_value('dir', '-d', '--dir')
@@ -85,9 +104,22 @@ class LsArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
 class Ls(marcel.op.filenamesop.FilenamesOp):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env, Ls.send_path)
 
     def __repr__(self):
+        """
+        Return a human - readable string representation of this d1.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.d0:
             depth = '0'
         elif self.d1:
@@ -107,12 +139,25 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     # For use by this class
 
     @staticmethod
     def send_path(op, file):
+        """
+        Send a file path
+
+        Args:
+            op: (todo): write your description
+            file: (str): write your description
+        """
         assert type(file) is File, f'{type(file)} {file}'
         mode = file.path.lstat().st_mode
         s = stat.S_ISLNK(mode)

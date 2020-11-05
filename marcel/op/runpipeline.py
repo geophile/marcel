@@ -20,6 +20,13 @@ import marcel.exception
 class RunPipeline(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.var = None
         self.args_arg = None
@@ -29,11 +36,23 @@ class RunPipeline(marcel.core.Op):
         self.pipeline = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'runpipeline({self.pipeline})'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Setup the pipeline setup.
+
+        Args:
+            self: (todo): write your description
+        """
         self.args = self.eval_function('args_arg')
         self.kwargs = self.eval_function('kwargs_arg')
         self.pipeline = self.getvar(self.var)
@@ -54,11 +73,25 @@ class RunPipeline(marcel.core.Op):
         self.pipeline.last_op().receiver = self.receiver
 
     def set_env(self, env):
+        """
+        Set the environment variable.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().set_env(env)
 
     # Op
 
     def receive(self, x):
+        """
+        Receive the given x.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         self.env().vars().push_scope(self.pipeline_args())
         try:
             self.pipeline.setup()
@@ -68,16 +101,34 @@ class RunPipeline(marcel.core.Op):
             self.env().vars().pop_scope()
 
     def receive_complete(self):
+        """
+        Receive a complete complete packet.
+
+        Args:
+            self: (todo): write your description
+        """
         self.pipeline.receive_complete()
         self.send_complete()
 
     # RunPipeline
 
     def set_pipeline_args(self, args, kwargs):
+        """
+        Set the pipeline args.
+
+        Args:
+            self: (todo): write your description
+        """
         self.args_arg = args
         self.kwargs_arg = kwargs
 
     def pipeline_args(self):
+        """
+        Parse arguments dictionary.
+
+        Args:
+            self: (todo): write your description
+        """
         map = None
         params = self.pipeline.parameters()
         if params is not None:

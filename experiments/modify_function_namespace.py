@@ -7,6 +7,12 @@ function = None
 
 
 def g(from_source):
+    """
+    Convenience function.
+
+    Args:
+        from_source: (str): write your description
+    """
     global function
     function = from_source
 

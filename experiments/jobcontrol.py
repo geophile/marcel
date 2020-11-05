@@ -10,6 +10,12 @@ DEBUG = True
 
 
 def debug(message):
+    """
+    Print a debug message
+
+    Args:
+        message: (str): write your description
+    """
     if DEBUG:
         print(f'{os.getpid()}: {message}', flush=True)
 
@@ -24,6 +30,14 @@ class Job:
     STATE_SYMBOLS = ['*', '+', '-', 'x']
 
     def __init__(self, line, function, args):
+        """
+        Initialize a signal.
+
+        Args:
+            self: (todo): write your description
+            line: (str): write your description
+            function: (callable): write your description
+        """
         super().__init__()
         self.line = line
         self.process = mp.Process(target=function, args=args)
@@ -42,9 +56,21 @@ class Job:
             signal.signal(signal.SIGTSTP, ctrl_z_handler)
 
     def __str__(self):
+        """
+        Return a string representation of this object.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'job({self.process.pid} ({Job.STATE_SYMBOLS[self.state]}): {self.line})'
 
     def kill(self):
+        """
+        Kills the child process.
+
+        Args:
+            self: (todo): write your description
+        """
         debug(f'kill {self}')
         self.state = Job.KILLED
         try:
@@ -60,6 +86,12 @@ class Job:
 
     # ctrl-z
     def pause(self):
+        """
+        Pause the job.
+
+        Args:
+            self: (todo): write your description
+        """
         debug(f'pause {self}')
         if self.state not in (Job.RUNNING_PAUSED, Job.KILLED):
             os.kill(self.process.pid, signal.SIGTSTP)
@@ -67,6 +99,12 @@ class Job:
 
     # bg
     def run_in_background(self):
+        """
+        Run the job in background.
+
+        Args:
+            self: (todo): write your description
+        """
         debug(f'run_in_background {self}')
         if self.state != Job.KILLED:
             os.kill(self.process.pid, signal.SIGCONT)
@@ -74,6 +112,12 @@ class Job:
 
     # fg
     def run_in_foreground(self):
+        """
+        Run jobs in the queue.
+
+        Args:
+            self: (todo): write your description
+        """
         debug(f'run_in_foreground {self}')
         if self.state == Job.KILLED:
             raise Exception('Cannot foreground killed job')
@@ -83,6 +127,11 @@ class Job:
 
     @staticmethod
     def foreground():
+        """
+        The number of jobs in the job.
+
+        Args:
+        """
         for job in Job.jobs:
             if job.state == Job.RUNNING_FOREGROUND:
                 return job
@@ -90,11 +139,21 @@ class Job:
 
     @staticmethod
     def foreground_is_alive():
+        """
+        Checks if the jobs in the jobs in the jobs.
+
+        Args:
+        """
         foreground = Job.foreground()
         return foreground and foreground.process.is_alive()
 
     @staticmethod
     def remove_completed():
+        """
+        Remove jobs from the queue
+
+        Args:
+        """
         new_jobs = []
         for job in Job.jobs:
             if job.process.is_alive():
@@ -106,6 +165,11 @@ class Interact:
 
     @staticmethod
     def run():
+        """
+        Main thread.
+
+        Args:
+        """
         while True:
             try:
                 line = input(PROMPT)
@@ -117,6 +181,12 @@ class Interact:
 
     @staticmethod
     def process_line(line):
+        """
+        Process a single line.
+
+        Args:
+            line: (str): write your description
+        """
         if line.startswith('fg '):
             job_id = int(line.split()[-1])
             Job.jobs[job_id].run_in_foreground()
@@ -125,10 +195,20 @@ class Interact:
             Job.jobs[job_id].run_in_background()
         elif len(line) == 0:
             def noop():
+                """
+                Åīľåŀ
+
+                Args:
+                """
                 pass
             Job(line, noop, tuple())
         elif line.startswith('sleep '):
             def sleep():
+                """
+                Sleep for a timestamp
+
+                Args:
+                """
                 label, sleeptime = line.split()[1:]
                 time.sleep(int(sleeptime))
                 print(f'Wakey wakey {label}')
@@ -142,6 +222,13 @@ class Interact:
             Job.jobs[job_id].kill()
         elif line.startswith('timer '):
             def timer(label, interval):
+                """
+                Timer timer until a timer until a timer.
+
+                Args:
+                    label: (todo): write your description
+                    interval: (todo): write your description
+                """
                 debug(f'timer {label}, handler: {signal.getsignal(signal.SIGTSTP)}')
                 try:
                     count = 0
@@ -156,11 +243,23 @@ class Interact:
             Job(line, timer, (label, interval))
         else:
             def echo():
+                """
+                Echo the current state.
+
+                Args:
+                """
                 print(f'<<<{line}>>>')
             Job(line, echo, tuple())
 
 
 def ctrl_z_handler(signum, frame):
+    """
+    Handler for jobs in the jobs.
+
+    Args:
+        signum: (int): write your description
+        frame: (todo): write your description
+    """
     assert signum == signal.SIGTSTP
     foreground = Job.foreground()
     debug(f'ctrl_z_handler, pause foreground: {foreground}')
@@ -176,6 +275,13 @@ def ctrl_z_handler(signum, frame):
 
 
 def ctrl_c_handler(signum, frame):
+    """
+    Kill the signal handler.
+
+    Args:
+        signum: (int): write your description
+        frame: (todo): write your description
+    """
     assert signum == signal.SIGINT
     foreground = Job.foreground()
     debug(f'ctrl_c_handler, kill foreground: {foreground}')
@@ -185,6 +291,11 @@ def ctrl_c_handler(signum, frame):
 
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     debug(f'main pid: {os.getpid()}')
     signal.signal(signal.SIGINT, ctrl_c_handler)
     signal.signal(signal.SIGTSTP, ctrl_z_handler)

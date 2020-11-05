@@ -5,12 +5,24 @@ G = 0
 
 
 def inc(x):
+    """
+    Inc ( x
+
+    Args:
+        x: (int): write your description
+    """
     global G
     G = x + 1
     return G
 
 
 def direct_call(n):
+    """
+    Return the direct direct direct direct direct direct arguments.
+
+    Args:
+        n: (todo): write your description
+    """
     f = inc
     x = 0
     start = time_ns()
@@ -22,6 +34,12 @@ def direct_call(n):
 
 
 def eval_call(n):
+    """
+    Evaluate n times.
+
+    Args:
+        n: (array): write your description
+    """
     x = 0
     start = time_ns()
     for i in range(n):
@@ -32,6 +50,12 @@ def eval_call(n):
 
 
 def code_call(n):
+    """
+    Compiles and n times.
+
+    Args:
+        n: (todo): write your description
+    """
     global G
     code = compile('inc(x)\n', '<string>', 'eval', optimize=2)
     x = 0

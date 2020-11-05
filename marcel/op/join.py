@@ -70,6 +70,14 @@ If the {r:--keep} flag were included, the output would have two additional rows:
 
 
 def join(env, pipeline, keep=False):
+    """
+    Join a pipeline.
+
+    Args:
+        env: (todo): write your description
+        pipeline: (todo): write your description
+        keep: (bool): write your description
+    """
     assert isinstance(pipeline, marcel.core.Pipelineable)
     args = ['--keep'] if keep else []
     args.append(pipeline.create_pipeline())
@@ -79,6 +87,13 @@ def join(env, pipeline, keep=False):
 class JoinArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the pipeline.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('join', env)
         self.add_flag_no_value('keep', '-k', '--keep')
         # str: To accommodate var names
@@ -89,18 +104,43 @@ class JoinArgsParser(marcel.argsparser.ArgsParser):
 class Join(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.pipeline = None
         self.keep = None
         self.inner = None  # Map containing contents of pipeline, keyed by join value
 
     def __repr__(self):
+        """
+        Return a human - readable representation of this object.
+
+        Args:
+            self: (todo): write your description
+        """
         return 'join(keep)' if self.keep else 'join()'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Run load_inner.
+
+        Args:
+            self: (todo): write your description
+        """
         def load_inner(*x):
+            """
+            Load inner inner inner inner inner inner inner inner inner inner inner inner values.
+
+            Args:
+                x: (str): write your description
+            """
             assert len(x) > 0
             x = tuple(x)
             join_value = x[0]
@@ -122,6 +162,13 @@ class Join(marcel.core.Op):
         marcel.core.Command(env, None, pipeline).execute()
 
     def receive(self, x):
+        """
+        Receive the given value to the queue.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         x = tuple(x)
         join_value = x[0]
         match = self.inner.get(join_value, None)

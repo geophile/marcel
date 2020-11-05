@@ -2,6 +2,12 @@ import dill
 
 
 def copy(x):
+    """
+    Copy dill copy of x
+
+    Args:
+        x: (todo): write your description
+    """
     return dill.loads(dill.dumps(x))
 
 

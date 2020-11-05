@@ -24,6 +24,14 @@ import marcel.op
 class OpModule:
 
     def __init__(self, op_name, env):
+        """
+        Initialize an operation.
+
+        Args:
+            self: (todo): write your description
+            op_name: (str): write your description
+            env: (todo): write your description
+        """
         self._op_name = op_name
         self._env = env
         self._api = None  # For creating op instances from the api
@@ -55,28 +63,70 @@ class OpModule:
         # args validator not always present, e.g. for gather
 
     def env(self):
+        """
+        Returns the environment variable.
+
+        Args:
+            self: (todo): write your description
+        """
         return self._env
 
     def op_name(self):
+        """
+        The name of the operation
+
+        Args:
+            self: (todo): write your description
+        """
         return self._op_name
 
     def api_function(self):
+        """
+        Return the api function.
+
+        Args:
+            self: (todo): write your description
+        """
         return self._api
 
     def create_op(self):
+        """
+        Create an op_constructor object.
+
+        Args:
+            self: (todo): write your description
+        """
         return self._op_constructor(self._env)
 
     def args_parser(self):
+        """
+        Return the args object.
+
+        Args:
+            self: (todo): write your description
+        """
         if self._args_parser is None:
             assert self._args_parser_constructor is not None
             self._args_parser = self._args_parser_constructor(self._env)
         return self._args_parser
 
     def help(self):
+        """
+        Returns the help string.
+
+        Args:
+            self: (todo): write your description
+        """
         return self._help
 
 
 def import_op_modules(env):
+    """
+    Import all op modules from the environment.
+
+    Args:
+        env: (todo): write your description
+    """
     op_modules = {}
     for op_name in marcel.op.all:
         op_modules[op_name] = OpModule(op_name, env)
@@ -85,6 +135,14 @@ def import_op_modules(env):
 
 
 def create_op(env, op_name, *op_args):
+    """
+    Create an op_module object.
+
+    Args:
+        env: (todo): write your description
+        op_name: (str): write your description
+        op_args: (todo): write your description
+    """
     op_module = env.op_modules[op_name]
     op, args = op_module.api_function()(op_module.env(), *op_args)
     op_module.args_parser().parse(args, op)

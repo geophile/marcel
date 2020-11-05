@@ -16,6 +16,11 @@ ALL_OPS = [
 
 
 def test_op():
+    """
+    Run test test.
+
+    Args:
+    """
     # No candidates
     TEST.run(line='xyz', text='xyz',
              expected=[])
@@ -39,11 +44,21 @@ def test_op():
 
 
 def test_executables():
+    """
+    Execute test test variables.
+
+    Args:
+    """
     TEST.run(line='ech', text='ech',
              expected=['echo '])
 
 
 def test_flags():
+    """
+    Print test test test flags.
+
+    Args:
+    """
     TEST.run(line='window -', text='-',
              expected=['-o', '--overlap', '-d', '--disjoint'])
     TEST.run(line='window --', text='--',
@@ -53,6 +68,11 @@ def test_flags():
 
 
 def test_filenames():
+    """
+    Generate test files.
+
+    Args:
+    """
     os.system('rm -rf /tmp/test')
     os.mkdir('/tmp/test')
     os.mkdir('/tmp/test/abcx')
@@ -68,6 +88,11 @@ def test_filenames():
 
 
 def test_pipeline_args():
+    """
+    Test for all of the pipeline.
+
+    Args:
+    """
     # Try (almost) every prefix of: ls --recursive -d | args [d: ls -fs (d)]
     all_files = ['a', 'b', 'c']
     TEST.run('rm -rf /tmp/test_pipeline_args')
@@ -144,6 +169,11 @@ def test_pipeline_args():
 
 
 def main_stable():
+    """
+    Run test.
+
+    Args:
+    """
     test_op()
     test_executables()
     test_flags()
@@ -152,11 +182,21 @@ def main_stable():
 
 
 def main_dev():
+    """
+    Main function to determine the device.
+
+    Args:
+    """
 
     pass
 
 
 def main():
+    """
+    Main entry point.
+
+    Args:
+    """
     TEST.reset_environment()
     main_stable()
     # main_dev()

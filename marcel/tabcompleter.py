@@ -32,6 +32,12 @@ DEBUG = False
 
 
 def debug(message):
+    """
+    Print debug message
+
+    Args:
+        message: (str): write your description
+    """
     if DEBUG:
         print(message, flush=True)
 
@@ -42,6 +48,13 @@ class TabCompleter:
     HELP_TOPICS = list(marcel.doc.topics) + OPS
 
     def __init__(self, main):
+        """
+        Initialize the main module.
+
+        Args:
+            self: (todo): write your description
+            main: (todo): write your description
+        """
         self.main = main
         self.op_name = None
         self.op_flags = None
@@ -52,10 +65,25 @@ class TabCompleter:
         readline.set_completer_delims(' \t\n`!@#$%^&*()=+[{]}\\|;:\'",<>?')
 
     def complete(self, text, state):
+        """
+        Complete the completion.
+
+        Args:
+            self: (todo): write your description
+            text: (str): write your description
+            state: (int): write your description
+        """
         candidates = self.candidates(readline.get_line_buffer(), text)
         return candidates[state] if candidates else None
 
     def complete_op(self, text):
+        """
+        Complete completion for completion.
+
+        Args:
+            self: (todo): write your description
+            text: (str): write your description
+        """
         debug(f'complete_op, text = <{text}>')
         candidates = []
         if len(text) > 0:
@@ -79,6 +107,12 @@ class TabCompleter:
 
     @staticmethod
     def complete_help(text):
+        """
+        Return a list of commands
+
+        Args:
+            text: (str): write your description
+        """
         debug(f'complete_help, text = <{text}>')
         candidates = []
         for topic in TabCompleter.HELP_TOPICS:
@@ -88,6 +122,14 @@ class TabCompleter:
         return candidates
 
     def complete_flag(self, text, flags):
+        """
+        Complete a list of flags.
+
+        Args:
+            self: (todo): write your description
+            text: (str): write your description
+            flags: (todo): write your description
+        """
         candidates = []
         for f in flags:
             if f.startswith(text):
@@ -96,6 +138,13 @@ class TabCompleter:
         return candidates
 
     def complete_filename(self, text):
+        """
+        Complete filename
+
+        Args:
+            self: (todo): write your description
+            text: (str): write your description
+        """
         debug('complete_filenames, text = <{}>'.format(text))
         current_dir = self.main.env.dir_state().pwd()
         if text:
@@ -134,6 +183,14 @@ class TabCompleter:
         return filenames
 
     def candidates(self, line, text):
+        """
+        Parse completion
+
+        Args:
+            self: (todo): write your description
+            line: (str): write your description
+            text: (str): write your description
+        """
         candidates = None
         debug(f'complete: line={line}, text=<{text}>')
         if len(line.strip()) == 0:
@@ -183,10 +240,22 @@ class TabCompleter:
 
     @staticmethod
     def op_name(line):
+        """
+        Return the name of a line.
+
+        Args:
+            line: (str): write your description
+        """
         first = line.split()[0]
         return first if first in TabCompleter.OPS else None
 
     def ensure_executables(self):
+        """
+        Ensure that the executables are running.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.executables is None:
             self.executables = []
             path = os.environ['PATH'].split(':')
@@ -196,6 +265,12 @@ class TabCompleter:
                         self.executables.append(f)
 
     def ensure_homedirs(self):
+        """
+        Ensure that all users have been created.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.homedirs is None:
             self.homedirs = {}
             # TODO: This is a hack. Is there a better way?

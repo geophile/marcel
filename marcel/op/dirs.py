@@ -29,12 +29,26 @@ Write the entries in the directory stack to the output stream, top first.
 
 
 def dirs(env, clear=None):
+    """
+    Return a directory.
+
+    Args:
+        env: (todo): write your description
+        clear: (bool): write your description
+    """
     return Dirs(env), [] if clear is None else ['--clear']
 
 
 class DirsArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('dirs', env)
         self.add_flag_no_value('clear', '-c', '--clear')
         self.validate()
@@ -43,15 +57,35 @@ class DirsArgsParser(marcel.argsparser.ArgsParser):
 class Dirs(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.clear = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'dirs(clear={self.clear})'
 
     # AbstractOp
 
     def receive(self, _):
+        """
+        Receive the contents of the environment.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         if self.clear:
             self.env().dir_state().reset_dir_stack()
         for dir in self.env().dir_state().dirs():
@@ -60,7 +94,19 @@ class Dirs(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

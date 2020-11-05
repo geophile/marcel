@@ -22,16 +22,36 @@ import random
 
 
 def dump(label, x):
+    """
+    Prints the object
+
+    Args:
+        label: (str): write your description
+        x: (todo): write your description
+    """
     print(f'{label}: {x}')
 
 
 class Env:
 
     def __init__(self):
+        """
+        Initialize the lock.
+
+        Args:
+            self: (todo): write your description
+        """
         self.map = {}
         self.lock = Lock()
 
     def inc(self, k):
+        """
+        Increment the lock.
+
+        Args:
+            self: (todo): write your description
+            k: (int): write your description
+        """
         self.lock.acquire()
         v = self.map.get(k, 0) + 1
         self.map[k] = v
@@ -47,6 +67,12 @@ EnvManager.register('Env', Env)
 
 
 def hello(env_manager):
+    """
+    This function
+
+    Args:
+        env_manager: (todo): write your description
+    """
     print(f'main: {os.getpid()}')
     env = env_manager.Env()
     env.setvar('a', 1)
@@ -68,7 +94,22 @@ TRIALS = 10
 
 
 def hello_hello(env, N):
+    """
+    This function
+
+    Args:
+        env: (todo): write your description
+        N: (todo): write your description
+    """
     def ping_env(thread, rand, N):
+        """
+        Ping n times
+
+        Args:
+            thread: (todo): write your description
+            rand: (todo): write your description
+            N: (todo): write your description
+        """
         print(f'{os.getpid()} -- ({type(env)}: {env}')
         for i in range(TRIALS):
             k = rand.randint(0, N-1)

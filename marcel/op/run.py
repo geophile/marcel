@@ -41,12 +41,25 @@ For more information on command history, run {n:help history}.
 
 
 def run(env):
+    """
+    Runs a command.
+
+    Args:
+        env: (todo): write your description
+    """
     return Run(env)
 
 
 class RunArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('run', env)
         self.add_anon('n', convert=self.str_to_int, default=None)
         self.validate()
@@ -55,6 +68,13 @@ class RunArgsParser(marcel.argsparser.ArgsParser):
 class Run(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.expected_args = None  # Set during parse. ! -> 1, !! -> 0
         self.n = None
@@ -62,17 +82,36 @@ class Run(marcel.core.Op):
         self.tmp_file = None
 
     def __repr__(self):
+        """
+        Return a repr representation of this parameter.
+
+        Args:
+            self: (todo): write your description
+        """
         return 'run()' if self.n is None else f'run({self.n})'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Initialize the marcel.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.expected_args == 1 and self.n is None:
             raise marcel.exception.KillCommandException('History command number required following !')
         elif self.expected_args == 0 and self.n is not None:
             raise marcel.exception.KillCommandException('No arguments permitted after !!')
 
     def receive(self, _):
+        """
+        Receive the history command.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         # Remove the run command from history
         readline.remove_history_item(readline.get_current_history_length() - 1)
         if self.n is None:
@@ -82,7 +121,19 @@ class Run(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

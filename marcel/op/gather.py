@@ -17,10 +17,29 @@ import marcel.op.apiop
 
 
 def _gather(output, unwrap_singleton=True, errors=None, error_handler=None):
+    """
+    Gather a singleton response.
+
+    Args:
+        output: (todo): write your description
+        unwrap_singleton: (todo): write your description
+        errors: (todo): write your description
+        error_handler: (todo): write your description
+    """
     return Gather(output, unwrap_singleton, errors, error_handler)
 
 
 class Gather(marcel.op.apiop.APIOp):
 
     def __init__(self, output, unwrap_singleton, errors, error_handler):
+        """
+        Called when a singleton.
+
+        Args:
+            self: (todo): write your description
+            output: (str): write your description
+            unwrap_singleton: (todo): write your description
+            errors: (str): write your description
+            error_handler: (todo): write your description
+        """
         super().__init__(output, unwrap_singleton, errors, error_handler, False)

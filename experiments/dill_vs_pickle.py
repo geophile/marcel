@@ -23,6 +23,12 @@ N = 10000
 
 
 def thing(x):
+    """
+    Convert a string
+
+    Args:
+        x: (int): write your description
+    """
     return [x, str(x), (x, x, x)]
 
 start = time.time()

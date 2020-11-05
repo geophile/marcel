@@ -10,6 +10,11 @@ lines = []
 
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     print(PROMPT, end='')
     position = 0
     line = 0
