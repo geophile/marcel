@@ -26,12 +26,25 @@ Write the marcel version number to the output stream.
 
 
 def version(env):
+    """
+    Return the version of the given environment.
+
+    Args:
+        env: (todo): write your description
+    """
     return Version(env), []
 
 
 class VersionArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('version', env)
         self.validate()
 
@@ -39,17 +52,43 @@ class VersionArgsParser(marcel.argsparser.ArgsParser):
 class Version(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return 'version()'
 
     # AbstractOp
 
     def receive(self, _):
+        """
+        Receive a message to the socket.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         self.send(marcel.version.VERSION)
 
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

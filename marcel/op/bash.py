@@ -41,6 +41,13 @@ Use this command if the {r:--interactive} flag is needed.
 
 
 def bash(env, *args, interactive=False):
+    """
+    Run a bash bash bash environment.
+
+    Args:
+        env: (todo): write your description
+        interactive: (todo): write your description
+    """
     op_args = ['--interactive'] if interactive else []
     op_args.extend(args)
     return Bash(env), op_args
@@ -49,6 +56,13 @@ def bash(env, *args, interactive=False):
 class BashArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('bash', env)
         self.add_flag_no_value('interactive', '-i', '--interactive')
         self.add_anon_list('args', convert=self.check_str, target='args_arg')
@@ -58,6 +72,13 @@ class BashArgsParser(marcel.argsparser.ArgsParser):
 class Bash(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.interactive = None
         self.args_arg = None
@@ -66,11 +87,23 @@ class Bash(marcel.core.Op):
         self.input = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'bash(args={self.args})'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Setup the function
+
+        Args:
+            self: (todo): write your description
+        """
         self.args = self.eval_function('args_arg')
         self.input = []
         if len(self.args) == 0:
@@ -81,12 +114,25 @@ class Bash(marcel.core.Op):
             self.runner = Interactive(self) if self.interactive else NonInteractive(self)
 
     def receive(self, x):
+        """
+        Receive a message to the stream.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         if x is not None:
             if len(x) == 1:
                 x = x[0]
             self.input.append(str(x))
 
     def receive_complete(self):
+        """
+        Receive the complete complete complete message.
+
+        Args:
+            self: (todo): write your description
+        """
         self.runner.run()
         self.send_complete()
 
@@ -94,21 +140,53 @@ class Bash(marcel.core.Op):
 class Escape:
 
     def __init__(self, op):
+        """
+        Initialize an op.
+
+        Args:
+            self: (todo): write your description
+            op: (todo): write your description
+        """
         self.op = op
 
     def run(self):
+        """
+        Runs the main thread.
+
+        Args:
+            self: (todo): write your description
+        """
         assert False
 
     def command(self):
+        """
+        Returns the command.
+
+        Args:
+            self: (todo): write your description
+        """
         return ' '.join([str(arg) for arg in self.op.args])
 
 
 class NonInteractive(Escape):
 
     def __init__(self, op):
+        """
+        Initialize the op.
+
+        Args:
+            self: (todo): write your description
+            op: (todo): write your description
+        """
         super().__init__(op)
 
     def run(self):
+        """
+        Runs the process.
+
+        Args:
+            self: (todo): write your description
+        """
         process = subprocess.Popen(self.command(),
                                    shell=True,
                                    executable='/bin/bash',
@@ -132,6 +210,12 @@ class NonInteractive(Escape):
 
     @staticmethod
     def normalize_output(x):
+        """
+        Normalize the output.
+
+        Args:
+            x: (str): write your description
+        """
         x = x.split('\n')
         if len(x[-1]) == 0:
             x = x[:-1]
@@ -139,15 +223,34 @@ class NonInteractive(Escape):
 
     @staticmethod
     def to_string(input):
+        """
+        Convert a string to a string.
+
+        Args:
+            input: (str): write your description
+        """
         return '\n'.join(input)
 
 
 class Interactive(Escape):
 
     def __init__(self, op):
+        """
+        Initialize the op.
+
+        Args:
+            self: (todo): write your description
+            op: (todo): write your description
+        """
         super().__init__(op)
 
     def run(self):
+        """
+        Runs a subprocess.
+
+        Args:
+            self: (todo): write your description
+        """
         process = subprocess.Popen(self.command(),
                                    shell=True,
                                    executable='/bin/bash',
@@ -162,9 +265,22 @@ class Interactive(Escape):
 class BashShell(Escape):
 
     def __init__(self, op):
+        """
+        Initialize the op.
+
+        Args:
+            self: (todo): write your description
+            op: (todo): write your description
+        """
         super().__init__(op)
 
     def run(self):
+        """
+        Run the process.
+
+        Args:
+            self: (todo): write your description
+        """
         process = subprocess.Popen('bash',
                                    shell=True,
                                    executable='/bin/bash',

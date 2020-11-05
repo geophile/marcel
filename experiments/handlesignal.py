@@ -3,6 +3,13 @@ import time
 
 
 def handler(x, frame):
+    """
+    Handler for keyboard handler.
+
+    Args:
+        x: (todo): write your description
+        frame: (todo): write your description
+    """
     print(f'Caught {signal.Signals(x).name}')
 
 

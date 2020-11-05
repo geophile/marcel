@@ -32,12 +32,26 @@ True are written to the output stream.
 
 
 def select(env, function):
+    """
+    Returns the first matching function from * env.
+
+    Args:
+        env: (todo): write your description
+        function: (todo): write your description
+    """
     return Select(env), [] if function is None else [function]
 
 
 class SelectArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the env.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('select', env)
         self.add_anon('function', convert=self.function)
         self.validate()
@@ -46,20 +60,47 @@ class SelectArgsParser(marcel.argsparser.ArgsParser):
 class Select(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.function = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'select({self.function.snippet()})'
 
     # AbstractOp
 
     def set_env(self, env):
+        """
+        Sets the environment variable.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         self.function.set_globals(env.vars())
 
     # Op
 
     def receive(self, x):
+        """
+        Receive a function or function.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         fx = (self.call(self.function)
               if x is None else
               self.call(self.function, *x))

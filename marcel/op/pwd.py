@@ -26,12 +26,25 @@ Write the current directory to the output stream, as a {n:File}.
 
 
 def pwd(env):
+    """
+    Return the path for the given environment.
+
+    Args:
+        env: (todo): write your description
+    """
     return Pwd(env), []
 
 
 class PwdArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('pwd', env)
         self.validate()
 
@@ -39,20 +52,52 @@ class PwdArgsParser(marcel.argsparser.ArgsParser):
 class Pwd(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return 'pwd()'
 
     # AbstractOp
 
     def receive(self, _):
+        """
+        Receive the marcel object.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         self.send(marcel.object.file.File(self.env().dir_state().pwd()))
 
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

@@ -33,12 +33,26 @@ Otherwise, ordering is based on the values computed by applying {r:KEY} to each 
 
 
 def sort(env, key=None):
+    """
+    Return the value by key.
+
+    Args:
+        env: (todo): write your description
+        key: (str): write your description
+    """
     return Sort(env), [] if key is None else [key]
 
 
 class SortArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('sort', env)
         self.add_anon('key', convert=self.function, default=None)
         self.validate()
@@ -47,19 +61,45 @@ class SortArgsParser(marcel.argsparser.ArgsParser):
 class Sort(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.key = None
         self.contents = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return 'sort'
 
     # AbstractOp
     
     def setup(self):
+        """
+        Setup the contents of the file.
+
+        Args:
+            self: (todo): write your description
+        """
         self.contents = []
 
     def set_env(self, env):
+        """
+        Set environment variables.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().set_env(env)
         if self.key:
             self.key.set_globals(env.vars())
@@ -67,12 +107,25 @@ class Sort(marcel.core.Op):
     # Op
 
     def receive(self, x):
+        """
+        Receive the given value.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         # x is None occurs only for the first op in a pipeline. Sort shouldn't be used there, but whatever.
         # Fixes bug 10.
         if x is not None:
             self.contents.append(x)
     
     def receive_complete(self):
+        """
+        Send complete complete complete complete packet.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.contents is not None:
             if self.key:
                 self.contents.sort(key=(lambda t: self.call(self.key, *t)))

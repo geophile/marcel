@@ -31,18 +31,44 @@ is resumed if it is not already running.
 class FgArgsValidator(marcel.op.jobop.JobOpArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('fg', env)
 
 
 class Fg(marcel.op.jobop.JobOp):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
 
     def __repr__(self):
+        """
+        Return a human - like object.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'fg(job={self.jid})' if self.jid is not None else f'fg(pid={self.pid})'
 
     # JobOp
 
     def action(self):
+        """
+        Run action.
+
+        Args:
+            self: (todo): write your description
+        """
         self.job.run_in_foreground()

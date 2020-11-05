@@ -42,23 +42,52 @@ the numbers in the variable {r:all100}.
 
 
 def ifthen(env, predicate, then):
+    """
+    Create a : class with the given predicate.
+
+    Args:
+        env: (todo): write your description
+        predicate: (bool): write your description
+        then: (todo): write your description
+    """
     return Ifthen(env), [predicate, then.create_pipeline()]
 
 
 class IfthenArgsParser(marcel.op.ifbase.IfBaseArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env, 'ifthen')
 
 
 class Ifthen(marcel.op.ifbase.IfBase):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
 
     # AbstractOp
 
     def receive(self, x):
+        """
+        Receive a message to the given value.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         if self.call(self.predicate, *x):
             self.then.receive(x)
         self.send(x)

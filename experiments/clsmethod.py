@@ -18,6 +18,13 @@ class Base:
 
     @classmethod
     def f(cls, x):
+        """
+        Return a function f.
+
+        Args:
+            cls: (todo): write your description
+            x: (int): write your description
+        """
         return -x
 
 
@@ -25,6 +32,13 @@ class X(Base):
 
     @classmethod
     def f(cls, x):
+        """
+        Return the function that returns a function f.
+
+        Args:
+            cls: (todo): write your description
+            x: (int): write your description
+        """
         return x + 100
 
 
@@ -32,6 +46,13 @@ class Y(Base):
 
     @classmethod
     def f(cls, x):
+        """
+        Returns a function f ( x and the result of the form.
+
+        Args:
+            cls: (todo): write your description
+            x: (int): write your description
+        """
         return x + 666000
 
 

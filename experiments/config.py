@@ -1,4 +1,10 @@
 def forget(x):
+    """
+    Get the given value
+
+    Args:
+        x: (str): write your description
+    """
     print(f'forget({x})')
 
 
@@ -22,8 +28,18 @@ print(f'locals: {locals.keys()}')
 
 
 def f():
+    """
+    Decorator that returns a function to a function.
+
+    Args:
+    """
     foobar = 1
     def g():
+        """
+        Åīľå»ºä¸ģ»ħåĳį
+
+        Args:
+        """
         global foobar
         foobar = 2
     g()

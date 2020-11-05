@@ -29,20 +29,58 @@ _COMMANDS = '''
 
 
 def minutes(n):
+    """
+    Return the number of seconds.
+
+    Args:
+        n: (todo): write your description
+    """
     return 60 * n
 
 
 def hours(n):
+    """
+    Return the number of seconds
+
+    Args:
+        n: (array): write your description
+    """
     return 3600 * n
 
 
 def days(n):
+    """
+    Return the number of days
+
+    Args:
+        n: (int): write your description
+    """
     return 24 * 3600 * n
 
 
 def remote(user, identity, host=None, hosts=None):
+    """
+    Run a remote command.
+
+    Args:
+        user: (todo): write your description
+        identity: (str): write your description
+        host: (str): write your description
+        hosts: (list): write your description
+    """
     return Cluster(user, identity, host, hosts)
 
 
 def database(driver, dbname, user, password=None, host=None, port=None):
+    """
+    Create a database.
+
+    Args:
+        driver: (todo): write your description
+        dbname: (str): write your description
+        user: (todo): write your description
+        password: (str): write your description
+        host: (str): write your description
+        port: (int): write your description
+    """
     return Database(driver, dbname, user, password, host, port)

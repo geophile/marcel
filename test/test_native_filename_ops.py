@@ -13,6 +13,13 @@ TEST = test_base.TestConsole()
 
 
 def relative(base, x):
+    """
+    Return the relative path relative to x.
+
+    Args:
+        base: (todo): write your description
+        x: (todo): write your description
+    """
     x_path = pathlib.Path(x)
     base_path = pathlib.Path(base)
     display_path = x_path.relative_to(base_path)
@@ -20,10 +27,22 @@ def relative(base, x):
 
 
 def absolute(base, x):
+    """
+    Return the absolute absolute path.
+
+    Args:
+        base: (str): write your description
+        x: (todo): write your description
+    """
     return pathlib.Path(base) / x
 
 
 def test_setup():
+    """
+    Create a test suite
+
+    Args:
+    """
     TEST.cd(test_dir + '/..')
     os.system(f'rm -rf {test_dir}')
     os.system(f'mkdir {test_dir}')
@@ -31,6 +50,11 @@ def test_setup():
 
 
 def test_mv():
+    """
+    Run the test suite.
+
+    Args:
+    """
     # Move file
     test_setup()
     os.system('echo asdf > f')
@@ -57,6 +81,11 @@ def test_mv():
 
 
 def test_cp():
+    """
+    Run test test suite.
+
+    Args:
+    """
     # Copy file
     test_setup()
     os.system('echo asdf > f')
@@ -81,6 +110,11 @@ def test_cp():
 
 
 def main():
+    """
+    Run the test.
+
+    Args:
+    """
     test_mv()
     test_cp()
     print(f'Test failures: {TEST.failures}')

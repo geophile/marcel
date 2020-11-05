@@ -16,10 +16,29 @@
 class Renderable:
 
     def __repr__(self):
+        """
+        Return the __compact__.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.render_compact()
 
     def render_compact(self):
+        """
+        Returns a string representation.
+
+        Args:
+            self: (todo): write your description
+        """
         return str(self)
 
     def render_full(self, color_scheme):
+        """
+        Render the full full full scheme.
+
+        Args:
+            self: (todo): write your description
+            color_scheme: (todo): write your description
+        """
         return str(self)

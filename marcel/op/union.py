@@ -35,6 +35,13 @@ output is unspecified.
 
 
 def union(env, pipeline):
+    """
+    Create a union of a pipeline.
+
+    Args:
+        env: (todo): write your description
+        pipeline: (todo): write your description
+    """
     assert isinstance(pipeline, marcel.core.Pipelineable)
     return Union(env), [pipeline.create_pipeline()]
 
@@ -42,6 +49,13 @@ def union(env, pipeline):
 class UnionArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('union', env)
         # str: To accommodate var names
         self.add_anon('pipeline', convert=self.check_str_or_pipeline)
@@ -51,17 +65,42 @@ class UnionArgsParser(marcel.argsparser.ArgsParser):
 class Union(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the pipeline.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.pipeline = None
         self.pipeline_copy = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return 'union()'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Sets up the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         def send_right(*x):
+            """
+            Sends the right.
+
+            Args:
+                x: (str): write your description
+            """
             self.send(x)
         env = self.env()
         self.pipeline_copy = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
@@ -71,9 +110,22 @@ class Union(marcel.core.Op):
     # Op
 
     def receive(self, x):
+        """
+        Receive a message.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         self.send(x)
 
     def receive_complete(self):
+        """
+        Receive a complete complete.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.pipeline_copy is not None:
             marcel.core.Command(self.env(), None, self.pipeline_copy).execute()
             self.pipeline_copy = None

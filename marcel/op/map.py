@@ -35,12 +35,26 @@ the {r:map} operator was intended.
 
 
 def map(env, function):
+    """
+    Map a function on a function.
+
+    Args:
+        env: (todo): write your description
+        function: (todo): write your description
+    """
     return Map(env), [] if function is None else [function]
 
 
 class MapArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the env.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('map', env)
         self.add_anon('function', convert=self.function)
         self.validate()
@@ -49,21 +63,48 @@ class MapArgsParser(marcel.argsparser.ArgsParser):
 class Map(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.function = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'map({self.function.snippet()})'
 
     # AbstractOp
 
     def set_env(self, env):
+        """
+        Sets the env.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().set_env(env)
         self.function.set_globals(env.vars())
 
     # Op
     
     def receive(self, x):
+        """
+        Receive a function call.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         output = (self.call(self.function)
                   if x is None else
                   self.call(self.function, *x))

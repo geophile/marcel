@@ -38,12 +38,26 @@ will be on the command line. (Hit enter to run the command, as usual.)
 
 
 def edit(env, n=None):
+    """
+    Edit an environment variable.
+
+    Args:
+        env: (todo): write your description
+        n: (todo): write your description
+    """
     return Edit(env), [] if n is None else [n]
 
 
 class EditArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('edit', env)
         self.add_anon('n', convert=self.str_to_int, default=None)
         self.validate()
@@ -52,17 +66,36 @@ class EditArgsParser(marcel.argsparser.ArgsParser):
 class Edit(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.n = None
         self.editor = None
         self.tmp_file = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return 'edit()'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+        """
         self.editor = self.env().getvar('EDITOR')
         if self.editor is None:
             raise marcel.exception.KillCommandException(
@@ -70,6 +103,13 @@ class Edit(marcel.core.Op):
         _, self.tmp_file = tempfile.mkstemp(text=True)
 
     def receive(self, _):
+        """
+        Receive the next command.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         # Remove the edit command from history
         readline.remove_history_item(readline.get_current_history_length() - 1)
         if self.n is None:
@@ -101,7 +141,19 @@ class Edit(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

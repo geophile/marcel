@@ -5,18 +5,46 @@ import os
 class XmitStr:
 
     def __init__(self, value):
+        """
+        Initialize the value
+
+        Args:
+            self: (todo): write your description
+            value: (todo): write your description
+        """
         self.value = value
 
     def __getstate__(self):
+        """
+        Get the state of the state
+
+        Args:
+            self: (todo): write your description
+        """
         print(f'{os.getpid()} getstate {self.value}')
         return self.__dict__
 
     def __setstate__(self, state):
+        """
+        Sets the state of the session.
+
+        Args:
+            self: (todo): write your description
+            state: (dict): write your description
+        """
         self.__dict__.update(state)
         print(f'{os.getpid()} selfstate {self.value}')
 
 
 def f(name, q, child):
+    """
+    Deprecords
+
+    Args:
+        name: (str): write your description
+        q: (int): write your description
+        child: (todo): write your description
+    """
     print(f'hello {name.value}: {os.getpid()} -> {os.getppid()}')
     q.put(XmitStr('goodbye'))
     print(f'child reads pipe: {os.getpid()} {child.recv().value}')

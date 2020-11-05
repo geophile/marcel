@@ -39,12 +39,25 @@ are selected.)
 
 
 def history(env):
+    """
+    Return the history of the environment.
+
+    Args:
+        env: (todo): write your description
+    """
     return History(env)
 
 
 class HistoryArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the env.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('history', env)
         self.add_flag_one_value('command', '-c', '--command')
         self.add_anon('n', convert=self.str_to_int, default=None)
@@ -54,11 +67,24 @@ class HistoryArgsParser(marcel.argsparser.ArgsParser):
 class History(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.command = None
         self.n = None
 
     def __repr__(self):
+        """
+        Return a human - readable representation of this command.
+
+        Args:
+            self: (todo): write your description
+        """
         args = []
         if self.command:
             args.append(f"command='{self.command}'")
@@ -70,6 +96,13 @@ class History(marcel.core.Op):
     # AbstractOp
 
     def receive(self, _):
+        """
+        Receive a new history command.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         history = self.env().reader.history()
         selected = []
         for i in range(len(history)):
@@ -84,7 +117,19 @@ class History(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

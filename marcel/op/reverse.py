@@ -24,12 +24,25 @@ The input stream is output in reverse order.
 
 
 def reverse(env):
+    """
+    Reverse reverse reverse reverse reverse.
+
+    Args:
+        env: (int): write your description
+    """
     return Reverse(env), []
 
 
 class ReverseArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('reverse', env)
         self.validate()
 
@@ -37,15 +50,35 @@ class ReverseArgsParser(marcel.argsparser.ArgsParser):
 class Reverse(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.contents = []
 
     # AbstractOp
 
     def receive(self, x):
+        """
+        Receive the given value.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         self.contents.append(x)
 
     def receive_complete(self):
+        """
+        Send complete complete complete complete complete.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.contents is not None:
             self.contents.reverse()
             for x in self.contents:

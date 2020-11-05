@@ -43,23 +43,52 @@ variable.
 
 
 def ifelse(env, predicate, then):
+    """
+    Returns the predicate for the given predicate.
+
+    Args:
+        env: (todo): write your description
+        predicate: (bool): write your description
+        then: (todo): write your description
+    """
     return Ifelse(env), [predicate, then.create_pipeline()]
 
 
 class IfelseArgsParser(marcel.op.ifbase.IfBaseArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env, 'ifelse')
 
 
 class Ifelse(marcel.op.ifbase.IfBase):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
 
     # AbstractOp
 
     def receive(self, x):
+        """
+        Receive a message.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         if self.call(self.predicate, *x):
             self.then.receive(x)
         else:

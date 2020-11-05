@@ -34,12 +34,25 @@ The job number can be used in conjunction with the {r:bg} and {r:fg} commands.
 
 
 def jobs(env):
+    """
+    Return a list of jobs.
+
+    Args:
+        env: (todo): write your description
+    """
     return Jobs(env)
 
 
 class JobsArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('jobs', env)
         self.validate()
 
@@ -47,14 +60,34 @@ class JobsArgsParser(marcel.argsparser.ArgsParser):
 class Jobs(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'jobs'
 
     # AbstractOp
     
     def receive(self, x):
+        """
+        Receive a message to the given job.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         job_id = 0
         for job in marcel.job.JobControl.only.jobs():
             # TODO: If job were a marcel.object, then it would have render_compact/full methods.
@@ -65,4 +98,10 @@ class Jobs(marcel.core.Op):
     # Op
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

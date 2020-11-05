@@ -45,9 +45,22 @@ class MultiLineReader:
             self._fix_history()
 
     def __getstate__(self):
+        """
+        Get the state of the state
+
+        Args:
+            self: (todo): write your description
+        """
         assert False
 
     def __setstate__(self, state):
+        """
+        Sets the state of the given state.
+
+        Args:
+            self: (todo): write your description
+            state: (dict): write your description
+        """
         assert False
 
     def input(self, prompt, continuation_prompt):
@@ -79,9 +92,21 @@ class MultiLineReader:
         return ''.join([line[:-len(self.continuation)] for line in lines])
 
     def close(self):
+        """
+        Close the history file.
+
+        Args:
+            self: (todo): write your description
+        """
         readline.write_history_file(self.history_file)
 
     def history(self):
+        """
+        Return the history of the history.
+
+        Args:
+            self: (todo): write your description
+        """
         history = []  # Newest first
         n = readline.get_current_history_length()
         i = 1  # readline is 1-based
@@ -94,6 +119,13 @@ class MultiLineReader:
     # with \n. Return the original multi-line form. Return None if the input was not a joined-together line
     # from history.
     def _multiline(self, line):
+        """
+        Multiline pattern.
+
+        Args:
+            self: (todo): write your description
+            line: (str): write your description
+        """
         lines = []
         join_pattern = self.continuation + '\n'
         position = 0
@@ -108,6 +140,12 @@ class MultiLineReader:
         return lines if start > 0 else None
 
     def _fix_history(self):
+        """
+        Fix history of history. history.
+
+        Args:
+            self: (todo): write your description
+        """
         try:
             readline.clear_history()
             readline.read_history_file(self.history_file)
@@ -132,6 +170,11 @@ class MultiLineReader:
 
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     history_file = '/tmp/history'
     readline.read_history_file(history_file)
     readline.parse_and_bind('set editing-mode emacs')

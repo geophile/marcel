@@ -27,12 +27,26 @@ Output the last {r:N} tuples of the input stream, and discard the others.
 
 
 def tail(env, n):
+    """
+    Return the tail of the environment.
+
+    Args:
+        env: (todo): write your description
+        n: (todo): write your description
+    """
     return Tail(env), [n]
 
 
 class TailArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('tail', env)
         self.add_anon('n', convert=self.str_to_int, target='n_arg')
         self.validate()
@@ -41,6 +55,13 @@ class TailArgsParser(marcel.argsparser.ArgsParser):
 class Tail(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.n_arg = None
         self.n = None
@@ -48,21 +69,46 @@ class Tail(marcel.core.Op):
         self.end = None  # End of the queue
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'tail({self.n})'
 
     # AbstractOp
     
     def setup(self):
+        """
+        Setup the function
+
+        Args:
+            self: (todo): write your description
+        """
         self.n = self.eval_function('n_arg', int)
         self.queue = None if self.n == 0 else [None] * self.n
         self.end = 0
 
     def receive(self, x):
+        """
+        Receive the next message.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         if self.queue:
             self.queue[self.end] = x
             self.end = self.next_position(self.end)
 
     def receive_complete(self):
+        """
+        Receive the next complete complete.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.queue is not None:
             p = self.end
             count = 0
@@ -78,4 +124,11 @@ class Tail(marcel.core.Op):
     # For use by this class
 
     def next_position(self, x):
+        """
+        Return the next position in x.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         return (x + 1) % self.n

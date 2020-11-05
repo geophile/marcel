@@ -34,12 +34,26 @@ and the current directory is changed to the new top directory on the stack.
 
 
 def pushd(env, directory=None):
+    """
+    Push a directory.
+
+    Args:
+        env: (todo): write your description
+        directory: (str): write your description
+    """
     return Pushd(env), [] if directory is None else [directory]
 
 
 class PushdArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('pushd', env)
         self.add_anon('directory', convert=self.check_str, default=None)
         self.validate()
@@ -48,19 +62,45 @@ class PushdArgsParser(marcel.argsparser.ArgsParser):
 class Pushd(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.directory = None
 
     def __repr__(self):
+        """
+        Return the __repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'pushd({self.directory})' if self.directory else 'pushd()'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Setup the directory.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.directory is not None:
             self.directory = pathlib.Path(self.directory).expanduser()
 
     def receive(self, _):
+        """
+        Receive a mar file.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         try:
             self.env().dir_state().pushd(self.directory)
         except PermissionError as e:
@@ -73,7 +113,19 @@ class Pushd(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

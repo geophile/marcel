@@ -45,6 +45,13 @@ output is unspecified.
 
 
 def difference(env, pipeline):
+    """
+    Returns the diff between two pipeline.
+
+    Args:
+        env: (todo): write your description
+        pipeline: (todo): write your description
+    """
     assert isinstance(pipeline, marcel.core.Pipelineable)
     return Difference(env), [pipeline.create_pipeline()]
 
@@ -52,6 +59,13 @@ def difference(env, pipeline):
 class DifferenceArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('difference', env)
         # str: To accommodate var names
         self.add_anon('pipeline', convert=self.check_str_or_pipeline)
@@ -61,17 +75,42 @@ class DifferenceArgsParser(marcel.argsparser.ArgsParser):
 class Difference(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.pipeline = None
         self.right = None  # Right input, tuple -> count
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return 'difference()'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Execute the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         def load_right(*x):
+            """
+            Load right right.
+
+            Args:
+                x: (str): write your description
+            """
             count = self.right.get(x, None)
             self.right[x] = 1 if count is None else count + 1
         env = self.env()
@@ -82,6 +121,13 @@ class Difference(marcel.core.Op):
         marcel.core.Command(env, None, pipeline).execute()
 
     def receive(self, x):
+        """
+        Receive a message.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         count = self.right.get(x, None)
         if count is not None:
             if count == 1:

@@ -20,6 +20,12 @@ MAIN = marcel.main.Main(None, same_process=True, old_namespace=None)
 
 
 def test(text):
+    """
+    Parse the input.
+
+    Args:
+        text: (str): write your description
+    """
     parser = marcel.parser.Parser(text, MAIN.op_modules)
     pipeline = parser.parse()
     print(f'{text} ->\n{pipeline}')

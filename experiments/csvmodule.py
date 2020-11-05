@@ -19,9 +19,22 @@ import csv
 class Receiver:
 
     def __init__(self):
+        """
+        Initialize the contents
+
+        Args:
+            self: (todo): write your description
+        """
         self.contents = []
 
     def write(self, x):
+        """
+        Write the given string to the input.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         self.contents.append(x)
 
 

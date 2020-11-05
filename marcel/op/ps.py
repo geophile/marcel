@@ -56,6 +56,20 @@ _UNINITIALIZED = Uninitialized()
 
 
 def ps(env, user=_UNINITIALIZED, group=_UNINITIALIZED, pid=_UNINITIALIZED, command=_UNINITIALIZED):
+    """
+    Create a new environment for the given environment.
+
+    Args:
+        env: (todo): write your description
+        user: (str): write your description
+        _UNINITIALIZED: (bool): write your description
+        group: (todo): write your description
+        _UNINITIALIZED: (bool): write your description
+        pid: (int): write your description
+        _UNINITIALIZED: (bool): write your description
+        command: (list): write your description
+        _UNINITIALIZED: (bool): write your description
+    """
     op = Ps(env)
     op.user = user
     op.group = group
@@ -67,6 +81,13 @@ def ps(env, user=_UNINITIALIZED, group=_UNINITIALIZED, pid=_UNINITIALIZED, comma
 class PsArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('ps', env)
         self.add_flag_optional_value('user', '-u', '--user', convert=self.check_str, target='user_arg')
         self.add_flag_optional_value('group', '-g', '--group', convert=self.check_str, target='group_arg')
@@ -79,6 +100,13 @@ class PsArgsParser(marcel.argsparser.ArgsParser):
 class Ps(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the process.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.user_arg = _UNINITIALIZED
         self.user = None
@@ -93,6 +121,12 @@ class Ps(marcel.core.Op):
     # AbstractOp
     
     def setup(self):
+        """
+        Set up the pid
+
+        Args:
+            self: (todo): write your description
+        """
         self.user = self.eval_function('user_arg', int, str)
         self.group = self.eval_function('group_arg', int, str)
         self.pid = self.eval_function('pid_arg', int)
@@ -120,6 +154,13 @@ class Ps(marcel.core.Op):
             self.filter = lambda p: self.command in p.commandline
 
     def receive(self, _):
+        """
+        Receive the given process.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         for process in marcel.object.process.processes():
             if self.filter(process):
                 self.send(process)
@@ -127,12 +168,25 @@ class Ps(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     # For use by this class
 
     @staticmethod
     def convert_to_id(name, lookup):
+        """
+        Convert a marcel id
+
+        Args:
+            name: (str): write your description
+            lookup: (todo): write your description
+        """
         id = lookup(name)
         if id is None:
             try:

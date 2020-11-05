@@ -31,12 +31,26 @@ If {r:DIRECTORY} is omitted, then change the current directory to the home direc
 
 
 def cd(env, directory=None):
+    """
+    Return the directory.
+
+    Args:
+        env: (todo): write your description
+        directory: (str): write your description
+    """
     return Cd(env), [] if directory is None else [directory]
 
 
 class CdArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('cd', env)
         self.add_anon('directory', convert=self.check_str, default='~')
         self.validate()
@@ -45,18 +59,44 @@ class CdArgsParser(marcel.argsparser.ArgsParser):
 class Cd(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.directory = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'cd({self.directory})'
 
     # AbstractOp
 
     def setup(self,):
+        """
+        Sets the directory.
+
+        Args:
+            self: (todo): write your description
+        """
         self.directory = pathlib.Path(self.directory)
 
     def receive(self, _):
+        """
+        Receive the environment to - receive.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         try:
             self.env().dir_state().cd(self.directory)
         except PermissionError as e:
@@ -67,7 +107,19 @@ class Cd(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

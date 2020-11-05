@@ -4,6 +4,12 @@ import marcel.helpformatter
 class TestColorScheme:
 
     def __init__(self):
+        """
+        Initializes the help
+
+        Args:
+            self: (todo): write your description
+        """
         self.help_reference = 'R'
         self.help_bold = 'B'
         self.help_italic = 'I'
@@ -11,16 +17,45 @@ class TestColorScheme:
         self.help_color = 'C'
 
     def bold(self):
+        """
+        Returns the number of rows.
+
+        Args:
+            self: (todo): write your description
+        """
         return 1
 
     def italic(self):
+        """
+        Return the : class : ~pypot. core
+
+        Args:
+            self: (todo): write your description
+        """
         return 2
 
     def color(self, r, g, b, style):
+        """
+        Return the color
+
+        Args:
+            self: (todo): write your description
+            r: (str): write your description
+            g: (str): write your description
+            b: (str): write your description
+            style: (str): write your description
+        """
         return f'C{r}{g}{b}{"" if style == 0 else "b" if style == 1 else "i" if style == 2 else "bi"}'
 
 
 def colorize(text, color):
+    """
+    Colorize text.
+
+    Args:
+        text: (str): write your description
+        color: (str): write your description
+    """
     return f'({color}:{text})'
 
 
@@ -65,6 +100,13 @@ If the {r:--pickle} formatting option is specified, then output must go to a fil
 
 
 def plain_and_formatted(label, text):
+    """
+    Prints the text
+
+    Args:
+        label: (str): write your description
+        text: (str): write your description
+    """
     print(f'{label}: ORIGINAL')
     print(text)
     print(f'{label}: FORMATTED')

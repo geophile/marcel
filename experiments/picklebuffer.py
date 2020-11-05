@@ -25,14 +25,36 @@ C_CACHE = {}
 class CustomPickler(dill.Pickler):
 
     def __init__(self, buffer, protocol):
+        """
+        Initialize the protocol.
+
+        Args:
+            self: (todo): write your description
+            buffer: (todo): write your description
+            protocol: (todo): write your description
+        """
         super().__init__(buffer, protocol=protocol)
         self.buffer = buffer
 
     def persistent_id(self, x):
+        """
+        Persist a persistent identifier
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         print(f'{x} -> {id(x)}')
         return id(x) if type(x) is C else None
 
     def dump(self, x):
+        """
+        Write the buffer.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         self.buffer.seek(0)
         super().dump(x)
 
@@ -40,15 +62,35 @@ class CustomPickler(dill.Pickler):
 class CustomUnpickler(dill.Unpickler):
 
     def __init__(self, buffer):
+        """
+        Initialize the buffer.
+
+        Args:
+            self: (todo): write your description
+            buffer: (todo): write your description
+        """
         super().__init__(buffer)
         self.buffer = buffer
 
     def persistent_load(self, pid):
+        """
+        Persist a persistent persistent persistent identifier.
+
+        Args:
+            self: (todo): write your description
+            pid: (todo): write your description
+        """
         x = C_CACHE.get(pid, None)
         print(f'{id(x)} -> {x}')
         return x
 
     def load(self):
+        """
+        Load the buffer.
+
+        Args:
+            self: (todo): write your description
+        """
         self.buffer.seek(0)
         return super().load()
 
@@ -56,21 +98,61 @@ class CustomUnpickler(dill.Unpickler):
 class C:
 
     def __init__(self, value):
+        """
+        Initializes the value
+
+        Args:
+            self: (todo): write your description
+            value: (todo): write your description
+        """
         self.value = value
         C_CACHE[id(self)] = self
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'C({self.value})'
 
 
 def hexid(x):
+    """
+    Return the hexadecimal hex string.
+
+    Args:
+        x: (todo): write your description
+    """
     return hex(id(x))
 
 
 def dump(label, x):
+    """
+    Pretty print a list of objects.
+
+    Args:
+        label: (str): write your description
+        x: (todo): write your description
+    """
     def _indent(level):
+        """
+        Indent the indentation.
+
+        Args:
+            level: (str): write your description
+        """
         return '    ' * level
     def _dump(x, level, buffer):
+        """
+        Dump a list of objects.
+
+        Args:
+            x: (todo): write your description
+            level: (int): write your description
+            buffer: (todo): write your description
+        """
         indent = _indent(level)
         if type(x) is list:
             buffer.append(f'{indent}{hexid(x)} [')
@@ -87,6 +169,12 @@ def dump(label, x):
 
 
 def copy(x):
+    """
+    Copy a pickler into a pickle.
+
+    Args:
+        x: (todo): write your description
+    """
     buffer = io.BytesIO()
     pickler = CustomPickler(buffer, protocol=pickle.DEFAULT_PROTOCOL)
     pickler.dump(x)

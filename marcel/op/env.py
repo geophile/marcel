@@ -51,12 +51,25 @@ the short flag names, {r:-cs} would get all symbols except the builtin ones.
 
 
 def env(env):
+    """
+    Return the environment variable.
+
+    Args:
+        env: (todo): write your description
+    """
     return Env(env), []
 
 
 class EnvArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        This function to env.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('env', env)
         self.add_flag_no_value('all', '-a', '--all')
         self.add_flag_no_value('builtin', '-b', '--builtin')
@@ -72,6 +85,13 @@ class Env(marcel.core.Op):
     OMITTED = ['__builtins__']
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.all = None
         self.builtin = None
@@ -79,6 +99,12 @@ class Env(marcel.core.Op):
         self.session = None
 
     def __repr__(self):
+        """
+        Return a string representation of this object.
+
+        Args:
+            self: (todo): write your description
+        """
         flags = ''
         if self.builtin:
             flags += 'b'
@@ -91,6 +117,12 @@ class Env(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
+        """
+        Setup the session.
+
+        Args:
+            self: (todo): write your description
+        """
         if not(self.all or self.builtin or self.config or self.session):
             # No flags specified. Default behiavor is all.
             self.all = True
@@ -100,6 +132,13 @@ class Env(marcel.core.Op):
             self.session = True
 
     def receive(self, _):
+        """
+        Receive a new environment.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         builtin_symbols = self.env().builtin_symbols
         config_symbols = self.env().config_symbols
         for key, value in sorted(self.env().vars().items()):
@@ -114,7 +153,19 @@ class Env(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True

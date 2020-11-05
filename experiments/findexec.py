@@ -8,6 +8,11 @@ N = 100
 
 
 def find_executables():
+    """
+    Finds a list of the executable.
+
+    Args:
+    """
     executable = []
     path = os.environ['PATH'].split(':')
     for p in path:
@@ -18,6 +23,11 @@ def find_executables():
 
 
 def main():
+    """
+    Main function.
+
+    Args:
+    """
     start = time.time()
     for i in range(N):
         find_executables()

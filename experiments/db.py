@@ -25,6 +25,11 @@ FILLER = 'x' * 100
 
 
 def standard():
+    """
+    Standardize the standard database
+
+    Args:
+    """
     conn = psycopg2.connect(dbname='jao', user='jao')
     cursor = conn.cursor()
     cursor.execute('drop table if exists t')
@@ -43,6 +48,12 @@ def standard():
 
 
 def mogrify(batch_size):
+    """
+    Mogrify mogrify
+
+    Args:
+        batch_size: (int): write your description
+    """
     conn = psycopg2.connect(dbname='jao', user='jao')
     cursor = conn.cursor()
     cursor.execute('drop table if exists t')
@@ -67,12 +78,22 @@ def mogrify(batch_size):
 
 
 def mogrify_vs_standard():
+    """
+    Mogrify standard standard deviation.
+
+    Args:
+    """
     standard()
     for b in (10, 100, 200, 500, 1000, 2000):
         mogrify(b)
 
 
 def param_styles():
+    """
+    List all styles
+
+    Args:
+    """
     conn = psycopg2.connect(dbname='jao', user='jao')
     cursor = conn.cursor()
     cursor.execute('drop table if exists t')

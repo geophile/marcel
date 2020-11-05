@@ -25,12 +25,25 @@ import marcel.util
 
 
 def help(env):
+    """
+    Return the help
+
+    Args:
+        env: (todo): write your description
+    """
     return Help(env)
 
 
 class HelpArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('help', env)
         self.add_anon('topic', convert=self.check_str, default='marcel')
         self.validate()
@@ -39,19 +52,45 @@ class HelpArgsParser(marcel.argsparser.ArgsParser):
 class Help(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.topic = None
         self.module = None
 
     def __repr__(self):
+        """
+        Return a repr representation of a repr__.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'help({self.topic})'
 
     # AbstractOp
     
     def setup(self):
+        """
+        Initialize the topic.
+
+        Args:
+            self: (todo): write your description
+        """
         self.topic = self.topic.lower()
 
     def receive(self, _):
+        """
+        Receive a message.
+
+        Args:
+            self: (todo): write your description
+            _: (todo): write your description
+        """
         op_module = self.env().op_modules.get(self.topic, None)
         help_text = self.op_help(op_module) if op_module else self.topic_help()
         self.send(help_text)
@@ -60,19 +99,44 @@ class Help(marcel.core.Op):
     # Op
 
     def must_be_first_in_pipeline(self):
+        """
+        Returns true if the pipeline is in the pipeline.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     def run_in_main_process(self):
+        """
+        Runs a list of - main loop.
+
+        Args:
+            self: (todo): write your description
+        """
         return True
 
     # For use by this class
 
     def op_help(self, op_module):
+        """
+        Return the help text for the given operation.
+
+        Args:
+            self: (todo): write your description
+            op_module: (todo): write your description
+        """
         help_text = op_module.help()
         formatter = marcel.helpformatter.HelpFormatter(self.env().color_scheme())
         return formatter.format(help_text)
 
     def topic_help(self):
+        """
+        Return the help string for the topic.
+
+        Args:
+            self: (todo): write your description
+        """
         try:
             self.module = importlib.import_module(f'marcel.doc.help_{self.topic}')
         except ModuleNotFoundError:

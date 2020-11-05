@@ -54,6 +54,14 @@ replacing the value, e.g. {r:gen 5 >> x}.
 
 
 def store(env, target, append=False):
+    """
+    Store the environment.
+
+    Args:
+        env: (todo): write your description
+        target: (str): write your description
+        append: (todo): write your description
+    """
     store = Store(env)
     args = []
     if append:
@@ -68,6 +76,13 @@ def store(env, target, append=False):
 class StoreArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
+        """
+        Initialize the env.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__('store', env)
         self.add_flag_no_value('append', '-a', '--append')
         # init_target actually creates the target file or reservoir if it doesn't exist. This would 
@@ -81,6 +96,13 @@ class StoreArgsParser(marcel.argsparser.ArgsParser):
 class Store(marcel.core.Op):
 
     def __init__(self, env):
+        """
+        Initialize the environment.
+
+        Args:
+            self: (todo): write your description
+            env: (todo): write your description
+        """
         super().__init__(env)
         self.target = None
         self.append = None
@@ -89,11 +111,23 @@ class Store(marcel.core.Op):
         self.nesting = None
 
     def __repr__(self):
+        """
+        Return a repr representation of this field.
+
+        Args:
+            self: (todo): write your description
+        """
         return f'store({self.target}, append)' if self.append else f'store({self.target})'
 
     # AbstractOp
 
     def setup(self):
+        """
+        Sets up the target.
+
+        Args:
+            self: (todo): write your description
+        """
         if type(self.target) is marcel.reservoir.Reservoir:
             # API
             self.picklefile = self.target
@@ -117,6 +151,13 @@ class Store(marcel.core.Op):
         self.nesting = self.env().vars().n_scopes()
 
     def receive(self, x):
+        """
+        Receive the stream.
+
+        Args:
+            self: (todo): write your description
+            x: (todo): write your description
+        """
         try:
             self.writer.write(x)
         except:
@@ -124,6 +165,12 @@ class Store(marcel.core.Op):
             raise
 
     def receive_complete(self):
+        """
+        Receive a complete message.
+
+        Args:
+            self: (todo): write your description
+        """
         # self.nesting, and the conditional execution of close() fixes bug 126. receive_complete for an op
         # can sometimes be reached on multiple paths, e.g.
         #         fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]
