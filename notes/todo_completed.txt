@@ -670,3 +670,13 @@ BUT:
 
 - pickle is also a lot faster, 20x. See experiments/dill_vs_pickle.py
 
+----------------------------------------------------------------------
+
+history:
+
+Add flags:
+
+    -n: n is int, list last n
+
+    -c x: list items containg x
+

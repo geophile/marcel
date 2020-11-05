@@ -2768,3 +2768,27 @@ This is after defining loc in RUN_ON_STARTUP:
       File "/home/jao/git/marcel/marcel/nestednamespace.py", line 72, in flattened
         for map in self.scopes:
     TypeError: 'NoneType' object is not iterable
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+139. Crash running ps on @jao
+
+M-0.11.10 jao@cheese:~$ @jao [ ps ]
+Traceback (most recent call last):
+  File "/usr/local/bin/farcel.py", line 163, in main
+    signal_id = input.load()
+  File "/usr/local/lib/python3.8/dist-packages/dill/_dill.py", line 472, in load
+    obj = StockUnpickler.load(self)
+EOFError: Ran out of input
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/bin/farcel.py", line 178, in <module>
+    main()
+  File "/usr/local/bin/farcel.py", line 168, in main
+    while pipeline_runner.is_alive():
+UnboundLocalError: local variable 'pipeline_runner' referenced before assignment

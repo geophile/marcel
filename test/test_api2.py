@@ -1,6 +1,11 @@
-import os
 from marcel.api import *
 
-x = reservoir('x')
-run(gen(10) | store(x))
-run(load(x))
+
+def fact(x):
+    return (gen(x, 1) |
+            args(lambda n: gen(n, 1) |
+                           red(r_times) |
+                           map(lambda f: (n, f))))
+
+
+run(fact(50))

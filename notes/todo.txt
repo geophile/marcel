@@ -435,16 +435,6 @@ See psutil
 
 ----------------------------------------------------------------------
 
-history:
-
-Add flags:
-
-    -n: n is int, list last n
-
-    -c x: list items containg x
-
-----------------------------------------------------------------------
-
 Honestly, the marcel equivalent to grep is kind of a pain.
 
     grep foo *.txt

@@ -90,6 +90,9 @@ class Ps(marcel.core.Op):
         self.command = None
         self.filter = None
 
+    def __repr__(self):
+        return f'Process({self.pid})'
+
     # AbstractOp
     
     def setup(self):
