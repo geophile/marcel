@@ -74,13 +74,13 @@ class PipelineRunner(threading.Thread):
             self.pipeline.setup()
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
             self.pipeline.first_op().receive_input(None)
+            self.pipeline.receive_complete()
         # except marcel.exception.KillCommandException as e:
         #     self.pickler.receive_error(marcel.object.error.Error(e))
         except BaseException as e:
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')
             marcel.util.print_stack(file=TRACE.file)
             self.pickler.receive_error(marcel.object.error.Error(e))
-        self.pipeline.receive_complete()
         TRACE.write('PipelineRunner: Execution complete.')
 
 

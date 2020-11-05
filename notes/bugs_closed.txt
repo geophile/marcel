@@ -2792,3 +2792,44 @@ Traceback (most recent call last):
   File "/usr/local/bin/farcel.py", line 168, in main
     while pipeline_runner.is_alive():
 UnboundLocalError: local variable 'pipeline_runner' referenced before assignment
+
+----------------------------------------------------------------------
+
+NOT A BUG
+
+Seems to be working now
+
+140. Variable not showing up in env -s
+
+    M-0.11.10 jao@cheese:~$ ls > x
+    M-0.11.10 jao@cheese:~$ env -s
+    ('x', Reservoir(/tmp/tmp2ywu7zm6))
+    M-0.11.10 jao@cheese:~$ @jao [df -h] > here
+    M-0.11.10 jao@cheese:~$ env -s
+    ('x', Reservoir(/tmp/tmp2ywu7zm6))
+
+But here is definitely present:
+
+    M-0.11.10 jao@cheese:~$ (here)
+    Reservoir(/tmp/tmpgc1cxlou)
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+141. Crash on unknown command run remotely
+
+    M-0.11.10 jao@cheese:~/git/marcel$ @acme [ ef -h ]
+    Exception in thread Thread-1:
+    Traceback (most recent call last):
+      File "/usr/local/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+        self.run()
+      File "/usr/local/bin/farcel.py", line 83, in run
+        self.pipeline.receive_complete()
+      File "/usr/local/lib/python3.8/site-packages/marcel/core.py", line 336, in receive_complete
+        self.ops[0].receive_complete()
+      File "/usr/local/lib/python3.8/site-packages/marcel/op/runpipeline.py", line 71, in receive_complete
+        self.pipeline.receive_complete()
+    AttributeError: 'NoneType' object has no attribute 'receive_complete'
+    Error(acme): The variable ef is undefined.
