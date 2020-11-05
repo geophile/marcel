@@ -107,11 +107,6 @@ timer: allow interval to be an int or real (#sec)
 
 ----------------------------------------------------------------------
 
-Revert to pickling if dill not present. And in that case, require
-function source for remote execution.
-
-----------------------------------------------------------------------
-
 Not all ops can be used in API, e.g. edit, help. What about fork? remote?
 
 ----------------------------------------------------------------------
@@ -246,11 +241,6 @@ env has paths as strings. Should be Paths.
 
 ----------------------------------------------------------------------
 
-Make namespace protected. Use vars() instead externally.  BTW:
-"vars()" is not a good name for returning the namespace. globals()?
-
-----------------------------------------------------------------------
-
 ls API: Need to complain if depth is other than 0 or 1
 
 ----------------------------------------------------------------------
@@ -315,10 +305,6 @@ Can't run ssh!
 ----------------------------------------------------------------------
 
 env options to print one var, or to find a var. Autocomplete.
-
-----------------------------------------------------------------------
-
-Replace now() by time(). (Code, doc)
 
 ----------------------------------------------------------------------
 
@@ -388,41 +374,6 @@ In api functions, why [None] instead of []? E.g., in store()
 
 ----------------------------------------------------------------------
 
-File.unlink()
-
-----------------------------------------------------------------------
-
-ls gets COLOR_SCHEME on each File:
-
-M-0.11.0 jao@cheese:~/git/marcel/marcel$ ls | ext py 
-getvar 139884242926800: PWD -> 139884242937296
-getvar 139884242926800: ext -> 139884241896976
-runpipeline.setup_1 ext: 139884241896976 [e: select(lambda f: f.suffix == '.' + e)]
-runpipeline.setup_1 pipeline env: <marcel.env.Environment object at 0x7f39569bfcd0>
-getvar 139884242926800: COLOR_SCHEME -> 139884242927472
--rw-r--r--   jao    jao         652   2020 May 10 15:41:11   __init__.py
-getvar 139884242926800: COLOR_SCHEME -> 139884242927472
--rw-rw-r--   jao    jao        7591   2020 Oct 08 14:28:17   api.py
-getvar 139884242926800: COLOR_SCHEME -> 139884242927472
--rw-rw-r--   jao    jao       18875   2020 Oct 05 12:02:02   argsparser.py
-getvar 139884242926800: COLOR_SCHEME -> 139884242927472
--rw-rw-r--   jao    jao        1356   2020 Oct 09 11:24:21   builtin.py
-getvar 139884242926800: COLOR_SCHEME -> 139884242927472
--rw-rw-r--   jao    jao       12925   2020 Oct 11 13:22:27   core.py
-getvar 139884242926800: COLOR_SCHEME -> 139884242927472
--rw-rw-r--   jao    jao       11985   2020 Oct 11 13:26:13   env.py
-getvar 139884242926800: COLOR_SCHEME -> 139884242927472
--rw-r--r--   jao    jao        4506   2020 Aug 21 09:20:16   exception.py
-getvar 139884242926800: COLOR_SCHEME -> 139884242927472
-
-----------------------------------------------------------------------
-
-For remote execution, is it still necessary to transmit env
-separately? Just send the pipeline as is, don't detach/retach env
-(which is vestigial anyway).
-
-----------------------------------------------------------------------
-
 Instead of serializing Pipelines, how about serializing pipeline
 strings, and them parse them on the other side? This is doable except
 for API pipelines containing native functions.
@@ -432,23 +383,6 @@ for API pipelines containing native functions.
 Replace /proc usage by OS calls?
 
 See psutil
-
-----------------------------------------------------------------------
-
-Honestly, the marcel equivalent to grep is kind of a pain.
-
-    grep foo *.txt
-
-->
-
-    read -l *.txt | select (file, line: 'foo' in line) | map (file, line: file)
-
-Can grep (at least, this simplified usage) be expressed as a pipeline?
-
-grep = [pattern, files: read -l (files) | select (f, l: pattern in l) | map (f, l: f) | unique]
-
-Yes! except that "grep" is understood to be an executable. Need to
-work out order of resolution (e.g., want vars before executables).
 
 ----------------------------------------------------------------------
 
@@ -470,3 +404,29 @@ would need to know Parser state.)
 
 OR: in the context that a comma is used, look for string instead, and
 check that it is a comma.
+
+----------------------------------------------------------------------
+
+What should be the default directory for a remote ls?
+
+M-0.11.10 jao@cheese:~/git/marcel$ @all [ls]
+(localhost, .)
+(localhost, .git)
+(localhost, .gitignore)
+(localhost, .idea)
+(localhost, COPYING)
+(localhost, LICENSE)
+(localhost, README.md)
+(localhost, bin)
+(localhost, build)
+(localhost, dist)
+(localhost, experiments)
+(localhost, marcel)
+(localhost, marcel.egg-info)
+(localhost, notes)
+(localhost, setup.py)
+(localhost, test)
+(localhost, venv)
+(localhost, venv3.8)
+Error(acme): [Errno 2] No such file or directory: '/home/jao/git/marcel'
+M-0.11.10 jao@cheese:~/git/marcel$ 
