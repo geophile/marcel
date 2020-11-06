@@ -18,44 +18,31 @@ HELP = '''
 A {i:Process} represents an operating system process.  Marcel's {n:ps}
 command generates a stream of {n:Process}es. {n:Process} provides a
 set of properties and functions for obtaining information on processes.
-This information is derived from the {n:proc} filesystem. E.g., the
-directory {n:/proc/23419} has files with information on the process whose
-pid is 23419.
-
-There are about 50 files in the {n:/proc} directory for a
-process. Marcel uses three of them:
-
-{L}{n:status}: Contains information on resource usage,
-ownership, process state, and much else.
-
-{L}{n:commandline}: The commandline used to launch the 
-process (if the process was launched that way).
-
-{L}{n:environ}: The environment variables for the process.
 
 {b:Process properties}
 
-A {n:Process} has the following properties:
+A {n:Process} is based on an object of the same name from the
+{n:psutil} module. The properties of {n:Process} derived from {n:pustil}
+are:
 
-{L,indent=4:6}- {n:pid}: The pid of the process.
-{L,indent=4:6}- {n:ppid}: The pid of the parent of the process.     
-{L,indent=4:6}- {n:uid}: The effective uid of the process.
-{L,indent=4:6}- {n:user}: The username of the effective uid.
-{L,indent=4:6}- {n:gid}: The effective gid of the process.
-{L,indent=4:6}- {n:group}: The group name of the effective gid.
-{L,indent=4:6}- {n:state}: The execution state of the process.
-{L,indent=4:6}- {n:commandline}: The command line used to launch the process.
-{L,indent=4:6}- {n:env}: The environment variables of the process.
+{L, indent=4:6}- {n:cmdline}
+{L, indent=4:6}- {n:cpu_percent}
+{L, indent=4:6}- {n:cpu_times}
+{L, indent=4:6}- {n:create_time}
+{L, indent=4:6}- {n:cwd}
+{L, indent=4:6}- {n:environ}
+{L, indent=4:6}- {n:exe}
+{L, indent=4:6}- {n:gids}
+{L, indent=4:6}- {n:memory_info}
+{L, indent=4:6}- {n:name}
+{L, indent=4:6}- {n:pid}
+{L, indent=4:6}- {n:ppid}
+{L, indent=4:6}- {n:status}
+{L, indent=4:6}- {n:username}
+{L, indent=4:6}- {n:uids}
 
-These properties represent information derived from the {n:status},
-{n:cmdline}, and {n:environ} files, modified in some cases for convenience.
-For example, all of the numbers are converted to {n:int}.
-
-The contents of the {n:status} file can also be accessed directly, by
-using the key from that file. So, for example, there is a {n:Uid}
-property, whose value is a string containing four uids. (The second of
-these is extracted as the value of the {n:uid} property).
-
+Consult {n:psutil} documentation for information on these properties. In addition, the {n:command}
+property returns the process command line as a single string, ({n:cmdline} returns a list of strings).
 
 {b:Process methods}
 

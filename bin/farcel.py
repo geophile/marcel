@@ -10,13 +10,13 @@ import sys
 import threading
 
 import dill
+import psutil
 
 import marcel.core
 import marcel.env
 import marcel.exception
 import marcel.object.color
 import marcel.object.error
-import marcel.object.process
 import marcel.nestednamespace
 import marcel.util
 import marcel.version
@@ -89,8 +89,8 @@ def kill_descendents(signal_id):
     try:
         pid = os.getpid()
         try:
-            process = marcel.object.process.Process(pid)
-            for p in process.descendents():
+            process = psutil.Process(pid)
+            for p in process.children(recursive=True):
                 TRACE.write(f'Killing descendent pid {p.pid}')
                 p.kill(signal_id)
             # # Suicide

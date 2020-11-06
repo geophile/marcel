@@ -13,7 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import functools
 import os
+
+import psutil
 
 import marcel.argsparser
 import marcel.core
@@ -21,6 +24,23 @@ import marcel.exception
 import marcel.object.process
 import marcel.util
 
+Proc = psutil.Process  # Avoid name collision with marcel.object.process.Process
+
+PROC_ATTRS = ['cmdline',
+              'cpu_percent',
+              'cpu_times',
+              'create_time',
+              'cwd',
+              'environ',
+              'exe',
+              'gids',
+              'memory_info',
+              'name',
+              'pid',
+              'ppid',
+              'status',
+              'username',
+              'uids']
 
 HELP = '''
 {L,wrap=F}ps [-u|--user [USER]] [-g|--group [GROUP]] [-p|--pid PID] [-c|--command STRING]
@@ -45,6 +65,13 @@ condition, based on the attributes of {n:Process} objects. (Run {n:help process}
 If {r:--user} is specified, and {r:USER} is omitted, then the processes owned by the current user
 are provided. Similarly, if {r:--group} is specified and {r:GROUP} is omitted, then the processes
 owned by the current user's group are provided.
+
+Users and groups can be identified by name, or by numeric id. In the latter case, real, effective and saved
+ids are checked. E.g. {n:ps -u 1002} would return processes in which the real uid, effective uid, or saved
+uid is 1002.
+
+If {r:--command} is specified, then the {r:STRING} argument is matched against the process name,
+executable name, and command line.
 '''
 
 
@@ -94,7 +121,7 @@ class Ps(marcel.core.Op):
         return f'Process({self.pid})'
 
     # AbstractOp
-    
+
     def setup(self):
         self.user = self.eval_function('user_arg', int, str)
         self.group = self.eval_function('group_arg', int, str)
@@ -109,21 +136,26 @@ class Ps(marcel.core.Op):
         self.filter = lambda p: True
         if type(self.user) is not Uninitialized:
             self.user = os.getuid() if self.user in (None, True) else Ps.convert_to_id(self.user, marcel.util.uid)
-            self.filter = lambda p: p.uid == self.user
+            self.filter = lambda p: self.user in p.uids
         if type(self.group) is not Uninitialized:
             self.group = os.getgid() if self.group in (None, True) else Ps.convert_to_id(self.group, marcel.util.gid)
-            self.filter = lambda p: p.gid == self.group
+            self.filter = lambda p: self.group in p.gids
         if type(self.pid) is not Uninitialized:
             try:
                 self.pid = int(self.pid)
-                self.filter = lambda p: p.pid == self.pid
+                self.filter = lambda p: self.pid == p.pid
             except ValueError:
                 raise marcel.exception.KillCommandException(f'pid must be an int: {self.pid}')
         if type(self.command) is not Uninitialized:
-            self.filter = lambda p: self.command in p.commandline
+            self.filter = (lambda p: p.name is not None and self.command in p.name or
+                                     p.exe is not None and self.command in p.exe or
+                                     p.cmdline is not None and functools.reduce(lambda x, y: x or y,
+                                                                                [self.command in x for x in p.cmdline],
+                                                                                False))
 
     def receive(self, _):
-        for process in marcel.object.process.processes():
+        for proc in psutil.process_iter(PROC_ATTRS):
+            process = marcel.object.process.Process(proc)
             if self.filter(process):
                 self.send(process)
 
@@ -145,4 +177,3 @@ class Ps(marcel.core.Op):
         if id is None:
             raise marcel.exception.KillCommandException(f'{name} is not a recognized id or name.')
         return id
-

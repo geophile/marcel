@@ -60,7 +60,7 @@ COLOR_SCHEME.file_extension =  \{'.jpg': COLOR_IMAGE_HIGHLIGHT,
                                 '.gif': COLOR_IMAGE_HIGHLIGHT\}
 COLOR_SCHEME.error = Color(5, 5, 0)
 COLOR_SCHEME.process_pid = Color(0, 2, 4, BOLD)
-COLOR_SCHEME.process_commandline = Color(3, 2, 0, BOLD)
+COLOR_SCHEME.process_command = Color(3, 2, 0, BOLD)
 COLOR_SCHEME.help_reference = Color(5, 3, 0)
 COLOR_SCHEME.help_bold = COLOR_DOC_BOLD
 COLOR_SCHEME.help_italic = COLOR_DOC_ITALIC
