@@ -21,13 +21,9 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/farcel.py" beforeDir="false" afterPath="$PROJECT_DIR$/bin/farcel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/doc/help_color.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_color.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/doc/help_process.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/doc/help_process.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/object/color.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/color.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/object/process.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/object/process.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/ps.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/ps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -618,7 +614,7 @@
       <workItem from="1604351175074" duration="1329000" />
       <workItem from="1604425374798" duration="7677000" />
       <workItem from="1604507044068" duration="3339000" />
-      <workItem from="1604526300777" duration="22907000" />
+      <workItem from="1604526300777" duration="23762000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -945,13 +941,13 @@
       <screen x="1920" y="0" width="2560" height="1440" />
     </state>
     <state x="3837" y="574" width="306" height="687" key="refactoring.ChangeSignatureDialog/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1600204877299" />
-    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup" timestamp="1604676116500">
+    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup" timestamp="1604676602204">
       <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1604510603624" />
     <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1604582584507" />
     <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1599329664953" />
-    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1604676116500" />
+    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1604676602204" />
     <state x="701" y="354" width="672" height="507" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1596033560611" />
     <state x="2621" y="335" width="672" height="519" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1599509774976" />
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1603200753774" />

@@ -57,7 +57,7 @@ class Process(marcel.object.renderable.Renderable):
 
     @property
     def command(self):
-        return ' '.join(self.cmdline)
+        return '' if self.cmdline is None else ' '.join(self.cmdline)
 
     def signal(self, signal):
         os.kill(self.pid, signal)

@@ -2833,3 +2833,29 @@ FIXED
         self.pipeline.receive_complete()
     AttributeError: 'NoneType' object has no attribute 'receive_complete'
     Error(acme): The variable ef is undefined.
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+142. Crash on unsupported color scheme property name
+
+jao@cheese:~/git/marcel$ marcel
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 300, in <module>
+    MAIN = Main(None, same_process=False, old_namespace=old_namespace)
+  File "/home/jao/git/marcel/marcel/main.py", line 98, in __init__
+    self.env = marcel.env.Environment.new(config_file, old_namespace)
+  File "/home/jao/git/marcel/marcel/env.py", line 211, in new
+    env.config_path = env.read_config(config_file)
+  File "/home/jao/git/marcel/marcel/env.py", line 333, in read_config
+    exec(config_source, self.namespace.flattened(), locals)
+  File "<string>", line 41, in <module>
+  File "/home/jao/git/marcel/marcel/object/color.py", line 96, in __setattr__
+    raise ColorSchemeError(f'{key} is not a supported color scheme attribute.')
+marcel.object.color.ColorSchemeError: asdf_scheme_value is not a supported color scheme attribute.

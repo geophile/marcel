@@ -15,6 +15,7 @@
 
 import sys
 
+import marcel.exception
 import marcel.object.renderable
 import marcel.util
 
@@ -51,7 +52,7 @@ class Color:
         return self.style & Color.ITALIC != 0
 
 
-class ColorSchemeError(Exception):
+class ColorSchemeError(marcel.exception.KillShellException):
 
         def __init__(self, message):
             super().__init__(message)
