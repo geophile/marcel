@@ -54,6 +54,14 @@ def r_count(acc, x):
     return 1 if acc is None else acc + 1
 
 
+def r_concat(acc, x):
+    if acc is None:
+        return [x]
+    else:
+        acc.append(x)
+        return acc
+
+
 # Should never be called. Used to identify grouping for the red operator.
 def r_group(acc, x):
     assert False

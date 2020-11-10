@@ -22,53 +22,24 @@ import time
 
 
 HELP = '''
-{L,wrap=F}timer [-c|--components] INTERVAL
+{L,wrap=F}timer INTERVAL
 
-{L,indent=4:28}{r:-c}, {r:--components}        Output timestamp as a Python {n:time.struct_time} value, 
-instead of seconds.
-
-{L,indent=4:28}{r:INTERVAL}                The amount of time to wait between consecutive timestamps.
+{L,indent=4:28}{r:INTERVAL}                The number of seconds to wait between consecutive timestamps.
 
 Generate a sequence of timestamps, separated in time by a specified {r:INTERVAL}.
-
-The {r:INTERVAL} format is {n:HH:MM:SS} where {r:HH} is hours, 
-{r:MM} is minutes, {r:SS} is seconds. {r:HH:} and
-{r:HH:MM:} may be omitted.
-
-{b:Examples}:
-{p,wrap=F}
-    {r:interval}        meaning
-    ------------------------------------
-    5               5 seconds
-    1:30            1 minute, 30 seconds
-    1:00:00         1 hour
-
-By default, the output timestamp is time in seconds since 1/1/1970.
-If {r:-c} is specified, then the timestamp is rendered as a Python {n:time.struct_time}
-tuple: (year, month, day, hour, minute, second, weekday, day of year, daylight savings time flag).
-
-Notes:
-{L}- month is 1-based (January = 1, February = 2, ...)
-{L}- day of month is 1-based.
-{L}- second can go as high as 61 due to leap-seconds.
-{L}- day of week is 0-based, Monday = 0.
-{L}- day of year is 1-based.
-{L}- dst is 1 if Daylight Savings Time is in effect, 0 otherwise.
+The output timestamp is time in seconds since 1/1/1970.
 '''
 
 
 def timer(env, interval, components=False):
-    args = ['--components'] if components else []
-    args.append(interval)
-    return Timer(env), args
+    return Timer(env), [interval]
 
 
 class TimerArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('timer', env)
-        self.add_flag_no_value('components', '-c', '--components')
-        self.add_anon('interval', convert=self.check_str)
+        self.add_anon('interval', convert=self.str_to_float)
         self.validate()
 
 
@@ -76,7 +47,6 @@ class Timer(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.components = None
         self.metronome = None
         self.interval = None
         self.lock = None
@@ -90,7 +60,6 @@ class Timer(marcel.core.Op):
     
     def setup(self):
         self.lock = threading.Condition()
-        self.interval = self.parse_interval(self.interval)
         self.metronome = Metronome(self)
 
     # AbstractOp
@@ -111,8 +80,6 @@ class Timer(marcel.core.Op):
                 # TODO: Still true?
                 self.lock.wait(1.0)
             now = self.now
-            if not self.components:
-                now = time.mktime(now)
             self.now = None
             self.lock.release()
             self.send(now)
@@ -124,32 +91,9 @@ class Timer(marcel.core.Op):
 
     # For use by this module
 
-    @staticmethod
-    def parse_interval(interval):
-        try:
-            colon1 = interval.find(':')
-            colon2 = -1
-            if colon1 > 0:
-                colon2 = interval.find(':', colon1 + 1)
-            # Normalize
-            if colon1 < 0:
-                # No colons
-                interval = '0:0:' + interval
-            elif colon2 < 0:
-                # One colon
-                interval = '0:' + interval
-            colon1 = interval.find(':')
-            colon2 = interval.find(':', colon1 + 1)
-            hh = int(interval[:colon1])
-            mm = int(interval[colon1 + 1:colon2])
-            ss = int(interval[colon2 + 1:])
-            return hh * 3600 + mm * 60 + ss
-        except Exception as e:
-            raise marcel.exception.KillCommandException(f'Bad interval format: {e}')
-
     def register_tick(self):
         self.lock.acquire()
-        self.now = time.localtime()
+        self.now = time.time()
         self.lock.notifyAll()
         self.lock.release()
 

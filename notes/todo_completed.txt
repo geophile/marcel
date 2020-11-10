@@ -727,3 +727,36 @@ getvar 139884242926800: COLOR_SCHEME -> 139884242927472
 ----------------------------------------------------------------------
 
 File.unlink()
+
+----------------------------------------------------------------------
+
+Replace /proc usage by OS calls?
+
+See psutil
+
+----------------------------------------------------------------------
+
+Make Bash.INTERACTIVE_EXECUTABLES an environment variable, so that it
+can be customized by the user.
+
+----------------------------------------------------------------------
+
+Red:
+
+- Need a red function for creating a list. + isn't a good choice, since it
+  already does expected things for numbers and strings. 
+
+- Can squish be eliminated in favor of some variation of red? 
+
+Could at least generalize similar to expand. E.g. squish 1 would take
+a sequence in position 1 and squish just that. So
+
+(1, [[1]])
+(2, [[2], [2]])
+(3, [[3], [3], [3]])
+
+ ->
+
+(1, [1])
+(2, [2, 2])
+(3, [3, 3, 3])

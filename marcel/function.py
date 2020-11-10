@@ -95,6 +95,7 @@ class SymbolFunction(Function):
         'max': marcel.reduction.r_max,
         'min': marcel.reduction.r_min,
         'count': marcel.reduction.r_count,
+        'concat': marcel.reduction.r_concat,
         '.': marcel.reduction.r_group
     }
 

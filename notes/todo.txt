@@ -5,13 +5,6 @@
 
 - Debugging & verbosity level
 
-- What happens to processes that disappear? E.g. ps | .... ps yields
-  non-existent processes which are then used downstream. Can this even
-  happen?
-
-- ps: If commandline blank, take contents of Name from status file
-  (enclosed in [])? That's what ps appears to do.
-
 ----------------------------------------------------------------------
 
 - Organize internal ops -- Fork, LabelThread
@@ -53,34 +46,7 @@ subprocess.Popen? I.e., not waiting for op to complete.
 
 ----------------------------------------------------------------------
 
-Make Bash.INTERACTIVE_EXECUTABLES an environment variable, so that it
-can be customized by the user.
-
-----------------------------------------------------------------------
-
 Import bash env?
-
-----------------------------------------------------------------------
-
-Red:
-
-- Need a red function for creating a list. + isn't a good choice, since it
-  already does expected things for numbers and strings. 
-
-- Can squish be eliminated in favor of some variation of red? 
-
-Could at least generalize similar to expand. E.g. squish 1 would take
-a sequence in position 1 and squish just that. So
-
-(1, [[1]])
-(2, [[2], [2]])
-(3, [[3], [3], [3]])
-
- ->
-
-(1, [1])
-(2, [2, 2])
-(3, [3, 3, 3])
 
 ----------------------------------------------------------------------
 
@@ -380,12 +346,6 @@ for API pipelines containing native functions.
 
 ----------------------------------------------------------------------
 
-Replace /proc usage by OS calls?
-
-See psutil
-
-----------------------------------------------------------------------
-
 Operator and pipeline logging, easily controllable, is needed. Can
 this be done avoiding runtime penalty when logging not in use?
 
@@ -404,29 +364,3 @@ would need to know Parser state.)
 
 OR: in the context that a comma is used, look for string instead, and
 check that it is a comma.
-
-----------------------------------------------------------------------
-
-What should be the default directory for a remote ls?
-
-M-0.11.10 jao@cheese:~/git/marcel$ @all [ls]
-(localhost, .)
-(localhost, .git)
-(localhost, .gitignore)
-(localhost, .idea)
-(localhost, COPYING)
-(localhost, LICENSE)
-(localhost, README.md)
-(localhost, bin)
-(localhost, build)
-(localhost, dist)
-(localhost, experiments)
-(localhost, marcel)
-(localhost, marcel.egg-info)
-(localhost, notes)
-(localhost, setup.py)
-(localhost, test)
-(localhost, venv)
-(localhost, venv3.8)
-Error(acme): [Errno 2] No such file or directory: '/home/jao/git/marcel'
-M-0.11.10 jao@cheese:~/git/marcel$ 

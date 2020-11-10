@@ -169,6 +169,8 @@ def test_red():
              expected_out=[0])
     TEST.run('gen 5 | red count',
              expected_out=[5])
+    TEST.run('gen 5 | red concat',
+             expected_out=[[0, 1, 2, 3, 4]])
     # Test incremental reduction
     TEST.run('gen 5 1 | red -i +',
              expected_out=[(1, 1), (2, 3), (3, 6), (4, 10), (5, 15)])
