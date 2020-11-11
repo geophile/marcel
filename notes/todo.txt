@@ -101,11 +101,6 @@ each copy of the pipeline to access the label.
 
 ----------------------------------------------------------------------
 
-Merge Env and Main? Or maybe make Main the thing that is available
-globally?
-
-----------------------------------------------------------------------
-
 first constructs an Exception out of an Error.
 
 Is it feasible to have Error carry the original exception, and reraise
@@ -145,11 +140,6 @@ What if there are two shells running at the same time -- how is
 history file maintained? Probably lose updates from the first one to
 exit. How should this be handled? To be safe, on exit, should read,
 append, write. Atomically.
-
-----------------------------------------------------------------------
-
-Cluster.set_host called by Remote.setup_2 and
-Fork.attach_thread_label. Unclear why both are needed.
 
 ----------------------------------------------------------------------
 
@@ -303,29 +293,11 @@ Maybe use read/write, and allow "out" as an alternative to write?
 
 ----------------------------------------------------------------------
 
-Suppose that an op with a pipeline arg does a send from receive_complete, e.g. 
-
-    join [... red +] | ...
-
-Will the join be correct? The red + can do such a "late" send. The
-fact that red's receive_complete was called means that the join has
-reached receive_complete too.
-
-----------------------------------------------------------------------
-
 Tab completion:
 
 - We often know when an op ends. Can tab-complete for |, >, >>, [, ], Enter.
 
 - We sometimes know when an arg is not a flag. Can prompt for var, (, [.
-
-----------------------------------------------------------------------
-
-env is hard to read. Make it easier:
-
-- Formatting of ColorScheme.
-
-- make functions more presentable.
 
 ----------------------------------------------------------------------
 
@@ -337,12 +309,6 @@ that early ones compute local sum of sizes, and later ones are global.
 ----------------------------------------------------------------------
 
 In api functions, why [None] instead of []? E.g., in store()
-
-----------------------------------------------------------------------
-
-Instead of serializing Pipelines, how about serializing pipeline
-strings, and them parse them on the other side? This is doable except
-for API pipelines containing native functions.
 
 ----------------------------------------------------------------------
 
@@ -364,3 +330,7 @@ would need to know Parser state.)
 
 OR: in the context that a comma is used, look for string instead, and
 check that it is a comma.
+
+----------------------------------------------------------------------
+
+head/tail options to SKIP first N/last N lines.

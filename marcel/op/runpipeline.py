@@ -29,7 +29,7 @@ class RunPipeline(marcel.core.Op):
         self.pipeline = None
 
     def __repr__(self):
-        return f'runpipeline({self.pipeline})'
+        return f'runpipeline({self.var} {self.args_arg})'
 
     # AbstractOp
 

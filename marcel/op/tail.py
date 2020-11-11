@@ -15,14 +15,19 @@
 
 import marcel.argsparser
 import marcel.core
+import marcel.exception
 
 
 HELP = '''
 {L,wrap=F}tail N
 
-{L,indent=4:28}{r:N}                       The number of input tuples to be written to output.
+{L,indent=4:28}{r:N}                       The number of input tuples to be written to output, or skipped
+(depending on the sign).
 
-Output the last {r:N} tuples of the input stream, and discard the others.  
+If {r:N} > 0, then output the last {r:N} tuples of the input stream, and discard the others.  
+
+If {r:N} < 0, then skip the last {r:N} tuples of the input stream, and output the others. (I.e.,
+output all but the last {r:N} tuples.)
 '''
 
 
@@ -43,39 +48,79 @@ class Tail(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.n_arg = None
-        self.n = None
-        self.queue = None  # Circular queue
-        self.end = None  # End of the queue
+        self.impl = None
 
     def __repr__(self):
-        return f'tail({self.n})'
+        return f'tail({self.n_arg})'
 
     # AbstractOp
     
     def setup(self):
-        self.n = self.eval_function('n_arg', int)
-        self.queue = None if self.n == 0 else [None] * self.n
-        self.end = 0
+        n = self.eval_function('n_arg', int)
+        if n == 0:
+            raise marcel.exception.KillCommandException('Argument to head must not be 0.')
+        self.impl = TailKeepN(self, n) if n > 0 else TailSkipN(self, -n)
 
     def receive(self, x):
-        if self.queue:
-            self.queue[self.end] = x
-            self.end = self.next_position(self.end)
+        self.impl.receive(x)
 
     def receive_complete(self):
-        if self.queue is not None:
-            p = self.end
-            count = 0
-            while count < self.n:
-                x = self.queue[p]
-                if x is not None:
-                    self.send(x)
-                p = self.next_position(p)
-                count += 1
-            self.queue = None
-        self.send_complete()
+        self.impl.receive_complete()
 
-    # For use by this class
 
-    def next_position(self, x):
-        return (x + 1) % self.n
+class TailImpl:
+
+    def __init__(self, op, n):
+        self.op = op
+        self.n = n
+        self.queue = []  # Circular queue
+        self.end = 0  # End of the queue
+
+    def receive(self, x):
+        assert False
+
+    def receive_complete(self):
+        assert False
+
+
+class TailKeepN(TailImpl):
+
+    def __init__(self, op, n):
+        super().__init__(op, n)
+
+    def receive(self, x):
+        if len(self.queue) < self.n:
+            self.queue.append(x)
+        else:
+            self.queue[self.end] = x
+            self.end = (self.end + 1) % self.n
+
+    def receive_complete(self):
+        p = self.end
+        count = min(self.n, len(self.queue))
+        while count > 0:
+            x = self.queue[p]
+            if x is not None:
+                self.op.send(x)
+            p = (p + 1) % self.n
+            count -= 1
+        self.op.send_complete()
+        self.queue.clear()
+
+
+class TailSkipN(TailImpl):
+
+    def __init__(self, op, n):
+        super().__init__(op, n)
+
+    def receive(self, x):
+        if len(self.queue) < self.n:
+            self.queue.append(x)
+        else:
+            y = self.queue[self.end]
+            self.queue[self.end] = x
+            self.end = (self.end + 1) % self.n
+            self.op.send(y)
+
+    def receive_complete(self):
+        pass

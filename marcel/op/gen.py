@@ -68,7 +68,13 @@ class Gen(Op):
         self.format = None
 
     def __repr__(self):
-        return f'gen(count={self.count_arg}, start={self.start_arg}, pad={self.pad_arg})'
+        args = [f'count={self.count_arg}']
+        if self.start_arg is not None:
+            args.append(f'start={self.start_arg}')
+        if self.pad_arg is not None:
+            args.append(f'pad={self.pad_arg}')
+        args_description = ', '.join(args)
+        return f'gen({args_description})'
 
     # AbstractOp
 

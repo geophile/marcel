@@ -297,7 +297,7 @@ def test_expand():
 
 def test_head():
     TEST.run('gen 100 | head 0',
-             expected_out=[])
+             expected_err="must not be 0")
     TEST.run('gen 100 | head 1',
              expected_out=[0])
     TEST.run('gen 100 | head 2',
@@ -308,6 +308,15 @@ def test_head():
              expected_out=[0, 1, 2])
     TEST.run('gen 3 | head 4',
              expected_out=[0, 1, 2])
+    # Negative arg
+    TEST.run('gen 3 | head -1',
+             expected_out=[1, 2])
+    TEST.run('gen 3 | head -2',
+             expected_out=[2])
+    TEST.run('gen 3 | head -3',
+             expected_out=[])
+    TEST.run('gen 3 | head -4',
+             expected_out=[])
     # Function-valued args
     TEST.run('gen 3 | head (4)',
              expected_out=[0, 1, 2])
@@ -315,7 +324,7 @@ def test_head():
 
 def test_tail():
     TEST.run('gen 100 | tail 0',
-             expected_out=[])
+             expected_err='must not be 0')
     TEST.run('gen 100 | tail 1',
              expected_out=[99])
     TEST.run('gen 100 | tail 2',
@@ -326,6 +335,15 @@ def test_tail():
              expected_out=[0, 1, 2])
     TEST.run('gen 3 | tail 4',
              expected_out=[0, 1, 2])
+    # Negative arg
+    TEST.run('gen 3 | tail -1',
+             expected_out=[0, 1])
+    TEST.run('gen 3 | tail -2',
+             expected_out=[0])
+    TEST.run('gen 3 | tail -3',
+             expected_out=[])
+    TEST.run('gen 3 | tail -4',
+             expected_out=[])
     # Function-valued args
     TEST.run('gen 3 | tail (4)',
              expected_out=[0, 1, 2])

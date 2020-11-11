@@ -760,3 +760,8 @@ a sequence in position 1 and squish just that. So
 (1, [1])
 (2, [2, 2])
 (3, [3, 3, 3])
+
+----------------------------------------------------------------------
+
+Merge Env and Main? Or maybe make Main the thing that is available
+globally?

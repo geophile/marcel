@@ -15,14 +15,18 @@
 
 import marcel.argsparser
 import marcel.core
+import marcel.exception
 
 
 HELP = '''
 {L,wrap=F}head N
 
-{L,indent=4:28}{r:N}                       The number of input tuples to be written to output.
+{L,indent=4:28}{r:N}                       The number of input tuples to be written to output, or skipped
+(depending on the sign).
 
-Output the first {r:N} tuples of the input stream, and discard the others.  
+If {r:N} > 0, then output the first {r:N} tuples of the input stream, and discard the others.
+
+If {r:N} < 0, then skip the first {r:N} tuples of the input stream, and output the others.  
 '''
 
 
@@ -43,19 +47,48 @@ class Head(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.n_arg = None
-        self.n = None
-        self.received = None
+        self.impl = None
 
     def __repr__(self):
-        return f'head({self.n})'
+        return f'head({self.n_arg})'
 
     # AbstractOp
     
     def setup(self):
-        self.n = self.eval_function('n_arg', int)
+        n = self.eval_function('n_arg', int)
+        if n == 0:
+            raise marcel.exception.KillCommandException('Argument to head must not be 0.')
+        self.impl = HeadKeepN(self, n) if n > 0 else HeadSkipN(self, -n)
+
+    def receive(self, x):
+        self.impl.receive(x)
+
+
+class HeadImpl:
+
+    def __init__(self, op, n):
+        self.op = op
+        self.n = n
         self.received = 0
+
+
+class HeadKeepN(HeadImpl):
+
+    def __init__(self, op, n):
+        super().__init__(op, n)
 
     def receive(self, x):
         self.received += 1
         if self.n >= self.received:
-            self.send(x)
+            self.op.send(x)
+
+
+class HeadSkipN(HeadImpl):
+
+    def __init__(self, op, n):
+        super().__init__(op, n)
+
+    def receive(self, x):
+        self.received += 1
+        if self.n < self.received:
+            self.op.send(x)

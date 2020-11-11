@@ -65,7 +65,8 @@ class Args(marcel.core.Op):
         self.impl = None
 
     def __repr__(self):
-        return f'args({self.pipeline_arg})'
+        flags = 'all, ' if self.all else ''
+        return f'args({flags}{self.pipeline_arg})'
 
     # AbstractOp
 

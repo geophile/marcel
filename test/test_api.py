@@ -307,6 +307,15 @@ def test_head():
              expected_out=[0, 1, 2])
     TEST.run(lambda: run(gen(3) | head(4)),
              expected_out=[0, 1, 2])
+    # Negative arg
+    TEST.run(lambda: run(gen(3) | head(-1)),
+             expected_out=[1, 2])
+    TEST.run(lambda: run(gen(3) | head(-2)),
+             expected_out=[2])
+    TEST.run(lambda: run(gen(3) | head(-3)),
+             expected_out=[])
+    TEST.run(lambda: run(gen(3) | head(-4)),
+             expected_out=[])
     # Function-valued args
     TEST.run(test=lambda: run(gen(3) | head(lambda: 4)),
              expected_out=[0, 1, 2])
@@ -325,6 +334,15 @@ def test_tail():
              expected_out=[0, 1, 2])
     TEST.run(lambda: run(gen(3) | tail(4)),
              expected_out=[0, 1, 2])
+    # Negative arg
+    TEST.run(lambda: run(gen(3) | tail(-1)),
+             expected_out=[0, 1])
+    TEST.run(lambda: run(gen(3) | tail(-2)),
+             expected_out=[0])
+    TEST.run(lambda: run(gen(3) | tail(-3)),
+             expected_out=[])
+    TEST.run(lambda: run(gen(3) | tail(-4)),
+             expected_out=[])
     # Function-valued args
     TEST.run(lambda: run(gen(3) | tail(lambda: 4)),
              expected_out=[0, 1, 2])
