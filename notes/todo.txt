@@ -345,3 +345,9 @@ ArgsParser, but there are some dependencies:
 - self.current_op: For function(). Need to revisit error handling
   (which is why f.set_op(self.current_op) is called), and perhaps get
   rid of this call.
+
+----------------------------------------------------------------------
+
+ANSI color codes not working on CentOS (Nasuni VM):
+
+https://stackoverflow.com/questions/64791428/why-are-ansi-escape-codes-not-displaying-properly/64846705#64846705

@@ -128,7 +128,7 @@ def print_stack(file=None):
     file.flush()
 
 
-def colorize(s, color):
+def colorize(s, color, readline=False):
     if color is None:
         return s
     # Those /001 and /002 codes seem to fix bug 2.
@@ -139,7 +139,9 @@ def colorize(s, color):
              '\033[1m' if bold else
              '\033[3m' if italic else
              '\033[0m')
-    return f'\001{style}\002\001\033[38;5;{color.code}m\002{s}\001\033[0m\002'
+    return (f'\001{style}\002\001\033[38;5;{color.code}m\002{s}\001\033[0m\002'
+            if readline else
+            f'{style}\033[38;5;{color.code}m{s}\033[0m')
 
 
 def console_width():

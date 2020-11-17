@@ -358,7 +358,7 @@ class Environment:
                     raise marcel.exception.KillShellException(f'Invalid prompt component: {x}')
                 if x:
                     x = str(x)
-                    buffer.append(marcel.util.colorize(x, color) if color else x)
+                    buffer.append(marcel.util.colorize(x, color, readline=True) if color else x)
             return ''.join(buffer)
         except Exception as e:
             print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)

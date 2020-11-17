@@ -277,4 +277,9 @@ Because comma is parsed.
 
 ----------------------------------------------------------------------
 
-144. 
+144. Use of colon in a bash command is problematic
+
+COLON is a Lexer token.
+
+M 0.11.12 jao@cheese:~$ bash scp ~/.marcel.py jorenstein@nd:/home/jorenstein
+[bash(args=None)] followed by excess tokens: Colon(:), String(/home/jorenstein)
