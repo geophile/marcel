@@ -285,6 +285,9 @@ ArgsParser, but there are some dependencies:
   (which is why f.set_op(self.current_op) is called), and perhaps get
   rid of this call.
 
+Tail now defines behavior for negative args, but there is a general
+problem. Args need to be checked at setup time, after function eval.
+
 ----------------------------------------------------------------------
 
 137. Why are there excess tokens?
@@ -298,4 +301,11 @@ Because comma is parsed.
 
 ----------------------------------------------------------------------
 
-143. 
+143. Need to import env
+
+M-0.11.11 jao@cheese:~/boat$ python bin/reduceimages.py original reduced 640
+Error: Traceback (most recent call last):
+Error:   File "bin/reduceimages.py", line 7, in <module>
+Error:     from pathlib import Path
+Error: ImportError: No module named pathlib
+M-0.11.11 jao@cheese:~/boat$ 

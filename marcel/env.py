@@ -184,7 +184,7 @@ class Environment:
         except FileNotFoundError:
             raise marcel.exception.KillShellException(
                 'Current directory does not exist! cd somewhere else and try again.')
-        initial_namespace = {} if old_namespace is None else old_namespace
+        initial_namespace = os.environ.copy() if old_namespace is None else old_namespace
         initial_namespace.update({
             'USER': user,
             'HOME': homedir.as_posix(),

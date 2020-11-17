@@ -117,10 +117,9 @@ class TailSkipN(TailImpl):
         if len(self.queue) < self.n:
             self.queue.append(x)
         else:
-            y = self.queue[self.end]
+            self.op.send(self.queue[self.end])
             self.queue[self.end] = x
             self.end = (self.end + 1) % self.n
-            self.op.send(y)
 
     def receive_complete(self):
         pass

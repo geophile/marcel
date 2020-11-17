@@ -292,7 +292,7 @@ def args():
 
 if __name__ == '__main__':
     dill, mpstart, echo = args()
-    old_namespace = {}
+    old_namespace = None
     input = None
     if mpstart is not None:
         multiprocessing.set_start_method(mpstart)

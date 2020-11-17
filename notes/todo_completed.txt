@@ -765,3 +765,7 @@ a sequence in position 1 and squish just that. So
 
 Merge Env and Main? Or maybe make Main the thing that is available
 globally?
+
+----------------------------------------------------------------------
+
+head/tail options to SKIP first N/last N lines.

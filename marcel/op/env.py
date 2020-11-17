@@ -17,7 +17,7 @@ import marcel.argsparser
 import marcel.core
 
 HELP = '''
-{L,wrap=F}env [-a|--all] [-b|--builtin] [-c|--config] [-s|--session]
+{L,wrap=F}env [-a|--all] [-b|--builtin] [-c|--config] [-s|--session] [-v|--vars STRING]
 
 {L,indent=4:28}{r:-a}, {r:--all}               Output all symbols defined in the environment.
 
@@ -26,6 +26,8 @@ HELP = '''
 {L,indent=4:28}{r:-c}, {r:--config}            Output only symbols defined in the configuration file, {n:~/.marcel.py}.
 
 {L,indent=4:28}{r:-s}, {r:--session}           Output only symbols defined during the current session.
+
+{L,indent=4:28}{r:-v}, {r:--vars}              Output symbols whose variable name contains the given {r:STRING}.
 
 Write the contents of the environment, (i.e., the marcel namespace), to the output stream.
 Each key/value pair is written to the output stream as a tuple,
@@ -62,9 +64,14 @@ class EnvArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_no_value('builtin', '-b', '--builtin')
         self.add_flag_no_value('config', '-c', '--config')
         self.add_flag_no_value('session', '-s', '--session')
+        self.add_flag_one_value('vars', '-v', '--vars')
         self.at_most_one('all', 'builtin')
         self.at_most_one('all', 'config')
         self.at_most_one('all', 'session')
+        self.at_most_one('all', 'vars')
+        self.at_most_one('vars', 'builtin')
+        self.at_most_one('vars', 'config')
+        self.at_most_one('vars', 'session')
         self.validate()
 
 
@@ -77,6 +84,7 @@ class Env(marcel.core.Op):
         self.builtin = None
         self.config = None
         self.session = None
+        self.vars = None
 
     def __repr__(self):
         flags = ''
@@ -86,6 +94,8 @@ class Env(marcel.core.Op):
             flags += 'c'
         if self.session:
             flags += 's'
+        if self.vars:
+            flags = f'vars={self.vars}'
         return f'env({flags})'
 
     # AbstractOp
@@ -103,7 +113,7 @@ class Env(marcel.core.Op):
         builtin_symbols = self.env().builtin_symbols
         config_symbols = self.env().config_symbols
         for key, value in sorted(self.env().vars().items()):
-            if key not in Env.OMITTED:
+            if key not in Env.OMITTED and (self.vars is None or self.vars in key):
                 key_builtin = key in builtin_symbols
                 key_config = key in config_symbols
                 if (self.builtin and key_builtin or

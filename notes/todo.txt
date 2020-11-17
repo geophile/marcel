@@ -330,7 +330,3 @@ would need to know Parser state.)
 
 OR: in the context that a comma is used, look for string instead, and
 check that it is a comma.
-
-----------------------------------------------------------------------
-
-head/tail options to SKIP first N/last N lines.

@@ -133,7 +133,8 @@ class Red(marcel.core.Op):
 
     def __repr__(self):
         sources = [None if f is None else f.snippet() for f in self.functions]
-        return f'red(incremental={self.incremental}, functions={sources})'
+        flags = 'incremental, ' if self.incremental else ''
+        return f'red({flags}functions={sources})'
 
     # AbstractOp
 
