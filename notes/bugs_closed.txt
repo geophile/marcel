@@ -2404,6 +2404,31 @@ Traceback (most recent call last):
 ValueError: write to closed file
 M-0.11.3 jao@cheese:~$ 
 
+----------------------------------------------------------------------
+
+NOT A BUG - defined behavior for negative arg
+
+129. tail shouldn't allow negative args
+
+Other ops likely have the same problem.
+
+Doing parse-time checking isn't sufficient. A check is also needed at
+execution time, for args that need to be evaluated. The conversion
+functions in ArgsParser (e.g. str_to_int) don't really allow for that
+second use, as they are tied to the ArgsParser object, which isn't
+available at runtime. They could *almost* be made independent of
+ArgsParser, but there are some dependencies:
+
+- self.op_name: op isn't available during arg parsing. 
+
+- self.env
+
+- self.current_op: For function(). Need to revisit error handling
+  (which is why f.set_op(self.current_op) is called), and perhaps get
+  rid of this call.
+
+Tail now defines behavior for negative args, but there is a general
+problem. Args need to be checked at setup time, after function eval.
 
 ----------------------------------------------------------------------
 
@@ -2859,3 +2884,14 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/object/color.py", line 96, in __setattr__
     raise ColorSchemeError(f'{key} is not a supported color scheme attribute.')
 marcel.object.color.ColorSchemeError: asdf_scheme_value is not a supported color scheme attribute.
+
+----------------------------------------------------------------------
+
+143. Need to import env
+
+M-0.11.11 jao@cheese:~/boat$ python bin/reduceimages.py original reduced 640
+Error: Traceback (most recent call last):
+Error:   File "bin/reduceimages.py", line 7, in <module>
+Error:     from pathlib import Path
+Error: ImportError: No module named pathlib
+M-0.11.11 jao@cheese:~/boat$ 

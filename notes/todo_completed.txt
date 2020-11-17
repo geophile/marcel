@@ -769,3 +769,7 @@ globally?
 ----------------------------------------------------------------------
 
 head/tail options to SKIP first N/last N lines.
+
+----------------------------------------------------------------------
+
+env options to print one var, or to find a var. Autocomplete.

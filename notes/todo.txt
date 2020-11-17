@@ -260,10 +260,6 @@ Can't run ssh!
 
 ----------------------------------------------------------------------
 
-env options to print one var, or to find a var. Autocomplete.
-
-----------------------------------------------------------------------
-
 EDITOR set to host's EDITOR on startup. Which is convenient, but odd
 if host value changes. How to keep the two in sync? Maybe reporting
 EDITOR should always get the value of os.getenv('EDITOR')?
@@ -330,3 +326,22 @@ would need to know Parser state.)
 
 OR: in the context that a comma is used, look for string instead, and
 check that it is a comma.
+
+----------------------------------------------------------------------
+
+Arg checking (derived from bug 129):
+
+Doing parse-time checking isn't sufficient. A check is also needed at
+execution time, for args that need to be evaluated. The conversion
+functions in ArgsParser (e.g. str_to_int) don't really allow for that
+second use, as they are tied to the ArgsParser object, which isn't
+available at runtime. They could *almost* be made independent of
+ArgsParser, but there are some dependencies:
+
+- self.op_name: op isn't available during arg parsing. 
+
+- self.env
+
+- self.current_op: For function(). Need to revisit error handling
+  (which is why f.set_op(self.current_op) is called), and perhaps get
+  rid of this call.
