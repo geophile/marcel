@@ -209,14 +209,27 @@ class Stack:
 
 class Trace:
 
-    def __init__(self, tracefile):
+    def __init__(self, tracefile, enabled=False):
         self.path = pathlib.Path(tracefile)
         self.path.touch(mode=0o666, exist_ok=True)
         self.path.unlink()
-        self.file = self.path.open(mode='w')
+        self.file = None
+        if enabled:
+            self.enable()
+
+    def enable(self):
+        if self.file is None:
+            self.file = self.path.open(mode='w')
+
+    def disable(self):
+        if self.file is not None:
+            self.close()
 
     def write(self, line):
-        print(f'{time.time()}: {line}', file=self.file, flush=True)
+        if self.file:
+            print(f'{time.time()}: {line}', file=self.file, flush=True)
 
     def close(self):
-        self.file.close()
+        if self.file:
+            self.file.close()
+        self.file = None

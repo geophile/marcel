@@ -2895,3 +2895,62 @@ Error:   File "bin/reduceimages.py", line 7, in <module>
 Error:     from pathlib import Path
 Error: ImportError: No module named pathlib
 M-0.11.11 jao@cheese:~/boat$ 
+
+----------------------------------------------------------------------
+
+145. Crash when defining cluster with unknown host name
+
+See on MacOS:
+
+    NAS-40015001:~ jorenstein$ marcel
+    Traceback (most recent call last):
+      File "/Library/Python/3.7/site-packages/marcel/object/cluster.py", line 29, in __init__
+        self.addr = str(ipaddress.ip_address(host))
+      File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.7/lib/python3.7/ipaddress.py", line 54, in ip_address
+        address)
+    ValueError: 'acme' does not appear to be an IPv4 or IPv6 address
+    
+    During handling of the above exception, another exception occurred:
+    
+    Traceback (most recent call last):
+      File "/Library/Python/3.7/site-packages/marcel/object/cluster.py", line 34, in __init__
+        self.addr = str(ipaddress.ip_address(socket.gethostbyname(host)))
+    socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+    
+    During handling of the above exception, another exception occurred:
+    
+    Traceback (most recent call last):
+      File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.7/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+        "__main__", mod_spec)
+      File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.7/lib/python3.7/runpy.py", line 85, in _run_code
+        exec(code, run_globals)
+      File "/Library/Python/3.7/site-packages/marcel/main.py", line 300, in <module>
+        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
+      File "/Library/Python/3.7/site-packages/marcel/main.py", line 98, in __init__
+        self.env = marcel.env.Environment.new(config_file, old_namespace)
+      File "/Library/Python/3.7/site-packages/marcel/env.py", line 211, in new
+        env.config_path = env.read_config(config_file)
+      File "/Library/Python/3.7/site-packages/marcel/env.py", line 333, in read_config
+        exec(config_source, self.namespace.flattened(), locals)
+      File "<string>", line 68, in <module>
+      File "/Library/Python/3.7/site-packages/marcel/builtin.py", line 44, in remote
+        return Cluster(user, identity, host, hosts)
+      File "/Library/Python/3.7/site-packages/marcel/object/cluster.py", line 68, in __init__
+        self.hosts = [Host(host, self) for host in hosts]
+      File "/Library/Python/3.7/site-packages/marcel/object/cluster.py", line 68, in <listcomp>
+        self.hosts = [Host(host, self) for host in hosts]
+      File "/Library/Python/3.7/site-packages/marcel/object/cluster.py", line 38, in __init__
+        f'Cannot understand {host} as a host name or as an IP address.')
+    marcel.exception.KillCommandException: Cannot understand acme as a host name or as an IP address.
+    NAS-40015001:~ jorenstein$ 
+
+----------------------------------------------------------------------
+
+NOT A BUG
+
+146. "bash" no longer works
+
+    M 0.11.12 jao@cheese:~/git/marcel/test$ bash
+    M 0.11.12 jao@cheese:~/git/marcel/test$ 
+
+This was caused by running "marcel" as the last command in .bashrc.
