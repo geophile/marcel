@@ -21,11 +21,10 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/exception.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/util.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -618,7 +617,7 @@
       <workItem from="1604507044068" duration="3339000" />
       <workItem from="1604526300777" duration="48976000" />
       <workItem from="1605299574470" duration="1820000" />
-      <workItem from="1605473035029" duration="7271000" />
+      <workItem from="1605473035029" duration="12793000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -648,6 +647,9 @@
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <option name="LAST_COMMIT_MESSAGE" value="" />
+  </component>
   <component name="WindowStateProjectService">
     <state x="1920" y="455" width="1084" height="756" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1604600646239">
       <screen x="0" y="27" width="4480" height="1413" />
@@ -666,10 +668,10 @@
     </state>
     <state x="794" y="371" width="624" height="531" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1598549460317" />
     <state x="794" y="371" width="624" height="538" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1600356069801" />
-    <state x="894" y="27" width="904" height="1053" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1602341495266">
-      <screen x="0" y="27" width="1920" height="1053" />
+    <state x="2085" y="27" width="904" height="1053" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1605716639740">
+      <screen x="0" y="27" width="4480" height="1413" />
     </state>
-    <state x="2085" y="27" width="1016" height="1413" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1600359805786" />
+    <state x="2085" y="27" width="1016" height="1413" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.27.4480.1413@0.27.4480.1413" timestamp="1605716639740" />
     <state x="894" y="27" width="904" height="1053" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1602341495266" />
     <state x="2987" y="529" width="524" height="508" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1602794909999">
       <screen x="1920" y="0" width="2560" height="1440" />
@@ -839,11 +841,11 @@
       <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="3213" y="255" width="778" height="789" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.27.4480.1413@0.27.4480.1413" timestamp="1603832901120" />
-    <state x="867" y="442" width="392" height="179" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1603073506024">
-      <screen x="0" y="27" width="1920" height="1053" />
+    <state x="2023" y="584" width="382" height="175" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1605637539162">
+      <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="867" y="442" width="412" height="175" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.27.1920.1053@0.27.1920.1053" timestamp="1603073506024" />
-    <state x="2023" y="584" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.27.4480.1413@0.27.4480.1413" timestamp="1599057679097" />
+    <state x="2023" y="584" width="382" height="175" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.27.4480.1413@0.27.4480.1413" timestamp="1605637539162" />
     <state x="3076" y="568" width="392" height="179" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1601318985964" />
     <state x="823" y="257" width="904" height="562" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1604270050864">
       <screen x="0" y="27" width="1920" height="1053" />
@@ -926,13 +928,13 @@
       <screen x="1920" y="0" width="2560" height="1440" />
     </state>
     <state x="3837" y="574" width="306" height="687" key="refactoring.ChangeSignatureDialog/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1600204877299" />
-    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup" timestamp="1605630510306">
+    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup" timestamp="1605716765370">
       <screen x="0" y="27" width="4480" height="1413" />
     </state>
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1605023098867" />
     <state x="934" y="466" width="672" height="678" key="search.everywhere.popup/0.27.2560.1413@0.27.2560.1413" timestamp="1605159102438" />
     <state x="2493" y="403" width="1008" height="506" key="search.everywhere.popup/0.27.3840.1053@0.27.3840.1053" timestamp="1599329664953" />
-    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1605630510306" />
+    <state x="2233" y="487" width="905" height="679" key="search.everywhere.popup/0.27.4480.1413@0.27.4480.1413" timestamp="1605716765370" />
     <state x="2621" y="335" width="672" height="519" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1599509774976" />
     <state x="701" y="354" width="672" height="506" key="search.everywhere.popup/1920.0.2560.1440/0.27.1920.1053@0.27.1920.1053" timestamp="1603200753774" />
     <state x="2854" y="447" width="672" height="691" key="search.everywhere.popup/1920.0.2560.1440/0.27.1920.1053@1920.0.2560.1440" timestamp="1603221220825" />

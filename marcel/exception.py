@@ -65,8 +65,8 @@ class KillAndResumeException(BaseException):
 
 class KillShellException(BaseException):
 
-    def __init__(self, message):
-        super().__init__(message)
+    def __init__(self, cause):
+        super().__init__(cause)
 
 
 def _format_input_for_reporting(command_input, buffer):

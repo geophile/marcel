@@ -96,6 +96,9 @@ class Main:
         self.same_process = same_process
         try:
             self.env = marcel.env.Environment.new(config_file, old_namespace)
+        except marcel.exception.KillCommandException as e:
+            print(f'Cannot start marcel: {e}', file=sys.stderr)
+            sys.exit(1)
         except marcel.exception.KillShellException as e:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)
