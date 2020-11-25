@@ -286,4 +286,36 @@ M 0.11.12 jao@cheese:~$ bash scp ~/.marcel.py jorenstein@nd:/home/jorenstein
 
 ----------------------------------------------------------------------
 
-147. 
+147. Space after tab-completion is broken
+
+Sometimes there's a space when there shouldn't be, and vice versa.
+
+Check ops, args, filenames.
+
+----------------------------------------------------------------------
+
+148. psql doesn't work when it needs a password:
+
+    M 0.11.12 jao@cheese ~/consulting/nasuni/analytics/load_simulation$ bash psql nasuni < schema.sql
+    Password for user jao: 
+    psql: error: FATAL:  password authentication failed for user "jao"
+    Escaped command failed with exit code 2: psql nasuni < schema.sql
+    None
+    M 0.11.12 jao@cheese ~/consulting/nasuni/analytics/load_simulation$ bash -i psql nasuni < schema.sql
+    Password for user jao: 
+    psql: error: FATAL:  password authentication failed for user "jao"
+    Escaped command failed with exit code 2: psql nasuni < schema.sql
+    None
+
+----------------------------------------------------------------------
+
+149. Field widths don't adapt well
+
+M 0.11.12 jao@cheese ~/consulting/nasuni/analytics/load_simulation$ ls
+drwxrwxr-x   jao    jao        4096   2020 Nov 19 13:49:28   .
+drwxrwxr-x   jao    jao        4096   2020 Nov 19 13:49:27   .idea
+-rw-rw-r--   jao    jao    4786675634   2020 Nov 19 13:50:33   1day.csv
+-rw-rw-r--   jao    jao        1908   2020 Nov 19 13:49:27   main.py
+-rw-rw-r--   jao    jao        2845   2020 Nov 19 12:40:01   notes.txt
+-rw-rw-r--   jao    jao        2446   2020 Nov 19 12:52:23   schema.sql
+drwxrwxr-x   jao    jao        4096   2020 Nov 19 11:27:25   venv

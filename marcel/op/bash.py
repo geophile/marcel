@@ -15,6 +15,7 @@
 
 import os
 import subprocess
+import threading
 
 import marcel.argsparser
 import marcel.core
@@ -81,13 +82,10 @@ class Bash(marcel.core.Op):
             self.runner = Interactive(self) if self.interactive else NonInteractive(self)
 
     def receive(self, x):
-        if x is not None:
-            if len(x) == 1:
-                x = x[0]
-            self.input.append(str(x))
+        self.runner.receive(x)
 
     def receive_complete(self):
-        self.runner.run()
+        self.runner.receive_complete()
         self.send_complete()
 
 
@@ -96,7 +94,10 @@ class Escape:
     def __init__(self, op):
         self.op = op
 
-    def run(self):
+    def receive(self, _):
+        assert False
+
+    def receive_complete(self):
         assert False
 
     def command(self):
@@ -107,28 +108,83 @@ class NonInteractive(Escape):
 
     def __init__(self, op):
         super().__init__(op)
+        self.process = subprocess.Popen(self.command(),
+                                        shell=True,
+                                        executable='/bin/bash',
+                                        stdin=subprocess.PIPE,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.STDOUT,
+                                        universal_newlines=True,
+                                        preexec_fn=os.setsid)
+        self.out_handler = ProcessOutputHandler(self.process.stdout, op)
+        self.out_handler.start()
+
+    def receive(self, x):
+        if x is not None:
+            if len(x) == 1:
+                x = x[0]
+            self.process.stdin.write(str(x))
+            self.process.stdin.write('\n')
+
+    def receive_complete(self):
+        self.process.stdin.close()
+        while self.process.poll() is None:
+            self.out_handler.join(0.1)
+
+
+class Interactive(Escape):
+
+    def __init__(self, op):
+        super().__init__(op)
+        self.process = subprocess.Popen(self.command(),
+                                        shell=True,
+                                        executable='/bin/bash',
+                                        universal_newlines=True,
+                                        preexec_fn=os.setsid)
+
+    def receive(self, _):
+        self.process.wait()
+        if self.process.returncode != 0:
+            print(f'Escaped command failed with exit code {self.process.returncode}: {" ".join(self.op.args)}')
+            marcel.util.print_to_stderr(self.process.stderr, self.op.env())
+
+    def receive_complete(self):
+        pass
+
+
+class BashShell(Escape):
+
+    def __init__(self, op):
+        super().__init__(op)
+        self.process = subprocess.Popen('bash',
+                                        shell=True,
+                                        executable='/bin/bash',
+                                        universal_newlines=True)
+
+    def receive(self, _):
+        self.process.wait()
+        if self.process.returncode != 0:
+            print(f'Escaped command failed with exit code {self.process.returncode}: {" ".join(self.op.args)}')
+            marcel.util.print_to_stderr(self.process.stderr, self.op.env())
+
+    def receive_complete(self):
+        pass
+
+
+class ProcessOutputHandler(threading.Thread):
+
+    def __init__(self, stream, op):
+        super().__init__()
+        self.stream = stream
+        self.op = op
 
     def run(self):
-        process = subprocess.Popen(self.command(),
-                                   shell=True,
-                                   executable='/bin/bash',
-                                   stdin=subprocess.PIPE,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE,
-                                   universal_newlines=True,
-                                   preexec_fn=os.setsid)
-        input = NonInteractive.to_string(self.op.input)
-        try:
-            stdout, stderr = process.communicate(input=input)
-        except Exception as e:
-            self.op.fatal_error(None, f'Caught {e.__class__.__name__}')
-        # stdout
         op = self.op
-        for line in NonInteractive.normalize_output(stdout):
-            op.send(line)
-        # stderr
-        for line in NonInteractive.normalize_output(stderr):
-            op.non_fatal_error(error=marcel.object.error.Error(line))
+        stream = self.stream
+        line = stream.readline()
+        while len(line) > 0:
+            op.send(ProcessOutputHandler.normalize_output(line))
+            line = stream.readline()
 
     @staticmethod
     def normalize_output(x):
@@ -136,40 +192,3 @@ class NonInteractive(Escape):
         if len(x[-1]) == 0:
             x = x[:-1]
         return x
-
-    @staticmethod
-    def to_string(input):
-        return '\n'.join(input)
-
-
-class Interactive(Escape):
-
-    def __init__(self, op):
-        super().__init__(op)
-
-    def run(self):
-        process = subprocess.Popen(self.command(),
-                                   shell=True,
-                                   executable='/bin/bash',
-                                   universal_newlines=True,
-                                   preexec_fn=os.setsid)
-        process.wait()
-        if process.returncode != 0:
-            print(f'Escaped command failed with exit code {process.returncode}: {" ".join(self.op.args)}')
-            marcel.util.print_to_stderr(process.stderr, self.op.env())
-
-
-class BashShell(Escape):
-
-    def __init__(self, op):
-        super().__init__(op)
-
-    def run(self):
-        process = subprocess.Popen('bash',
-                                   shell=True,
-                                   executable='/bin/bash',
-                                   universal_newlines=True)
-        process.wait()
-        if process.returncode != 0:
-            print(f'Escaped command failed with exit code {process.returncode}: {" ".join(self.op.args)}')
-            marcel.util.print_to_stderr(process.stderr, self.op.env())

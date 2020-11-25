@@ -222,8 +222,7 @@ class Trace:
             self.file = self.path.open(mode='w')
 
     def disable(self):
-        if self.file is not None:
-            self.close()
+        self.close()
 
     def write(self, line):
         if self.file:

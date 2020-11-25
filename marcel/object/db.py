@@ -81,7 +81,7 @@ class Psycopg2Connection(Connection):
                                       user=db.user,
                                       password=db.password,
                                       host=db.host,
-                                      posrt=db.port)
+                                      port=db.port)
         super().__init__(connection)
 
     # def insert(self, sql, args):

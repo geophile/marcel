@@ -32,7 +32,7 @@ the tuple is passed downstream.
 
 {b:Example}
 
-{L,indent=4,wrap=F}gen 100 | ifthen (x: x % 2 == 0) [store even] | store odd
+{L,indent=4,wrap=F}gen 100 | ifelse (x: x % 2 == 0) [store even] | store odd
 
 {r:gen 100} generates a stream of integers, 0, ..., 99.
 The predicate is True for even integers. These integers are

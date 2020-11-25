@@ -75,8 +75,6 @@ class PipelineRunner(threading.Thread):
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
             self.pipeline.first_op().receive_input(None)
             self.pipeline.receive_complete()
-        # except marcel.exception.KillCommandException as e:
-        #     self.pickler.receive_error(marcel.object.error.Error(e))
         except BaseException as e:
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')
             marcel.util.print_stack(file=TRACE.file)
@@ -102,6 +100,7 @@ def kill_descendents(signal_id):
     except BaseException as e:
         TRACE.write(f'Caught {type(e)} in kill_self_and_descendents: {e}')
         marcel.util.print_stack(TRACE.file)
+
 
 # Adapted from Environment.read_config
 def read_config(config_path=None):
