@@ -6,7 +6,7 @@ It used to be the case that a host executable's output would be buffered
 until the executable ends its output. This made it difficult to monitor
 long-running host executables. Now, this buffering does not happen.
 
-The marcel equivalent of the `find` executable is `ls -R`. But ignoring
+The marcel equivalent of the `find` executable is `ls -r`. But ignoring
 that: Previously, if you ran `find /` from marcel, 
 the `find` would run completely, buffering the output,
 and then marcel would print the buffer's contents. Now
