@@ -1,40 +1,16 @@
 What's New
 ----------
 
-Streams can now be stored to and loaded from files, as well as environment variables.
-For example, to store the stream resulting from ls in variable `myfiles`:
+Commands that mix host executables and marcel operators work better now.
+It used to be the case that a host executable's output would be buffered
+until the executable ends its output. This made it difficult to monitor
+long-running host executables. Now, this buffering does not happen.
 
-```shell script
-ls > myfiles
-```
-
-`myfiles` is now a variable in the environment. The command `env -s` shows this:
-
-```shell script
-('myfiles', Reservoir(/tmp/tmpojj8jfv1))
-```
-
-The contents of `myfiles` can be loaded into a stream like this:
-
-```shell script
-myfiles > ...
-``` 
-
-To store in a file instead:
-
-```shell script
-ls > /tmp/myfiles
-```
-
-Now, `/tmp/myfiles` exists and stores the stream, pickled. It can be loaded back
-into marcel too:
-
-```shell script
-/tmp/myfiles > ...
-```
-
-As in other shells, environment variables last for the duration of your session,
-while files exist until you delete them. 
+The marcel equivalent of the `find` executable is `ls -R`. But ignoring
+that: Previous, if you ran `find /` from marcel, 
+the `find` would run completely, buffering the output,
+and then marcel would print the buffer's contents. Now
+you see output immediately.
 
 Marcel
 ======
