@@ -57,3 +57,6 @@ class IfBase(marcel.core.Op):
     def flush(self):
         self.then.flush()
         self.propagate_flush()
+
+    def cleanup(self):
+        self.then.cleanup()

@@ -129,7 +129,7 @@ class Sql(marcel.core.Op):
         self.statement = self.eval_function('statement_arg', str)
         self.args = self.eval_function('args_arg')
         if self.commit is None:
-            self.commit = 0  # Commit only in receive_complete
+            self.commit = 0  # Commit only in flush
         elif self.commit < 0:
             raise marcel.exception.KillCommandException(f'--commit value must be a positive integer: {self.commit}')
         self.total_update_count = 0

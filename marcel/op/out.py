@@ -146,8 +146,8 @@ class Out(marcel.core.Op):
         finally:
             self.send(x)
 
-    def flush(self):
-        self.writer.flush()
+    def cleanup(self):
+        self.writer.cleanup()
 
     # For use by this class
 
@@ -176,8 +176,8 @@ class Writer:
     def receive(self, x):
         assert False
 
-    def flush(self):
-        assert False
+    def cleanup(self):
+        pass
 
 
 class TextWriter(Writer):
@@ -192,10 +192,9 @@ class TextWriter(Writer):
         else:
             self.output = sys.stdout
 
-    def flush(self):
+    def cleanup(self):
         if self.output != sys.stdout:
             self.output.close()
-        self.op.propagate_flush()
 
     def write_line(self, x):
         print(x, file=self.output, flush=True)
@@ -216,9 +215,6 @@ class CSVWriter(TextWriter):
         self.writer.writerow(x)
         self.write_line(self.row)
 
-    def flush(self):
-        self.op.propagate_flush()
-
     def write(self, x):
         self.row = x
 
@@ -231,9 +227,6 @@ class PythonWriter(TextWriter):
 
     def receive(self, x):
         self.write_line(self.format.format(*x))
-
-    def flush(self):
-        self.op.propagate_flush()
 
 
 class DefaultWriter(TextWriter):
@@ -259,9 +252,6 @@ class DefaultWriter(TextWriter):
             assert False, type(x)
         self.write_line(out)
 
-    def flush(self):
-        self.op.propagate_flush()
-
 
 class PickleWriter(Writer):
 
@@ -274,6 +264,5 @@ class PickleWriter(Writer):
     def receive(self, x):
         self.writer.write(x)
 
-    def flush(self):
+    def cleanup(self):
         self.writer.close()
-        self.op.propagate_flush()

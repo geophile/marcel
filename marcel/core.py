@@ -169,8 +169,8 @@ class Op(AbstractOp):
     def flush(self):
         self.propagate_flush()
 
-    def run_local(self):
-        return False
+    def cleanup(self):
+        pass
 
     def env(self):
         return self._env
@@ -349,7 +349,8 @@ class Pipeline(AbstractOp):
         self.ops[0].flush()
 
     def cleanup(self):
-        pass
+        for op in self.ops:
+            op.cleanup()
 
     def set_parameters(self, parameters):
         if parameters is not None:

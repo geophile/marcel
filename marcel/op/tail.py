@@ -80,7 +80,7 @@ class TailImpl:
         assert False
 
     def flush(self):
-        assert False
+        pass
 
 
 class TailKeepN(TailImpl):
@@ -120,6 +120,3 @@ class TailSkipN(TailImpl):
             self.op.send(self.queue[self.end])
             self.queue[self.end] = x
             self.end = (self.end + 1) % self.n
-
-    def flush(self):
-        pass

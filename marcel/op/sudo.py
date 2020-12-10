@@ -125,7 +125,5 @@ class Sudo(marcel.core.Op):
         except EOFError:
             self.propagate_flush()
 
-    # Op
-
     def must_be_first_in_pipeline(self):
         return True

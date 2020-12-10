@@ -98,7 +98,7 @@ class Escape:
         assert False
 
     def flush(self):
-        assert False
+        pass
 
     def command(self):
         return ' '.join([str(arg) for arg in self.op.args])
@@ -148,9 +148,6 @@ class Interactive(Escape):
             print(f'Escaped command failed with exit code {self.process.returncode}: {" ".join(self.op.args)}')
             marcel.util.print_to_stderr(self.process.stderr, self.op.env())
 
-    def flush(self):
-        pass
-
 
 class BashShell(Escape):
 
@@ -166,9 +163,6 @@ class BashShell(Escape):
         if self.process.returncode != 0:
             print(f'Escaped command failed with exit code {self.process.returncode}: {" ".join(self.op.args)}')
             marcel.util.print_to_stderr(self.process.stderr, self.op.env())
-
-    def flush(self):
-        pass
 
 
 class ProcessOutputHandler(threading.Thread):

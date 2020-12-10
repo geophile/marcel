@@ -49,14 +49,14 @@ class PickleOutput(marcel.core.Op):
         TRACE.write(f'Pickling: ({type(x)}) {x}')
         self.pickler.dump(x)
 
+    def cleanup(self):
+        TRACE.write('Closing stdout')
+        sys.stdout.buffer.close()
+
     def receive_error(self, error):
         TRACE.write(f'Pickling error: ({type(error)}) {error}')
         self.pickler.dump(error)
         super().receive_error(error)
-
-    def receive_complete(self):
-        TRACE.write('Closing stdout')
-        sys.stdout.buffer.close()
 
 
 class PipelineRunner(threading.Thread):

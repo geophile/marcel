@@ -1253,12 +1253,12 @@ def main_stable():
 
 
 def main_dev():
-    # Bug 152
-    TEST.run('fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]')
-    TEST.run('fact (5) > f')
-    TEST.run('f >')
-    # test_bug_126()
-    # test_bug_151()
+    # # Bug 152
+    # TEST.run('fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]')
+    # TEST.run('fact (5) > f')
+    # TEST.run('f >')
+    # # test_bug_126()
+    # # test_bug_151()
     pass
 
 

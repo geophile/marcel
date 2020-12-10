@@ -330,23 +330,29 @@ Causes:
 
 Implementation
 
-- Command.execute: Replace receive_complete() by flush() and
++ Command.execute: Replace receive_complete() by flush() and
   cleanup().
 
-- Replace Pipeline receive_complete by flush, cleanup. flush can
-  delegate to ops[0]. cleanup won't propagate via Op.receiver, so
-  iterator over ops instead.
++ Replace Pipeline receive_complete by flush, cleanup. flush can
+  delegate to ops[0]. 
 
-- send_complete -> propagate_flush
++ send_complete -> propagate_flush
 
-- Rename Op.receive_complete() to Op.flush() (including all
++ Rename Op.receive_complete() to Op.flush() (including all
   subclasses). That should leave things working as well as they are
   now.
 
-- For ops defining flush(), split out cleanup-related activities to
++ cleanup won't propagate via Op.receiver, so iterate over ops
+  instead.
+
++ For ops defining flush(), split out cleanup-related activities to
   cleanup().
 
++ Ops with pipelines need to propagate cleanup into them.
+
 - Revisit labelthread.flush. See comment about bug 4.
+
+- Revisit store.cleanup & comment. Is the if still necessary?
 
 - Ensure adequate testing for bugs 126, 151, 152; interactive and api.
 

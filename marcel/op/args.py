@@ -160,9 +160,6 @@ class ArgsInteractive(ArgsImpl):
         finally:
             self.op.env().vars().pop_scope()
 
-    def flush(self):
-        super().flush()
-
     def run_pipeline(self, env):
         op = self.op
         env = op.env()
