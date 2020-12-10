@@ -1197,10 +1197,22 @@ def test_bug_136():
              expected_out=[615])
 
 
+def test_bug_151():
+    TEST.run('bytime = [sort (f: f.mtime)]')
+    TEST.run('ls | bytime > a')
+    TEST.run('a >')
+    # TEST.run('ls | sort (f: f.mtime) > b')
+    # TEST.run('a > difference [b >] | red count',
+    #          expected_out=[0])
+    # TEST.run('b > difference [a >] | red count',
+    #          expected_out=[0])
+
+
 # For bugs that aren't specific to a single op.
 def test_bugs():
     test_bug_126()
     test_bug_136()
+    test_bug_151()
 
 
 def main_stable():
@@ -1243,13 +1255,19 @@ def main_stable():
 
 
 def main_dev():
+    # Bug 152
+    TEST.run('fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]')
+    TEST.run('fact (5) > f')
+    TEST.run('f >')
+    # test_bug_126()
+    # test_bug_151()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

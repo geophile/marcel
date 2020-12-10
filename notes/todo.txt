@@ -383,7 +383,4 @@ How should the predicate be expressed?
 
 - Function or variable yielding row#?
 
-----------------------------------------------------------------------
-
-Bash output gets buffered until EOF. Terrible for monitoring progress.
-
+- Each op could have a counter.

@@ -115,8 +115,10 @@ class Store(marcel.core.Op):
                 f'{self.target} is not usable as a reservoir, it stores a value of type {type(self.picklefile)}.')
         self.writer = self.picklefile.writer(self.append)
         self.nesting = self.env().vars().n_scopes()
+        print(f'{self} setup: {self.target}')
 
     def receive(self, x):
+        print(f'{self} receive {x}')
         try:
             self.writer.write(x)
         except:
@@ -124,6 +126,7 @@ class Store(marcel.core.Op):
             raise
 
     def receive_complete(self):
+        print(f'{self} receive_complete, scopes: {self.env().vars().n_scopes()}, nesting: {self.nesting}')
         # self.nesting, and the conditional execution of close() fixes bug 126. receive_complete for an op
         # can sometimes be reached on multiple paths, e.g.
         #         fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]

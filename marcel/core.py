@@ -88,7 +88,7 @@ class AbstractOp(Pipelineable):
     def setup(self):
         pass
 
-    def setup_env(self, env):
+    def set_env(self, env):
         pass
 
 
@@ -393,10 +393,12 @@ class Command:
     def execute(self, api=False):
         depth = self.env.vars().n_scopes()
         self.env.clear_changes()
+        print(f'Command.execute {self.pipeline}, before setup, scopes: {depth}')
         self.pipeline.setup()
         self.pipeline.set_env(self.env)
         self.pipeline.receive(None)
         self.pipeline.receive_complete()
+        # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.
         assert self.env.vars().n_scopes() == depth, self.env.vars().n_scopes()
         # An interactive Command is executed by a multiprocessing.Process.
         # Need to transmit the Environment's vars relating to the directory, to the parent

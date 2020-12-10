@@ -779,3 +779,8 @@ env options to print one var, or to find a var. Autocomplete.
 ANSI color codes not working on CentOS (Nasuni VM):
 
 https://stackoverflow.com/questions/64791428/why-are-ansi-escape-codes-not-displaying-properly/64846705#64846705
+
+----------------------------------------------------------------------
+
+Bash output gets buffered until EOF. Terrible for monitoring progress.
+

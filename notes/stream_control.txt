@@ -1,0 +1,327 @@
+Communication between ops is mediated by Op and AbstractOp:
+
+    - AbstractOp (inherited by Pipeline too):
+
+        - setup initializes each op, e.g. evaluating args, 
+          instantiating helpers.
+
+        - set_env: Propagate the env everywhere needed (e.g. Function)
+
+    - Op:
+
+        - receive: Where most of the work of each op is done.
+          If input is None, then the op is first in the
+          pipeline (receives no input stream).
+
+        - receive_complete: Called when the stream is done,
+          allowing for completion of work in progress.
+          Especially important for red, sort, which just
+          maintain state during receive.
+
+        - send: Called by receive and receive_complete to feed
+          the output stream.
+
+        - send_complete: Called by receive_complete to propagate
+          the completion activities downstream.
+
+This design is ancient, going back to osh. But it has been problematic
+due to more recent features, e.g. pipeline vars, parameterized
+pipelines, reservoirs, and the args and runpipeline ops. (E.g., see
+bugs 126, 151.)
+
+- args:
+
+    - ArgsInteractive: 
+    
+        - setup copies pipeline and pushes scope.
+
+        - receive runs pipeline, using Command.execute (on a pipeline
+          copy), which does setup/receive/receive_complete.
+
+        - receive_complete runs pipeline on stragglers, and pops scope.
+
+    - ArgsAPI: Similar, but doesn't have to deal with scopes.
+
+- runpipeline:
+
+    - setup copies pipeline. Pushes and pops scope around pipeline
+      copy's setup/set_env.
+
+    - receive pushes scope, passes input to pipeline.receive, pops
+      scope.
+
+    - receive_complete calls receive_complete on pipeline, then
+      send_complete.
+
+- store:
+
+    - setup gets target (finds reservoir or opens picklefile), opens
+      writer to target, notes nesting (of parameterized pipelines).
+
+    - receive writes to store.
+
+    - receive_complete closes writer if nesting level matches what it
+      was on setup. 
+
+
+Store.receive_complete trickiness is necessary due to bug
+126. E.g.
+
+    some_pipeline | store var
+
+receive_complete reaches store on two paths: 1) last op of
+some_pipeline is connected to store, allowing data to flow properly;
+2) propagation from runpipeline(some_pipeline). The test of nesting is
+store.receive_complete is meant to distinguish between these, and
+close the writer in case #2. That was bug 126 (I think). rc on path #1
+closed the reservoir, so data from red, sent via receive_complete, was
+arriving after the reservoir was closed.
+
+Bug 152: runpipeline pushes/pops scope in setup. It also calls setup
+on its pipeline. If that pipeline contains arg, then we get this
+pattern:
+
+    runpipeline start setup
+        NN push_scope {'x'} -> 1 scopes
+        args start setup
+            NN push_scope {'n'} -> 2 scopes
+        args end setup
+        NN pop_scope {'n'} -> 1 scopes
+    runpipeline end setup
+
+runpipeline setup running pop_scope implies that the pipeline's setup
+doesn't modify the nested namespaces. But args was written
+differently, it pushes but does not pop, and hilarity ensues.
+
+----------------------------------------------------------------------
+
+receive_complete cleanup:
+
+Args: pop scope
+
+Bash: Wait for process to complete (non-interactive)
+
+Ifbase: Propagate to pipeline
+
+Labelthread: SUPPRESS propagation of receive_complete, to avoid
+multiple calls to downstream receive_complete.
+
+Out: Close file if necessary.
+
+Red: Send final output.
+
+Reverse: Send output.
+
+Runpipeline: Propagate to pipeline.
+
+Sort: Send output.
+
+Sql: Commit.
+
+Store: Close picklefile (with guard against multiple calls).
+
+Tail: Send output.
+
+Union: Send output from pipeline (with guard against multiple calls).
+
+Window: Send final output (guard against multiple calls looks
+incomplete, window_generator is tested but not set to None).
+
+----------------------------------------------------------------------
+
+receive_complete does two things:
+
+1) send data that isn't available until all input has been consumed,
+(e.g. red, sort).
+
+2) Resource cleanup: closing picklefile, popping scope. (Although this
+sort of cleanup sometimes gets done in receive.)
+
+Idempotency is necessary because there can be multiple invocations
+(via nested pipeline, and via the parent). This has been achieved in
+ad hoc ways:
+
+- Update a convenient piece of state, and test for that update,
+  e.g. reverse.
+
+- store, testing scope depth before closing writer.
+
+----------------------------------------------------------------------
+
+Conclusions:
+
+- Scope management is flaky. See discussion of bug 152 above.
+
+- Separate the two purposes of receive_complete:
+
+    1) flush(): A traditional "flush" is idempotent. Multiple calls,
+    just to get data moved out, are fine.
+
+    2) cleanup(): Resource cleanup. Although popping scope doesn't
+    really fit this model.
+
+  flush propagates along receivers, but cleanup should not. Instead,
+  follow the structure of the pipeline. I.e., use pipeline.ops
+  instead of receiver.
+
+- Scope management: Just get runpipeline and args correct.
+
+======================================================================
+
+Relevant bugs
+
+----------------------------------------------------------------------
+
+126. Reservoirs broken?
+
+M-0.11.3 jao@cheese:~$ fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]    
+M-0.11.3 jao@cheese:~$ fact (100) > f
+Process Process-4:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 385, in execute
+    self.pipeline.receive(None)
+  File "/home/jao/git/marcel/marcel/core.py", line 333, in receive
+    self.ops[0].receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/runpipeline.py", line 68, in receive
+    self.pipeline.receive(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 333, in receive
+    self.ops[0].receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/gen.py", line 98, in receive
+    self.send(self.apply_padding(x))
+  File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/args.py", line 77, in receive
+    self.impl.receive(x)
+  File "/home/jao/git/marcel/marcel/op/args.py", line 110, in receive
+    self.run_pipeline(self.op.env())
+  File "/home/jao/git/marcel/marcel/op/args.py", line 169, in run_pipeline
+    marcel.core.Command(env, None, self.pipeline).execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 386, in execute
+    self.pipeline.receive_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 336, in receive_complete
+    self.ops[0].receive_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 158, in receive_complete
+    self.send_complete()
+  File "/home/jao/git/marcel/marcel/core.py", line 136, in send_complete
+    self.receiver.receive_complete()
+  File "/home/jao/git/marcel/marcel/op/red.py", line 167, in receive_complete
+    self.reducer.receive_complete()
+  File "/home/jao/git/marcel/marcel/op/red.py", line 202, in receive_complete
+    self.op.send(tuple(self.accumulator))
+  File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/map.py", line 66, in receive
+    self.send(output)
+  File "/home/jao/git/marcel/marcel/core.py", line 127, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 144, in receive_input
+    self.receive(None if x is None else
+  File "/home/jao/git/marcel/marcel/op/store.py", line 103, in receive
+    self.writer.write(x)
+  File "/home/jao/git/marcel/marcel/reservoir.py", line 111, in write
+    dill.dump(x, self.file)
+  File "/usr/local/lib/python3.8/dist-packages/dill/_dill.py", line 259, in dump
+    Pickler(file, protocol, **_kwds).dump(obj)
+  File "/usr/local/lib/python3.8/dist-packages/dill/_dill.py", line 445, in dump
+    StockPickler.dump(self, obj)
+  File "/usr/lib/python3.8/pickle.py", line 482, in dump
+    self.write(PROTO + pack("<B", self.proto))
+  File "/usr/lib/python3.8/pickle.py", line 245, in write
+    return self.file_write(data)
+ValueError: write to closed file
+M-0.11.3 jao@cheese:~$ 
+
+----------------------------------------------------------------------
+
+151. Sort done by pipeline-valued arg not working
+
+Define this: byt = [sort (f: f.mtime)]
+
+Then:
+
+Sorting explicitly works:
+
+    M 0.11.14 jao@cheese ~$ ls Downloads | sort (f: f.mtime)
+    -rw-rw-r--   jao    jao       51973   2020 Aug 15 10:50:40   Screenshot from 2020-08-15 10-50-39.png
+    -rw-rw-r--   jao    jao       51471   2020 Aug 15 10:57:11   Screenshot from 2020-08-15 10-57-10.png
+    -rw-rw-r--   jao    jao       12054   2020 Aug 15 11:35:12   Screenshot from 2020-08-15 11-35-11.png
+    -rw-rw-r--   jao    jao       11457   2020 Aug 15 11:36:16   Screenshot from 2020-08-15 11-36-13.png
+    -rw-rw-r--   jao    jao       47219   2020 Aug 15 11:38:46   Screenshot from 2020-08-15 11-38-44.png
+    -rw-rw-r--   jao    jao       14645   2020 Aug 15 11:41:36   Screenshot from 2020-08-15 11-41-35.png
+    -rw-rw-r--   jao    jao       28798   2020 Aug 15 11:51:33   Screenshot from 2020-08-15 11-51-31.png
+    -rw-rw-r--   jao    jao       52104   2020 Aug 15 11:53:44   Screenshot from 2020-08-15 11-53-43.png
+    -rw-rw-r--   jao    jao       24154   2020 Aug 15 13:57:33   Screenshot from 2020-08-15 13-57-32.png
+    -rw-rw-r--   jao    jao       10660   2020 Aug 15 14:00:24   Screenshot from 2020-08-15 14-00-23.png
+    -rw-rw-r--   jao    jao       34980   2020 Aug 15 14:03:28   Screenshot from 2020-08-15 14-03-26.png
+    -rw-rw-r--   jao    jao       52256   2020 Aug 15 14:22:10   Screenshot from 2020-08-15 14-22-09.png
+    -rw-rw-r--   jao    jao       20926   2020 Aug 15 14:44:05   Screenshot from 2020-08-15 14-44-03.png
+    -rw-rw-r--   jao    jao       20923   2020 Aug 15 14:45:02   Screenshot from 2020-08-15 14-45-01.png
+    -rw-rw-r--   jao    jao       20937   2020 Aug 15 14:45:43   Screenshot from 2020-08-15 14-45-42.png
+    -rw-rw-r--   jao    jao    19855068   2020 Aug 17 19:31:04   DFABookInstall#1.pdf
+    -rw-rw-r--   jao    jao      259427   2020 Aug 22 10:25:46   elections.jpg
+    -rw-rw-r--   jao    jao      261481   2020 Sep 24 19:13:49   mumpsweirdness.zip
+    -rw-rw-r--   jao    jao    68328818   2020 Sep 27 21:18:01   discord-0.0.12.deb
+    -rw-rw-r--   jao    jao       18934   2020 Sep 28 15:00:25   magritte-notrepro_400x400.jpg
+    -rw-rw-r--   jao    jao      173649   2020 Sep 29 10:41:39   Screenshot from 2020-09-29 10-41-34.png
+    -rw-rw-r--   jao    jao      444664   2020 Oct 28 10:50:06   OpenExternalObject (1).pdf
+    -rw-rw-r--   jao    jao      560652   2020 Oct 28 10:50:06   OpenExternalObject.pdf
+    -rw-rw-r--   jao    jao     2873437   2020 Oct 29 19:12:50   IMG_6236.jpg
+    -rw-rw-r--   jao    jao     6034565   2020 Oct 29 19:13:24   IMG_6238.jpg
+    -rw-rw-r--   jao    jao        3968   2020 Oct 30 00:12:49   Screenshot from 2020-10-30 00-12-44.png
+    drwxrwxr-x   jao    jao        4096   2020 Nov 15 18:26:48   repair
+    -rw-rw-r--   jao    jao       73274   2020 Nov 30 12:36:03   SnipImage.JPG
+    -rw-rw-r--   jao    jao       56889   2020 Nov 30 12:36:13   Jerry.jpg
+    drwxr-xr-x   jao    jao        4096   2020 Nov 30 12:36:15   .
+
+
+But the stored pipeline does not, removing files:
+
+    M 0.11.14 jao@cheese ~$ ls Downloads | byt
+    drwxrwxr-x   jao    jao        4096   2020 Nov 15 18:26:48   repair
+
+----------------------------------------------------------------------
+
+152. Assertion complaining about attempt to read from reservoir open for write
+
+    TEST.run('fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]')
+    TEST.run('fact (5) > f')
+    TEST.run('f >')
+
+Causes:
+
+    Traceback (most recent call last):
+      File "/home/jao/git/marcel/test/test_ops.py", line 1274, in <module>
+        main()
+      File "/home/jao/git/marcel/test/test_ops.py", line 1269, in main
+        main_dev()
+      File "/home/jao/git/marcel/test/test_ops.py", line 1260, in main_dev
+        TEST.run('f >')
+      File "/home/jao/git/marcel/test/test_base.py", line 123, in run
+        self.main.run_command(test)
+      File "/home/jao/git/marcel/marcel/main.py", line 156, in run_command
+        command.execute()
+      File "/home/jao/git/marcel/marcel/core.py", line 396, in execute
+        self.pipeline.setup()
+      File "/home/jao/git/marcel/marcel/core.py", line 337, in setup
+        op.setup()
+      File "/home/jao/git/marcel/marcel/op/load.py", line 110, in setup
+        self.reader = iter(self.picklefile)
+      File "/home/jao/git/marcel/marcel/picklefile.py", line 38, in __iter__
+        return self.reader()
+      File "/home/jao/git/marcel/marcel/picklefile.py", line 48, in reader
+        assert len(self.writers) == 0, self
+    AssertionError: Reservoir(/tmp/tmppdf62cm1: readers = 0, writers = 1)

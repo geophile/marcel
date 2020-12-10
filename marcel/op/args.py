@@ -134,6 +134,7 @@ class ArgsInteractive(ArgsImpl):
         self.params = None
 
     def setup(self):
+        print('args start setup')
         op = self.op
         env = op.env()
         self.params = op.pipeline_arg.parameters()
@@ -147,17 +148,25 @@ class ArgsInteractive(ArgsImpl):
         # to arg's downstream operator. But receive_complete is a dead end, it doesn't propagate
         # to arg's downstream, which was the issue in bug 136.
         self.pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
-        scope = {}
+        self.  scope = {}
         for param in self.params:
-            scope[param] = None
-        env.vars().push_scope(scope)
+            self.  scope[param] = None
+        # TODO: EXPERIMENTAL env.vars().push_scope(scope)
         self.args = []
+        print('args end setup')
+
+    def receive(self, x):
+        self.op.env().vars().push_scope(self.scope)
+        super().receive(x)
+        self.op.env().vars().pop_scope()
 
     def receive_complete(self):
-        try:
-            super().receive_complete()
-        finally:
-            self.op.env().vars().pop_scope()
+        super().receive_complete()
+        # TODO: EXPERIMENT
+        # try:
+        #     super().receive_complete()
+        # finally:
+        #     self.op.env().vars().pop_scope()
 
     def run_pipeline(self, env):
         op = self.op

@@ -28,22 +28,29 @@ class NestedNamespace(dict):
         super().__init__(map)
         self.scopes = []
         self.params = set(map.keys())
+        self.pushed_params = {}
 
     def __repr__(self):
         return str(self.flattened())
 
+    # The number of pushed scopes. The top-level marcel namespace, which is passed as the
+    # map arg of __init__, is not counted.
     def n_scopes(self):
-        return len(self.scopes) + 1
+        return len(self.scopes)
 
     def push_scope(self, map):
         if map is None:
             map = {}
         assert type(map) is dict, type(map)
+        pushed_params = set(map.keys())
         copy = NestedNamespace(self)
         copy.scopes = None
-        self.params = set(map.keys())
+        copy.pushed_params = pushed_params
+        self.pushed_params = self.params
+        self.params = pushed_params
         self.update(map)
         self.scopes.append(copy)
+        print(f'NN push_scope {self.params} -> {self.n_scopes()} scopes')
 
     def pop_scope(self):
         assert len(self.scopes) > 0
@@ -60,6 +67,7 @@ class NestedNamespace(dict):
         self.clear()
         self.update(updated_map)
         self.params = scope.params
+        print(f'NN pop_scope {scope.pushed_params} -> {self.n_scopes()} scopes')
 
     def flattened(self):
         flattened = self.copy()

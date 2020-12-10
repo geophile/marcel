@@ -34,6 +34,7 @@ class RunPipeline(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
+        print('runpipeline start setup')
         self.args = self.eval_function('args_arg')
         self.kwargs = self.eval_function('kwargs_arg')
         self.pipeline = self.getvar(self.var)
@@ -52,22 +53,25 @@ class RunPipeline(marcel.core.Op):
         self.pipeline = self.pipeline.copy()
         self.pipeline.set_error_handler(self.owner.error_handler)
         self.pipeline.last_op().receiver = self.receiver
-
-    def set_env(self, env):
-        super().set_env(env)
+        self.env().vars().push_scope(self.pipeline_args())
+        try:
+            self.pipeline.setup()
+            self.pipeline.set_env(self.env())
+        finally:
+            self.env().vars().pop_scope()
+        print('runpipeline end setup')
 
     # Op
 
     def receive(self, x):
         self.env().vars().push_scope(self.pipeline_args())
         try:
-            self.pipeline.setup()
-            self.pipeline.set_env(self.env())
             self.pipeline.receive(x)
         finally:
             self.env().vars().pop_scope()
 
     def receive_complete(self):
+        print(f'{self} receive_complete, scopes: {self.env().vars().n_scopes()}')
         self.pipeline.receive_complete()
         self.send_complete()
 
