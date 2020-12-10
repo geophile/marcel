@@ -325,3 +325,28 @@ Causes:
       File "/home/jao/git/marcel/marcel/picklefile.py", line 48, in reader
         assert len(self.writers) == 0, self
     AssertionError: Reservoir(/tmp/tmppdf62cm1: readers = 0, writers = 1)
+
+======================================================================
+
+Implementation
+
+- Command.execute: Replace receive_complete() by flush() and
+  cleanup().
+
+- Replace Pipeline receive_complete by flush, cleanup. flush can
+  delegate to ops[0]. cleanup won't propagate via Op.receiver, so
+  iterator over ops instead.
+
+- send_complete -> propagate_flush
+
+- Rename Op.receive_complete() to Op.flush() (including all
+  subclasses). That should leave things working as well as they are
+  now.
+
+- For ops defining flush(), split out cleanup-related activities to
+  cleanup().
+
+- Revisit labelthread.flush. See comment about bug 4.
+
+- Ensure adequate testing for bugs 126, 151, 152; interactive and api.
+

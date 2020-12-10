@@ -45,10 +45,10 @@ class Reverse(marcel.core.Op):
     def receive(self, x):
         self.contents.append(x)
 
-    def receive_complete(self):
+    def flush(self):
         if self.contents is not None:
             self.contents.reverse()
             for x in self.contents:
                 self.send(x)
             self.contents = None
-        self.send_complete()
+        self.propagate_flush()

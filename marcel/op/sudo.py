@@ -123,7 +123,7 @@ class Sudo(marcel.core.Op):
             while True:
                 self.send(input.load())
         except EOFError:
-            self.send_complete()
+            self.propagate_flush()
 
     # Op
 

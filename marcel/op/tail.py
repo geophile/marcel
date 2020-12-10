@@ -64,8 +64,8 @@ class Tail(marcel.core.Op):
     def receive(self, x):
         self.impl.receive(x)
 
-    def receive_complete(self):
-        self.impl.receive_complete()
+    def flush(self):
+        self.impl.flush()
 
 
 class TailImpl:
@@ -79,7 +79,7 @@ class TailImpl:
     def receive(self, x):
         assert False
 
-    def receive_complete(self):
+    def flush(self):
         assert False
 
 
@@ -95,7 +95,7 @@ class TailKeepN(TailImpl):
             self.queue[self.end] = x
             self.end = (self.end + 1) % self.n
 
-    def receive_complete(self):
+    def flush(self):
         p = self.end
         count = min(self.n, len(self.queue))
         while count > 0:
@@ -104,7 +104,7 @@ class TailKeepN(TailImpl):
                 self.op.send(x)
             p = (p + 1) % self.n
             count -= 1
-        self.op.send_complete()
+        self.op.propagate_flush()
         self.queue.clear()
 
 
@@ -121,5 +121,5 @@ class TailSkipN(TailImpl):
             self.queue[self.end] = x
             self.end = (self.end + 1) % self.n
 
-    def receive_complete(self):
+    def flush(self):
         pass

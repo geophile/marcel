@@ -164,8 +164,8 @@ class Red(marcel.core.Op):
     def receive(self, x):
         self.reducer.receive(x)
 
-    def receive_complete(self):
-        self.reducer.receive_complete()
+    def flush(self):
+        self.reducer.flush()
 
 
 class Reducer:
@@ -177,7 +177,7 @@ class Reducer:
     def receive(self, x):
         assert False
 
-    def receive_complete(self):
+    def flush(self):
         assert False
 
 
@@ -198,12 +198,12 @@ class NonGroupingReducer(Reducer):
         if op.incremental:
             op.send(x + tuple(accumulator))
 
-    def receive_complete(self):
+    def flush(self):
         op = self.op
         if not op.incremental and self.accumulator is not None:
             op.send(tuple(self.accumulator))
             self.accumulator = None
-        op.send_complete()
+        op.propagate_flush()
 
 
 class GroupingReducer(Reducer):
@@ -229,13 +229,13 @@ class GroupingReducer(Reducer):
         if op.incremental:
             op.send(x + tuple(self.data(accumulator)))
 
-    def receive_complete(self):
+    def flush(self):
         op = self.op
         if not op.incremental and self.accumulators is not None:
             for _, data in self.accumulators.items():
                 op.send(tuple(data))
                 self.accumulators = None
-        op.send_complete()
+        op.propagate_flush()
 
     def group(self, x):
         group = []

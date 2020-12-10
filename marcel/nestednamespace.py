@@ -50,7 +50,6 @@ class NestedNamespace(dict):
         self.params = pushed_params
         self.update(map)
         self.scopes.append(copy)
-        print(f'NN push_scope {self.params} -> {self.n_scopes()} scopes')
 
     def pop_scope(self):
         assert len(self.scopes) > 0
@@ -67,7 +66,6 @@ class NestedNamespace(dict):
         self.clear()
         self.update(updated_map)
         self.params = scope.params
-        print(f'NN pop_scope {scope.pushed_params} -> {self.n_scopes()} scopes')
 
     def flattened(self):
         flattened = self.copy()

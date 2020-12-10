@@ -73,8 +73,8 @@ class Union(marcel.core.Op):
     def receive(self, x):
         self.send(x)
 
-    def receive_complete(self):
+    def flush(self):
         if self.pipeline_copy is not None:
             marcel.core.Command(self.env(), None, self.pipeline_copy).execute()
             self.pipeline_copy = None
-        self.send_complete()
+        self.propagate_flush()

@@ -124,7 +124,7 @@ class ForkWorker:
                 self.pipeline.setup()
                 self.pipeline.set_env(self.op.env())
                 self.pipeline.receive(None)
-                self.pipeline.receive_complete()
+                self.pipeline.flush()
             except BaseException as e:
                 self.writer.send(dill.dumps(e))
             self.writer.close()

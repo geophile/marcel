@@ -146,8 +146,8 @@ class Out(marcel.core.Op):
         finally:
             self.send(x)
 
-    def receive_complete(self):
-        self.writer.receive_complete()
+    def flush(self):
+        self.writer.flush()
 
     # For use by this class
 
@@ -176,7 +176,7 @@ class Writer:
     def receive(self, x):
         assert False
 
-    def receive_complete(self):
+    def flush(self):
         assert False
 
 
@@ -192,10 +192,10 @@ class TextWriter(Writer):
         else:
             self.output = sys.stdout
 
-    def receive_complete(self):
+    def flush(self):
         if self.output != sys.stdout:
             self.output.close()
-        self.op.send_complete()
+        self.op.propagate_flush()
 
     def write_line(self, x):
         print(x, file=self.output, flush=True)
@@ -216,8 +216,8 @@ class CSVWriter(TextWriter):
         self.writer.writerow(x)
         self.write_line(self.row)
 
-    def receive_complete(self):
-        self.op.send_complete()
+    def flush(self):
+        self.op.propagate_flush()
 
     def write(self, x):
         self.row = x
@@ -232,8 +232,8 @@ class PythonWriter(TextWriter):
     def receive(self, x):
         self.write_line(self.format.format(*x))
 
-    def receive_complete(self):
-        self.op.send_complete()
+    def flush(self):
+        self.op.propagate_flush()
 
 
 class DefaultWriter(TextWriter):
@@ -259,8 +259,8 @@ class DefaultWriter(TextWriter):
             assert False, type(x)
         self.write_line(out)
 
-    def receive_complete(self):
-        self.op.send_complete()
+    def flush(self):
+        self.op.propagate_flush()
 
 
 class PickleWriter(Writer):
@@ -274,6 +274,6 @@ class PickleWriter(Writer):
     def receive(self, x):
         self.writer.write(x)
 
-    def receive_complete(self):
+    def flush(self):
         self.writer.close()
-        self.op.send_complete()
+        self.op.propagate_flush()

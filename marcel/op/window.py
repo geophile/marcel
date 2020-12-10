@@ -172,9 +172,9 @@ class Window(marcel.core.Op):
     def receive(self, x):
         self.window_generator.receive(x)
 
-    def receive_complete(self):
+    def flush(self):
         if self.window_generator is not None:
-            self.window_generator.receive_complete()
+            self.window_generator.flush()
 
 
 class WindowBase:
@@ -186,10 +186,10 @@ class WindowBase:
     def receive(self, x):
         assert False
 
-    def receive_complete(self):
+    def flush(self):
         assert False
 
-    def flush(self):
+    def flush_window(self):
         if len(self.window) > 0:
             self.op.send(self.window)
             self.window = []
@@ -202,12 +202,12 @@ class PredicateWindow(WindowBase):
 
     def receive(self, x):
         if self.op.call(self.op.predicate, *x):
-            self.flush()
+            self.flush_window()
         self.window.append(marcel.util.unwrap_op_output(x))
 
-    def receive_complete(self):
-        self.flush()
-        self.op.send_complete()
+    def flush(self):
+        self.flush_window()
+        self.op.propagate_flush()
 
 
 class OverlapWindow(WindowBase):
@@ -222,7 +222,7 @@ class OverlapWindow(WindowBase):
         if len(self.window) == self.op.n:
             self.op.send(self.window)
 
-    def receive_complete(self):
+    def flush(self):
         padding = None
         if len(self.window) < self.op.n:
             while len(self.window) < self.op.n:
@@ -232,7 +232,7 @@ class OverlapWindow(WindowBase):
             self.window = self.window[1:]
             self.window.append(padding)
             self.op.send(self.window)
-        self.op.send_complete()
+        self.op.propagate_flush()
 
 
 class DisjointWindow(WindowBase):
@@ -243,13 +243,13 @@ class DisjointWindow(WindowBase):
     def receive(self, x):
         self.window.append(marcel.util.unwrap_op_output(x))
         if len(self.window) == self.op.n:
-            self.flush()
+            self.flush_window()
 
-    def receive_complete(self):
+    def flush(self):
         if len(self.window) > 0:
             padding = None
             while len(self.window) < self.op.n:
                 self.window.append(padding)
-            self.flush()
-        self.op.send_complete()
+            self.flush_window()
+        self.op.propagate_flush()
 

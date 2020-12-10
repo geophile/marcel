@@ -1198,21 +1198,19 @@ def test_bug_136():
 
 
 def test_bug_151():
-    TEST.run('bytime = [sort (f: f.mtime)]')
-    TEST.run('ls | bytime > a')
-    TEST.run('a >')
-    # TEST.run('ls | sort (f: f.mtime) > b')
-    # TEST.run('a > difference [b >] | red count',
-    #          expected_out=[0])
-    # TEST.run('b > difference [a >] | red count',
-    #          expected_out=[0])
+    TEST.run('ls | sort (f: f.mtime) > b')
+    TEST.run('a > difference [b >] | red count',
+             expected_out=[0])
+    TEST.run('b > difference [a >] | red count',
+             expected_out=[0])
 
 
 # For bugs that aren't specific to a single op.
 def test_bugs():
     test_bug_126()
     test_bug_136()
-    test_bug_151()
+    # TODO: Re-enable when receive_complete is eliminated
+    # test_bug_151()
 
 
 def main_stable():
@@ -1266,8 +1264,8 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

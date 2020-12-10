@@ -72,7 +72,7 @@ class Sort(marcel.core.Op):
         if x is not None:
             self.contents.append(x)
     
-    def receive_complete(self):
+    def flush(self):
         if self.contents is not None:
             if self.key:
                 self.contents.sort(key=(lambda t: self.call(self.key, *t)))
@@ -81,4 +81,4 @@ class Sort(marcel.core.Op):
             for x in self.contents:
                 self.send(x)
             self.contents = None
-        self.send_complete()
+        self.propagate_flush()

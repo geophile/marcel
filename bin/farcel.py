@@ -74,7 +74,7 @@ class PipelineRunner(threading.Thread):
             self.pipeline.setup()
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
             self.pipeline.first_op().receive_input(None)
-            self.pipeline.receive_complete()
+            self.pipeline.flush()
         except BaseException as e:
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')
             marcel.util.print_stack(file=TRACE.file)

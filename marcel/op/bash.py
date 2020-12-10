@@ -84,9 +84,9 @@ class Bash(marcel.core.Op):
     def receive(self, x):
         self.runner.receive(x)
 
-    def receive_complete(self):
-        self.runner.receive_complete()
-        self.send_complete()
+    def flush(self):
+        self.runner.flush()
+        self.propagate_flush()
 
 
 class Escape:
@@ -97,7 +97,7 @@ class Escape:
     def receive(self, _):
         assert False
 
-    def receive_complete(self):
+    def flush(self):
         assert False
 
     def command(self):
@@ -126,7 +126,7 @@ class NonInteractive(Escape):
             self.process.stdin.write(str(x))
             self.process.stdin.write('\n')
 
-    def receive_complete(self):
+    def flush(self):
         self.process.stdin.close()
         while self.process.poll() is None:
             self.out_handler.join(0.1)
@@ -148,7 +148,7 @@ class Interactive(Escape):
             print(f'Escaped command failed with exit code {self.process.returncode}: {" ".join(self.op.args)}')
             marcel.util.print_to_stderr(self.process.stderr, self.op.env())
 
-    def receive_complete(self):
+    def flush(self):
         pass
 
 
@@ -167,7 +167,7 @@ class BashShell(Escape):
             print(f'Escaped command failed with exit code {self.process.returncode}: {" ".join(self.op.args)}')
             marcel.util.print_to_stderr(self.process.stderr, self.op.env())
 
-    def receive_complete(self):
+    def flush(self):
         pass
 
 

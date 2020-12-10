@@ -77,11 +77,11 @@ class Args(marcel.core.Op):
     def receive(self, x):
         self.impl.receive(x)
 
-    def receive_complete(self):
+    def flush(self):
         if self.impl is not None:
-            self.impl.receive_complete()
+            self.impl.flush()
             self.impl = None
-        self.send_complete()
+        self.propagate_flush()
 
 
 class ArgsImpl:
@@ -110,7 +110,7 @@ class ArgsImpl:
         if not self.all and len(self.args) == self.n_params:
             self.run_pipeline(self.op.env())
 
-    def receive_complete(self):
+    def flush(self):
         if len(self.args) > 0:
             if self.all:
                 self.args = [self.args]
@@ -132,9 +132,9 @@ class ArgsInteractive(ArgsImpl):
         super().__init__(op)
         self.pipeline = None
         self.params = None
+        self.scope = None
 
     def setup(self):
-        print('args start setup')
         op = self.op
         env = op.env()
         self.params = op.pipeline_arg.parameters()
@@ -148,25 +148,20 @@ class ArgsInteractive(ArgsImpl):
         # to arg's downstream operator. But receive_complete is a dead end, it doesn't propagate
         # to arg's downstream, which was the issue in bug 136.
         self.pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
-        self.  scope = {}
+        self.scope = {}
         for param in self.params:
-            self.  scope[param] = None
-        # TODO: EXPERIMENTAL env.vars().push_scope(scope)
+            self.scope[param] = None
         self.args = []
-        print('args end setup')
 
     def receive(self, x):
         self.op.env().vars().push_scope(self.scope)
-        super().receive(x)
-        self.op.env().vars().pop_scope()
+        try:
+            super().receive(x)
+        finally:
+            self.op.env().vars().pop_scope()
 
-    def receive_complete(self):
-        super().receive_complete()
-        # TODO: EXPERIMENT
-        # try:
-        #     super().receive_complete()
-        # finally:
-        #     self.op.env().vars().pop_scope()
+    def flush(self):
+        super().flush()
 
     def run_pipeline(self, env):
         op = self.op

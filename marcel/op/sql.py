@@ -156,16 +156,16 @@ class Sql(marcel.core.Op):
             self.connection.rollback()
             raise marcel.exception.KillCommandException(e)
 
-    def receive_complete(self):
+    def flush(self):
         try:
-            self.delegate.receive_complete()
+            self.delegate.flush()
             self.connection.commit()
         except Exception as e:
             self.connection.rollback()
             raise marcel.exception.KillCommandException(e)
         finally:
             self.connection.close()
-            self.send_complete()
+            self.propagate_flush()
 
     # For use by this class
 
@@ -192,7 +192,7 @@ class SqlStatement:
     def receive(self, x):
         pass
 
-    def receive_complete(self):
+    def flush(self):
         if self.op.autocommit is False:
             self.connection.commit()
 

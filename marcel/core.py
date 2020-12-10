@@ -131,9 +131,9 @@ class Op(AbstractOp):
         if self.receiver:
             self.receiver.receive_error(error)
 
-    def send_complete(self):
+    def propagate_flush(self):
         if self.receiver:
-            self.receiver.receive_complete()
+            self.receiver.flush()
 
     def call(self, function, *args, **kwargs):
         try:
@@ -166,8 +166,8 @@ class Op(AbstractOp):
         assert isinstance(error, Error)
         self.send_error(error)
 
-    def receive_complete(self):
-        self.send_complete()
+    def flush(self):
+        self.propagate_flush()
 
     def run_local(self):
         return False
@@ -345,8 +345,11 @@ class Pipeline(AbstractOp):
     def receive(self, x):
         self.ops[0].receive_input(x)
 
-    def receive_complete(self):
-        self.ops[0].receive_complete()
+    def flush(self):
+        self.ops[0].flush()
+
+    def cleanup(self):
+        pass
 
     def set_parameters(self, parameters):
         if parameters is not None:
@@ -393,11 +396,11 @@ class Command:
     def execute(self, api=False):
         depth = self.env.vars().n_scopes()
         self.env.clear_changes()
-        print(f'Command.execute {self.pipeline}, before setup, scopes: {depth}')
         self.pipeline.setup()
         self.pipeline.set_env(self.env)
         self.pipeline.receive(None)
-        self.pipeline.receive_complete()
+        self.pipeline.flush()
+        self.pipeline.cleanup()
         # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.
         assert self.env.vars().n_scopes() == depth, self.env.vars().n_scopes()
         # An interactive Command is executed by a multiprocessing.Process.

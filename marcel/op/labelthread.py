@@ -46,7 +46,7 @@ class LabelThread(marcel.core.Op):
     # this will result in n+1 calls of the parent pipeline's receiver -- one for each of the
     # n threads, and another from the parent.
     # See bug 4.
-    def receive_complete(self):
+    def flush(self):
         pass
 
     def receive_error(self, error):

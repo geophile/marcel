@@ -54,6 +54,6 @@ class IfBase(marcel.core.Op):
     def receive(self, x):
         assert False
 
-    def receive_complete(self):
-        self.then.receive_complete()
-        self.send_complete()
+    def flush(self):
+        self.then.flush()
+        self.propagate_flush()
