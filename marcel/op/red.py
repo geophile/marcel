@@ -186,6 +186,10 @@ class NonGroupingReducer(Reducer):
     def __init__(self, op):
         super().__init__(op)
         self.accumulator = [None] * self.n
+        # Reduction using count is a special case, see bug 153.
+        for i in range(self.n):
+            if self.op.functions[i].is_count():
+                self.accumulator[i] = 0
 
     def receive(self, x):
         op = self.op

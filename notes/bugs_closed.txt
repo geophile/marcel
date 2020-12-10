@@ -2954,3 +2954,14 @@ NOT A BUG
     M 0.11.12 jao@cheese:~/git/marcel/test$ 
 
 This was caused by running "marcel" as the last command in .bashrc.
+
+----------------------------------------------------------------------
+
+FIXED
+
+153. red count should return 0 on empty input
+
+It's returning None:
+
+    M 0.12.0 jao@cheese ~/git/marcel/test$ gen 3 | select (x: False) | red count
+    None

@@ -213,6 +213,13 @@ def test_red():
                               | map(lambda x: (x, 10 * x) if x % 2 == 0 else (x, 10 * x, 100 * x))
                               | red(None, r_plus, r_plus, incremental=True)),
              expected_out=[Error('too short'), (1, 10, 100, 10, 100), Error('too short'), (3, 30, 300, 30, 300)])
+    # Bug 153
+    TEST.run(test=lambda: run(gen(3) | select(lambda x: False) | red(r_count)),
+             expected_out=[0])
+    TEST.run(test=lambda: run(gen(3) | red(r_count, incremental=True)),
+             expected_out=[(0, 1), (1, 2), (2, 3)])
+    TEST.run(test=lambda: run(gen(5) | map(lambda x: (x//2, None)) | red(r_group, r_count) | sort()),
+             expected_out=[(0, 2), (1, 2), (2, 1)])
 
 
 def test_expand():
@@ -296,7 +303,7 @@ def test_expand():
 
 def test_head():
     TEST.run(lambda: run(gen(100) | head(0)),
-             expected_out=[])
+             expected_err="must not be 0")
     TEST.run(lambda: run(gen(100) | head(1)),
              expected_out=[0])
     TEST.run(lambda: run(gen(100) | head(2)),
@@ -323,7 +330,7 @@ def test_head():
 
 def test_tail():
     TEST.run(lambda: run(gen(100) | tail(0)),
-             expected_out=[])
+             expected_err="must not be 0")
     TEST.run(lambda: run(gen(100) | tail(1)),
              expected_out=[99])
     TEST.run(lambda: run(gen(100) | tail(2)),
@@ -725,7 +732,7 @@ def test_read():
                            '1\t2.3\tab', '2\t3.4\txy',
                            'hello,world', 'goodbye'])
     # Flags inherited from FilenamesOp
-    TEST.run(lambda: run(read('tmp/read/*', label=True, recursive=True) | map(lambda f, l: (str(f), l))),
+    TEST.run(lambda: run(read('/tmp/read/*', label=True, recursive=True) | map(lambda f, l: (str(f), l))),
              expected_out=[('f1.csv', '1,2.3,ab'),
                            ('f1.csv', '2,3.4,xy'),
                            ('f1.csv', '3,4.5,"m,n"'),
@@ -1047,7 +1054,7 @@ def main_dev():
 def main():
     TEST.reset_environment()
     main_stable()
-    main_dev()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

@@ -350,9 +350,11 @@ Implementation
 
 + Ops with pipelines need to propagate cleanup into them.
 
-- Revisit labelthread.flush. See comment about bug 4.
++ Revisit labelthread.flush. See comment about bug 4.
 
-- Revisit store.cleanup & comment. Is the if still necessary?
++ Revisit store.cleanup & comment. Is the if still necessary?
 
-- Ensure adequate testing for bugs 126, 151, 152; interactive and api.
++ Revisit comment in args setup
+
++ Ensure adequate testing for bugs 126, 151, 152; interactive and api.
 

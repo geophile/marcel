@@ -47,6 +47,9 @@ class Function:
     def is_grouping(self):
         return False
 
+    def is_count(self):
+        return self.function is marcel.reduction.r_count
+
 
 class NativeFunction(Function):
 

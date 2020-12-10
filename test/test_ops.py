@@ -214,6 +214,13 @@ def test_red():
              expected_out=[Error('too short'), Error('too short'), (1, 10, 100), (3, 30, 300)])
     TEST.run('gen 4 | map (x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x)) | red -i . + +',
              expected_out=[Error('too short'), (1, 10, 100, 10, 100), Error('too short'), (3, 30, 300, 30, 300)])
+    # Bug 153
+    TEST.run('gen 3 | select (x: False) | red count',
+             expected_out=[0])
+    TEST.run('gen 3 | red -i count',
+             expected_out=[(0, 1), (1, 2), (2, 3)])
+    TEST.run('gen 5 | (x: (x // 2, None)) | red . count | sort',
+             expected_out=[(0, 2), (1, 2), (2, 1)])
 
 
 def test_expand():
@@ -1198,6 +1205,8 @@ def test_bug_136():
 
 
 def test_bug_151():
+    TEST.run('bytime = [sort (f: f.mtime)]')
+    TEST.run('ls | bytime > a')
     TEST.run('ls | sort (f: f.mtime) > b')
     TEST.run('a > difference [b >] | red count',
              expected_out=[0])
@@ -1205,12 +1214,15 @@ def test_bug_151():
              expected_out=[0])
 
 
+def test_bug_152():
+    # Same test case as for bug 126. Failure was different as code changes.
+    pass
+
 # For bugs that aren't specific to a single op.
 def test_bugs():
     test_bug_126()
     test_bug_136()
-    # TODO: Re-enable when receive_complete is eliminated
-    # test_bug_151()
+    test_bug_151()
 
 
 def main_stable():
@@ -1253,12 +1265,6 @@ def main_stable():
 
 
 def main_dev():
-    # # Bug 152
-    # TEST.run('fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]')
-    # TEST.run('fact (5) > f')
-    # TEST.run('f >')
-    # # test_bug_126()
-    # # test_bug_151()
     pass
 
 

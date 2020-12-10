@@ -125,12 +125,3 @@ class Store(marcel.core.Op):
 
     def cleanup(self):
         self.writer.close()
-        # # self.nesting, and the conditional execution of close() fixes bug 126. receive_complete for an op
-        # # can sometimes be reached on multiple paths, e.g.
-        # #         fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]
-        # #         fact (100) > f
-        # # "> f" gives rise to store(f) on the pipeline to be executed (fact (100) > f). But store's receive_complete
-        # # is reached on execution of the fact pipeline, due to the way that Op receivers are connected. We only
-        # # want to actually close self.writer in the pipeline that created it.
-        # if self.env().vars().n_scopes() == self.nesting:
-        #     self.writer.close()

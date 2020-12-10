@@ -145,7 +145,7 @@ class ArgsInteractive(ArgsImpl):
         self.pipeline = op.pipeline_arg_value(env, op.pipeline_arg).copy()
         self.pipeline.set_error_handler(op.owner.error_handler)
         # By appending map(self.send_pipeline_output) to the pipeline, we relay pipeline output
-        # to arg's downstream operator. But receive_complete is a dead end, it doesn't propagate
+        # to arg's downstream operator. But flush is a dead end, it doesn't propagate
         # to arg's downstream, which was the issue in bug 136.
         self.pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
         self.scope = {}
