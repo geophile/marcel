@@ -1,16 +1,35 @@
 What's New
 ----------
 
-Commands that mix host executables and marcel operators work better now.
-It used to be the case that a host executable's output would be buffered
-until the executable ends its output. This made it difficult to monitor
-long-running host executables. Now, this buffering does not happen.
+The way that data flows through marcel operators dates back to
+a predecessor project, [osh](https://github.com/geophile/osh). 
+Each operator implemented `receive(x)` to handle a tuple, `x`, arriving
+from the input stream; and `receive_complete()` to do any needed termination
+after the entire input stream had been received. This could include
+writing to the output stream any data that couldn't be made available
+until all input had been seen, (e.g. the `reverse` and `sort` ops), and
+cleanup of resources.
 
-The marcel equivalent of the `find` executable is `ls -r`. But ignoring
-that: Previously, if you ran `find /` from marcel, 
-the `find` would run completely, buffering the output,
-and then marcel would print the buffer's contents. Now
-you see output immediately.
+But marcel has added pipelines in several contexts (assigned to variables,
+as arguments to operators), and this processing
+model was not working well, (e.g.
+see bugs 126, 151, 152).
+
+This has all been cleaned up. `receive_complete()` has been replaced
+by two functions: 
+
+1) `flush()`, which writes any output that is available
+only after all input has been seen. As the name implies, `flush()`
+   is idempotent. Calling it multiple times is fine, and this 
+   simplifies some of the control flow that can arise, e.g.
+   due to remote execution, and with the `args` operator, after all output
+   has been generated.
+   
+2) `cleanup()` does any operator cleanup, such as closing open files.
+`cleanup()` will be called exactly once on each operator.
+   
+All this should be invisible, except that the situations that led
+to bugs 126, 151 and 152 are now working correctly.
 
 Marcel
 ======

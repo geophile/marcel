@@ -21,15 +21,7 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/function.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/function.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/args.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/args.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/labelthread.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/labelthread.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/red.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/red.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/store.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/store.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs_closed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs_closed.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/stream_control.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/stream_control.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_ops.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -400,7 +392,7 @@
       <workItem from="1606953801547" duration="49000" />
       <workItem from="1606953874767" duration="11202000" />
       <workItem from="1607290808517" duration="9573000" />
-      <workItem from="1607547759325" duration="26194000" />
+      <workItem from="1607547759325" duration="26908000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
