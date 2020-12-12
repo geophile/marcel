@@ -2887,6 +2887,8 @@ marcel.object.color.ColorSchemeError: asdf_scheme_value is not a supported color
 
 ----------------------------------------------------------------------
 
+FIXED
+
 143. Need to import env
 
 M-0.11.11 jao@cheese:~/boat$ python bin/reduceimages.py original reduced 640
@@ -2897,6 +2899,8 @@ Error: ImportError: No module named pathlib
 M-0.11.11 jao@cheese:~/boat$ 
 
 ----------------------------------------------------------------------
+
+FIXED
 
 145. Crash when defining cluster with unknown host name
 
@@ -2957,6 +2961,8 @@ This was caused by running "marcel" as the last command in .bashrc.
 
 ----------------------------------------------------------------------
 
+FIXED
+
 151. Sort done by pipeline-valued arg not working
 
 Define this: byt = [sort (f: f.mtime)]
@@ -3004,6 +3010,8 @@ But the stored pipeline does not, removing files:
     drwxrwxr-x   jao    jao        4096   2020 Nov 15 18:26:48   repair
 
 ----------------------------------------------------------------------
+
+FIXED
 
 152. Assertion complaining about attempt to read from reservoir open for write
 

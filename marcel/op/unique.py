@@ -28,7 +28,7 @@ Write to the output stream all input tuples, but without duplicates.
 Input tuples are passed to output, removing duplicates. No output is
 generated until the end of the input stream occurs. However, if the
 duplicates are known to be consecutive, then {r:--consecutive} allows
-output to be generated sooner. Input order is preserved only if {r:--consecutive}
+output to be generated sooner. Input order is preserved if {r:--consecutive}
 is specified.
 '''
 
