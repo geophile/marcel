@@ -913,6 +913,14 @@ def test_args():
              expected_out=[0, 0, 1, 0, 1, 2])
 
 
+def test_pos():
+    TEST.run(test=lambda: run(gen(5) |
+                              map(lambda x: (x, pos())) |
+                              select(lambda x, p1: x % 2 == 0) |
+                              map(lambda x, p1: (x, p1, pos()))),
+             expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
+
+
 def test_api_run():
     # Error-free output, just an op
     TEST.run(test=lambda: run(gen(3)),
@@ -1040,6 +1048,7 @@ def main_stable():
     test_union()
     test_difference()
     test_args()
+    test_pos()
     test_api_run()
     test_api_gather()
     test_api_first()

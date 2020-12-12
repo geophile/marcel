@@ -18,8 +18,12 @@ import time
 
 from marcel.api import *
 
-start = time.time()
-run(ls('/home/jao/git', recursive=True, file=True) | select(lambda f: False))
-stop = time.time()
-msec = (stop - start) * 1000
-print(f'{msec} msec')
+TRIALS = 5
+total = 0
+for t in range(TRIALS):
+    start = time.time()
+    run(gen(1000000) | map(lambda x: -x) | select(lambda x: False))
+    stop = time.time()
+    msec = (stop - start) * 1000
+    total += msec
+print(f'{total / TRIALS} msec')

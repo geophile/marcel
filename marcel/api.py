@@ -179,3 +179,7 @@ def reservoir(name=None):
         name = f'r{_reservoir_counter}'
         _reservoir_counter += 1
     return _reservoir.Reservoir(name)
+
+
+def pos():
+    return _MAIN.env.current_op.pos()

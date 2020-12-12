@@ -184,6 +184,7 @@ class Environment:
         except FileNotFoundError:
             raise marcel.exception.KillShellException(
                 'Current directory does not exist! cd somewhere else and try again.')
+        env.current_op = None
         initial_namespace = os.environ.copy() if old_namespace is None else old_namespace
         initial_namespace.update({
             'USER': user,
@@ -198,6 +199,8 @@ class Environment:
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
             'Color': marcel.object.color.Color,
+            # EXPERIMENT
+            'pos': lambda: env.current_op.pos()
         })
         env.initialize_interactive_executables(initial_namespace)
         if editor:

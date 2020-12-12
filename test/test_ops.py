@@ -1192,6 +1192,11 @@ def test_env():
              expected_out=[29])
 
 
+def test_pos():
+    TEST.run('gen 5 | (x: (x, pos())) | select (x, p1: x % 2 == 0) | (x, p1: (x, p1, pos()))',
+             expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
+
+
 def test_bug_126():
     TEST.run('fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]')
     TEST.run(test='fact (5) > f',
@@ -1261,6 +1266,7 @@ def main_stable():
     test_difference()
     test_args()
     # test_env()
+    test_pos()
     test_bugs()
 
 

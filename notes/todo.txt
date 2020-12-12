@@ -384,3 +384,10 @@ How should the predicate be expressed?
 - Function or variable yielding row#?
 
 - Each op could have a counter.
+
+Profiling run(gen(1000000) | map(lambda x: -x) | select(lambda x: False))
+
+Without counter: 1963 1987 1884
+With counter:    2423 2352 2566
+
+The counter is REALLY EXPENSIVE!

@@ -103,6 +103,8 @@ class Op(AbstractOp):
         self.receiver = None
         # The pipeline to which this op belongs
         self.owner = None
+        # EXPERIMENT
+        self._count = -1
 
     def __repr__(self):
         assert False, self.op_name()
@@ -151,13 +153,17 @@ class Op(AbstractOp):
     # and util.wrap_op_input is inlined.
     def receive_input(self, x):
         # assert not isinstance(x, Error)
+        self._env.current_op = self
         try:
-            t = type(x)
+            self._count += 1
             self.receive(None if x is None else
-                         x if t is tuple or t is list else
+                         x if type(x) in (tuple, list) else
                          (x,))
         except marcel.exception.KillAndResumeException as e:
             self.receive_error(Error(e))
+
+    def pos(self):
+        return self._count
 
     def receive(self, x):
         pass
