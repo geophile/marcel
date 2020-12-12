@@ -21,14 +21,7 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/profiling.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/profiling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_ops.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -422,7 +415,7 @@
       <workItem from="1606953801547" duration="49000" />
       <workItem from="1606953874767" duration="11202000" />
       <workItem from="1607290808517" duration="9573000" />
-      <workItem from="1607547759325" duration="34627000" />
+      <workItem from="1607547759325" duration="35571000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

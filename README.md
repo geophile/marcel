@@ -1,35 +1,51 @@
 What's New
 ----------
 
-The way that data flows through marcel operators dates back to
-a predecessor project, [osh](https://github.com/geophile/osh). 
-Each operator implemented `receive(x)` to handle a tuple, `x`, arriving
-from the input stream; and `receive_complete()` to do any needed termination
-after the entire input stream had been received. This could include
-writing to the output stream any data that couldn't be made available
-until all input had been seen, (e.g. the `reverse` and `sort` ops), and
-cleanup of resources.
+Sometimes it's convenient to have something like line numbers, because
+you want to treat inputs differently, based on their position in the 
+input stream. For example, if you have CSV input, you might want
+to ignore the first line, containing headers. You can do this as follows:
 
-But marcel has added pipelines in several contexts (assigned to variables,
-as arguments to operators), and this processing
-model was not working well, (e.g.
-see bugs 126, 151, 152).
+```shell
+read --csv foo.csv | head -1
+```
 
-This has all been cleaned up. `receive_complete()` has been replaced
-by two functions: 
+This reads `foo.csv`, and keeps all lines except for the first.
 
-1) `flush()`, which writes any output that is available
-only after all input has been seen. As the name implies, `flush()`
-   is idempotent. Calling it multiple times is fine, and this 
-   simplifies some of the control flow that can arise, e.g.
-   due to remote execution, and with the `args` operator, after all output
-   has been generated.
-   
-2) `cleanup()` does any operator cleanup, such as closing open files.
-`cleanup()` will be called exactly once on each operator.
-   
-All this should be invisible, except that the situations that led
-to bugs 126, 151 and 152 are now working correctly.
+But this isn't very general. E.g., you might want to keep every other 
+input, starting with the first. This is now possible through the addition
+of the `pos()` builtin function. Each operator has its own position counter,
+which can be accessed using `pos()`. So to keep evey other line of a file
+`foo.txt`, starting with the first line:
+
+```shell
+read foo.txt | select (line: pos() % 2 == 0)
+```
+
+`read` has its own counter, but it is inaccessible, as the `read` operator
+does not allow for a function argument which could reference `pos()`. However,
+the next operator, `select`, also has a counter, also accessible through
+`pos()`, and that is the counter that is tested.
+
+To see this fact more clearly, that each operator has its own `pos()`, 
+look at this command:
+
+```shell
+gen 5 1000 \
+| map (x: (x, pos())) \
+| select (x, y: x % 2 == 0) \
+| map (x, y: (x, y, pos()))
+```
+
+- `gen 5 1000`: Generates the stream 1000, 1001, 1002, 1003, 1004.
+- `map(x: (x, pos()))`: This appends a position to each input item, yielding
+  (1000, 0), (1001, 1), (1002, 2), (1003, 3), (1004, 4).
+  
+- `select(x, y: x % 2 == 0)`: For each input row, keep those for which x is 
+  even, so: (1000, 0), (1002, 2), (1004, 4).
+  
+- `map(x, y: (x, y, pos()))`: This attaches a new `pos()` value for each input.
+- The command's output is: (1000, 0, 0), (1002, 2, 1), (1004, 4, 2).
 
 Marcel
 ======
