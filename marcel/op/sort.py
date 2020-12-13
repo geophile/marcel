@@ -17,6 +17,7 @@ import types
 
 import marcel.argsparser
 import marcel.core
+import marcel.exception
 
 
 HELP = '''
@@ -74,11 +75,14 @@ class Sort(marcel.core.Op):
     
     def flush(self):
         if self.contents is not None:
-            if self.key:
-                self.contents.sort(key=(lambda t: self.call(self.key, *t)))
-            else:
-                self.contents.sort()
-            for x in self.contents:
-                self.send(x)
-            self.contents = None
+            try:
+                if self.key:
+                    self.contents.sort(key=(lambda t: self.call(self.key, *t)))
+                else:
+                    self.contents.sort()
+                for x in self.contents:
+                    self.send(x)
+                self.contents = None
+            except TypeError as e:
+                raise marcel.exception.KillCommandException(e)
         self.propagate_flush()

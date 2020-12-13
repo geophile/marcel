@@ -107,6 +107,8 @@ def test_sort():
     # Bad types
     TEST.run(test=lambda: run(gen(5) | map(lambda x: (-x, x)) | sort(123)),
              expected_err='key argument must be a function')
+    TEST.run(test=lambda: run(map(lambda: (1, "a", 2, "b")) | expand() | sort()),
+             expected_err="'<' not supported between instances of 'str' and 'int'")
     # Bug 10
     TEST.run(test=lambda: run(sort()), expected_out=[])
 
@@ -404,29 +406,29 @@ def test_unique():
 
 def test_window():
     TEST.run(lambda: run(gen(10) | window(lambda x: False)),
-             expected_out=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
+             expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)])
     TEST.run(lambda: run(gen(10) | window(lambda x: True)),
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run(lambda: run(gen(10) | window(overlap=1)),
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run(lambda: run(gen(10) | window(overlap=3)),
-             expected_out=[[0, 1, 2],
-                           [1, 2, 3],
-                           [2, 3, 4],
-                           [3, 4, 5],
-                           [4, 5, 6],
-                           [5, 6, 7],
-                           [6, 7, 8],
-                           [7, 8, 9],
-                           [8, 9, None],
-                           [9, None, None]])
+             expected_out=[(0, 1, 2),
+                           (1, 2, 3),
+                           (2, 3, 4),
+                           (3, 4, 5),
+                           (4, 5, 6),
+                           (5, 6, 7),
+                           (6, 7, 8),
+                           (7, 8, 9),
+                           (8, 9, None),
+                           (9, None, None)])
     TEST.run(lambda: run(gen(10) | window(disjoint=1)),
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run(lambda: run(gen(10) | window(disjoint=3)),
-             expected_out=[[0, 1, 2],
-                           [3, 4, 5],
-                           [6, 7, 8],
-                           [9, None, None]])
+             expected_out=[(0, 1, 2),
+                           (3, 4, 5),
+                           (6, 7, 8),
+                           (9, None, None)])
     # Negative-test args
     TEST.run(lambda: run(gen(10) | window(disjoint=33, overlap=33)),
              expected_err='Must specify exactly one')
@@ -441,16 +443,16 @@ def test_window():
     # Function-valued args
     THREE = 3
     TEST.run(lambda: run(gen(10) | window(overlap=lambda: THREE)),
-             expected_out=[[0, 1, 2],
-                           [1, 2, 3],
-                           [2, 3, 4],
-                           [3, 4, 5],
-                           [4, 5, 6],
-                           [5, 6, 7],
-                           [6, 7, 8],
-                           [7, 8, 9],
-                           [8, 9, None],
-                           [9, None, None]])
+             expected_out=[(0, 1, 2),
+                           (1, 2, 3),
+                           (2, 3, 4),
+                           (3, 4, 5),
+                           (4, 5, 6),
+                           (5, 6, 7),
+                           (6, 7, 8),
+                           (7, 8, 9),
+                           (8, 9, None),
+                           (9, None, None)])
     TEST.run(lambda: run(gen(10) | window(disjoint=lambda: THREE - 2)),
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
@@ -564,12 +566,20 @@ def test_join():
                                      | map(lambda x: (x, (x * 100, x * 100 + 1)))
                                      | expand(1))),
              expected_out=[(0, 0, 0), (0, 0, 1), (1, -1, 100), (1, -1, 101), (2, -2, 200), (2, -2, 201)])
-    # # Right argument in variable
-    # x100 = gen(3) | map(lambda x: (x, x * 100))
-    # TEST.run(test=lambda: run(gen(4)
-    #                           | map(lambda x: (x, -x))
-    #                           | join(x100)),
-    #          expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
+    # Right argument in variable
+    x100 = gen(3) | map(lambda x: (x, x * 100))
+    TEST.run(test=lambda: run(gen(4)
+                              | map(lambda x: (x, -x))
+                              | join(x100)),
+             expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
+    # Handle non-hashable join keys
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: ((x,), x)) | join(gen(3) | map(lambda x: ((x,), x*100)))),
+             expected_out=[((0,), 0, 0), ((1,), 1, 100), ((2,), 2, 200)])
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: ([x], x)) | join(gen(3) | map(lambda x: ((x,), x*100)))),
+             expected_err='not hashable')
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: ((x,), x)) | join(gen(3) | map(lambda x: ([x], x*100)))),
+             expected_err='not hashable')
+
 
 
 def test_pipeline_args():
@@ -786,6 +796,13 @@ def test_intersect():
              expected_out=[(2, 200), (2, 200),
                            (3, 300), (3, 300), (3, 300),
                            (4, 400), (4, 400), (4, 400)])
+    # Lists cannot be hashed
+    TEST.run(lambda: run(gen(2) | map(lambda x: (x, (x, x))) | intersect(gen(2, 1) | map(lambda x: (x, (x, x))))),
+             expected_out=[(1, (1, 1))])
+    TEST.run(lambda: run(gen(2) | map(lambda x: (x, [x, x])) | intersect(gen(2, 1) | map(lambda x: (x, (x, x))))),
+             expected_err='not hashable')
+    TEST.run(lambda: run(gen(2) | map(lambda x: (x, (x, x))) | intersect(gen(2, 1) | map(lambda x: (x, [x, x])))),
+             expected_err='not hashable')
 
 
 def test_union():
@@ -842,6 +859,13 @@ def test_difference():
                                     expand()) |
                          sort()),
              expected_out=[(4, 400), (5, 500), (5, 500), (6, 600), (6, 600), (6, 600)])
+    # Lists aren't hashable
+    TEST.run(lambda: run(gen(3) | map(lambda x: (x, (x, x))) | difference(gen(2) | map(lambda x: (x, (x, x))))),
+             expected_out=[(2, (2, 2))])
+    TEST.run(lambda: run(gen(3) | map(lambda x: (x, [x, x])) | difference(gen(2) | map(lambda x: (x, (x, x))))),
+             expected_err='not hashable')
+    TEST.run(lambda: run(gen(3) | map(lambda x: (x, (x, x))) | difference(gen(2) | map(lambda x: (x, [x, x])))),
+             expected_err='not hashable')
 
 
 def test_args():
@@ -905,8 +929,8 @@ def test_args():
     TEST.run(test=lambda: run(gen(3) | args(lambda: gen(3))),
              expected_err='The args pipeline must be parameterized')
     # Bug 94
-    TEST.run(test=lambda: run(gen(4, 1) | args(lambda n: gen (n)) | window(lambda x: x == 0)),
-             expected_out=[0, [0, 1], [0, 1, 2], [0, 1, 2, 3]])
+    TEST.run(test=lambda: run(gen(4, 1) | args(lambda n: gen(n)) | window(lambda x: x == 0)),
+             expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
     # Bug 116
     g = lambda n: gen (n)
     TEST.run(test=lambda: run(gen(3, 1) | args(lambda n: g(n))),

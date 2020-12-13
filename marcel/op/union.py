@@ -61,8 +61,6 @@ class Union(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
-        def send_right(*x):
-            self.send(x)
         env = self.env()
         self.pipeline_copy = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
         self.pipeline_copy.set_error_handler(self.owner.error_handler)

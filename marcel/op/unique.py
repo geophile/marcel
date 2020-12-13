@@ -15,6 +15,7 @@
 
 import marcel.argsparser
 import marcel.core
+import marcel.exception
 import marcel.util
 
 
@@ -78,9 +79,12 @@ class GeneralUniquer(Uniquer):
 
     def receive(self, x):
         x = marcel.util.wrap_op_input(x)  # convert list to tuple
-        if x not in self.unique:
-            self.unique.add(x)
-            self.op.send(x)
+        try:
+            if x not in self.unique:
+                self.unique.add(x)
+                self.op.send(x)
+        except TypeError:
+            raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
 
 class ConsecutiveUniquer(Uniquer):

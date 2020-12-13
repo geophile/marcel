@@ -191,7 +191,7 @@ class WindowBase:
 
     def flush_window(self):
         if len(self.window) > 0:
-            self.op.send(self.window)
+            self.op.send(tuple(self.window))
             self.window = []
 
 
@@ -220,18 +220,18 @@ class OverlapWindow(WindowBase):
             self.window = self.window[1:]
         self.window.append(marcel.util.unwrap_op_output(x))
         if len(self.window) == self.op.n:
-            self.op.send(self.window)
+            self.op.send(tuple(self.window))
 
     def flush(self):
         padding = None
         if len(self.window) < self.op.n:
             while len(self.window) < self.op.n:
                 self.window.append(padding)
-            self.op.send(self.window)
+            self.op.send(tuple(self.window))
         for i in range(self.op.n - 1):
             self.window = self.window[1:]
             self.window.append(padding)
-            self.op.send(self.window)
+            self.op.send(tuple(self.window))
         self.op.propagate_flush()
 
 

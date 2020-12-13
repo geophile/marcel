@@ -104,14 +104,17 @@ class Join(marcel.core.Op):
             assert len(x) > 0
             x = tuple(x)
             join_value = x[0]
-            match = self.inner.get(join_value, None)
-            if match is None:
-                self.inner[join_value] = x
-            elif type(match) is list:
-                match.append(x)
-            else:
-                # match is first value associated with join_value, x is the second. Need a list.
-                self.inner[join_value] = [match, x]
+            try:
+                match = self.inner.get(join_value, None)
+                if match is None:
+                    self.inner[join_value] = x
+                elif type(match) is list:
+                    match.append(x)
+                else:
+                    # match is first value associated with join_value, x is the second. Need a list.
+                    self.inner[join_value] = [match, x]
+            except TypeError:
+                raise marcel.exception.KillCommandException(f'{x} is not hashable')
         super().setup()
         env = self.env()
         self.inner = {}
@@ -124,7 +127,10 @@ class Join(marcel.core.Op):
     def receive(self, x):
         x = tuple(x)
         join_value = x[0]
-        match = self.inner.get(join_value, None)
+        try:
+            match = self.inner.get(join_value, None)
+        except TypeError:
+            raise marcel.exception.KillCommandException(f'{x} is not hashable')
         if match is None:
             if self.keep:
                 self.send(x)

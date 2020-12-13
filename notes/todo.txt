@@ -385,9 +385,15 @@ How should the predicate be expressed?
 
 - Each op could have a counter.
 
-Profiling run(gen(1000000) | map(lambda x: -x) | select(lambda x: False))
+Profiling 5 runs of: run(gen(1000000) | map(lambda x: -x) | select(lambda x: False))
+Measured msec.
 
-Without counter: 1963 1987 1884
-With counter:    2423 2352 2566
+Without counter:       1963 1987 1884
+With counter:          2423 2352 2566
+_env instead of env(): 2096 2229 2195
+optimized*:            2290 2199 2239
+                       2303 2260 2181
 
 The counter is REALLY EXPENSIVE!
+
+* Micro-optimization of receive_input

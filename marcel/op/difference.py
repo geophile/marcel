@@ -72,8 +72,11 @@ class Difference(marcel.core.Op):
 
     def setup(self):
         def load_right(*x):
-            count = self.right.get(x, None)
-            self.right[x] = 1 if count is None else count + 1
+            try:
+                count = self.right.get(x, None)
+                self.right[x] = 1 if count is None else count + 1
+            except TypeError:
+                raise marcel.exception.KillCommandException(f'{x} is not hashable')
         env = self.env()
         self.right = {}
         pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
@@ -82,11 +85,15 @@ class Difference(marcel.core.Op):
         marcel.core.Command(env, None, pipeline).execute()
 
     def receive(self, x):
-        count = self.right.get(x, None)
-        if count is not None:
-            if count == 1:
-                del self.right[x]
+        try:
+            count = self.right.get(x, None)
+            if count is not None:
+                if count == 1:
+                    del self.right[x]
+                else:
+                    self.right[x] = count - 1
             else:
-                self.right[x] = count - 1
-        else:
-            self.send(x)
+                self.send(x)
+        except TypeError:
+            raise marcel.exception.KillCommandException(f'{x} is not hashable')
+

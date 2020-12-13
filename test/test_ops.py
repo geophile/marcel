@@ -108,9 +108,14 @@ def test_out():
 
 
 def test_sort():
-    TEST.run('gen 5 | sort', expected_out=[0, 1, 2, 3, 4])
-    TEST.run('gen 5 | sort (lambda x: -x)', expected_out=[4, 3, 2, 1, 0])
-    TEST.run('gen 5 | map (x: (-x, x)) | sort', expected_out=[(-4, 4), (-3, 3), (-2, 2), (-1, 1), (0, 0)])
+    TEST.run('gen 5 | sort',
+             expected_out=[0, 1, 2, 3, 4])
+    TEST.run('gen 5 | sort (lambda x: -x)',
+             expected_out=[4, 3, 2, 1, 0])
+    TEST.run('gen 5 | map (x: (-x, x)) | sort',
+             expected_out=[(-4, 4), (-3, 3), (-2, 2), (-1, 1), (0, 0)])
+    TEST.run('((1, "a", 2, "b")) | expand | sort',
+             expected_err="'<' not supported between instances of 'str' and 'int'")
     # Bug 10
     TEST.run('sort', expected_out=[])
     # Bug 101
@@ -403,33 +408,35 @@ def test_unique():
              expected_out=[0, 1, 2, 3])
     TEST.run('gen 10 | map (x: x % 3) | unique',
              expected_out=[0, 1, 2])
+    TEST.run('gen 3 | (x: (x//2, [x//2])) | unique',
+             expected_err='not hashable')
 
 
 def test_window():
     TEST.run('gen 10 | window (x: False)',
-             expected_out=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
+             expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)])
     TEST.run('gen 10 | window (x: True)',
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run('gen 10 | window -o 1',
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run('gen 10 | window -o 3',
-             expected_out=[[0, 1, 2],
-                           [1, 2, 3],
-                           [2, 3, 4],
-                           [3, 4, 5],
-                           [4, 5, 6],
-                           [5, 6, 7],
-                           [6, 7, 8],
-                           [7, 8, 9],
-                           [8, 9, None],
-                           [9, None, None]])
+             expected_out=[(0, 1, 2),
+                           (1, 2, 3),
+                           (2, 3, 4),
+                           (3, 4, 5),
+                           (4, 5, 6),
+                           (5, 6, 7),
+                           (6, 7, 8),
+                           (7, 8, 9),
+                           (8, 9, None),
+                           (9, None, None)])
     TEST.run('gen 10 | window -d 1',
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run('gen 10 | window -d 3',
-             expected_out=[[0, 1, 2],
-                           [3, 4, 5],
-                           [6, 7, 8],
-                           [9, None, None]])
+             expected_out=[(0, 1, 2),
+                           (3, 4, 5),
+                           (6, 7, 8),
+                           (9, None, None)])
     # Negative-test args
     TEST.run('gen 10 | window -d 33 -o 22',
              expected_err='Must specify exactly one')
@@ -440,16 +447,16 @@ def test_window():
     # Function-valued args
     TEST.run('THREE = (3)')
     TEST.run('gen 10 | window -o (THREE)',
-             expected_out=[[0, 1, 2],
-                           [1, 2, 3],
-                           [2, 3, 4],
-                           [3, 4, 5],
-                           [4, 5, 6],
-                           [5, 6, 7],
-                           [6, 7, 8],
-                           [7, 8, 9],
-                           [8, 9, None],
-                           [9, None, None]])
+             expected_out=[(0, 1, 2),
+                           (1, 2, 3),
+                           (2, 3, 4),
+                           (3, 4, 5),
+                           (4, 5, 6),
+                           (5, 6, 7),
+                           (6, 7, 8),
+                           (7, 8, 9),
+                           (8, 9, None),
+                           (9, None, None)])
     TEST.run('gen 10 | window -d (THREE-2)',
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
@@ -601,6 +608,13 @@ def test_join():
     TEST.run('get = [f: (File(f).readlines()) | expand | map (x: eval(x))]')
     TEST.run('get /tmp/a.csv | join [get /tmp/b.csv]',
              expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200)])
+    # Handle non-hashable join keys
+    TEST.run('gen 3 | (x: ((x,), x)) | join [gen 3 | (x: ((x,), x*100))]',
+             expected_out=[((0,), 0, 0), ((1,), 1, 100), ((2,), 2, 200)])
+    TEST.run('gen 3 | (x: ([x], x)) | join [gen 3 | (x: ((x,), x*100))]',
+             expected_err='not hashable')
+    TEST.run('gen 3 | (x: ((x,), x)) | join [gen 3 | (x: ([x], x*100))]',
+             expected_err='not hashable')
 
 
 def test_comment():
@@ -1034,6 +1048,13 @@ def test_intersect():
              expected_out=[(2, 200), (2, 200),
                            (3, 300), (3, 300), (3, 300),
                            (4, 400), (4, 400), (4, 400)])
+    # Lists cannot be hashed
+    TEST.run('gen 2 | (x: (x, (x, x))) | intersect [gen 2 1 | (x: (x, (x, x)))]',
+             expected_out=[(1, (1, 1))])
+    TEST.run('gen 2 | (x: (x, [x, x])) | intersect [gen 2 1 | (x: (x, (x, x)))]',
+             expected_err='not hashable')
+    TEST.run('gen 2 | (x: (x, (x, x))) | intersect [gen 2 1 | (x: (x, [x, x]))]',
+             expected_err='not hashable')
 
 
 def test_union():
@@ -1085,6 +1106,13 @@ def test_difference():
              '                     expand] | '
              'sort',
              expected_out=[(4, 400), (5, 500), (5, 500), (6, 600), (6, 600), (6, 600)])
+    # Lists aren't hashable
+    TEST.run('gen 3 | (x: (x, (x, x))) | difference [gen 2 | (x: (x, (x, x)))]',
+             expected_out=[(2, (2, 2))])
+    TEST.run('gen 3 | (x: (x, [x, x])) | difference [gen 2 | (x: (x, (x, x)))]',
+             expected_err='not hashable')
+    TEST.run('gen 3 | (x: (x, (x, x))) | difference [gen 2 | (x: (x, [x, x]))]',
+             expected_err='not hashable')
 
 
 def test_args():
@@ -1159,7 +1187,7 @@ def test_args():
              expected_err='the pipeline must have a single parameter')
     # Bug 94
     TEST.run('gen 4 1 | args [n: gen (n)] | window (x: x == 0)',
-             expected_out=[0, [0, 1], [0, 1, 2], [0, 1, 2, 3]])
+             expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
     # Bug 116
     TEST.run('g = [n: gen (n)]')
     TEST.run('gen 3 1 | args [n: g (n)]',
