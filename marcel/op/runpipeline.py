@@ -62,15 +62,16 @@ class RunPipeline(marcel.core.Op):
     # Op
 
     def run(self):
-        self.receive(None)
+        self.env().vars().push_scope(self.pipeline_args())
+        try:
+            self.pipeline.run()
+        finally:
+            self.env().vars().pop_scope()
 
     def receive(self, x):
         self.env().vars().push_scope(self.pipeline_args())
         try:
-            if x is None:
-                self.pipeline.run()
-            else:
-                self.pipeline.receive(x)
+            self.pipeline.receive(x)
         finally:
             self.env().vars().pop_scope()
 
