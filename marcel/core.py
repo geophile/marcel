@@ -149,15 +149,15 @@ class Op(AbstractOp):
             args_description = None if len(function_input) == 0 else ', '.join(function_input)
             self.fatal_error(args_description, str(e))
 
-    # This function is performance-critical, so the assertion is commented out,
+    # This function is performance-critical, so assertions are commented out,
     # and util.wrap_op_input is inlined.
     def receive_input(self, x):
+        # assert x is not None
         # assert not isinstance(x, Error)
         self._env.current_op = self
         try:
             self._count += 1
-            self.receive(None if x is None else
-                         x if type(x) in (tuple, list) else
+            self.receive(x if type(x) in (tuple, list) else
                          (x,))
         except marcel.exception.KillAndResumeException as e:
             self.receive_error(Error(e))

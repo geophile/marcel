@@ -1036,10 +1036,19 @@ def test_bug_136():
              expected_out=[615])
 
 
+def test_bug_10():
+    TEST.run(lambda: run(sort()), expected_err='cannot be the first operator in a pipeline')
+    TEST.run(lambda: run(unique()), expected_err='cannot be the first operator in a pipeline')
+    TEST.run(lambda: run(window(overlap=2)), expected_err='cannot be the first operator in a pipeline')
+    TEST.run(lambda: run(map(lambda: 3)), expected_out=[3])
+    TEST.run(lambda: run(args(lambda x: gen(3))), expected_err='cannot be the first operator in a pipeline')
+
+
 # For bugs that aren't specific to a single op.
 def test_bugs():
     test_bug_126()
     test_bug_136()
+    test_bug_10()
 
 
 def main_stable():

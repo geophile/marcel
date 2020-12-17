@@ -340,21 +340,3 @@ Output:
     COLOR_SCHEME.file_link = Color(4, 2, 0, BOLD)
     COLOR_SCHEME.file_executable = Color(0, 4, 0, BOLD)
     ...
-
-
-----------------------------------------------------------------------
-
-REOPENED
-
-10. sort all by itself produces None as output
-
-This seems wrong:
-
-     M jao@cheese:~/git/marcel$ sort
-     None
-
-....................
-
-Fixed for sort, but a more systematic fix is needed. Also affects
-unique, window, probably others.
-

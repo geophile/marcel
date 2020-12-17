@@ -181,6 +181,32 @@ map: error: argument function: not a valid function
 
 - There shouldn't be a stack, just an error message.
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+10. sort all by itself produces None as output
+
+This seems wrong:
+
+     M jao@cheese:~/git/marcel$ sort
+     None
+
+....................
+
+Fixed for sort, but a more systematic fix is needed. Also affects
+unique, window, probably others.
+
+....................
+
+Op:
+
+- receive: For actually receiving something, input should not be None.
+
+- run: For the first op in a pipeline, when there is no
+  input. (E.g. runpipeline first op might receive input).
+
 ----------------------------------------------------------------------
 
 FIXED
