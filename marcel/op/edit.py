@@ -69,7 +69,7 @@ class Edit(marcel.core.Op):
                 'Specify editor in the EDITOR environment variable')
         _, self.tmp_file = tempfile.mkstemp(text=True)
 
-    def receive(self, _):
+    def run(self):
         # Remove the edit command from history
         readline.remove_history_item(readline.get_current_history_length() - 1)
         if self.n is None:

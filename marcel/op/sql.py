@@ -149,6 +149,9 @@ class Sql(marcel.core.Op):
             self.connection.set_autocommit(True)
         self.delegate = self.classify_statement()(self.connection, self)
 
+    def run(self):
+        self.receive(None)
+
     def receive(self, x):
         try:
             self.delegate.receive(x)

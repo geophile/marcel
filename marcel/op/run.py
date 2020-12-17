@@ -72,7 +72,7 @@ class Run(marcel.core.Op):
         elif self.expected_args == 0 and self.n is not None:
             raise marcel.exception.KillCommandException('No arguments permitted after !!')
 
-    def receive(self, _):
+    def run(self):
         # Remove the run command from history
         readline.remove_history_item(readline.get_current_history_length() - 1)
         if self.n is None:

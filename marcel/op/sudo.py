@@ -91,7 +91,7 @@ class Sudo(marcel.core.Op):
 
     # Op
 
-    def receive(self, _):
+    def run(self):
         # Start the remote process
         command = ' '.join(['sudo'] + self.args + ['farcel.py'])
         self.process = subprocess.Popen(command,

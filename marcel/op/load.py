@@ -109,7 +109,7 @@ class Load(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'{self.picklefile} is not a Reservoir.')
         self.reader = iter(self.picklefile)
 
-    def receive(self, _):
+    def run(self):
         try:
             while True:
                 self.send(next(self.reader))

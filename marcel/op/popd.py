@@ -47,7 +47,7 @@ class Popd(marcel.core.Op):
 
     # AbstractOp
 
-    def receive(self, _):
+    def run(self):
         try:
             self.env().dir_state().popd()
         except PermissionError as e:

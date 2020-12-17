@@ -61,6 +61,9 @@ class RunPipeline(marcel.core.Op):
 
     # Op
 
+    def run(self):
+        self.receive(None)
+
     def receive(self, x):
         self.env().vars().push_scope(self.pipeline_args())
         try:

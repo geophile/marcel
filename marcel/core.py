@@ -165,6 +165,9 @@ class Op(AbstractOp):
     def pos(self):
         return self._count
 
+    def run(self):
+        raise marcel.exception.KillCommandException(f'{self} cannot be the first operator in a pipeline')
+
     def receive(self, x):
         pass
 
@@ -348,8 +351,15 @@ class Pipeline(AbstractOp):
 
     # Pipeline
 
+    def run(self):
+        self.ops[0].run()
+
     def receive(self, x):
-        self.ops[0].receive_input(x)
+        op = self.ops[0]
+        if x is None:
+            op.run()
+        else:
+            op.receive_input(x)
 
     def flush(self):
         self.ops[0].flush()
@@ -405,7 +415,7 @@ class Command:
         self.env.clear_changes()
         self.pipeline.setup()
         self.pipeline.set_env(self.env)
-        self.pipeline.receive(None)
+        self.pipeline.run()
         self.pipeline.flush()
         self.pipeline.cleanup()
         # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.

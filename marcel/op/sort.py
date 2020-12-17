@@ -68,11 +68,8 @@ class Sort(marcel.core.Op):
     # Op
 
     def receive(self, x):
-        # x is None occurs only for the first op in a pipeline. Sort shouldn't be used there, but whatever.
-        # Fixes bug 10.
-        if x is not None:
-            self.contents.append(x)
-    
+        self.contents.append(x)
+
     def flush(self):
         if self.contents is not None:
             try:

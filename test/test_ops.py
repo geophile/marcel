@@ -116,8 +116,6 @@ def test_sort():
              expected_out=[(-4, 4), (-3, 3), (-2, 2), (-1, 1), (0, 0)])
     TEST.run('((1, "a", 2, "b")) | expand | sort',
              expected_err="'<' not supported between instances of 'str' and 'int'")
-    # Bug 10
-    TEST.run('sort', expected_out=[])
     # Bug 101
     TEST.run('(', expected_err='Malformed Python expression')
 
@@ -1251,11 +1249,20 @@ def test_bug_152():
     # Same test case as for bug 126. Failure was different as code changes.
     pass
 
+
+def test_bug_10():
+    TEST.run('sort', expected_err='cannot be the first operator in a pipeline')
+    TEST.run('unique', expected_err='cannot be the first operator in a pipeline')
+    TEST.run('window -o 2', expected_err='cannot be the first operator in a pipeline')
+    TEST.run('map(3)', expected_out=[3])
+    TEST.run('args[x: gen(3)]', expected_err='cannot be the first operator in a pipeline')
+
 # For bugs that aren't specific to a single op.
 def test_bugs():
     test_bug_126()
     test_bug_136()
     test_bug_151()
+    test_bug_10()
 
 
 def main_stable():

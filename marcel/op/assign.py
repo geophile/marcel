@@ -55,7 +55,7 @@ class Assign(marcel.core.Op):
         if isinstance(self.value, marcel.function.Function):
             self.value.set_globals(env.vars())
 
-    def receive(self, _):
+    def run(self):
         self.env().setvar(self.var, self.value)
 
     # Op

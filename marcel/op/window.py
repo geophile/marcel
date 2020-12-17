@@ -134,10 +134,10 @@ class Window(marcel.core.Op):
         buffer = ['window(']
         if self.overlap:
             buffer.append('overlap=')
-            buffer.append(self.overlap)
+            buffer.append(str(self.overlap))
         if self.disjoint:
             buffer.append('disjoint=')
-            buffer.append(self.disjoint)
+            buffer.append(str(self.disjoint))
         if self.predicate:
             buffer.append('predicate=')
             buffer.append(self.predicate.source())
@@ -223,16 +223,17 @@ class OverlapWindow(WindowBase):
             self.op.send(tuple(self.window))
 
     def flush(self):
-        padding = None
-        if len(self.window) < self.op.n:
-            while len(self.window) < self.op.n:
+        if len(self.window) > 0:
+            padding = None
+            if len(self.window) < self.op.n:
+                while len(self.window) < self.op.n:
+                    self.window.append(padding)
+                self.op.send(tuple(self.window))
+            for i in range(self.op.n - 1):
+                self.window = self.window[1:]
                 self.window.append(padding)
-            self.op.send(tuple(self.window))
-        for i in range(self.op.n - 1):
-            self.window = self.window[1:]
-            self.window.append(padding)
-            self.op.send(tuple(self.window))
-        self.op.propagate_flush()
+                self.op.send(tuple(self.window))
+            self.op.propagate_flush()
 
 
 class DisjointWindow(WindowBase):

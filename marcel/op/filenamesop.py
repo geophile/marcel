@@ -80,7 +80,7 @@ class FilenamesOp(marcel.core.Op):
 
     # Op
 
-    def receive(self, _):
+    def run(self):
         for root in self.roots:
             self.visit(root, 0)
 

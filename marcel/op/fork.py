@@ -64,7 +64,7 @@ class Fork(marcel.core.Op):
 
     # Op
 
-    def receive(self, _):
+    def run(self):
         for worker in self.workers:
             worker.start_process()
         for worker in self.workers:
@@ -123,7 +123,7 @@ class ForkWorker:
                 self.pipeline.set_error_handler(self.op.owner.error_handler)
                 self.pipeline.setup()
                 self.pipeline.set_env(self.op.env())
-                self.pipeline.receive(None)
+                self.pipeline.run()
                 self.pipeline.flush()
                 self.pipeline.cleanup()
             except BaseException as e:

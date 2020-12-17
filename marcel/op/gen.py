@@ -92,7 +92,7 @@ class Gen(Op):
                 raise marcel.exception.KillCommandException(f'Padding {pad} too small.')
             self.format = '{:>0' + str(pad) + '}'
 
-    def receive(self, _):
+    def run(self):
         if self.count is None or self.count == 0:
             x = self.start
             while True:

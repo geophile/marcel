@@ -56,7 +56,7 @@ class Remote(marcel.core.Op):
     def setup(self):
         self.host = self.eval_function('host', str)
 
-    def receive(self, _):
+    def run(self):
         # Start the remote process
         command = ' '.join([
             'ssh',

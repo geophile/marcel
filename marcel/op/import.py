@@ -84,7 +84,7 @@ class Import(marcel.core.Op):
         if self.name and not self.name.isidentifier():
             raise marcel.exception.KillCommandException(f'name is not a valid identifier: {self.name}')
 
-    def receive(self, _):
+    def run(self):
         env = self.env()
         try:
             module = importlib.import_module(self.module)

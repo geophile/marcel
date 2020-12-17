@@ -153,7 +153,7 @@ class Ps(marcel.core.Op):
                                                                                 [self.command in x for x in p.cmdline],
                                                                                 False))
 
-    def receive(self, _):
+    def run(self):
         for proc in psutil.process_iter(PROC_ATTRS):
             process = marcel.object.process.Process(proc)
             if self.filter(process):

@@ -60,7 +60,7 @@ class Pushd(marcel.core.Op):
         if self.directory is not None:
             self.directory = pathlib.Path(self.directory).expanduser()
 
-    def receive(self, _):
+    def run(self):
         try:
             self.env().dir_state().pushd(self.directory)
         except PermissionError as e:

@@ -57,7 +57,7 @@ class Delete(marcel.core.Op):
             if var not in self.env().namespace:
                 raise marcel.exception.KillCommandException(f'Variable {var} is not defined.')
 
-    def receive(self, _):
+    def run(self):
         for var in self.vars:
             self.env().delvar(var)
 

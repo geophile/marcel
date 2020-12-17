@@ -81,6 +81,9 @@ class Bash(marcel.core.Op):
                 self.interactive = True
             self.runner = Interactive(self) if self.interactive else NonInteractive(self)
 
+    def run(self):
+        self.receive(None)
+
     def receive(self, x):
         self.runner.receive(x)
 

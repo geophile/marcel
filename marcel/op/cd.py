@@ -56,7 +56,7 @@ class Cd(marcel.core.Op):
     def setup(self,):
         self.directory = pathlib.Path(self.directory)
 
-    def receive(self, _):
+    def run(self):
         try:
             self.env().dir_state().cd(self.directory)
         except PermissionError as e:

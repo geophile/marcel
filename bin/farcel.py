@@ -30,7 +30,7 @@ import marcel.version
 
 
 CONFIG_FILENAME = '.marcel.py'
-TRACE = marcel.util.Trace('/tmp/farcel.log')
+TRACE = marcel.util.Trace('/tmp/farcel.log', enabled=True)
 
 
 class PickleOutput(marcel.core.Op):
@@ -73,7 +73,7 @@ class PipelineRunner(threading.Thread):
             TRACE.write(f'PipelineRunner: About to setup {self.pipeline}')
             self.pipeline.setup()
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
-            self.pipeline.first_op().receive_input(None)
+            self.pipeline.first_op().run()
             self.pipeline.flush()
         except BaseException as e:
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')

@@ -51,7 +51,7 @@ class Dirs(marcel.core.Op):
 
     # AbstractOp
 
-    def receive(self, _):
+    def run(self):
         if self.clear:
             self.env().dir_state().reset_dir_stack()
         for dir in self.env().dir_state().dirs():

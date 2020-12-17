@@ -69,7 +69,7 @@ class History(marcel.core.Op):
 
     # AbstractOp
 
-    def receive(self, _):
+    def run(self):
         history = self.env().reader.history()
         selected = []
         for i in range(len(history)):

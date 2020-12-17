@@ -109,7 +109,7 @@ class Env(marcel.core.Op):
             self.config = True
             self.session = True
 
-    def receive(self, _):
+    def run(self):
         builtin_symbols = self.env().builtin_symbols
         config_symbols = self.env().config_symbols
         for key, value in sorted(self.env().vars().items()):
