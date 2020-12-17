@@ -185,17 +185,6 @@ map: error: argument function: not a valid function
 
 FIXED
 
-10. sort all by itself produces None as output
-
-This seems wrong:
-
-     M jao@cheese:~/git/marcel$ sort
-     None
-
-----------------------------------------------------------------------
-
-FIXED
-
 11. ls () works?!
 
 M jao@cheese:~/git/marcel$ ls ()

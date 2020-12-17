@@ -53,7 +53,7 @@ class Sort(marcel.core.Op):
         self.contents = None
 
     def __repr__(self):
-        return 'sort'
+        return f'sort({self.key})' if self.key else 'sort()'
 
     # AbstractOp
     
