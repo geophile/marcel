@@ -1,4 +1,4 @@
-- Complete Python string parsing
+1- Complete Python string parsing
 
 - Complete shell string parsing (termination on things other than EOL
   and whiteapce).
@@ -46,10 +46,6 @@ subprocess.Popen? I.e., not waiting for op to complete.
 
 ----------------------------------------------------------------------
 
-Import bash env?
-
-----------------------------------------------------------------------
-
 Should help output go through more?
 
 ----------------------------------------------------------------------
@@ -66,10 +62,6 @@ History commands
 
 - If history were in the namespace, then edited_command wouldn't need
   special handling.
-
-----------------------------------------------------------------------
-
-timer: allow interval to be an int or real (#sec)
 
 ----------------------------------------------------------------------
 
@@ -91,13 +83,6 @@ test types other than int
 ----------------------------------------------------------------------
 
 sudo has a zillion args. How to express this on sudo()? **kwargs?
-
-----------------------------------------------------------------------
-
-todo: fork doc describes remote execution. Doesn't discuss @int, or
-@sequence. Does @sequence even work? Non-remote versions are kind of
-useless without more interesting kinds of sequences, and a way for
-each copy of the pipeline to access the label.
 
 ----------------------------------------------------------------------
 
@@ -126,11 +111,6 @@ This is broken: Op.op_name() evalutes to "op".
 
 ----------------------------------------------------------------------
 
-Import selected bash env variables? Can't see anything other than
-EDITOR right now.
-
-----------------------------------------------------------------------
-
 ps lines are often long enough to wrap. Should render_full leave off
 args? If so, then provide an args method.
 
@@ -140,13 +120,6 @@ What if there are two shells running at the same time -- how is
 history file maintained? Probably lose updates from the first one to
 exit. How should this be handled? To be safe, on exit, should read,
 append, write. Atomically.
-
-----------------------------------------------------------------------
-
-API has fork and remote, and they are bound bound to Fork. remote
-*intended* for remote execution. 
-
-Need both remote and fork ops?
 
 ----------------------------------------------------------------------
 

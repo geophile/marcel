@@ -51,7 +51,7 @@ The join is computed as follows:
 
 This generates the following output:
 
-{L,wrap=F,indent=4}
+{P,wrap=F,indent=4}
 (0, 0, 0)
 (1, -1, 1)
 (2, -2, 4)
@@ -59,7 +59,7 @@ This generates the following output:
 
 If the {r:--keep} flag were included, the output would have two additional rows:
 
-{L,wrap=F,indent=4}
+{P,wrap=F,indent=4}
 (0, 0, 0)
 (1, -1, 1)
 (2, -2, 4)

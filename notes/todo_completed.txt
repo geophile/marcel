@@ -784,3 +784,88 @@ https://stackoverflow.com/questions/64791428/why-are-ansi-escape-codes-not-displ
 
 Bash output gets buffered until EOF. Terrible for monitoring progress.
 
+
+----------------------------------------------------------------------
+
+Line numbers?
+
+This one keeps coming up. Handling the first element of a stream
+differently from the rest. I wrote this script to sum up some, but not
+all columns of a csv file (from nasuni consulting):
+
+    #!/usr/bin/python3
+    
+    import sys
+    
+    from marcel.api import *
+    
+    
+    def keep(acc, x):
+        return x
+    
+    
+    run(
+        read(sys.argv[1], csv=True) |
+        head(1) |
+        out(file=sys.argv[2],csv=True)
+    )
+    run(
+        read(sys.argv[1], csv=True) |
+        head(-1) |
+        map(lambda t, m, v, pk, d, h, rl, ul: (float(t),
+                                               int(m),
+                                               int(v) * 5000000000,
+                                               int(pk),
+                                               int(d),
+                                               int(h),
+                                               int(rl),
+                                               int(ul))) |
+        red(keep, r_plus, keep, r_plus, r_plus, r_plus, r_plus, r_plus, incremental=True) |
+        map(lambda *x: x[len(x)//2:]) |
+        out(append=sys.argv[2], csv=True)
+    )
+
+This reads the input file twice, once for the header (head(1)), once
+for the data (head(-1)). It would be nice to do everything in one pass, e.g.
+
+    read(sys.argv[1], csv=True) |
+    ifelse ???first line??? [out(file=sys.argv[2],csv=True)] | 
+    red ...
+
+How should the predicate be expressed?
+
+- Could write a predicate on the input line. In this case, detecting
+  the first (headings) line of a csv file. But hard to do it reliably,
+  and its different for every application.
+
+- Function or variable yielding row#?
+
+- Each op could have a counter.
+
+Profiling 5 runs of: run(gen(1000000) | map(lambda x: -x) | select(lambda x: False))
+Measured msec.
+
+Without counter:       1963 1987 1884
+With counter:          2423 2352 2566
+_env instead of env(): 2096 2229 2195
+optimized*:            2290 2199 2239
+                       2303 2260 2181
+
+The counter is REALLY EXPENSIVE!
+
+* Micro-optimization of receive_input
+
+----------------------------------------------------------------------
+
+Import bash env
+
+----------------------------------------------------------------------
+
+timer: allow interval to be an int or real (#sec)
+
+----------------------------------------------------------------------
+
+todo: fork doc describes remote execution. Doesn't discuss @int, or
+@sequence. Does @sequence even work? Non-remote versions are kind of
+useless without more interesting kinds of sequences, and a way for
+each copy of the pipeline to access the label.

@@ -418,7 +418,16 @@ class Paragraph:
                                            subsequent_indent=' ' * self.paragraph_markup.indent2)
             self.wrapped = '\n'.join(wrapper.wrap(self.plaintext))
         else:
-            self.wrapped = ' ' * self.paragraph_markup.indent1 + self.plaintext
+            lines = self.plaintext.split('\n')
+            buffer = []
+            indent = ' ' * self.paragraph_markup.indent1
+            first = True
+            for line in lines:
+                buffer.append(indent + line)
+                if first:
+                    indent = ' ' * self.paragraph_markup.indent2
+                    first = False
+            self.wrapped = '\n'.join(buffer)
 
     def trim_lines_to_be_wrapped(self):
         trimmed = []

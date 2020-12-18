@@ -340,3 +340,5 @@ Output:
     COLOR_SCHEME.file_link = Color(4, 2, 0, BOLD)
     COLOR_SCHEME.file_executable = Color(0, 4, 0, BOLD)
     ...
+
+See also output from "help join".

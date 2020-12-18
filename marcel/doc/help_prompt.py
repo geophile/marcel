@@ -19,15 +19,16 @@ You can customize the prompt by assigning to the {r:PROMPT}
 environment variable, 
 in your configuration script, (run
 {n:help configuration} for more information on configuration). For example:
+
 {p,wrap=F,indent=4}
 PROMPT = [
-    COLOR_RED_BOLD,
+    Color(5, 0, 0, BOLD),
     'M ',
     Color(1, 2, 4, BOLD),
     USER,
     '@',
     HOST,
-    COLOR_WHITE,
+    Color(5, 5, 5),
     ':',
     Color(0, 3, 3, BOLD),
     lambda: ('~' + PWD[len(HOME):]) if PWD.startswith(HOME) else PWD,
@@ -45,8 +46,7 @@ Notes:
 {L}- The value assigned to {r:PROMPT} is a list containing colors, strings, and functions
    evaluating to colors or strings. A color is in effect for all following strings, until
    a different color is specified. (Run {n:help color} for more information on colors.)
-{L}- {r:COLOR_RED_BOLD} has been defined previously, and is used to establish a color.
-{L}- {r:'M '}: This string is displayed using the current color, {r:COLOR_RED_BOLD}.
+{L}- {r:'M '}: This string is displayed using the current color, {r:Color(5, 0, 0, BOLD)}, (boldface red).
 {L}- {r:Color(0, 2, 1, BOLD)}: Establishes a new color.
 {L}- {r:USER}, {r:HOST}, {r:HOME}, {r:PWD} are variables initialized by marcel representing,
    respectively, the current username, the current hostname, the user's home directory,
@@ -66,7 +66,7 @@ is used, e.g.
 
 {p,wrap=F,indent=4}
 PROMPT_CONTINUATION = [
-    COLOR_RED_BOLD,
+    Color(5, 0, 0, BOLD),
     'M ',
     Color(3, 4, 0, BOLD),
     '+$    '
