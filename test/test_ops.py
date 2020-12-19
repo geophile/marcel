@@ -1261,6 +1261,7 @@ def test_bug_10():
 def test_bug_154():
     TEST.reset_environment()
     TEST.run('gen 3 > x')
+    TEST.run('x >> (y: -y)', expected_err='Append not permitted')
     TEST.run('x > (y: -y)', expected_out=[0, -1, -2])
 
 

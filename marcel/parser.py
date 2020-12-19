@@ -879,6 +879,8 @@ class Parser:
                     op_sequence = [load_op, store_op]
                 elif self.next_token(Expression):
                     # map is implied
+                    if arrow_token.is_append():
+                        raise SyntaxError(arrow_token, 'Append not permitted here.')
                     map_op = self.map_op(self.token)
                     op_sequence = [load_op, map_op]
                 else:

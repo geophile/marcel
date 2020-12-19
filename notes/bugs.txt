@@ -319,3 +319,21 @@ drwxrwxr-x   jao    jao        4096   2020 Nov 19 13:49:27   .idea
 -rw-rw-r--   jao    jao        2845   2020 Nov 19 12:40:01   notes.txt
 -rw-rw-r--   jao    jao        2446   2020 Nov 19 12:52:23   schema.sql
 drwxrwxr-x   jao    jao        4096   2020 Nov 19 11:27:25   venv
+
+----------------------------------------------------------------------
+
+155. This shouldn't work    
+
+    M 0.12.3 jao@cheese ~/git/marcel/test$ gen 3 > x
+
+This is correct behavior:
+
+    M 0.12.3 jao@cheese ~/git/marcel/test$ x >> map (x: -x)
+    Parsing error at position 2 of "...x >> map (x: -x)...": Append not permitted here.
+
+This is not:
+
+    M 0.12.3 jao@cheese ~/git/marcel/test$ x >> (x: -x)
+    0
+    -1
+    -2
