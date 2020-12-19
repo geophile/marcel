@@ -1257,12 +1257,20 @@ def test_bug_10():
     TEST.run('map(3)', expected_out=[3])
     TEST.run('args[x: gen(3)]', expected_err='cannot be the first operator in a pipeline')
 
+
+def test_bug_154():
+    TEST.reset_environment()
+    TEST.run('gen 3 > x')
+    TEST.run('x > (y: -y)', expected_out=[0, -1, -2])
+
+
 # For bugs that aren't specific to a single op.
 def test_bugs():
+    test_bug_10()
     test_bug_126()
     test_bug_136()
     test_bug_151()
-    test_bug_10()
+    test_bug_154()
 
 
 def main_stable():

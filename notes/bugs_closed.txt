@@ -2978,6 +2978,31 @@ This was caused by running "marcel" as the last command in .bashrc.
 
 FIXED
 
+150. Help wrapping is broken
+
+Spec:
+
+    {p,wrap=F,indent=4}
+    COLOR_SCHEME.file_file = COLOR_WHITE_BOLD
+    COLOR_SCHEME.file_dir = Color(0, 2, 3, BOLD)
+    COLOR_SCHEME.file_link = Color(4, 2, 0, BOLD)
+    COLOR_SCHEME.file_executable = Color(0, 4, 0, BOLD)
+    ...
+
+Output:
+
+        COLOR_SCHEME.file_file = COLOR_WHITE_BOLD
+    COLOR_SCHEME.file_dir = Color(0, 2, 3, BOLD)
+    COLOR_SCHEME.file_link = Color(4, 2, 0, BOLD)
+    COLOR_SCHEME.file_executable = Color(0, 4, 0, BOLD)
+    ...
+
+See also output from "help join".
+
+----------------------------------------------------------------------
+
+FIXED
+
 151. Sort done by pipeline-valued arg not working
 
 Define this: byt = [sort (f: f.mtime)]
@@ -3069,3 +3094,31 @@ It's returning None:
 
     M 0.12.0 jao@cheese ~/git/marcel/test$ gen 3 | select (x: False) | red count
     None
+
+----------------------------------------------------------------------
+
+FIXED
+
+154. var > (x: ...) crashes
+
+    M 0.12.3 jao@cheese ~$ gen 3 > x
+    M 0.12.3 jao@cheese ~$ x > (y: -y)
+    Traceback (most recent call last):
+      File "/usr/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+        return _run_code(code, main_globals, None,
+      File "/usr/lib/python3.8/runpy.py", line 87, in _run_code
+        exec(code, run_globals)
+      File "/home/jao/git/marcel/marcel/main.py", line 310, in <module>
+        MAIN.run()
+      File "/home/jao/git/marcel/marcel/main.py", line 134, in run
+        self.run_command(self.input)
+      File "/home/jao/git/marcel/marcel/main.py", line 146, in run_command
+        pipeline = parser.parse()
+      File "/home/jao/git/marcel/marcel/parser.py", line 805, in parse
+        return self.command()
+      File "/home/jao/git/marcel/marcel/parser.py", line 813, in command
+        command = self.pipeline(None)
+      File "/home/jao/git/marcel/marcel/parser.py", line 885, in pipeline
+        assert False
+    AssertionError
+    

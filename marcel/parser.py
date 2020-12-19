@@ -877,6 +877,10 @@ class Parser:
                     # var > var
                     store_op = self.store_op(self.token, arrow_token.is_append())
                     op_sequence = [load_op, store_op]
+                elif self.next_token(Expression):
+                    # map is implied
+                    map_op = self.map_op(self.token)
+                    op_sequence = [load_op, map_op]
                 else:
                     assert False
             else:
@@ -923,6 +927,10 @@ class Parser:
     @staticmethod
     def store_op(var, append):
         return Op('store'), ['--append', var] if append else [var]
+
+    @staticmethod
+    def map_op(expr):
+        return Op('map'), [expr]
 
     def op_sequence(self):
         op_args = [self.op_args()]
