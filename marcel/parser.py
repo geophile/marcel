@@ -42,7 +42,9 @@ class SyntaxError(marcel.exception.KillCommandException):
             snippet_start = max(token_start - SyntaxError.SNIPPET_SIZE, 0)
             snippet_end = max(token_start + SyntaxError.SNIPPET_SIZE + 1, len(token_text))
             snippet = token_text[snippet_start:snippet_end]
-            return f'Parsing error at position {token_start - snippet_start} of "...{snippet}...": {self.message}'
+            if snippet_start > 0:
+                snippet = '...' + snippet
+            return f'Parsing error at position {token_start - snippet_start} of "{snippet}...": {self.message}'
 
 
 class PrematureEndError(SyntaxError):
@@ -78,6 +80,7 @@ class EmptyCommand(marcel.exception.KillCommandException):
 # Tokens
 
 class Source:
+
     def __init__(self, text, position=0):
         self.text = text
         self.start = position
@@ -113,6 +116,7 @@ class Source:
 
 
 class Token(Source):
+
     # Special characters that need to be escaped for python strings
     ESCAPABLE = '''\\\'\"\a\b\f\n\r\t\v'''
     SINGLE_QUOTE = "'"
@@ -130,11 +134,10 @@ class Token(Source):
     COMMENT = '#'
     COMMA = ','
     COLON = ':'
-    SHORT_ARROW = '>'
-    SHORT_ARROW_2 = '>>'
-    LONG_ARROW = '->'
+    ARROW = '>'
+    ARROW_2 = '>>'
     LONG_ARROW_2 = '->>'
-    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON, SHORT_ARROW, SHORT_ARROW_2]
+    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON, ARROW, ARROW_2]
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position)
@@ -176,10 +179,7 @@ class Token(Source):
     def is_colon(self):
         return False
 
-    def is_short_arrow(self):
-        return False
-
-    def is_long_arrow(self):
+    def is_arrow(self):
         return False
 
     def is_lexer_failure(self):
@@ -528,14 +528,14 @@ class Arrow(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous, symbol):
         super().__init__(text, position, adjacent_to_previous, symbol)
-        assert symbol in (Token.SHORT_ARROW, Token.SHORT_ARROW_2)
+        assert symbol in (Token.ARROW, Token.ARROW_2)
         self.end += len(symbol) - 1  # Symbol.__init__ already added one
 
-    def is_short_arrow(self):
+    def is_arrow(self):
         return True
 
     def is_append(self):
-        return self.symbol == Token.SHORT_ARROW_2
+        return self.symbol == Token.ARROW_2
 
 
 class ImpliedMap(Token):
@@ -613,10 +613,10 @@ class Lexer(Source):
                 token = Colon(self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.COMMENT):
                 return None  # Ignore the rest of the line
-            elif self.match(c, Token.SHORT_ARROW_2):
-                token = Arrow(self.text, self.end, adjacent_to_previous, Token.SHORT_ARROW_2)
-            elif self.match(c, Token.SHORT_ARROW):
-                token = Arrow(self.text, self.end, adjacent_to_previous, Token.SHORT_ARROW)
+            elif self.match(c, Token.ARROW_2):
+                token = Arrow(self.text, self.end, adjacent_to_previous, Token.ARROW_2)
+            elif self.match(c, Token.ARROW):
+                token = Arrow(self.text, self.end, adjacent_to_previous, Token.ARROW)
             else:
                 token = String(self.text, self.end, adjacent_to_previous)
                 if token.string in self.main.op_modules:
