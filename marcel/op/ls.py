@@ -94,6 +94,7 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
             depth = '1'
         else:
             depth = 'recursive'
+        buffer = [f'depth={depth}']
         include = ''
         if self.file:
             include += 'f'
@@ -101,8 +102,12 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
             include += 'd'
         if self.symlink:
             include += 's'
-        filenames = [str(p) for p in self.filenames] if self.filenames else '?'
-        return f'ls(depth={depth}, include={include}, filename={filenames})'
+        if len(include) > 0:
+            buffer.append(f'include={include}')
+        if self.filenames:
+            buffer.extend(self.filenames)
+        args = ','.join(buffer)
+        return f'ls({args})'
 
     # Op
 
