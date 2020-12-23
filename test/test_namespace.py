@@ -31,15 +31,15 @@ def test_namespace():
         fail()
     except KeyError:
         pass
-    check_match(ns.flattened(), {'a': 1, 'b': 2})
+    check_match(ns, {'a': 1, 'b': 2})
     ns.push_scope({'a': None, 'd': None, 'e': None})
-    check_match(ns.flattened(), {'a': None, 'b': 2, 'd': None, 'e': None})
+    check_match(ns, {'a': None, 'b': 2, 'd': None, 'e': None})
     ns['a'] = 10
     ns['b'] = 20
     ns['d'] = 30
-    check_match(ns.flattened(), {'a': 10, 'b': 20, 'd': 30, 'e': None})
+    check_match(ns, {'a': 10, 'b': 20, 'd': 30, 'e': None})
     ns.pop_scope()
-    check_match(ns.flattened(), {'a': 1, 'b': 20})
+    check_match(ns, {'a': 1, 'b': 20})
     # Shouldn't be able to pop the only frame
     try:
         ns.pop_scope()

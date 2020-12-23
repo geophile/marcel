@@ -332,14 +332,11 @@ class Environment:
         locals = {}
         # Execute the config file. Imported and newly-defined symbols go into locals, which
         # will then be added to self.namespace, for use in the execution of op functions.
-        # TODO: Why does this fail without flattening? BOLD is undefined, for example.
-        exec(config_source, self.namespace.flattened(), locals)
+        exec(config_source, self.namespace, locals)
         self.namespace.update(locals)
+        self.config_symbols = set(locals.keys())
+        #
         return config_path
-
-    def compute_config_symbols(self):
-        self.config_symbols = set(self.namespace.keys())
-        self.config_symbols = self.config_symbols.difference(self.builtin_symbols)
 
     def prompt_string(self, prompt_pieces):
         try:

@@ -215,7 +215,6 @@ class Main:
                 self.run_script(run_on_startup)
             else:
                 fail(f'RUN_ON_STARTUP must be a string')
-        self.env.compute_config_symbols()
 
     def run_script(self, script):
         with SameProcessMode(self, True):
