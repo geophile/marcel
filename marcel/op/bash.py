@@ -77,7 +77,10 @@ class Bash(marcel.core.Op):
         if len(self.args) == 0:
             self.runner = BashShell(self)
         else:
-            if self.args[0] in self.env().getvar('INTERACTIVE_EXECUTABLES'):
+            interactive_executables = self.env().getvar('INTERACTIVE_EXECUTABLES')
+            if (interactive_executables is not None and
+                    type(interactive_executables) in (tuple, list) and
+                    self.args[0] in interactive_executables):
                 self.interactive = True
             self.runner = Interactive(self) if self.interactive else NonInteractive(self)
 

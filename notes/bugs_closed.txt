@@ -3169,3 +3169,11 @@ FIXED
     M 0.12.3 jao@cheese ~$ touch ~/.marcel.py  
     M 0.12.3 jao@cheese ~$ env -c
     M 0.12.3 jao@cheese ~$ 
+
+----------------------------------------------------------------------
+
+FIXED
+
+157. Move INTERACTIVE_EXECUTABLES to .marcel.py
+
+Makes it more obvious how a user can modify it.

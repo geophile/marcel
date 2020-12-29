@@ -22,10 +22,10 @@
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/nestednamespace.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/nestednamespace.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_namespace.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_namespace.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/op/bash.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/bash.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/bugs_closed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs_closed.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/todo.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -429,7 +429,8 @@
       <workItem from="1607290808517" duration="9573000" />
       <workItem from="1607547759325" duration="43395000" />
       <workItem from="1607882806498" duration="34166000" />
-      <workItem from="1608651012327" duration="8302000" />
+      <workItem from="1608651012327" duration="13315000" />
+      <workItem from="1609201452916" duration="2338000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

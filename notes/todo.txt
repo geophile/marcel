@@ -300,3 +300,7 @@ ArgsParser, but there are some dependencies:
 - self.current_op: For function(). Need to revisit error handling
   (which is why f.set_op(self.current_op) is called), and perhaps get
   rid of this call.
+
+----------------------------------------------------------------------
+
+Tab completion for env vars.

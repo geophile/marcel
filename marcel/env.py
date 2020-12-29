@@ -77,6 +77,17 @@ DEFAULT_CONFIG = '''from marcel.builtin import *
 
 PROMPT = [lambda: PWD, ' $ ']
 PROMPT_CONTINUATION = [lambda: PWD, ' + ']
+
+INTERACTIVE_EXECUTABLES = [
+    'emacs',
+    'less',
+    'man',
+    'more',
+    'psql',
+    'top',
+    'vi',
+    'vim'
+]
 '''
 
 
@@ -161,17 +172,7 @@ class Environment:
     CONFIG_FILENAME = '.marcel.py'
     DEFAULT_PROMPT = f'M-{marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
-    INITIAL_INTERACTIVE_EXECUTABLES = {
-        'emacs',
-        'less',
-        'man',
-        'more',
-        'psql',
-        'top',
-        'vi',
-        'vim'
-    }
-    
+
     @staticmethod
     def new(config_file, old_namespace):
         env = Environment()
@@ -202,7 +203,6 @@ class Environment:
             # EXPERIMENT
             'pos': lambda: env.current_op.pos()
         })
-        env.initialize_interactive_executables(initial_namespace)
         if editor:
             initial_namespace['EDITOR'] = editor
         for key, value in marcel.builtin.__dict__.items():
@@ -335,7 +335,6 @@ class Environment:
         exec(config_source, self.namespace, locals)
         self.namespace.update(locals)
         self.config_symbols = set(locals.keys())
-        #
         return config_path
 
     def prompt_string(self, prompt_pieces):
@@ -363,13 +362,6 @@ class Environment:
         except Exception as e:
             print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)
             return Environment.DEFAULT_PROMPT
-
-    def initialize_interactive_executables(self, initial_namespace):
-        exes = []
-        for x in Environment.INITIAL_INTERACTIVE_EXECUTABLES:
-            if marcel.util.is_executable(x):
-                exes.append(x)
-        initial_namespace['INTERACTIVE_EXECUTABLES'] = exes
 
     def note_var_access(self, var, value):
         if not Environment.immutable(value):
