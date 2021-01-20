@@ -301,6 +301,9 @@ def test_expand():
     N = 1
     TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, (x * 10, x * 10 + 1))) | expand(lambda: N)),
              expected_out=[(0, 0), (0, 1), (1, 10), (1, 11), (2, 20), (2, 21)])
+    # Bug 158
+    TEST.run(lambda: run(gen(3, 1) | map(lambda x: [str(x * 111)] * x) | expand()),
+             expected_out=[111, 222, 222, 333, 333, 333])
 
 
 def test_head():
@@ -905,10 +908,10 @@ def test_args():
     TEST.run(test=lambda: run(gen(5) | args(lambda n: bash('echo', f'X{n}Y'))),
              expected_out=['X0Y', 'X1Y', 'X2Y', 'X3Y', 'X4Y'])
     # expand
-    TEST.run(test=lambda: run(gen(3) | args(lambda x: map(lambda: ("ab", "cd", "ef")) | expand (x))),
-             expected_out=[("a", "cd", "ef"), ("b", "cd", "ef"),
-                           ("ab", "c", "ef"), ("ab", "d", "ef"),
-                           ("ab", "cd", "e"), ("ab", "cd", "f")])
+    TEST.run(test=lambda: run(gen(3) | args(lambda x: map(lambda: ((1, 2), (3, 4), (5, 6))) | expand(x))),
+             expected_out=[(1, (3, 4), (5, 6)), (2, (3, 4), (5, 6)),
+                           ((1, 2), 3, (5, 6)), ((1, 2), 4, (5, 6)),
+                           ((1, 2), (3, 4), 5), ((1, 2), (3, 4), 6)])
     # sql
     TEST.run(test=lambda: run(sql("drop table if exists t") | select(lambda x: False)))
     TEST.run(test=lambda: run(sql("create table t(x int)") | select(lambda x: False)))

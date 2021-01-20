@@ -15,29 +15,25 @@
 
 HELP = '''
 If the marcel configuration file, {n:~/.marcel.py}, defines the variable 
-{r:LOAD_ON_STARTUP}, then the scripts specified by this variable will be run
-when marcel starts. The value of this variable can be a string identifying
-a script, or a list or tuple whose elements are such strings.
-
-The startup scripts can contain any marcel commands. Typically, then will 
-define variables that you would like to have available when using marcel.
+{r:LOAD_ON_STARTUP}, then the commands listed will be run
+when marcel starts. The value of this variable should be a string,
+with one command per line, (so probably a triple-quoted string).
 
 {b:Example}
 
 Suppose {n:~/.marcel.py} defines {r:LOAD_ON_STARTUP} as follows:
 
-{L,wrap=F}LOAD_ON_STARTUP = '~/.init.marcel'
+{p,indent=4,wrap=F}LOAD_ON_STARTUP = """
+ext = [e: select (f: f.suffix == '.' + e)]
+recent = [d: ls -fr | select (f: now() - f.mtime < days(float(d)))]
+"""
 
-And {r:~/.init.marcel} contains these commands:
+In your marcel session, you can now use the variables {r:ext} and {r:recent}.
 
-{p,wrap=F,indent=4}
-recent = [select (f: now() - f.mtime < days(1))]
-cat = [map (f: (f, f.readlines()) | expand 1]
-
-In your marcel session, you can now use the variables {r:recent} and {r:cat}.
+{L}- {r:ext} receives a stream of {n:File} objects, and outputs those whose extension matches
+the given extension, {r:e}. E.g. {n:ls -fr | ext py} explores the current directory
+recursively, and lists files with a {n:.py} extension.
 
 {L}- {r:recent} receives a stream of {n:File} objects, and outputs those that have been modified
-in the past day.
-{L}- {r:cat} receives a stream of {n:File} objects, and outputs (file name, line of file) tuples
-for each line in each {n:File}. (So it is similar to the Linux command by the same name.)
+in the previous {r:d} days.
 '''

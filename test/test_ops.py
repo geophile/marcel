@@ -303,6 +303,9 @@ def test_expand():
     TEST.run('N = (1)')
     TEST.run('gen 3 | map (x: (x, (x * 10, x * 10 + 1))) | expand (N)',
              expected_out=[(0, 0), (0, 1), (1, 10), (1, 11), (2, 20), (2, 21)])
+    # Bug 158
+    TEST.run('gen 3 1 | (x: [str(x * 111)] * x) | expand',
+             expected_out=[111, 222, 222, 333, 333, 333])
 
 
 def test_head():
@@ -1150,10 +1153,10 @@ def test_args():
     TEST.run('gen 5 | args [n: echo X(n)Y]',
              expected_out=['X0Y', 'X1Y', 'X2Y', 'X3Y', 'X4Y'])
     # expand
-    TEST.run('gen 3 | args [x: (("ab", "cd", "ef")) | expand (x)]',
-             expected_out=[("a", "cd", "ef"), ("b", "cd", "ef"),
-                           ("ab", "c", "ef"), ("ab", "d", "ef"),
-                           ("ab", "cd", "e"), ("ab", "cd", "f")])
+    TEST.run('gen 3 | args [x: (((1, 2), (3, 4), (5, 6))) | expand (x)]',
+             expected_out=[(1, (3, 4), (5, 6)), (2, (3, 4), (5, 6)),
+                           ((1, 2), 3, (5, 6)), ((1, 2), 4, (5, 6)),
+                           ((1, 2), (3, 4), 5), ((1, 2), (3, 4), 6)])
     # sql
     TEST.run('sql "drop table if exists t" | select (x: False)')
     TEST.run('sql "create table t(x int)" | select (x: False)')

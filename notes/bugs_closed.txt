@@ -3177,3 +3177,18 @@ FIXED
 157. Move INTERACTIVE_EXECUTABLES to .marcel.py
 
 Makes it more obvious how a user can modify it.
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+158. expand is awkward
+
+    sql "select zvals(b) from z" | (x: x.split(',')) | expand
+
+The query and split yields some items with a single string, others
+with a list. expand expands the strings, but does the right thing with
+the lists.
+
+And "expand 0" does this: can only concatenate list (not "tuple") to list
