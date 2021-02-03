@@ -3192,3 +3192,41 @@ with a list. expand expands the strings, but does the right thing with
 the lists.
 
 And "expand 0" does this: can only concatenate list (not "tuple") to list
+
+----------------------------------------------------------------------
+
+FIXED
+
+160. Piping shell output to grep crashes
+
+    M 0.12.5 jao@cheese ~/git/marcel$ ifconfig | grep inet
+            inet 127.0.0.1  netmask 255.0.0.0
+            inet6 ::1  prefixlen 128  scopeid 0x10<host>
+            inet 10.0.0.121  netmask 255.255.255.0  broadcast 10.0.0.255
+            inet6 2601:184:4602:2d10:364b:ead:f982:3e9d  prefixlen 64  scopeid 0x0<global>
+            inet6 2601:184:4602:2d10:70d2:9f19:6bb2:6d9c  prefixlen 64  scopeid 0x0<global>
+            inet6 2601:184:4602:2d10:9043:b18a:64a1:cf04  prefixlen 64  scopeid 0x0<global>
+            inet6 2601:184:4602:2d10:e2de:808a:a5b3:5484  prefixlen 64  scopeid 0x0<global>
+            inet6 2601:184:4602:2d10:cbd0:c8fb:1e72:f4fe  prefixlen 64  scopeid 0x0<global>
+            inet6 2601:184:4602:2d10:8c19:e680:8454:ad5  prefixlen 64  scopeid 0x0<global>
+            inet6 2601:184:4602:2d10:e2e4:ac84:5943:f1d6  prefixlen 64  scopeid 0x0<global>
+            inet6 2601:184:4602:2d10:280:a9b0:7f90:17cc  prefixlen 64  scopeid 0x0<global>
+            inet6 fe80::e640:6aeb:4e56:140  prefixlen 64  scopeid 0x20<link>
+            inet6 2601:184:4602:2d10:feb:7600:ae20:c9fe  prefixlen 64  scopeid 0x0<global>
+            inet6 2601:184:4602:2d10::7434  prefixlen 128  scopeid 0x0<global>
+    M 0.12.5 jao@cheese ~/git/marcel$ ifconfig | grep inet
+    Exception in thread Thread-2:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+        self.run()
+      File "/home/jao/git/marcel/marcel/op/bash.py", line 186, in run
+        op.send(ProcessOutputHandler.normalize_output(line))
+      File "/home/jao/git/marcel/marcel/core.py", line 129, in send
+        receiver.receive_input(x)
+      File "/home/jao/git/marcel/marcel/core.py", line 160, in receive_input
+        self.receive(x if type(x) in (tuple, list) else
+      File "/home/jao/git/marcel/marcel/op/bash.py", line 91, in receive
+        self.runner.receive(x)
+    AttributeError: 'NoneType' object has no attribute 'receive'
+
+ifconfig by itself works.

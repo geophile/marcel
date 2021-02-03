@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
+import os as _os
 
 import marcel.core as _core
 import marcel.exception as _exception
@@ -63,7 +63,7 @@ from marcel.op.window import window as _window
 from marcel.builtin import *
 from marcel.reduction import *
 
-_MAIN = _main.Main(os.getenv('MARCEL_CONFIG', default=None),
+_MAIN = _main.Main(_os.getenv('MARCEL_CONFIG', default=None),
                    same_process=True,
                    old_namespace=None)
 env = _MAIN.env

@@ -319,3 +319,13 @@ drwxrwxr-x   jao    jao        4096   2020 Nov 19 13:49:27   .idea
 -rw-rw-r--   jao    jao        2845   2020 Nov 19 12:40:01   notes.txt
 -rw-rw-r--   jao    jao        2446   2020 Nov 19 12:52:23   schema.sql
 drwxrwxr-x   jao    jao        4096   2020 Nov 19 11:27:25   venv
+
+----------------------------------------------------------------------
+
+159. sql query with string literal confuses the driver
+
+    M 0.12.5 jao@cheese ~/git/marcel$ sql "select * from s where s like '%a%'"
+    list index out of range
+
+Is the problem the %?
+

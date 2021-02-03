@@ -16,6 +16,7 @@
 import os
 import subprocess
 import threading
+import time
 
 import marcel.argsparser
 import marcel.core
@@ -60,10 +61,9 @@ class Bash(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.interactive = None
         self.args_arg = None
         self.args = None
-        self.runner = None
+        self.escape = None
         self.input = None
 
     def __repr__(self):
@@ -74,31 +74,36 @@ class Bash(marcel.core.Op):
     def setup(self):
         self.args = self.eval_function('args_arg')
         self.input = []
-        if len(self.args) == 0:
-            self.runner = BashShell(self)
-        else:
-            interactive_executables = self.env().getvar('INTERACTIVE_EXECUTABLES')
-            if (interactive_executables is not None and
-                    type(interactive_executables) in (tuple, list) and
-                    self.args[0] in interactive_executables):
-                self.interactive = True
-            self.runner = Interactive(self) if self.interactive else NonInteractive(self)
+        self.escape = (BashShell(self) if len(self.args) == 0 else
+                       Interactive(self) if self.env().is_interactive_executable(self.args[0]) else
+                       NonInteractive(self))
+
+    def set_env(self, env):
+        super().set_env(env)
+        self.escape.ensure_command_running()
+        
 
     def run(self):
         self.receive(None)
 
     def receive(self, x):
-        self.runner.receive(x)
+        self.escape.receive(x)
 
     def flush(self):
-        self.runner.flush()
+        self.escape.flush()
         self.propagate_flush()
+
+    def cleanup(self):
+        self.escape.cleanup()
 
 
 class Escape:
 
     def __init__(self, op):
         self.op = op
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.op})'
 
     def receive(self, _):
         assert False
@@ -114,18 +119,14 @@ class NonInteractive(Escape):
 
     def __init__(self, op):
         super().__init__(op)
-        self.process = subprocess.Popen(self.command(),
-                                        shell=True,
-                                        executable='/bin/bash',
-                                        stdin=subprocess.PIPE,
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.STDOUT,
-                                        universal_newlines=True,
-                                        preexec_fn=os.setsid)
-        self.out_handler = ProcessOutputHandler(self.process.stdout, op)
-        self.out_handler.start()
+        self.process = None
+        self.out_handler = None
+        # There is a race between receive() (from an upstream command's ProcessOutputHandler),
+        # and flush(), combing from Command execution.
+        self.lock = threading.Lock()
 
     def receive(self, x):
+        self.ensure_command_running()
         if x is not None:
             if len(x) == 1:
                 x = x[0]
@@ -133,9 +134,29 @@ class NonInteractive(Escape):
             self.process.stdin.write('\n')
 
     def flush(self):
+        self.ensure_command_running()
+        self.process.stdin.flush()
+
+    def cleanup(self):
         self.process.stdin.close()
-        while self.process.poll() is None:
+        while self.out_handler.is_alive():
             self.out_handler.join(0.1)
+
+    def ensure_command_running(self):
+        if self.process is None:
+            self.lock.acquire()
+            if self.process is None:
+                self.process = subprocess.Popen(self.command(),
+                                                shell=True,
+                                                executable='/bin/bash',
+                                                stdin=subprocess.PIPE,
+                                                stdout=subprocess.PIPE,
+                                                stderr=subprocess.STDOUT,
+                                                universal_newlines=True,
+                                                preexec_fn=os.setsid)
+                self.out_handler = ProcessOutputHandler(self.process.stdout, self.op)
+                self.out_handler.start()
+            self.lock.release()
 
 
 class Interactive(Escape):
@@ -151,7 +172,6 @@ class Interactive(Escape):
     def receive(self, _):
         self.process.wait()
         if self.process.returncode != 0:
-            print(f'Escaped command failed with exit code {self.process.returncode}: {" ".join(self.op.args)}')
             marcel.util.print_to_stderr(self.process.stderr, self.op.env())
 
 
@@ -167,7 +187,6 @@ class BashShell(Escape):
     def receive(self, _):
         self.process.wait()
         if self.process.returncode != 0:
-            print(f'Escaped command failed with exit code {self.process.returncode}: {" ".join(self.op.args)}')
             marcel.util.print_to_stderr(self.process.stderr, self.op.env())
 
 
@@ -177,6 +196,9 @@ class ProcessOutputHandler(threading.Thread):
         super().__init__()
         self.stream = stream
         self.op = op
+
+    def __repr__(self):
+        return f'ProcessOutputHandler for {str(self.op)}'
 
     def run(self):
         op = self.op
@@ -192,3 +214,4 @@ class ProcessOutputHandler(threading.Thread):
         if len(x[-1]) == 0:
             x = x[:-1]
         return x
+

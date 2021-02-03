@@ -304,3 +304,9 @@ ArgsParser, but there are some dependencies:
 ----------------------------------------------------------------------
 
 Tab completion for env vars.
+
+----------------------------------------------------------------------
+
+Can threading/multiprocessing (for fork) be replaced by async io?
+
+https://realpython.com/async-io-python/

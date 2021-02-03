@@ -309,6 +309,12 @@ class Environment:
     def set_color_scheme(self, color_scheme):
         self.setvar('COLOR_SCHEME', color_scheme)
 
+    def is_interactive_executable(self, x):
+        interactive_executables = self.getvar('INTERACTIVE_EXECUTABLES')
+        return (interactive_executables is not None and
+                type(interactive_executables) in (tuple, list) and
+                x in interactive_executables)
+
     # Remove Reservoirs, which can be arbitrarily large.
     def remotify(self):
         # Shallow copy suffices, except for the namespace which must be modified.
