@@ -21,7 +21,7 @@ import marcel.object.file
 HELP = '''
 {L}dirs [-c|--clear]
 
-{L,indent=4:28}{r:-c}, {r:--clear}              Clear the directory stack, and then place the current
+{L,indent=4:28}{r:-c}, {r:--clear}             Clear the directory stack, and then place the current
 directory on it. 
 
 Write the entries in the directory stack to the output stream, top first.

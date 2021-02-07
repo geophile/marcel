@@ -329,3 +329,17 @@ drwxrwxr-x   jao    jao        4096   2020 Nov 19 11:27:25   venv
 
 Is the problem the %?
 
+----------------------------------------------------------------------
+
+161. env -s is broken
+
+It is including items defined in config (e.g. byt, ext)
+
+    M 0.12.7 jao@cheese ~/git/marcel/test$ env -s
+    ('byt', [sort(lambda f: f.mtime)])
+    ('ext', [e: select(lambda f: f.suffix == '.' + e)])
+    ('grem', [pattern, files: read(depth=recursive,label=True, filename=?) | select(lambda f, l: pattern in l)])
+    ('loc', [ls(depth=0) | args([d: ls(depth=recursive,include=f) | runpipeline(ext ['py']) | map(lambda f: f.read().count('\n')) | red(functions=['+']) | map(lambda n: (d, n))])])
+    ('pi', 3.141592653589793)
+    ('rand', [n: gen(count=0, start=0) | map(lambda x: random.randint(0, int(n)-1))])
+    ('recent', [d: ls(depth=recursive,include=f) | select(lambda f: now() - f.mtime < days(float(d)))])

@@ -15,15 +15,15 @@
 
 HELP = '''
 If the marcel configuration file, {n:~/.marcel.py}, defines the variable 
-{r:LOAD_ON_STARTUP}, then the commands listed will be run
+{r:RUN_ON_STARTUP}, then the commands listed will be run
 when marcel starts. The value of this variable should be a string,
 with one command per line, (so probably a triple-quoted string).
 
 {b:Example}
 
-Suppose {n:~/.marcel.py} defines {r:LOAD_ON_STARTUP} as follows:
+Suppose {n:~/.marcel.py} defines {r:RUN_ON_STARTUP} as follows:
 
-{p,indent=4,wrap=F}LOAD_ON_STARTUP = """
+{p,indent=4,wrap=F}RUN_ON_STARTUP = """
 ext = [e: select (f: f.suffix == '.' + e)]
 recent = [d: ls -fr | select (f: now() - f.mtime < days(float(d)))]
 """

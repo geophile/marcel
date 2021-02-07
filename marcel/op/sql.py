@@ -39,7 +39,7 @@ runs in its own implicit transaction.
 {L,indent=4:28}{r:STATEMENT}               A SQL statement. Consistent with Python's DBAPI specification,
 parameters are indicated using %s.
 
-{L,indent=4:28}{r:ARG}                     A value to be bound to a variable in a SQL statement.
+{L,indent=4:28}{r:ARG}                     An expression whose value will be bound to a variable in a SQL statement.
 
 SQL statements may have parameters, which are indicated by %s. There are two ways in which values are bound to
 these arguments:

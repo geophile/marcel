@@ -78,11 +78,6 @@ class Bash(marcel.core.Op):
                        Interactive(self) if self.env().is_interactive_executable(self.args[0]) else
                        NonInteractive(self))
 
-    def set_env(self, env):
-        super().set_env(env)
-        self.escape.ensure_command_running()
-        
-
     def run(self):
         self.receive(None)
 
@@ -109,6 +104,9 @@ class Escape:
         assert False
 
     def flush(self):
+        pass
+
+    def cleanup(self):
         pass
 
     def command(self):
