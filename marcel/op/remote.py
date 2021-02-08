@@ -73,7 +73,7 @@ class Remote(marcel.core.Op):
                                         universal_newlines=False)
         buffer = io.BytesIO()
         pickler = dill.Pickler(buffer)
-        pickler.dump(self.env().remotify())
+        pickler.dump(self.env().without_reservoirs())
         pickler.dump(self.pipeline)
         buffer.seek(0)
         try:

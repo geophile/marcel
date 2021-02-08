@@ -316,11 +316,8 @@ class Environment:
                 x in interactive_executables)
 
     # Remove Reservoirs, which can be arbitrarily large.
-    def remotify(self):
-        # Shallow copy suffices, except for the namespace which must be modified.
+    def without_reservoirs(self):
         remote_env = marcel.util.copy(self)
-        # remote_env = self.shallow_copy()
-        # remote_env.namespace = remote_env.namespace.copy()
         for var, value in self.namespace.items():
             if type(value) is marcel.reservoir.Reservoir:
                 del remote_env.namespace[var]
