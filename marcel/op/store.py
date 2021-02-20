@@ -102,9 +102,14 @@ class Store(marcel.core.Op):
             # Interactive: string is a filename or environment variable name.
             if self.target.isidentifier():
                 self.picklefile = self.getvar(self.target)
-                if self.append and type(self.picklefile) is not marcel.reservoir.Reservoir:
-                    raise marcel.exception.KillCommandException(
-                        f'{self.target} is not usable as a reservoir, it stores a value of type {type(self.picklefile)}.')
+                if type(self.picklefile) is not marcel.reservoir.Reservoir:
+                    if self.append:
+                        raise marcel.exception.KillCommandException(
+                            f'{self.target} is not usable as a reservoir, '
+                            f'it stores a value of type {type(self.picklefile)}.')
+                    else:
+                        self.picklefile = marcel.reservoir.Reservoir(self.target)
+                        self.env().setvar(self.target, self.picklefile)
                 self.env().mark_possibly_changed(self.target)
             else:
                 self.picklefile = marcel.picklefile.PickleFile(self.target)

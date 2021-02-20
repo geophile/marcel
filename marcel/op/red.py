@@ -36,7 +36,7 @@ Each {r:FUNCTION} takes two inputs and produces one output.
 
 {b:Basic usage}
 
-Given a sequence of inputs such as {n:(1,), (2,), (3,)}, {r:red} can be used to find the sum:
+Given a sequence of inputs such as {n:1, 2, 3}, {r:red} can be used to find the sum:
 {p,wrap=F}
     ... | red +
 
@@ -83,7 +83,8 @@ The output would be:
 
 If the {r:-i} flag is specified, then one output tuple is generated for each input tuple;
 an output element contains the current accumulated values. The accumulator appears
-in the output element after the inputs. For example, if the input stream contains {n:(1,), (2,), (3,)},
+in the output element after the inputs. For example, if the input stream 
+contains {n:1, 2, 3},
 then the running total can be computed as follows:
 {p,wrap=F}
     ... | red -i + | ...

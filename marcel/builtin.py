@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import datetime
 from time import time as now
 
 from marcel.object.color import Color
@@ -42,6 +43,10 @@ def days(n):
 
 def remote(user, identity, host=None, hosts=None):
     return Cluster(user, identity, host, hosts)
+
+
+def epoch(year, month, day, hour=0, minute=0, sec=0, usec=0):
+    return datetime.datetime(year, month, day, hour, minute, sec, usec).timestamp()
 
 
 def database(driver, dbname, user, password=None, host=None, port=None):

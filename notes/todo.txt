@@ -310,3 +310,32 @@ Tab completion for env vars.
 Can threading/multiprocessing (for fork) be replaced by async io?
 
 https://realpython.com/async-io-python/
+
+And maybe for the bash op:
+
+- create_subprocess_exec
+- create_subprocess_shell
+
+----------------------------------------------------------------------
+
+Documentation for builtin functions
+
+----------------------------------------------------------------------
+
+Osh handled stdin:
+
+    osh ^ ...
+
+Need something like this for marcel.
+
+The read op (without a FILENAME) assumes that inputs are File objects,
+not a stream of text.
+
+What about connecting stdin to input stream? If nothing shows up, no
+harm. As long as we don't get stuck waiting forever.
+
+----------------------------------------------------------------------
+
+json
+
+https://cameronnokes.com/blog/working-with-json-in-bash-using-jq/

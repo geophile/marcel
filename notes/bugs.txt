@@ -343,3 +343,24 @@ It is including items defined in config (e.g. byt, ext)
     ('pi', 3.141592653589793)
     ('rand', [n: gen(count=0, start=0) | map(lambda x: random.randint(0, int(n)-1))])
     ('recent', [d: ls(depth=recursive,include=f) | select(lambda f: now() - f.mtime < days(float(d)))])
+----------------------------------------------------------------------
+
+163. Pickling error
+
+M 0.12.7 jao@cheese ~$ @acme [ df -h ]
+Traceback (most recent call last):
+  File "/usr/local/bin/farcel.py", line 177, in <module>
+    main()
+  File "/usr/local/bin/farcel.py", line 162, in main
+    signal_id = input.load()
+  File "/usr/local/lib/python3.8/site-packages/dill/_dill.py", line 472, in load
+    obj = StockUnpickler.load(self)
+_pickle.UnpicklingError: unpickling stack underflow
+M 0.12.7 jao@cheese ~$ @acme [ bash df -h ]
+Traceback (most recent call last):
+  File "/usr/local/bin/farcel.py", line 177, in <module>
+    main()
+  File "/usr/local/bin/farcel.py", line 162, in main
+    signal_id = input.load()
+  File "/usr/local/lib/python3.8/site-packages/dill/_dill.py", line 472, in load
+    obj = StockUnpickler.load(self)

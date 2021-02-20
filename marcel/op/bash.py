@@ -16,7 +16,6 @@
 import os
 import subprocess
 import threading
-import time
 
 import marcel.argsparser
 import marcel.core

@@ -3230,3 +3230,31 @@ FIXED
     AttributeError: 'NoneType' object has no attribute 'receive'
 
 ifconfig by itself works.
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+162. Crash on overwriting variable
+
+M 0.12.7 jao@cheese ~$ x = ([1, (4-2), 3])
+M 0.12.7 jao@cheese ~$ (x)
+[1, 2, 3]
+M 0.12.7 jao@cheese ~$ gen 10 > x
+Process Process-3:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 416, in execute
+    self.pipeline.setup()
+  File "/home/jao/git/marcel/marcel/core.py", line 346, in setup
+    op.setup()
+  File "/home/jao/git/marcel/marcel/op/store.py", line 116, in setup
+    self.writer = self.picklefile.writer(self.append)
+AttributeError: 'list' object has no attribute 'writer'
+

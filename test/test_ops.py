@@ -726,16 +726,14 @@ def test_store_load():
     TEST.run(test='gen 3 300 | store -a y',
              verification='load y',
              expected_out=[300, 301, 302])
-    # Bind the variable to something other than a reservoir and then append
-    TEST.run('x = (123)')
-    TEST.run(test='gen 3 200 | store -a x',
+    # Target is bound to something other than a reservoir
+    TEST.run('x = 1')
+    TEST.run(test='gen 3 | store x',
              verification='load x',
-             expected_err='not a Reservoir')
-    # Files
-    os.system('rm -rf /tmp/storeload.test')
-    TEST.run(test='gen 3 | store /tmp/storeload.test',
-             verification='load /tmp/storeload.test',
              expected_out=[0, 1, 2])
+    TEST.run('x = 1')
+    TEST.run(test='gen 3 | store -a x',
+             expected_err='not usable as a reservoir')
 
 
 def test_store_load_sugar():
