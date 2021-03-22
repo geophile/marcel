@@ -49,7 +49,7 @@ class JobOp(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'There is no job {self.jid}')
         self.job = job_control.job(jid=self.jid, pid=self.pid)
 
-    def receive(self, x):
+    def run(self):
         self.action()
 
     # Op

@@ -3258,3 +3258,14 @@ Traceback (most recent call last):
     self.writer = self.picklefile.writer(self.append)
 AttributeError: 'list' object has no attribute 'writer'
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+164. jobs is broken
+
+M 0.12.7 jao@cheese ~$ jobs
+jobs cannot be the first operator in a pipeline
+
+bg broken too.

@@ -64,7 +64,7 @@ public = [
 all = public + [
     'assign',
     'first',
-    'fork', 'asyncfork',
+    'fork',
     'gather',
     'remote',
     'runpipeline'

@@ -54,7 +54,7 @@ class Jobs(marcel.core.Op):
 
     # AbstractOp
     
-    def receive(self, x):
+    def run(self):
         job_id = 0
         for job in marcel.job.JobControl.only.jobs():
             # TODO: If job were a marcel.object, then it would have render_compact/full methods.
