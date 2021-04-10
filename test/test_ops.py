@@ -572,6 +572,10 @@ def test_assign():
     TEST.run('x = [(5)]')
     TEST.run(test='x',
              expected_out=[5])
+    # Bug 165
+    TEST.run('ls = abc')
+    TEST.run('(ls)',
+             expected_out=['abc'])
 
 
 def test_join():
@@ -1255,7 +1259,7 @@ def test_bug_10():
     TEST.run('sort', expected_err='cannot be the first operator in a pipeline')
     TEST.run('unique', expected_err='cannot be the first operator in a pipeline')
     TEST.run('window -o 2', expected_err='cannot be the first operator in a pipeline')
-    TEST.run('map(3)', expected_out=[3])
+    TEST.run('map (3)', expected_out=[3])
     TEST.run('args[x: gen(3)]', expected_err='cannot be the first operator in a pipeline')
 
 

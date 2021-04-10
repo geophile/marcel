@@ -329,7 +329,7 @@ class Expression(Token):
 
 class String(Token):
 
-    def __init__(self, text, position=None, adjacent_to_previous=False):
+    def __init__(self, op_modules, text, position=None, adjacent_to_previous=False):
         super().__init__(text, 0 if position is None else position, adjacent_to_previous)
         if position is None:
             # Text is fine as is.
@@ -339,6 +339,8 @@ class String(Token):
             # Text is from the input being parsed. Scan it to deal with escapes and quotes.
             self.string = None
             self.scan()
+        # op_modules is a dict, name -> OpModule
+        self.op_name = self.string if self.string in op_modules else None
 
     def value(self, parser):
         return self.string
@@ -346,8 +348,8 @@ class String(Token):
     def is_string(self):
         return True
 
-    def op_name(self):
-        return self.string
+    def is_op(self):
+        return self.op_name is not None
 
     def scan(self):
         quote = None
@@ -391,24 +393,6 @@ class String(Token):
             else:
                 chars.append(c)
         self.string = ''.join(chars)
-
-
-class Op(String):
-
-    def __init__(self, text, position=None, adjacent_to_previous=False):
-        super().__init__(text, 0 if position is None else position, adjacent_to_previous)
-
-    # Op is a subclass of String, so that the implementation of String can be inherited.
-    # But for classification of tokens, they should be considered as separate things,
-    # so is_string() is overridden to return False.
-    def is_string(self):
-        return False
-
-    def is_op(self):
-        return True
-
-    def op_name(self):
-        return self.string
 
 
 class Run(Token):
@@ -472,6 +456,7 @@ class Fork(Symbol):
     def is_op(self):
         return True
 
+    @property
     def op_name(self):
         return 'fork'
 
@@ -618,9 +603,7 @@ class Lexer(Source):
             elif self.match(c, Token.ARROW):
                 token = Arrow(self.text, self.end, adjacent_to_previous, Token.ARROW)
             else:
-                token = String(self.text, self.end, adjacent_to_previous)
-                if token.string in self.main.op_modules:
-                    token = Op(self.text, self.end, adjacent_to_previous)
+                token = String(self.main.op_modules, self.text, self.end, adjacent_to_previous)
             self.end = token.end
         return token
 
@@ -834,70 +817,73 @@ class Parser:
         pipeline = marcel.core.Pipeline()
         pipeline.set_parameters(parameters)
         self.current_pipelines.push(pipeline)
-        if self.next_token(Op, Arrow):
-            op_token = self.token
-            self.tab_completion_context.complete_disabled()
-            found_arrow = self.next_token(Arrow)
-            assert found_arrow
-            arrow_token = self.token
-            if self.pipeline_end():
-                # op >
-                raise SyntaxError(self.token, f'A variable must precede {arrow_token.value(self)}, '
-                                              f'not an operator ({self.token.op_name()})')
-            elif self.pipeline_end(1):
-                if self.next_token(String):
-                    # op > var
-                    op = (op_token, [])
-                    store_op = self.store_op(self.token, arrow_token.is_append())
-                    op_sequence = [op, store_op]
+
+        if self.next_token(String, Arrow):
+            if self.token.op_name:
+                op_token = self.token
+                self.tab_completion_context.complete_disabled()
+                found_arrow = self.next_token(Arrow)
+                assert found_arrow
+                arrow_token = self.token
+                if self.pipeline_end():
+                    # op >
+                    raise SyntaxError(self.token, f'A variable must precede {arrow_token.value(self)}, '
+                                                  f'not an operator ({self.token.op_name})')
+                elif self.pipeline_end(1):
+                    if self.next_token(String):
+                        # op > var
+                        op = (op_token, [])
+                        store_op = self.store_op(self.token, arrow_token.is_append())
+                        op_sequence = [op, store_op]
+                    else:
+                        raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value(self)}')
                 else:
                     raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value(self)}')
             else:
-                raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value(self)}')
-        elif self.next_token(String, Arrow):
-            self.tab_completion_context.complete_disabled()
-            load_op = self.load_op(self.token)
-            found_arrow = self.next_token(Arrow)
-            assert found_arrow
-            self.tab_completion_context.complete_disabled()
-            arrow_token = self.token
-            if self.pipeline_end():
-                # var >
-                if arrow_token.is_append():
-                    raise SyntaxError(arrow_token, 'Append not permitted here.')
-                op_sequence = [load_op]
-            elif self.pipeline_end(1):
-                if self.next_token(Op):
-                    # var > op
+                self.tab_completion_context.complete_disabled()
+                load_op = self.load_op(self.token)
+                found_arrow = self.next_token(Arrow)
+                assert found_arrow
+                self.tab_completion_context.complete_disabled()
+                arrow_token = self.token
+                if self.pipeline_end():
+                    # var >
                     if arrow_token.is_append():
                         raise SyntaxError(arrow_token, 'Append not permitted here.')
-                    op = (self.token, [])
-                    op_sequence = [load_op, op]
-                elif self.next_token(String):
-                    # var > var
-                    store_op = self.store_op(self.token, arrow_token.is_append())
-                    op_sequence = [load_op, store_op]
-                elif self.next_token(Expression):
-                    # map is implied
-                    if arrow_token.is_append():
-                        raise SyntaxError(arrow_token, 'Append not permitted here.')
-                    map_op = self.map_op(self.token)
-                    op_sequence = [load_op, map_op]
+                    op_sequence = [load_op]
+                elif self.pipeline_end(1):
+                    if self.next_token(String):
+                        if self.token.op_name:
+                            # var > op
+                            if arrow_token.is_append():
+                                raise SyntaxError(arrow_token, 'Append not permitted here.')
+                            op = (self.token, [])
+                            op_sequence = [load_op, op]
+                        else:
+                            # var > var
+                            store_op = self.store_op(self.token, arrow_token.is_append())
+                            op_sequence = [load_op, store_op]
+                    elif self.next_token(Expression):
+                        # map is implied
+                        if arrow_token.is_append():
+                            raise SyntaxError(arrow_token, 'Append not permitted here.')
+                        map_op = self.map_op(self.token)
+                        op_sequence = [load_op, map_op]
+                    else:
+                        assert False
                 else:
-                    assert False
-            else:
-                op_sequence = [load_op] + self.op_sequence()
-                if self.next_token(Arrow, String):
-                    # var > op_sequence > var
-                    arrow_token = self.token
-                    found_string = self.next_token(String)
-                    assert found_string
-                    store_op = self.store_op(self.token, arrow_token.is_append())
-                    op_sequence.append(store_op)
-                else:
-                    # var > op_sequence
-                    if arrow_token.is_append():
-                        raise SyntaxError(arrow_token, 'Append not permitted here.')
+                    op_sequence = [load_op] + self.op_sequence()
+                    if self.next_token(Arrow, String):
+                        # var > op_sequence > var
+                        arrow_token = self.token
+                        found_string = self.next_token(String)
+                        assert found_string
+                        store_op = self.store_op(self.token, arrow_token.is_append())
+                        op_sequence.append(store_op)
+                    else:
+                        # var > op_sequence
+                        if arrow_token.is_append():
+                            raise SyntaxError(arrow_token, 'Append not permitted here.')
         elif self.next_token(Arrow, String):
             self.tab_completion_context.complete_disabled()
             # > var
@@ -922,17 +908,14 @@ class Parser:
         self.current_pipelines.pop()
         return pipeline
 
-    @staticmethod
-    def load_op(var):
-        return Op('load'), [var]
+    def load_op(self, var):
+        return String(self.op_modules, 'load'), [var]
 
-    @staticmethod
-    def store_op(var, append):
-        return Op('store'), ['--append', var] if append else [var]
+    def store_op(self, var, append):
+        return String(self.op_modules, 'store'), ['--append', var] if append else [var]
 
-    @staticmethod
-    def map_op(expr):
-        return Op('map'), [expr]
+    def map_op(self, expr):
+        return String(self.op_modules, 'map'), [expr]
 
     def op_sequence(self):
         op_args = [self.op_args()]
@@ -946,7 +929,7 @@ class Parser:
     def op_args(self):
         self.tab_completion_context.complete_op()
         if self.next_token(Expression):
-            op_args = (Op('map'), [self.token])
+            op_args = (String(self.op_modules, 'map'), [self.token])
         else:
             op_token = self.op()
             arg_tokens = []
@@ -961,7 +944,7 @@ class Parser:
         return op_args
 
     def op(self):
-        if self.next_token(Op) or self.next_token(String) or self.next_token(Fork) or self.next_token(Run):
+        if self.next_token(String) or self.next_token(Fork) or self.next_token(Run):
             return self.token
         else:
             raise PrematureEndError(self.token)
@@ -980,7 +963,7 @@ class Parser:
                 return pipeline
             else:
                 raise PrematureEndError(self.token)
-        elif self.next_token(String) or self.next_token(Op) or self.next_token(Expression):
+        elif self.next_token(String) or self.next_token(Expression):
             return self.token
         else:
             return None
@@ -1040,7 +1023,7 @@ class Parser:
     def create_op_builtin(self, op_token, arg_tokens):
         op = None
         if op_token.is_op():
-            op_name = op_token.op_name()
+            op_name = op_token.op_name
             op_module = self.op_modules[op_name]
             op = op_module.create_op()
             # Both ! and !! map to the run op.

@@ -367,7 +367,7 @@ Traceback (most recent call last):
 
 ----------------------------------------------------------------------
 
-164. Crash during sudo
+166. Crash during sudo
 
 The /tmp/Python* directory is size 19M.
 
