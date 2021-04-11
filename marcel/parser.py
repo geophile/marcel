@@ -411,6 +411,7 @@ class Run(Token):
     def is_op(self):
         return True
 
+    @property
     def op_name(self):
         return 'run'
 

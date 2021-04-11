@@ -1701,6 +1701,27 @@ jao@cheese:~/git/marcel$
 
 ----------------------------------------------------------------------
 
+NOT FIXABLE
+
+There is already an error message identifying unhashable input.
+
+102. Set ops can't be applied to lists
+
+And the lists can't be anywhere, not even deeply nested. The problem
+is hashing, which is applied deeply, and may reach a list. Lists are
+not hashable.
+
+Comparison-based algorithms are out too, since, for example:
+
+    >>> [1,2] < ['a']
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    TypeError: '<' not supported between instances of 'int' and 'str'
+
+Hmm.
+
+----------------------------------------------------------------------
+
 103. RUN_ON_STARTUP symbols should count toward config symbols, not session symbols
 
 ext is defined in ~/.marcel.py, in RUN_ON_STARTUP.
@@ -2170,6 +2191,15 @@ M-0.11.0 jao@cheese:~/git/marcel$ timer 1
 1602780805.0
 ^CM-0.11.0 jao@cheese:~/git/marcel$ 
 
+----------------------------------------------------------------------
+
+FIXED
+
+123. This should be a syntax error
+
+M-0.11.1 jao@cheese:~/git/marcel$ p = gen n | args [n: echo (n)]
+M-0.11.1 jao@cheese:~/git/marcel$ (p)
+gen
 
 ----------------------------------------------------------------------
 
@@ -3258,6 +3288,34 @@ Traceback (most recent call last):
     self.writer = self.picklefile.writer(self.append)
 AttributeError: 'list' object has no attribute 'writer'
 
+----------------------------------------------------------------------
+
+NOT A BUG
+
+Appears to be due to mismatched marcel versions between local and
+remote. Not yet clear whether the exact same version should be
+required, so leaving this alone.
+
+163. Pickling error
+
+M 0.12.7 jao@cheese ~$ @acme [ df -h ]
+Traceback (most recent call last):
+  File "/usr/local/bin/farcel.py", line 177, in <module>
+    main()
+  File "/usr/local/bin/farcel.py", line 162, in main
+    signal_id = input.load()
+  File "/usr/local/lib/python3.8/site-packages/dill/_dill.py", line 472, in load
+    obj = StockUnpickler.load(self)
+_pickle.UnpicklingError: unpickling stack underflow
+M 0.12.7 jao@cheese ~$ @acme [ bash df -h ]
+Traceback (most recent call last):
+  File "/usr/local/bin/farcel.py", line 177, in <module>
+    main()
+  File "/usr/local/bin/farcel.py", line 162, in main
+    signal_id = input.load()
+  File "/usr/local/lib/python3.8/site-packages/dill/_dill.py", line 472, in load
+    obj = StockUnpickler.load(self)
+
 
 ----------------------------------------------------------------------
 
@@ -3269,3 +3327,65 @@ M 0.12.7 jao@cheese ~$ jobs
 jobs cannot be the first operator in a pipeline
 
 bg broken too.
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+165. Op names can't be used as var names
+
+    M 0.12.8 jao@cheese ~$ ls = 5
+    [ls(depth=recursive)] followed by excess tokens: Assign(=), String(5)
+
+Are op names keys in the global namespace? If so, then this is
+correct. If not, then this is buggy behavior.
+
+Bash allows executable names as variables.
+
+......................................................................
+
+- Lexer creates a String, or Op if the string is an op name. 
+
+- Op is a subclass of string, but is_string() returns False. (I.e.,
+  the inheritance simplifies implementation).
+
+- Parser.command sees that token is an Op and tries to parse a
+  pipeline. The test is done like this:
+
+        if self.next_token(String, Assign):
+
+  This would work correctly if "ls" worked as both an Op and a String.
+  But that would probably break something else.
+
+  next_token() tests for exact match of token type, (i.e. is_string() 
+  isn't used).
+
+......................................................................
+
+Plan:
+
++ Get rid of Op type. 
+
++ Simplifies Lexer.next_token, distinguishing Op from String.
+
++ Parser.pipeline does this:
+
+    if self.next_token(Op, Arrow)
+        ...
+    elif self.next_token(String, Arrow)
+
+  Easy to fix. Similar thing later: 
+
+    if self.next_token(Op)
+        ...
+    elif self.next_token(String)
+
++ create_op_builtin: Replace is_op() call.
+
++ Parser.load_op, store_op, map_op are no longer staticmethod.
+
++ op_name() -> field op_name. None if not an op. 
+
++ Pass op_modules to String init so that op_name can be set.
+

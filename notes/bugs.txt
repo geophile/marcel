@@ -191,23 +191,6 @@ should produce '--recursive '. The space is omitted.
 
 ----------------------------------------------------------------------
 
-102. Set ops can't be applied to lists
-
-And the lists can't be anywhere, not even deeply nested. The problem
-is hashing, which is applied deeply, and may reach a list. Lists are
-not hashable.
-
-Comparison-based algorithms are out too, since, for example:
-
-    >>> [1,2] < ['a']
-    Traceback (most recent call last):
-      File "<stdin>", line 1, in <module>
-    TypeError: '<' not supported between instances of 'int' and 'str'
-
-Hmm.
-
-----------------------------------------------------------------------
-
 108. quote_files is failing, but only through the API?!
 
 This fails, in test_api:
@@ -242,14 +225,6 @@ Need to review how errors and exceptions are reported from farcel.
 - ctrl-c while it's running
 
 The env var isn't there, but the temp file is.
-
-----------------------------------------------------------------------
-
-123. This should be a syntax error
-
-M-0.11.1 jao@cheese:~/git/marcel$ p = gen n | args [n: echo (n)]
-M-0.11.1 jao@cheese:~/git/marcel$ (p)
-gen
 
 ----------------------------------------------------------------------
 
@@ -343,51 +318,3 @@ It is including items defined in config (e.g. byt, ext)
     ('pi', 3.141592653589793)
     ('rand', [n: gen(count=0, start=0) | map(lambda x: random.randint(0, int(n)-1))])
     ('recent', [d: ls(depth=recursive,include=f) | select(lambda f: now() - f.mtime < days(float(d)))])
-----------------------------------------------------------------------
-
-163. Pickling error
-
-M 0.12.7 jao@cheese ~$ @acme [ df -h ]
-Traceback (most recent call last):
-  File "/usr/local/bin/farcel.py", line 177, in <module>
-    main()
-  File "/usr/local/bin/farcel.py", line 162, in main
-    signal_id = input.load()
-  File "/usr/local/lib/python3.8/site-packages/dill/_dill.py", line 472, in load
-    obj = StockUnpickler.load(self)
-_pickle.UnpicklingError: unpickling stack underflow
-M 0.12.7 jao@cheese ~$ @acme [ bash df -h ]
-Traceback (most recent call last):
-  File "/usr/local/bin/farcel.py", line 177, in <module>
-    main()
-  File "/usr/local/bin/farcel.py", line 162, in main
-    signal_id = input.load()
-  File "/usr/local/lib/python3.8/site-packages/dill/_dill.py", line 472, in load
-    obj = StockUnpickler.load(self)
-
-----------------------------------------------------------------------
-
-166. Crash during sudo
-
-The /tmp/Python* directory is size 19M.
-
-M 0.12.6 jao@localhost ~$ sudo [rm -rf /tmp/Python*]
-Process Process-1:
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
-    self.run()
-  File "/usr/local/lib/python3.9/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/usr/local/lib/python3.9/site-packages/marcel/job.py", line 147, in run_command_in_child
-    child_namespace_changes = command.execute(self.env)
-  File "/usr/local/lib/python3.9/site-packages/marcel/core.py", line 417, in execute
-    self.pipeline.set_env(self.env)
-  File "/usr/local/lib/python3.9/site-packages/marcel/core.py", line 350, in set_env
-    op.set_env(env)
-  File "/usr/local/lib/python3.9/site-packages/marcel/op/sudo.py", line 90, in set_env
-    self.pipeline.set_env(env)
-  File "/usr/local/lib/python3.9/site-packages/marcel/core.py", line 350, in set_env
-    op.set_env(env)
-  File "/usr/local/lib/python3.9/site-packages/marcel/op/bash.py", line 83, in set_env
-    self.escape.ensure_command_running()
-AttributeError: 'NoneType' object has no attribute 'ensure_command_running'

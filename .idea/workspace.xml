@@ -24,7 +24,7 @@
       <change beforePath="$PROJECT_DIR$/marcel/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_ops.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes/bugs_closed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs_closed.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -473,7 +473,9 @@
       <workItem from="1617844431936" duration="603000" />
       <workItem from="1617985595615" duration="1949000" />
       <workItem from="1617995035528" duration="4252000" />
-      <workItem from="1618077463798" duration="2441000" />
+      <workItem from="1618077463798" duration="5076000" />
+      <workItem from="1618108308897" duration="666000" />
+      <workItem from="1618177402935" duration="2010000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -545,7 +547,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/marcel/parser.py</url>
-          <line>1026</line>
+          <line>1027</line>
           <option name="timeStamp" value="103" />
         </line-breakpoint>
       </breakpoints>
