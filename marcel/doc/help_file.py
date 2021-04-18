@@ -71,8 +71,6 @@ Run {n:help namespace} for more information on builtin functions.
 
 {b:File content}
 
-{n:File} has functions {n:read} and {n:readlines} to read the contents
-of a file as a single string, with newline characters included, or as
-a list of strings, in which trailing newline characters are removed
-from each line.
-'''
+{n:File} has a {n:read} function, to read the contents of a file as a
+single string. The function {n:readlines} returns a list of lines,
+in which trailing newline characters are removed.  '''

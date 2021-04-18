@@ -21,10 +21,6 @@
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notes/bugs_closed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes/bugs_closed.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +59,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../MiniMachete/backup.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/experiments/detectpipedinput.py" />
     <property name="settings.editor.selected.configurable" value="editor.reader.mode" />
   </component>
   <component name="ReaderModeSettings">
@@ -75,7 +71,7 @@
       <recent name="$PROJECT_DIR$/experiments" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.test_ops">
+  <component name="RunManager" selected="Python.detect piped input">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="marcel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -112,6 +108,28 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/async_expt.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="detect piped input" type="PythonConfigurationType" factoryName="Python">
+      <module name="marcel" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv3.8/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/experiments" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/detectpipedinput.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -324,6 +342,7 @@
     <list>
       <item itemvalue="Python.test_ops" />
       <item itemvalue="Python.async_expt" />
+      <item itemvalue="Python.detect piped input" />
       <item itemvalue="Python.test_api" />
       <item itemvalue="Python.test_tab_completion" />
       <item itemvalue="Python.test_api2" />
@@ -475,7 +494,9 @@
       <workItem from="1617995035528" duration="4252000" />
       <workItem from="1618077463798" duration="5076000" />
       <workItem from="1618108308897" duration="666000" />
-      <workItem from="1618177402935" duration="2010000" />
+      <workItem from="1618177402935" duration="2059000" />
+      <workItem from="1618282334482" duration="616000" />
+      <workItem from="1618451894263" duration="6223000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -539,11 +560,6 @@
           <url>file://$PROJECT_DIR$/marcel/object/db.py</url>
           <line>53</line>
           <option name="timeStamp" value="100" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/marcel/core.py</url>
-          <line>168</line>
-          <option name="timeStamp" value="101" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/marcel/parser.py</url>
