@@ -3389,3 +3389,26 @@ Plan:
 
 + Pass op_modules to String init so that op_name can be set.
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+166. read without FILENAMES reads all files in the current directory
+
+This is wrong, should expect Files from input stream.
+
+
+read foo.bar
+
+    - write lines to output stream
+
+ls | read
+
+    - write to output stream, lines of each File arriving on input stream
+
+read
+
+    - No FILENAMEs given, so get Files from input stream.
+
+    - But there is no input, so output nothing.

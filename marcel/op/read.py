@@ -46,7 +46,7 @@ to any depth.
 {L,indent=4:28}{r:FILENAME}                A filename or glob pattern.
 
 Reads the contents of the specified files. Input files can be specified on
-the command line, (the {r:FILENAME} arguments), or piped in from an upstream command,
+the command line, by giving their names (the {r:FILENAME} arguments); or piped in from an upstream command,
 typically {r:ls}. In the latter case, input tuples are assumed to be 1-tuples containing {n:File}s. 
 
 Each file is read, and each
@@ -117,8 +117,11 @@ class Read(marcel.op.filenamesop.FilenamesOp):
             options.append('tsv')
         if self.pickle:
             options.append('pickle')
-        filenames = [str(p) for p in self.filenames] if self.filenames else '?'
-        return f'read({",".join(options)}, filename={filenames})'
+        if self.filenames:
+            filenames = [str(p) for p in self.filenames]
+            return f'read({",".join(options)}, filename={filenames})'
+        else:
+            return f'read({",".join(options)})'
 
     # AbstractOp
 
@@ -130,6 +133,12 @@ class Read(marcel.op.filenamesop.FilenamesOp):
                        TextReader(self))
 
     # Op
+
+    def run(self):
+        if self.filenames:
+            return super().run()
+        else:
+            return self.receive(None)
 
     def receive(self, x):
         if x is None:
