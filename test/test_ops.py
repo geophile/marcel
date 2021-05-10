@@ -1228,6 +1228,15 @@ def test_pos():
              expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
 
 
+def test_tee():
+    TEST.run('gen 5 1 | tee',
+             expected_err='No pipelines')
+    TEST.run('gen 5 1 | tee [red + > a] [red * > b]',
+             expected_out=[1, 2, 3, 4, 5])
+    TEST.run('a >', expected_out=[15])
+    TEST.run('b >', expected_out=[120])
+
+
 def test_bug_126():
     TEST.run('fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]')
     TEST.run(test='fact (5) > f',
@@ -1316,6 +1325,7 @@ def main_stable():
     test_args()
     # test_env()
     test_pos()
+    test_tee()
     test_bugs()
 
 

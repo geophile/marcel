@@ -50,6 +50,7 @@ as in other shells.
     - {n:out}         - {n:popd}        - {n:ps}          - {n:pushd}
     - {n:pwd}         - {n:red}         - {n:reverse}     - {n:run}
     - {n:select}      - {n:sort}        - {n:sql}         - {n:squish}
-    - {n:store}       - {n:sudo}        - {n:tail}        - {n:timer}
-    - {n:unique}      - {n:union}       - {n:version}     - {n:window}
+    - {n:store}       - {n:sudo}        - {n:tail}        - {n:tee}
+    - {n:timer}       - {n:unique}      - {n:union}       - {n:version}
+    - {n:window}
 '''

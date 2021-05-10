@@ -948,6 +948,20 @@ def test_pos():
              expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
 
 
+def test_tee():
+    r = reservoir('r')
+    TEST.run(test=lambda: run(gen(5, 1) | tee()),
+             expected_err='No pipelines')
+    a = reservoir('a')
+    b = reservoir('b')
+    TEST.run(test=lambda: run(gen(5, 1) |
+                              tee(red(r_plus) | store(a),
+                                  red(r_times) | store(b))),
+             expected_out=[1, 2, 3, 4, 5])
+    TEST.run(test=lambda: run(load(a)), expected_out=[15])
+    TEST.run(test=lambda: run(load(b)), expected_out=[120])
+
+
 def test_api_run():
     # Error-free output, just an op
     TEST.run(test=lambda: run(gen(3)),
@@ -1085,6 +1099,7 @@ def main_stable():
     test_difference()
     test_args()
     test_pos()
+    test_tee()
     test_api_run()
     test_api_gather()
     test_api_first()

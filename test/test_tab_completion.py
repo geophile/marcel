@@ -11,7 +11,7 @@ ALL_OPS = [
     'popd', 'select', 'union', 'delete', 'gen', 'jobs', 'ps',
     'sort', 'unique', 'difference', 'head', 'join', 'pushd',
     'sql', 'version', 'dirs', 'help', 'load', 'pwd', 'squish',
-    'window', 'edit', 'history', 'read', 'store'
+    'window', 'edit', 'history', 'read', 'store', 'tee'
 ]
 
 

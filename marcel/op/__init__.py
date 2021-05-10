@@ -54,6 +54,7 @@ public = [
     'store',
     'sudo',
     'tail',
+    'tee',
     'timer',
     'unique',
     'union',

@@ -55,6 +55,7 @@ from marcel.op.squish import squish as _squish
 from marcel.op.store import store as _store
 from marcel.op.sudo import sudo as _sudo
 from marcel.op.tail import tail as _tail
+from marcel.op.tee import tee as _tee
 from marcel.op.timer import timer as _timer
 from marcel.op.unique import unique as _unique
 from marcel.op.union import union as _union
@@ -104,6 +105,7 @@ def store(*args, **kwargs): return _generate_op(_store, *args, **kwargs)
 def squish(*args, **kwargs): return _generate_op(_squish, *args, **kwargs)
 def sudo(*args, **kwargs): return _generate_op(_sudo, *args, **kwargs)
 def tail(*args, **kwargs): return _generate_op(_tail, *args, **kwargs)
+def tee(*args, **kwargs): return _generate_op(_tee, *args, **kwargs)
 def timer(*args, **kwargs): return _generate_op(_timer, *args, **kwargs)
 def unique(*args, **kwargs): return _generate_op(_unique, *args, **kwargs)
 def union(*args, **kwargs): return _generate_op(_union, *args, **kwargs)
