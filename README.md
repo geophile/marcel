@@ -1,51 +1,31 @@
 What's New
 ----------
 
-Sometimes it's convenient to have something like line numbers, because
-you want to treat inputs differently, based on their position in the 
-input stream. For example, if you have CSV input, you might want
-to ignore the first line, containing headers. You can do this as follows:
+The Linux `tee` command copies an
+input stream to multiple files. Marcel now has a `tee` operator. For example:
 
 ```shell
-read --csv foo.csv | head -1
+ls | tee [> f] [select (f: now() - f.mtime < days(1)) > r]
 ```
 
-This reads `foo.csv`, and keeps all lines except for the first.
+* `ls` lists the contents of the current directory. 
 
-But this isn't very general. E.g., you might want to keep every other 
-input, starting with the first. This is now possible through the addition
-of the `pos()` builtin function. Each operator has its own position counter,
-which can be accessed using `pos()`. So to keep evey other line of a file
-`foo.txt`, starting with the first line:
+* The `tee` command sends each received `File` produced by `ls` to each pipeline
+and to the output stream, which causes the files to be printed.
 
-```shell
-read foo.txt | select (line: pos() % 2 == 0)
-```
-
-`read` has its own counter, but it is inaccessible, as the `read` operator
-does not allow for a function argument which could reference `pos()`. However,
-the next operator, `select`, also has a counter, also accessible through
-`pos()`, and that is the counter that is tested.
-
-To see this fact more clearly, that each operator has its own `pos()`, 
-look at this command:
-
-```shell
-gen 5 1000 \
-| map (x: (x, pos())) \
-| select (x, y: x % 2 == 0) \
-| map (x, y: (x, y, pos()))
-```
-
-- `gen 5 1000`: Generates the stream 1000, 1001, 1002, 1003, 1004.
-- `map(x: (x, pos()))`: This appends a position to each input item, yielding
-  (1000, 0), (1001, 1), (1002, 2), (1003, 3), (1004, 4).
+* `[> f]` is the first pipeline, which simply writes the `File`s to the variable
+`f`. 
   
-- `select(x, y: x % 2 == 0)`: For each input row, keep those for which x is 
-  even, so: (1000, 0), (1002, 2), (1004, 4).
+* `[select ... > r]` is the second pipeline. It locates those `File`s that have been
+modified in the past day, and writes those `File`s to variable `r`.
   
-- `map(x, y: (x, y, pos()))`: This attaches a new `pos()` value for each input.
-- The command's output is: (1000, 0, 0), (1002, 2, 1), (1004, 4, 2).
+The output from this command is the result from the `ls` command, but in addition,
+the `f` and `r` variables have been set, and can be examined.
+E.g., to print out the contents of `r`:
+
+```shell
+r >
+```
 
 Marcel
 ======
