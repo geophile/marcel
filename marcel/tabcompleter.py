@@ -93,6 +93,8 @@ class TabCompleter:
             if f.startswith(text):
                 candidates.append(f)
         debug('complete_flag candidates for <{}>: {}'.format(text, candidates))
+        if len(candidates) == 1:
+            candidates = [candidates[0] + ' ']
         return candidates
 
     def complete_filename(self, text):
@@ -129,7 +131,8 @@ class TabCompleter:
             filenames = [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
         filenames = [f + '/' if os.path.isdir(f) else f for f in filenames]
         if len(filenames) == 1:
-            filenames = [filenames[0] + ' ']
+            if not filenames[0].endswith('/'):
+                filenames = [filenames[0] + ' ']
         debug('complete_filename candidates for {}: {}'.format(text, filenames))
         return filenames
 

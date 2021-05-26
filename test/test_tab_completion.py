@@ -50,6 +50,9 @@ def test_flags():
              expected=['--overlap', '--disjoint'])
     TEST.run(line='reverse -', text='-',
              expected=[])
+    # Bug 147
+    TEST.run(line='ls --rec', text='--rec',
+             expected=['--recursive '])
 
 
 def test_filenames():
@@ -65,6 +68,12 @@ def test_filenames():
     # Executable
     TEST.run(line='echo /tmp/test/a', text='/tmp/test/a',
              expected=['/tmp/test/abcx/', '/tmp/test/abcy/', '/tmp/test/abcz'])
+    # Bug 147
+    os.system('rm -rf /tmp/bug147*')
+    os.mkdir('/tmp/bug147xxx')
+    os.system('touch /tmp/bug147xxx/x')
+    TEST.run(line='ls /tmp/bug147', text='/tmp/bug147',
+             expected=['/tmp/bug147xxx/'])
 
 
 def test_pipeline_args():
@@ -87,17 +96,17 @@ def test_pipeline_args():
     TEST.run(line='ls --', text='--',
              expected=['--recursive', '--file', '--dir', '--symlink'])
     TEST.run(line='ls --r', text='--r',
-             expected=['--recursive'])
+             expected=['--recursive '])
     TEST.run(line='ls --re', text='--re',
-             expected=['--recursive'])
+             expected=['--recursive '])
     TEST.run(line='ls --recursive', text='--recursive',
-             expected=['--recursive'])
+             expected=['--recursive '])
     TEST.run(line='ls --recursive ', text='--recursive ',
              expected=all_files)
     TEST.run(line='ls --recursive -', text='-',
              expected=['-0', '-1', '-r', '--recursive', '-f', '--file', '-d', '--dir', '-s', '--symlink'])
     TEST.run(line='ls --recursive -d', text='-d',
-             expected=['-d'])
+             expected=['-d '])
     TEST.run(line='ls --recursive -d ', text='-d ',
              expected=all_files)
     # Not sure why, but Python's input invokes the completer with text = '' in this case
@@ -128,7 +137,7 @@ def test_pipeline_args():
     TEST.run(line='ls --recursive -d | args [d: ls -', text='-',
              expected=['-0', '-1', '-r', '--recursive', '-f', '--file', '-d', '--dir', '-s', '--symlink'])
     TEST.run(line='ls --recursive -d | args [d: ls -f', text='-f',
-             expected=['-f'])
+             expected=['-f '])
     TEST.run(line='ls --recursive -d | args [d: ls -fs', text='-fs',
              expected=[])
     TEST.run(line='ls --recursive -d | args [d: ls -fs ', text='',
@@ -152,7 +161,6 @@ def main_stable():
 
 
 def main_dev():
-
     pass
 
 

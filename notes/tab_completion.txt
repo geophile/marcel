@@ -117,3 +117,23 @@ ls <tab>:       Op is complete. Do filename completion.
 
 The problem is that the parse doesn't see whitespace. Lexer can help,
 adding info to Tokens, e.g. Token.adjacent_to_previous.
+
+======================================================================
+
+Tab completion bugs:
+
+----------------------------------------------------------------------
+
+128. Tab completion vs. syntactic sugar
+
+For "var > ..." or "./file > ...", tab completion doesn't work. Tab
+completion for first symbol expects executable.
+
+----------------------------------------------------------------------
+
+147. Space after tab-completion is broken
+
+Sometimes there's a space when there shouldn't be, and vice versa.
+
+Check ops, args, filenames.
+

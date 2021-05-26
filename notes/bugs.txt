@@ -1,13 +1,3 @@
-34. Tab completion vs. sudo -- shell crash
-
-If we enter this much of a command:
-
-    sudo -i [ ls /home/jao/.dbus/ses
-
-tab-completion runs into permission problems trying to do its work.
-
-----------------------------------------------------------------------
-
 47. Emacs in background doesn't work
 
 - Run emacs
@@ -183,14 +173,6 @@ Error message: Variable date is undefined.
 
 ----------------------------------------------------------------------
 
-100. Space after tab-completed flag is missing
-
-ls --r<tab>
-
-should produce '--recursive '. The space is omitted.
-
-----------------------------------------------------------------------
-
 108. quote_files is failing, but only through the API?!
 
 This fails, in test_api:
@@ -265,7 +247,11 @@ M 0.11.12 jao@cheese:~$ bash scp ~/.marcel.py jorenstein@nd:/home/jorenstein
 
 Sometimes there's a space when there shouldn't be, and vice versa.
 
-Check ops, args, filenames.
+Check ops, flags, filenames.
+
+- Op completion works
+
+- Flag completion: Doesn't leave a space after unique completion.
 
 ----------------------------------------------------------------------
 

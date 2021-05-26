@@ -656,6 +656,18 @@ Error(error: Could not access '>')
 
 FIXED
 
+34. Tab completion vs. sudo -- shell crash
+
+If we enter this much of a command:
+
+    sudo -i [ ls /home/jao/.dbus/ses
+
+tab-completion runs into permission problems trying to do its work.
+
+----------------------------------------------------------------------
+
+FIXED
+
 35. Completed jobs accumulate in jobs output
 
 JobControl.jobs shouldn't be exposed directly. Go through a method
@@ -1650,6 +1662,17 @@ Notes:
 
 - Parser.arg calls self.next_token(End) but doesn't check that it's there. Allows 
   things like this to work: "sudo [ls". FIXED
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+100. Space after tab-completed flag is missing
+
+ls --r<tab>
+
+should produce '--recursive '. The space is omitted.
 
 ----------------------------------------------------------------------
 
