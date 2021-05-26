@@ -243,18 +243,6 @@ M 0.11.12 jao@cheese:~$ bash scp ~/.marcel.py jorenstein@nd:/home/jorenstein
 
 ----------------------------------------------------------------------
 
-147. Space after tab-completion is broken
-
-Sometimes there's a space when there shouldn't be, and vice versa.
-
-Check ops, flags, filenames.
-
-- Op completion works
-
-- Flag completion: Doesn't leave a space after unique completion.
-
-----------------------------------------------------------------------
-
 148. psql doesn't work when it needs a password:
 
     M 0.11.12 jao@cheese ~/consulting/nasuni/analytics/load_simulation$ bash psql nasuni < schema.sql

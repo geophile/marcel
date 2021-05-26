@@ -3027,6 +3027,24 @@ NOT A BUG
 
 This was caused by running "marcel" as the last command in .bashrc.
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+147. Space after tab-completion is broken
+
+Sometimes there's a space when there shouldn't be, and vice versa.
+
+Check ops, flags, filenames.
+
+- Op completion works
+
+- Flag completion: Doesn't leave a space after unique completion,
+  (e.g. "ls --rec")
+
+- Filename completion: Shouldn't leave a space after /.
+
 ----------------------------------------------------------------------
 
 FIXED

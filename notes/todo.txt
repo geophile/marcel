@@ -1,4 +1,4 @@
-1- Complete Python string parsing
+- Complete Python string parsing
 
 - Complete shell string parsing (termination on things other than EOL
   and whiteapce).
@@ -27,13 +27,6 @@ Tab completion:
 - Tab completion for command should distinguish between first op of
   pipeline and subsequent ones. I.e., only show those ops that can be
   used in the current position within the pipeline.
-
-- Tab completion for directory should include / at end.
-
-- Tab completion for file should include ' ' at end.
-
-- Tab completion with more alternatives should end on the last common
-  character.
 
 ----------------------------------------------------------------------
 

@@ -87,7 +87,8 @@ class TabCompleter:
         debug('complete_help candidates for <{}>: {}'.format(text, candidates))
         return candidates
 
-    def complete_flag(self, text, flags):
+    @staticmethod
+    def complete_flag(text, flags):
         candidates = []
         for f in flags:
             if f.startswith(text):
