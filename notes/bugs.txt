@@ -311,16 +311,3 @@ cheese:
     (localhost, .Test-unix)
     (localhost, .X11-unix)
     ...
-
-----------------------------------------------------------------------
-
-170. args -a failing when receiving input from host executable
-
-    bash: echo a > /tmp/f; echo b >> /tmp/f
-
-Then
-
-    $ cat /tmp/f | args [x: (x)]
-    a
-    b
-    $ cat /tmp/f | args -a [x: (x)]
