@@ -132,7 +132,9 @@ class NonInteractive(Escape):
 
     def flush(self):
         self.ensure_command_running()
-        self.process.stdin.flush()
+        self.process.stdin.close()
+        while self.out_handler.is_alive():
+            self.out_handler.join(0.1)
 
     def cleanup(self):
         self.process.stdin.close()

@@ -78,10 +78,11 @@ class Args(marcel.core.Op):
         self.impl.receive(x)
 
     def flush(self):
-        if self.impl is not None:
-            self.impl.flush()
-            self.impl = None
+        self.impl.flush()
         self.propagate_flush()
+
+    def cleanup(self):
+        self.impl = None
 
 
 class ArgsImpl:

@@ -3453,3 +3453,49 @@ read
     - No FILENAMEs given, so get Files from input stream.
 
     - But there is no input, so output nothing.
+
+----------------------------------------------------------------------
+
+NOT A BUG
+
+167. args crashing following host executable
+
+M 0.12.9 jao@cheese ~$ cat zack_disk_usage.txt | args[*x: (x)]
+Exception in thread Thread-2:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/home/jao/git/marcel/marcel/op/bash.py", line 205, in run
+    op.send(ProcessOutputHandler.normalize_output(line))
+  File "/home/jao/git/marcel/marcel/core.py", line 129, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 160, in receive_input
+    self.receive(x if type(x) in (tuple, list) else
+  File "/home/jao/git/marcel/marcel/op/args.py", line 78, in receive
+    self.impl.receive(x)
+AttributeError: 'NoneType' object has no attribute 'receive'
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+168. red crashing following host executable
+
+cat README.md | red count
+0
+Exception in thread Thread-2:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/home/jao/git/marcel/marcel/op/bash.py", line 205, in run
+    op.send(ProcessOutputHandler.normalize_output(line))
+  File "/home/jao/git/marcel/marcel/core.py", line 129, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 160, in receive_input
+    self.receive(x if type(x) in (tuple, list) else
+  File "/home/jao/git/marcel/marcel/op/red.py", line 166, in receive
+    self.reducer.receive(x)
+  File "/home/jao/git/marcel/marcel/op/red.py", line 202, in receive
+    accumulator[i] = op.call(functions[i], accumulator[i], x[i])
+TypeError: 'NoneType' object is not subscriptable

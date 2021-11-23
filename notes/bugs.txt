@@ -295,4 +295,32 @@ It is including items defined in config (e.g. byt, ext)
 
 ----------------------------------------------------------------------
 
-167.
+169. Remote ls fails on some hosts
+
+acme:
+
+    M 0.12.9 jao@cheese ~$ @acme [ ls /tmp ]
+    XXX lineno: 121, opcode: 117
+    Error(acme): unknown opcode
+
+cheese:
+
+    M 0.12.9 jao@cheese ~$ @jao [ ls /tmp ]
+    (localhost, .)
+    (localhost, .ICE-unix)
+    (localhost, .Test-unix)
+    (localhost, .X11-unix)
+    ...
+
+----------------------------------------------------------------------
+
+170. args -a failing when receiving input from host executable
+
+    bash: echo a > /tmp/f; echo b >> /tmp/f
+
+Then
+
+    $ cat /tmp/f | args [x: (x)]
+    a
+    b
+    $ cat /tmp/f | args -a [x: (x)]

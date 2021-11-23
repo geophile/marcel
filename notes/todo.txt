@@ -261,10 +261,6 @@ this be done avoiding runtime penalty when logging not in use?
 
 ----------------------------------------------------------------------
 
-Error handling needs to be revisited.
-
-----------------------------------------------------------------------
-
 ls abc.{x,y}
 
 is not parsed properly, because the comma is its own token.
@@ -332,3 +328,7 @@ harm. As long as we don't get stuck waiting forever.
 json
 
 https://cameronnokes.com/blog/working-with-json-in-bash-using-jq/
+
+----------------------------------------------------------------------
+
+env -d: Delete var

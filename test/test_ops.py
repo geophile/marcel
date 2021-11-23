@@ -1195,6 +1195,10 @@ def test_args():
     TEST.run('g = [n: gen (n)]')
     TEST.run('gen 3 1 | args [n: g (n)]',
              expected_out=[0, 0, 1, 0, 1, 2])
+    # Bug 167
+    os.system('rm -rf /tmp/hello')
+    os.system('echo hello > /tmp/hello')
+    os.system('echo hello >> /tmp/hello')
 
 
 def test_env():
@@ -1279,6 +1283,17 @@ def test_bug_154():
     TEST.run('x > (y: -y)', expected_out=[0, -1, -2])
 
 
+def test_bug_168():
+    os.system('rm -rf /tmp/hello')
+    os.system('echo hello1 > /tmp/hello')
+    os.system('echo hello2 >> /tmp/hello')
+    TEST.run('read /tmp/hello | red count',
+             expected_out=[2])
+    TEST.run('cat /tmp/hello | red count',
+             expected_out=[2])
+    os.system('rm -rf /tmp/hello')
+
+
 # For bugs that aren't specific to a single op.
 def test_bugs():
     test_bug_10()
@@ -1286,6 +1301,7 @@ def test_bugs():
     test_bug_136()
     test_bug_151()
     test_bug_154()
+    test_bug_168()
 
 
 def main_stable():
@@ -1330,13 +1346,17 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    # test_sql()
+    # test_args()
+    #
+    test_bash()
+    test_bugs()
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

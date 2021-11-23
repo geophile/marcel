@@ -37,17 +37,20 @@ Each {r:FUNCTION} takes two inputs and produces one output.
 {b:Basic usage}
 
 Given a sequence of inputs such as {n:1, 2, 3}, {r:red} can be used to find the sum:
+
 {p,wrap=F}
     ... | red +
 
 yields {r:(6,)}. For input elements with more than a single value, multiple functions can be provided.
 For example, to find the sum of 0 ... 9, the sum of their squares, and the sum of their cubes:
+
 {p,wrap=F}
     gen 10 | map (x: (x, x**2, x**3)) | red + + +
 
 which yields the output {n:(45, 285, 2025)}.
 
 The {r:count} function can be used to count the number of input tuples, e.g.
+
 {p,wrap=F}
     gen 10 | red count
     
@@ -199,6 +202,9 @@ class NonGroupingReducer(Reducer):
         accumulator = self.accumulator
         functions = op.functions
         for i in range(self.n):
+            assert functions is not None
+            assert accumulator is not None
+            assert x is not None
             accumulator[i] = op.call(functions[i], accumulator[i], x[i])
         if op.incremental:
             op.send(x + tuple(accumulator))
