@@ -17,11 +17,14 @@ import marcel.argsparser
 import marcel.core
 
 HELP = '''
-{L,wrap=F}env [-a|--all] [-b|--builtin] [-c|--config] [-s|--session] [-v|--vars STRING]
+{L,wrap=F}env [-a|--all] [-b|--builtin] [-c|--config] [-d|--delete var] [-s|--session] [-v|--vars STRING]
 
 {L,indent=4:28}{r:-a}, {r:--all}               Output all symbols defined in the environment.
 
 {L,indent=4:28}{r:-b}, {r:--builtin}           Output only builtin symbols.
+
+{L,indent=4:28}{r:-d}, {r:--delete}            Output the named variable and its value, and remove the variable 
+from the environment.
 
 {L,indent=4:28}{r:-c}, {r:--config}            Output only symbols defined in the configuration file, {n:~/.marcel.py}.
 
@@ -46,6 +49,10 @@ If the {r:--config} flas is provided, then the symbols defined in the config fil
 If the {r:--session} flag is provided, then the symbols defined in the current session are provided. These are variables
 that obtain their value by assignment, (e.g. {n:answer = (42)}), or by storing a stream, (e.g. {n:ls -fr > files}).
 
+If the {r:--delete} flag is specified, the named variable and its current value
+are written to output, and the variable
+is removed from the environment.
+
 Default behavior, (i.e., no flags are specified) is the same as {r:--all}. This is also equivalent to specifying
 all of {r:--builtin}, {r:--config}, and {r:--session}. Those three flags can also be combined. E.g, using
 the short flag names, {r:-cs} would get all symbols except the builtin ones.
@@ -63,6 +70,7 @@ class EnvArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_no_value('all', '-a', '--all')
         self.add_flag_no_value('builtin', '-b', '--builtin')
         self.add_flag_no_value('config', '-c', '--config')
+        self.add_flag_one_value('delete', '-d', '--delete')
         self.add_flag_no_value('session', '-s', '--session')
         self.add_flag_one_value('vars', '-v', '--vars')
         self.at_most_one('all', 'builtin')
@@ -72,6 +80,11 @@ class EnvArgsParser(marcel.argsparser.ArgsParser):
         self.at_most_one('vars', 'builtin')
         self.at_most_one('vars', 'config')
         self.at_most_one('vars', 'session')
+        self.at_most_one('delete', 'all')
+        self.at_most_one('delete', 'builtin')
+        self.at_most_one('delete', 'config')
+        self.at_most_one('delete', 'session')
+        self.at_most_one('delete', 'vars')
         self.validate()
 
 
@@ -83,7 +96,9 @@ class Env(marcel.core.Op):
         self.all = None
         self.builtin = None
         self.config = None
+        self.delete = None
         self.session = None
+        self.var = None
         self.vars = None
 
     def __repr__(self):
@@ -92,6 +107,8 @@ class Env(marcel.core.Op):
             flags += 'b'
         if self.config:
             flags += 'c'
+        if self.delete:
+            flags += 'd'
         if self.session:
             flags += 's'
         if self.vars:
@@ -101,7 +118,7 @@ class Env(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
-        if not(self.all or self.builtin or self.config or self.session):
+        if not(self.all or self.builtin or self.config or self.delete or self.session):
             # No flags specified. Default behiavor is all.
             self.all = True
         if self.all:
@@ -110,16 +127,24 @@ class Env(marcel.core.Op):
             self.session = True
 
     def run(self):
-        builtin_symbols = self.env().builtin_symbols
-        config_symbols = self.env().config_symbols
-        for key, value in sorted(self.env().vars().items()):
-            if key not in Env.OMITTED and (self.vars is None or self.vars in key):
-                key_builtin = key in builtin_symbols
-                key_config = key in config_symbols
-                if (self.builtin and key_builtin or
-                        self.config and key_config or
-                        self.session and not (key_builtin or key_config)):
-                    self.send((key, value))
+        if self.delete:
+            try:
+                value = self.env().vars().pop(self.delete)
+                self.send((self.delete, value))
+            except KeyError:
+                # var isn't present, nothing to do
+                pass
+        else:
+            builtin_symbols = self.env().builtin_symbols
+            config_symbols = self.env().config_symbols
+            for key, value in sorted(self.env().vars().items()):
+                if key not in Env.OMITTED and (self.vars is None or self.vars in key):
+                    key_builtin = key in builtin_symbols
+                    key_config = key in config_symbols
+                    if (self.builtin and key_builtin or
+                            self.config and key_config or
+                            self.session and not (key_builtin or key_config)):
+                        self.send((key, value))
 
     # Op
 

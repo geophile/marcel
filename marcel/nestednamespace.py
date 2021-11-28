@@ -32,7 +32,7 @@ class NestedNamespace(dict):
         self.params = set(map.keys())
 
     def __repr__(self):
-        return str(self)
+        return super().__repr__()
 
     # The number of pushed scopes. The top-level marcel namespace, which is passed as the
     # map arg of __init__, is not counted.
@@ -64,6 +64,3 @@ class NestedNamespace(dict):
         self.clear()
         self.update(updated_map)
         self.params = scope.params
-
-    def flattened(self):
-        return self

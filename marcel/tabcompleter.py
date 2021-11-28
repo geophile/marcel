@@ -196,7 +196,7 @@ class TabCompleter:
             path = os.environ['PATH'].split(':')
             for p in path:
                 for f in os.listdir(p):
-                    if marcel.util.is_executable(f):
+                    if marcel.util.is_executable(f) and f not in self.executables:
                         self.executables.append(f)
 
     def ensure_homedirs(self):
