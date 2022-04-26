@@ -311,3 +311,17 @@ cheese:
     (localhost, .Test-unix)
     (localhost, .X11-unix)
     ...
+
+On acme:
+
+Caught <class 'SystemError'>: unknown opcode
+  File "/usr/local/bin/farcel.py", line 76, in run
+    self.pipeline.first_op().run()
+  File "/usr/local/lib/python3.8/site-packages/marcel/op/filenamesop.py", line 85, in run
+    self.visit(root, 0)
+  File "/usr/local/lib/python3.8/site-packages/marcel/op/filenamesop.py", line 91, in visit
+    self.action(self, file)
+  File "/home/jao/git/marcel/marcel/op/ls.py", line 121, in send_path
+    assert type(file) is File, f'{type(file)} {file}'
+1640518413.3948474: Pickling error: (<class 'marcel.object.error.Error'>) Error:
+ unknown opcode

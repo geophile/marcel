@@ -331,4 +331,7 @@ https://cameronnokes.com/blog/working-with-json-in-bash-using-jq/
 
 ----------------------------------------------------------------------
 
-env -d: Delete var
+Syntax:
+
+    - Replace > by ~
+    - Have > work more conventionally, as syntactic sugar for out -f.
