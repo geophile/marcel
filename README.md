@@ -25,7 +25,7 @@ Print the value of `x`:
 x ~~
 ```
 
-Append the stream `[3, 4, 5]` to x, yielding `[0, 1, 2, 3, 4, 5]`
+Append the stream `[3, 4, 5]` to `x`, yielding `[0, 1, 2, 3, 4, 5]`
 
 ```shell
 gen 3 3 ~~+ x
