@@ -1,30 +1,34 @@
 What's New
 ----------
 
-The Linux `tee` command copies an
-input stream to multiple files. Marcel now has a `tee` operator. For example:
+Bash uses `>`, `>>`, and `<` to connect streams and files.
 
+Marcel's approach is different, using the `read` operator to stream a file, and `out` to write a stream
+to a file. It previously used `>` and `>>` to save streams in variables or files, (the internal
+format is pickled Python values.) But this is confusing. The bash usage of `>` and `>>` is so ingrained
+in me (at least), that I kept misusing those symbols in bash when I meant to write to a file, for example.
+
+This is the first of a two-part fix. In this release, `~~` is used to write a stream (pickled, as before)
+to a variable
+or file, replacing the previous value. `~~+` appends instead.
+
+Examples:
+
+Generate the stream `[0, 1, 2]` and store it in variable `x`:
 ```shell
-ls | tee [> f] [select (f: now() - f.mtime < days(1)) > r]
+gen 3 ~~ x
 ```
 
-* `ls` lists the contents of the current directory. 
-
-* The `tee` command sends each received `File` produced by `ls` to each pipeline
-and to the output stream, which causes the files to be printed.
-
-* `[> f]` is the first pipeline, which simply writes the `File`s to the variable
-`f`. 
-  
-* `[select ... > r]` is the second pipeline. It locates those `File`s that have been
-modified in the past day, and writes those `File`s to variable `r`.
-  
-The output from this command is the result from the `ls` command, but in addition,
-the `f` and `r` variables have been set, and can be examined.
-E.g., to print out the contents of `r`:
+Print the value of `x`:
 
 ```shell
-r >
+x ~~
+```
+
+Append the stream `[3, 4, 5]` to x, yielding `[0, 1, 2, 3, 4, 5]`
+
+```shell
+gen 3 3 ~~+ x
 ```
 
 Marcel

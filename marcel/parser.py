@@ -134,10 +134,9 @@ class Token(Source):
     COMMENT = '#'
     COMMA = ','
     COLON = ':'
-    ARROW = '>'
-    ARROW_2 = '>>'
-    LONG_ARROW_2 = '->>'
-    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON, ARROW, ARROW_2]
+    STREAM = '~~'
+    STREAM_APPEND = '~~+'
+    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON, STREAM, STREAM_APPEND]
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position)
@@ -179,7 +178,7 @@ class Token(Source):
     def is_colon(self):
         return False
 
-    def is_arrow(self):
+    def is_stream(self):
         return False
 
     def is_lexer_failure(self):
@@ -510,18 +509,18 @@ class Colon(Symbol):
         return True
 
 
-class Arrow(Symbol):
+class Stream(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous, symbol):
         super().__init__(text, position, adjacent_to_previous, symbol)
-        assert symbol in (Token.ARROW, Token.ARROW_2)
+        assert symbol in (Token.STREAM, Token.STREAM_APPEND)
         self.end += len(symbol) - 1  # Symbol.__init__ already added one
 
-    def is_arrow(self):
+    def is_stream(self):
         return True
 
     def is_append(self):
-        return self.symbol == Token.ARROW_2
+        return self.symbol == Token.STREAM_APPEND
 
 
 class ImpliedMap(Token):
@@ -599,10 +598,10 @@ class Lexer(Source):
                 token = Colon(self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.COMMENT):
                 return None  # Ignore the rest of the line
-            elif self.match(c, Token.ARROW_2):
-                token = Arrow(self.text, self.end, adjacent_to_previous, Token.ARROW_2)
-            elif self.match(c, Token.ARROW):
-                token = Arrow(self.text, self.end, adjacent_to_previous, Token.ARROW)
+            elif self.match(c, Token.STREAM_APPEND):
+                token = Stream(self.text, self.end, adjacent_to_previous, Token.STREAM_APPEND)
+            elif self.match(c, Token.STREAM):
+                token = Stream(self.text, self.end, adjacent_to_previous, Token.STREAM)
             else:
                 token = String(self.main.op_modules, self.text, self.end, adjacent_to_previous)
             self.end = token.end
@@ -819,11 +818,11 @@ class Parser:
         pipeline.set_parameters(parameters)
         self.current_pipelines.push(pipeline)
 
-        if self.next_token(String, Arrow):
+        if self.next_token(String, Stream):
             if self.token.op_name:
                 op_token = self.token
                 self.tab_completion_context.complete_disabled()
-                found_arrow = self.next_token(Arrow)
+                found_arrow = self.next_token(Stream)
                 assert found_arrow
                 arrow_token = self.token
                 if self.pipeline_end():
@@ -843,7 +842,7 @@ class Parser:
             else:
                 self.tab_completion_context.complete_disabled()
                 load_op = self.load_op(self.token)
-                found_arrow = self.next_token(Arrow)
+                found_arrow = self.next_token(Stream)
                 assert found_arrow
                 self.tab_completion_context.complete_disabled()
                 arrow_token = self.token
@@ -874,7 +873,7 @@ class Parser:
                         assert False
                 else:
                     op_sequence = [load_op] + self.op_sequence()
-                    if self.next_token(Arrow, String):
+                    if self.next_token(Stream, String):
                         # var > op_sequence > var
                         arrow_token = self.token
                         found_string = self.next_token(String)
@@ -885,7 +884,7 @@ class Parser:
                         # var > op_sequence
                         if arrow_token.is_append():
                             raise SyntaxError(arrow_token, 'Append not permitted here.')
-        elif self.next_token(Arrow, String):
+        elif self.next_token(Stream, String):
             self.tab_completion_context.complete_disabled()
             # > var
             arrow_token = self.token
@@ -895,7 +894,7 @@ class Parser:
             op_sequence = [store_op]
         else:
             op_sequence = self.op_sequence()
-            if self.next_token(Arrow, String):
+            if self.next_token(Stream, String):
                 # op_sequence > var
                 arrow_token = self.token
                 found_string = self.next_token(String)

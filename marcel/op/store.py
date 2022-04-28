@@ -39,17 +39,17 @@ If {r:--append} is specified, then the incoming tuples are appended. (And,
 in case the {r:TARGET} is an environment variable, that the variable's value must have previously
 been assigned tuples from a stream.)
 
-There is special syntax for the {r:store} operator: {r:store TARGET} can be written as {r:> TARGET}. 
-With this alternative syntax, the {r:>} acts as a pipe ({r:|}). So, for example, the following command:
+There is special syntax for the {r:store} operator: {r:store TARGET} can be written as {r:~ TARGET}. 
+With this alternative syntax, the {r:~} acts as a pipe ({r:|}). So, for example, the following command:
 
 {L,wrap=F}gen 5 | store x
 
 stores the stream carrying {r:0, 1, 2, 3, 4} in variable {r:x}. This can also be written as:
 
-{L,wrap=F}gen 5 > x
+{L,wrap=F}gen 5 ~ x
 
-The symbol {r:>>} is used to append to the contents of the {r:TARGET}, instead of
-replacing the value, e.g. {r:gen 5 >> x}. 
+The symbol {r:~~} is used to append to the contents of the {r:TARGET}, instead of
+replacing the value, e.g. {r:gen 5 ~~ x}. 
 '''
 
 

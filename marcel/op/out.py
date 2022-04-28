@@ -52,7 +52,7 @@ by {r:--append}, then output is appended to an existing file.
 
 The {r:--append} and {r:--file} options are mutually exclusive.
 
-The formatting options: {r:--csv}, {r:--pickle}, and {r:FORMAT} options are mutually exclusive.
+The formatting options {r:--csv}, {r:--pickle}, and {r:FORMAT} options are mutually exclusive.
 If no formatting options are specified, then the default rendering is used, except
 that 1-tuples are unwrapped. (Note that for certain objects, including
 {r:File} and {r:Process}, the default rendering is specified by the {n:render_compact()}

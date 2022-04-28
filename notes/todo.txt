@@ -335,3 +335,55 @@ Syntax:
 
     - Replace > by ~
     - Have > work more conventionally, as syntactic sugar for out -f.
+
+PROBLEM: Lexer sees ~ and assumes it's a TILDE, even here:
+
+    ls ~/foo*
+
+Can't rely on / to disambiguate, e.g.
+
+    ls ~ 
+
+Disambiguating:
+
+- ~ adjacent to string: Concatenate, the ~ is part of the string. (adjacent: touching)
+
+- ~ followed by EOL: String
+
+- ~ followed by |: String
+
+- ~ followed by string: TILDE
+
+  But
+
+      ls ~ abc
+
+  is ambiguous. Could mean list this directory and abc, or redirect ls contents to abc.
+
+~ is just a bad choice for redirection.
+
+Alternatives:
+
+        ls ~> v
+        ls ~>> v
+
+        ls ~~ v
+        ???
+
+        
+What about using ~~ for append? Delete the variable to start over. But
+replacing var's value is probably the most common usage, so that gets
+clunky -- have to delete and then store.
+
+Fixing this:
+
+       ls ~~ v       # overwrite
+       ls ~~+ v      # append
+
+
+
+     ls . v
+     ls .. v
+     v . select (...)
+
+No, same problem as ~, overloaded.
