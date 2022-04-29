@@ -742,146 +742,146 @@ def test_store_load():
 
 def test_store_load_sugar():
     # ------------------------ Test all the paths through Parser.pipeline()
-    # var ~~
+    # var >
     TEST.run(test='gen 3 | store p1',
-             verification='p1 ~~',
+             verification='p1 >',
              expected_out=[0, 1, 2])
-    # var ~~+ (error)
+    # var >> (error)
     TEST.run(test='gen 3 | store p2',
-             verification='p2 ~~+',
+             verification='p2 >>',
              expected_err='Append not permitted here')
-    # var ~~ var
+    # var > var
     TEST.run('gen 3 | store p3')
-    TEST.run(test='p3 ~~ p4',
-             verification='p4 ~~',
+    TEST.run(test='p3 > p4',
+             verification='p4 >',
              expected_out=[0, 1, 2])
-    # var ~~+ var
+    # var >> var
     TEST.run('gen 3 | store p5')
     TEST.run('gen 3 | map (x: x + 100) | store p6')
-    TEST.run(test='p5 ~~+ p7',
-             verification='p7 ~~',
+    TEST.run(test='p5 >> p7',
+             verification='p7 >',
              expected_out=[0, 1, 2])
-    TEST.run(test='p6 ~~+ p7',
-             verification='p7 ~~',
+    TEST.run(test='p6 >> p7',
+             verification='p7 >',
              expected_out=[0, 1, 2, 100, 101, 102])
-    # var ~~ op_sequence
+    # var > op_sequence
     TEST.run('gen 3 | store p8')
-    TEST.run(test='p8 ~~ map (x: x + 100)',
+    TEST.run(test='p8 > map (x: x + 100)',
              expected_out=[100, 101, 102])
-    # var ~~+ op_sequence (error)
+    # var >> op_sequence (error)
     TEST.run('gen 3 | store p9')
-    TEST.run(test='p9 ~~+ map (x: x + 100)',
+    TEST.run(test='p9 >> map (x: x + 100)',
              expected_err='Append not permitted here')
-    # var ~~ op_sequence ~~ var
+    # var > op_sequence > var
     TEST.run('gen 3 | store p10')
-    TEST.run(test='p10 ~~ map (x: x + 100) ~~ p11',
-             verification='p11 ~~',
+    TEST.run(test='p10 > map (x: x + 100) > p11',
+             verification='p11 >',
              expected_out=[100, 101, 102])
-    # var ~~ op_sequence ~~+ var
+    # var > op_sequence >> var
     TEST.run('gen 3 | store p12')
-    TEST.run(test='p12 ~~ map (x: x + 100) ~~+ p13',
-             verification='p13 ~~',
+    TEST.run(test='p12 > map (x: x + 100) >> p13',
+             verification='p13 >',
              expected_out=[100, 101, 102])
-    TEST.run(test='p12 ~~ map (x: x + 1000) ~~+ p13',
-             verification='p13 ~~',
+    TEST.run(test='p12 > map (x: x + 1000) >> p13',
+             verification='p13 >',
              expected_out=[100, 101, 102, 1000, 1001, 1002])
     # op_sequence -- tested adequately elsewhere
-    # op_sequence ~~ var
-    TEST.run(test='gen 3 ~~ p14',
-             verification='p14 ~~',
+    # op_sequence > var
+    TEST.run(test='gen 3 > p14',
+             verification='p14 >',
              expected_out=[0, 1, 2])
-    # op_sequence ~~+ var
-    TEST.run(test='gen 3 ~~+ p15',
-             verification='p15 ~~',
+    # op_sequence >> var
+    TEST.run(test='gen 3 >> p15',
+             verification='p15 >',
              expected_out=[0, 1, 2])
-    TEST.run(test='gen 3 | map (x: x + 100) ~~+ p15',
-             verification='p15 ~~',
+    TEST.run(test='gen 3 | map (x: x + 100) >> p15',
+             verification='p15 >',
              expected_out=[0, 1, 2, 100, 101, 102])
-    # ~~ var
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [~~ p16] | select (x: False)',
-             verification='p16 ~~',
+    # > var
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [> p16] | select (x: False)',
+             verification='p16 >',
              expected_out=[0, 2, 4])
-    # ~~+ var
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [~~+ p17] | select (x: False)',
-             verification='p17 ~~',
+    # >> var
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [>> p17] | select (x: False)',
+             verification='p17 >',
              expected_out=[0, 2, 4])
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 1) [~~+ p17] | select (x: False)',
-             verification='p17 ~~',
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 1) [>> p17] | select (x: False)',
+             verification='p17 >',
              expected_out=[0, 2, 4, 1, 3, 5])
     # ---------------------------------------------------------------------
     # Ops that look confusingly like vars
-    # op ~~
-    TEST.run(test='pwd ~~',
-             expected_err='A variable must precede ~~')
-    # op ~~+
-    TEST.run(test='pwd ~~+',
-             expected_err='A variable must precede ~~+')
-    # op ~~ var
+    # op >
+    TEST.run(test='pwd >',
+             expected_err='A variable must precede >')
+    # op >>
+    TEST.run(test='pwd >>',
+             expected_err='A variable must precede >>')
+    # op > var
     dir = os.getcwd()
-    TEST.run(test='pwd ~~ o1',
-             verification='o1 ~~ map (f: f.path)',
+    TEST.run(test='pwd > o1',
+             verification='o1 > map (f: f.path)',
              expected_out=[dir])
-    # op ~~+ var
+    # op >> var
     dir = os.getcwd()
-    TEST.run(test='pwd ~~+ o2',
-             verification='o2 ~~ map (f: f.path)',
+    TEST.run(test='pwd >> o2',
+             verification='o2 > map (f: f.path)',
              expected_out=[dir])
-    TEST.run(test='pwd ~~+ o2',
-             verification='o2 ~~ map (f: f.path)',
+    TEST.run(test='pwd >> o2',
+             verification='o2 > map (f: f.path)',
              expected_out=[dir, dir])
-    # var ~~ op
-    TEST.run('gen 3 ~~ o3')
-    TEST.run(test='o3 ~~ reverse',
+    # var > op
+    TEST.run('gen 3 > o3')
+    TEST.run(test='o3 > reverse',
              expected_out=[2, 1, 0])
-    # var ~~+ op
-    TEST.run('gen 3 ~~ o4')
-    TEST.run(test='o4 ~~+ reverse',
+    # var >> op
+    TEST.run('gen 3 > o4')
+    TEST.run(test='o4 >> reverse',
              expected_err='Append not permitted here')
     # ---------------------------------------------------------------------
     # Store at end of top-level pipeline
-    TEST.run(test='gen 5 ~~ g5',
+    TEST.run(test='gen 5 > g5',
              verification='load g5',
              expected_out=[0, 1, 2, 3, 4])
     # Store at end of pipeline arg
-    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [map (x: x * 10) ~~ e10x10]',
+    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [map (x: x * 10) > e10x10]',
              verification='load e10x10',
              expected_out=[0, 20, 40, 60, 80])
     # Store as the entire pipeline arg
-    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [~~ e10]',
+    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [> e10]',
              verification='load e10',
              expected_out=[0, 2, 4, 6, 8])
     # Append
-    TEST.run(test='gen 5 ~~ g5g5',
+    TEST.run(test='gen 5 > g5g5',
              verification='load g5g5',
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run(test='gen 5 ~~+ g5g5',
+    TEST.run(test='gen 5 >> g5g5',
              verification='load g5g5',
              expected_out=[0, 1, 2, 3, 4, 0, 1, 2, 3, 4])
     # Load at beginning of top-level pipeline
-    TEST.run(test='gen 4 ~~ g4',
-             verification='g4 ~~ map (x: -x)',
+    TEST.run(test='gen 4 > g4',
+             verification='g4 > map (x: -x)',
              expected_out=[0, -1, -2, -3])
     # Load by itself at beginning of top-level pipeline
-    TEST.run(test='gen 4 ~~ g4',
-             verification='g4 ~~',
+    TEST.run(test='gen 4 > g4',
+             verification='g4 >',
              expected_out=[0, 1, 2, 3])
     # Load in pipeline arg
-    TEST.run('gen 4 | map (x: (x, x * 10)) ~~ x10')
-    TEST.run('gen 4 | map (x: (x, x * 100)) ~~ x100')
-    TEST.run('x10 ~~ join [x100 ~~]',
+    TEST.run('gen 4 | map (x: (x, x * 10)) > x10')
+    TEST.run('gen 4 | map (x: (x, x * 100)) > x100')
+    TEST.run('x10 > join [x100 >]',
              expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
     # Bug 73
-    TEST.run('gen 3 | map (x: (x, x*10)) ~~ a')
-    TEST.run('gen 3 | map (x: (x, x*100)) ~~ b')
-    TEST.run('gen 3 | map (x: (x, x*1000)) ~~ c')
-    TEST.run('a ~~ join [b ~~] | join [c ~~]',
+    TEST.run('gen 3 | map (x: (x, x*10)) > a')
+    TEST.run('gen 3 | map (x: (x, x*100)) > b')
+    TEST.run('gen 3 | map (x: (x, x*1000)) > c')
+    TEST.run('a > join [b >] | join [c >]',
              expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
     # Bug 74
-    TEST.run('gen 3 | map (x: (x, x*10)) ~~ a')
-    TEST.run('gen 3 | map (x: (x, x*100)) ~~ b')
-    TEST.run('gen 3 | map (x: (x, x*1000)) ~~ c')
-    TEST.run('a ~~ join [b ~~] | join [c ~~] ~~ d')
-    TEST.run('d ~~',
+    TEST.run('gen 3 | map (x: (x, x*10)) > a')
+    TEST.run('gen 3 | map (x: (x, x*100)) > b')
+    TEST.run('gen 3 | map (x: (x, x*1000)) > c')
+    TEST.run('a > join [b >] | join [c >] > d')
+    TEST.run('d >',
              expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
 
 
@@ -1023,12 +1023,12 @@ def test_read():
 def test_intersect():
     TEST.reset_environment()
     # Empty inputs
-    TEST.run('gen 1 | select (*x: False) ~~ empty')
-    TEST.run('gen 3 | intersect [empty ~~]',
+    TEST.run('gen 1 | select (*x: False) > empty')
+    TEST.run('gen 3 | intersect [empty >]',
              expected_out=[])
-    TEST.run('empty ~~ intersect [empty ~~]',
+    TEST.run('empty > intersect [empty >]',
              expected_out=[])
-    TEST.run('empty ~~ intersect [gen 3]',
+    TEST.run('empty > intersect [gen 3]',
              expected_out=[])
     # Non-empty inputs, empty intersection
     TEST.run('gen 3 | intersect [gen 3]',
@@ -1036,9 +1036,9 @@ def test_intersect():
     TEST.run('gen 3 | intersect [gen 1 1]',
              expected_out=[1])
     # Duplicates
-    TEST.run('gen 5 | map (x: [x] * x) | expand ~~ a')
-    TEST.run('gen 5 | map (x: [x] * 2) | expand ~~ b')
-    TEST.run('a ~~ intersect [b ~~] | sort',
+    TEST.run('gen 5 | map (x: [x] * x) | expand > a')
+    TEST.run('gen 5 | map (x: [x] * 2) | expand > b')
+    TEST.run('a > intersect [b >] | sort',
              expected_out=[1, 2, 2, 3, 3, 4, 4])
     # Composite elements
     TEST.run('gen 3 2 | '
@@ -1063,12 +1063,12 @@ def test_intersect():
 def test_union():
     TEST.reset_environment()
     # Empty inputs
-    TEST.run('gen 1 | select (*x: False) ~~ empty')
-    TEST.run('empty ~~ union [empty ~~]',
+    TEST.run('gen 1 | select (*x: False) > empty')
+    TEST.run('empty > union [empty >]',
              expected_out=[])
-    TEST.run('gen 3 | union [empty ~~] | sort',
+    TEST.run('gen 3 | union [empty >] | sort',
              expected_out=[0, 1, 2])
-    TEST.run('empty ~~ union [gen 3] | sort',
+    TEST.run('empty > union [gen 3] | sort',
              expected_out=[0, 1, 2])
     # Non-empty inputs4
     TEST.run('gen 3 | union [gen 3 100] | sort',
@@ -1084,12 +1084,12 @@ def test_union():
 def test_difference():
     TEST.reset_environment()
     # Empty inputs
-    TEST.run('gen 1 | select (*x: False) ~~ empty')
-    TEST.run('empty ~~ difference [empty ~~]',
+    TEST.run('gen 1 | select (*x: False) > empty')
+    TEST.run('empty > difference [empty >]',
              expected_out=[])
-    TEST.run('gen 3 | difference [empty ~~] | sort',
+    TEST.run('gen 3 | difference [empty >] | sort',
              expected_out=[0, 1, 2])
-    TEST.run('empty ~~ difference [gen 3]',
+    TEST.run('empty > difference [gen 3]',
              expected_out=[])
     # Non-empty inputs
     TEST.run('gen 6 | difference [gen 6 100] | sort',
@@ -1206,12 +1206,12 @@ def test_env():
     TEST.reset_environment()
     TEST.run('ko = [map (k, v: k)]')  # key only
     TEST.run('env | ko')
-    TEST.run(test='env | ko ~~ env_keys',
-             verification='env_keys ~~ red count',
+    TEST.run(test='env | ko > env_keys',
+             verification='env_keys > red count',
              expected_out=[29])  # 2 of them were just defined: ko, env_keys
-    TEST.run('env -a | ko | difference [env_keys ~~]',
+    TEST.run('env -a | ko | difference [env_keys >]',
              expected_out=[])
-    TEST.run('env_keys ~~ difference [env -a | ko]',
+    TEST.run('env_keys > difference [env -a | ko]',
              expected_out=[])
     TEST.run('env -b | red count',
              expected_out=[26])
@@ -1235,16 +1235,16 @@ def test_pos():
 def test_tee():
     TEST.run('gen 5 1 | tee',
              expected_err='No pipelines')
-    TEST.run('gen 5 1 | tee [red + ~~ a] [red * ~~ b]',
+    TEST.run('gen 5 1 | tee [red + > a] [red * > b]',
              expected_out=[1, 2, 3, 4, 5])
-    TEST.run('a ~~', expected_out=[15])
-    TEST.run('b ~~', expected_out=[120])
+    TEST.run('a >', expected_out=[15])
+    TEST.run('b >', expected_out=[120])
 
 
 def test_bug_126():
     TEST.run('fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]')
-    TEST.run(test='fact (5) ~~ f',
-             verification='f ~~',
+    TEST.run(test='fact (5) > f',
+             verification='f >',
              expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
 
 
@@ -1255,11 +1255,11 @@ def test_bug_136():
 
 def test_bug_151():
     TEST.run('bytime = [sort (f: f.mtime)]')
-    TEST.run('ls | bytime ~~ a')
-    TEST.run('ls | sort (f: f.mtime) ~~ b')
-    TEST.run('a ~~ difference [b ~~] | red count',
+    TEST.run('ls | bytime > a')
+    TEST.run('ls | sort (f: f.mtime) > b')
+    TEST.run('a > difference [b >] | red count',
              expected_out=[0])
-    TEST.run('b ~~ difference [a ~~] | red count',
+    TEST.run('b > difference [a >] | red count',
              expected_out=[0])
 
 
@@ -1278,9 +1278,9 @@ def test_bug_10():
 
 def test_bug_154():
     TEST.reset_environment()
-    TEST.run('gen 3 ~~ x')
-    TEST.run('x ~~+ (y: -y)', expected_err='Append not permitted')
-    TEST.run('x ~~ (y: -y)', expected_out=[0, -1, -2])
+    TEST.run('gen 3 > x')
+    TEST.run('x >> (y: -y)', expected_err='Append not permitted')
+    TEST.run('x > (y: -y)', expected_out=[0, -1, -2])
 
 
 def test_bug_168():
@@ -1346,13 +1346,17 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    # test_sql()
+    # test_args()
+    #
+    test_bash()
+    test_bugs()
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

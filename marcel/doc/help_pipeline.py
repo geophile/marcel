@@ -20,7 +20,7 @@ Every marcel command amounts to the execution of a pipeline.
 {b:A pipeline can be an argument to an operator}
 
 A pipeline can also appear as an argument for some operators.
-In the case, the pipeline is bracketed: using {n:[...]} 
+In this case, the pipeline is bracketed: using {n:[...]} 
 For example, this pipeline lists the sum of file sizes under 
 {n:/tmp}:
 
@@ -79,4 +79,11 @@ e.g.
 
 This command lists all files inside the current directory,
 recursively, and prints out those that changed within the past day.
+
+Pipelines can be parameterized. So to generalize the {n:recent} pipeline to
+go back {n:d} days instead of 1:
+
+{L,wrap=F}recent = [d: select (file: now() - file.mtime < days(float(d)))]
+{L,wrap=F}ls -fr | recent 3
+
 '''

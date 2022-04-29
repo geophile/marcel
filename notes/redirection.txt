@@ -1,0 +1,200 @@
+Syntax:
+
+    - Replace > by ~
+    - Have > work more conventionally, as syntactic sugar for out -f.
+
+PROBLEM: Lexer sees ~ and assumes it's a TILDE, even here:
+
+    ls ~/foo*
+
+Can't rely on / to disambiguate, e.g.
+
+    ls ~ 
+
+Disambiguating:
+
+- ~ adjacent to string: Concatenate, the ~ is part of the string. (adjacent: touching)
+
+- ~ followed by EOL: String
+
+- ~ followed by |: String
+
+- ~ followed by string: TILDE
+
+  But
+
+      ls ~ abc
+
+  is ambiguous. Could mean list this directory and abc, or redirect ls contents to abc.
+
+~ is just a bad choice for redirection.
+
+Alternatives:
+
+        ls ~> v
+        ls ~>> v
+
+        ls ~~ v
+        ???
+
+        
+What about using ~~ for append? Delete the variable to start over. But
+replacing var's value is probably the most common usage, so that gets
+clunky -- have to delete and then store.
+
+Fixing this:
+
+       ls ~~ v       # overwrite
+       ls ~~+ v      # append
+
+
+
+     ls . v
+     ls .. v
+     v . select (...)
+
+No, same problem as ~, overloaded.
+
+
+ls > ./files.txt
+
+./files.txt > out
+
+./files.txt > ./files2.txt
+
+......................................................................
+
+> and >> are very much like ~~ and ~~+. 
+
+Minor issue: Still not happy with the syntax. Ideally the latter
+symbols would be ~ and ~~, but ~ can't be disambiguated (see above).
+
+Bigger issue: 
+
+- > is for text, like Linux, writing strings to a file. ~~ is for
+streams, pickling the whole thing. So the difference between > and ~~
+is really about format, text vs. pickling.
+
+- ~~ works on vars or files, while > works just on files. 
+
+- read has options for text (default), csv, tsv, pickle. out has
+  options for csv, pickle.
+
+Could regularize all of this:
+
+- Have one set of redirection symbols, > and >>.
+
+- Somehow indicate format (text stream, csv, tsv, pickle stream). Perhaps a format
+  operator? But then what should the default be?
+
+- Support reading from/writing to files or vars.
+
+Example:
+
+    gen 3 ~~ x
+    x ~~
+
+This has to know to write a pickled result to the var x, and then
+unpickle. This formatting info is current implicit in the ~~ syntax.
+
+And here:
+
+    gen 3 > ./file.txt
+    ./file.txt >
+
+implies text stream.
+
+What about this:
+
+- Default is pickling for vars, text stream for files.
+
+- format operator for when the defaults are not what's wanted.
+
+But what about this:
+
+    gen 3 > x
+    x > ./file.txt
+
+x is a var, so we assume pickling. ./file.txt is a file so we assume
+text stream. The conversion is implied. Equivalent to (inventing some
+flags):
+
+    load --pickle x | out --text ./file.txt
+
+Along these lines, and to clean things up, read/out, load/store should
+be unified.
+
+----------------------------------------------------------------------
+
+Design, first attempt:
+
+- Combine load and read -> in
+
+- read has args for a few different purposes:
+
+  - File traversal: -0, -1, --recursive
+  - Format: --csv, --tsv, --pickle
+  - Output: --label
+  - filenames
+
+  The format flags can be applied to vars also.
+
+- Combine store and out -> out
+
+- out (current version) has args for a few different purposes:
+
+  - Target: stdout or file. File is implied by use of --append or
+    --file flags, which must be followed by a filename arg.
+
+  - Format: --csv, --pickle, FORMAT. If none of these are provided, do
+    default rendering.
+
+  Keep the format flags, and add --tsv. 
+
+Var or file?
+
+- var is a python identifier.
+
+- file must begin with ., ~, or /. Could do more complex inference,
+  e.g. file.txt is a file because . is not valid in a python
+  identifier. But keep it simple. file.txt is not valid as either a
+  var or a file. ./file.txt is a file.
+
+- in VAR:
+
+  - One var, no wildcards.
+  - format flag
+
+- in FILE:
+
+  - Multiple filenames, wildcards, start with ., ~, or /.
+  - format flag
+  - traversal flags
+
+- out (no filename or var)
+
+  - write to stdout
+  - format
+
+- out VAR:
+
+  - format. Maybe require --format flag. 
+  - target
+
+- out FILE:
+
+  - format
+  - target
+
+Syntactic sugar:
+
+    Syntax              Meaning
+
+    ... > var           ... | out --pickle var
+
+
+    ... > ./file        ... | out --text --file ./file
+
+    var > ...           in --pickle var | ...
+
+    ./file > ...        in --text --file ./file | ...
