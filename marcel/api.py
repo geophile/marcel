@@ -39,7 +39,7 @@ from marcel.op.join import join as _join
 from marcel.op.load import load as _load
 from marcel.op.ls import ls as _ls
 from marcel.op.map import map as _map
-from marcel.op.out import out as _out, Out as _Out
+from marcel.op.write import out as _out, Write as _Out
 from marcel.op.popd import popd as _popd
 from marcel.op.ps import ps as _ps
 from marcel.op.pushd import pushd as _pushd

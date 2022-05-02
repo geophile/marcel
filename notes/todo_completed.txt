@@ -311,7 +311,7 @@ Turn off color scheme for API
 
 API execution
 
-- run(pipeline): Append Out() if not present, same as console.
+- run(pipeline): Append Write() if not present, same as console.
 
 - first(pipeline): 
 

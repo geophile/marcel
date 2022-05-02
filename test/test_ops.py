@@ -22,28 +22,28 @@ def test_no_such_op():
 
 def test_gen():
     # Explicit out
-    TEST.run('gen 5 | out',
+    TEST.run('gen 5 | write',
              expected_out=[0, 1, 2, 3, 4])
     # Implicit out
     TEST.run('gen 5',
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run('gen 5 10 | out',
+    TEST.run('gen 5 10 | write',
              expected_out=[10, 11, 12, 13, 14])
-    TEST.run('gen 5 10 123 | out',
+    TEST.run('gen 5 10 123 | write',
              expected_err='Too many anonymous')
-    TEST.run('gen 5 -5 | out',
+    TEST.run('gen 5 -5 | write',
              expected_out=[-5, -4, -3, -2, -1])
-    TEST.run('gen 3 -p 2 | out',
+    TEST.run('gen 3 -p 2 | write',
              expected_err='Flags must all appear before the first anonymous arg')
-    TEST.run('gen -p 2 3 | out',
+    TEST.run('gen -p 2 3 | write',
              expected_out=['00', '01', '02'])
-    TEST.run('gen --pad 2 3 | out',
+    TEST.run('gen --pad 2 3 | write',
              expected_out=['00', '01', '02'])
-    TEST.run('gen -p 3 3 99 | out',
+    TEST.run('gen -p 3 3 99 | write',
              expected_out=['099', '100', '101'])
-    TEST.run('gen -p 2 3 99 | out',
+    TEST.run('gen -p 2 3 99 | write',
              expected_err='Padding 2 too small')
-    TEST.run('gen -p 4 3 -10 | out',
+    TEST.run('gen -p 4 3 -10 | write',
              expected_err='Padding incompatible with start < 0')
     # Error along with output
     TEST.run('gen 3 -1 | map (x: 5 / x)',
@@ -61,50 +61,113 @@ def test_gen():
              expected_err="unsupported operand type(s) for -: 'str' and 'int'")
 
 
-def test_out():
+def test_write():
     output_filename = '/tmp/out.txt'
-    TEST.run('gen 3 | out {}',
+    # Write to var
+    TEST.run('gen 3 | write x',
+             verification='read x',
              expected_out=[0, 1, 2])
-    TEST.run('gen 3',
+    TEST.run('gen 3 3 | write --append x',
+             verification='read x',
+             expected_out=[0, 1, 2, 3, 4, 5])
+    TEST.run('gen 3 6 | write -a x',
+             verification='read x',
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8])
+    TEST.run('gen 3 | write x',
+             verification='read x',
              expected_out=[0, 1, 2])
-    TEST.run('gen 3 | out -c',
+    # Write to file -- default format
+    TEST.run(f'gen 3 | write {output_filename}',
+             verification=f'read {output_filename}',
              expected_out=[0, 1, 2])
-    TEST.run('gen 3 | out --csv',
+    TEST.run(f'gen 3 3 | write --append {output_filename}',
+             verification=f'read {output_filename}',
+             expected_out=[0, 1, 2, 3, 4, 5])
+    TEST.run(f'gen 3 6 | write -a {output_filename}',
+             verification=f'read {output_filename}',
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8])
+    TEST.run(f'gen 3 | write {output_filename}',
+             verification=f'read {output_filename}',
              expected_out=[0, 1, 2])
-    TEST.run('gen 3 | out -c {}',
-             expected_err='Cannot specify more than one of')
-    TEST.run(f'gen 3 | out -f {output_filename}',
-             expected_out=[0, 1, 2], file=output_filename)
-    TEST.run(f'gen 3 | out --file {output_filename}',
-             expected_out=[0, 1, 2], file=output_filename)
-    TEST.delete_file(output_filename)
-    TEST.run(f'gen 3 | out -a {output_filename}',
-             expected_out=[0, 1, 2],
-             file=output_filename)
-    TEST.run(f'gen 3 | out --append {output_filename}',
-             expected_out=[0, 1, 2, 0, 1, 2],
-             file=output_filename)
-    TEST.run(f'gen 3 | out -a {output_filename} -f {output_filename}',
-             expected_err='Cannot specify more than one of')
-    # Function-valued args
-    TEST.run(f'gen 3 | out -f ("{output_filename}")',
-             expected_out=[0, 1, 2],
-             file=output_filename)
-    TEST.run(f'gen 3 | out -a ("{output_filename}")',
-             expected_out=[0, 1, 2, 0, 1, 2],
-             file=output_filename)
-    TEST.delete_file(output_filename)
-    TEST.run('gen 3 | out ("{}")',
+    # Write to stdout -- default format
+    TEST.run('gen 3 | write',
              expected_out=[0, 1, 2])
-    # Pickle output
-    TEST.run('gen 3 | out --pickle',
-             expected_err='Must specify either --file or --append with --pickle')
-    TEST.run(test='gen 3 | (x: [x] * x) | out --file /tmp/pickle.txt --pickle',
-             verification='read --pickle /tmp/pickle.txt',
-             expected_out=[[], 1, [2, 2]])
-    TEST.run(test='gen 3 3 | (x: [x] * x) | out --append /tmp/pickle.txt --pickle',
-             verification='read --pickle /tmp/pickle.txt',
-             expected_out=[[], 1, [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5, 5, 5]])
+    TEST.run(f'gen 3 3 | write --append',
+             expected_err='--append cannot be specified when writing to stdout.')
+    # --csv
+    TEST.run(f'gen 3 | (x: (x, -x)) | write --csv',
+             expected_out=['0,0', '1,-1', '2,-2'])
+    TEST.run(f'gen 3 | (x: (x, -x)) | write -c',
+             expected_out=['0,0', '1,-1', '2,-2'])
+    # --tsv
+    TEST.run(f'gen 3 | (x: (x, -x)) | write --tsv',
+             expected_out=['0\t0', '1\t-1', '2\t-2'])
+    TEST.run(f'gen 3 | (x: (x, -x)) | write -t',
+             expected_out=['0\t0', '1\t-1', '2\t-2'])
+    # --format
+    TEST.run('gen 3 | write --format {}',
+             expected_out=[0, 1, 2])
+    TEST.run('gen 3 | write -f {}',
+             expected_out=[0, 1, 2])
+    # --pickle
+    TEST.run(f'gen 3 | write --pickle {output_filename}',
+             verification=f'read --pickle {output_filename}',
+             expected_out=[0, 1, 2])
+    TEST.run(f'gen 3 3 | write -p --append {output_filename}',
+             verification=f'read -p {output_filename}',
+             expected_out=[0, 1, 2, 3, 4, 5])
+    # Text formatting options invalid for writing to var. --pickle is unnecessary but permitted.
+    TEST.run('gen 3 | write --csv x',
+             expected_err='Text formatting flags cannot be used when writing to a variable.')
+    TEST.run('gen 3 | write --tsv x',
+             expected_err='Text formatting flags cannot be used when writing to a variable.')
+    TEST.run('gen 3 | write --format {} x',
+             expected_err='Text formatting flags cannot be used when writing to a variable.')
+    TEST.run('gen 3 | write --pickle x',
+             verification='read x',
+             expected_out=[0, 1, 2])
+
+    # # Default args
+    # TEST.run('gen 3',
+    #          expected_out=[0, 1, 2])
+    # # --csv
+    # TEST.run('gen 3 | (x: (x, x)) | write --csv',
+    #          expected_out=[0, 1, 2])
+    # TEST.run('gen 3 | write --csv',
+    #          expected_out=[0, 1, 2])
+    # TEST.run('gen 3 | write -c -f {}',
+    #          expected_err='Cannot specify more than one of')
+    # TEST.run(f'gen 3 | write {output_filename}',
+    #          expected_out=[0, 1, 2], file=output_filename)
+    # TEST.delete_file(output_filename)
+    # TEST.run(f'gen 3 | write -a {output_filename}',
+    #          expected_out=[0, 1, 2],
+    #          file=output_filename)
+    # TEST.run(f'gen 3 | write --append {output_filename}',
+    #          expected_out=[0, 1, 2, 0, 1, 2],
+    #          file=output_filename)
+    # TEST.run(f'gen 3 | write -a {output_filename} {output_filename}',
+    #          expected_err='Too many anonymous args')
+    # # Function-valued args
+    # TEST.run(f'gen 3 | write ("{output_filename}")',
+    #          expected_out=[0, 1, 2],
+    #          file=output_filename)
+    # TEST.run(f'gen 3 | write -a ("{output_filename}")',
+    #          expected_out=[0, 1, 2, 0, 1, 2],
+    #          file=output_filename)
+    # TEST.delete_file(output_filename)
+    # TEST.run('gen 3 | write -f ("{}")',
+    #          expected_out=[0, 1, 2])
+    # # Pickle output
+    # TEST.run('gen 3 | write --pickle',
+    #          expected_err='--pickle cannot be specified when writing to stdout.')
+    # TEST.delete_file('/tmp/pickle.txt')
+    # TEST.run(test='gen 3 | (x: [x] * x) | write --pickle /tmp/pickle.txt',
+    #          verification='read --pickle /tmp/pickle.txt',
+    #          expected_out=[[], 1, [2, 2]])
+    # TEST.run(test='gen 3 3 | (x: [x] * x) | write --append --pickle /tmp/pickle.txt',
+    #          verification='read --pickle /tmp/pickle.txt',
+    #          expected_out=[[], 1, [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5, 5, 5]])
 
 
 def test_sort():
@@ -1307,7 +1370,7 @@ def test_bugs():
 def main_stable():
     test_no_such_op()
     test_gen()
-    test_out()
+    test_write()
     test_sort()
     test_map()
     test_select()
@@ -1346,11 +1409,44 @@ def main_stable():
 
 
 def main_dev():
+    test_write()
+    # test_read()
+
+    # test_store_load()
+    # test_store_load_sugar()
+
+    # test_sort()
+    # test_map()
+    # test_select()
+    # test_red()
+    # test_expand()
+    # test_head()
+    # test_tail()
+    # test_reverse()
+    # test_squish()
+    # test_unique()
+    # test_window()
+    # test_bash()
+    # test_namespace()
+    # test_remote()
+    # test_sudo()
+    # test_version()
+    # test_assign()
+    # test_join()
+    # test_comment()
+    # test_pipeline_args()
     # test_sql()
+    # test_import()
+    # test_if()
+    # test_delete()
+    # test_intersect()
+    # test_union()
+    # test_difference()
     # test_args()
-    #
-    test_bash()
-    test_bugs()
+    # # test_env()
+    # test_pos()
+    # test_tee()
+    # test_bugs()
 
 
 def main():
