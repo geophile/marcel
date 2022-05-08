@@ -21,29 +21,29 @@ def test_no_such_op():
 
 
 def test_gen():
-    # Explicit out
-    TEST.run('gen 5 | out',
+    # Explicit write
+    TEST.run('gen 5 | write',
              expected_out=[0, 1, 2, 3, 4])
-    # Implicit out
+    # Implicit write
     TEST.run('gen 5',
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run('gen 5 10 | out',
+    TEST.run('gen 5 10 | write',
              expected_out=[10, 11, 12, 13, 14])
-    TEST.run('gen 5 10 123 | out',
+    TEST.run('gen 5 10 123 | write',
              expected_err='Too many anonymous')
-    TEST.run('gen 5 -5 | out',
+    TEST.run('gen 5 -5 | write',
              expected_out=[-5, -4, -3, -2, -1])
-    TEST.run('gen 3 -p 2 | out',
+    TEST.run('gen 3 -p 2 | write',
              expected_err='Flags must all appear before the first anonymous arg')
-    TEST.run('gen -p 2 3 | out',
+    TEST.run('gen -p 2 3 | write',
              expected_out=['00', '01', '02'])
-    TEST.run('gen --pad 2 3 | out',
+    TEST.run('gen --pad 2 3 | write',
              expected_out=['00', '01', '02'])
-    TEST.run('gen -p 3 3 99 | out',
+    TEST.run('gen -p 3 3 99 | write',
              expected_out=['099', '100', '101'])
-    TEST.run('gen -p 2 3 99 | out',
+    TEST.run('gen -p 2 3 99 | write',
              expected_err='Padding 2 too small')
-    TEST.run('gen -p 4 3 -10 | out',
+    TEST.run('gen -p 4 3 -10 | write',
              expected_err='Padding incompatible with start < 0')
     # Error along with output
     TEST.run('gen 3 -1 | map (x: 5 / x)',
@@ -61,48 +61,48 @@ def test_gen():
              expected_err="unsupported operand type(s) for -: 'str' and 'int'")
 
 
-def test_out():
+def test_write():
     output_filename = '/tmp/out.txt'
-    TEST.run('gen 3 | out {}',
+    TEST.run('gen 3 | write {}',
              expected_out=[0, 1, 2])
     TEST.run('gen 3',
              expected_out=[0, 1, 2])
-    TEST.run('gen 3 | out -c',
+    TEST.run('gen 3 | write -c',
              expected_out=[0, 1, 2])
-    TEST.run('gen 3 | out --csv',
+    TEST.run('gen 3 | write --csv',
              expected_out=[0, 1, 2])
-    TEST.run('gen 3 | out -c {}',
+    TEST.run('gen 3 | write -c {}',
              expected_err='Cannot specify more than one of')
-    TEST.run(f'gen 3 | out -f {output_filename}',
+    TEST.run(f'gen 3 | write -f {output_filename}',
              expected_out=[0, 1, 2], file=output_filename)
-    TEST.run(f'gen 3 | out --file {output_filename}',
+    TEST.run(f'gen 3 | write --file {output_filename}',
              expected_out=[0, 1, 2], file=output_filename)
     TEST.delete_file(output_filename)
-    TEST.run(f'gen 3 | out -a {output_filename}',
+    TEST.run(f'gen 3 | write -a {output_filename}',
              expected_out=[0, 1, 2],
              file=output_filename)
-    TEST.run(f'gen 3 | out --append {output_filename}',
+    TEST.run(f'gen 3 | write --append {output_filename}',
              expected_out=[0, 1, 2, 0, 1, 2],
              file=output_filename)
-    TEST.run(f'gen 3 | out -a {output_filename} -f {output_filename}',
+    TEST.run(f'gen 3 | write -a {output_filename} -f {output_filename}',
              expected_err='Cannot specify more than one of')
     # Function-valued args
-    TEST.run(f'gen 3 | out -f ("{output_filename}")',
+    TEST.run(f'gen 3 | write -f ("{output_filename}")',
              expected_out=[0, 1, 2],
              file=output_filename)
-    TEST.run(f'gen 3 | out -a ("{output_filename}")',
+    TEST.run(f'gen 3 | write -a ("{output_filename}")',
              expected_out=[0, 1, 2, 0, 1, 2],
              file=output_filename)
     TEST.delete_file(output_filename)
-    TEST.run('gen 3 | out ("{}")',
+    TEST.run('gen 3 | write ("{}")',
              expected_out=[0, 1, 2])
     # Pickle output
-    TEST.run('gen 3 | out --pickle',
+    TEST.run('gen 3 | write --pickle',
              expected_err='Must specify either --file or --append with --pickle')
-    TEST.run(test='gen 3 | (x: [x] * x) | out --file /tmp/pickle.txt --pickle',
+    TEST.run(test='gen 3 | (x: [x] * x) | write --file /tmp/pickle.txt --pickle',
              verification='read --pickle /tmp/pickle.txt',
              expected_out=[[], 1, [2, 2]])
-    TEST.run(test='gen 3 3 | (x: [x] * x) | out --append /tmp/pickle.txt --pickle',
+    TEST.run(test='gen 3 3 | (x: [x] * x) | write --append /tmp/pickle.txt --pickle',
              verification='read --pickle /tmp/pickle.txt',
              expected_out=[[], 1, [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5, 5, 5]])
 
@@ -608,8 +608,8 @@ def test_join():
     TEST.run(test='gen 4 | map (x: (x, -x)) | join [xn (100)]',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
     os.system('rm -f /tmp/?.csv')
-    TEST.run('gen 3 | map (x: (x, x*10)) | out -f /tmp/a.csv')
-    TEST.run('gen 3 | map (x: (x, x*100)) | out -f /tmp/b.csv')
+    TEST.run('gen 3 | map (x: (x, x*10)) | write -f /tmp/a.csv')
+    TEST.run('gen 3 | map (x: (x, x*100)) | write -f /tmp/b.csv')
     TEST.run('get = [f: (File(f).readlines()) | expand | map (x: eval(x))]')
     TEST.run('get /tmp/a.csv | join [get /tmp/b.csv]',
              expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200)])
@@ -1307,7 +1307,7 @@ def test_bugs():
 def main_stable():
     test_no_such_op()
     test_gen()
-    test_out()
+    test_write()
     test_sort()
     test_map()
     test_select()
@@ -1346,17 +1346,13 @@ def main_stable():
 
 
 def main_dev():
-    # test_sql()
-    # test_args()
-    #
-    test_bash()
-    test_bugs()
+    pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

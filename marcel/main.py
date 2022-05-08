@@ -149,8 +149,8 @@ class Main:
                 # So check this before tacking on the out op.
                 run_immediate = self.run_immediate(pipeline)
                 # Append an out op at the end of pipeline, if there is no output op there already.
-                if not pipeline.last_op().op_name() == 'out':
-                    pipeline.append(marcel.opmodule.create_op(self.env, 'out'))
+                if not pipeline.last_op().op_name() == 'write':
+                    pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
                 command = marcel.core.Command(self.env, line, pipeline)
                 if run_immediate:
                     command.execute()

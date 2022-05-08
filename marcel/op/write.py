@@ -64,7 +64,7 @@ If the {r:--pickle} formatting option is specified, then output must go to a fil
 '''
 
 
-def out(env, append=None, file=None, csv=False, pickle=None, format=None):
+def write(env, append=None, file=None, csv=False, pickle=None, format=None):
     args = []
     if append:
         args.extend(['--append', append])
@@ -76,10 +76,10 @@ def out(env, append=None, file=None, csv=False, pickle=None, format=None):
         args.append('--pickle')
     if format:
         args.append(format)
-    return Out(env), args
+    return Write(env), args
 
 
-class OutArgsParser(marcel.argsparser.ArgsParser):
+class WriteArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('out', env)
@@ -93,7 +93,7 @@ class OutArgsParser(marcel.argsparser.ArgsParser):
         self.validate()
 
 
-class Out(marcel.core.Op):
+class Write(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
@@ -118,7 +118,7 @@ class Out(marcel.core.Op):
         if self.pickle:
             buffer.append('pickle')
         if self.format:
-            buffer.append(f'format={Out.ensure_quoted(self.format)}')
+            buffer.append(f'format={Write.ensure_quoted(self.format)}')
         options = ', '.join(buffer)
         return f'out({options})'
 

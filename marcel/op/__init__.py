@@ -38,7 +38,6 @@ public = [
     'load',
     'ls',
     'map',
-    'out',
     'popd',
     'ps',
     'pushd',
@@ -59,7 +58,8 @@ public = [
     'unique',
     'union',
     'version',
-    'window'
+    'window',
+    'write'
 ]
 
 all = public + [
