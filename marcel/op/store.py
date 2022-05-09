@@ -20,48 +20,45 @@ import marcel.picklefile
 import marcel.reservoir
 
 HELP = '''
-{L,wrap=F}store [-a|--append] TARGET
-{L,wrap=F}> TARGET
-{L,wrap=F}>> TARGET
+{L,wrap=F}store [-a|--append] VAR
+{L,wrap=F}>$ VAR
+{L,wrap=F}>>$ VAR
 
-{L,indent=4:28}{r:-a}, {r:--append}            Append to {r:TARGET}s list, instead of replacing.
+{L,indent=4:28}{r:-a}, {r:--append}            Append to {r:VAR}s list, instead of replacing.
 
-{L,indent=4:28}{r:TARGET}                  An environment variable or a file.
+{L,indent=4:28}{r:VAR}                     A variable.
 
-Write the incoming tuples to the {r:TARGET}. 
+Write the incoming tuples to the {r:VAR}. 
 
-A {r:TARGET} is either an environment variable
-or a file. A variable is indicated by a Python identifier, and any other string identifies a file.
-(So {n:abc} is an identifier, while {n:./abc} is a file in the current directory.) 
+{r:VAR} is an environment variable. 
 
-By default, the current value of {r:TARGET} is replaced. 
-If {r:--append} is specified, then the incoming tuples are appended. (And,
-in case the {r:TARGET} is an environment variable, that the variable's value must have previously
-been assigned tuples from a stream.)
+By default, the current value of {r:VAR} is replaced. 
+If {r:--append} is specified, then the incoming tuples are appended. The variable's value must have 
+previously been assigned tuples from a stream.)
 
-There is special syntax for the {r:store} operator: {r:store TARGET} can be written as {r:~ TARGET}. 
-With this alternative syntax, the {r:~} acts as a pipe ({r:|}). So, for example, the following command:
+There is special syntax for the {r:store} operator: {r:store VAR} can be written as {r:>$ VAR}. 
+With this alternative syntax, the {r:>$} acts as a pipe ({r:|}). So, for example, the following command:
 
 {L,wrap=F}gen 5 | store x
 
 stores the stream carrying {r:0, 1, 2, 3, 4} in variable {r:x}. This can also be written as:
 
-{L,wrap=F}gen 5 ~ x
+{L,wrap=F}gen 5 >$ x
 
-The symbol {r:~~} is used to append to the contents of the {r:TARGET}, instead of
-replacing the value, e.g. {r:gen 5 ~~ x}. 
+The symbol {r:>>$} is used to append to the contents of the {r:VAR}, instead of
+replacing the value, e.g. {r:gen 5 >>$ x}. 
 '''
 
 
-def store(env, target, append=False):
+def store(env, var, append=False):
     store = Store(env)
     args = []
     if append:
         args.append('--append')
-    if type(target) in (str, marcel.reservoir.Reservoir):
-        args.append(target)
+    if type(var) in (str, marcel.reservoir.Reservoir):
+        args.append(var)
     else:
-        raise marcel.exception.KillCommandException(f'{target} is not a Reservoir: {type(target)}')
+        raise marcel.exception.KillCommandException(f'{var} is not a Reservoir: {type(var)}')
     return store, args
 
 
@@ -74,7 +71,7 @@ class StoreArgsParser(marcel.argsparser.ArgsParser):
         # normally be done by setup. However, for commands that don't terminate for a while, (e.g. ls -r / > x),
         # we want the variable available immediately. This allows the long-running command to be run in background,
         # monitoring progress, e.g. x > tail 5.
-        self.add_anon('target', convert=self.init_target)
+        self.add_anon('var', convert=self.init_var)
         self.validate()
 
 
@@ -82,42 +79,42 @@ class Store(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.target = None
+        self.var = None
         self.append = None
         self.picklefile = None
         self.writer = None
         self.nesting = None
 
     def __repr__(self):
-        return f'store({self.target}, append)' if self.append else f'store({self.target})'
+        return f'store({self.var}, append)' if self.append else f'store({self.var})'
 
     # AbstractOp
 
     def setup(self):
-        if type(self.target) is marcel.reservoir.Reservoir:
+        if type(self.var) is marcel.reservoir.Reservoir:
             # API
-            self.picklefile = self.target
-        elif type(self.target) is str:
+            self.picklefile = self.var
+        elif type(self.var) is str:
             # API: string is a filename.
             # Interactive: string is a filename or environment variable name.
-            if self.target.isidentifier():
-                self.picklefile = self.getvar(self.target)
+            if self.var.isidentifier():
+                self.picklefile = self.getvar(self.var)
                 if type(self.picklefile) is not marcel.reservoir.Reservoir:
                     if self.append:
                         raise marcel.exception.KillCommandException(
-                            f'{self.target} is not usable as a reservoir, '
+                            f'{self.var} is not usable as a reservoir, '
                             f'it stores a value of type {type(self.picklefile)}.')
                     else:
-                        self.picklefile = marcel.reservoir.Reservoir(self.target)
-                        self.env().setvar(self.target, self.picklefile)
-                self.env().mark_possibly_changed(self.target)
+                        self.picklefile = marcel.reservoir.Reservoir(self.var)
+                        self.env().setvar(self.var, self.picklefile)
+                self.env().mark_possibly_changed(self.var)
             else:
-                self.picklefile = marcel.picklefile.PickleFile(self.target)
-        elif self.target is None:
+                raise marcel.exception.KillCommandException(f'{self.var} is not a Python identifier.')
+        elif self.var is None:
             raise marcel.exception.KillCommandException(f'Reservoir is undefined.')
         else:
             raise marcel.exception.KillCommandException(
-                f'{self.target} is not usable as a reservoir, it stores a value of type {type(self.picklefile)}.')
+                f'{self.var} is not usable as a reservoir, it stores a value of type {type(self.picklefile)}.')
         self.writer = self.picklefile.writer(self.append)
         self.nesting = self.env().vars().n_scopes()
 

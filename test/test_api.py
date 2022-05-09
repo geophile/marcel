@@ -685,11 +685,9 @@ def test_store_load():
     i = 123
     TEST.run(test=lambda: run(gen(3) | store(i)),
              expected_err='is not a Reservoir')
-    # Files
-    os.system('rm -rf /tmp/storeload.test')
+    # Bad variable name
     TEST.run(test=lambda: run(gen(3) | store('/tmp/storeload.test')),
-             verification=lambda: run(load('/tmp/storeload.test')),
-             expected_out=[0, 1, 2])
+             expected_err='is not a Python identifier')
 
 
 def test_if():

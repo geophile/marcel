@@ -134,10 +134,9 @@ class Token(Source):
     COMMENT = '#'
     COMMA = ','
     COLON = ':'
-    ARROW = '>'
-    ARROW_2 = '>>'
-    LONG_ARROW_2 = '->>'
-    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON, ARROW, ARROW_2]
+    REDIRECT_VAR = '>$'
+    REDIRECT_VAR_2 = '>>$'
+    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON, REDIRECT_VAR, REDIRECT_VAR_2]
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position)
@@ -514,14 +513,14 @@ class Arrow(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous, symbol):
         super().__init__(text, position, adjacent_to_previous, symbol)
-        assert symbol in (Token.ARROW, Token.ARROW_2)
+        assert symbol in (Token.REDIRECT_VAR, Token.REDIRECT_VAR_2)
         self.end += len(symbol) - 1  # Symbol.__init__ already added one
 
     def is_arrow(self):
         return True
 
     def is_append(self):
-        return self.symbol == Token.ARROW_2
+        return self.symbol == Token.REDIRECT_VAR_2
 
 
 class ImpliedMap(Token):
@@ -599,10 +598,10 @@ class Lexer(Source):
                 token = Colon(self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.COMMENT):
                 return None  # Ignore the rest of the line
-            elif self.match(c, Token.ARROW_2):
-                token = Arrow(self.text, self.end, adjacent_to_previous, Token.ARROW_2)
-            elif self.match(c, Token.ARROW):
-                token = Arrow(self.text, self.end, adjacent_to_previous, Token.ARROW)
+            elif self.match(c, Token.REDIRECT_VAR_2):
+                token = Arrow(self.text, self.end, adjacent_to_previous, Token.REDIRECT_VAR_2)
+            elif self.match(c, Token.REDIRECT_VAR):
+                token = Arrow(self.text, self.end, adjacent_to_previous, Token.REDIRECT_VAR)
             else:
                 token = String(self.main.op_modules, self.text, self.end, adjacent_to_previous)
             self.end = token.end
