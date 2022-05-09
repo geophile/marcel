@@ -63,48 +63,91 @@ def test_gen():
 
 def test_write():
     output_filename = '/tmp/out.txt'
-    TEST.run('gen 3 | write {}',
-             expected_out=[0, 1, 2])
-    TEST.run('gen 3',
-             expected_out=[0, 1, 2])
-    TEST.run('gen 3 | write -c',
-             expected_out=[0, 1, 2])
-    TEST.run('gen 3 | write --csv',
-             expected_out=[0, 1, 2])
-    TEST.run('gen 3 | write -c {}',
+    # Write to stdout
+    TEST.run('gen 3 | (x: (x, -x))',
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    TEST.run('gen 3 | (x: (x, -x)) | write --format "{}~{}"',
+             expected_out=['0~0', '1~-1', '2~-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write -f "{}~{}"',
+             expected_out=['0~0', '1~-1', '2~-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write --csv',
+             expected_out=['0,0', '1,-1', '2,-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write -c',
+             expected_out=['0,0', '1,-1', '2,-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write --tsv',
+             expected_out=['0\t0', '1\t-1', '2\t-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write -t',
+             expected_out=['0\t0', '1\t-1', '2\t-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write --pickle',
+             expected_err='--pickle incompatible with stdout')
+    TEST.run('gen 3 | (x: (x, -x)) | write -p',
+             expected_err='--pickle incompatible with stdout')
+    TEST.run('gen 3 | (x: (x, -x)) | write --csv --tsv',
              expected_err='Cannot specify more than one of')
-    TEST.run(f'gen 3 | write -f {output_filename}',
-             expected_out=[0, 1, 2], file=output_filename)
-    TEST.run(f'gen 3 | write --file {output_filename}',
-             expected_out=[0, 1, 2], file=output_filename)
+    # Write to file
+    TEST.run('gen 3 | (x: (x, -x)) | write ' + output_filename,
+             expected_out=[(0, 0), (1, -1), (2, -2)],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --format "{}~{}" ' + output_filename,
+             expected_out=['0~0', '1~-1', '2~-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write -f "{}~{}" ' + output_filename,
+             expected_out=['0~0', '1~-1', '2~-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --csv ' + output_filename,
+             expected_out=['0,0', '1,-1', '2,-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write -c ' + output_filename,
+             expected_out=['0,0', '1,-1', '2,-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --tsv ' + output_filename,
+             expected_out=['0\t0', '1\t-1', '2\t-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write -t ' + output_filename,
+             expected_out=['0\t0', '1\t-1', '2\t-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --pickle ' + output_filename,
+             verification=f'read --pickle {output_filename}',
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    TEST.run('gen 3 | (x: (x, -x)) | write -p ' + output_filename,
+             verification=f'read --pickle {output_filename}',
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    # Append
+    TEST.run('gen 3 | write --append',
+             expected_err='--append incompatible with stdout')
+    TEST.run('gen 3 | write -a',
+             expected_err='--append incompatible with stdout')
     TEST.delete_file(output_filename)
-    TEST.run(f'gen 3 | write -a {output_filename}',
+    TEST.run('gen 3 | write --append ' + output_filename,
+             verification='read ' + output_filename,
+             expected_out=[0, 1, 2])
+    TEST.run('gen 3 3 | write --append ' + output_filename,
+             verification='read ' + output_filename,
+             expected_out=[0, 1, 2, 3, 4, 5])
+    TEST.delete_file(output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --csv --append ' + output_filename,
+             expected_out=['0,0', '1,-1', '2,-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --tsv --append ' + output_filename,
+             expected_out=['0,0', '1,-1', '2,-2',
+                           '0\t0', '1\t-1', '2\t-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --append ' + output_filename,
+             expected_out=['0,0', '1,-1', '2,-2',
+                           '0\t0', '1\t-1', '2\t-2',
+                           (0, 0), (1, -1), (2, -2)],
+             file=output_filename)
+    TEST.delete_file(output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --pickle --append ' + output_filename,
+             verification='read --pickle ' + output_filename,
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    TEST.run('gen 3 3 | (x: (x, -x)) | write --pickle --append ' + output_filename,
+             verification='read --pickle ' + output_filename,
+             expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4), (5, -5)])
+    # Function-valued filename
+    TEST.run(f'gen 3 | write ("{output_filename}")',
              expected_out=[0, 1, 2],
              file=output_filename)
-    TEST.run(f'gen 3 | write --append {output_filename}',
-             expected_out=[0, 1, 2, 0, 1, 2],
-             file=output_filename)
-    TEST.run(f'gen 3 | write -a {output_filename} -f {output_filename}',
-             expected_err='Cannot specify more than one of')
-    # Function-valued args
-    TEST.run(f'gen 3 | write -f ("{output_filename}")',
-             expected_out=[0, 1, 2],
-             file=output_filename)
-    TEST.run(f'gen 3 | write -a ("{output_filename}")',
-             expected_out=[0, 1, 2, 0, 1, 2],
-             file=output_filename)
-    TEST.delete_file(output_filename)
-    TEST.run('gen 3 | write ("{}")',
-             expected_out=[0, 1, 2])
-    # Pickle output
-    TEST.run('gen 3 | write --pickle',
-             expected_err='Must specify either --file or --append with --pickle')
-    TEST.run(test='gen 3 | (x: [x] * x) | write --file /tmp/pickle.txt --pickle',
-             verification='read --pickle /tmp/pickle.txt',
-             expected_out=[[], 1, [2, 2]])
-    TEST.run(test='gen 3 3 | (x: [x] * x) | write --append /tmp/pickle.txt --pickle',
-             verification='read --pickle /tmp/pickle.txt',
-             expected_out=[[], 1, [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5, 5, 5]])
 
 
 def test_sort():
@@ -608,8 +651,8 @@ def test_join():
     TEST.run(test='gen 4 | map (x: (x, -x)) | join [xn (100)]',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
     os.system('rm -f /tmp/?.csv')
-    TEST.run('gen 3 | map (x: (x, x*10)) | write -f /tmp/a.csv')
-    TEST.run('gen 3 | map (x: (x, x*100)) | write -f /tmp/b.csv')
+    TEST.run('gen 3 | map (x: (x, x*10)) | write /tmp/a.csv')
+    TEST.run('gen 3 | map (x: (x, x*100)) | write /tmp/b.csv')
     TEST.run('get = [f: (File(f).readlines()) | expand | map (x: eval(x))]')
     TEST.run('get /tmp/a.csv | join [get /tmp/b.csv]',
              expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200)])
@@ -1346,13 +1389,13 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_write()
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

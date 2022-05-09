@@ -52,7 +52,10 @@ class TestBase:
             return str(x)
 
     def delete_file(self, filename):
-        os.remove(filename)
+        try:
+            os.remove(filename)
+        except FileNotFoundError:
+            pass
 
     def remove_empty_line_at_end(self, lines):
         if len(lines[-1]) == 0:
