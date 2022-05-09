@@ -20,10 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/marcel/op/read.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/read.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/op/write.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/op/write.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/test_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_ops.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -484,7 +483,7 @@
       <workItem from="1650978328852" duration="4902000" />
       <workItem from="1651152173770" duration="10734000" />
       <workItem from="1651247497333" duration="6640000" />
-      <workItem from="1651969388004" duration="15090000" />
+      <workItem from="1651969388004" duration="15570000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
@@ -559,11 +558,6 @@
           <url>file://$PROJECT_DIR$/marcel/tabcompleter.py</url>
           <line>66</line>
           <option name="timeStamp" value="109" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/marcel/op/read.py</url>
-          <line>203</line>
-          <option name="timeStamp" value="129" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

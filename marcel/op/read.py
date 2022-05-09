@@ -64,8 +64,11 @@ If {r:--label} is specified, then the input {n:File} is included in the output, 
 position of each output tuple.
 '''
 
+COMMA = ','
+TAB = '\t'
 
-def read(env, *paths, depth=None, recursive=False, csv=False, tsv=False, pickle=False, label=False):
+
+def read(env, *filenames, depth=None, recursive=False, csv=False, tsv=False, pickle=False, label=False):
     args = []
     if depth == 0:
         args.append('-0')
@@ -81,7 +84,7 @@ def read(env, *paths, depth=None, recursive=False, csv=False, tsv=False, pickle=
         args.append('--pickle')
     if label:
         args.append('--label')
-    args.extend(paths)
+    args.extend(filenames)
     return Read(env), args
 
 
@@ -122,7 +125,7 @@ class Read(marcel.op.filenamesop.FilenamesOp):
             options.append('pickle')
         if self.filenames:
             filenames = [str(p) for p in self.filenames]
-            return f'read({",".join(options)}, filename={filenames})'
+            return f'read({",".join(options)}, filenames={filenames})'
         else:
             return f'read({",".join(options)})'
 
@@ -131,7 +134,8 @@ class Read(marcel.op.filenamesop.FilenamesOp):
     def setup(self):
         self.file = True
         super().setup()
-        self.reader = (CSVReader(self) if self.csv or self.tsv else
+        self.reader = (CSVReader(self, COMMA) if self.csv else
+                       CSVReader(self, TAB) if self.tsv else
                        PickleReader(self) if self.pickle else
                        TextReader(self))
 
@@ -206,10 +210,10 @@ class PickleReader(Reader):
 
 class CSVReader(Reader):
     
-    def __init__(self, op):
+    def __init__(self, op, delimiter):
         super().__init__(op)
         self.input = InputIterator(self)
-        self.reader = csv.reader(self.input, delimiter=(',' if op.csv else '\t'))
+        self.reader = csv.reader(self.input, delimiter=delimiter)
 
     def read_file(self, op, file, label):
         with open(file.path, 'r') as input:

@@ -118,7 +118,7 @@ def test_write():
     TEST.run(test=lambda: run(gen(3) | write(lambda: output_filename)),
              expected_out=[0, 1, 2],
              file=output_filename)
-    
+
 
 def test_sort():
     TEST.run(test=lambda: run(gen(5) | sort()),
@@ -759,7 +759,7 @@ def test_read():
                          map(lambda f, x, y, z: (str(f), x, y, z))),
              expected_out=[('f2.tsv', '1', '2.3', 'ab'),
                            ('f2.tsv', '2', '3.4', 'xy')])
-    # --pickle testing is done in test_out()
+    # --pickle testing is done in test_write()
     # Filenames on commandline
     TEST.run(lambda: run(read('/tmp/read/f1.csv')),
              expected_out=['1,2.3,ab', '2,3.4,xy', '3,4.5,"m,n"'])
