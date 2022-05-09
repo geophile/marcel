@@ -65,7 +65,7 @@ COMMA = ','
 TAB = '\t'
 
 
-def write(env, csv=False, tsv=False, pickle=False, format=None, append=False, filename=None):
+def write(env, filename=None, csv=False, tsv=False, pickle=False, format=None, append=False):
     args = []
     if csv:
         args.append('--csv')
