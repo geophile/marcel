@@ -51,11 +51,12 @@ class TestBase:
         else:
             return str(x)
 
-    def delete_file(self, filename):
-        try:
-            os.remove(filename)
-        except FileNotFoundError:
-            pass
+    def delete_files(self, *filenames):
+        for filename in filenames:
+            try:
+                os.remove(filename)
+            except FileNotFoundError:
+                pass
 
     def remove_empty_line_at_end(self, lines):
         if len(lines[-1]) == 0:

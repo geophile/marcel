@@ -87,14 +87,14 @@ def test_write():
     # Append
     TEST.run(test=lambda: run(gen(3) | write(append=True)),
              expected_err='--append incompatible with stdout')
-    TEST.delete_file(output_filename)
+    TEST.delete_files(output_filename)
     TEST.run(test=lambda: run(gen(3) | write(output_filename, append=True)),
              verification=lambda: run(read(output_filename)),
              expected_out=[0, 1, 2])
     TEST.run(test=lambda: run(gen(3, 3) | write(output_filename, append=True)),
              verification=lambda: run(read(output_filename)),
              expected_out=[0, 1, 2, 3, 4, 5])
-    TEST.delete_file(output_filename)
+    TEST.delete_files(output_filename)
     TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(output_filename, csv=True, append=True)),
              expected_out=['0,0', '1,-1', '2,-2'],
              file=output_filename)
@@ -107,7 +107,7 @@ def test_write():
                            '0\t0', '1\t-1', '2\t-2',
                            (0, 0), (1, -1), (2, -2)],
              file=output_filename)
-    TEST.delete_file(output_filename)
+    TEST.delete_files(output_filename)
     TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(output_filename, pickle=True, append=True)),
              verification=lambda: run(read(output_filename, pickle=True)),
              expected_out=[(0, 0), (1, -1), (2, -2)])

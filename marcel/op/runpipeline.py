@@ -39,7 +39,7 @@ class RunPipeline(marcel.core.Op):
         self.pipeline = self.getvar(self.var)
         if self.pipeline is None:
             raise marcel.exception.KillCommandException(
-                f'The variable {self.var} is undefined.')
+                f'{self.var} is not executable.')
         if not isinstance(self.pipeline, marcel.core.Pipeline):
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is not bound to anything executable.')

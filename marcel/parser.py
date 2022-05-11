@@ -134,9 +134,25 @@ class Token(Source):
     COMMENT = '#'
     COMMA = ','
     COLON = ':'
+    REDIRECT_FILE = '>'
+    REDIRECT_FILE_APPEND = '>>'
     REDIRECT_VAR = '>$'
-    REDIRECT_VAR_2 = '>>$'
-    STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON, REDIRECT_VAR, REDIRECT_VAR_2]
+    REDIRECT_VAR_APPEND = '>>$'
+    STRING_TERMINATING = [
+        OPEN,
+        CLOSE,
+        PIPE,
+        BEGIN,
+        END,
+        ASSIGN,
+        COMMENT,
+        COMMA,
+        COLON,
+        REDIRECT_FILE,
+        REDIRECT_FILE_APPEND,
+        REDIRECT_VAR,
+        REDIRECT_VAR_APPEND
+    ]
 
     def __init__(self, text, position, adjacent_to_previous):
         super().__init__(text, position)
@@ -513,14 +529,21 @@ class Arrow(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous, symbol):
         super().__init__(text, position, adjacent_to_previous, symbol)
-        assert symbol in (Token.REDIRECT_VAR, Token.REDIRECT_VAR_2)
+        assert symbol in (Token.REDIRECT_VAR, Token.REDIRECT_VAR_APPEND,
+                          Token.REDIRECT_FILE, Token.REDIRECT_FILE_APPEND)
         self.end += len(symbol) - 1  # Symbol.__init__ already added one
 
     def is_arrow(self):
         return True
 
+    def is_var(self):
+        return self.symbol in (Token.REDIRECT_VAR, Token.REDIRECT_VAR_APPEND)
+
+    def is_file(self):
+        return self.symbol in (Token.REDIRECT_FILE, Token.REDIRECT_FILE_APPEND)
+
     def is_append(self):
-        return self.symbol == Token.REDIRECT_VAR_2
+        return self.symbol in (Token.REDIRECT_VAR_APPEND, Token.REDIRECT_FILE_APPEND)
 
 
 class ImpliedMap(Token):
@@ -598,10 +621,14 @@ class Lexer(Source):
                 token = Colon(self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.COMMENT):
                 return None  # Ignore the rest of the line
-            elif self.match(c, Token.REDIRECT_VAR_2):
-                token = Arrow(self.text, self.end, adjacent_to_previous, Token.REDIRECT_VAR_2)
+            elif self.match(c, Token.REDIRECT_VAR_APPEND):
+                token = Arrow(self.text, self.end, adjacent_to_previous, Token.REDIRECT_VAR_APPEND)
             elif self.match(c, Token.REDIRECT_VAR):
                 token = Arrow(self.text, self.end, adjacent_to_previous, Token.REDIRECT_VAR)
+            elif self.match(c, Token.REDIRECT_FILE_APPEND):
+                token = Arrow(self.text, self.end, adjacent_to_previous, Token.REDIRECT_FILE_APPEND)
+            elif self.match(c, Token.REDIRECT_FILE):
+                token = Arrow(self.text, self.end, adjacent_to_previous, Token.REDIRECT_FILE)
             else:
                 token = String(self.main.op_modules, self.text, self.end, adjacent_to_previous)
             self.end = token.end
@@ -817,7 +844,6 @@ class Parser:
         pipeline = marcel.core.Pipeline()
         pipeline.set_parameters(parameters)
         self.current_pipelines.push(pipeline)
-
         if self.next_token(String, Arrow):
             if self.token.op_name:
                 op_token = self.token
@@ -827,13 +853,17 @@ class Parser:
                 arrow_token = self.token
                 if self.pipeline_end():
                     # op >
-                    raise SyntaxError(self.token, f'A variable must precede {arrow_token.value(self)}, '
-                                                  f'not an operator ({self.token.op_name})')
+                    if arrow_token.is_var():
+                        raise SyntaxError(self.token, f'A variable must precede {arrow_token.value(self)}, '
+                                                      f'not an operator ({self.token.op_name})')
+                    elif arrow_token.is_file():
+                        raise SyntaxError(self.token, f'A filename must precede {arrow_token.value(self)}, '
+                                                      f'not an operator ({self.token.op_name})')
                 elif self.pipeline_end(1):
                     if self.next_token(String):
-                        # op > var
+                        # op > x
                         op = (op_token, [])
-                        store_op = self.store_op(self.token, arrow_token.is_append())
+                        store_op = self.redirect_in_op(arrow_token, self.token)
                         op_sequence = [op, store_op]
                     else:
                         raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value(self)}')
@@ -841,27 +871,28 @@ class Parser:
                     raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value(self)}')
             else:
                 self.tab_completion_context.complete_disabled()
-                load_op = self.load_op(self.token)
+                source = self.token
                 found_arrow = self.next_token(Arrow)
                 assert found_arrow
                 self.tab_completion_context.complete_disabled()
                 arrow_token = self.token
+                load_op = self.redirect_out_op(arrow_token, source)
                 if self.pipeline_end():
-                    # var >
+                    # x >
                     if arrow_token.is_append():
                         raise SyntaxError(arrow_token, 'Append not permitted here.')
                     op_sequence = [load_op]
                 elif self.pipeline_end(1):
                     if self.next_token(String):
                         if self.token.op_name:
-                            # var > op
+                            # x > op
                             if arrow_token.is_append():
                                 raise SyntaxError(arrow_token, 'Append not permitted here.')
                             op = (self.token, [])
                             op_sequence = [load_op, op]
                         else:
-                            # var > var
-                            store_op = self.store_op(self.token, arrow_token.is_append())
+                            # x > y
+                            store_op = self.redirect_in_op(arrow_token, self.token)
                             op_sequence = [load_op, store_op]
                     elif self.next_token(Expression):
                         # map is implied
@@ -874,32 +905,32 @@ class Parser:
                 else:
                     op_sequence = [load_op] + self.op_sequence()
                     if self.next_token(Arrow, String):
-                        # var > op_sequence > var
+                        # x > op_sequence > y
                         arrow_token = self.token
                         found_string = self.next_token(String)
                         assert found_string
-                        store_op = self.store_op(self.token, arrow_token.is_append())
+                        store_op = self.redirect_in_op(arrow_token, self.token)
                         op_sequence.append(store_op)
                     else:
-                        # var > op_sequence
+                        # x > op_sequence
                         if arrow_token.is_append():
                             raise SyntaxError(arrow_token, 'Append not permitted here.')
         elif self.next_token(Arrow, String):
             self.tab_completion_context.complete_disabled()
-            # > var
+            # > x
             arrow_token = self.token
             found_string = self.next_token(String)
             assert found_string
-            store_op = self.store_op(self.token, arrow_token.is_append())
+            store_op = self.redirect_in_op(arrow_token, self.token)
             op_sequence = [store_op]
         else:
             op_sequence = self.op_sequence()
             if self.next_token(Arrow, String):
-                # op_sequence > var
+                # op_sequence > x
                 arrow_token = self.token
                 found_string = self.next_token(String)
                 assert found_string
-                store_op = self.store_op(self.token, arrow_token.is_append())
+                store_op = self.redirect_in_op(arrow_token, self.token)
                 op_sequence.append(store_op)
             # else:  op_sequence is OK as is
         for op_args in op_sequence:
@@ -908,11 +939,13 @@ class Parser:
         self.current_pipelines.pop()
         return pipeline
 
-    def load_op(self, var):
-        return String(self.op_modules, 'load'), [var]
+    def redirect_out_op(self, arrow_token, source=None):
+        op_name = 'load' if arrow_token.is_var() else 'read'
+        return String(self.op_modules, op_name), [] if source is None else [source]
 
-    def store_op(self, var, append):
-        return String(self.op_modules, 'store'), ['--append', var] if append else [var]
+    def redirect_in_op(self, arrow_token, target):
+        op_name = 'store' if arrow_token.is_var() else 'write'
+        return String(self.op_modules, op_name), ['--append', target] if arrow_token.is_append() else [target]
 
     def map_op(self, expr):
         return String(self.op_modules, 'map'), [expr]
