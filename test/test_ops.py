@@ -17,7 +17,7 @@ TEST = test_base.TestConsole()
 
 
 def test_no_such_op():
-    TEST.run('gen 5 | abc', expected_err='The variable abc is undefined')
+    TEST.run('gen 5 | abc', expected_err='is not executable')
 
 
 def test_gen():
@@ -1536,13 +1536,13 @@ def main_stable():
 
 
 def main_dev():
-    test_redirect_var()
+    pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

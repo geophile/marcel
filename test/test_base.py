@@ -3,6 +3,7 @@ import io
 import os
 import pathlib
 import sys
+import shutil
 
 import dill.source
 
@@ -55,6 +56,8 @@ class TestBase:
         for filename in filenames:
             try:
                 os.remove(filename)
+            except IsADirectoryError:
+                shutil.rmtree(filename)
             except FileNotFoundError:
                 pass
 
