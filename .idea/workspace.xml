@@ -22,7 +22,6 @@
     <list default="true" id="65395a2f-6fac-4296-b046-471355077228" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marcel/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/marcel/version.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -484,7 +483,7 @@
       <workItem from="1651152173770" duration="10734000" />
       <workItem from="1651247497333" duration="6640000" />
       <workItem from="1651969388004" duration="24880000" />
-      <workItem from="1652215434155" duration="14817000" />
+      <workItem from="1652215434155" duration="15753000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

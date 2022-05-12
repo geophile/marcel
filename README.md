@@ -53,7 +53,7 @@ There is now a file `/tmp/x` containing
 gen 20 1 | (x: (x, x ** (1/2))) >$ f
 ```
 
-4) Append more squre roots, for x = 21 through 30.
+4) Append more square roots, for x = 21 through 30.
 
 ```shell
 gen 10 21 | (x: (x, x ** (1/2))) >>$ f
