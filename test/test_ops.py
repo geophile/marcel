@@ -787,7 +787,7 @@ def test_store_load():
 
 
 def test_redirect_file():
-    # ------------------------ Test all the paths through Parser.pipeline()
+    # ------------------------ Test all the paths through Parser.pipeline() for files
     # file >
     TEST.delete_files('/tmp/p1')
     TEST.run(test='gen 3 | write /tmp/p1',
@@ -876,17 +876,18 @@ def test_redirect_file():
              expected_err='A filename must precede >>')
     # op > file
     TEST.delete_files('/tmp/o1')
+    version = marcel.version.VERSION
     TEST.run(test='version > /tmp/o1',
              verification='/tmp/o1 > map (v: f"v{v}")',
-             expected_out=[f"v{marcel.version.VERSION}"])
+             expected_out=[f"v{version}"])
     # op >> file
     TEST.delete_files('/tmp/o2')
     TEST.run(test='version >> /tmp/o2',
              verification='/tmp/o2 > map (v: f"v{v}")',
-             expected_out=[f"v{marcel.version.VERSION}"])
+             expected_out=[f"v{version}"])
     TEST.run(test='version >> /tmp/o2',
              verification='/tmp/o2 > map (v: f"v{v}")',
-             expected_out=[f"v{marcel.version.VERSION}", f"v{marcel.version.VERSION}"])
+             expected_out=[f"v{version}", f"v{version}"])
     # ---------------------------------------------------------------------
     # Store at end of top-level pipeline
     TEST.delete_files('/tmp/g5')
@@ -936,6 +937,140 @@ def test_redirect_file():
     TEST.run('gen 3 | map (x: (x, x*1000)) > /tmp/c')
     TEST.run('/tmp/a > (x: eval(x)) | join [/tmp/b > (x: eval(x))] | join [/tmp/c > (x: eval(x))] > /tmp/d')
     TEST.run('/tmp/d >',
+             expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
+
+
+def test_redirect_var():
+    # ------------------------ Test all the paths through Parser.pipeline() for vars
+    # var >$
+    TEST.run(test='gen 3 | store p1',
+             verification='p1 >$',
+             expected_out=[0, 1, 2])
+    # var >>$ (error)
+    TEST.run(test='gen 3 | store p2',
+             verification='p2 >>',
+             expected_err='Append not permitted here')
+    # file >$ file
+    TEST.run('gen 3 | store p3')
+    TEST.run(test='p3 >$ p4',
+             verification='p4 >$',
+             expected_out=[0, 1, 2])
+    # var >> var4
+    TEST.run('gen 3 | store p5')
+    TEST.run('gen 3 | map (x: x + 100) | store p6')
+    TEST.run(test='p5 >>$ p7',
+             verification='p7 >$',
+             expected_out=[0, 1, 2])
+    TEST.run(test='p6 >>$ p7',
+             verification='p7 >$',
+             expected_out=[0, 1, 2, 100, 101, 102])
+    # var >$ op_sequence
+    TEST.run('gen 3 | store p8')
+    TEST.run(test='p8 >$ map (x: x + 100)',
+             expected_out=[100, 101, 102])
+    # var >>$ op_sequence (error)
+    TEST.run('gen 3 | store p9')
+    TEST.run(test='p9 >>$ map (x: x + 100)',
+             expected_err='Append not permitted here')
+    # var >$ op_sequence >$ var
+    TEST.run('gen 3 | store p10')
+    TEST.run(test='p10 >$ map (x: x + 100) >$ p11',
+             verification='p11 >$',
+             expected_out=[100, 101, 102])
+    # var >$ op_sequence >>$ var
+    TEST.run('gen 3 | store p12')
+    TEST.run(test='p12 >$ map (x: x + 100) >>$ p13',
+             verification='p13 >$',
+             expected_out=[100, 101, 102])
+    TEST.run(test='p12 >$ map (x: x + 1000) >>$ p13',
+             verification='p13 >$',
+             expected_out=[100, 101, 102, 1000, 1001, 1002])
+    # op_sequence -- tested adequately elsewhere
+    # op_sequence >$ var
+    TEST.run(test='gen 3 >$ p14',
+             verification='p14 >$',
+             expected_out=[0, 1, 2])
+    # op_sequence >>$ var
+    TEST.run(test='gen 3 >>$ p15',
+             verification='p15 >$',
+             expected_out=[0, 1, 2])
+    TEST.run(test='gen 3 | map (x: x + 100) >>$ p15',
+             verification='p15 >$',
+             expected_out=[0, 1, 2, 100, 101, 102])
+    # >$ var
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [>$ p16] | select (x: False)',
+             verification='p16 >$',
+             expected_out=[0, 2, 4])
+    # >>$ var
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [>>$ p17] | select (x: False)',
+             verification='p17 >$',
+             expected_out=[0, 2, 4])
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 1) [>>$ p17] | select (x: False)',
+             verification='p17 >$',
+             expected_out=[0, 2, 4, 1, 3, 5])
+    # ---------------------------------------------------------------------
+    # Ops that look confusingly like files from context
+    # op >$
+    TEST.run(test='pwd >$',
+             expected_err='A variable must precede >$')
+    # op >>$
+    TEST.run(test='pwd >>$',
+             expected_err='A variable must precede >>$')
+    # op >$ var
+    version = marcel.version.VERSION
+    TEST.run(test='version >$ o1',
+             verification='o1 >$ map (v: f"v{v}")',
+             expected_out=[f"v{version}"])
+    # op >>$ var
+    TEST.run(test='version >>$ o2',
+             verification='o2 >$ map (v: f"v{v}")',
+             expected_out=[f"v{version}"])
+    TEST.run(test='version >>$ o2',
+             verification='o2 >$ map (v: f"v{v}")',
+             expected_out=[f"v{version}", f"v{version}"])
+    # ---------------------------------------------------------------------
+    # Store at end of top-level pipeline
+    TEST.run(test='gen 5 >$ g5',
+             verification='load g5',
+             expected_out=[0, 1, 2, 3, 4])
+    # Store at end of pipeline arg
+    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [map (x: x * 10) >$ e10x10]',
+             verification='load e10x10',
+             expected_out=[0, 20, 40, 60, 80])
+    # Store as the entire pipeline arg
+    TEST.delete_files('e10')
+    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [>$ e10]',
+             verification='load e10',
+             expected_out=[0, 2, 4, 6, 8])
+    # Append
+    TEST.run(test='gen 5 >$ g10',
+             verification='load g10',
+             expected_out=[0, 1, 2, 3, 4])
+    TEST.run(test='gen 5 5 >>$ g10',
+             verification='load g10',
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    # Load at beginning of top-level pipeline
+    TEST.run(test='gen 4 >$ g4',
+             verification='g4 >$ map (x: -x)',
+             expected_out=[0, -1, -2, -3])
+    # Load in pipeline arg
+    TEST.run('gen 4 | map (x: (x, x * 10)) >$ x10')
+    TEST.run('gen 4 | map (x: (x, x * 100)) >$ x100')
+    TEST.run('x10 >$ join [x100 >$]',
+             expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
+    # Bug 73
+    TEST.run('gen 3 | map (x: (x, x*10)) >$ a')
+    TEST.run('gen 3 | map (x: (x, x*100)) >$ b')
+    TEST.run('gen 3 | map (x: (x, x*1000)) >$ c')
+    TEST.run('a >$ join [b >$] | join [c >$]',
+             expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
+    # Bug 74
+    TEST.delete_files('a', 'b', 'c', 'd')
+    TEST.run('gen 3 | map (x: (x, x*10)) >$ a')
+    TEST.run('gen 3 | map (x: (x, x*100)) >$ b')
+    TEST.run('gen 3 | map (x: (x, x*1000)) >$ c')
+    TEST.run('a >$ join [b >$] | join [c >$] >$ d')
+    TEST.run('d >$',
              expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
 
 
@@ -1386,6 +1521,7 @@ def main_stable():
     test_import()
     test_store_load()
     test_redirect_file()
+    test_redirect_var()
     test_if()
     test_delete()
     test_read()
@@ -1400,7 +1536,7 @@ def main_stable():
 
 
 def main_dev():
-    test_redirect_file()
+    test_redirect_var()
 
 
 def main():
