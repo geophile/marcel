@@ -1,34 +1,68 @@
 What's New
 ----------
 
-Bash uses `>`, `>>`, and `<` to connect streams and files.
+This release revisits the commands and syntax for storing and retrieving streams, in files and
+variables.
 
-Marcel's approach is different, using the `read` operator to stream a file, and `out` to write a stream
-to a file. It previously used `>` and `>>` to save streams in variables or files, (the internal
-format is pickled Python values.) But this is confusing. The bash usage of `>` and `>>` is so ingrained
-in me (at least), that I kept misusing those symbols in bash when I meant to write to a file, for example.
+The commands for operating on files are `read` and `write`. (`out`, which was present in earlier
+releases, has been renamed to `write`). Both of these commands provide support for reading text,
+parsing CSV files (with command or tab delimiters), and for pickled data.
 
-This is the first of a two-part fix. In this release, `~~` is used to write a stream (pickled, as before)
-to a variable
-or file, replacing the previous value. `~~+` appends instead.
+The commands for operating on variables are `load` and `store`. These commands store streams which
+cannot be accessed except via pipelines (sequences of commands). For this reason, the internal
+format is not specified, and no formatting options are supported.
+
+Marcel has had redirection syntax all along. The symbols `>` and `>>` were provided to operate
+on variables only. To operate on files, the `read` and `write` (formerly `out`) commands had to
+be used directly. This was confusing, as the use of `>` and `>>` for files is so ingrained for 
+the users of many shells.
+(Bash also uses the redirection symbol `<` to provide a process's stdin. So in bash you might
+write `foo < a > b`. The marcel equivalent would be `a > foo > b`.)
+
+In this release, the symbols `>` and `>>` are provided to operate on files, consistent with bash usage.
+To operate on variables, the equivalent symbols are `>$` and `>>$`.
 
 Examples:
 
-Generate the stream `[0, 1, 2]` and store it in variable `x`:
+1) Generate the stream `[0, 1, 2]` and store it in variable `x`:
 ```shell
-gen 3 ~~ x
+gen 3 >$ x
+```
+The stream in x can now be fed into a pipeline, e.g.
+
+```shell
+x >$ map (x: (x, x ** (1/2))) 
 ```
 
-Print the value of `x`:
-
+2) Generate the stream `[0, 1, 2]` and store it in file `/tmp/x`:
 ```shell
-x ~~
+gen 3 > /tmp/x
 ```
 
-Append the stream `[3, 4, 5]` to `x`, yielding `[0, 1, 2, 3, 4, 5]`
+There is now a file `/tmp/x` containing 
 
 ```shell
-gen 3 3 ~~+ x
+0
+1
+2
+```
+
+3) Generate a sequence of (x, sqrt(x)), for x = 1 through 20, and store it in the variable `f`.
+
+```shell
+gen 20 1 | (x: (x, x ** (1/2))) >$ f
+```
+
+4) Append more squre roots, for x = 21 through 30.
+
+```shell
+gen 10 21 | (x: (x, x ** (1/2))) >>$ f
+```
+
+5) Format and print the contents of `f`
+
+```shell
+f >$ write --format 'sqrt({}) = {}'
 ```
 
 Marcel
