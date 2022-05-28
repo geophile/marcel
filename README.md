@@ -24,22 +24,22 @@ To operate on variables, the equivalent symbols are `>$` and `>>$`.
 
 Examples:
 
-1) Generate the stream `[0, 1, 2]` and store it in variable `x`:
+1) Generate the stream `[0, 1, 2]` and store it in variable `stream012`:
 ```shell
-gen 3 >$ x
+gen 3 >$ stream012
 ```
-The stream in x can now be fed into a pipeline, e.g.
+The stream in `stream012` can now be fed into a pipeline, e.g.
 
 ```shell
-x >$ map (x: (x, x ** (1/2))) 
+stream012 >$ map (x: (x, x ** (1/2))) 
 ```
 
-2) Generate the stream `[0, 1, 2]` and store it in file `/tmp/x`:
+2) Generate the stream `[0, 1, 2]` and store it in file `/tmp/file012`:
 ```shell
-gen 3 > /tmp/x
+gen 3 > /tmp/file012
 ```
 
-There is now a file `/tmp/x` containing 
+There is now a file `/tmp/file012` containing 
 
 ```shell
 0
