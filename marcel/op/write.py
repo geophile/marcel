@@ -28,111 +28,118 @@ import marcel.picklefile
 Renderable = marcel.object.renderable.Renderable
 
 HELP = '''
-{L,wrap=F}out [-a|--append FILENAME] [-f|--file FILENAME] [-c|--csv] [-p|--pickle] [FORMAT]
-
-{L,indent=4:28}{r:-a}, {r:--append}            Append output to the file identified by FILENAME.
-
-{L,indent=4:28}{r:-f}, {r:--file}              Write output to the file identified by FILENAME, 
-replacing an existing file if necessary.
+{L,wrap=F}write [-c|--csv] [-t|--tsv] [-p|--pickle] [-f|--format FORMAT] [-a|--append] [FILENAME]
 
 {L,indent=4:28}{r:-c}, {r:--csv}               Format output as comma-separated values.
 
+{L,indent=4:28}{r:-t}, {r:--tsv}               Format output as tab-separated values.
+
 {L,indent=4:28}{r:-p}, {r:--pickle}            Pickle the output.
 
-{L,indent=4:28}{r:FORMAT}                  The Python formatting specification to be applied to output tuples.
+{L,indent=4:28}{r:-f}, {r:--format}            Format output according to the Python formatting 
+specification {r:FORMAT}.
 
+{L,indent=4:28}{r:-a}, {r:--append}            Append output to the file identified by {r:FILENAME}. 
+
+{L,indent=4:28}FILENAME                Write output to the file identified by {r:FILENAME}. If omitted,
+output is written to stdout.
 
 Tuples arriving on the input stream are formatted and written out to a file (or stdout). 
 
 Tuples received on the input stream are passed to the output stream. As a side-effect, input
-tuples are formatted and written to stdout or to the specified {r:FILENAME}. 
-If the {r:FILENAME} is specified
-by {r:--file}, then an existing file is replaced. If the {r:FILENAME} is specified
-by {r:--append}, then output is appended to an existing file.
-
-The {r:--append} and {r:--file} options are mutually exclusive.
-
-The formatting options {r:--csv}, {r:--pickle}, and {r:FORMAT} options are mutually exclusive.
+tuples are formatted and written to stdout or to the specified {r:FILENAME}.
+If {r:FILENAME} already exists, its contents will be replaced, unless {r:--append} is specified,
+in which case the stream will be appended. {r:--append} is not permitted for writing to stdout.
+ 
+The formatting options {r:--csv}, {r:-tsv} {r:--pickle}, and {r:FORMAT} options are mutually exclusive.
 If no formatting options are specified, then the default rendering is used, except
 that 1-tuples are unwrapped. (Note that for certain objects, including
 {r:File} and {r:Process}, the default rendering is specified by the {n:render_compact()}
 or {n:render_full()} methods. Run {n:help object} for more information.)
-If the {r:--pickle} formatting option is specified, then output must go to a file, i.e.
-{r:--file} or {r:--append} must be specified.
+The {r:--pickle} option is not permitted for writing to stdout.
 
 {n:Error} objects are not subject to formatting specifications, and are not passed on as output.
 '''
 
+COMMA = ','
+TAB = '\t'
 
-def out(env, append=None, file=None, csv=False, pickle=None, format=None):
+
+def write(env, filename=None, csv=False, tsv=False, pickle=False, format=None, append=False):
     args = []
-    if append:
-        args.extend(['--append', append])
-    if file:
-        args.extend(['--file', file])
     if csv:
         args.append('--csv')
+    if tsv:
+        args.append('--tsv')
     if pickle:
         args.append('--pickle')
     if format:
-        args.append(format)
-    return Out(env), args
+        args.extend(['--format', format])
+    if append:
+        args.append('--append')
+    if filename:
+        args.append(filename)
+    return Write(env), args
 
 
-class OutArgsParser(marcel.argsparser.ArgsParser):
+class WriteArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('out', env)
-        self.add_flag_one_value('append', '-a', '--append', convert=self.check_str, target='append_arg')
-        self.add_flag_one_value('file', '-f', '--file', convert=self.check_str, target='file_arg')
+        super().__init__('write', env)
         self.add_flag_no_value('csv', '-c', '--csv')
+        self.add_flag_no_value('tsv', '-t', '--tsv')
         self.add_flag_no_value('pickle', '-p', '--pickle')
-        self.add_anon('format', default=None, convert=self.check_str)
-        self.at_most_one('file', 'append')
-        self.at_most_one('csv', 'pickle', 'format')
+        self.add_flag_one_value('format', '-f', '--format')
+        self.add_flag_no_value('append', '-a', '--append')
+        self.add_anon('filename', convert=self.check_str, default=None, target='filename_arg')
+        self.at_most_one('csv', 'tsv', 'pickle', 'format')
         self.validate()
 
 
-class Out(marcel.core.Op):
+class Write(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.append_arg = None
-        self.append = None
-        self.file_arg = None
-        self.file = None
         self.csv = False
+        self.tsv = False
         self.pickle = False
         self.format = None
+        self.append = None
+        self.filename_arg = None
+        self.filename = None
         self.output = None
         self.writer = None
 
     def __repr__(self):
         buffer = []
-        if self.file:
-            buffer.append(f'file={self.file}')
-        if self.append:
-            buffer.append(f'append={self.append}')
         if self.csv:
             buffer.append('csv')
+        if self.tsv:
+            buffer.append('tsv')
         if self.pickle:
             buffer.append('pickle')
         if self.format:
-            buffer.append(f'format={Out.ensure_quoted(self.format)}')
+            buffer.append(f'format={Write.ensure_quoted(self.format)}')
+        if self.append:
+            buffer.append('append')
+        if self.filename_arg:
+            buffer.append(f'file={self.filename_arg}')
         options = ', '.join(buffer)
-        return f'out({options})'
+        return f'write({options})'
 
     # AbstractOp
 
     def setup(self):
-        self.append = self.eval_function('append_arg', str)
-        self.file = self.eval_function('file_arg', str)
-        self.format = self.eval_function('format', str)
-        if self.append is None and self.file is None and self.pickle:
+        self.filename = self.eval_function('filename_arg', str)
+        if self.pickle and self.filename is None:
             raise marcel.exception.KillCommandException(
-                'Must specify either --file or --append with --pickle.')
+                '--pickle incompatible with stdout.')
+        if self.append and self.filename is None:
+            raise marcel.exception.KillCommandException(
+                '--append incompatible with stdout.')
         self.writer = (PythonWriter(self) if self.format else
-                       CSVWriter(self) if self.csv else
+                       CSVWriter(self, COMMA) if self.csv else
+                       CSVWriter(self, TAB) if self.tsv else
                        PickleWriter(self) if self.pickle else
                        DefaultWriter(self))
 
@@ -184,11 +191,9 @@ class TextWriter(Writer):
 
     def __init__(self, op):
         super().__init__(op)
-        if op.append or op.file:
-            path, mode = (op.append, 'a') if op.append else (op.file, 'w')
-            path = os.path.normpath(path)
-            path = pathlib.Path(path).expanduser()
-            self.output = open(path, mode=mode)
+        if op.filename:
+            path = pathlib.Path(os.path.normpath(op.filename)).expanduser()
+            self.output = open(path, mode='a' if op.append else 'w')
         else:
             self.output = sys.stdout
 
@@ -202,10 +207,10 @@ class TextWriter(Writer):
 
 class CSVWriter(TextWriter):
 
-    def __init__(self, op):
+    def __init__(self, op, delimiter):
         super().__init__(op)
         self.writer = csv.writer(self,
-                                 delimiter=',',
+                                 delimiter=delimiter,
                                  quotechar="'",
                                  quoting=csv.QUOTE_MINIMAL,
                                  lineterminator='')
@@ -257,9 +262,8 @@ class PickleWriter(Writer):
 
     def __init__(self, op):
         super().__init__(op)
-        self.writer = (marcel.picklefile.PickleFile(op.append).writer(True)
-                       if op.append else
-                       marcel.picklefile.PickleFile(op.file).writer(False))
+        assert op.filename is not None  # Should have been checked in setup
+        self.writer = marcel.picklefile.PickleFile(op.filename).writer(op.append)
 
     def receive(self, x):
         self.writer.write(x)

@@ -259,7 +259,7 @@ class Op(AbstractOp):
                     f'Type of {self.op_name()}.{field} is {type(x)}, but must be one of {types}')
             return x
         state = self.__dict__
-        val = state[field]
+        val = state.get(field, None)
         if callable(val):
             val = call(val)
         elif type(val) in (tuple, list):

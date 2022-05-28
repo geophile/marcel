@@ -17,33 +17,33 @@ TEST = test_base.TestConsole()
 
 
 def test_no_such_op():
-    TEST.run('gen 5 | abc', expected_err='The variable abc is undefined')
+    TEST.run('gen 5 | abc', expected_err='is not executable')
 
 
 def test_gen():
-    # Explicit out
-    TEST.run('gen 5 | out',
+    # Explicit write
+    TEST.run('gen 5 | write',
              expected_out=[0, 1, 2, 3, 4])
-    # Implicit out
+    # Implicit write
     TEST.run('gen 5',
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run('gen 5 10 | out',
+    TEST.run('gen 5 10 | write',
              expected_out=[10, 11, 12, 13, 14])
-    TEST.run('gen 5 10 123 | out',
+    TEST.run('gen 5 10 123 | write',
              expected_err='Too many anonymous')
-    TEST.run('gen 5 -5 | out',
+    TEST.run('gen 5 -5 | write',
              expected_out=[-5, -4, -3, -2, -1])
-    TEST.run('gen 3 -p 2 | out',
+    TEST.run('gen 3 -p 2 | write',
              expected_err='Flags must all appear before the first anonymous arg')
-    TEST.run('gen -p 2 3 | out',
+    TEST.run('gen -p 2 3 | write',
              expected_out=['00', '01', '02'])
-    TEST.run('gen --pad 2 3 | out',
+    TEST.run('gen --pad 2 3 | write',
              expected_out=['00', '01', '02'])
-    TEST.run('gen -p 3 3 99 | out',
+    TEST.run('gen -p 3 3 99 | write',
              expected_out=['099', '100', '101'])
-    TEST.run('gen -p 2 3 99 | out',
+    TEST.run('gen -p 2 3 99 | write',
              expected_err='Padding 2 too small')
-    TEST.run('gen -p 4 3 -10 | out',
+    TEST.run('gen -p 4 3 -10 | write',
              expected_err='Padding incompatible with start < 0')
     # Error along with output
     TEST.run('gen 3 -1 | map (x: 5 / x)',
@@ -61,50 +61,93 @@ def test_gen():
              expected_err="unsupported operand type(s) for -: 'str' and 'int'")
 
 
-def test_out():
+def test_write():
     output_filename = '/tmp/out.txt'
-    TEST.run('gen 3 | out {}',
-             expected_out=[0, 1, 2])
-    TEST.run('gen 3',
-             expected_out=[0, 1, 2])
-    TEST.run('gen 3 | out -c',
-             expected_out=[0, 1, 2])
-    TEST.run('gen 3 | out --csv',
-             expected_out=[0, 1, 2])
-    TEST.run('gen 3 | out -c {}',
+    # Write to stdout
+    TEST.run('gen 3 | (x: (x, -x))',
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    TEST.run('gen 3 | (x: (x, -x)) | write --format "{}~{}"',
+             expected_out=['0~0', '1~-1', '2~-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write -f "{}~{}"',
+             expected_out=['0~0', '1~-1', '2~-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write --csv',
+             expected_out=['0,0', '1,-1', '2,-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write -c',
+             expected_out=['0,0', '1,-1', '2,-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write --tsv',
+             expected_out=['0\t0', '1\t-1', '2\t-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write -t',
+             expected_out=['0\t0', '1\t-1', '2\t-2'])
+    TEST.run('gen 3 | (x: (x, -x)) | write --pickle',
+             expected_err='--pickle incompatible with stdout')
+    TEST.run('gen 3 | (x: (x, -x)) | write -p',
+             expected_err='--pickle incompatible with stdout')
+    TEST.run('gen 3 | (x: (x, -x)) | write --csv --tsv',
              expected_err='Cannot specify more than one of')
-    TEST.run(f'gen 3 | out -f {output_filename}',
-             expected_out=[0, 1, 2], file=output_filename)
-    TEST.run(f'gen 3 | out --file {output_filename}',
-             expected_out=[0, 1, 2], file=output_filename)
-    TEST.delete_file(output_filename)
-    TEST.run(f'gen 3 | out -a {output_filename}',
+    # Write to file
+    TEST.run('gen 3 | (x: (x, -x)) | write ' + output_filename,
+             expected_out=[(0, 0), (1, -1), (2, -2)],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --format "{}~{}" ' + output_filename,
+             expected_out=['0~0', '1~-1', '2~-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write -f "{}~{}" ' + output_filename,
+             expected_out=['0~0', '1~-1', '2~-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --csv ' + output_filename,
+             expected_out=['0,0', '1,-1', '2,-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write -c ' + output_filename,
+             expected_out=['0,0', '1,-1', '2,-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --tsv ' + output_filename,
+             expected_out=['0\t0', '1\t-1', '2\t-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write -t ' + output_filename,
+             expected_out=['0\t0', '1\t-1', '2\t-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --pickle ' + output_filename,
+             verification=f'read --pickle {output_filename}',
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    TEST.run('gen 3 | (x: (x, -x)) | write -p ' + output_filename,
+             verification=f'read --pickle {output_filename}',
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    # Append
+    TEST.run('gen 3 | write --append',
+             expected_err='--append incompatible with stdout')
+    TEST.run('gen 3 | write -a',
+             expected_err='--append incompatible with stdout')
+    TEST.delete_files(output_filename)
+    TEST.run('gen 3 | write --append ' + output_filename,
+             verification='read ' + output_filename,
+             expected_out=[0, 1, 2])
+    TEST.run('gen 3 3 | write --append ' + output_filename,
+             verification='read ' + output_filename,
+             expected_out=[0, 1, 2, 3, 4, 5])
+    TEST.delete_files(output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --csv --append ' + output_filename,
+             expected_out=['0,0', '1,-1', '2,-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --tsv --append ' + output_filename,
+             expected_out=['0,0', '1,-1', '2,-2',
+                           '0\t0', '1\t-1', '2\t-2'],
+             file=output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --append ' + output_filename,
+             expected_out=['0,0', '1,-1', '2,-2',
+                           '0\t0', '1\t-1', '2\t-2',
+                           (0, 0), (1, -1), (2, -2)],
+             file=output_filename)
+    TEST.delete_files(output_filename)
+    TEST.run('gen 3 | (x: (x, -x)) | write --pickle --append ' + output_filename,
+             verification='read --pickle ' + output_filename,
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    TEST.run('gen 3 3 | (x: (x, -x)) | write --pickle --append ' + output_filename,
+             verification='read --pickle ' + output_filename,
+             expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4), (5, -5)])
+    # Function-valued filename
+    TEST.run(f'gen 3 | write ("{output_filename}")',
              expected_out=[0, 1, 2],
              file=output_filename)
-    TEST.run(f'gen 3 | out --append {output_filename}',
-             expected_out=[0, 1, 2, 0, 1, 2],
-             file=output_filename)
-    TEST.run(f'gen 3 | out -a {output_filename} -f {output_filename}',
-             expected_err='Cannot specify more than one of')
-    # Function-valued args
-    TEST.run(f'gen 3 | out -f ("{output_filename}")',
-             expected_out=[0, 1, 2],
-             file=output_filename)
-    TEST.run(f'gen 3 | out -a ("{output_filename}")',
-             expected_out=[0, 1, 2, 0, 1, 2],
-             file=output_filename)
-    TEST.delete_file(output_filename)
-    TEST.run('gen 3 | out ("{}")',
-             expected_out=[0, 1, 2])
-    # Pickle output
-    TEST.run('gen 3 | out --pickle',
-             expected_err='Must specify either --file or --append with --pickle')
-    TEST.run(test='gen 3 | (x: [x] * x) | out --file /tmp/pickle.txt --pickle',
-             verification='read --pickle /tmp/pickle.txt',
-             expected_out=[[], 1, [2, 2]])
-    TEST.run(test='gen 3 3 | (x: [x] * x) | out --append /tmp/pickle.txt --pickle',
-             verification='read --pickle /tmp/pickle.txt',
-             expected_out=[[], 1, [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5, 5, 5]])
 
 
 def test_sort():
@@ -608,8 +651,8 @@ def test_join():
     TEST.run(test='gen 4 | map (x: (x, -x)) | join [xn (100)]',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
     os.system('rm -f /tmp/?.csv')
-    TEST.run('gen 3 | map (x: (x, x*10)) | out -f /tmp/a.csv')
-    TEST.run('gen 3 | map (x: (x, x*100)) | out -f /tmp/b.csv')
+    TEST.run('gen 3 | map (x: (x, x*10)) | write /tmp/a.csv')
+    TEST.run('gen 3 | map (x: (x, x*100)) | write /tmp/b.csv')
     TEST.run('get = [f: (File(f).readlines()) | expand | map (x: eval(x))]')
     TEST.run('get /tmp/a.csv | join [get /tmp/b.csv]',
              expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200)])
@@ -738,150 +781,296 @@ def test_store_load():
     TEST.run('x = 1')
     TEST.run(test='gen 3 | store -a x',
              expected_err='not usable as a reservoir')
+    # Bad variable name
+    TEST.run('gen 3 | store /tmp/storeload.test',
+             expected_err='is not a Python identifier')
 
 
-def test_store_load_sugar():
-    # ------------------------ Test all the paths through Parser.pipeline()
-    # var >
-    TEST.run(test='gen 3 | store p1',
-             verification='p1 >',
+def test_redirect_file():
+    # ------------------------ Test all the paths through Parser.pipeline() for files
+    # file >
+    TEST.delete_files('/tmp/p1')
+    TEST.run(test='gen 3 | write /tmp/p1',
+             verification='/tmp/p1 >',
              expected_out=[0, 1, 2])
-    # var >> (error)
+    # file >> (error)
+    TEST.delete_files('/tmp/p2')
+    TEST.run(test='gen 3 | write /tmp/p2',
+             verification='/tmp/p2 >>',
+             expected_err='Append not permitted here')
+    # file > file
+    TEST.delete_files('/tmp/p3', '/tmp/p4')
+    TEST.run('gen 3 | write /tmp/p3')
+    TEST.run(test='/tmp/p3 > /tmp/p4',
+             verification='/tmp/p4 >',
+             expected_out=[0, 1, 2])
+    # file >> file
+    TEST.delete_files('/tmp/p5', '/tmp/p6', '/tmp/p7')
+    TEST.run('gen 3 | write /tmp/p5')
+    TEST.run('gen 3 | map (x: x + 100) | write /tmp/p6')
+    TEST.run(test='/tmp/p5 >> /tmp/p7',
+             verification='/tmp/p7 >',
+             expected_out=[0, 1, 2])
+    TEST.run(test='/tmp/p6 >> /tmp/p7',
+             verification='/tmp/p7 >',
+             expected_out=[0, 1, 2, 100, 101, 102])
+    # file > op_sequence
+    TEST.delete_files('/tmp/p8')
+    TEST.run('gen 3 | write /tmp/p8')
+    TEST.run(test='/tmp/p8 > map (x: int(x) + 100)',
+             expected_out=[100, 101, 102])
+    # file >> op_sequence (error)
+    TEST.delete_files('tmp/p9')
+    TEST.run('gen 3 | write /tmp/p9')
+    TEST.run(test='/tmp/p9 >> map (x: x + 100)',
+             expected_err='Append not permitted here')
+    # file > op_sequence > file
+    TEST.delete_files('/tmp/p10', '/tmp/p11')
+    TEST.run('gen 3 | write /tmp/p10')
+    TEST.run(test='/tmp/p10 > map (x: int(x) + 100) > /tmp/p11',
+             verification='/tmp/p11 >',
+             expected_out=[100, 101, 102])
+    # file > op_sequence >> file
+    TEST.delete_files('/tmp/p12', '/tmp/p13')
+    TEST.run('gen 3 | write /tmp/p12')
+    TEST.run(test='/tmp/p12 > map (x: int(x) + 100) >> /tmp/p13',
+             verification='/tmp/p13 >',
+             expected_out=[100, 101, 102])
+    TEST.run(test='/tmp/p12 > map (x: int(x) + 1000) >> /tmp/p13',
+             verification='/tmp/p13 >',
+             expected_out=[100, 101, 102, 1000, 1001, 1002])
+    # op_sequence -- tested adequately elsewhere
+    # op_sequence > file
+    TEST.delete_files('/tmp/p14')
+    TEST.run(test='gen 3 > /tmp/p14',
+             verification='/tmp/p14 >',
+             expected_out=[0, 1, 2])
+    # op_sequence >> file
+    TEST.delete_files('/tmp/p15')
+    TEST.run(test='gen 3 >> /tmp/p15',
+             verification='/tmp/p15 >',
+             expected_out=[0, 1, 2])
+    TEST.run(test='gen 3 | map (x: int(x) + 100) >> /tmp/p15',
+             verification='/tmp/p15 >',
+             expected_out=[0, 1, 2, 100, 101, 102])
+    # > file
+    TEST.delete_files('/tmp/p16')
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [> /tmp/p16] | select (x: False)',
+             verification='/tmp/p16 >',
+             expected_out=[0, 2, 4])
+    # >> file
+    TEST.delete_files('/tmp/p17')
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [>> /tmp/p17] | select (x: False)',
+             verification='/tmp/p17 >',
+             expected_out=[0, 2, 4])
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 1) [>> /tmp/p17] | select (x: False)',
+             verification='/tmp/p17 >',
+             expected_out=[0, 2, 4, 1, 3, 5])
+    # ---------------------------------------------------------------------
+    # Ops that look confusingly like files from context
+    # op >
+    TEST.run(test='pwd >',
+             expected_err='A filename must precede >')
+    # op >>
+    TEST.run(test='pwd >>',
+             expected_err='A filename must precede >>')
+    # op > file
+    TEST.delete_files('/tmp/o1')
+    version = marcel.version.VERSION
+    TEST.run(test='version > /tmp/o1',
+             verification='/tmp/o1 > map (v: f"v{v}")',
+             expected_out=[f"v{version}"])
+    # op >> file
+    TEST.delete_files('/tmp/o2')
+    TEST.run(test='version >> /tmp/o2',
+             verification='/tmp/o2 > map (v: f"v{v}")',
+             expected_out=[f"v{version}"])
+    TEST.run(test='version >> /tmp/o2',
+             verification='/tmp/o2 > map (v: f"v{v}")',
+             expected_out=[f"v{version}", f"v{version}"])
+    # ---------------------------------------------------------------------
+    # Store at end of top-level pipeline
+    TEST.delete_files('/tmp/g5')
+    TEST.run(test='gen 5 > /tmp/g5',
+             verification='read /tmp/g5',
+             expected_out=[0, 1, 2, 3, 4])
+    # Store at end of pipeline arg
+    TEST.delete_files('/tmp/e10x10')
+    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [map (x: x * 10) > /tmp/e10x10]',
+             verification='read /tmp/e10x10',
+             expected_out=[0, 20, 40, 60, 80])
+    # Store as the entire pipeline arg
+    TEST.delete_files('/tmp/e10')
+    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [> /tmp/e10]',
+             verification='read /tmp/e10',
+             expected_out=[0, 2, 4, 6, 8])
+    # Append
+    TEST.delete_files('/tmp/g10')
+    TEST.run(test='gen 5 > /tmp/g10',
+             verification='read /tmp/g10',
+             expected_out=[0, 1, 2, 3, 4])
+    TEST.run(test='gen 5 5 >> /tmp/g10',
+             verification='read /tmp/g10',
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    # Load at beginning of top-level pipeline
+    TEST.delete_files('/tmp/g4')
+    TEST.run(test='gen 4 > /tmp/g4',
+             verification='/tmp/g4 > map (x: -int(x))',
+             expected_out=[0, -1, -2, -3])
+    # Load in pipeline arg
+    TEST.delete_files('/tmp/x10', '/tmp/x100')
+    TEST.run('gen 4 | map (x: (x, x * 10)) > /tmp/x10')
+    TEST.run('gen 4 | map (x: (x, x * 100)) > /tmp/x100')
+    TEST.run('/tmp/x10 > map (x: eval(x)) | join [/tmp/x100 > map (x: eval(x))]',
+             expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
+    # Bug 73
+    TEST.delete_files('/tmp/a', '/tmp/b', '/tmp/c')
+    TEST.run('gen 3 | map (x: (x, x*10)) > /tmp/a')
+    TEST.run('gen 3 | map (x: (x, x*100)) > /tmp/b')
+    TEST.run('gen 3 | map (x: (x, x*1000)) > /tmp/c')
+    TEST.run('/tmp/a > (x: eval(x)) | join [/tmp/b > (x: eval(x))] | join [/tmp/c > (x: eval(x))]',
+             expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
+    # Bug 74
+    TEST.delete_files('/tmp/a', '/tmp/b', '/tmp/c', '/tmp/d')
+    TEST.run('gen 3 | map (x: (x, x*10)) > /tmp/a')
+    TEST.run('gen 3 | map (x: (x, x*100)) > /tmp/b')
+    TEST.run('gen 3 | map (x: (x, x*1000)) > /tmp/c')
+    TEST.run('/tmp/a > (x: eval(x)) | join [/tmp/b > (x: eval(x))] | join [/tmp/c > (x: eval(x))] > /tmp/d')
+    TEST.run('/tmp/d >',
+             expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
+
+
+def test_redirect_var():
+    # ------------------------ Test all the paths through Parser.pipeline() for vars
+    # var >$
+    TEST.run(test='gen 3 | store p1',
+             verification='p1 >$',
+             expected_out=[0, 1, 2])
+    # var >>$ (error)
     TEST.run(test='gen 3 | store p2',
              verification='p2 >>',
              expected_err='Append not permitted here')
-    # var > var
+    # file >$ file
     TEST.run('gen 3 | store p3')
-    TEST.run(test='p3 > p4',
-             verification='p4 >',
+    TEST.run(test='p3 >$ p4',
+             verification='p4 >$',
              expected_out=[0, 1, 2])
-    # var >> var
+    # var >> var4
     TEST.run('gen 3 | store p5')
     TEST.run('gen 3 | map (x: x + 100) | store p6')
-    TEST.run(test='p5 >> p7',
-             verification='p7 >',
+    TEST.run(test='p5 >>$ p7',
+             verification='p7 >$',
              expected_out=[0, 1, 2])
-    TEST.run(test='p6 >> p7',
-             verification='p7 >',
+    TEST.run(test='p6 >>$ p7',
+             verification='p7 >$',
              expected_out=[0, 1, 2, 100, 101, 102])
-    # var > op_sequence
+    # var >$ op_sequence
     TEST.run('gen 3 | store p8')
-    TEST.run(test='p8 > map (x: x + 100)',
+    TEST.run(test='p8 >$ map (x: x + 100)',
              expected_out=[100, 101, 102])
-    # var >> op_sequence (error)
+    # var >>$ op_sequence (error)
     TEST.run('gen 3 | store p9')
-    TEST.run(test='p9 >> map (x: x + 100)',
+    TEST.run(test='p9 >>$ map (x: x + 100)',
              expected_err='Append not permitted here')
-    # var > op_sequence > var
+    # var >$ op_sequence >$ var
     TEST.run('gen 3 | store p10')
-    TEST.run(test='p10 > map (x: x + 100) > p11',
-             verification='p11 >',
+    TEST.run(test='p10 >$ map (x: x + 100) >$ p11',
+             verification='p11 >$',
              expected_out=[100, 101, 102])
-    # var > op_sequence >> var
+    # var >$ op_sequence >>$ var
     TEST.run('gen 3 | store p12')
-    TEST.run(test='p12 > map (x: x + 100) >> p13',
-             verification='p13 >',
+    TEST.run(test='p12 >$ map (x: x + 100) >>$ p13',
+             verification='p13 >$',
              expected_out=[100, 101, 102])
-    TEST.run(test='p12 > map (x: x + 1000) >> p13',
-             verification='p13 >',
+    TEST.run(test='p12 >$ map (x: x + 1000) >>$ p13',
+             verification='p13 >$',
              expected_out=[100, 101, 102, 1000, 1001, 1002])
     # op_sequence -- tested adequately elsewhere
-    # op_sequence > var
-    TEST.run(test='gen 3 > p14',
-             verification='p14 >',
+    # op_sequence >$ var
+    TEST.run(test='gen 3 >$ p14',
+             verification='p14 >$',
              expected_out=[0, 1, 2])
-    # op_sequence >> var
-    TEST.run(test='gen 3 >> p15',
-             verification='p15 >',
+    # op_sequence >>$ var
+    TEST.run(test='gen 3 >>$ p15',
+             verification='p15 >$',
              expected_out=[0, 1, 2])
-    TEST.run(test='gen 3 | map (x: x + 100) >> p15',
-             verification='p15 >',
+    TEST.run(test='gen 3 | map (x: x + 100) >>$ p15',
+             verification='p15 >$',
              expected_out=[0, 1, 2, 100, 101, 102])
-    # > var
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [> p16] | select (x: False)',
-             verification='p16 >',
+    # >$ var
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [>$ p16] | select (x: False)',
+             verification='p16 >$',
              expected_out=[0, 2, 4])
-    # >> var
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [>> p17] | select (x: False)',
-             verification='p17 >',
+    # >>$ var
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) [>>$ p17] | select (x: False)',
+             verification='p17 >$',
              expected_out=[0, 2, 4])
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 1) [>> p17] | select (x: False)',
-             verification='p17 >',
+    TEST.run(test='gen 6 | ifthen (x: x % 2 == 1) [>>$ p17] | select (x: False)',
+             verification='p17 >$',
              expected_out=[0, 2, 4, 1, 3, 5])
     # ---------------------------------------------------------------------
-    # Ops that look confusingly like vars
-    # op >
-    TEST.run(test='pwd >',
-             expected_err='A variable must precede >')
-    # op >>
-    TEST.run(test='pwd >>',
-             expected_err='A variable must precede >>')
-    # op > var
-    dir = os.getcwd()
-    TEST.run(test='pwd > o1',
-             verification='o1 > map (f: f.path)',
-             expected_out=[dir])
-    # op >> var
-    dir = os.getcwd()
-    TEST.run(test='pwd >> o2',
-             verification='o2 > map (f: f.path)',
-             expected_out=[dir])
-    TEST.run(test='pwd >> o2',
-             verification='o2 > map (f: f.path)',
-             expected_out=[dir, dir])
-    # var > op
-    TEST.run('gen 3 > o3')
-    TEST.run(test='o3 > reverse',
-             expected_out=[2, 1, 0])
-    # var >> op
-    TEST.run('gen 3 > o4')
-    TEST.run(test='o4 >> reverse',
-             expected_err='Append not permitted here')
+    # Ops that look confusingly like files from context
+    # op >$
+    TEST.run(test='pwd >$',
+             expected_err='A variable must precede >$')
+    # op >>$
+    TEST.run(test='pwd >>$',
+             expected_err='A variable must precede >>$')
+    # op >$ var
+    version = marcel.version.VERSION
+    TEST.run(test='version >$ o1',
+             verification='o1 >$ map (v: f"v{v}")',
+             expected_out=[f"v{version}"])
+    # op >>$ var
+    TEST.run(test='version >>$ o2',
+             verification='o2 >$ map (v: f"v{v}")',
+             expected_out=[f"v{version}"])
+    TEST.run(test='version >>$ o2',
+             verification='o2 >$ map (v: f"v{v}")',
+             expected_out=[f"v{version}", f"v{version}"])
     # ---------------------------------------------------------------------
     # Store at end of top-level pipeline
-    TEST.run(test='gen 5 > g5',
+    TEST.run(test='gen 5 >$ g5',
              verification='load g5',
              expected_out=[0, 1, 2, 3, 4])
     # Store at end of pipeline arg
-    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [map (x: x * 10) > e10x10]',
+    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [map (x: x * 10) >$ e10x10]',
              verification='load e10x10',
              expected_out=[0, 20, 40, 60, 80])
     # Store as the entire pipeline arg
-    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [> e10]',
+    TEST.delete_files('e10')
+    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) [>$ e10]',
              verification='load e10',
              expected_out=[0, 2, 4, 6, 8])
     # Append
-    TEST.run(test='gen 5 > g5g5',
-             verification='load g5g5',
+    TEST.run(test='gen 5 >$ g10',
+             verification='load g10',
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run(test='gen 5 >> g5g5',
-             verification='load g5g5',
-             expected_out=[0, 1, 2, 3, 4, 0, 1, 2, 3, 4])
+    TEST.run(test='gen 5 5 >>$ g10',
+             verification='load g10',
+             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     # Load at beginning of top-level pipeline
-    TEST.run(test='gen 4 > g4',
-             verification='g4 > map (x: -x)',
+    TEST.run(test='gen 4 >$ g4',
+             verification='g4 >$ map (x: -x)',
              expected_out=[0, -1, -2, -3])
-    # Load by itself at beginning of top-level pipeline
-    TEST.run(test='gen 4 > g4',
-             verification='g4 >',
-             expected_out=[0, 1, 2, 3])
     # Load in pipeline arg
-    TEST.run('gen 4 | map (x: (x, x * 10)) > x10')
-    TEST.run('gen 4 | map (x: (x, x * 100)) > x100')
-    TEST.run('x10 > join [x100 >]',
+    TEST.run('gen 4 | map (x: (x, x * 10)) >$ x10')
+    TEST.run('gen 4 | map (x: (x, x * 100)) >$ x100')
+    TEST.run('x10 >$ join [x100 >$]',
              expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
     # Bug 73
-    TEST.run('gen 3 | map (x: (x, x*10)) > a')
-    TEST.run('gen 3 | map (x: (x, x*100)) > b')
-    TEST.run('gen 3 | map (x: (x, x*1000)) > c')
-    TEST.run('a > join [b >] | join [c >]',
+    TEST.run('gen 3 | map (x: (x, x*10)) >$ a')
+    TEST.run('gen 3 | map (x: (x, x*100)) >$ b')
+    TEST.run('gen 3 | map (x: (x, x*1000)) >$ c')
+    TEST.run('a >$ join [b >$] | join [c >$]',
              expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
     # Bug 74
-    TEST.run('gen 3 | map (x: (x, x*10)) > a')
-    TEST.run('gen 3 | map (x: (x, x*100)) > b')
-    TEST.run('gen 3 | map (x: (x, x*1000)) > c')
-    TEST.run('a > join [b >] | join [c >] > d')
-    TEST.run('d >',
+    TEST.delete_files('a', 'b', 'c', 'd')
+    TEST.run('gen 3 | map (x: (x, x*10)) >$ a')
+    TEST.run('gen 3 | map (x: (x, x*100)) >$ b')
+    TEST.run('gen 3 | map (x: (x, x*1000)) >$ c')
+    TEST.run('a >$ join [b >$] | join [c >$] >$ d')
+    TEST.run('d >$',
              expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
 
 
@@ -988,7 +1177,7 @@ def test_read():
     TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: [str(f), x, y, z])',
              expected_out=[['f2.tsv', '1', '2.3', 'ab'],
                            ['f2.tsv', '2', '3.4', 'xy']])
-    # --pickle testing is done in test_out()
+    # --pickle testing is done in test_write()
     # Filenames on commandline
     TEST.run('cd /tmp/read')
     TEST.run('read f1.csv',
@@ -1023,12 +1212,12 @@ def test_read():
 def test_intersect():
     TEST.reset_environment()
     # Empty inputs
-    TEST.run('gen 1 | select (*x: False) > empty')
-    TEST.run('gen 3 | intersect [empty >]',
+    TEST.run('gen 1 | select (*x: False) >$ empty')
+    TEST.run('gen 3 | intersect [empty >$]',
              expected_out=[])
-    TEST.run('empty > intersect [empty >]',
+    TEST.run('empty >$ intersect [empty >$]',
              expected_out=[])
-    TEST.run('empty > intersect [gen 3]',
+    TEST.run('empty >$ intersect [gen 3]',
              expected_out=[])
     # Non-empty inputs, empty intersection
     TEST.run('gen 3 | intersect [gen 3]',
@@ -1036,9 +1225,9 @@ def test_intersect():
     TEST.run('gen 3 | intersect [gen 1 1]',
              expected_out=[1])
     # Duplicates
-    TEST.run('gen 5 | map (x: [x] * x) | expand > a')
-    TEST.run('gen 5 | map (x: [x] * 2) | expand > b')
-    TEST.run('a > intersect [b >] | sort',
+    TEST.run('gen 5 | map (x: [x] * x) | expand >$ a')
+    TEST.run('gen 5 | map (x: [x] * 2) | expand >$ b')
+    TEST.run('a >$ intersect [b >$] | sort',
              expected_out=[1, 2, 2, 3, 3, 4, 4])
     # Composite elements
     TEST.run('gen 3 2 | '
@@ -1063,12 +1252,12 @@ def test_intersect():
 def test_union():
     TEST.reset_environment()
     # Empty inputs
-    TEST.run('gen 1 | select (*x: False) > empty')
-    TEST.run('empty > union [empty >]',
+    TEST.run('gen 1 | select (*x: False) >$ empty')
+    TEST.run('empty >$ union [empty >$]',
              expected_out=[])
-    TEST.run('gen 3 | union [empty >] | sort',
+    TEST.run('gen 3 | union [empty >$] | sort',
              expected_out=[0, 1, 2])
-    TEST.run('empty > union [gen 3] | sort',
+    TEST.run('empty >$ union [gen 3] | sort',
              expected_out=[0, 1, 2])
     # Non-empty inputs4
     TEST.run('gen 3 | union [gen 3 100] | sort',
@@ -1084,12 +1273,12 @@ def test_union():
 def test_difference():
     TEST.reset_environment()
     # Empty inputs
-    TEST.run('gen 1 | select (*x: False) > empty')
-    TEST.run('empty > difference [empty >]',
+    TEST.run('gen 1 | select (*x: False) >$ empty')
+    TEST.run('empty >$ difference [empty >$]',
              expected_out=[])
-    TEST.run('gen 3 | difference [empty >] | sort',
+    TEST.run('gen 3 | difference [empty >$] | sort',
              expected_out=[0, 1, 2])
-    TEST.run('empty > difference [gen 3]',
+    TEST.run('empty >$ difference [gen 3]',
              expected_out=[])
     # Non-empty inputs
     TEST.run('gen 6 | difference [gen 6 100] | sort',
@@ -1206,12 +1395,12 @@ def test_env():
     TEST.reset_environment()
     TEST.run('ko = [map (k, v: k)]')  # key only
     TEST.run('env | ko')
-    TEST.run(test='env | ko > env_keys',
-             verification='env_keys > red count',
+    TEST.run(test='env | ko >$ env_keys',
+             verification='env_keys >$ red count',
              expected_out=[29])  # 2 of them were just defined: ko, env_keys
-    TEST.run('env -a | ko | difference [env_keys >]',
+    TEST.run('env -a | ko | difference [env_keys >$]',
              expected_out=[])
-    TEST.run('env_keys > difference [env -a | ko]',
+    TEST.run('env_keys >$ difference [env -a | ko]',
              expected_out=[])
     TEST.run('env -b | red count',
              expected_out=[26])
@@ -1235,16 +1424,16 @@ def test_pos():
 def test_tee():
     TEST.run('gen 5 1 | tee',
              expected_err='No pipelines')
-    TEST.run('gen 5 1 | tee [red + > a] [red * > b]',
+    TEST.run('gen 5 1 | tee [red + >$ a] [red * >$ b]',
              expected_out=[1, 2, 3, 4, 5])
-    TEST.run('a >', expected_out=[15])
-    TEST.run('b >', expected_out=[120])
+    TEST.run('a >$', expected_out=[15])
+    TEST.run('b >$', expected_out=[120])
 
 
 def test_bug_126():
     TEST.run('fact = [x: gen (x) 1 | args [n: gen (n) 1 | red * | map (f: (n, f))]]')
-    TEST.run(test='fact (5) > f',
-             verification='f >',
+    TEST.run(test='fact (5) >$ f',
+             verification='f >$',
              expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
 
 
@@ -1255,11 +1444,11 @@ def test_bug_136():
 
 def test_bug_151():
     TEST.run('bytime = [sort (f: f.mtime)]')
-    TEST.run('ls | bytime > a')
-    TEST.run('ls | sort (f: f.mtime) > b')
-    TEST.run('a > difference [b >] | red count',
+    TEST.run('ls | bytime >$ a')
+    TEST.run('ls | sort (f: f.mtime) >$ b')
+    TEST.run('a >$ difference [b >$] | red count',
              expected_out=[0])
-    TEST.run('b > difference [a >] | red count',
+    TEST.run('b >$ difference [a >$] | red count',
              expected_out=[0])
 
 
@@ -1278,9 +1467,9 @@ def test_bug_10():
 
 def test_bug_154():
     TEST.reset_environment()
-    TEST.run('gen 3 > x')
-    TEST.run('x >> (y: -y)', expected_err='Append not permitted')
-    TEST.run('x > (y: -y)', expected_out=[0, -1, -2])
+    TEST.run('gen 3 >$ x')
+    TEST.run('x >>$ (y: -y)', expected_err='Append not permitted')
+    TEST.run('x >$ (y: -y)', expected_out=[0, -1, -2])
 
 
 def test_bug_168():
@@ -1307,7 +1496,7 @@ def test_bugs():
 def main_stable():
     test_no_such_op()
     test_gen()
-    test_out()
+    test_write()
     test_sort()
     test_map()
     test_select()
@@ -1331,7 +1520,8 @@ def main_stable():
     test_sql()
     test_import()
     test_store_load()
-    test_store_load_sugar()
+    test_redirect_file()
+    test_redirect_var()
     test_if()
     test_delete()
     test_read()
@@ -1346,17 +1536,13 @@ def main_stable():
 
 
 def main_dev():
-    # test_sql()
-    # test_args()
-    #
-    test_bash()
-    test_bugs()
+    pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

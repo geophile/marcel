@@ -222,7 +222,7 @@ class ArgsParser:
         raise marcel.argsparser.ArgsError(self.op_name,
                                           f'{arg.name} argument must be a Pipeline: {x}')
 
-    def init_target(self, arg, x):
+    def init_var(self, arg, x):
         if type(x) is marcel.reservoir.Reservoir:
             # API set the arg to a Reservoir already
             pass

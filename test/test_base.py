@@ -3,6 +3,7 @@ import io
 import os
 import pathlib
 import sys
+import shutil
 
 import dill.source
 
@@ -51,8 +52,14 @@ class TestBase:
         else:
             return str(x)
 
-    def delete_file(self, filename):
-        os.remove(filename)
+    def delete_files(self, *filenames):
+        for filename in filenames:
+            try:
+                os.remove(filename)
+            except IsADirectoryError:
+                shutil.rmtree(filename)
+            except FileNotFoundError:
+                pass
 
     def remove_empty_line_at_end(self, lines):
         if len(lines[-1]) == 0:

@@ -39,7 +39,6 @@ from marcel.op.join import join as _join
 from marcel.op.load import load as _load
 from marcel.op.ls import ls as _ls
 from marcel.op.map import map as _map
-from marcel.op.out import out as _out, Out as _Out
 from marcel.op.popd import popd as _popd
 from marcel.op.ps import ps as _ps
 from marcel.op.pushd import pushd as _pushd
@@ -61,6 +60,7 @@ from marcel.op.unique import unique as _unique
 from marcel.op.union import union as _union
 from marcel.op.version import version as _version
 from marcel.op.window import window as _window
+from marcel.op.write import write as _write, Write as _Write
 from marcel.builtin import *
 from marcel.reduction import *
 
@@ -90,7 +90,7 @@ def load(*args, **kwargs): return _generate_op(_load, *args, **kwargs)
 def loop(*args, **kwargs): return _generate_op(_loop, *args, **kwargs)
 def ls(*args, **kwargs): return _generate_op(_ls, *args, **kwargs)
 def map(*args, **kwargs): return _generate_op(_map, *args, **kwargs)
-def out(*args, **kwargs): return _generate_op(_out, *args, **kwargs)
+def write(*args, **kwargs): return _generate_op(_write, *args, **kwargs)
 def popd(*args, **kwargs): return _generate_op(_popd, *args, **kwargs)
 def ps(*args, **kwargs): return _generate_op(_ps, *args, **kwargs)
 def pushd(*args, **kwargs): return _generate_op(_pushd, *args, **kwargs)
@@ -137,8 +137,8 @@ def _prepare_pipeline(x):
 
 def run(x):
     pipeline = _prepare_pipeline(x)
-    if not isinstance(pipeline.last_op(), _Out):
-        pipeline.append(out())
+    if not isinstance(pipeline.last_op(), _Write):
+        pipeline.append(write())
     pipeline.set_error_handler(_MAIN.default_error_handler)
     _MAIN.run_api(pipeline)
 

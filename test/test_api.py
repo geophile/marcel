@@ -16,22 +16,22 @@ TEST = test_base.TestAPI()
 
 def test_gen():
     # Explicit out
-    TEST.run(test=lambda: run(gen(5) | out()),
+    TEST.run(test=lambda: run(gen(5) | write()),
              expected_out=[0, 1, 2, 3, 4])
     # Implicit out
     TEST.run(test=lambda: run(gen(5)),
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run(test=lambda: run(gen(count=5, start=10) | out()),
+    TEST.run(test=lambda: run(gen(count=5, start=10) | write()),
              expected_out=[10, 11, 12, 13, 14])
-    TEST.run(test=lambda: run(gen(5, -5) | out()),
+    TEST.run(test=lambda: run(gen(5, -5) | write()),
              expected_out=[-5, -4, -3, -2, -1])
-    TEST.run(test=lambda: run(gen(count=3, pad=2) | out()),
+    TEST.run(test=lambda: run(gen(count=3, pad=2) | write()),
              expected_out=['00', '01', '02'])
-    TEST.run(test=lambda: run(gen(count=3, start=99, pad=3) | out()),
+    TEST.run(test=lambda: run(gen(count=3, start=99, pad=3) | write()),
              expected_out=['099', '100', '101'])
-    TEST.run(test=lambda: run(gen(count=3, start=99, pad=2) | out()),
+    TEST.run(test=lambda: run(gen(count=3, start=99, pad=2) | write()),
              expected_err='Padding 2 too small')
-    TEST.run(test=lambda: run(gen(count=3, start=-10, pad=4) | out()),
+    TEST.run(test=lambda: run(gen(count=3, start=-10, pad=4) | write()),
              expected_err='Padding incompatible with start < 0')
     TEST.run(test=lambda: run(gen(3, -1) | map(lambda x: 5 / x)),
              expected_out=[-5.0, Error('division by zero'), 5.0])
@@ -53,48 +53,71 @@ def test_gen():
              expected_out=['010', '011', '012', '013', '014'])
 
 
-def test_out():
+def test_write():
     output_filename = '/tmp/out.txt'
-    TEST.run(test=lambda: run(gen(3) | out(format='{}')),
-             expected_out=[0, 1, 2])
-    TEST.run(test=lambda: run(gen(3)),
-             expected_out=[0, 1, 2])
-    TEST.run(test=lambda: run(gen(3) | out(csv=True)),
-             expected_out=[0, 1, 2])
-    TEST.run(test=lambda: run(gen(3) | out(csv=True, format='{}')),
+    # Write to stdout
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write()),
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(format='{}~{}')),
+             expected_out=['0~0', '1~-1', '2~-2'])
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(csv=True)),
+             expected_out=['0,0', '1,-1', '2,-2'])
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(tsv=True)),
+             expected_out=['0\t0', '1\t-1', '2\t-2'])
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(pickle=True)),
+             expected_err='--pickle incompatible with stdout')
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(csv=True, tsv=True)),
              expected_err='Cannot specify more than one of')
-    TEST.run(test=lambda: run(gen(3) | out(file=output_filename)),
-             expected_out=[0, 1, 2],
+    # Write to file
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(filename=output_filename)),
+             expected_out=[(0, 0), (1, -1), (2, -2)],
              file=output_filename)
-    TEST.delete_file(output_filename)
-    TEST.run(test=lambda: run(gen(3) | out(append=output_filename)),
-             expected_out=[0, 1, 2],
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(output_filename, format='{}~{}')),
+             expected_out=['0~0', '1~-1', '2~-2'],
              file=output_filename)
-    TEST.run(test=lambda: run(gen(3) | out(append=output_filename)),
-             expected_out=[0, 1, 2, 0, 1, 2],
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(filename=output_filename, csv=True)),
+             expected_out=['0,0', '1,-1', '2,-2'],
              file=output_filename)
-    TEST.run(test=lambda: run(gen(3) | out(append=output_filename, file=output_filename)),
-             expected_err='Cannot specify more than one of')
-    TEST.delete_file(output_filename)
-    # Function-valued args
-    TEST.run(test=lambda: run(gen(3) | out(file=lambda: output_filename)),
-             expected_out=[0, 1, 2],
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(output_filename, tsv=True)),
+             expected_out=['0\t0', '1\t-1', '2\t-2'],
              file=output_filename)
-    TEST.run(test=lambda: run(gen(3) | out(append=lambda: output_filename)),
-             expected_out=[0, 1, 2, 0, 1, 2],
-             file=output_filename)
-    TEST.delete_file(output_filename)
-    TEST.run(test=lambda: run(gen(3) | out(format=lambda: '{}')),
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(output_filename, pickle=True)),
+             verification=lambda: run(read(output_filename, pickle=True)),
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    # Append
+    TEST.run(test=lambda: run(gen(3) | write(append=True)),
+             expected_err='--append incompatible with stdout')
+    TEST.delete_files(output_filename)
+    TEST.run(test=lambda: run(gen(3) | write(output_filename, append=True)),
+             verification=lambda: run(read(output_filename)),
              expected_out=[0, 1, 2])
-    # Pickle output
-    TEST.run(test=lambda: run(gen(3) | out(pickle=True)),
-             expected_err='Must specify either --file or --append with --pickle')
-    TEST.run(test=lambda: run(gen(3) | map(lambda x: [x] * x) | out(file='/tmp/pickle.txt', pickle=True)),
-             verification=lambda: run(read('/tmp/pickle.txt', pickle=True)),
-             expected_out=[[], 1, [2, 2]])
-    TEST.run(test=lambda: run(gen(3, 3) | map(lambda x: [x] * x) | out(append='/tmp/pickle.txt', pickle=True)),
-             verification=lambda: run(read('/tmp/pickle.txt', pickle=True)),
-             expected_out=[[], 1, [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5, 5, 5]])
+    TEST.run(test=lambda: run(gen(3, 3) | write(output_filename, append=True)),
+             verification=lambda: run(read(output_filename)),
+             expected_out=[0, 1, 2, 3, 4, 5])
+    TEST.delete_files(output_filename)
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(output_filename, csv=True, append=True)),
+             expected_out=['0,0', '1,-1', '2,-2'],
+             file=output_filename)
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(output_filename, tsv=True, append=True)),
+             expected_out=['0,0', '1,-1', '2,-2',
+                           '0\t0', '1\t-1', '2\t-2'],
+             file=output_filename)
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(output_filename, append=True)),
+             expected_out=['0,0', '1,-1', '2,-2',
+                           '0\t0', '1\t-1', '2\t-2',
+                           (0, 0), (1, -1), (2, -2)],
+             file=output_filename)
+    TEST.delete_files(output_filename)
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(output_filename, pickle=True, append=True)),
+             verification=lambda: run(read(output_filename, pickle=True)),
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    TEST.run(test=lambda: run(gen(3, 3) | map(lambda x: (x, -x)) | write(output_filename, pickle=True, append=True)),
+             verification=lambda: run(read(output_filename, pickle=True)),
+             expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4), (5, -5)])
+    # Function-valued filename
+    TEST.run(test=lambda: run(gen(3) | write(lambda: output_filename)),
+             expected_out=[0, 1, 2],
+             file=output_filename)
 
 
 def test_sort():
@@ -662,11 +685,9 @@ def test_store_load():
     i = 123
     TEST.run(test=lambda: run(gen(3) | store(i)),
              expected_err='is not a Reservoir')
-    # Files
-    os.system('rm -rf /tmp/storeload.test')
+    # Bad variable name
     TEST.run(test=lambda: run(gen(3) | store('/tmp/storeload.test')),
-             verification=lambda: run(load('/tmp/storeload.test')),
-             expected_out=[0, 1, 2])
+             expected_err='is not a Python identifier')
 
 
 def test_if():
@@ -736,7 +757,7 @@ def test_read():
                          map(lambda f, x, y, z: (str(f), x, y, z))),
              expected_out=[('f2.tsv', '1', '2.3', 'ab'),
                            ('f2.tsv', '2', '3.4', 'xy')])
-    # --pickle testing is done in test_out()
+    # --pickle testing is done in test_write()
     # Filenames on commandline
     TEST.run(lambda: run(read('/tmp/read/f1.csv')),
              expected_out=['1,2.3,ab', '2,3.4,xy', '3,4.5,"m,n"'])
@@ -1070,7 +1091,7 @@ def test_bugs():
 
 def main_stable():
     test_gen()
-    test_out()
+    test_write()
     test_sort()
     test_map()
     test_select()
@@ -1108,7 +1129,7 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_write()
 
 
 def main():

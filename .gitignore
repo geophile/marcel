@@ -1,6 +1,6 @@
 *.pyc
 *__pycache__*
-.idea
+.idea/**
 build
 dist
 marcel.egg-info
