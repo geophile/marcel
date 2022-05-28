@@ -329,3 +329,30 @@ json
 
 https://cameronnokes.com/blog/working-with-json-in-bash-using-jq/
 
+----------------------------------------------------------------------
+
+Unbundle csv/tsv/pickle options from read and write?
+
+This:
+
+    read --csv foobar
+
+would become:
+
+    read foobar | parse --csv
+
+or 
+
+    foobar > parse --csv
+
+This:
+
+    ... | write --csv foobar
+
+would become:
+
+    ... | format --csv | write foobar
+
+or
+
+    ... | format --csv > foobar
