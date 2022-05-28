@@ -10,7 +10,7 @@ Error handling choices are general -- should apply to CLI, and all APIs:
 
 ----------------------------------------------------------------------
 
-Can print an Error when KillAndResume is raised. Don't have Write op
+Can print an Error when KillAndResume is raised. Don't have Out op
 implement receive_error. Still need to carry the Error along the
 stream, however, to get relayed from remote execution, and then be
 labelled by LabelThread.

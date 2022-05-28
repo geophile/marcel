@@ -136,6 +136,7 @@ class Token(Source):
     COLON = ':'
     ARROW = '>'
     ARROW_2 = '>>'
+    LONG_ARROW_2 = '->>'
     STRING_TERMINATING = [OPEN, CLOSE, PIPE, BEGIN, END, ASSIGN, COMMENT, COMMA, COLON, ARROW, ARROW_2]
 
     def __init__(self, text, position, adjacent_to_previous):

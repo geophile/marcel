@@ -25,15 +25,14 @@ File = marcel.object.file.File
 
 
 HELP = '''
-{L,wrap=F}read [[-01] [-r|--recursive]] [-c|--csv] [-t|--tsv] [-p|--pickle] [-l|--label] [NAME ...]
-{L,wrap=F}NAME >
+{L,wrap=F}read [[-01] [-r|--recursive]] [-c|--csv] [-t|--tsv] [-l|--label] [FILENAME ...]
 
-{L,indent=4:28}{r:-0}                      Include only files matching the specified NAMEs, (i.e., depth 0).
+{L,indent=4:28}{r:-0}                      Include only files matching the specified FILENAMEs, (i.e., depth 0).
 
-{L,indent=4:28}{r:-1}                      Include files matching the specified NAMEs, and in any directories
-among the NAMEs, (i.e., depth 1).
+{L,indent=4:28}{r:-1}                      Include files matching the specified FILENAMEs, and in any directories
+among the FILENAMEs, (i.e., depth 1).
 
-{L,indent=4:28}{r:-r}, {r:--recursive}         Include all files contained in the identified NAMEs, recursively,
+{L,indent=4:28}{r:-r}, {r:--recursive}         Include all files contained in the identified FILENAMEs, recursively,
 to any depth.
 
 {L,indent=4:28}{r:-c}, {r:--csv}               Parse CSV-formatted lines with comma separator.
@@ -44,44 +43,22 @@ to any depth.
 
 {L,indent=4:28}{r:-l}, {r:--label}             Include the input {n:File} in the output.
 
-{L,indent=4:28}{r:NAME}                A variable, filename or glob pattern.
+{L,indent=4:28}{r:FILENAME}                A filename or glob pattern.
 
-Tuples from a source are written to the output stream. The source can
-be a variable, or one or more files. In the latter case, files can be
-specified by giving their names, or glob patterns (the {r:NAME}
-arguments). Alternatively, files can be piped in from an upstream
-command, typically {r:ls}. In the latter case, input tuples are
-assumed to be 1-tuples containing {n:File}s.
+Reads the contents of the specified files. Input files can be specified on
+the command line, by giving their names (the {r:FILENAME} arguments); or piped in from an upstream command,
+typically {r:ls}. In the latter case, input tuples are assumed to be 1-tuples containing {n:File}s. 
 
-Each file is read, and each line is written to the output stream, with
-end-of-line characters ({r:\\\\r}, {r:\\\\n}) removed.
+Each file is read, and each
+line is written to the output stream, with end-of-line characters ({r:\\\\r}, {r:\\\\n}) removed.
 
-The formatting options ({r:--csv}, {r:--tsv}, {r:--pickle}) may only
-be used when reading from files. These options are mutually exclusive.
+If {r:--csv} is specified, then input lines are assumed to be in the CSV format, using a comma
+separator. The line is
+parsed, and a tuple of fields is output. Similarly, if {r:--tsv} is specified, input
+lines are assumed to be in the CSV format with a tab separator.
 
-If {r:--csv} is specified, then input lines are assumed to be in the
-CSV format, using a comma. The line is parsed, and a tuple of fields
-is output. Similarly, if {r:--tsv} is specified, input lines are
-assumed to be in the CSV format with a tab separator.  {r:--pickle}
-parses the input for the Python pickle format.
-
-
-If the input is from {r:File}s, and {r:--label} is specified, then the
-input {n:File} is included in the output, in the first position of
-each output tuple, (i.e., each line is labelled with the {r:File} it
-came from).
-{r:--label} cannot be used for other sources.
-
-There is special syntax for the {n:in} operator:
-
-{L,indent=4,wrap=F}in NAME | ...
-
-can be written as
-
-{L,indent=4,wrap=F}NAME > ...
-
-The syntax is designed to be reminiscent of bash behavior for files,
-but it accomodates variables as well.
+If {r:--label} is specified, then the input {n:File} is included in the output, in the first
+position of each output tuple.
 '''
 
 

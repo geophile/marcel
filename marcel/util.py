@@ -185,10 +185,6 @@ def time_sec(f, *args, **kwargs):
     return stop - start, output
 
 
-def is_filename(x):
-    return x[0] in ('.', '~', '/')
-
-
 class Stack:
 
     def __init__(self):
