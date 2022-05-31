@@ -37,8 +37,13 @@ TRACE = marcel.util.Trace('/tmp/farcel.log', enabled=True)
 class PythonVersionMismatch(Exception):
 
     def __init__(self, client_python_version, server_python_version):
-        super().__init__(f'Python version mismatch between client ({client_python_version}) '
-                         f'and server ({server_python_version}).')
+        super().__init__(f'Python version mismatch between client ('
+                         f'{PythonVersionMismatch.version_string(client_python_version)} and server '
+                         f'{PythonVersionMismatch.version_string(server_python_version)}.')
+
+    @staticmethod
+    def version_string(v):
+        return f'{v[0]}.{v[1]}'
 
 
 class PickleOutput(marcel.core.Op):
@@ -92,7 +97,7 @@ class PipelineRunner(threading.Thread):
         TRACE.write('PipelineRunner: Execution complete.')
 
     def check_python_version(self):
-        server_python_version = f'{sys.version_info.major}.{sys.version_info.minor}'
+        server_python_version = sys.version_info.major, sys.version_info.minor
         if server_python_version != self.client_python_version:
             raise PythonVersionMismatch(self.client_python_version, server_python_version)
 
@@ -153,6 +158,7 @@ def shutdown():
 def main():
     def noop_error_handler(env, error):
         pass
+
     try:
         namespace = marcel.nestednamespace.NestedNamespace(read_config())
         # Use sys.stdin.buffer because we want binary data, not the text version

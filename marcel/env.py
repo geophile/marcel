@@ -381,4 +381,4 @@ class Environment:
 
     @staticmethod
     def python_version():
-        return f'{sys.version_info.major}.{sys.version_info.minor}'
+        return sys.version_info.major, sys.version_info.minor
