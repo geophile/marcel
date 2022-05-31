@@ -3504,6 +3504,46 @@ TypeError: 'NoneType' object is not subscriptable
 
 FIXED
 
+169. Remote ls fails on some hosts
+
+acme:
+
+    M 0.12.9 jao@cheese ~$ @acme [ ls /tmp ]
+    XXX lineno: 121, opcode: 117
+    Error(acme): unknown opcode
+
+cheese:
+
+    M 0.12.9 jao@cheese ~$ @jao [ ls /tmp ]
+    (localhost, .)
+    (localhost, .ICE-unix)
+    (localhost, .Test-unix)
+    (localhost, .X11-unix)
+    ...
+
+On acme:
+
+Caught <class 'SystemError'>: unknown opcode
+  File "/usr/local/bin/farcel.py", line 76, in run
+    self.pipeline.first_op().run()
+  File "/usr/local/lib/python3.8/site-packages/marcel/op/filenamesop.py", line 85, in run
+    self.visit(root, 0)
+  File "/usr/local/lib/python3.8/site-packages/marcel/op/filenamesop.py", line 91, in visit
+    self.action(self, file)
+  File "/home/jao/git/marcel/marcel/op/ls.py", line 121, in send_path
+    assert type(file) is File, f'{type(file)} {file}'
+1640518413.3948474: Pickling error: (<class 'marcel.object.error.Error'>) Error:
+ unknown opcode
+
+The problem was different versions of Python (3.8 vs 3.9). Check for
+matching version x.y. Use sys.version_info, e.g.
+
+sys.version_info(major=3, minor=9, micro=7, releaselevel='final', serial=0)
+
+----------------------------------------------------------------------
+
+FIXED
+
 170. args -a failing when receiving input from host executable
 
     bash: echo a > /tmp/f; echo b >> /tmp/f

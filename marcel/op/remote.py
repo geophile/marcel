@@ -25,6 +25,13 @@ import marcel.core
 import marcel.object.error
 import marcel.util
 
+# Remote execution is done by sending a pickled message to the remote server, containing:
+#
+# - The client's Python version (see bug 169).
+# - The client's environment (omitting Reservoirs).
+# - The pipeline to be executed.
+# - A kill signal, if ctrl-c is detected on client.
+
 
 def remote(env, pipeline):
     assert isinstance(pipeline, marcel.core.Pipelineable)
@@ -73,6 +80,7 @@ class Remote(marcel.core.Op):
                                         universal_newlines=False)
         buffer = io.BytesIO()
         pickler = dill.Pickler(buffer)
+        pickler.dump(self.env().python_version())
         pickler.dump(self.env().without_reservoirs())
         pickler.dump(self.pipeline)
         buffer.seek(0)

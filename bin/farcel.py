@@ -22,6 +22,7 @@ import marcel.util
 import marcel.version
 
 # stdin carries the following from the client process:
+#   - The client's python version (checked to match server's, see bug 169.)
 #   - The client's environment
 #   - The pipeline to be executed
 #   - Possibly a kill signal
@@ -31,6 +32,13 @@ import marcel.version
 
 CONFIG_FILENAME = '.marcel.py'
 TRACE = marcel.util.Trace('/tmp/farcel.log', enabled=True)
+
+
+class PythonVersionMismatch(Exception):
+
+    def __init__(self, client_python_version, server_python_version):
+        super().__init__(f'Python version mismatch between client ({client_python_version}) '
+                         f'and server ({server_python_version}).')
 
 
 class PickleOutput(marcel.core.Op):
@@ -61,8 +69,9 @@ class PickleOutput(marcel.core.Op):
 
 class PipelineRunner(threading.Thread):
 
-    def __init__(self, env, pipeline):
+    def __init__(self, client_python_version, env, pipeline):
         super().__init__()
+        self.client_python_version = client_python_version
         self.env = env
         self.pickler = PickleOutput(env)
         pipeline.append(self.pickler)
@@ -70,6 +79,7 @@ class PipelineRunner(threading.Thread):
 
     def run(self):
         try:
+            self.check_python_version()
             TRACE.write(f'PipelineRunner: About to setup {self.pipeline}')
             self.pipeline.setup()
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
@@ -80,6 +90,11 @@ class PipelineRunner(threading.Thread):
             marcel.util.print_stack(file=TRACE.file)
             self.pickler.receive_error(marcel.object.error.Error(e))
         TRACE.write('PipelineRunner: Execution complete.')
+
+    def check_python_version(self):
+        server_python_version = f'{sys.version_info.major}.{sys.version_info.minor}'
+        if server_python_version != self.client_python_version:
+            raise PythonVersionMismatch(self.client_python_version, server_python_version)
 
 
 def kill_descendents(signal_id):
@@ -142,10 +157,14 @@ def main():
         namespace = marcel.nestednamespace.NestedNamespace(read_config())
         # Use sys.stdin.buffer because we want binary data, not the text version
         input = dill.Unpickler(sys.stdin.buffer)
+        # Python version from client
+        client_python_version = input.load()
+        # env from client
         env = input.load()
         namespace.update(env.namespace)
         env.namespace = namespace
         env.main_pid = os.getpid()
+        # pipeline from client
         pipeline = input.load()
         version = env.getvar('MARCEL_VERSION')
         TRACE.write(f'Marcel version {version}')
@@ -153,7 +172,7 @@ def main():
         atexit.register(shutdown)
         pipeline.set_env(env)
         pipeline.set_error_handler(noop_error_handler)
-        pipeline_runner = PipelineRunner(env, pipeline)
+        pipeline_runner = PipelineRunner(client_python_version, env, pipeline)
         pipeline_runner.start()
     except Exception as e:
         TRACE.write(f'Caught {type(e)}: {e}')

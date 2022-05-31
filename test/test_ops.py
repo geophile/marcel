@@ -554,7 +554,16 @@ def test_remote():
     localhost = marcel.object.cluster.Host('localhost', None)
     TEST.run('@jao [ gen 3 ]',
              expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
-    # Handling of remote error in execution
+    # # Handling of remote error in execution
+    # TEST.run('@jao [ gen 3 -1 | map (x: 5 / x) ]',
+    #          expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
+    # # Handling of remote error in setup
+    # TEST.run('@jao [ ls /nosuchfile ]',
+    #          expected_out=[Error('No qualifying paths')])
+    # # Bug 4
+    # TEST.run('@jao [ gen 3 ] | red . +',
+    #          expected_out=[(localhost, 3)])
+    # TEST.run('@jao [ gen 10 | map (x: (x%2, x)) | red . + ]',    # Handling of remote error in execution
     TEST.run('@jao [ gen 3 -1 | map (x: 5 / x) ]',
              expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
     # Handling of remote error in setup
@@ -571,6 +580,13 @@ def test_remote():
     # Bug 121
     TEST.run('@notacluster [ gen 3]',
              expected_err='There is no cluster named')
+    #          expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
+    # # Implied map
+    # TEST.run('@jao[(419)]',
+    #          expected_out=[(localhost, 419)])
+    # # Bug 121
+    # TEST.run('@notacluster [ gen 3]',
+    #          expected_err='There is no cluster named')
 
 
 def test_sudo():

@@ -356,3 +356,7 @@ would become:
 or
 
     ... | format --csv > foobar
+
+----------------------------------------------------------------------
+
+File copying to/from cluster

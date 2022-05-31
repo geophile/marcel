@@ -101,9 +101,10 @@ class Sudo(marcel.core.Op):
                                         shell=True,
                                         universal_newlines=False)
         # The pipeline's environment will be set remotely.
-        # Send the environment and pipeline
+        # Send the python version, environment and pipeline, (as in Remote)
         buffer = io.BytesIO()
         pickler = dill.Pickler(buffer)
+        pickler.dump(self.env().python_version())
         pickler.dump(self.env())
         pickler.dump(self.pipeline)
         buffer.seek(0)
