@@ -360,3 +360,67 @@ or
 ----------------------------------------------------------------------
 
 File copying to/from cluster
+
+    upload path cluster:remote_path
+
+    download cluster:remote_path path
+
+Or a single command, where direction depends on where the cluster arg
+appears?
+
+Cluster is now an Object. Say so in "help object", and add "help
+cluster".
+
+......................................................................
+
+upload FILENAME ... CLUSTER DIR 
+
+    FILENAME     A filename or glob pattern.
+
+    CLUSTER      A marcel Cluster.
+
+    PATH         Path to a directory on CLUSTER.
+
+Copies local files to the indicated directory on each node of a cluster.
+
+The files to be copied are specified by one or more FILENAMEs. Each
+FILENAME is a file name or a glob pattern. 
+
+CLUSTER must be configured for marcel, (run "help cluster" for
+information on configuring clusters).
+
+PATH must be an absolute path, corresponding to a pre-exising
+directory on each node of the CLUSTER. The user configured for cluster
+access must have permission to write to the directory.
+
+......................................................................
+
+download [-s|--separate] CLUSTER FILENAME ... DIR
+
+----------------------------------------------------------------------
+
+rsync -avz foo* bar/* user@host:/abc/xyz
+
+    @cluster [rsync ... (HOST):/abc/xyz]   # RUNS HERE
+
+    @cluster [gen 3]   # RUNS THERE
+
+Alternative approach for rsync:
+
+    args CLUSTER [host: rsync ... (host):/abc/xyz]
+
+But args isn't quite right. It doesn't parallelize, and is geared to
+iteration over input stream.
+
+Upload:
+
+    fork CLUSTER [host: rsync ... (host):/abc/xyz]
+
+Download:
+
+    fork CLUSTER [host: rsync (host):/abc/xyz/foo* ./download/(host)]
+
+First argument to fork is something iterable. The things iterated over
+are bound to the pipeline arg.  As long as CLUSTER is bound to a
+Cluster, then this will just work as long as Cluster is implemented to
+be an iterator.
