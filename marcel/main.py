@@ -85,7 +85,6 @@ class SameProcessMode:
 
 
 class Main:
-    MAIN_SLEEP_SEC = 0.1
 
     def __init__(self, config_file, same_process, old_namespace):
         # sys.argv sets config_path, dill

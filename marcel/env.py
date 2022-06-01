@@ -169,7 +169,6 @@ class DirectoryState:
 
 
 class Environment:
-    CONFIG_FILENAME = '.marcel.py'
     DEFAULT_PROMPT = f'M-{marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
 
@@ -324,9 +323,7 @@ class Environment:
         return remote_env
 
     def read_config(self, config_path):
-        config_path = (pathlib.Path(config_path)
-                       if config_path else
-                       pathlib.Path.home() / Environment.CONFIG_FILENAME).expanduser()
+        config_path = self.config_file_path(config_path)
         if not config_path.exists():
             with open(config_path.as_posix(), 'w') as config_file:
                 config_file.write(DEFAULT_CONFIG)
@@ -374,6 +371,31 @@ class Environment:
         copy = Environment()
         copy.__dict__.update(self.__dict__)
         return copy
+
+    def config_file_path(self, path):
+        if path is not None:
+            if type(path) is str:
+                config_path = pathlib.Path(path)
+            else:
+                raise marcel.exception.KillShellException(
+                    f'Type of config path is {type(path)}. If defined, it must be a string')
+        else:
+            xdg_config_home = self.getvar('XDG_CONFIG_HOME')
+            if xdg_config_home is None:
+                xdg_config_home = pathlib.Path.home().expanduser() / '.config' / 'marcel'
+            else:
+                if type(xdg_config_home) is not str:
+                    raise marcel.exception.KillShellException(
+                        f'Type of XDG_CONFIG_HOME is {type(xdg_config_home)}. If defined, it must be a string')
+                xdg_config_home = pathlib.Path(xdg_config_home).expanduser()
+            if xdg_config_home.exists():
+                if not xdg_config_home.is_dir():
+                    raise marcel.exception.KillShellException(
+                        f'Expected home of startup.py is not a directory: {xdg_config_home}')
+            else:
+                xdg_config_home.mkdir(exist_ok=False)
+            config_path = xdg_config_home / 'startup.py'
+        return config_path
 
     @staticmethod
     def immutable(x):
