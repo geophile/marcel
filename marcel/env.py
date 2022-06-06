@@ -382,19 +382,20 @@ class Environment:
         else:
             xdg_config_home = self.getvar('XDG_CONFIG_HOME')
             if xdg_config_home is None:
-                xdg_config_home = pathlib.Path.home().expanduser() / '.config' / 'marcel'
+                xdg_config_home = pathlib.Path.home().expanduser() / '.config'
             else:
                 if type(xdg_config_home) is not str:
                     raise marcel.exception.KillShellException(
                         f'Type of XDG_CONFIG_HOME is {type(xdg_config_home)}. If defined, it must be a string')
                 xdg_config_home = pathlib.Path(xdg_config_home).expanduser()
-            if xdg_config_home.exists():
-                if not xdg_config_home.is_dir():
+            config_path = xdg_config_home / 'marcel'
+            if config_path.exists():
+                if not config_path.is_dir():
                     raise marcel.exception.KillShellException(
                         f'Expected home of startup.py is not a directory: {xdg_config_home}')
             else:
-                xdg_config_home.mkdir(exist_ok=False)
-            config_path = xdg_config_home / 'startup.py'
+                config_path.mkdir(exist_ok=False)
+            config_path = config_path / 'startup.py'
         return config_path
 
     @staticmethod

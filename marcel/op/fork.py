@@ -73,14 +73,6 @@ class Fork(marcel.core.Op):
     def must_be_first_in_pipeline(self):
         return True
 
-    # Fork
-
-    @staticmethod
-    def return_remote_output(writer):
-        def f(x):
-            writer.send(dill.dumps(x))
-        return f
-
 
 class ForkWorker:
 

@@ -424,3 +424,9 @@ First argument to fork is something iterable. The things iterated over
 are bound to the pipeline arg.  As long as CLUSTER is bound to a
 Cluster, then this will just work as long as Cluster is implemented to
 be an iterator.
+
+......................................................................
+
+- Get rid of Environment.cluster(self, name). Fork should call getvar
+  instead, and then ensure that the returned value is iterable. (Use
+  iter() to get the iterator, or raise TypeError).
