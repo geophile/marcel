@@ -24,6 +24,7 @@ import marcel.builtin
 import marcel.core
 import marcel.exception
 import marcel.function
+import marcel.locations
 import marcel.nestednamespace
 import marcel.object.cluster
 import marcel.object.db
@@ -210,6 +211,7 @@ class Environment:
         env.namespace = marcel.nestednamespace.NestedNamespace(initial_namespace)
         env.builtin_symbols = set(env.namespace.keys())
         env.config_symbols = None  # Set by compute_config_symbols() after startup script is run
+        env.locations = marcel.locations.Locations(env)
         env.config_path = env.read_config(config_file)
         env.directory_state = DirectoryState(env)
         # TODO: This is a hack. Clean it up once the env handles command history
@@ -223,6 +225,7 @@ class Environment:
         self.namespace = None
         self.builtin_symbols = None
         self.config_symbols = None
+        self.locations = None
         self.config_path = None
         self.directory_state = None
         self.edited_command = None
@@ -322,11 +325,15 @@ class Environment:
                 del remote_env.namespace[var]
         return remote_env
 
-    def read_config(self, config_path):
-        config_path = self.config_file_path(config_path)
+    def read_config(self, config_path=None):
+        if config_path is None:
+            config_path = self.locations.config_path()
+        else:
+            config_path = pathlib.Path(config_path)
         if not config_path.exists():
             with open(config_path.as_posix(), 'w') as config_file:
                 config_file.write(DEFAULT_CONFIG)
+            config_path.chmod(0o600)
         with open(config_path.as_posix()) as config_file:
             config_source = config_file.read()
         locals = {}
@@ -371,32 +378,6 @@ class Environment:
         copy = Environment()
         copy.__dict__.update(self.__dict__)
         return copy
-
-    def config_file_path(self, path):
-        if path is not None:
-            if type(path) is str:
-                config_path = pathlib.Path(path)
-            else:
-                raise marcel.exception.KillShellException(
-                    f'Type of config path is {type(path)}. If defined, it must be a string')
-        else:
-            xdg_config_home = self.getvar('XDG_CONFIG_HOME')
-            if xdg_config_home is None:
-                xdg_config_home = pathlib.Path.home().expanduser() / '.config'
-            else:
-                if type(xdg_config_home) is not str:
-                    raise marcel.exception.KillShellException(
-                        f'Type of XDG_CONFIG_HOME is {type(xdg_config_home)}. If defined, it must be a string')
-                xdg_config_home = pathlib.Path(xdg_config_home).expanduser()
-            config_path = xdg_config_home / 'marcel'
-            if config_path.exists():
-                if not config_path.is_dir():
-                    raise marcel.exception.KillShellException(
-                        f'Expected home of startup.py is not a directory: {xdg_config_home}')
-            else:
-                config_path.mkdir(exist_ok=False)
-            config_path = config_path / 'startup.py'
-        return config_path
 
     @staticmethod
     def immutable(x):

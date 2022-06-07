@@ -39,6 +39,7 @@ class MultiLineReader:
         continued. It is typically \\, which is the default. If the history file is not specified,
         then multiline items in the history file will not be recalled correctly across process
         boundaries."""
+        history_file.touch(0o666)
         self.continuation = continuation
         self.history_file = history_file
         if history_file:

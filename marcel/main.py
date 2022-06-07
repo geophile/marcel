@@ -41,6 +41,7 @@ import marcel.core
 import marcel.env
 import marcel.exception
 import marcel.job
+import marcel.locations
 import marcel.multilinereader
 import marcel.opmodule
 import marcel.parser
@@ -48,7 +49,6 @@ import marcel.reservoir
 import marcel.tabcompleter
 import marcel.util
 
-HISTORY_FILE = '.marcel_history'
 HISTORY_LENGTH = 1000
 
 
@@ -176,12 +176,7 @@ class Main:
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
         readline.set_pre_input_hook(self.insert_edited_command)
-        self.reader = Reader(self.env, self.history_file())
-
-    def history_file(self):
-        environment = self.env
-        home = environment.getvar('HOME')
-        return pathlib.Path(home) / HISTORY_FILE
+        self.reader = Reader(self.env, self.env.locations.history_path())
 
     def shutdown(self, restart=False):
         namespace = self.env.namespace
