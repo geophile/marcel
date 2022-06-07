@@ -14,7 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 HELP = '''
-Your configuration script, {n:.marcel.py} should do the following to
+Your configuration script, typically {n:~/.config/marcel/startup.py} should do the following to
 make a few useful functions available to your commands:
 
 {L}from marcel.builtin import *

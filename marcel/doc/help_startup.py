@@ -14,14 +14,14 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 HELP = '''
-If the marcel configuration file, {n:~/.marcel.py}, defines the variable 
+If the marcel startup script, typically {n:~/.config/marcel/startup.py}, defines the variable 
 {r:RUN_ON_STARTUP}, then the commands listed will be run
 when marcel starts. The value of this variable should be a string,
 with one command per line, (so probably a triple-quoted string).
 
 {b:Example}
 
-Suppose {n:~/.marcel.py} defines {r:RUN_ON_STARTUP} as follows:
+Suppose {n:startup.py} defines {r:RUN_ON_STARTUP} as follows:
 
 {p,indent=4,wrap=F}RUN_ON_STARTUP = """
 ext = [e: select (f: f.suffix == '.' + e)]

@@ -14,8 +14,12 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 HELP = '''
-Marcel is configured and customized by running the script
-{n:~/.marcel.py} on startup. In this script, you can 
+Marcel is configured and customized by running the startup script {n:startup.py}.
+This script is typically located in the directory {n:~/.config/marcel},
+but may be in a different location, specified by the environment
+variable {n:XDG_CONFIG_HOME}.
+
+In this script, you can 
 customize the prompt, output colorization, remote host configuration,
 as well as defining any other symbols you would like to have
 available. As usual, these symbols can be defined by imports, by

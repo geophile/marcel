@@ -16,7 +16,7 @@
 HELP = '''
 Python code always runs in the context of a namespace. The {i:marcel namespace}
 is the namespace used by marcel to execute user-supplied code. During startup, 
-the configuration script {n:~/.marcel.py} is executed. At this point, the 
+the configuration script, usually {n:~/.config/marcel/startup.py}, is executed. At this point, the 
 marcel namespace contains a few variables (such as {n:USER}, {n:HOME},
 and {n:PROMPT}), and functions for configuring access to various
 resources (e.g. {n:define_remote}).
@@ -40,7 +40,7 @@ To compute the golden ratio:
     {c550:Error(map((1 + sqrt(5)) / 2) failed on : name 'sqrt' is not defined}
 
 This fails because {r:sqrt} is not a builtin function in Python. It comes from
-the {n:math} module. If this line is added to {n:~/.marcel.py}:
+the {n:math} module. If this line is added to {n:startup.py}:
 {p,wrap=F,indent=4}
     from math import sqrt
 
