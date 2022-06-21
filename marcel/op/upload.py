@@ -24,42 +24,64 @@ import marcel.opmodule
 import marcel.op.labelthread
 
 
-def fork(env, host, pipelineable):
-    assert isinstance(pipelineable, marcel.core.Pipelineable)
-    pipelineable = pipelineable.create_pipeline()
-    return Fork(env), [host, pipelineable]
+HELP = '''
+{L,wrap=F}upload CLUSTER:DIR FILENAME ...
+
+{L,indent=4:28}{r:CLUSTER}                 The cluster to which files will be uploaded. 
+
+{L,indent=4:28}{r:DIR}                     The directory on each cluster node to receive uploaded files.
+
+{L,indent=4:28}{r:FILENAME}                A filename or glob pattern.
+
+Copies local files to the indicated directory on each node of a cluster.
+
+The files to be copied are specified by one or more FILENAMEs. Each
+FILENAME is a file name or a glob pattern.
+
+CLUSTER must be configured for marcel, (run "help cluster" for
+information on configuring clusters).
+
+DIR must be an absolute path, corresponding to a pre-exising directory
+on each node of the CLUSTER. The user configured for cluster access
+must have permission to write to the directory.
+'''
 
 
-class ForkArgsParser(marcel.argsparser.ArgsParser):
+def upload(env, cluster, dir, *paths):
+    return Upload(env), [cluster, dir, paths]
+
+
+class UploadArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('fork', env)
-        self.add_anon('cluster', convert=self.fork_spec, target='cluster_name')
-        self.add_anon('pipeline', convert=self.check_pipeline)
+        self.add_anon('cluster_dir')
+        self.add_anon_list('paths')
         self.validate()
 
 
-class Fork(marcel.core.Op):
+class Upload(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.cluster_dir = None
+        self.paths = None
         self.cluster_name = None
-        self.cluster = None
+        self.dir = None
         self.pipeline = None
-        self.workers = None
 
     def __repr__(self):
-        return f'@{self.cluster_name} {self.pipeline}'
+        return f'upload {self.cluster}:{self.dir} {self.paths}'
 
     # AbstractOp
 
     def setup(self):
-        self.cluster = self.env().cluster(self.cluster_name)
-        if self.cluster is None:
-            raise marcel.exception.KillCommandException(f'There is no cluster named {self.cluster_name}')
-        self.workers = []
-        for host in self.cluster.hosts:
-            self.workers.append(ForkWorker(host, self))
+        colon = self.cluster_dir.find(':')
+        if colon < 1 or colon == len(self.cluster_dir) - 1:
+            raise marcel.exception.KillCommandException(f'Invalid specification of CLUSTER:DIR: {self.cluster_dir}')
+        self.cluster_name = self.cluster_dir[:colon]
+        self.dir = self.cluster_dir[colon + 1:]
+        self.pipeline = self.create_pipeline()
 
     # Op
 
@@ -72,6 +94,24 @@ class Fork(marcel.core.Op):
     def must_be_first_in_pipeline(self):
         return True
 
+    # Implementation
+    def create_pipeline(self):
+        # [fork CLUSTER [bash rsync -asz -i CLUSTER.identity PATHS host:DIR]], for each host in CLUSTER
+        rsync_pipeline = marcel.core.Pipeline()
+        cluster = self.env().cluster(self.cluster_name)
+        host_dir =
+        if cluster is None:
+            raise marcel.exception.KillCommandException(f'There is no cluster named {self.cluster_name}')
+        bash_op = marcel.opmodule.create_op(self.env(), 'bash',
+                                            'rsync',
+                                            '-asz',
+                                            '-i',
+                                            cluster.identity,
+                                            *self.paths,
+                                            host_dir)
+        fork_pipeline = marcel.core.Pipeline()
+        fork_op = marcel.opmodule.create_op(self.env(), 'fork', self.cluster, rsync_pipeline)
+        return fork_pipeline
 
 class ForkWorker:
 

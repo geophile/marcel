@@ -57,6 +57,7 @@ public = [
     'timer',
     'unique',
     'union',
+    'upload',
     'version',
     'window',
     'write'

@@ -373,29 +373,6 @@ cluster".
 
 ......................................................................
 
-upload FILENAME ... CLUSTER DIR 
-
-    FILENAME     A filename or glob pattern.
-
-    CLUSTER      A marcel Cluster.
-
-    PATH         Path to a directory on CLUSTER.
-
-Copies local files to the indicated directory on each node of a cluster.
-
-The files to be copied are specified by one or more FILENAMEs. Each
-FILENAME is a file name or a glob pattern. 
-
-CLUSTER must be configured for marcel, (run "help cluster" for
-information on configuring clusters).
-
-PATH must be an absolute path, corresponding to a pre-exising
-directory on each node of the CLUSTER. The user configured for cluster
-access must have permission to write to the directory.
-
-......................................................................
-
-download [-s|--separate] CLUSTER FILENAME ... DIR
 
 ----------------------------------------------------------------------
 
@@ -430,3 +407,46 @@ be an iterator.
 - Get rid of Environment.cluster(self, name). Fork should call getvar
   instead, and then ensure that the returned value is iterable. (Use
   iter() to get the iterator, or raise TypeError).
+
+......................................................................
+
+Using rsync doesn't work well. Verbose. Need authentication info, so
+user/password, or identity, which would be more pipeline args.
+
+......................................................................
+
+So back to upload/download
+
+upload CLUSTER:DIR FILENAME ...
+
+download [-s|--separate] CLUSTER:DIR FILENAME ...
+
+For multiple FILENAME download, use rsync user@host:f1 :f2 :f3 ...
+
+Use -s|--protect_args to allow for filenames with whitespace. 
+
+......................................................................
+
+upload CLUSTER:DIR FILENAME ... 
+
+    CLUSTER      A marcel Cluster.
+
+    DIR          Target directory on each node of CLUSTER.
+
+    FILENAME     A filename or glob pattern identifying local files.
+
+Copies local files to the indicated directory on each node of a cluster.
+
+The files to be copied are specified by one or more FILENAMEs. Each
+FILENAME is a file name or a glob pattern.
+
+CLUSTER must be configured for marcel, (run "help cluster" for
+information on configuring clusters).
+
+DIR must be an absolute path, corresponding to a pre-exising directory
+on each node of the CLUSTER. The user configured for cluster access
+must have permission to write to the directory.
+
+......................................................................
+
+download [-s|--separate] CLUSTER FILENAME ... DIR

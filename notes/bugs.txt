@@ -292,3 +292,14 @@ It is including items defined in config (e.g. byt, ext)
     ('pi', 3.141592653589793)
     ('rand', [n: gen(count=0, start=0) | map(lambda x: random.randint(0, int(n)-1))])
     ('recent', [d: ls(depth=recursive,include=f) | select(lambda f: now() - f.mtime < days(float(d)))])
+
+----------------------------------------------------------------------
+
+171. Remote error not showing up correctly
+
+From test_api:
+
+    # TODO: Bug - should be expected_err
+    TEST.run(lambda: run(fork('jao', ls('/nosuchfile'))),
+             expected_out=[Error('No qualifying paths')])
+             # expected_err='No qualifying paths')
