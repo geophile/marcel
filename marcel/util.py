@@ -185,6 +185,10 @@ def time_sec(f, *args, **kwargs):
     return stop - start, output
 
 
+def iterable(x):
+    return isinstance(x, collections.abc.Iterable)
+
+
 class Stack:
 
     def __init__(self):

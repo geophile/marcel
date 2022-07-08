@@ -45,7 +45,6 @@ from marcel.op.pushd import pushd as _pushd
 from marcel.op.pwd import pwd as _pwd
 from marcel.op.read import read as _read
 from marcel.op.red import red as _red
-from marcel.op.remote import remote as _remote
 from marcel.op.reverse import reverse as _reverse
 from marcel.op.select import select as _select
 from marcel.op.sort import sort as _sort
@@ -111,9 +110,6 @@ def unique(*args, **kwargs): return _generate_op(_unique, *args, **kwargs)
 def union(*args, **kwargs): return _generate_op(_union, *args, **kwargs)
 def version(*args, **kwargs): return _generate_op(_version, *args, **kwargs)
 def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
-
-
-remote = fork
 
 
 # Utilities

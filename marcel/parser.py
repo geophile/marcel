@@ -1081,8 +1081,7 @@ class Parser:
 
     def create_op_variable(self, op_token, arg_tokens):
         var = op_token.value(self)
-        op_module = self.op_modules['runpipeline']
-        op = op_module.create_op()
+        op = self.op_modules['runpipeline'].create_op()
         op.var = var
         if len(arg_tokens) > 0:
             pipeline_args = []

@@ -579,8 +579,7 @@ def test_remote():
              expected_out=[(localhost, 419)])
     # Bug 121
     TEST.run('@notacluster [ gen 3]',
-             expected_err='There is no cluster named')
-    #          expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
+             expected_err='must be an int, iterable, or Cluster')
     # # Implied map
     # TEST.run('@jao[(419)]',
     #          expected_out=[(localhost, 419)])

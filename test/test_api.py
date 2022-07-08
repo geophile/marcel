@@ -37,7 +37,7 @@ def test_gen():
              expected_out=[-5.0, Error('division by zero'), 5.0])
     # Bad types
     TEST.run(test=lambda: run(gen(True)),
-             expected_err='count must be a string')
+             expected_err='count must be an int')
     # str is OK, but it had better look like an int
     TEST.run(test=lambda: run(gen('5')),
              expected_out=[0, 1, 2, 3, 4])
@@ -133,7 +133,7 @@ def test_sort():
     TEST.run(test=lambda: run(map(lambda: (1, "a", 2, "b")) | expand() | sort()),
              expected_err="'<' not supported between instances of 'str' and 'int'")
     # Bug 10
-    TEST.run(test=lambda: run(sort()), expected_out=[])
+    TEST.run(test=lambda: run(sort()), expected_err='sort cannot be the first operator in a pipeline')
 
 
 def test_map():
@@ -465,7 +465,7 @@ def test_window():
     TEST.run(lambda: run(gen(10) | window(overlap='abc')),
              expected_err='overlap cannot be converted to int')
     TEST.run(lambda: run(gen(10) | window(disjoint=[])),
-             expected_err='disjoint must be a string')
+             expected_err='disjoint must be an int')
     # Function-valued args
     THREE = 3
     TEST.run(lambda: run(gen(10) | window(overlap=lambda: THREE)),
@@ -543,7 +543,7 @@ def test_remote():
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
     # Bug 121
     TEST.run(test=lambda: run(fork('notacluster', gen(3))),
-             expected_err='There is no cluster named')
+             expected_err='notacluster must be an int, iterable, or Cluster')
 
 
 def test_sudo():
@@ -1129,7 +1129,7 @@ def main_stable():
 
 
 def main_dev():
-    test_write()
+    pass
 
 
 def main():

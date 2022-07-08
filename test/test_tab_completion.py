@@ -8,7 +8,7 @@ ALL_OPS = [
     'args', 'ifelse', 'ls', 'red', 'sudo', 'bash',
     'env', 'ifthen', 'map', 'reverse', 'tail', 'bg', 'expand',
     'import', 'run', 'timer', 'cd', 'fg', 'intersect',
-    'popd', 'select', 'union', 'delete', 'gen', 'jobs', 'ps',
+    'popd', 'select', 'union', 'delete', 'fork', 'gen', 'jobs', 'ps',
     'sort', 'unique', 'difference', 'head', 'join', 'pushd',
     'sql', 'version', 'dirs', 'help', 'load', 'pwd', 'squish',
     'window', 'edit', 'history', 'read', 'store', 'tee', 'write'
