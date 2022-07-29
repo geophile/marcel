@@ -140,7 +140,6 @@ def kill_descendents(signal_id):
 # Adapted from Environment.read_config
 def read_config(config_path=None):
     current_dir = pathlib.Path.cwd().resolve()
-    TRACE.write(f'current_dir: {current_dir}')
     namespace = {
         'USER': getpass.getuser(),
         'HOME': pathlib.Path.home().resolve().as_posix(),
@@ -155,7 +154,6 @@ def read_config(config_path=None):
     }
     locations = marcel.locations.Locations(marcel.env.Environment())
     config_path = locations.config_path()
-    TRACE.write(f'config_path: {config_path}')
     if config_path.exists():
         with open(config_path.as_posix()) as config_file:
             config_source = config_file.read()
