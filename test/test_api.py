@@ -526,23 +526,23 @@ def test_namespace():
 
 def test_remote():
     localhost = marcel.object.cluster.Host('localhost', None)
-    TEST.run(lambda: run(fork('jao', gen(3))),
+    TEST.run(lambda: run(remote('jao', gen(3))),
              expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
     # Handling of remote error in execution
-    TEST.run(lambda: run(fork('jao', gen(3, -1) | map(lambda x: 5 / x))),
+    TEST.run(lambda: run(remote('jao', gen(3, -1) | map(lambda x: 5 / x))),
              expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
     # Handling of remote error in setup
     # TODO: Bug - should be expected_err
-    TEST.run(lambda: run(fork('jao', ls('/nosuchfile'))),
+    TEST.run(lambda: run(remote('jao', ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
              # expected_err='No qualifying paths')
     # Bug 4
-    TEST.run(lambda: run(fork('jao', gen(3)) | red(None, r_plus)),
+    TEST.run(lambda: run(remote('jao', gen(3)) | red(None, r_plus)),
              expected_out=[(localhost, 3)])
-    TEST.run(lambda: run(fork('jao', gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
+    TEST.run(lambda: run(remote('jao', gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
     # Bug 121
-    TEST.run(test=lambda: run(fork('notacluster', gen(3))),
+    TEST.run(test=lambda: run(remote('notacluster', gen(3))),
              expected_err='notacluster must be an int, iterable, or Cluster')
 
 

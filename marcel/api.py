@@ -45,6 +45,7 @@ from marcel.op.pushd import pushd as _pushd
 from marcel.op.pwd import pwd as _pwd
 from marcel.op.read import read as _read
 from marcel.op.red import red as _red
+from marcel.op.remote import remote as _remote
 from marcel.op.reverse import reverse as _reverse
 from marcel.op.select import select as _select
 from marcel.op.sort import sort as _sort
@@ -96,6 +97,7 @@ def pushd(*args, **kwargs): return _generate_op(_pushd, *args, **kwargs)
 def pwd(*args, **kwargs): return _generate_op(_pwd, *args, **kwargs)
 def read(*args, **kwargs): return _generate_op(_read, *args, **kwargs)
 def red(*args, **kwargs): return _generate_op(_red, *args, **kwargs)
+def remote(*args, **kwargs): return _generate_op(_remote, *args, **kwargs)
 def reverse(*args, **kwargs): return _generate_op(_reverse, *args, **kwargs)
 def select(*args, **kwargs): return _generate_op(_select, *args, **kwargs)
 def sort(*args, **kwargs): return _generate_op(_sort, *args, **kwargs)

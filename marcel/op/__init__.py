@@ -45,6 +45,7 @@ public = [
     'pwd',
     'red',
     'read',
+    'remote',
     'reverse',
     'run',
     'select',

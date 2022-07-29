@@ -525,3 +525,126 @@ far simpler to use the {n:upload} and {n:download} commands.
 + Remote class could be demoted to be nested, like ForkWorker.SendToParent.
 
 + LabelThread can also be demoted.
+
+......................................................................
+
+Fork works like Args, in having a pipeline with args.
+
+Args implementation:
+
+Args -> ArgsImpl
+        /       \
+       /         \
+    Args         Args
+    Interactive  API
+
+ArgsInteractive:
+
+- setup: 
+  
+  - Copy pipeline
+
+  - Create scope, a map of param: None for each pipeline param.
+
+- receive: 
+
+  - push scope
+
+  - Run pipeline
+
+      - Set params (which are represented by env vars)
+
+      - Command(pipeline).execute()
+
+  - Pop scope
+
+ArgsAPI:
+
+- setup: Clear self.args, (same as ArgsInteractive)
+
+- receive
+
+    - Execute pipeline arg (API pipeline is a function yielding a Node
+      tree).
+
+    - create_pipeline() which converts the Nodes into a Pipeline.
+
+    - Command(pipeline).execute()
+
+----------------------------------------------------------------------
+
+Wait a minute. 
+
+    @cluster [...]
+
+translates to:
+
+    fork cluster [...]
+
+which runs the pipeline on each node of the cluster. The pipeline runs remotely. 
+
+The idea was that upload would translate to:
+
+    fork cluster [host: rsync ... (host):...]
+
+But that requires the pipeline to run *locally*.
+
+......................................................................
+
+Fork uses the multiprocessing module to run instances of the same
+pipeline in parallel. Remote execution (as in @cluster [...]) needs
+the same thing.
+
+So @cluster [...] can be implemented by Fork(Remote([...])). 
+
+Syntax:
+
+    fork FORKGEN PIPELINE
+
+where FORKGEN is an int or iterable. By making Cluster iterable, the
+upload and download ops can be supported. 
+
+So @ syntax needs to add the Remote wrapper.
+
+======================================================================
+
+Should allow pipeline vars for args:
+
+    ... | args pipeline_var
+
+M 0.13.6 jao@cheese ~/git/marcel$ gen 3 1 | args pn
+Process Process-3:
+Traceback (most recent call last):
+  File "/usr/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 416, in execute
+    self.pipeline.setup()
+  File "/home/jao/git/marcel/marcel/core.py", line 346, in setup
+    op.setup()
+  File "/home/jao/git/marcel/marcel/op/args.py", line 75, in setup
+    self.impl.setup()
+  File "/home/jao/git/marcel/marcel/op/args.py", line 141, in setup
+    self.params = op.pipeline_arg.parameters()
+AttributeError: 'str' object has no attribute 'parameters'
+M 0.13.6 jao@cheese ~/git/marcel$ gen 3 1 | args (pn)
+Process Process-4:
+Traceback (most recent call last):
+  File "/usr/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 416, in execute
+    self.pipeline.setup()
+  File "/home/jao/git/marcel/marcel/core.py", line 346, in setup
+    op.setup()
+  File "/home/jao/git/marcel/marcel/op/args.py", line 75, in setup
+    self.impl.setup()
+  File "/home/jao/git/marcel/marcel/op/args.py", line 181, in setup
+    self.n_params = len(self.op.pipeline_arg.__code__.co_varnames)
+AttributeError: 'SourceFunction' object has no attribute '__code__'

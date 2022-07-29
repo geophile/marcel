@@ -127,7 +127,7 @@ class Token(Source):
     CLOSE = ')'
     PIPE = '|'
     BANG = '!'
-    FORK = '@'
+    REMOTE = '@'
     BEGIN = '['
     END = ']'
     ASSIGN = '='
@@ -167,7 +167,7 @@ class Token(Source):
     def is_op(self):
         return False
 
-    def is_fork(self):
+    def is_remote(self):
         return False
 
     def is_bang(self):
@@ -461,12 +461,12 @@ class Pipe(Symbol):
         return True
 
 
-class Fork(Symbol):
+class Remote(Symbol):
 
     def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous, Token.FORK)
+        super().__init__(text, position, adjacent_to_previous, Token.REMOTE)
 
-    def is_fork(self):
+    def is_remote(self):
         return True
 
     def is_op(self):
@@ -609,8 +609,8 @@ class Lexer(Source):
                 token = Begin(self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.END):
                 token = End(self.text, self.end, adjacent_to_previous)
-            elif self.match(c, Token.FORK):
-                token = Fork(self.text, self.end, adjacent_to_previous)
+            elif self.match(c, Token.REMOTE):
+                token = Remote(self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.BANG):
                 token = Run(self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.ASSIGN):
@@ -977,7 +977,7 @@ class Parser:
         return op_args
 
     def op(self):
-        if self.next_token(String) or self.next_token(Fork) or self.next_token(Run):
+        if self.next_token(String) or self.next_token(Remote) or self.next_token(Run):
             return self.token
         else:
             raise PrematureEndError(self.token)
@@ -1059,8 +1059,13 @@ class Parser:
             op_name = op_token.op_name
             op_module = self.op_modules[op_name]
             op = op_module.create_op()
+            # @syntax, indicated by is_remote() == True, needs to set flag on Fork op, to indicate
+            # remote execution
+            if op_token.is_remote():
+                assert op_name == 'fork'
+                op.execute_remotely()
             # Both ! and !! map to the run op.
-            if op_name == 'run':
+            elif op_name == 'run':
                 # !: Expect a command number
                 # !!: Don't expect a command number, run the previous command
                 # else: 'run' was entered

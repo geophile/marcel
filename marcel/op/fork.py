@@ -111,6 +111,15 @@ def fork(env, forkgen, pipelineable):
     return Fork(env), [forkgen, pipelineable]
 
 
+# For API
+def fork_remote(env, forkgen, pipelineable):
+    assert isinstance(pipelineable, marcel.core.Pipelineable)
+    pipelineable = pipelineable.create_pipeline()
+    fork = Fork(env)
+    fork.execute_remotely()
+    return fork, [forkgen, pipelineable]
+
+
 class ForkArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
@@ -128,9 +137,11 @@ class Fork(marcel.core.Op):
         self.pipeline = None
         self.impl = None
         self.workers = None
+        self.remote = False
 
     def __repr__(self):
-        return f'fork({self.forkgen}, {self.pipeline})'
+        op_name = 'remote' if self.remote else 'fork'
+        return f'{op_name}({self.forkgen}, {self.pipeline})'
 
     # AbstractOp
 
@@ -141,8 +152,8 @@ class Fork(marcel.core.Op):
         forkgen = self.eval_function('forkgen') if callable(self.forkgen) else self.forkgen
         if type(forkgen) is int:
             self.impl = ForkInt(self, forkgen)
-        elif type(forkgen) is marcel.object.cluster.Cluster:
-            self.impl = ForkCluster(self, forkgen)
+        elif self.remote:
+            self.impl = ForkRemote(self, forkgen)
         elif marcel.util.iterable(forkgen):
             self.impl = ForkIterable(self, forkgen)
         else:
@@ -161,6 +172,11 @@ class Fork(marcel.core.Op):
 
     def must_be_first_in_pipeline(self):
         return True
+
+    # Fork
+
+    def execute_remotely(self):
+        self.remote = True
 
 
 class ForkWorker:
@@ -237,17 +253,7 @@ class ForkImpl(object):
         self.thread_ids = None
 
 
-class ForkInt(ForkImpl):
-
-    def __init__(self, op, n_forks):
-        super().__init__(op)
-        if n_forks > 0:
-            self.thread_ids = list(range(n_forks))
-        else:
-            raise marcel.exception.KillCommandException(f'If fork generator is an int, it must be positive.')
-
-
-class ForkCluster(ForkImpl):
+class ForkRemote(ForkImpl):
 
     class SendToParent(marcel.core.Op):
 
@@ -291,6 +297,7 @@ class ForkCluster(ForkImpl):
                 self.host.addr,
                 'farcel.py'
             ])
+            print(command)
             self.process = subprocess.Popen(command,
                                             stdin=subprocess.PIPE,
                                             stdout=subprocess.PIPE,
@@ -339,16 +346,26 @@ class ForkCluster(ForkImpl):
 
     def pipeline_instance(self, fork_worker):
         op = self.op
-        thread_id = fork_worker.thread_id
+        host = fork_worker.thread_id
         pipeline = marcel.core.Pipeline()
-        remote = ForkCluster.Remote(op.env(), thread_id, op.pipeline)
-        label_thread = ForkImpl.LabelThread(op.env(), thread_id)
-        send_to_parent = ForkCluster.SendToParent(op.env(), fork_worker.writer)
+        remote = ForkRemote.Remote(op.env(), host, op.pipeline)
+        label_thread = ForkImpl.LabelThread(op.env(), host)
+        send_to_parent = ForkRemote.SendToParent(op.env(), fork_worker.writer)
         pipeline.append(remote)
         pipeline.append(label_thread)
         pipeline.append(send_to_parent)
         label_thread.receiver = op.receiver
         return pipeline
+
+
+class ForkInt(ForkImpl):
+
+    def __init__(self, op, n_forks):
+        super().__init__(op)
+        if n_forks > 0:
+            self.thread_ids = list(range(n_forks))
+        else:
+            raise marcel.exception.KillCommandException(f'If fork generator is an int, it must be positive.')
 
 
 class ForkIterable(ForkImpl):

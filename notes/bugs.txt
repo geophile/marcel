@@ -292,3 +292,22 @@ It is including items defined in config (e.g. byt, ext)
     ('pi', 3.141592653589793)
     ('rand', [n: gen(count=0, start=0) | map(lambda x: random.randint(0, int(n)-1))])
     ('recent', [d: ls(depth=recursive,include=f) | select(lambda f: now() - f.mtime < days(float(d)))])
+
+----------------------------------------------------------------------
+
+171. Running python doesn't work
+
+jao@cheese:~$ marcel
+M 0.13.6 jao@cheese ~$ python
+M 0.13.6 jao@cheese ~$ 
+
+----------------------------------------------------------------------
+
+172. Args to bash are interpreted as belonging to marcel
+
+M 0.13.6 jao@cheese ~$ bash ssh -l jao -i /home/jao/.ssh/id_rsa 127.0.0.1 'ls /tmp'
+Operator bash: Flags must all appear before the first anonymous arg
+
+----------------------------------------------------------------------
+
+173. 

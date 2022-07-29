@@ -51,7 +51,7 @@ class OpModule:
                     elif isclass and marcel.argsparser.ArgsParser in parents:
                         # E.g. LsArgsParser
                         self._args_parser_constructor = v
-        assert self._op_constructor is not None, op_name
+        # assert self._op_constructor is not None, op_name
         # args validator not always present, e.g. for gather
 
     def env(self):
