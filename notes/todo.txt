@@ -606,6 +606,8 @@ upload and download ops can be supported.
 
 So @ syntax needs to add the Remote wrapper.
 
+@c [a | b] -> fork(c, [host: remote(host, [a | b])])Remote
+
 ======================================================================
 
 Should allow pipeline vars for args:

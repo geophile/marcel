@@ -252,6 +252,13 @@ class ForkImpl(object):
         self.op = op
         self.thread_ids = None
 
+    def pipeline_instance(self, fork_worker):
+        # Copy the op's pipeline
+        op = self.op
+        pipeline = op.pipeline.copy()
+        pipeline.set_error_handler(op.pipeline.error_handler)
+        return pipeline
+
 
 class ForkRemote(ForkImpl):
 
@@ -297,7 +304,6 @@ class ForkRemote(ForkImpl):
                 self.host.addr,
                 'farcel.py'
             ])
-            print(command)
             self.process = subprocess.Popen(command,
                                             stdin=subprocess.PIPE,
                                             stdout=subprocess.PIPE,
@@ -345,9 +351,13 @@ class ForkRemote(ForkImpl):
         self.thread_ids = self.cluster.hosts
 
     def pipeline_instance(self, fork_worker):
+        # Create a pipeline that:
+        #    - Runs the op's pipeline remotely
+        #    - Prepends the host to each tuple from the remote host
+        #    - Sends tuples to the parent
+        pipeline = marcel.core.Pipeline()
         op = self.op
         host = fork_worker.thread_id
-        pipeline = marcel.core.Pipeline()
         remote = ForkRemote.Remote(op.env(), host, op.pipeline)
         label_thread = ForkImpl.LabelThread(op.env(), host)
         send_to_parent = ForkRemote.SendToParent(op.env(), fork_worker.writer)
