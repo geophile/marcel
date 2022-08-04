@@ -543,7 +543,26 @@ def test_remote():
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
     # Bug 121
     TEST.run(test=lambda: run(remote('notacluster', gen(3))),
-             expected_err='notacluster must be an int, iterable, or Cluster')
+             expected_err='must be an int, iterable, or Cluster')
+
+
+def test_fork():
+    pass
+#     # TEST.run(lambda: run(fork(3, gen(3, 100)) | sort()),
+#     #          expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
+#     TEST.run(lambda: run(fork(3, lambda: gen(3, 100)) | sort()))
+#     # TEST.run(lambda: run(fork(3, lambda: gen(3, 100)) | sort()),
+#     #          expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
+#     # TEST.run('fork 3 [t: gen 3 100 | (x: (t, x))] | sort',
+#     #          expected_out=[(0, 100), (0, 101), (0, 102),
+#     #                        (1, 100), (1, 101), (1, 102),
+#     #                        (2, 100), (2, 101), (2, 102)])
+#     # TEST.run('fork "abc" [gen 3 100] | sort',
+#     #          expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
+#     # TEST.run('fork "abc" [t: gen 3 100 | (x: (t, x))] | sort',
+#     #          expected_out=[('a', 100), ('a', 101), ('a', 102),
+#     #                        ('b', 100), ('b', 101), ('b', 102),
+#     #                        ('c', 100), ('c', 101), ('c', 102)])
 
 
 def test_sudo():
@@ -1129,13 +1148,13 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_fork()
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

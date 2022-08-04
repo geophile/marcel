@@ -39,9 +39,15 @@ Instances of a pipeline are executed concurrently.
 {r:FORK_GEN} is an int or an iterable, used to specify the number of
 concurrent executions of {r:PIPELINE}. For discussion purposes, the
 execution of each instance of {r:PIPELINE} is executed by a thread, but
-the actual implementation is unspecified. {r:PIPELINE} has one argument, a
+the actual implementation is unspecified. {r:PIPELINE} has no arguments, or
+one argument, a
 thread id. Output from {r:fork} comprises tuples containing the thread id,
 and the output from the pipeline instance.
+
+If {r:FORK_GEN} is an int, N, then the thread ids are 0, ..., N-1.
+
+If {r:FORK_GEN} is an iterable, then the thread ids are the values obtained by iteration, 
+(i.e., successive calls to next()).
 
 Example:
 
@@ -84,12 +90,12 @@ yields:
 ('b', 102)
 ('c', 102)
 
-{r:FORK_GEN} may be a {n:Cluster}. A {n:Cluster} is iterable, and the values
-obtained by iteration are {n:Host} objects.
+{r:FORK_GEN} may be a {n:Cluster}, because {n:Cluster} is iterable.
+In this case, the thread ids are the {n:Host} objects comprising the named cluster.
 
 It should not normally be necessary to use a {n:Cluster} for
-{r:FORK_GEN}. Remote execution can be done by using special syntax,
-e.g. to send a {n:grep} command to each node in cluster {r:lab}:
+{r:FORK_GEN}. Remote execution can be done by using remote execution syntax.
+E.g. to send a {n:grep} command to each node in cluster {r:lab}:
 
 {p,indent=4,wrap=F}
 @lab [grep foobar /var/log/syslog]
@@ -106,20 +112,12 @@ far simpler to use the {n:upload} and {n:download} commands.
 
 
 def fork(env, forkgen, pipelineable):
-    assert isinstance(pipelineable, marcel.core.Pipelineable)
+    assert isinstance(pipelineable, marcel.core.Pipelineable), type(pipelineable)
     pipelineable = pipelineable.create_pipeline()
     return Fork(env), [forkgen, pipelineable]
 
 
 # For API
-def fork_remote(env, forkgen, pipelineable):
-    assert isinstance(pipelineable, marcel.core.Pipelineable)
-    pipelineable = pipelineable.create_pipeline()
-    fork = Fork(env)
-    fork.execute_remotely()
-    return fork, [forkgen, pipelineable]
-
-
 class ForkArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
@@ -153,11 +151,13 @@ class Fork(marcel.core.Op):
         if type(forkgen) is int:
             self.impl = ForkInt(self, forkgen)
         elif self.remote:
+            if type(forkgen) is not marcel.object.cluster.Cluster:
+                Fork.bad_forkgen()
             self.impl = ForkRemote(self, forkgen)
         elif marcel.util.iterable(forkgen):
             self.impl = ForkIterable(self, forkgen)
         else:
-            raise marcel.exception.KillCommandException(f'fork generator must be an int, Cluster, or iterable.')
+            Fork.bad_forkgen()
         self.workers = []
         for thread_id in self.impl.thread_ids:
             self.workers.append(ForkWorker(self, thread_id))
@@ -178,6 +178,12 @@ class Fork(marcel.core.Op):
     def execute_remotely(self):
         self.remote = True
 
+    # Internal
+
+    @staticmethod
+    def bad_forkgen():
+        raise marcel.exception.KillCommandException(f'fork generator must be an int, iterable, or Cluster.')
+
 
 class ForkWorker:
 
@@ -195,10 +201,17 @@ class ForkWorker:
             try:
                 self.pipeline.set_error_handler(self.op.owner.error_handler)
                 self.pipeline.setup()
-                self.pipeline.set_env(self.op.env())
-                self.pipeline.run()
-                self.pipeline.flush()
-                self.pipeline.cleanup()
+                env = self.op.env()
+                env.vars().push_scope(self.op.impl.scope)
+                self.pipeline.set_env(env)
+                if self.pipeline.params:
+                    env.setvar(self.pipeline.params[0], self.thread_id)
+                try:
+                    self.pipeline.run()
+                    self.pipeline.flush()
+                    self.pipeline.cleanup()
+                finally:
+                    env.vars().push_scope(self.op.impl.scope)
             except BaseException as e:
                 self.writer.send(dill.dumps(e))
             self.writer.close()
@@ -220,6 +233,21 @@ class ForkWorker:
 
 
 class ForkImpl(object):
+
+    class SendToParent(marcel.core.Op):
+
+        def __init__(self, env, parent):
+            super().__init__(env)
+            self.parent = parent
+
+        def __repr__(self):
+            return 'sendtoparent()'
+
+        def receive(self, x):
+            self.parent.send(dill.dumps(x))
+
+        def receive_error(self, error):
+            self.parent.send(dill.dumps(error))
 
     class LabelThread(marcel.core.Op):
 
@@ -251,31 +279,20 @@ class ForkImpl(object):
     def __init__(self, op):
         self.op = op
         self.thread_ids = None
+        params = op.pipeline.params
+        self.scope = {params[0]: None} if params else {}
 
     def pipeline_instance(self, fork_worker):
         # Copy the op's pipeline
         op = self.op
         pipeline = op.pipeline.copy()
         pipeline.set_error_handler(op.pipeline.error_handler)
+        send_to_parent = ForkImpl.SendToParent(op.env(), fork_worker.writer)
+        pipeline.append(send_to_parent)
         return pipeline
 
 
 class ForkRemote(ForkImpl):
-
-    class SendToParent(marcel.core.Op):
-
-        def __init__(self, env, parent):
-            super().__init__(env)
-            self.parent = parent
-
-        def __repr__(self):
-            return 'sendtoparent()'
-
-        def receive(self, x):
-            self.parent.send(dill.dumps(x))
-
-        def receive_error(self, error):
-            self.parent.send(dill.dumps(error))
 
     class Remote(marcel.core.Op):
 
@@ -360,7 +377,7 @@ class ForkRemote(ForkImpl):
         host = fork_worker.thread_id
         remote = ForkRemote.Remote(op.env(), host, op.pipeline)
         label_thread = ForkImpl.LabelThread(op.env(), host)
-        send_to_parent = ForkRemote.SendToParent(op.env(), fork_worker.writer)
+        send_to_parent = ForkImpl.SendToParent(op.env(), fork_worker.writer)
         pipeline.append(remote)
         pipeline.append(label_thread)
         pipeline.append(send_to_parent)
@@ -382,4 +399,4 @@ class ForkIterable(ForkImpl):
 
     def __init__(self, op, iterable):
         super().__init__(op)
-        self.thread_ids = iterable
+        self.thread_ids = list(iterable)

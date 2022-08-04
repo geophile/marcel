@@ -650,3 +650,13 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/op/args.py", line 181, in setup
     self.n_params = len(self.op.pipeline_arg.__code__.co_varnames)
 AttributeError: 'SourceFunction' object has no attribute '__code__'
+
+----------------------------------------------------------------------
+
+Add -r|--remote flag to fork. Currently there, sort of, hidden, for
+use by @ syntax. (See Fork.execute_remotely()).
+
+----------------------------------------------------------------------
+
+Get rid of Pipeline.set_error_handler. Can the error handler be
+inherited from Pipeline.copy()?

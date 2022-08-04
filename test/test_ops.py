@@ -554,16 +554,7 @@ def test_remote():
     localhost = marcel.object.cluster.Host('localhost', None)
     TEST.run('@jao [ gen 3 ]',
              expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
-    # # Handling of remote error in execution
-    # TEST.run('@jao [ gen 3 -1 | map (x: 5 / x) ]',
-    #          expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
-    # # Handling of remote error in setup
-    # TEST.run('@jao [ ls /nosuchfile ]',
-    #          expected_out=[Error('No qualifying paths')])
-    # # Bug 4
-    # TEST.run('@jao [ gen 3 ] | red . +',
-    #          expected_out=[(localhost, 3)])
-    # TEST.run('@jao [ gen 10 | map (x: (x%2, x)) | red . + ]',    # Handling of remote error in execution
+    # Handling of remote error in execution
     TEST.run('@jao [ gen 3 -1 | map (x: 5 / x) ]',
              expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
     # Handling of remote error in setup
@@ -580,12 +571,22 @@ def test_remote():
     # Bug 121
     TEST.run('@notacluster [ gen 3]',
              expected_err='must be an int, iterable, or Cluster')
-    # # Implied map
-    # TEST.run('@jao[(419)]',
-    #          expected_out=[(localhost, 419)])
-    # # Bug 121
-    # TEST.run('@notacluster [ gen 3]',
-    #          expected_err='There is no cluster named')
+
+
+def test_fork():
+    pass
+#     TEST.run('fork 3 [gen 3 100] | sort',
+#              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
+#     TEST.run('fork 3 [t: gen 3 100 | (x: (t, x))] | sort',
+#              expected_out=[(0, 100), (0, 101), (0, 102),
+#                            (1, 100), (1, 101), (1, 102),
+#                            (2, 100), (2, 101), (2, 102)])
+#     TEST.run('fork "abc" [gen 3 100] | sort',
+#              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
+#     TEST.run('fork "abc" [t: gen 3 100 | (x: (t, x))] | sort',
+#              expected_out=[('a', 100), ('a', 101), ('a', 102),
+#                            ('b', 100), ('b', 101), ('b', 102),
+#                            ('c', 100), ('c', 101), ('c', 102)])
 
 
 def test_sudo():
@@ -1525,6 +1526,7 @@ def main_stable():
     test_window()
     test_bash()
     test_namespace()
+    test_fork()
     test_remote()
     test_sudo()
     test_version()

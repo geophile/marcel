@@ -221,8 +221,8 @@ class ArgsParser:
                 cluster = self.env.cluster(x)
                 if cluster:
                     return cluster
-        elif marcel.util.iterable(x):
-            return x
+                else:
+                    return x
         raise ArgsError(arg.op_name, f'{x} must be an int, iterable, or Cluster')
 
     def init_var(self, arg, x):

@@ -310,4 +310,6 @@ Operator bash: Flags must all appear before the first anonymous arg
 
 ----------------------------------------------------------------------
 
-173. 
+173. Creating config directories may need to create paths
+
+E.g. .local/share might not be present.
