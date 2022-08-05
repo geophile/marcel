@@ -40,10 +40,9 @@ will be bound to {n:None}.
 '''
 
 
-def args(env, pipeline, all=False):
-    assert callable(pipeline)
+def args(env, pipeline_function, all=False):
     op_args = ['--all'] if all else []
-    op_args.append(pipeline)
+    op_args.append(marcel.core.PipelineFunction(pipeline_function))
     return (Args(env)), op_args
 
 
@@ -71,7 +70,10 @@ class Args(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
-        self.impl = ArgsAPI(self) if callable(self.pipeline_arg) else ArgsInteractive(self)
+        assert isinstance(self.pipeline_arg, marcel.core.Pipelineable)
+        self.impl = (ArgsAPI(self)
+                     if type(self.pipeline_arg) is marcel.core.PipelineFunction
+                     else ArgsInteractive(self))
         self.impl.setup()
 
     def receive(self, x):
@@ -92,7 +94,6 @@ class ArgsImpl:
         self.all = op.all
         self.n_params = None
         self.args = None
-        self.pipeline_arg = None
 
     def check_args(self):
         error = None
@@ -104,7 +105,9 @@ class ArgsImpl:
             raise marcel.exception.KillCommandException(error)
 
     def setup(self):
-        assert False
+        self.n_params = self.op.pipeline_arg.n_params()
+        self.check_args()
+        self.args = []
 
     def receive(self, x):
         self.args.append(unwrap_op_output(x))
@@ -131,18 +134,16 @@ class ArgsInteractive(ArgsImpl):
 
     def __init__(self, op):
         super().__init__(op)
-        self.pipeline = None
         self.params = None
         self.scope = None
 
     def setup(self):
+        super().setup()
         op = self.op
         env = op.env()
         self.params = op.pipeline_arg.parameters()
         if self.params is None:
             raise marcel.exception.KillCommandException('The args pipeline must be parameterized.')
-        self.n_params = len(self.params)
-        self.check_args()
         self.pipeline = op.pipeline_arg_value(env, op.pipeline_arg).copy()
         self.pipeline.set_error_handler(op.owner.error_handler)
         # By appending map(self.send_pipeline_output) to the pipeline, we relay pipeline output
@@ -152,7 +153,6 @@ class ArgsInteractive(ArgsImpl):
         self.scope = {}
         for param in self.params:
             self.scope[param] = None
-        self.args = []
 
     def receive(self, x):
         self.op.env().vars().push_scope(self.scope)
@@ -177,18 +177,13 @@ class ArgsAPI(ArgsImpl):
     def __init__(self, op):
         super().__init__(op)
 
-    def setup(self):
-        self.n_params = len(self.op.pipeline_arg.__code__.co_varnames)
-        self.check_args()
-        self.args = []
-
     def run_pipeline(self, env):
         op = self.op
         # Through the API, a pipeline is expressed as a Python function which, when evaluated,
         # yields a pipeline composed of op.core.Nodes. This function is the value of the op's
         # pipeline_arg field. So op.pipeline_arg(*self.args) evaluates
         # the function (using the current value of the args), and yields the pipeline to execute.
-        pipeline = op.pipeline_arg(*self.args).create_pipeline()
+        pipeline = op.pipeline_arg.create_pipeline(self.args)
         pipeline.set_error_handler(op.owner.error_handler)
         pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
         marcel.core.Command(env, None, pipeline).execute()

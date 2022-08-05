@@ -17,9 +17,6 @@ import marcel.argsparser
 import marcel.core
 import marcel.exception
 
-Op = marcel.core.Op
-
-
 HELP = '''
 {L,wrap=F}gen [-p|--pad PAD] [COUNT [START]]
 
@@ -56,7 +53,7 @@ class GenArgsParser(marcel.argsparser.ArgsParser):
         self.validate()
 
 
-class Gen(Op):
+class Gen(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)

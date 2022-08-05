@@ -24,8 +24,33 @@ Error = marcel.object.error.Error
 
 class Pipelineable:
 
-    def create_pipeline(self):
+    def n_params(self):
         assert False
+
+    def create_pipeline(self, args):
+        assert False
+
+
+# Used to represent a function yielding a Node tree (which then yields a Pipeline).
+class PipelineFunction(Pipelineable):
+
+    def __init__(self, function):
+        if not callable(function):
+            raise marcel.exception.KillCommandException(
+                f'Should be a function that evaluates to a Pipeline: {function}')
+        self.function = function
+
+    def n_params(self):
+        return len(self.function.__code__.co_varnames)
+
+    def create_pipeline(self, args=None):
+        if args is None:
+            args = []
+        pipelineable = self.function(*args)
+        if not (type(pipelineable) is Node or isinstance(pipelineable, Op)):
+            raise marcel.exception.KillCommandException(
+                f'Function that should evaluate to a Pipeline evalutes instead to {type(pipelineable)}.')
+        return pipelineable.create_pipeline()
 
 
 class Node(Pipelineable):
@@ -44,7 +69,7 @@ class Node(Pipelineable):
 
     # Pipelineable
 
-    def create_pipeline(self):
+    def create_pipeline(self, args=None):
         def visit(op):
             if isinstance(op, Op):
                 ops = [op]
@@ -66,6 +91,7 @@ class Node(Pipelineable):
                 # op.set_owner(pipeline)
                 pipeline.append(op)
 
+        assert args is None
         pipeline = Pipeline()
         self.traverse(visit)
         return pipeline
@@ -111,7 +137,8 @@ class Op(AbstractOp):
 
     # Pipelineable
 
-    def create_pipeline(self):
+    def create_pipeline(self, args=None):
+        assert args is None
         pipeline = Pipeline()
         pipeline.append(self)
         return pipeline
@@ -327,7 +354,11 @@ class Pipeline(AbstractOp):
 
     # Pipelineable
 
-    def create_pipeline(self):
+    def n_params(self):
+        return len(self.params) if self.params else 0
+
+    def create_pipeline(self, args=None):
+        assert args is None
         return self
 
     # AbstractOp

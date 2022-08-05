@@ -660,3 +660,72 @@ use by @ syntax. (See Fork.execute_remotely()).
 
 Get rid of Pipeline.set_error_handler. Can the error handler be
 inherited from Pipeline.copy()?
+
+
+ArgsInteractive pipeline handling:
+
+- setup:
+
+    - self.pipeline = op.pipeline_arg_value(...).copy()
+
+        - Pipeline: keep
+        - Pipelineable: create_pipeline()
+        
+    - create scope
+
+- receive: push/pop scope around pipeline execution
+
+- run_pipeline: 
+
+    - env.setvar for each pipeline param
+    - execute pipeline
+
+ArgsAPI pipeline handling:
+
+- setup: Don't have to create pipeline or scope. Pipeline is a
+  function.  (THIS IS NOT GENERAL: For args, the pipeline must have at
+  least one arg, i.e. it must be a function. For fork, pipeline could
+  have no args, and need not be a function).
+
+- receive: execute pipeline (no scope handling needed)
+
+- run_pipeline: 
+
+    - Invoke op.pipeline (execute the pipeline creating function)
+    - Execute pipeline
+
+......................................................................
+
+Pipeline lifecycle:
+
+Interactive: 
+
+    - Create Pipeline, which may have args
+    - Copy, to avoid side effects on structure shared with other pipelines
+    - Push scope, bind args
+    - Execute
+    - Pop scope
+
+API:
+
+    - Create one of:
+
+        - Node tree (e.g. join)
+        - Function returning Node tree, (e.g. args)
+
+    - Create Pipeline (noop, or convert Node tree to pipeline)
+
+        If no args: Could have an actual pipeline. Create_pipeline is a noop.
+
+        Else: There are args, and the pipeline is a function yielding a pipeline
+        Execute the function each time.
+
+    - Execute
+
+......................................................................
+
+
+
+----------------------------------------------------------------------
+
+IDEA: Implement interactive usage by translating into API usage.
