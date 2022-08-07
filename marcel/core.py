@@ -31,84 +31,6 @@ class Pipelineable:
         assert False
 
 
-# Used to represent a function yielding a Node tree (which then yields a Pipeline).
-class PipelineFunction(Pipelineable):
-
-    def __init__(self, function):
-        if not callable(function):
-            raise marcel.exception.KillCommandException(
-                f'Should be a function that evaluates to a Pipeline: {function}')
-        self.function = function
-
-    def n_params(self):
-        return len(self.function.__code__.co_varnames)
-
-    def create_pipeline(self, args=None):
-        if args is None:
-            args = []
-        pipelineable = self.function(*args)
-        if not (type(pipelineable) is Node or isinstance(pipelineable, Op)):
-            raise marcel.exception.KillCommandException(
-                f'Function that should evaluate to a Pipeline evalutes instead to {type(pipelineable)}.')
-        return pipelineable.create_pipeline()
-
-
-class Node(Pipelineable):
-
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
-    def __or__(self, other):
-        assert isinstance(other, Op) or type(other) is Pipeline, type(other)
-        return Node(self, other)
-
-    def __iter__(self):
-        pipeline = self.create_pipeline()
-        return PipelineIterator(pipeline)
-
-    # Pipelineable
-
-    def create_pipeline(self, args=None):
-        def visit(op):
-            if isinstance(op, Op):
-                ops = [op]
-            elif type(op) is Pipeline:
-                # op will usually be an Op. But the op could represent a Pipeline, e.g.
-                #     recent = [select (f: now() - f.mtime < days(1))]
-                #     ls | recent
-                # In this case, through the CLI, the Pipeline would be wrapped in a runpipeline op. But
-                # through the API, op could actually be a Pipeline.
-                ops = list(op.ops)
-            else:
-                assert False, op
-            for op in ops:
-                # # TODO: Obsolete?
-                # # The need to set the owner on the source of the copy is a bit subtle. op might be something that owns
-                # # a FunctionWrapper. A FunctionWrapper points to it's op, and error handling requires the op's owner
-                # # for error handling. If the owner isn't set prior to the copy, then the copy won't have its
-                # # FunctionWrapper's op's owner set.
-                # op.set_owner(pipeline)
-                pipeline.append(op)
-
-        assert args is None
-        pipeline = Pipeline()
-        self.traverse(visit)
-        return pipeline
-
-    # Node
-
-    def traverse(self, visit):
-        if type(self.left) is Node:
-            self.left.traverse(visit)
-        else:
-            visit(self.left)
-        if type(self.right) is Node:
-            self.right.traverse(visit)
-        else:
-            visit(self.right)
-
-
 class AbstractOp(Pipelineable):
 
     def setup(self):
@@ -321,6 +243,110 @@ class Op(AbstractOp):
                      f'Running {self} on {input}: {message}')
 
 
+class Command:
+
+    def __init__(self, env, source, pipeline):
+        self.env = env
+        self.source = source
+        self.pipeline = pipeline
+
+    def __repr__(self):
+        return str(self.pipeline)
+
+    def execute(self, api=False):
+        depth = self.env.vars().n_scopes()
+        self.env.clear_changes()
+        self.pipeline.setup()
+        self.pipeline.set_env(self.env)
+        self.pipeline.run()
+        self.pipeline.flush()
+        self.pipeline.cleanup()
+        # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.
+        assert self.env.vars().n_scopes() == depth, self.env.vars().n_scopes()
+        # An interactive Command is executed by a multiprocessing.Process.
+        # Need to transmit the Environment's vars relating to the directory, to the parent
+        # process, because they may have changed. This doesn't apply to API usage.
+        return self.env.changes() if api else None
+
+
+# Used to represent a function yielding a Node tree (which then yields a Pipeline).
+class PipelineFunction(Pipelineable):
+
+    def __init__(self, function):
+        if not callable(function):
+            raise marcel.exception.KillCommandException(
+                f'Should be a function that evaluates to a Pipeline: {function}')
+        self.function = function
+
+    def n_params(self):
+        return len(self.function.__code__.co_varnames)
+
+    def create_pipeline(self, args=None):
+        if args is None:
+            args = []
+        pipelineable = self.function(*args)
+        if not (type(pipelineable) is Node or isinstance(pipelineable, Op)):
+            raise marcel.exception.KillCommandException(
+                f'Function that should evaluate to a Pipeline evalutes instead to {type(pipelineable)}.')
+        return pipelineable.create_pipeline()
+
+
+class Node(Pipelineable):
+
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def __or__(self, other):
+        assert isinstance(other, Op) or type(other) is Pipeline, type(other)
+        return Node(self, other)
+
+    def __iter__(self):
+        pipeline = self.create_pipeline()
+        return PipelineIterator(pipeline)
+
+    # Pipelineable
+
+    def create_pipeline(self, args=None):
+        def visit(op):
+            if isinstance(op, Op):
+                ops = [op]
+            elif type(op) is Pipeline:
+                # op will usually be an Op. But the op could represent a Pipeline, e.g.
+                #     recent = [select (f: now() - f.mtime < days(1))]
+                #     ls | recent
+                # In this case, through the CLI, the Pipeline would be wrapped in a runpipeline op. But
+                # through the API, op could actually be a Pipeline.
+                ops = list(op.ops)
+            else:
+                assert False, op
+            for op in ops:
+                # # TODO: Obsolete?
+                # # The need to set the owner on the source of the copy is a bit subtle. op might be something that owns
+                # # a FunctionWrapper. A FunctionWrapper points to it's op, and error handling requires the op's owner
+                # # for error handling. If the owner isn't set prior to the copy, then the copy won't have its
+                # # FunctionWrapper's op's owner set.
+                # op.set_owner(pipeline)
+                pipeline.append(op)
+
+        assert args is None
+        pipeline = Pipeline()
+        self.traverse(visit)
+        return pipeline
+
+    # Node
+
+    def traverse(self, visit):
+        if type(self.left) is Node:
+            self.left.traverse(visit)
+        else:
+            visit(self.left)
+        if type(self.right) is Node:
+            self.right.traverse(visit)
+        else:
+            visit(self.right)
+
+
 class Pipeline(AbstractOp):
 
     def __init__(self):
@@ -431,32 +457,6 @@ class Pipeline(AbstractOp):
         return self.ops[-1]
 
 
-class Command:
-
-    def __init__(self, env, source, pipeline):
-        self.env = env
-        self.source = source
-        self.pipeline = pipeline
-
-    def __repr__(self):
-        return str(self.pipeline)
-
-    def execute(self, api=False):
-        depth = self.env.vars().n_scopes()
-        self.env.clear_changes()
-        self.pipeline.setup()
-        self.pipeline.set_env(self.env)
-        self.pipeline.run()
-        self.pipeline.flush()
-        self.pipeline.cleanup()
-        # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.
-        assert self.env.vars().n_scopes() == depth, self.env.vars().n_scopes()
-        # An interactive Command is executed by a multiprocessing.Process.
-        # Need to transmit the Environment's vars relating to the directory, to the parent
-        # process, because they may have changed. This doesn't apply to API usage.
-        return self.env.changes() if api else None
-
-
 class PipelineIterator:
 
     def __init__(self, pipeline):
@@ -470,7 +470,7 @@ class PipelineIterator:
         try:
             command.execute()
         except marcel.exception.KillCommandException as e:
-            marcel.util.print_to_stderr(e, env)
+           marcel.util.print_to_stderr(e, env)
         finally:
             self.iterator = iter(output)
 

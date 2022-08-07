@@ -1552,7 +1552,7 @@ def main_stable():
 
 
 def main_dev():
-    test_args()
+    pass
     # test_fork()
 
 

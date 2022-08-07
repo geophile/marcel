@@ -1151,7 +1151,7 @@ def main_stable():
 
 
 def main_dev():
-    test_remote()
+    pass
     # test_fork()
 
 

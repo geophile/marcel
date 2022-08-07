@@ -84,7 +84,7 @@ class Args(marcel.core.Op):
     def receive(self, x):
         self.args.append(unwrap_op_output(x))
         if not self.all and len(self.args) == self.n_params:
-            self.pipeline_wrapper.run_pipeline(self.env())
+            self.pipeline_wrapper.run_pipeline(self.env(), self.args)
             self.args.clear()
 
     def flush(self):
@@ -94,7 +94,7 @@ class Args(marcel.core.Op):
             else:
                 while len(self.args) < self.n_params:
                     self.args.append(None)
-            self.pipeline_wrapper.run_pipeline(self.env())
+            self.pipeline_wrapper.run_pipeline(self.env(), self.args)
             self.args.clear()
         self.propagate_flush()
 
@@ -116,11 +116,11 @@ class PipelineWrapper(object):
     def setup(self):
         assert False
 
+    def run_pipeline(self, env, args):
+        assert False
+
     def send_pipeline_output(self, *x):
         self.op.send(x)
-
-    def run_pipeline(self, env):
-        assert False
 
 
 class PipelineInteractive(PipelineWrapper):
@@ -147,11 +147,11 @@ class PipelineInteractive(PipelineWrapper):
         for param in self.params:
             self.scope[param] = None
 
-    def run_pipeline(self, env):
+    def run_pipeline(self, env, args):
+        assert len(args) == len(self.params)
         op = self.op
         env = op.env()
         vars = env.vars()
-        args = op.args
         vars.push_scope(self.scope)
         a = 0
         for param in self.params:
@@ -171,13 +171,13 @@ class PipelineAPI(PipelineWrapper):
     def setup(self):
         pass
 
-    def run_pipeline(self, env):
+    def run_pipeline(self, env, args):
         op = self.op
         # Through the API, a pipeline is expressed as a Python function which, when evaluated,
         # yields a pipeline composed of op.core.Nodes. This function is the value of the op's
-        # pipeline_arg field. So op.pipeline_arg(*self.args) evaluates
-        # the function (using the current value of the args), and yields the pipeline to execute.
-        pipeline = op.pipeline_arg.create_pipeline(op.args)
+        # pipeline_arg field. So op.pipeline_arg(*args) evaluates the function (using the current value of the args),
+        # and yields the pipeline to execute.
+        pipeline = op.pipeline_arg.create_pipeline(args)
         pipeline.set_error_handler(op.owner.error_handler)
         pipeline.append(marcel.opmodule.create_op(op.env(), 'map', self.send_pipeline_output))
         marcel.core.Command(env, None, pipeline).execute()
