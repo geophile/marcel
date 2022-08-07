@@ -27,7 +27,7 @@ class Pipelineable:
     def n_params(self):
         assert False
 
-    def create_pipeline(self, args):
+    def create_pipeline(self, args=None):
         assert False
 
 

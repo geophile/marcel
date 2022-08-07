@@ -574,19 +574,18 @@ def test_remote():
 
 
 def test_fork():
-    pass
-#     TEST.run('fork 3 [gen 3 100] | sort',
-#              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
-#     TEST.run('fork 3 [t: gen 3 100 | (x: (t, x))] | sort',
-#              expected_out=[(0, 100), (0, 101), (0, 102),
-#                            (1, 100), (1, 101), (1, 102),
-#                            (2, 100), (2, 101), (2, 102)])
-#     TEST.run('fork "abc" [gen 3 100] | sort',
-#              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
-#     TEST.run('fork "abc" [t: gen 3 100 | (x: (t, x))] | sort',
-#              expected_out=[('a', 100), ('a', 101), ('a', 102),
-#                            ('b', 100), ('b', 101), ('b', 102),
-#                            ('c', 100), ('c', 101), ('c', 102)])
+    TEST.run('fork 3 [gen 3 100] | sort',
+             expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
+    TEST.run('fork 3 [t: gen 3 100 | (x: (t, x))] | sort',
+             expected_out=[(0, 100), (0, 101), (0, 102),
+                           (1, 100), (1, 101), (1, 102),
+                           (2, 100), (2, 101), (2, 102)])
+    TEST.run('fork "abc" [gen 3 100] | sort',
+             expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
+    TEST.run('fork "abc" [t: gen 3 100 | (x: (t, x))] | sort',
+             expected_out=[('a', 100), ('a', 101), ('a', 102),
+                           ('b', 100), ('b', 101), ('b', 102),
+                           ('c', 100), ('c', 101), ('c', 102)])
 
 
 def test_sudo():
@@ -1526,7 +1525,7 @@ def main_stable():
     test_window()
     test_bash()
     test_namespace()
-    test_fork()
+    # test_fork()
     test_remote()
     test_sudo()
     test_version()
@@ -1553,7 +1552,8 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_args()
+    # test_fork()
 
 
 def main():

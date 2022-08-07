@@ -111,10 +111,12 @@ far simpler to use the {n:upload} and {n:download} commands.
 '''
 
 
-def fork(env, forkgen, pipelineable):
-    assert isinstance(pipelineable, marcel.core.Pipelineable), type(pipelineable)
-    pipelineable = pipelineable.create_pipeline()
-    return Fork(env), [forkgen, pipelineable]
+def fork(env, forkgen, pipeline):
+    if callable(pipeline):
+        pipeline = marcel.core.PipelineFunction(pipeline)
+    assert isinstance(pipeline, marcel.core.Pipelineable), type(pipeline)
+    pipeline = pipeline.create_pipeline()
+    return Fork(env), [forkgen, pipeline]
 
 
 # For API

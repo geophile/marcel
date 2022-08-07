@@ -724,6 +724,26 @@ API:
 
 ......................................................................
 
+Pipelineable
+
+    - create_pipeline()
+
+    Node
+
+        __or__(other) -> Node
+
+    PipelineFunction     *** NEW ***
+
+    AbstractOp
+
+        - setup()
+        - set_env(env)
+
+        Op
+
+            __or__(other) -> Node
+
+        Pipeline
 
 
 ----------------------------------------------------------------------
