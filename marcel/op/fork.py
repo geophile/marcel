@@ -111,12 +111,8 @@ far simpler to use the {n:upload} and {n:download} commands.
 '''
 
 
-def fork(env, forkgen, pipeline):
-    if callable(pipeline):
-        pipeline = marcel.core.PipelineFunction(pipeline)
-    assert isinstance(pipeline, marcel.core.Pipelineable), type(pipeline)
-    pipeline = pipeline.create_pipeline()
-    return Fork(env), [forkgen, pipeline]
+def fork(env, forkgen, pipeline_function):
+    return Fork(env), [forkgen, marcel.core.PipelineFunction(pipeline_function)]
 
 
 # For API
@@ -125,7 +121,7 @@ class ForkArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('fork', env)
         self.add_anon('forkgen', convert=self.fork_gen)
-        self.add_anon('pipeline', convert=self.check_pipeline)
+        self.add_anon('pipeline', convert=self.check_str_or_pipeline, target='pipeline_arg')
         self.validate()
 
 
@@ -134,21 +130,25 @@ class Fork(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.forkgen = None
-        self.pipeline = None
+        self.pipeline_arg = None
+        self.pipeline_wrapper = None
         self.impl = None
         self.workers = None
         self.remote = False
 
     def __repr__(self):
         op_name = 'remote' if self.remote else 'fork'
-        return f'{op_name}({self.forkgen}, {self.pipeline})'
+        return f'{op_name}({self.forkgen}, {self.pipeline_arg})'
 
     # AbstractOp
 
     def setup(self):
-        params = self.pipeline.params
-        if params and len(params) > 1:
+        pipeline_arg = self.pipeline_arg
+        assert isinstance(pipeline_arg, marcel.core.Pipelineable)
+        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(self, pipeline_arg)
+        if self.pipeline_wrapper.n_params() > 1:
             raise marcel.exception.KillCommandException('fork pipeline must have no more than one parameter.')
+        self.pipeline_wrapper.setup()
         forkgen = self.eval_function('forkgen') if callable(self.forkgen) else self.forkgen
         if type(forkgen) is int:
             self.impl = ForkInt(self, forkgen)

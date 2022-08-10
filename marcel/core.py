@@ -17,6 +17,7 @@ import marcel.exception
 import marcel.function
 import marcel.helpformatter
 import marcel.object.error
+import marcel.opmodule
 import marcel.util
 
 Error = marcel.object.error.Error
@@ -207,6 +208,7 @@ class Op(AbstractOp):
                 raise marcel.exception.KillCommandException(
                     f'Type of {self.op_name()}.{field} is {type(x)}, but must be one of {types}')
             return x
+
         state = self.__dict__
         val = state.get(field, None)
         if callable(val):
@@ -470,7 +472,7 @@ class PipelineIterator:
         try:
             command.execute()
         except marcel.exception.KillCommandException as e:
-           marcel.util.print_to_stderr(e, env)
+            marcel.util.print_to_stderr(e, env)
         finally:
             self.iterator = iter(output)
 
@@ -480,3 +482,76 @@ class PipelineIterator:
     @staticmethod
     def noop_error_handler(env, error):
         pass
+
+
+class PipelineWrapper(object):
+
+    # customize_pipeline takes pipeline as an argument, returns None
+    def __init__(self, op, pipeline_arg, customize_pipeline):
+        self.op = op
+        self.pipeline_arg = pipeline_arg
+        self.customize_pipeline = customize_pipeline
+
+    def setup(self):
+        assert False
+
+    def run_pipeline(self, env, args):
+        assert False
+
+    @staticmethod
+    def create(op, pipeline_arg, customize_pipeline):
+        return (PipelineAPI(op, pipeline_arg, customize_pipeline)
+                if type(pipeline_arg) is PipelineFunction
+                else PipelineInteractive(op, pipeline_arg, customize_pipeline))
+
+
+class PipelineInteractive(PipelineWrapper):
+
+    def __init__(self, op, pipeline_arg, customize_pipeline):
+        super().__init__(op, pipeline_arg, customize_pipeline)
+        self.params = None
+        self.scope = None
+        self.pipeline = None
+
+    def setup(self):
+        op = self.op
+        env = op.env()
+        self.params = self.pipeline_arg.parameters()
+        assert self.params is not None  # Should already have been checked
+        self.pipeline = op.pipeline_arg_value(env, self.pipeline_arg).copy()
+        self.pipeline.set_error_handler(op.owner.error_handler)
+        self.customize_pipeline(self.pipeline)
+        self.scope = {}
+        for param in self.params:
+            self.scope[param] = None
+
+    def run_pipeline(self, env, args):
+        assert len(args) == len(self.params)
+        env = self.op.env()
+        env.vars().push_scope(self.scope)
+        for i in range(len(self.params)):
+            env.setvar(self.params[i], args[i])
+        try:
+            marcel.core.Command(env, None, self.pipeline).execute()
+        finally:
+            env.vars().pop_scope()
+
+
+class PipelineAPI(PipelineWrapper):
+
+    def __init__(self, op, pipeline_arg, customize_pipeline):
+        super().__init__(op, pipeline_arg, customize_pipeline)
+
+    def setup(self):
+        pass
+
+    def run_pipeline(self, env, args):
+        op = self.op
+        # Through the API, a pipeline is expressed as a Python function which, when evaluated,
+        # yields a pipeline composed of op.core.Nodes. This function is the value of the op's
+        # pipeline_arg field. So op.pipeline_arg(*args) evaluates the function (using the current value of the args),
+        # and yields the pipeline to execute.
+        pipeline = self.pipeline_arg.create_pipeline(args)
+        pipeline.set_error_handler(op.owner.error_handler)
+        self.customize_pipeline(pipeline)
+        marcel.core.Command(env, None, pipeline).execute()
