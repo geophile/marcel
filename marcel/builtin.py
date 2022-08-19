@@ -16,13 +16,13 @@
 import datetime
 from time import time as now
 
+# import symbols that we want in the marcel namespace
 from marcel.object.color import Color
 from marcel.object.cluster import Cluster
 from marcel.object.db import Database
 from marcel.object.file import File
 from marcel.object.process import Process
 from marcel.util import username, groupname, quote_files
-
 
 _COMMANDS = '''
 #    read = [map (f: f.readlines()) | expand]
@@ -41,7 +41,7 @@ def days(n):
     return 24 * 3600 * n
 
 
-def remote(user, identity, host=None, hosts=None):
+def cluster(user, identity, host=None, hosts=None):
     return Cluster(user, identity, host, hosts)
 
 

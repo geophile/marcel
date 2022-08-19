@@ -222,7 +222,7 @@ class Environment:
         return env
 
     def __init__(self):
-        self.namespace = None
+        self.namespace = {}
         self.builtin_symbols = None
         self.config_symbols = None
         self.locations = None

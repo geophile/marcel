@@ -97,6 +97,7 @@ def pushd(*args, **kwargs): return _generate_op(_pushd, *args, **kwargs)
 def pwd(*args, **kwargs): return _generate_op(_pwd, *args, **kwargs)
 def read(*args, **kwargs): return _generate_op(_read, *args, **kwargs)
 def red(*args, **kwargs): return _generate_op(_red, *args, **kwargs)
+def remote(*args, **kwargs): return _generate_op(_remote, *args, **kwargs)
 def reverse(*args, **kwargs): return _generate_op(_reverse, *args, **kwargs)
 def select(*args, **kwargs): return _generate_op(_select, *args, **kwargs)
 def sort(*args, **kwargs): return _generate_op(_sort, *args, **kwargs)
@@ -111,9 +112,6 @@ def unique(*args, **kwargs): return _generate_op(_unique, *args, **kwargs)
 def union(*args, **kwargs): return _generate_op(_union, *args, **kwargs)
 def version(*args, **kwargs): return _generate_op(_version, *args, **kwargs)
 def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
-
-
-remote = fork
 
 
 # Utilities

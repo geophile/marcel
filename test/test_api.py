@@ -37,7 +37,7 @@ def test_gen():
              expected_out=[-5.0, Error('division by zero'), 5.0])
     # Bad types
     TEST.run(test=lambda: run(gen(True)),
-             expected_err='count must be a string')
+             expected_err='count must be an int')
     # str is OK, but it had better look like an int
     TEST.run(test=lambda: run(gen('5')),
              expected_out=[0, 1, 2, 3, 4])
@@ -133,7 +133,7 @@ def test_sort():
     TEST.run(test=lambda: run(map(lambda: (1, "a", 2, "b")) | expand() | sort()),
              expected_err="'<' not supported between instances of 'str' and 'int'")
     # Bug 10
-    TEST.run(test=lambda: run(sort()), expected_out=[])
+    TEST.run(test=lambda: run(sort()), expected_err='sort cannot be the first operator in a pipeline')
 
 
 def test_map():
@@ -465,7 +465,7 @@ def test_window():
     TEST.run(lambda: run(gen(10) | window(overlap='abc')),
              expected_err='overlap cannot be converted to int')
     TEST.run(lambda: run(gen(10) | window(disjoint=[])),
-             expected_err='disjoint must be a string')
+             expected_err='disjoint must be an int')
     # Function-valued args
     THREE = 3
     TEST.run(lambda: run(gen(10) | window(overlap=lambda: THREE)),
@@ -526,24 +526,56 @@ def test_namespace():
 
 def test_remote():
     localhost = marcel.object.cluster.Host('localhost', None)
-    TEST.run(lambda: run(fork('jao', gen(3))),
+    TEST.run(lambda: run(remote('jao', lambda host: gen(3))),
              expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
     # Handling of remote error in execution
-    TEST.run(lambda: run(fork('jao', gen(3, -1) | map(lambda x: 5 / x))),
+    TEST.run(lambda: run(remote('jao', lambda host: gen(3, -1) | map(lambda x: 5 / x))),
              expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
     # Handling of remote error in setup
     # TODO: Bug - should be expected_err
-    TEST.run(lambda: run(fork('jao', ls('/nosuchfile'))),
+    TEST.run(lambda: run(remote('jao', lambda host: ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
              # expected_err='No qualifying paths')
     # Bug 4
-    TEST.run(lambda: run(fork('jao', gen(3)) | red(None, r_plus)),
+    TEST.run(lambda: run(remote('jao',
+                                lambda host: gen(3)) | red(None, r_plus)),
              expected_out=[(localhost, 3)])
-    TEST.run(lambda: run(fork('jao', gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
+    TEST.run(lambda: run(remote('jao',
+                                lambda host: gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
     # Bug 121
-    TEST.run(test=lambda: run(fork('notacluster', gen(3))),
-             expected_err='There is no cluster named')
+    TEST.run(test=lambda: run(remote('notacluster', lambda host: gen(3))),
+             expected_err='must be an int, iterable, or Cluster')
+
+
+def test_fork():
+    # int forkgen
+    TEST.run(lambda: run(fork(3, lambda: gen(3, 100)) | sort()),
+             expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
+    TEST.run(lambda: run(fork(3, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_out=[(0, 100), (0, 101), (0, 102),
+                           (1, 100), (1, 101), (1, 102),
+                           (2, 100), (2, 101), (2, 102)])
+    TEST.run(lambda: run(fork(3, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_err='fork pipeline must have no more than one parameter')
+    # iterable forkgen
+    TEST.run(lambda: run(fork('abc', lambda: gen(3, 100)) | sort()),
+             expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
+    TEST.run(lambda: run(fork('abc', lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_out=[('a', 100), ('a', 101), ('a', 102),
+                           ('b', 100), ('b', 101), ('b', 102),
+                           ('c', 100), ('c', 101), ('c', 102)])
+    TEST.run(lambda: run(fork('abc', lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_err='fork pipeline must have no more than one parameter')
+    # Cluster forkgen
+    jao = TEST.main.env.cluster('jao')
+    localhost = marcel.object.cluster.Host('localhost', None)
+    TEST.run(lambda: run(fork(jao, lambda: gen(3, 100)) | sort()),
+             expected_out=[100, 101, 102])
+    TEST.run(lambda: run(fork(jao, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_out=[(localhost, 100), (localhost, 101), (localhost, 102)])
+    TEST.run(lambda: run(fork(jao, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_err='fork pipeline must have no more than one parameter')
 
 
 def test_sudo():
@@ -1106,6 +1138,7 @@ def main_stable():
     test_bash()
     # test_namespace()
     test_remote()
+    # test_fork()
     test_sudo()
     test_version()
     test_assign()
@@ -1129,7 +1162,7 @@ def main_stable():
 
 
 def main_dev():
-    test_write()
+    pass
 
 
 def main():

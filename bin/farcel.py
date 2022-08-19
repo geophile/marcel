@@ -1,5 +1,20 @@
 #!/usr/bin/python3
 
+# This file is part of Marcel.
+#
+# Marcel is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or at your
+# option) any later version.
+#
+# Marcel is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
+
 import atexit
 import getpass
 import os
@@ -15,6 +30,7 @@ import psutil
 import marcel.core
 import marcel.env
 import marcel.exception
+import marcel.locations
 import marcel.object.color
 import marcel.object.error
 import marcel.nestednamespace
@@ -30,7 +46,6 @@ import marcel.version
 # on a thread so that stdin can be monitored for the kill signal and then acted upon.
 
 
-CONFIG_FILENAME = '.marcel.py'
 TRACE = marcel.util.Trace('/tmp/farcel.log', enabled=True)
 
 
@@ -110,7 +125,7 @@ def kill_descendents(signal_id):
             process = psutil.Process(pid)
             for p in process.children(recursive=True):
                 TRACE.write(f'Killing descendent pid {p.pid}')
-                p.kill(signal_id)
+                p.send_signal(signal_id)
             # # Suicide
             # TRACE.write(f'Killing self, pid = {pid}')
             # process.kill(signal_id)
@@ -137,9 +152,8 @@ def read_config(config_path=None):
         'COLOR_SCHEME': marcel.object.color.ColorScheme(),
         'Color': marcel.object.color.Color,
     }
-    config_path = (pathlib.Path(config_path)
-                   if config_path else
-                   pathlib.Path.home() / CONFIG_FILENAME).expanduser()
+    locations = marcel.locations.Locations(marcel.env.Environment())
+    config_path = locations.config_path()
     if config_path.exists():
         with open(config_path.as_posix()) as config_file:
             config_source = config_file.read()

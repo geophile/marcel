@@ -13,13 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-# A bracketed Python expression on the commandline is turned into a function by eval(source, namespace).
+# A parenthesized Python expression on the commandline is turned into a function by eval(source, namespace).
 # The namespace implementation must implement nesting, to support pipeline args. Based on experiments/dict_subclass,
 # function evaluation uses __getitem__. Defining __setitem__ seems to make a mess of pickling, so it's important
 # to avoid overriding it.
 #
 # A NestedNamespace is a dict (superclass) and the set of params defined in that scope (introduced by a
-# parameterized pipeline). scopes are outer namespaces, so scopes[0] is the namespace containing the current one,
+# parameterized pipeline). scopes stores outer namespaces, so scopes[0] is the namespace containing the current one,
 # and scope[-1] is the topmost namespace, (the marcel namespace).
 
 class NestedNamespace(dict):

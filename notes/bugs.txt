@@ -295,7 +295,103 @@ It is including items defined in config (e.g. byt, ext)
 
 ----------------------------------------------------------------------
 
-171. Remote error not showing up correctly
+171. Running python doesn't work
+
+jao@cheese:~$ marcel
+M 0.13.6 jao@cheese ~$ python
+M 0.13.6 jao@cheese ~$ 
+
+----------------------------------------------------------------------
+
+172. Args to bash are interpreted as belonging to marcel
+
+M 0.13.6 jao@cheese ~$ bash ssh -l jao -i /home/jao/.ssh/id_rsa 127.0.0.1 'ls /tmp'
+Operator bash: Flags must all appear before the first anonymous arg
+
+----------------------------------------------------------------------
+
+173. Creating config directories may need to create paths
+
+E.g. .local/share might not be present.
+
+----------------------------------------------------------------------
+
+174. Error shouldn't result in stacks being printed
+
+M 0.13.8 jao@cheese ~$ fork jao [host: ((host.cluster.name, host, host.cluster.user))]
+Error: Running map(lambda: (host.cluster.name, host, host.cluster.user)): 'Cluster' object has no attribute 'name'
+Caught <class 'marcel.exception.KillAndResumeException'>: 'Cluster' object has no attribute 'name'
+  File "/home/jao/git/marcel/marcel/op/fork.py", line 219, in run_pipeline_in_child
+    self.pipeline_wrapper.run_pipeline([self.thread_id])
+  File "/home/jao/git/marcel/marcel/core.py", line 548, in run_pipeline
+    marcel.core.Command(env, None, self.pipeline).execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 263, in execute
+    self.pipeline.run()
+  File "/home/jao/git/marcel/marcel/core.py", line 417, in run
+    self.ops[0].run()
+  File "/home/jao/git/marcel/marcel/op/map.py", line 67, in run
+    self.send(self.call(self.function))
+  File "/home/jao/git/marcel/marcel/core.py", line 100, in call
+    self.fatal_error(args_description, str(e))
+  File "/home/jao/git/marcel/marcel/core.py", line 151, in fatal_error
+    raise marcel.exception.KillAndResumeException(message)
+Process Process-10:
+Traceback (most recent call last):
+  File "/usr/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 263, in execute
+    self.pipeline.run()
+  File "/home/jao/git/marcel/marcel/core.py", line 417, in run
+    self.ops[0].run()
+  File "/home/jao/git/marcel/marcel/op/fork.py", line 167, in run
+    worker.wait()
+  File "/home/jao/git/marcel/marcel/op/fork.py", line 235, in wait
+    x = dill.loads(input)
+  File "/usr/local/lib/python3.9/dist-packages/dill/_dill.py", line 387, in loads
+    return load(file, ignore, **kwds)
+  File "/usr/local/lib/python3.9/dist-packages/dill/_dill.py", line 373, in load
+    return Unpickler(file, ignore=ignore, **kwds).load()
+  File "/usr/local/lib/python3.9/dist-packages/dill/_dill.py", line 646, in load
+    obj = StockUnpickler.load(self)
+TypeError: __init__() missing 1 required positional argument: 'error'
+M 0.13.8 jao@cheese ~$ 
+
+----------------------------------------------------------------------
+
+175. Crash on upgrade
+
+I just installed 0.13.8 on geophile.com and started marcel:
+
+[ec2-user@ip-172-31-29-105 ~]$ marcel
+Traceback (most recent call last):
+  File "/usr/lib64/python3.6/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/usr/lib64/python3.6/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/ec2-user/.local/lib/python3.6/site-packages/marcel/main.py", line 296, in <module>
+    MAIN = Main(None, same_process=False, old_namespace=old_namespace)
+  File "/home/ec2-user/.local/lib/python3.6/site-packages/marcel/main.py", line 97, in __init__
+    self.env = marcel.env.Environment.new(config_file, old_namespace)
+  File "/home/ec2-user/.local/lib/python3.6/site-packages/marcel/env.py", line 215, in new
+    env.config_path = env.read_config(config_file)
+  File "/home/ec2-user/.local/lib/python3.6/site-packages/marcel/env.py", line 330, in read_config
+    config_path = self.locations.config_path()
+  File "/home/ec2-user/.local/lib/python3.6/site-packages/marcel/locations.py", line 13, in config_path
+    return self._dir('XDG_CONFIG_HOME', '.config') / 'startup.py'
+  File "/home/ec2-user/.local/lib/python3.6/site-packages/marcel/locations.py", line 34, in _dir
+    dir.mkdir(exist_ok=False)
+  File "/usr/lib64/python3.6/pathlib.py", line 1248, in mkdir
+    self._accessor.mkdir(self, mode)
+  File "/usr/lib64/python3.6/pathlib.py", line 387, in wrapped
+    return strfunc(str(pathobj), *args)
+FileNotFoundError: [Errno 2] No such file or directory: '/home/ec2-user/.config/marcel'
+[ec2-user@ip-172-31-29-105 ~]$ 
+
+176. Remote error not showing up correctly
 
 From test_api:
 

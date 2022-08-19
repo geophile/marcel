@@ -17,6 +17,7 @@ import marcel.exception
 import marcel.function
 import marcel.helpformatter
 import marcel.object.error
+import marcel.opmodule
 import marcel.util
 
 Error = marcel.object.error.Error
@@ -24,63 +25,11 @@ Error = marcel.object.error.Error
 
 class Pipelineable:
 
-    def create_pipeline(self):
+    def n_params(self):
         assert False
 
-
-class Node(Pipelineable):
-
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
-    def __or__(self, other):
-        assert isinstance(other, Op) or type(other) is Pipeline, type(other)
-        return Node(self, other)
-
-    def __iter__(self):
-        pipeline = self.create_pipeline()
-        return PipelineIterator(pipeline)
-
-    # Pipelineable
-
-    def create_pipeline(self):
-        def visit(op):
-            if isinstance(op, Op):
-                ops = [op]
-            elif type(op) is Pipeline:
-                # op will usually be an Op. But the op could represent a Pipeline, e.g.
-                #     recent = [select (f: now() - f.mtime < days(1))]
-                #     ls | recent
-                # In this case, through the CLI, the Pipeline would be wrapped in a runpipeline op. But
-                # through the API, op could actually be a Pipeline.
-                ops = list(op.ops)
-            else:
-                assert False, op
-            for op in ops:
-                # # TODO: Obsolete?
-                # # The need to set the owner on the source of the copy is a bit subtle. op might be something that owns
-                # # a FunctionWrapper. A FunctionWrapper points to it's op, and error handling requires the op's owner
-                # # for error handling. If the owner isn't set prior to the copy, then the copy won't have its
-                # # FunctionWrapper's op's owner set.
-                # op.set_owner(pipeline)
-                pipeline.append(op)
-
-        pipeline = Pipeline()
-        self.traverse(visit)
-        return pipeline
-
-    # Node
-
-    def traverse(self, visit):
-        if type(self.left) is Node:
-            self.left.traverse(visit)
-        else:
-            visit(self.left)
-        if type(self.right) is Node:
-            self.right.traverse(visit)
-        else:
-            visit(self.right)
+    def create_pipeline(self, args=None):
+        assert False
 
 
 class AbstractOp(Pipelineable):
@@ -111,7 +60,8 @@ class Op(AbstractOp):
 
     # Pipelineable
 
-    def create_pipeline(self):
+    def create_pipeline(self, args=None):
+        assert args is None
         pipeline = Pipeline()
         pipeline.append(self)
         return pipeline
@@ -166,7 +116,7 @@ class Op(AbstractOp):
         return self._count
 
     def run(self):
-        raise marcel.exception.KillCommandException(f'{self} cannot be the first operator in a pipeline')
+        raise marcel.exception.KillCommandException(f'{self.op_name()} cannot be the first operator in a pipeline')
 
     def receive(self, x):
         pass
@@ -258,6 +208,7 @@ class Op(AbstractOp):
                 raise marcel.exception.KillCommandException(
                     f'Type of {self.op_name()}.{field} is {type(x)}, but must be one of {types}')
             return x
+
         state = self.__dict__
         val = state.get(field, None)
         if callable(val):
@@ -294,6 +245,110 @@ class Op(AbstractOp):
                      f'Running {self} on {input}: {message}')
 
 
+class Command:
+
+    def __init__(self, env, source, pipeline):
+        self.env = env
+        self.source = source
+        self.pipeline = pipeline
+
+    def __repr__(self):
+        return str(self.pipeline)
+
+    def execute(self, api=False):
+        depth = self.env.vars().n_scopes()
+        self.env.clear_changes()
+        self.pipeline.setup()
+        self.pipeline.set_env(self.env)
+        self.pipeline.run()
+        self.pipeline.flush()
+        self.pipeline.cleanup()
+        # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.
+        assert self.env.vars().n_scopes() == depth, self.env.vars().n_scopes()
+        # An interactive Command is executed by a multiprocessing.Process.
+        # Need to transmit the Environment's vars relating to the directory, to the parent
+        # process, because they may have changed. This doesn't apply to API usage.
+        return self.env.changes() if api else None
+
+
+# Used to represent a function yielding a Node tree (which then yields a Pipeline).
+class PipelineFunction(Pipelineable):
+
+    def __init__(self, function):
+        if not callable(function):
+            raise marcel.exception.KillCommandException(
+                f'Should be a function that evaluates to a Pipeline: {function}')
+        self.function = function
+
+    def n_params(self):
+        return len(self.function.__code__.co_varnames)
+
+    def create_pipeline(self, args=None):
+        if args is None:
+            args = []
+        pipelineable = self.function(*args)
+        if not (type(pipelineable) is Node or isinstance(pipelineable, Op)):
+            raise marcel.exception.KillCommandException(
+                f'Function that should evaluate to a Pipeline evalutes instead to {type(pipelineable)}.')
+        return pipelineable.create_pipeline()
+
+
+class Node(Pipelineable):
+
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def __or__(self, other):
+        assert isinstance(other, Op) or type(other) is Pipeline, type(other)
+        return Node(self, other)
+
+    def __iter__(self):
+        pipeline = self.create_pipeline()
+        return PipelineIterator(pipeline)
+
+    # Pipelineable
+
+    def create_pipeline(self, args=None):
+        def visit(op):
+            if isinstance(op, Op):
+                ops = [op]
+            elif type(op) is Pipeline:
+                # op will usually be an Op. But the op could represent a Pipeline, e.g.
+                #     recent = [select (f: now() - f.mtime < days(1))]
+                #     ls | recent
+                # In this case, through the CLI, the Pipeline would be wrapped in a runpipeline op. But
+                # through the API, op could actually be a Pipeline.
+                ops = list(op.ops)
+            else:
+                assert False, op
+            for op in ops:
+                # # TODO: Obsolete?
+                # # The need to set the owner on the source of the copy is a bit subtle. op might be something that owns
+                # # a FunctionWrapper. A FunctionWrapper points to it's op, and error handling requires the op's owner
+                # # for error handling. If the owner isn't set prior to the copy, then the copy won't have its
+                # # FunctionWrapper's op's owner set.
+                # op.set_owner(pipeline)
+                pipeline.append(op)
+
+        assert args is None
+        pipeline = Pipeline()
+        self.traverse(visit)
+        return pipeline
+
+    # Node
+
+    def traverse(self, visit):
+        if type(self.left) is Node:
+            self.left.traverse(visit)
+        else:
+            visit(self.left)
+        if type(self.right) is Node:
+            self.right.traverse(visit)
+        else:
+            visit(self.right)
+
+
 class Pipeline(AbstractOp):
 
     def __init__(self):
@@ -327,7 +382,11 @@ class Pipeline(AbstractOp):
 
     # Pipelineable
 
-    def create_pipeline(self):
+    def n_params(self):
+        return len(self.params) if self.params else 0
+
+    def create_pipeline(self, args=None):
+        assert args is None
         return self
 
     # AbstractOp
@@ -337,7 +396,10 @@ class Pipeline(AbstractOp):
         prev_op = None
         for op in self.ops:
             if isinstance(op, Op) and op is not self.ops[0] and op.must_be_first_in_pipeline():
-                raise marcel.exception.KillCommandException('%s cannot receive input from a pipe' % op.op_name())
+                print(f'op: {op}')
+                print(f'first op in pipeline: {self.ops[0]}')
+                raise marcel.exception.KillCommandException(
+                    f'{op.op_name()} cannot receive input from a pipe')
             op.owner = self
             if prev_op:
                 prev_op.receiver = op
@@ -400,32 +462,6 @@ class Pipeline(AbstractOp):
         return self.ops[-1]
 
 
-class Command:
-
-    def __init__(self, env, source, pipeline):
-        self.env = env
-        self.source = source
-        self.pipeline = pipeline
-
-    def __repr__(self):
-        return str(self.pipeline)
-
-    def execute(self, api=False):
-        depth = self.env.vars().n_scopes()
-        self.env.clear_changes()
-        self.pipeline.setup()
-        self.pipeline.set_env(self.env)
-        self.pipeline.run()
-        self.pipeline.flush()
-        self.pipeline.cleanup()
-        # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.
-        assert self.env.vars().n_scopes() == depth, self.env.vars().n_scopes()
-        # An interactive Command is executed by a multiprocessing.Process.
-        # Need to transmit the Environment's vars relating to the directory, to the parent
-        # process, because they may have changed. This doesn't apply to API usage.
-        return self.env.changes() if api else None
-
-
 class PipelineIterator:
 
     def __init__(self, pipeline):
@@ -449,3 +485,88 @@ class PipelineIterator:
     @staticmethod
     def noop_error_handler(env, error):
         pass
+
+
+class PipelineWrapper(object):
+
+    # customize_pipeline takes pipeline as an argument, returns None
+    def __init__(self, op, pipeline_arg, customize_pipeline):
+        self.op = op
+        self.pipeline_arg = pipeline_arg
+        self.customize_pipeline = customize_pipeline
+
+    def __repr__(self):
+        return f'PipelineWrapper({self.pipeline_arg})'
+
+    def setup(self):
+        assert False
+
+    def n_params(self):
+        return self.pipeline_arg.n_params()
+
+    def run_pipeline(self, args):
+        assert False
+
+    @staticmethod
+    def create(op, pipeline_arg, customize_pipeline):
+        return (PipelineAPI(op, pipeline_arg, customize_pipeline)
+                if type(pipeline_arg) is PipelineFunction
+                else PipelineInteractive(op, pipeline_arg, customize_pipeline))
+
+
+class PipelineInteractive(PipelineWrapper):
+
+    def __init__(self, op, pipeline_arg, customize_pipeline):
+        super().__init__(op, pipeline_arg, customize_pipeline)
+        self.params = None
+        self.scope = None
+        self.pipeline = None
+
+    def setup(self):
+        op = self.op
+        env = op.env()
+        self.params = self.pipeline_arg.parameters()
+        if self.params is None:
+            self.params = []
+        self.pipeline = op.pipeline_arg_value(env, self.pipeline_arg).copy()
+        self.pipeline.set_error_handler(op.owner.error_handler)
+        x = self.pipeline
+        self.pipeline = self.customize_pipeline(x)
+        if self.pipeline is None:
+            x = self.customize_pipeline(x)
+            assert False
+        self.scope = {}
+        for param in self.params:
+            self.scope[param] = None
+
+    def run_pipeline(self, args):
+        env = self.op.env()
+        env.vars().push_scope(self.scope)
+        for i in range(len(self.params)):
+            env.setvar(self.params[i], args[i])
+        try:
+            marcel.core.Command(env, None, self.pipeline).execute()
+        finally:
+            env.vars().pop_scope()
+
+
+class PipelineAPI(PipelineWrapper):
+
+    def __init__(self, op, pipeline_arg, customize_pipeline):
+        super().__init__(op, pipeline_arg, customize_pipeline)
+
+    def setup(self):
+        pass
+
+    def run_pipeline(self, args):
+        op = self.op
+        # Through the API, a pipeline is expressed as a Python function which, when evaluated,
+        # yields a pipeline composed of op.core.Nodes. This function is the value of the op's
+        # pipeline_arg field. So op.pipeline_arg(*args) evaluates the function (using the current
+        # value of the args), and yields the pipeline to execute.
+        pipeline = (self.pipeline_arg.create_pipeline(args)
+                    if self.n_params() > 0 else
+                    self.pipeline_arg.create_pipeline())
+        pipeline.set_error_handler(op.owner.error_handler)
+        pipeline = self.customize_pipeline(pipeline)
+        marcel.core.Command(self.op.env(), None, pipeline).execute()

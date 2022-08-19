@@ -408,24 +408,63 @@ be an iterator.
   instead, and then ensure that the returned value is iterable. (Use
   iter() to get the iterator, or raise TypeError).
 
-......................................................................
 
-Using rsync doesn't work well. Verbose. Need authentication info, so
-user/password, or identity, which would be more pipeline args.
+----------------------------------------------------------------------
 
-......................................................................
+Should allow pipeline vars for args:
 
-So back to upload/download
+    ... | args pipeline_var
 
-upload CLUSTER:DIR FILENAME ...
+M 0.13.6 jao@cheese ~/git/marcel$ gen 3 1 | args pn
+Process Process-3:
+Traceback (most recent call last):
+  File "/usr/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 416, in execute
+    self.pipeline.setup()
+  File "/home/jao/git/marcel/marcel/core.py", line 346, in setup
+    op.setup()
+  File "/home/jao/git/marcel/marcel/op/args.py", line 75, in setup
+    self.impl.setup()
+  File "/home/jao/git/marcel/marcel/op/args.py", line 141, in setup
+    self.params = op.pipeline_arg.parameters()
+AttributeError: 'str' object has no attribute 'parameters'
+M 0.13.6 jao@cheese ~/git/marcel$ gen 3 1 | args (pn)
+Process Process-4:
+Traceback (most recent call last):
+  File "/usr/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 416, in execute
+    self.pipeline.setup()
+  File "/home/jao/git/marcel/marcel/core.py", line 346, in setup
+    op.setup()
+  File "/home/jao/git/marcel/marcel/op/args.py", line 75, in setup
+    self.impl.setup()
+  File "/home/jao/git/marcel/marcel/op/args.py", line 181, in setup
+    self.n_params = len(self.op.pipeline_arg.__code__.co_varnames)
+AttributeError: 'SourceFunction' object has no attribute '__code__'
 
-download [-s|--separate] CLUSTER:DIR FILENAME ...
+----------------------------------------------------------------------
 
-For multiple FILENAME download, use rsync user@host:f1 :f2 :f3 ...
+Add -r|--remote flag to fork. Currently there, sort of, hidden, for
+use by @ syntax. (See Fork.execute_remotely()).
 
-Use -s|--protect_args to allow for filenames with whitespace. 
+----------------------------------------------------------------------
 
-......................................................................
+Get rid of Pipeline.set_error_handler. Can the error handler be
+inherited from Pipeline.copy()?
+
+----------------------------------------------------------------------
+
+IDEA: Implement interactive usage by translating into API usage.
 
 upload CLUSTER:DIR FILENAME ... 
 

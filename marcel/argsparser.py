@@ -33,7 +33,6 @@ import marcel.util
 #     - Exactly one must be specified
 # Additional constraints can be checked by the op.
 
-
 VALUE_NONE = 1
 VALUE_ONE = 2
 VALUE_OPTIONAL = 3
@@ -171,7 +170,7 @@ class ArgsParser:
                 return int(x)
             except ValueError:
                 raise ArgsError(arg.op_name, f'{arg.name} cannot be converted to int: {x}')
-        raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
+        raise ArgsError(arg.op_name, f'{arg.name} must be an int: {x}')
 
     def str_to_float(self, arg, x):
         if type(x) is float or callable(x):
@@ -200,27 +199,28 @@ class ArgsParser:
             return x
         raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
 
-    def fork_spec(self, arg, x):
-        if type(x) is int:
-            if x <= 0:
-                raise ArgsError(arg.op_name, f'{arg.name} must be a positive int: {x}')
-            return x
-        if type(x) is str or callable(x):
-            return x
-        if type(x) is marcel.object.cluster.Cluster:
-            return x
-        raise ArgsError(arg.op_name, f'{arg.name} must be an int or cluster name: {x}')
-
-    def check_pipeline(self, arg, x):
-        if type(x) is marcel.core.Pipeline or callable(x):
-            return x
-        raise ArgsError(arg.op_name, f'{arg.name} must be a pipeline.')
-
     def check_str_or_pipeline(self, arg, x):
-        if type(x) in (str, marcel.core.Pipeline) or callable(x):
+        if type(x) in (str, marcel.core.Pipeline, marcel.core.PipelineFunction):
             return x
         raise marcel.argsparser.ArgsError(self.op_name,
                                           f'{arg.name} argument must be a Pipeline: {x}')
+
+    def fork_gen(self, arg, x):
+        if type(x) is int or callable(x):
+            return x
+        elif type(x) is marcel.object.cluster.Cluster:
+            return x
+        elif type(x) is str:
+            try:
+                return int(x)
+            except ValueError:
+                # Could be a cluster name
+                cluster = self.env.cluster(x)
+                if cluster:
+                    return cluster
+                else:
+                    return x
+        raise ArgsError(arg.op_name, f'{x} must be an int, iterable, or Cluster')
 
     def init_var(self, arg, x):
         if type(x) is marcel.reservoir.Reservoir:

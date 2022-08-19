@@ -71,4 +71,7 @@ class Cluster:
 
     def __repr__(self):
         hosts = ', '.join([str(host) for host in self.hosts])
-        return f'Cluster({self.user}: {hosts})'
+        return f'Cluster({self.user}, {hosts})'
+
+    def __iter__(self):
+        return iter(self.hosts)
