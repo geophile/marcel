@@ -390,3 +390,12 @@ Traceback (most recent call last):
     return strfunc(str(pathobj), *args)
 FileNotFoundError: [Errno 2] No such file or directory: '/home/ec2-user/.config/marcel'
 [ec2-user@ip-172-31-29-105 ~]$ 
+
+176. Remote error not showing up correctly
+
+From test_api:
+
+    # TODO: Bug - should be expected_err
+    TEST.run(lambda: run(fork('jao', ls('/nosuchfile'))),
+             expected_out=[Error('No qualifying paths')])
+             # expected_err='No qualifying paths')

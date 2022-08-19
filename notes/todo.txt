@@ -373,29 +373,6 @@ cluster".
 
 ......................................................................
 
-upload FILENAME ... CLUSTER DIR 
-
-    FILENAME     A filename or glob pattern.
-
-    CLUSTER      A marcel Cluster.
-
-    PATH         Path to a directory on CLUSTER.
-
-Copies local files to the indicated directory on each node of a cluster.
-
-The files to be copied are specified by one or more FILENAMEs. Each
-FILENAME is a file name or a glob pattern. 
-
-CLUSTER must be configured for marcel, (run "help cluster" for
-information on configuring clusters).
-
-PATH must be an absolute path, corresponding to a pre-exising
-directory on each node of the CLUSTER. The user configured for cluster
-access must have permission to write to the directory.
-
-......................................................................
-
-download [-s|--separate] CLUSTER FILENAME ... DIR
 
 ----------------------------------------------------------------------
 
@@ -431,100 +408,6 @@ be an iterator.
   instead, and then ensure that the returned value is iterable. (Use
   iter() to get the iterator, or raise TypeError).
 
-----------------------------------------------------------------------
-
-{L,wrap=F}fork FORK_GEN PIPELINE
-
-{L,indent=4:28}{r:FORK_GEN}                     An int or iterable used to specify forks.
-   
-{L,indent=4:28}{r:PIPELINE}                     A pipeline whose instances are to be executed concurrently.
-
-Instances of a pipeline are executed concurrently.
-
-{r:FORK_GEN} is an int or an iterable, used to specify the number of
-concurrent executions of {r:PIPELINE}.  For discussion purposes, the
-execution of each instance of {r:PIPELINE} is executed by a thread, but
-the actual implementation is unspecified. {r:PIPELINE} has one argument, a
-thread id. Output from fork comprises tuples containing the thread id,
-and the output from the pipeline.
-
-Example:
-
-{p,indent=4,wrap=F}
-fork 3 [id: gen (id+1) 100]
-
-This command creates three threads, with ids 0, 1, 2. For id 0, the
-command executed is gen 1 100, which generates the stream [100]. For
-id 1, the stream is [100, 101], and for id 2, the stream is [100, 101,
-102]. The fork command prepends the id to each tuple of output from
-the gen operator, so the output for the command is something like
-this:
-
-{p,indent=4,wrap=F}
-(0, 100)
-(1, 100)
-(2, 100)
-(1, 101)
-(2, 101)
-(2, 102)
-
-(Any interleaving of the streams may be observed.)
-
-If {r:FORK_GEN} is an iterable, then the thread id is bound to each value
-returned by the iterable. So this command:
-
-{p,indent=4,wrap=F}
-fork 'abc' [id: gen 3 100]
-
-yields:
-
-{p,indent=4,wrap=F}
-('a', 100)
-('b', 100)
-('c', 100)
-('a', 101)
-('b', 101)
-('c', 101)
-('a', 102)
-('b', 102)
-('c', 102)
-
-The FORK_SPEC may be a {n:Cluster}. A {n:Cluster} is iterable, and the values
-obtained by iteration are {n:Host} objects.
-
-It should not normally be necessary to use a {n:Cluster} for
-{r:FORK_GEN}. Remote execution can be done by using special syntax,
-e.g. to send a grep command to each node in cluster lab:
-
-{p,indent=4,wrap=F}
-@lab [grep foobar /var/log/syslog]
-
-This is equivalent to something like:
-
-{p,indent=4,wrap=F}
-fork lab [host: ssh -i ~/.ssh/(host).pem -l (host.cluster.user) "grep foobar /var/log/syslog]
-
-Similarly, copying files to and from clusters can be done using the
-{r:fork} command (e.g., with the {r:PIPELINE} using {n:rsync}), but it would be
-far simpler to use the {n:upload} and {n:download} commands.
-
-......................................................................
-
-- Add pipeline args to fork.
-
-- upload
-
-- download
-
-- Document Cluster and Host as objects (update object doc too).
-
-- Add fork as op to top-level help.
-
-+ Remote is internal only. Don't need remote() in API. 
-
-+ Remote class could be demoted to be nested, like ForkWorker.SendToParent.
-
-+ LabelThread can also be demoted.
 
 ----------------------------------------------------------------------
 
@@ -582,3 +465,27 @@ inherited from Pipeline.copy()?
 ----------------------------------------------------------------------
 
 IDEA: Implement interactive usage by translating into API usage.
+
+upload CLUSTER:DIR FILENAME ... 
+
+    CLUSTER      A marcel Cluster.
+
+    DIR          Target directory on each node of CLUSTER.
+
+    FILENAME     A filename or glob pattern identifying local files.
+
+Copies local files to the indicated directory on each node of a cluster.
+
+The files to be copied are specified by one or more FILENAMEs. Each
+FILENAME is a file name or a glob pattern.
+
+CLUSTER must be configured for marcel, (run "help cluster" for
+information on configuring clusters).
+
+DIR must be an absolute path, corresponding to a pre-exising directory
+on each node of the CLUSTER. The user configured for cluster access
+must have permission to write to the directory.
+
+......................................................................
+
+download [-s|--separate] CLUSTER FILENAME ... DIR
