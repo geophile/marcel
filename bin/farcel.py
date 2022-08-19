@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # This file is part of Marcel.
 #
 # Marcel is free software: you can redistribute it and/or modify it
@@ -12,8 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
-
-#!/usr/bin/python3
 
 import atexit
 import getpass

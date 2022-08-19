@@ -84,7 +84,7 @@ class Args(marcel.core.Op):
     def receive(self, x):
         self.args.append(unwrap_op_output(x))
         if not self.all and len(self.args) == self.n_params:
-            self.pipeline_wrapper.run_pipeline(self.env(), self.args)
+            self.pipeline_wrapper.run_pipeline(self.args)
             self.args.clear()
 
     def flush(self):
@@ -94,7 +94,7 @@ class Args(marcel.core.Op):
             else:
                 while len(self.args) < self.n_params:
                     self.args.append(None)
-            self.pipeline_wrapper.run_pipeline(self.env(), self.args)
+            self.pipeline_wrapper.run_pipeline(self.args)
             self.args.clear()
         self.propagate_flush()
 
@@ -112,6 +112,7 @@ class Args(marcel.core.Op):
         # to arg's downstream operator. But flush is a dead end, it doesn't propagate
         # to arg's downstream, which was the issue in bug 136.
         pipeline.append(marcel.opmodule.create_op(self.env(), 'map', self.send_pipeline_output))
+        return pipeline
 
     def send_pipeline_output(self, *x):
         self.send(x)

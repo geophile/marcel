@@ -208,7 +208,9 @@ class ArgsParser:
     def fork_gen(self, arg, x):
         if type(x) is int or callable(x):
             return x
-        if type(x) is str:
+        elif type(x) is marcel.object.cluster.Cluster:
+            return x
+        elif type(x) is str:
             try:
                 return int(x)
             except ValueError:

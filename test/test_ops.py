@@ -574,18 +574,31 @@ def test_remote():
 
 
 def test_fork():
+    # int forkgen
     TEST.run('fork 3 [gen 3 100] | sort',
              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
     TEST.run('fork 3 [t: gen 3 100 | (x: (t, x))] | sort',
              expected_out=[(0, 100), (0, 101), (0, 102),
                            (1, 100), (1, 101), (1, 102),
                            (2, 100), (2, 101), (2, 102)])
+    TEST.run('fork 3 [t, u: gen 3 100 | (x: (t, x))] | sort',
+             expected_err='fork pipeline must have no more than one parameter')
+    # iterable forkgen
     TEST.run('fork "abc" [gen 3 100] | sort',
              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
     TEST.run('fork "abc" [t: gen 3 100 | (x: (t, x))] | sort',
              expected_out=[('a', 100), ('a', 101), ('a', 102),
                            ('b', 100), ('b', 101), ('b', 102),
                            ('c', 100), ('c', 101), ('c', 102)])
+    TEST.run('fork "abc" [t, u: gen 3 100 | (x: (t, x))] | sort',
+             expected_err='fork pipeline must have no more than one parameter')
+    # Cluster forkgen
+    TEST.run('fork jao [gen 3 100]',
+             expected_out=[100, 101, 102])
+    TEST.run('fork jao [t: gen 3 100 | (x: (str(t), x))]',
+             expected_out=[('localhost', 100), ('localhost', 101), ('localhost', 102)])
+    TEST.run('fork jao [t, u: gen 3 100 | (x: (str(t), x))]',
+             expected_err='fork pipeline must have no more than one parameter')
 
 
 def test_sudo():
@@ -1552,14 +1565,13 @@ def main_stable():
 
 
 def main_dev():
-    test_args()
-    # test_fork()
+    pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

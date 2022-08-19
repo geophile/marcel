@@ -131,24 +131,18 @@ class Fork(marcel.core.Op):
         super().__init__(env)
         self.forkgen = None
         self.pipeline_arg = None
-        self.pipeline_wrapper = None
         self.impl = None
         self.workers = None
         self.remote = False
 
     def __repr__(self):
-        op_name = 'remote' if self.remote else 'fork'
-        return f'{op_name}({self.forkgen}, {self.pipeline_arg})'
+        return f'fork({self.forkgen}, {self.pipeline_arg})'
 
     # AbstractOp
 
     def setup(self):
         pipeline_arg = self.pipeline_arg
         assert isinstance(pipeline_arg, marcel.core.Pipelineable)
-        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(self, pipeline_arg)
-        if self.pipeline_wrapper.n_params() > 1:
-            raise marcel.exception.KillCommandException('fork pipeline must have no more than one parameter.')
-        self.pipeline_wrapper.setup()
         forkgen = self.eval_function('forkgen') if callable(self.forkgen) else self.forkgen
         if type(forkgen) is int:
             self.impl = ForkInt(self, forkgen)
@@ -189,6 +183,21 @@ class Fork(marcel.core.Op):
 
 class ForkWorker:
 
+    class SendToParent(marcel.core.Op):
+
+        def __init__(self, env, parent):
+            super().__init__(env)
+            self.parent = parent
+
+        def __repr__(self):
+            return 'sendtoparent()'
+
+        def receive(self, x):
+            self.parent.send(dill.dumps(x))
+
+        def receive_error(self, error):
+            self.parent.send(dill.dumps(error))
+
     def __init__(self, op, thread_id):
         self.op = op
         self.thread_id = thread_id
@@ -196,25 +205,22 @@ class ForkWorker:
         # duplex=False: child writes to parent when function completes execution. No need to communicate in the
         # other direction
         self.reader, self.writer = mp.Pipe(duplex=False)
-        self.pipeline = op.impl.pipeline_instance(self)
+        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(self.op,
+                                                                   op.pipeline_arg,
+                                                                   self.customize_pipeline)
+        if self.pipeline_wrapper.n_params() > 1:
+            raise marcel.exception.KillCommandException(
+                'fork pipeline must have no more than one parameter.')
+        self.pipeline_wrapper.setup()
 
     def start_process(self):
         def run_pipeline_in_child():
             try:
-                self.pipeline.set_error_handler(self.op.owner.error_handler)
-                self.pipeline.setup()
-                env = self.op.env()
-                env.vars().push_scope(self.op.impl.scope)
-                self.pipeline.set_env(env)
-                if self.pipeline.params:
-                    env.setvar(self.pipeline.params[0], self.thread_id)
-                try:
-                    self.pipeline.run()
-                    self.pipeline.flush()
-                    self.pipeline.cleanup()
-                finally:
-                    env.vars().push_scope(self.op.impl.scope)
+                self.pipeline_wrapper.run_pipeline([self.thread_id])
             except BaseException as e:
+                # TODO: Remove this
+                marcel.util.print_stack()
+                #
                 self.writer.send(dill.dumps(e))
             self.writer.close()
         self.process = mp.Process(target=run_pipeline_in_child, args=tuple())
@@ -233,23 +239,14 @@ class ForkWorker:
         while self.process.is_alive():
             self.process.join(0.1)
 
+    def customize_pipeline(self, pipeline):
+        pipeline = self.op.impl.customize_pipeline(pipeline, self)
+        send_to_parent = ForkWorker.SendToParent(self.op.env(), self.writer)
+        pipeline.append(send_to_parent)
+        return pipeline
+
 
 class ForkImpl(object):
-
-    class SendToParent(marcel.core.Op):
-
-        def __init__(self, env, parent):
-            super().__init__(env)
-            self.parent = parent
-
-        def __repr__(self):
-            return 'sendtoparent()'
-
-        def receive(self, x):
-            self.parent.send(dill.dumps(x))
-
-        def receive_error(self, error):
-            self.parent.send(dill.dumps(error))
 
     class LabelThread(marcel.core.Op):
 
@@ -281,16 +278,9 @@ class ForkImpl(object):
     def __init__(self, op):
         self.op = op
         self.thread_ids = None
-        params = op.pipeline.params
-        self.scope = {params[0]: None} if params else {}
 
-    def pipeline_instance(self, fork_worker):
-        # Copy the op's pipeline
-        op = self.op
-        pipeline = op.pipeline.copy()
-        pipeline.set_error_handler(op.pipeline.error_handler)
-        send_to_parent = ForkImpl.SendToParent(op.env(), fork_worker.writer)
-        pipeline.append(send_to_parent)
+    # Returns a pipeline, which could be the same or could be new.
+    def customize_pipeline(self, pipeline, *args):
         return pipeline
 
 
@@ -298,14 +288,14 @@ class ForkRemote(ForkImpl):
 
     class Remote(marcel.core.Op):
 
-        def __init__(self, env, host, pipeline):
+        def __init__(self, env, host, pipeline_wrapper):
             super().__init__(env)
             self.host = host
-            self.pipeline = pipeline
+            self.pipeline_wrapper = pipeline_wrapper
             self.process = None
 
         def __repr__(self):
-            return f'remote({self.host}, {self.pipeline})'
+            return f'remote({self.host}, ...)'
 
         # AbstractOp
 
@@ -333,7 +323,7 @@ class ForkRemote(ForkImpl):
             pickler = dill.Pickler(buffer)
             pickler.dump(self.env().python_version())
             pickler.dump(self.env().without_reservoirs())
-            pickler.dump(self.pipeline)
+            pickler.dump(self.pipeline_wrapper)
             buffer.seek(0)
             try:
                 stdout, stderr = self.process.communicate(input=buffer.getvalue())
@@ -369,22 +359,19 @@ class ForkRemote(ForkImpl):
         self.cluster = cluster
         self.thread_ids = self.cluster.hosts
 
-    def pipeline_instance(self, fork_worker):
-        # Create a pipeline that:
-        #    - Runs the op's pipeline remotely
-        #    - Prepends the host to each tuple from the remote host
-        #    - Sends tuples to the parent
-        pipeline = marcel.core.Pipeline()
+    def customize_pipeline(self, pipeline, *args):
         op = self.op
+        fork_worker = args[0]
         host = fork_worker.thread_id
-        remote = ForkRemote.Remote(op.env(), host, op.pipeline)
+        remote = ForkRemote.Remote(op.env(), host, pipeline)
         label_thread = ForkImpl.LabelThread(op.env(), host)
-        send_to_parent = ForkImpl.SendToParent(op.env(), fork_worker.writer)
-        pipeline.append(remote)
-        pipeline.append(label_thread)
-        pipeline.append(send_to_parent)
         label_thread.receiver = op.receiver
-        return pipeline
+        wrapped_pipeline = marcel.core.Pipeline()
+        wrapped_pipeline.set_error_handler(pipeline.error_handler)
+        wrapped_pipeline.params = pipeline.params
+        wrapped_pipeline.append(remote)
+        wrapped_pipeline.append(label_thread)
+        return wrapped_pipeline
 
 
 class ForkInt(ForkImpl):
@@ -394,7 +381,8 @@ class ForkInt(ForkImpl):
         if n_forks > 0:
             self.thread_ids = list(range(n_forks))
         else:
-            raise marcel.exception.KillCommandException(f'If fork generator is an int, it must be positive.')
+            raise marcel.exception.KillCommandException(
+                f'If fork generator is an int, it must be positive.')
 
 
 class ForkIterable(ForkImpl):

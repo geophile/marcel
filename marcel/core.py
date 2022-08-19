@@ -396,7 +396,10 @@ class Pipeline(AbstractOp):
         prev_op = None
         for op in self.ops:
             if isinstance(op, Op) and op is not self.ops[0] and op.must_be_first_in_pipeline():
-                raise marcel.exception.KillCommandException('%s cannot receive input from a pipe' % op.op_name())
+                print(f'op: {op}')
+                print(f'first op in pipeline: {self.ops[0]}')
+                raise marcel.exception.KillCommandException(
+                    f'{op.op_name()} cannot receive input from a pipe')
             op.owner = self
             if prev_op:
                 prev_op.receiver = op
@@ -492,10 +495,16 @@ class PipelineWrapper(object):
         self.pipeline_arg = pipeline_arg
         self.customize_pipeline = customize_pipeline
 
+    def __repr__(self):
+        return f'PipelineWrapper({self.pipeline_arg})'
+
     def setup(self):
         assert False
 
-    def run_pipeline(self, env, args):
+    def n_params(self):
+        return self.pipeline_arg.n_params()
+
+    def run_pipeline(self, args):
         assert False
 
     @staticmethod
@@ -517,16 +526,20 @@ class PipelineInteractive(PipelineWrapper):
         op = self.op
         env = op.env()
         self.params = self.pipeline_arg.parameters()
-        assert self.params is not None  # Should already have been checked
+        if self.params is None:
+            self.params = []
         self.pipeline = op.pipeline_arg_value(env, self.pipeline_arg).copy()
         self.pipeline.set_error_handler(op.owner.error_handler)
-        self.customize_pipeline(self.pipeline)
+        x = self.pipeline
+        self.pipeline = self.customize_pipeline(x)
+        if self.pipeline is None:
+            x = self.customize_pipeline(x)
+            assert False
         self.scope = {}
         for param in self.params:
             self.scope[param] = None
 
-    def run_pipeline(self, env, args):
-        assert len(args) == len(self.params)
+    def run_pipeline(self, args):
         env = self.op.env()
         env.vars().push_scope(self.scope)
         for i in range(len(self.params)):
@@ -545,13 +558,15 @@ class PipelineAPI(PipelineWrapper):
     def setup(self):
         pass
 
-    def run_pipeline(self, env, args):
+    def run_pipeline(self, args):
         op = self.op
         # Through the API, a pipeline is expressed as a Python function which, when evaluated,
         # yields a pipeline composed of op.core.Nodes. This function is the value of the op's
-        # pipeline_arg field. So op.pipeline_arg(*args) evaluates the function (using the current value of the args),
-        # and yields the pipeline to execute.
-        pipeline = self.pipeline_arg.create_pipeline(args)
+        # pipeline_arg field. So op.pipeline_arg(*args) evaluates the function (using the current
+        # value of the args), and yields the pipeline to execute.
+        pipeline = (self.pipeline_arg.create_pipeline(args)
+                    if self.n_params() > 0 else
+                    self.pipeline_arg.create_pipeline())
         pipeline.set_error_handler(op.owner.error_handler)
-        self.customize_pipeline(pipeline)
-        marcel.core.Command(env, None, pipeline).execute()
+        pipeline = self.customize_pipeline(pipeline)
+        marcel.core.Command(self.op.env(), None, pipeline).execute()
