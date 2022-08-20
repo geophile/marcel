@@ -16,6 +16,7 @@
 import marcel.op.fork
 
 
+# Used by API only. Interactive usage relies on @ syntax.
 def remote(env, forkgen, pipelineable):
     op, args = marcel.op.fork.fork(env, forkgen, pipelineable)
     op.execute_remotely()

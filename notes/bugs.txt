@@ -391,6 +391,8 @@ Traceback (most recent call last):
 FileNotFoundError: [Errno 2] No such file or directory: '/home/ec2-user/.config/marcel'
 [ec2-user@ip-172-31-29-105 ~]$ 
 
+----------------------------------------------------------------------
+
 176. Remote error not showing up correctly
 
 From test_api:
@@ -399,3 +401,13 @@ From test_api:
     TEST.run(lambda: run(fork('jao', ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
              # expected_err='No qualifying paths')
+
+----------------------------------------------------------------------
+
+177. Different behavior for OS command depending on whether "bash" is explicit
+
+M 0.13.9 jao@cheese ~/git/marcel/marcel$ fork jao [host: bash (type(host))]
+/bin/bash: -c: line 1: syntax error near unexpected token `newline'
+/bin/bash: -c: line 1: `<class 'marcel.object.cluster.Host'>'
+M 0.13.9 jao@cheese ~/git/marcel/marcel$ fork jao [host:  (type(host))]
+<class 'marcel.object.cluster.Host'>
