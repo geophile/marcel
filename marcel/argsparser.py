@@ -208,8 +208,6 @@ class ArgsParser:
     def fork_gen(self, arg, x):
         if type(x) is int or callable(x):
             return x
-        elif marcel.util.iterable(x):
-            return x
         elif type(x) is marcel.object.cluster.Cluster:
             return x
         elif type(x) is str:
@@ -222,6 +220,8 @@ class ArgsParser:
                     return cluster
                 else:
                     return x
+        elif marcel.util.iterable(x):
+            return x
         raise ArgsError(arg.op_name, f'{x} must be an int, iterable, or Cluster')
 
     def cluster(self, arg, x):
