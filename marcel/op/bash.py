@@ -66,7 +66,7 @@ class Bash(marcel.core.Op):
         self.input = None
 
     def __repr__(self):
-        return f'bash(args={self.args})'
+        return f'bash(args={self.args_arg})'
 
     # AbstractOp
 
@@ -145,7 +145,8 @@ class NonInteractive(Escape):
         if self.process is None:
             self.lock.acquire()
             if self.process is None:
-                self.process = subprocess.Popen(self.command(),
+                command = self.command()
+                self.process = subprocess.Popen(command,
                                                 shell=True,
                                                 executable='/bin/bash',
                                                 stdin=subprocess.PIPE,

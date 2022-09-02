@@ -401,13 +401,3 @@ From test_api:
     TEST.run(lambda: run(fork('jao', ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
              # expected_err='No qualifying paths')
-
-----------------------------------------------------------------------
-
-177. Different behavior for OS command depending on whether "bash" is explicit
-
-M 0.13.9 jao@cheese ~/git/marcel/marcel$ fork jao [host: bash (type(host))]
-/bin/bash: -c: line 1: syntax error near unexpected token `newline'
-/bin/bash: -c: line 1: `<class 'marcel.object.cluster.Host'>'
-M 0.13.9 jao@cheese ~/git/marcel/marcel$ fork jao [host:  (type(host))]
-<class 'marcel.object.cluster.Host'>

@@ -111,8 +111,11 @@ far simpler to use the {n:upload} and {n:download} commands.
 '''
 
 
-def fork(env, forkgen, pipeline_function):
-    return Fork(env), [forkgen, marcel.core.PipelineFunction(pipeline_function)]
+def fork(env, forkgen, pipeline):
+    # callable: Through API.
+    # not callable: Interactive, with bash parsing calling fork() (for example).
+    pipeline_arg = marcel.core.PipelineFunction(pipeline) if callable(pipeline) else pipeline
+    return Fork(env), [forkgen, pipeline_arg]
 
 
 # For API
@@ -205,7 +208,7 @@ class ForkWorker:
         # duplex=False: child writes to parent when function completes execution. No need to communicate in the
         # other direction
         self.reader, self.writer = mp.Pipe(duplex=False)
-        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(self.op,
+        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(op,
                                                                    op.pipeline_arg,
                                                                    self.customize_pipeline)
         if self.pipeline_wrapper.n_params() > 1:
@@ -381,8 +384,7 @@ class ForkInt(ForkImpl):
         if n_forks > 0:
             self.thread_ids = list(range(n_forks))
         else:
-            raise marcel.exception.KillCommandException(
-                f'If fork generator is an int, it must be positive.')
+            raise marcel.exception.KillCommandException(f'If fork generator is an int, it must be positive.')
 
 
 class ForkIterable(ForkImpl):

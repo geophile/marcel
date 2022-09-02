@@ -91,19 +91,29 @@ class Upload(marcel.core.Op):
                                                         f' {self.filenames}')
 
     def run(self):
-        scp_command = Upload.SCP_COMMAND.format(identity=self.cluster.identity,
-                                                sources=' '.join(self.filenames),
-                                                user=self.cluster.user,
-                                                host='(host)',
-                                                dest=self.dir)
-        print(f'upload command: {scp_command}')
-        scp_pipeline = marcel.core.Pipeline()
-        scp_pipeline.set_error_handler(self.owner.error_handler)
-        scp_pipeline.append(marcel.opmodule.create_op(self.env(), 'bash', scp_command))
-        print(f'scp_pipeline: {scp_pipeline}')
+        host_pipeline = marcel.core.Pipeline()
+        host_pipeline.set_error_handler(self.owner.error_handler)
+        host_pipeline.append(marcel.opmodule.create_op(self.env(), 'bash', '(scp_command)'))
+        host_pipeline.set_parameters(['scp_command'])
+        print(f'host_pipeline: {host_pipeline}')
         pipeline = marcel.core.Pipeline()
         pipeline.set_error_handler(self.owner.error_handler)
-        pipeline.set_parameters(['host'])
-        pipeline.append(marcel.opmodule.create_op(self.env(), 'fork', self.cluster, scp_pipeline))
+        sources = ' '.join(self.filenames)
+        scp_commands = [Upload.scp_command(identity=self.cluster.identity,
+                                           sources=sources,
+                                           user=self.cluster.user,
+                                           host=host,
+                                           dest=self.dir)
+                        for host in self.cluster]
+        print(f'scp_commands: {scp_commands}')
+        pipeline.append(marcel.opmodule.create_op(self.env(), 'fork', scp_commands, host_pipeline))
         print(f'pipeline: {pipeline}')
         marcel.core.Command(self.env(), None, pipeline).execute()
+
+    @staticmethod
+    def scp_command(identity, sources, user, host, dest):
+        return Upload.SCP_COMMAND.format(identity=identity,
+                                         sources=sources,
+                                         user=user,
+                                         host=host,
+                                         dest=dest)
