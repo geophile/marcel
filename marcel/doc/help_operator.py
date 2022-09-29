@@ -42,7 +42,7 @@ does not require an input stream, but it does generate output. For example,
 
 Streams always carry tuples between commands. Often, these are
 1-tuples.  For example, the {n:ls} operator generates a stream
-containing {n:File} objects, each wrapped in a 1-tuple. When a Linux
+containing {n:File} objects, each wrapped in a 1-tuple. When a host OS
 executable is run, its {n:stdout} is conveyed to the next command by
 wrapping strings (separated by \\\\n characters) in 1-tuples. Marcel
 operators can generate n-tuples, with n > 1. For example, this command
@@ -133,6 +133,6 @@ error on the attempt to go inside of it. The position of
 the {r:Error} in the output indicates when the
 attempt was made -- between listing the {r:hi} and {r:welcome} directories.
 
-For Linux executables, each line of {n:stderr} is turned into an {n:Error}
+For host OS executables, each line of {n:stderr} is turned into an {n:Error}
 and written to the same stream receiving {n:stdout}.
 '''

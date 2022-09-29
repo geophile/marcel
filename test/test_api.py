@@ -13,6 +13,8 @@ Error = marcel.object.error.Error
 start_dir = os.getcwd()
 TEST = test_base.TestAPI()
 
+SQL = False  # Until Postgres & psycopg2 are working again
+
 
 def test_gen():
     # Explicit out
@@ -545,7 +547,7 @@ def test_remote():
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
     # Bug 121
     TEST.run(test=lambda: run(remote('notacluster', lambda host: gen(3))),
-             expected_err='must be an int, iterable, or Cluster')
+             expected_err='notacluster is not a Cluster')
 
 
 def test_fork():
@@ -664,6 +666,8 @@ def test_pipeline_args():
 
 
 def test_sql():
+    if not SQL:
+        return
     TEST.run(test=lambda: run(sql('drop table if exists t') | select(lambda *t: False)))
     TEST.run(test=lambda: run(sql('create table t(id int primary key, s varchar)') | select(lambda *t: False)))
     TEST.run(test=lambda: run(sql("insert into t values(1, 'one')")),
@@ -966,11 +970,12 @@ def test_args():
                            ((1, 2), 3, (5, 6)), ((1, 2), 4, (5, 6)),
                            ((1, 2), (3, 4), 5), ((1, 2), (3, 4), 6)])
     # sql
-    TEST.run(test=lambda: run(sql("drop table if exists t") | select(lambda x: False)))
-    TEST.run(test=lambda: run(sql("create table t(x int)") | select(lambda x: False)))
-    TEST.run(test=lambda: run(gen(5) | args(lambda x: sql("insert into t values(%s)", x))),
-             verification=lambda: run(sql("select * from t order by x")),
-             expected_out=[0, 1, 2, 3, 4])
+    if SQL:
+        TEST.run(test=lambda: run(sql("drop table if exists t") | select(lambda x: False)))
+        TEST.run(test=lambda: run(sql("create table t(x int)") | select(lambda x: False)))
+        TEST.run(test=lambda: run(gen(5) | args(lambda x: sql("insert into t values(%s)", x))),
+                 verification=lambda: run(sql("select * from t order by x")),
+                 expected_out=[0, 1, 2, 3, 4])
     # window
     TEST.run(test=lambda: run(gen(3) | args(lambda w: gen(10) | window(disjoint=w))),
              expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),

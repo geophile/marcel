@@ -26,7 +26,8 @@ HELP = '''
 {L,indent=4:28}{r:-d}, {r:--delete}            Output the named variable and its value, and remove the variable 
 from the environment.
 
-{L,indent=4:28}{r:-c}, {r:--config}            Output only symbols defined in the configuration file, {n:~/.marcel.py}.
+{L,indent=4:28}{r:-c}, {r:--config}            Output only symbols defined in the marcel configuration file, 
+(e.g. {n:~/.config/marcel/startup.py}).
 
 {L,indent=4:28}{r:-s}, {r:--session}           Output only symbols defined during the current session.
 
@@ -41,10 +42,12 @@ If the {r:--all} flag is provided, then all symbols in the environment (except t
 are output. This is the default behavior. The {r:--all} flag cannot be combined with others. 
 
 If the {r:--builtin} flag is provided, then the symbols defined by marcel are output. This excludes symbols
-defined in the config file ({n:~/.marcel.py}), and those defined in the current session, e.g. by assigning to
+defined in the marcel configuration file 
+(e.g. {n:~/.config/marcel/startup.py}), and those defined in the current session, e.g. by assigning to
 a previously undefined environment variable.
 
-If the {r:--config} flas is provided, then the symbols defined in the config file ({n:~/.marcel.py}) are output.
+If the {r:--config} flag is provided, then the symbols defined in the marcel configuration file 
+(e.g. {n:~/.config/marcel/startup.py}) are output.
 
 If the {r:--session} flag is provided, then the symbols defined in the current session are provided. These are variables
 that obtain their value by assignment, (e.g. {n:answer = (42)}), or by storing a stream, (e.g. {n:ls -fr > files}).

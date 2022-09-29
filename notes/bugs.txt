@@ -401,3 +401,24 @@ From test_api:
     TEST.run(lambda: run(fork('jao', ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
              # expected_err='No qualifying paths')
+
+----------------------------------------------------------------------
+
+177. Tab completion for filename doesn't add quotes or otherwise escape filenames
+
+----------------------------------------------------------------------
+
+178. Cannot start without internet
+
+No internet, started marcel:
+
+jao@cheese:~$ marcel
+Cannot start marcel: Cannot understand geophile.com as a host name or as an IP address.
+
+Should complain when the cluster is actually used.
+
+----------------------------------------------------------------------
+
+179. Fix references to ~/.marcel.py in help
+
+

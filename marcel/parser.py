@@ -474,7 +474,7 @@ class Remote(Symbol):
 
     @property
     def op_name(self):
-        return 'fork'
+        return 'remote'
 
 
 class Begin(Symbol):
@@ -1059,13 +1059,8 @@ class Parser:
             op_name = op_token.op_name
             op_module = self.op_modules[op_name]
             op = op_module.create_op()
-            # @syntax, indicated by is_remote() == True, needs to set flag on Fork op, to indicate
-            # remote execution
-            if op_token.is_remote():
-                assert op_name == 'fork'
-                op.execute_remotely()
             # Both ! and !! map to the run op.
-            elif op_name == 'run':
+            if op_name == 'run':
                 # !: Expect a command number
                 # !!: Don't expect a command number, run the previous command
                 # else: 'run' was entered

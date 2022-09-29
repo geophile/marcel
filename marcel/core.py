@@ -490,8 +490,9 @@ class PipelineIterator:
 class PipelineWrapper(object):
 
     # customize_pipeline takes pipeline as an argument, returns None
-    def __init__(self, op, pipeline_arg, customize_pipeline):
-        self.op = op
+    def __init__(self, env, error_handler, pipeline_arg, customize_pipeline):
+        self.env = env
+        self.error_handler = error_handler
         self.pipeline_arg = pipeline_arg
         self.customize_pipeline = customize_pipeline
 
@@ -508,39 +509,34 @@ class PipelineWrapper(object):
         assert False
 
     @staticmethod
-    def create(op, pipeline_arg, customize_pipeline):
-        return (PipelineAPI(op, pipeline_arg, customize_pipeline)
+    def create(env, error_handler, pipeline_arg, customize_pipeline):
+        return (PipelineAPI(env, error_handler, pipeline_arg, customize_pipeline)
                 if type(pipeline_arg) is PipelineFunction
-                else PipelineInteractive(op, pipeline_arg, customize_pipeline))
+                else PipelineInteractive(env, error_handler, pipeline_arg, customize_pipeline))
 
 
 class PipelineInteractive(PipelineWrapper):
 
-    def __init__(self, op, pipeline_arg, customize_pipeline):
-        super().__init__(op, pipeline_arg, customize_pipeline)
+    def __init__(self, env, error_handler, pipeline_arg, customize_pipeline):
+        super().__init__(env, error_handler, pipeline_arg, customize_pipeline)
         self.params = None
         self.scope = None
         self.pipeline = None
 
     def setup(self):
-        op = self.op
-        env = op.env()
         self.params = self.pipeline_arg.parameters()
         if self.params is None:
             self.params = []
-        self.pipeline = op.pipeline_arg_value(env, self.pipeline_arg).copy()
-        self.pipeline.set_error_handler(op.owner.error_handler)
-        x = self.pipeline
-        self.pipeline = self.customize_pipeline(x)
-        if self.pipeline is None:
-            x = self.customize_pipeline(x)
-            assert False
+        self.pipeline = marcel.core.Op.pipeline_arg_value(self.env, self.pipeline_arg).copy()
+        self.pipeline.set_error_handler(self.error_handler)
+        self.pipeline = self.customize_pipeline(self.pipeline)
+        assert self.pipeline is not None
         self.scope = {}
         for param in self.params:
             self.scope[param] = None
 
     def run_pipeline(self, args):
-        env = self.op.env()
+        env = self.env
         env.vars().push_scope(self.scope)
         for i in range(len(self.params)):
             env.setvar(self.params[i], args[i])
@@ -552,14 +548,13 @@ class PipelineInteractive(PipelineWrapper):
 
 class PipelineAPI(PipelineWrapper):
 
-    def __init__(self, op, pipeline_arg, customize_pipeline):
-        super().__init__(op, pipeline_arg, customize_pipeline)
+    def __init__(self, env, error_handler, pipeline_arg, customize_pipeline):
+        super().__init__(env, error_handler, pipeline_arg, customize_pipeline)
 
     def setup(self):
         pass
 
     def run_pipeline(self, args):
-        op = self.op
         # Through the API, a pipeline is expressed as a Python function which, when evaluated,
         # yields a pipeline composed of op.core.Nodes. This function is the value of the op's
         # pipeline_arg field. So op.pipeline_arg(*args) evaluates the function (using the current
@@ -567,6 +562,6 @@ class PipelineAPI(PipelineWrapper):
         pipeline = (self.pipeline_arg.create_pipeline(args)
                     if self.n_params() > 0 else
                     self.pipeline_arg.create_pipeline())
-        pipeline.set_error_handler(op.owner.error_handler)
+        pipeline.set_error_handler(self.error_handler)
         pipeline = self.customize_pipeline(pipeline)
-        marcel.core.Command(self.op.env(), None, pipeline).execute()
+        marcel.core.Command(self.env, None, pipeline).execute()

@@ -14,9 +14,9 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 HELP = '''
-Marcel is a shell. As in any Linux shell, there are commands which
+Marcel is a shell. As in any Linux or UNIX shell, there are commands which
 can be executed, and the output from one command
-can be piped to another.  The conventional piping syntax is used: {n:|}. Linux
+can be piped to another.  The conventional piping syntax is used: {n:|}. Linux/UNIX
 pipes stream unstructured text between commands. In marcel, streams
 carry arbitrary Python values.
 

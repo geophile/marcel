@@ -15,6 +15,8 @@ Error = marcel.object.error.Error
 start_dir = os.getcwd()
 TEST = test_base.TestConsole()
 
+SQL = False  # Until Postgres & psycopg2 are working again
+
 
 def test_no_such_op():
     TEST.run('gen 5 | abc', expected_err='is not executable')
@@ -570,7 +572,10 @@ def test_remote():
              expected_out=[(localhost, 419)])
     # Bug 121
     TEST.run('@notacluster [ gen 3]',
-             expected_err='must be an int, iterable, or Cluster')
+             expected_err='notacluster is not a Cluster')
+    # Use explicit 'remote'
+    TEST.run('remote jao [ gen 3 ]',
+             expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
 
 
 def test_fork():
@@ -743,6 +748,8 @@ def test_pipeline_args():
 
 
 def test_sql():
+    if not SQL:
+        return
     TEST.run('''sql "drop table if exists t"''')
     TEST.run('''sql "create table t(id int primary key, s varchar)"''')
     TEST.run('''sql "insert into t values(1, 'one')"''',
@@ -1377,11 +1384,12 @@ def test_args():
                            ((1, 2), 3, (5, 6)), ((1, 2), 4, (5, 6)),
                            ((1, 2), (3, 4), 5), ((1, 2), (3, 4), 6)])
     # sql
-    TEST.run('sql "drop table if exists t" | select (x: False)')
-    TEST.run('sql "create table t(x int)" | select (x: False)')
-    TEST.run(test='gen 5 | args [x: sql "insert into t values(%s)" (x)]',
-             verification='sql "select * from t order by x"',
-             expected_out=[0, 1, 2, 3, 4])
+    if SQL:
+        TEST.run('sql "drop table if exists t" | select (x: False)')
+        TEST.run('sql "create table t(x int)" | select (x: False)')
+        TEST.run(test='gen 5 | args [x: sql "insert into t values(%s)" (x)]',
+                 verification='sql "select * from t order by x"',
+                 expected_out=[0, 1, 2, 3, 4])
     # window
     TEST.run('gen 3 | args [w: gen 10 | window -d (w)]',
              expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),

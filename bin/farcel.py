@@ -52,9 +52,9 @@ TRACE = marcel.util.Trace('/tmp/farcel.log', enabled=True)
 class PythonVersionMismatch(Exception):
 
     def __init__(self, client_python_version, server_python_version):
-        super().__init__(f'Python version mismatch between client ('
-                         f'{PythonVersionMismatch.version_string(client_python_version)} and server '
-                         f'{PythonVersionMismatch.version_string(server_python_version)}.')
+        super().__init__(f'Python version mismatch between client '
+                         f'({PythonVersionMismatch.version_string(client_python_version)}) and server '
+                         f'({PythonVersionMismatch.version_string(server_python_version)}).')
 
     @staticmethod
     def version_string(v):

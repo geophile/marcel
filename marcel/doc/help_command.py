@@ -27,7 +27,7 @@ and writes an output stream containing Python tuples. Every marcel operator
 provides documentation via the {r:help}
 command. For more information on operators in general, run {n:help operator}.
 
-{L,indent=4:4}{i:Linux executable:} Linux executables can be executed, as with any other
+{L,indent=4:4}{i:Host executable:} Host executables can be executed, as with any other
 shell. Many such executables can read and write streams of strings, which can
 be carried by marcel pipes.
 
@@ -38,7 +38,7 @@ applies a function to each tuple arriving on its input stream, and writes the re
 to the output stream. {n:map} does not concern itself with printing these results -- that 
 would be done by using the {n:out} operator later in the pipeline.
 
-Many Linux commands have large collections of flags and options controlling the selection
+Many host OS commands have large collections of flags and options controlling the selection
 and printing of relevant information. Marcel aims for simpler operators, and relies on
 piping and general-purpose operators for selection and formatting. For example, the Linux
 command {n:ls -rlt} does the following:
@@ -68,9 +68,9 @@ run {n:help operator}.
 
 The use of "ls" as the name of the marcel operator for listing files
 needs some explaining: In some cases, the marcel operator has the same
-name as a Linux executable with similar capabilities,
-e.g. {n:ls}. This is intentional, as the Linux executable operates in
-ways incompatible with marcel. (The Linux executable can still be
+name as a host OS executable with similar capabilities,
+e.g. {n:ls}. This is intentional, as the host OS executable operates in
+ways incompatible with marcel. (The host OS executable can still be
 executed by using the {n:bash} command, e.g. {n:bash ls}.)
 
 {b:Assignment}
@@ -123,9 +123,9 @@ command sequence that lists the names of users whose shell is
 
 The file {n:/etc/passwd} contains usernames and shell
 executables. This file is written to {n:stdout} by using
-the Linux executable {n:cat}. {n:stdout} then feeds into a sequence of
+the host OS executable {n:cat}. {n:stdout} then feeds into a sequence of
 three marcel operators ({r:map}, {r:select}, and then {r:map} again), and the
-output from these operators feeds into another Linux executable, {r:xargs}, which
+output from these operators feeds into another host OS executable, {r:xargs}, which
 uses invokes {r:echo}.
 
 Comments:

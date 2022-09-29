@@ -873,3 +873,7 @@ each copy of the pipeline to access the label.
 ----------------------------------------------------------------------
 
 env -d: Delete var
+
+----------------------------------------------------------------------
+
+Move history to xdg directory

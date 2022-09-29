@@ -64,6 +64,7 @@ class UploadArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Upload(marcel.core.Op):
+
     SCP_COMMAND = 'scp -Cpqr -i {identity} {sources} {user}@{host}:{dest}'
 
     def __init__(self, env):

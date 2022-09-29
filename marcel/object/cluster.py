@@ -25,20 +25,11 @@ class Host:
     def __init__(self, host, cluster):
         self.host = host
         self.cluster = cluster
-        try:
-            self.addr = str(ipaddress.ip_address(host))
-            self.name = None
-        except ValueError:
-            # host is not an ipv4 or ipv6 address. Proceed as if it is a host name.
-            try:
-                self.addr = str(ipaddress.ip_address(socket.gethostbyname(host)))
-                self.name = host
-            except socket.gaierror:
-                raise marcel.exception.KillCommandException(
-                    f'Cannot understand {host} as a host name or as an IP address.')
+        self._addr = None
+        self._name = None
 
     def __repr__(self):
-        return self.addr if self.name is None else self.name
+        return self.host if self._name is None else self._name
 
     def __hash__(self):
         return hash(self.host)
@@ -49,6 +40,30 @@ class Host:
     @property
     def user(self):
         return self.cluster.user
+
+    @property
+    def addr(self):
+        self.ensure_name_and_addr()
+        return self._addr
+
+    @property
+    def name(self):
+        self.ensure_name_and_addr()
+        return self._name
+
+    def ensure_name_and_addr(self):
+        if self._addr is None:
+            try:
+                self._addr = str(ipaddress.ip_address(self.host))
+                self._name = self._addr
+            except ValueError:
+                # host is not an ipv4 or ipv6 address. Proceed as if it is a host name.
+                try:
+                    self._addr = str(ipaddress.ip_address(socket.gethostbyname(self.host)))
+                    self._name = self.host
+                except socket.gaierror:
+                    raise marcel.exception.KillCommandException(
+                        f'Cannot understand {self.host} as a host name or as an IP address.')
 
 
 class Cluster:
