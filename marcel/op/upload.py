@@ -22,7 +22,8 @@ import marcel.main
 import marcel.object.file
 import marcel.opmodule
 import marcel.op.bash
-import marcel.op.fork
+import marcel.op.forkmanager
+import marcel.util
 
 File = marcel.object.file.File
 
@@ -37,14 +38,14 @@ HELP = '''
 
 Copies local files to the indicated directory on each node of a cluster. The output stream is empty.
 
-The files to be copied are specified by one or more FILENAMEs. Each
-FILENAME is a file name or a glob pattern.
+The files to be copied are specified by one or more {r:FILENAME}s. Each
+{r:FILENAME} is a file name or a glob pattern.
 
-CLUSTER must be configured for marcel, (run "help cluster" for
+{r:CLUSTER} must be configured for marcel, (run {n:help cluster} for
 information on configuring clusters).
 
-DIR must be an absolute path, corresponding to a pre-exising directory
-on each node of the CLUSTER. The user configured for cluster access
+{r:DIR} must be an absolute path, corresponding to a pre-exising directory
+on each node of the {r:CLUSTER}. The user configured for cluster access
 must have permission to write to the directory.
 '''
 
@@ -74,15 +75,18 @@ class Upload(marcel.core.Op):
         self.dir = None
         self.filenames_arg = None
         self.filenames = None
+        self.fork_manager = None
 
     def __repr__(self):
-        return f'upload({self.cluster}:{self.dir_arg} {self.filenames_arg})'
+        return f'upload({self.cluster} {self.dir_arg} {self.filenames_arg})'
 
     def setup(self):
         self.dir = self.eval_function('dir_arg',
                                       str,
                                       pathlib.Path, pathlib.PosixPath, File)
-        print(f'dir: {self.dir}')
+        self.dir = pathlib.Path(self.dir)
+        if not self.dir.is_absolute():
+            raise marcel.exception.KillCommandException(f'Target directory must be absolute: {self.dir}')
         self.filenames = self.eval_function('filenames_arg',
                                             str,
                                             pathlib.Path, pathlib.PosixPath, File)
@@ -90,31 +94,29 @@ class Upload(marcel.core.Op):
         if len(self.filenames) == 0:
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
+        pipeline_template = marcel.core.Pipeline()
+        pipeline_template.set_error_handler(self.owner.error_handler)
+        self.fork_manager = marcel.op.forkmanager.ForkManager(self,
+                                                              self.cluster.hosts,
+                                                              pipeline_template,
+                                                              self.customize_pipeline)
+        self.fork_manager.setup()
 
     def run(self):
-        host_pipeline = marcel.core.Pipeline()
-        host_pipeline.set_error_handler(self.owner.error_handler)
-        host_pipeline.append(marcel.opmodule.create_op(self.env(), 'bash', '(scp_command)'))
-        host_pipeline.set_parameters(['scp_command'])
-        print(f'host_pipeline: {host_pipeline}')
-        pipeline = marcel.core.Pipeline()
-        pipeline.set_error_handler(self.owner.error_handler)
-        sources = ' '.join(self.filenames)
-        scp_commands = [Upload.scp_command(identity=self.cluster.identity,
-                                           sources=sources,
-                                           user=self.cluster.user,
-                                           host=host,
-                                           dest=self.dir)
-                        for host in self.cluster]
-        print(f'scp_commands: {scp_commands}')
-        pipeline.append(marcel.opmodule.create_op(self.env(), 'fork', scp_commands, host_pipeline))
-        print(f'pipeline: {pipeline}')
-        marcel.core.Command(self.env(), None, pipeline).execute()
+        self.fork_manager.run()
 
     @staticmethod
     def scp_command(identity, sources, user, host, dest):
+        sources = marcel.util.quote_files(sources)
+        print(f'sources: {sources}')
         return Upload.SCP_COMMAND.format(identity=identity,
                                          sources=sources,
                                          user=user,
                                          host=host,
                                          dest=dest)
+
+    def customize_pipeline(self, pipeline, host):
+        host_pipeline = pipeline.copy()
+        scp_command = Upload.scp_command(host.identity, self.filenames, host.user, host.name, self.dir)
+        host_pipeline.append(marcel.opmodule.create_op(self.env(), 'bash', scp_command))
+        return host_pipeline

@@ -51,6 +51,10 @@ class Host:
         self.ensure_name_and_addr()
         return self._name
 
+    @property
+    def identity(self):
+        return self.cluster.identity
+
     def ensure_name_and_addr(self):
         if self._addr is None:
             try:

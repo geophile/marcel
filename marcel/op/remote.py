@@ -193,7 +193,10 @@ class Remote(marcel.core.Op):
 
     def setup(self):
         assert isinstance(self.pipeline_arg, marcel.core.Pipelineable)
-        self.fork_manager = marcel.op.forkmanager.ForkManager(self, self.cluster.hosts, self, self.pipeline_arg)
+        self.fork_manager = marcel.op.forkmanager.ForkManager(self,
+                                                              self.cluster.hosts,
+                                                              self.pipeline_arg,
+                                                              self.customize_pipeline)
         self.fork_manager.setup()
 
     # Op
@@ -204,11 +207,9 @@ class Remote(marcel.core.Op):
     def must_be_first_in_pipeline(self):
         return True
 
-    # Fork implementation
+    #
 
-    def customize_pipeline(self, pipeline, *args):
-        fork_worker = args[0]
-        host = fork_worker.thread_id
+    def customize_pipeline(self, pipeline, host):
         remote = Remote.RunRemote(self.env(), host, pipeline)
         label_thread = Remote.LabelThread(self.env(), host)
         label_thread.receiver = self.receiver

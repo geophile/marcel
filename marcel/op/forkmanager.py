@@ -27,15 +27,15 @@ import marcel.util
 
 class ForkManager(object):
 
-    def __init__(self, op, thread_ids, fork_impl, pipeline_arg):
+    def __init__(self, op, thread_ids, pipeline_arg, customize_pipeline=lambda pipeline, thread_id: pipeline):
         self.op = op
         self.thread_ids = thread_ids
-        self.fork_impl = fork_impl
+        self.customize_pipeline = customize_pipeline
         self.pipeline_arg = pipeline_arg
         self.workers = []
 
     def __repr__(self):
-        return f'forkmanager({self.thread_ids}: {type(self.fork_impl)})'
+        return f'forkmanager({self.thread_ids})'
 
     def setup(self):
         for thread_id in self.thread_ids:
@@ -108,8 +108,7 @@ class ForkWorker(object):
 
     def customize_pipeline(self, pipeline):
         op = self.fork_manager.op
-        impl = self.fork_manager.fork_impl
-        pipeline = impl.customize_pipeline(pipeline, self)
+        pipeline = self.fork_manager.customize_pipeline(pipeline, self.thread_id)
         send_to_parent = ForkWorker.SendToParent(op.env(), self.writer)
         pipeline.append(send_to_parent)
         return pipeline

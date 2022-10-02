@@ -448,50 +448,6 @@ must have permission to write to the directory.
 
 download [-s|--separate] CLUSTER FILENAME ... DIR
 
-----------------------------------------------------------------------
-
-Fork is getting complicated, because it does two things:
-
-1) It's a concurrent execution op, which allows for the specification
-of thread labels in various ways (int, iterable, cluster)
-
-2) Remote execution for @ syntax.
-
-There are three implementation classes (ForkInt, ForkIterable,
-ForkRemote) doing the actual work in each thread.
-
-And now more implementation classes are needed, to support other ops:
-upload and download. These need the concurrent execution parts of
-Fork.  Need to unbundle Fork to separate out the concurrent execution
-logic.
-
-
-Overview of fork:
-
-- Fork:
-
-  - setup: determine impl class, create ForkWorkers.
-
-  - run: Start workers, wait for workers to complete.
-
-- ForkWorker:
-
-  - __init__: 
-
-    - set up multiprocessing.
-
-    - Create PipelineWrapper, including passing
-      self.customize_pipeline function. Each Fork impl customizes the
-      pipeline, and then FW.customize_pipeline appends SendToParent
-      op.
-
-    - Run mp Process
-
-- ForkImpl & subclasses:
-
-  - create thread ids
-
-  - ForkRemote.run spawns remote process to execute pipeline
 
 ----------------------------------------------------------------------
 

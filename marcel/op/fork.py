@@ -123,6 +123,7 @@ class Fork(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.forkgen = None
+        self.thread_ids = None
         self.pipeline_arg = None
         self.manager = None
         self.workers = None
@@ -136,14 +137,18 @@ class Fork(marcel.core.Op):
         pipeline_arg = self.pipeline_arg
         assert isinstance(pipeline_arg, marcel.core.Pipelineable)
         forkgen = self.eval_function('forkgen') if callable(self.forkgen) else self.forkgen
-        impl = None
         if type(forkgen) is int:
-            impl = ForkInt(self, forkgen)
+            if forkgen > 0:
+                self.thread_ids = list(range(forkgen))
+            else:
+                raise marcel.exception.KillCommandException(f'Int fork generator must be positive.')
         elif marcel.util.iterable(forkgen):
-            impl = ForkIterable(self, forkgen)
+            self.thread_ids = list(forkgen)
+            if len(self.thread_ids) == 0:
+                raise marcel.exception.KillCommandException(f'Iterable fork generator must not be empty.')
         else:
-            Fork.bad_forkgen()
-        self.manager = marcel.op.forkmanager.ForkManager(self, impl.thread_ids, impl, pipeline_arg)
+            raise marcel.exception.KillCommandException(f'Invalid fork generator.')
+        self.manager = marcel.op.forkmanager.ForkManager(self, self.thread_ids, pipeline_arg)
         self.manager.setup()
 
     # Op
@@ -153,64 +158,3 @@ class Fork(marcel.core.Op):
 
     def must_be_first_in_pipeline(self):
         return True
-
-    # Internal
-
-    @staticmethod
-    def bad_forkgen():
-        raise marcel.exception.KillCommandException(f'Invalid fork generator.')
-
-
-class ForkImpl(object):
-
-    class LabelThread(marcel.core.Op):
-
-        ID_COUNTER = 0
-
-        def __init__(self, env, label):
-            super().__init__(env)
-            self.label_list = [label]
-            self.label_tuple = (label,)
-            self.id = ForkImpl.LabelThread.ID_COUNTER
-            ForkImpl.LabelThread.ID_COUNTER += 1
-
-        def __repr__(self):
-            return (f'labelthread(#{self.id}: {self.label_list})'
-                    if self.label_list is not None
-                    else f'labelthread(#{self.id})')
-
-        # AbstractOp
-
-        def receive(self, x):
-            self.send(self.label_tuple + x
-                      if type(x) is tuple
-                      else self.label_list + x)
-
-        def receive_error(self, error):
-            error.set_label(self.label_tuple[0])
-            super().receive_error(error)
-
-    def __init__(self, op):
-        self.op = op
-        self.thread_ids = None
-
-    # Returns a pipeline, which could be the same or could be new.
-    def customize_pipeline(self, pipeline, *args):
-        return pipeline
-
-
-class ForkInt(ForkImpl):
-
-    def __init__(self, op, n_forks):
-        super().__init__(op)
-        if n_forks > 0:
-            self.thread_ids = list(range(n_forks))
-        else:
-            raise marcel.exception.KillCommandException(f'If fork generator is an int, it must be positive.')
-
-
-class ForkIterable(ForkImpl):
-
-    def __init__(self, op, iterable):
-        super().__init__(op)
-        self.thread_ids = list(iterable)
