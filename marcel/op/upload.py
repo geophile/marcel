@@ -22,6 +22,7 @@ import marcel.main
 import marcel.object.file
 import marcel.opmodule
 import marcel.op.bash
+import marcel.op.filenames
 import marcel.op.forkmanager
 import marcel.util
 
@@ -51,7 +52,7 @@ must have permission to write to the directory.
 
 
 def upload(env, cluster, dir, *paths):
-    return Upload(env), [cluster, dir, paths]
+    return Upload(env), [cluster, dir] + list(paths)
 
 
 class UploadArgsParser(marcel.argsparser.ArgsParser):
@@ -90,7 +91,7 @@ class Upload(marcel.core.Op):
         self.filenames = self.eval_function('filenames_arg',
                                             str,
                                             pathlib.Path, pathlib.PosixPath, File)
-        print(f'filenames: {self.filenames}')
+        self.filenames = marcel.op.filenames.Filenames(self.env(), self.filenames).normalize()
         if len(self.filenames) == 0:
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
@@ -108,7 +109,6 @@ class Upload(marcel.core.Op):
     @staticmethod
     def scp_command(identity, sources, user, host, dest):
         sources = marcel.util.quote_files(sources)
-        print(f'sources: {sources}')
         return Upload.SCP_COMMAND.format(identity=identity,
                                          sources=sources,
                                          user=user,

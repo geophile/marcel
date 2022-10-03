@@ -58,6 +58,7 @@ from marcel.op.tee import tee as _tee
 from marcel.op.timer import timer as _timer
 from marcel.op.unique import unique as _unique
 from marcel.op.union import union as _union
+from marcel.op.upload import upload as _upload
 from marcel.op.version import version as _version
 from marcel.op.window import window as _window
 from marcel.op.write import write as _write, Write as _Write
@@ -110,6 +111,7 @@ def tee(*args, **kwargs): return _generate_op(_tee, *args, **kwargs)
 def timer(*args, **kwargs): return _generate_op(_timer, *args, **kwargs)
 def unique(*args, **kwargs): return _generate_op(_unique, *args, **kwargs)
 def union(*args, **kwargs): return _generate_op(_union, *args, **kwargs)
+def upload(*args, **kwargs): return _generate_op(_upload, *args, **kwargs)
 def version(*args, **kwargs): return _generate_op(_version, *args, **kwargs)
 def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 

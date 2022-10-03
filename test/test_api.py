@@ -528,25 +528,25 @@ def test_namespace():
 
 def test_remote():
     localhost = marcel.object.cluster.Host('localhost', None)
-    TEST.run(lambda: run(remote('jao', lambda host: gen(3))),
+    TEST.run(lambda: run(remote('jao', lambda: gen(3))),
              expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
     # Handling of remote error in execution
-    TEST.run(lambda: run(remote('jao', lambda host: gen(3, -1) | map(lambda x: 5 / x))),
+    TEST.run(lambda: run(remote('jao', lambda: gen(3, -1) | map(lambda x: 5 / x))),
              expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
     # Handling of remote error in setup
     # TODO: Bug - should be expected_err
-    TEST.run(lambda: run(remote('jao', lambda host: ls('/nosuchfile'))),
+    TEST.run(lambda: run(remote('jao', lambda: ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
              # expected_err='No qualifying paths')
     # Bug 4
     TEST.run(lambda: run(remote('jao',
-                                lambda host: gen(3)) | red(None, r_plus)),
+                                lambda: gen(3)) | red(None, r_plus)),
              expected_out=[(localhost, 3)])
     TEST.run(lambda: run(remote('jao',
-                                lambda host: gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
+                                lambda: gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
     # Bug 121
-    TEST.run(test=lambda: run(remote('notacluster', lambda host: gen(3))),
+    TEST.run(test=lambda: run(remote('notacluster', lambda: gen(3))),
              expected_err='notacluster is not a Cluster')
 
 
@@ -1020,6 +1020,34 @@ def test_tee():
     TEST.run(test=lambda: run(load(b)), expected_out=[120])
 
 
+def test_upload():
+    os.system('rm -rf /tmp/source')
+    os.system('mkdir /tmp/source')
+    os.system('touch /tmp/source/a /tmp/source/b "/tmp/source/a b"')
+    os.system('rm -rf /tmp/dest')
+    os.system('mkdir /tmp/dest')
+    # Target dir must be absolute
+    TEST.run(test=lambda: run(upload('jao', 'dest', '/tmp/source/a')),
+             expected_err='Target directory must be absolute: dest')
+    # There must be at least one source
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest')),
+             expected_err='No qualifying paths')
+    # Copy fully-specified filenames
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/source/a', '/tmp/source/b')),
+             verification=lambda: run(ls('/tmp/dest', file=True) | map(lambda f: f.name)),
+             expected_out=['a', 'b'])
+    os.system('rm /tmp/dest/*')
+    # Filename with spaces
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/source/a b')),
+             verification=lambda: run(ls('/tmp/dest', file=True) | map(lambda f: f.name)),
+             expected_out=['a b'])
+    os.system('rm /tmp/dest/*')
+    # Wildcard
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/source/a*')),
+             verification=lambda: run(ls('/tmp/dest', file=True) | map(lambda f: f.name)),
+             expected_out=['a', 'a b'])
+
+
 def test_api_run():
     # Error-free output, just an op
     TEST.run(test=lambda: run(gen(3)),
@@ -1159,6 +1187,7 @@ def main_stable():
     test_args()
     test_pos()
     test_tee()
+    test_upload()
     test_api_run()
     test_api_gather()
     test_api_first()

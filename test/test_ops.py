@@ -1472,27 +1472,26 @@ def test_upload():
     os.system('touch /tmp/source/a /tmp/source/b "/tmp/source/a b"')
     os.system('rm -rf /tmp/dest')
     os.system('mkdir /tmp/dest')
-    # # Target dir must be absolute
-    # TEST.run('upload jao dest /tmp/source/a',
-    #          expected_err='Target directory must be absolute: dest')
-    # # There must be at least one source
-    # TEST.run('upload jao /tmp/dest',
-    #          expected_err='No qualifying paths')
-    # # Copy fully-specified filenames
-    # TEST.run(test='upload jao /tmp/dest /tmp/source/a /tmp/source/b',
-    #          verification='ls -f /tmp/dest | (f: f.name)',
-    #          expected_out=['a', 'b'])
-    # os.system('rm /tmp/dest/*')
-    # # Filename with spaces
-    # TEST.run(test='upload jao /tmp/dest "/tmp/source/a b"',
-    #          verification='ls -f /tmp/dest | (f: f.name)',
-    #          expected_out=['a b'])
-    # os.system('rm /tmp/dest/*')
+    # Target dir must be absolute
+    TEST.run('upload jao dest /tmp/source/a',
+             expected_err='Target directory must be absolute: dest')
+    # There must be at least one source
+    TEST.run('upload jao /tmp/dest',
+             expected_err='No qualifying paths')
+    # Copy fully-specified filenames
+    TEST.run(test='upload jao /tmp/dest /tmp/source/a /tmp/source/b',
+             verification='ls -f /tmp/dest | (f: f.name)',
+             expected_out=['a', 'b'])
+    os.system('rm /tmp/dest/*')
+    # Filename with spaces
+    TEST.run(test='upload jao /tmp/dest "/tmp/source/a b"',
+             verification='ls -f /tmp/dest | (f: f.name)',
+             expected_out=['a b'])
+    os.system('rm /tmp/dest/*')
     # Wildcard
-    TEST.run(test='upload jao /tmp/dest /tmp/source/a*')
-    # TEST.run(test='upload jao /tmp/dest /tmp/source/a*',
-    #          verification='ls -f /tmp/dest | (f: f.name)',
-    #          expected_out=['a', 'a b'])
+    TEST.run(test='upload jao /tmp/dest /tmp/source/a*',
+             verification='ls -f /tmp/dest | (f: f.name)',
+             expected_out=['a', 'a b'])
 
 
 
@@ -1604,14 +1603,13 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run("ls b*")
-    # test_upload()
+    pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
