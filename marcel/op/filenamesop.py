@@ -21,6 +21,7 @@ import marcel.core
 import marcel.exception
 import marcel.object.error
 import marcel.object.file
+import marcel.op.filenames
 
 File = marcel.object.file.File
 
@@ -61,7 +62,7 @@ class FilenamesOp(marcel.core.Op):
         self.filenames = self.eval_function('filenames_arg', str, pathlib.Path, pathlib.PosixPath, File)
         self.roots = []
         self.current_dir = self.env().dir_state().pwd()
-        self.roots = self.deglob()
+        self.roots = marcel.op.filenames.Filenames(self.env(), self.filenames).normalize()
         if len(self.filenames) > 0 and len(self.roots) == 0:
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
@@ -116,40 +117,3 @@ class FilenamesOp(marcel.core.Op):
         self.base = pathlib.Path('/' + '/'.join(nca_parts[1:nca]))
         if self.base.is_file():
             self.base = self.base.parent
-
-    def normalize_paths(self):
-        # Resolve ~
-        # Resolve . and ..
-        # Convert to Path
-        paths = []
-        for filename in self.filenames:
-            if type(filename) is File:
-                filename = filename.path
-            # Resolve . and ..
-            filename = os.path.normpath(filename)
-            # Convert to Path and resolve ~
-            path = pathlib.Path(filename).expanduser()
-            # If path is relative, specify what it is relative to.
-            if not path.is_absolute():
-                path = pathlib.Path.cwd() / path
-            paths.append(path)
-        return paths
-
-    def deglob(self):
-        # Expand globs and eliminate duplicates
-        paths = self.normalize_paths()
-        roots = []
-        roots_set = set()
-        for path in paths:
-            # Proceed as if path is a glob pattern, but this works for non-globs too.
-            path_str = path.as_posix()
-            glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
-                                       if path.is_absolute() else
-                                       (self.current_dir, path_str))
-            for root in (glob_base.glob(glob_pattern)
-                         if len(glob_pattern) > 0 else
-                         glob_base.iterdir()):
-                if root not in roots_set:
-                    roots_set.add(root)
-                    roots.append(root)
-        return roots

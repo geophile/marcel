@@ -1604,12 +1604,14 @@ def main_stable():
 
 
 def main_dev():
-    test_upload()
+    TEST.run("ls b*")
+    # test_upload()
+
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
