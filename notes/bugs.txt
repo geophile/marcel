@@ -421,4 +421,9 @@ Should complain when the cluster is actually used.
 
 179. Fix references to ~/.marcel.py in help
 
+----------------------------------------------------------------------
 
+180. bash command doesn't work in marcel
+
+M 0.13.9 jao@cheese /tmp$ touch source/{a,b,c}
+[bash(args=['touch', 'source/{a'])] followed by excess tokens: Comma(,), String(b), Comma(,), String(c})

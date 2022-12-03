@@ -1,4 +1,4 @@
-- Complete Python string parsing
+ Complete Python string parsing
 
 - Complete shell string parsing (termination on things other than EOL
   and whiteapce).
@@ -421,33 +421,6 @@ inherited from Pipeline.copy()?
 ----------------------------------------------------------------------
 
 IDEA: Implement interactive usage by translating into API usage.
-
-----------------------------------------------------------------------
-
-upload CLUSTER:DIR FILENAME ... 
-
-    CLUSTER      A marcel Cluster.
-
-    DIR          Target directory on each node of CLUSTER.
-
-    FILENAME     A filename or glob pattern identifying local files.
-
-Copies local files to the indicated directory on each node of a cluster.
-
-The files to be copied are specified by one or more FILENAMEs. Each
-FILENAME is a file name or a glob pattern.
-
-CLUSTER must be configured for marcel, (run "help cluster" for
-information on configuring clusters).
-
-DIR must be an absolute path, corresponding to a pre-exising directory
-on each node of the CLUSTER. The user configured for cluster access
-must have permission to write to the directory.
-
-......................................................................
-
-download [-s|--separate] CLUSTER FILENAME ... DIR
-
 
 ----------------------------------------------------------------------
 

@@ -29,71 +29,72 @@ import marcel.util
 File = marcel.object.file.File
 
 HELP = '''
-{L,wrap=F}upload CLUSTER DIR FILENAME ...
+{L,wrap=F}download DIR CLUSTER FILENAME ...
 
-{L,indent=4:28}{r:CLUSTER}                 The cluster to which files will be uploaded.
+{L,indent=4:28}{r:DIR}                     The local directory to which files will be downloaded.
 
-{L,indent=4:28}{r:DIR}                     The directory on each cluster node to receive uploaded files.
+{L,indent=4:28}{r:CLUSTER}                 The cluster from which files will be downloaded.
 
-{L,indent=4:28}{r:FILENAME}                A filename or glob pattern.
+{L,indent=4:28}{r:FILENAME}                A remote filename or glob pattern.
 
-Copies local files to the indicated directory on each node of a cluster. The output stream is empty.
+Copies remote files from each node of a cluster, to a local directory. The output stream is empty.
 
-The files to be copied are specified by one or more {r:FILENAME}s. Each
-{r:FILENAME} is a file name or a glob pattern.
+{r:DIR} must be a  pre-exising directory.
 
 {r:CLUSTER} must be configured for marcel, (run {n:help cluster} for
 information on configuring clusters).
 
-{r:DIR} must be an absolute path, corresponding to a pre-exising directory
-on each node of the {r:CLUSTER}. The user configured for cluster access
-must have permission to write to the directory.
+The files to be copied are specified by one or more {r:FILENAME}s. Each
+{r:FILENAME} is a file name or a glob pattern, and must be an absolute path, (i.e., it must start with /).
+Files from host H will be downloaded to the directory {r:DIR}/H. 
 '''
 
 
-def upload(env, cluster, dir, *paths):
-    return Upload(env), [cluster, dir] + list(paths)
+def download(env, dir, cluster, *paths):
+    return Download(env), [dir, cluster] + list(paths)
 
 
-class UploadArgsParser(marcel.argsparser.ArgsParser):
+class DownloadArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('upload', env)
-        self.add_anon('cluster', convert=self.cluster)
+        super().__init__('download', env)
         self.add_anon('dir', convert=self.check_str_or_file, target='dir_arg')
+        self.add_anon('cluster', convert=self.cluster)
         self.add_anon_list('filenames', convert=self.check_str_or_file, target='filenames_arg')
         self.validate()
 
 
-class Upload(marcel.core.Op):
-
-    SCP_COMMAND = 'scp -Cpqr -i {identity} {sources} {user}@{host}:{dest}'
+class Download(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.cluster = None
         self.dir_arg = None
         self.dir = None
+        self.cluster = None
         self.filenames_arg = None
         self.filenames = None
         self.fork_manager = None
 
     def __repr__(self):
-        return f'upload({self.cluster} {self.dir_arg} {self.filenames_arg})'
+        return f'download({self.dir_arg} {self.cluster} {self.filenames_arg})'
 
     def setup(self):
         self.dir = self.eval_function('dir_arg',
                                       str,
                                       pathlib.Path, pathlib.PosixPath, File)
         self.dir = pathlib.Path(self.dir)
-        if not self.dir.is_absolute():
-            raise marcel.exception.KillCommandException(f'Target directory must be absolute: {self.dir}')
+        self.dir = marcel.op.filenames.Filenames(self.env(), [self.dir]).normalize()
+        if len(self.dir) == 0:
+            raise marcel.exception.KillCommandException(f'Target directory does not exist: {self.dir_arg}')
+        else:
+            self.dir = self.dir[0]
         self.filenames = self.eval_function('filenames_arg',
                                             str, pathlib.Path, pathlib.PosixPath, File)
-        self.filenames = marcel.op.filenames.Filenames(self.env(), self.filenames).normalize()
         if len(self.filenames) == 0:
-            raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
-                                                        f' {self.filenames}')
+            raise marcel.exception.KillCommandException('No remote files specified')
+        for filename in self.filenames:
+            if not filename.startswith('/'):
+                raise marcel.exception.KillCommandException(f'Remote filenames must be absolute: {filename}')
         # Empty pipeline will be filled in by customize_pipeline
         pipeline_template = marcel.core.Pipeline()
         pipeline_template.set_error_handler(self.owner.error_handler)
@@ -108,15 +109,15 @@ class Upload(marcel.core.Op):
 
     @staticmethod
     def scp_command(identity, sources, user, host, dest):
-        sources = marcel.util.quote_files(sources)
-        return Upload.SCP_COMMAND.format(identity=identity,
-                                         sources=sources,
-                                         user=user,
-                                         host=host,
-                                         dest=dest)
+        scp_command = ['scp', '-Cpqr', '-i', identity]
+        for source in sources:
+            scp_command.append(f'{user}@{host}:{marcel.util.quote_files(source)}')
+        scp_command.append(dest.as_posix())
+        print(scp_command)
+        return ' '.join(scp_command)
 
     def customize_pipeline(self, pipeline, host):
         host_pipeline = pipeline.copy()
-        scp_command = Upload.scp_command(host.identity, self.filenames, host.user, host.name, self.dir)
+        scp_command = Download.scp_command(host.identity, self.filenames, host.user, host.name, self.dir)
         host_pipeline.append(marcel.opmodule.create_op(self.env(), 'bash', scp_command))
         return host_pipeline

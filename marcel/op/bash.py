@@ -118,6 +118,7 @@ class NonInteractive(Escape):
         super().__init__(op)
         self.process = None
         self.out_handler = None
+        self.err_handler = None
         # There is a race between receive() (from an upstream command's ProcessOutputHandler),
         # and flush(), combing from Command execution.
         self.lock = threading.Lock()
@@ -132,14 +133,18 @@ class NonInteractive(Escape):
 
     def flush(self):
         self.ensure_command_running()
-        self.process.stdin.close()
-        while self.out_handler.is_alive():
-            self.out_handler.join(0.1)
+        self.cleanup()
 
     def cleanup(self):
-        self.process.stdin.close()
-        while self.out_handler.is_alive():
-            self.out_handler.join(0.1)
+        if self.process:
+            self.process.stdin.close()
+            while self.out_handler.is_alive():
+                self.out_handler.join(0.1)
+            while self.err_handler.is_alive():
+                self.err_handler.join(0.1)
+            self.process.stdout.close()
+            self.process.stderr.close()
+            self.process = None
 
     def ensure_command_running(self):
         if self.process is None:
@@ -151,11 +156,13 @@ class NonInteractive(Escape):
                                                 executable='/bin/bash',
                                                 stdin=subprocess.PIPE,
                                                 stdout=subprocess.PIPE,
-                                                stderr=subprocess.STDOUT,
+                                                stderr=subprocess.PIPE,
                                                 universal_newlines=True,
                                                 preexec_fn=os.setsid)
-                self.out_handler = ProcessOutputHandler(self.process.stdout, self.op)
+                self.out_handler = ProcessStdoutHandler(self.process.stdout, self.op)
                 self.out_handler.start()
+                self.err_handler = ProcessStderrHandler(self.process.stderr, self.op)
+                self.err_handler.start()
             self.lock.release()
 
 
@@ -197,16 +204,15 @@ class ProcessOutputHandler(threading.Thread):
         self.stream = stream
         self.op = op
 
-    def __repr__(self):
-        return f'ProcessOutputHandler for {str(self.op)}'
-
     def run(self):
-        op = self.op
         stream = self.stream
         line = stream.readline()
         while len(line) > 0:
-            op.send(ProcessOutputHandler.normalize_output(line))
+            self.send(ProcessOutputHandler.normalize_output(line))
             line = stream.readline()
+
+    def send(self, x):
+        assert False
 
     @staticmethod
     def normalize_output(x):
@@ -215,3 +221,26 @@ class ProcessOutputHandler(threading.Thread):
             x = x[:-1]
         return x
 
+
+class ProcessStdoutHandler(ProcessOutputHandler):
+
+    def __init__(self, stream, op):
+        super().__init__(stream, op)
+
+    def __repr__(self):
+        return f'ProcessStdoutHandler for {str(self.op)}'
+
+    def send(self, x):
+        self.op.send(x)
+
+
+class ProcessStderrHandler(ProcessOutputHandler):
+
+    def __init__(self, stream, op):
+        super().__init__(stream, op)
+
+    def __repr__(self):
+        return f'ProcessStderrHandler for {str(self.op)}'
+
+    def send(self, x):
+        self.op.send(marcel.object.error.Error(x))

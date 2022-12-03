@@ -1,5 +1,4 @@
 import contextlib
-import io
 import os
 import pathlib
 import sys
@@ -13,6 +12,10 @@ import marcel.object.error
 import marcel.util
 
 
+TEST_STDOUT = '/tmp/test_stdout.txt'
+TEST_STDERR = '/tmp/test_stderr.txt'
+
+
 class TestBase:
     start_dir = os.getcwd()
 
@@ -21,6 +24,8 @@ class TestBase:
         self.main = None
         self.failures = 0
         self.reset_environment(config_file)
+        self.test_stdout = None
+        self.test_stderr = None
 
     def reset_environment(self, config_file='./.marcel.py'):
         self.main = marcel.main.Main(config_file, same_process=True, old_namespace=None)
@@ -152,11 +157,17 @@ class TestConsole(TestBase):
                 print(f'{self.description(test)}: Terminated by KillCommandException: {e}', file=sys.__stderr__)
 
     def run_and_capture_output(self, command):
-        out = io.StringIO()
-        err = io.StringIO()
-        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        self.test_stdout = open(TEST_STDOUT, 'w')
+        self.test_stderr = open(TEST_STDERR, 'w')
+        with contextlib.redirect_stdout(self.test_stdout), contextlib.redirect_stderr(self.test_stderr):
             self.main.run_command(command)
-        return out.getvalue(), err.getvalue()
+        self.test_stdout = open(TEST_STDOUT, 'r')
+        self.test_stderr = open(TEST_STDERR, 'r')
+        test_stdout_contents = ''.join(self.test_stdout.readlines())
+        test_stderr_contents = ''.join(self.test_stderr.readlines())
+        self.test_stdout.close()
+        self.test_stderr.close()
+        return test_stdout_contents, test_stderr_contents
 
     def expect_config_change_exception(self):
         try:
@@ -226,17 +237,21 @@ class TestAPI(TestBase):
                     self.failures += 1
 
     def run_and_capture_output(self, command):
-        out = io.StringIO()
-        err = io.StringIO()
-        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        self.test_stdout = open(TEST_STDOUT, 'w')
+        self.test_stderr = open(TEST_STDERR, 'w')
+        with contextlib.redirect_stdout(self.test_stdout), contextlib.redirect_stderr(self.test_stderr):
             try:
                 actual_return = command()
             except marcel.exception.KillCommandException as e:
                 print(f'{self.description(command)}: Terminated by KillCommandException: {e}', file=sys.stderr)
                 actual_return = None
-        actual_stdout = out.getvalue()
-        actual_stderr = err.getvalue()
-        return actual_stdout, actual_stderr, actual_return
+        self.test_stdout = open(TEST_STDOUT, 'r')
+        self.test_stderr = open(TEST_STDERR, 'r')
+        test_stdout_contents = ''.join(self.test_stdout.readlines())
+        test_stderr_contents = ''.join(self.test_stderr.readlines())
+        self.test_stdout.close()
+        self.test_stderr.close()
+        return test_stdout_contents, test_stderr_contents, actual_return
 
     def check_eq(self, test, expected, actual):
         def match():

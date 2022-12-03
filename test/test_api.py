@@ -145,6 +145,9 @@ def test_map():
              expected_err='No value specified for function')
     TEST.run(test=lambda: run(gen(5) | map(True)),
              expected_err='function argument must be a function')
+    # Mix of output and error
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: 1 / (1 - x))),
+             expected_out=[1.0, Error('division by zero'), -1.0])
 
 
 def test_select():
@@ -1026,6 +1029,20 @@ def test_upload():
     os.system('touch /tmp/source/a /tmp/source/b "/tmp/source/a b"')
     os.system('rm -rf /tmp/dest')
     os.system('mkdir /tmp/dest')
+    # No qualifying paths
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/nosuchfile')),
+             expected_err='No qualifying paths')
+    # Qualifying paths exist but insufficient permission to read
+    os.system('sudo touch /tmp/nope1')
+    os.system('sudo rm /tmp/nope?')
+    os.system('touch /tmp/nope1')
+    os.system('touch /tmp/nope2')
+    os.system('chmod 000 /tmp/nope?')
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/nope1')),
+             expected_out=[Error('nope1: Permission denied')])
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/nope?')),
+             expected_out=[Error('Permission denied'),
+                           Error('Permission denied')])
     # Target dir must be absolute
     TEST.run(test=lambda: run(upload('jao', 'dest', '/tmp/source/a')),
              expected_err='Target directory must be absolute: dest')
@@ -1046,6 +1063,7 @@ def test_upload():
     TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/source/a*')),
              verification=lambda: run(ls('/tmp/dest', file=True) | map(lambda f: f.name)),
              expected_out=['a', 'a b'])
+    os.system('rm /tmp/dest/*')
 
 
 def test_api_run():
