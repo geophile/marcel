@@ -73,19 +73,4 @@ This is shorthand for:
 
 which runs the builtin Python function {r:hex} with the input {r:123}, and prints
 the result, {r:0x7b}.
-
-Values obtained in this way can, of course, be piped. For example, here is 
-a marcel implementation of FizzBuzz:
-
-{L,indent=4,wrap=F}
-gen 100 1 \\\\
-| map (x: 'FizzBuzz' if x % 15 == 0 else \\\\
-          'Fizz' if x % 3 == 0 else \\\\
-          'Buzz' if x % 5 == 0 else \\\\
-          x)
-
-Explanation:
-
-{L,wrap=F}- {r:gen 100 1}: Generates a stream containing the integers 1 ... 100.
-{L,wrap=F}- {r:map (...)}: Applies the FizzBuzz rules to each integer.
 '''

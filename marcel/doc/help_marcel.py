@@ -25,7 +25,7 @@ on these introductory topics:
 
 {L,indent=4:12}- {n:configuration}: How to customize and configure marcel.
 {L,indent=4:12}- {n:interaction}: Interacting with marcel.
-{L,indent=4:12}- {n:command}: Marcel operators, Linux executables.
+{L,indent=4:12}- {n:command}: Marcel operators, host OS executables.
 {L,indent=4:12}- {n:function}: The use of functions in marcel commands.
 {L,indent=4:12}- {n:pipeline}: The main structuring mechanism of marcel, relying on pipes 
 as in other shells.

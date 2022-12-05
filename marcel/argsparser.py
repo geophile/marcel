@@ -220,7 +220,19 @@ class ArgsParser:
                     return cluster
                 else:
                     return x
+        elif marcel.util.iterable(x):
+            return x
         raise ArgsError(arg.op_name, f'{x} must be an int, iterable, or Cluster')
+
+    def cluster(self, arg, x):
+        if type(x) is marcel.object.cluster.Cluster:
+            return x
+        elif type(x) is str:
+            cluster = self.env.cluster(x)
+            if cluster:
+                return cluster
+            else:
+                raise ArgsError(arg.op_name, f'{x} is not a Cluster')
 
     def init_var(self, arg, x):
         if type(x) is marcel.reservoir.Reservoir:

@@ -13,6 +13,8 @@ Error = marcel.object.error.Error
 start_dir = os.getcwd()
 TEST = test_base.TestAPI()
 
+SQL = False  # Until Postgres & psycopg2 are working again
+
 
 def test_gen():
     # Explicit out
@@ -143,6 +145,9 @@ def test_map():
              expected_err='No value specified for function')
     TEST.run(test=lambda: run(gen(5) | map(True)),
              expected_err='function argument must be a function')
+    # Mix of output and error
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: 1 / (1 - x))),
+             expected_out=[1.0, Error('division by zero'), -1.0])
 
 
 def test_select():
@@ -526,26 +531,26 @@ def test_namespace():
 
 def test_remote():
     localhost = marcel.object.cluster.Host('localhost', None)
-    TEST.run(lambda: run(remote('jao', lambda host: gen(3))),
+    TEST.run(lambda: run(remote('jao', lambda: gen(3))),
              expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
     # Handling of remote error in execution
-    TEST.run(lambda: run(remote('jao', lambda host: gen(3, -1) | map(lambda x: 5 / x))),
+    TEST.run(lambda: run(remote('jao', lambda: gen(3, -1) | map(lambda x: 5 / x))),
              expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
     # Handling of remote error in setup
     # TODO: Bug - should be expected_err
-    TEST.run(lambda: run(remote('jao', lambda host: ls('/nosuchfile'))),
+    TEST.run(lambda: run(remote('jao', lambda: ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
              # expected_err='No qualifying paths')
     # Bug 4
     TEST.run(lambda: run(remote('jao',
-                                lambda host: gen(3)) | red(None, r_plus)),
+                                lambda: gen(3)) | red(None, r_plus)),
              expected_out=[(localhost, 3)])
     TEST.run(lambda: run(remote('jao',
-                                lambda host: gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
+                                lambda: gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
              expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
     # Bug 121
-    TEST.run(test=lambda: run(remote('notacluster', lambda host: gen(3))),
-             expected_err='must be an int, iterable, or Cluster')
+    TEST.run(test=lambda: run(remote('notacluster', lambda: gen(3))),
+             expected_err='notacluster is not a Cluster')
 
 
 def test_fork():
@@ -664,6 +669,8 @@ def test_pipeline_args():
 
 
 def test_sql():
+    if not SQL:
+        return
     TEST.run(test=lambda: run(sql('drop table if exists t') | select(lambda *t: False)))
     TEST.run(test=lambda: run(sql('create table t(id int primary key, s varchar)') | select(lambda *t: False)))
     TEST.run(test=lambda: run(sql("insert into t values(1, 'one')")),
@@ -966,11 +973,12 @@ def test_args():
                            ((1, 2), 3, (5, 6)), ((1, 2), 4, (5, 6)),
                            ((1, 2), (3, 4), 5), ((1, 2), (3, 4), 6)])
     # sql
-    TEST.run(test=lambda: run(sql("drop table if exists t") | select(lambda x: False)))
-    TEST.run(test=lambda: run(sql("create table t(x int)") | select(lambda x: False)))
-    TEST.run(test=lambda: run(gen(5) | args(lambda x: sql("insert into t values(%s)", x))),
-             verification=lambda: run(sql("select * from t order by x")),
-             expected_out=[0, 1, 2, 3, 4])
+    if SQL:
+        TEST.run(test=lambda: run(sql("drop table if exists t") | select(lambda x: False)))
+        TEST.run(test=lambda: run(sql("create table t(x int)") | select(lambda x: False)))
+        TEST.run(test=lambda: run(gen(5) | args(lambda x: sql("insert into t values(%s)", x))),
+                 verification=lambda: run(sql("select * from t order by x")),
+                 expected_out=[0, 1, 2, 3, 4])
     # window
     TEST.run(test=lambda: run(gen(3) | args(lambda w: gen(10) | window(disjoint=w))),
              expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
@@ -1013,6 +1021,49 @@ def test_tee():
              expected_out=[1, 2, 3, 4, 5])
     TEST.run(test=lambda: run(load(a)), expected_out=[15])
     TEST.run(test=lambda: run(load(b)), expected_out=[120])
+
+
+def test_upload():
+    os.system('rm -rf /tmp/source')
+    os.system('mkdir /tmp/source')
+    os.system('touch /tmp/source/a /tmp/source/b "/tmp/source/a b"')
+    os.system('rm -rf /tmp/dest')
+    os.system('mkdir /tmp/dest')
+    # No qualifying paths
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/nosuchfile')),
+             expected_err='No qualifying paths')
+    # Qualifying paths exist but insufficient permission to read
+    os.system('sudo touch /tmp/nope1')
+    os.system('sudo rm /tmp/nope?')
+    os.system('touch /tmp/nope1')
+    os.system('touch /tmp/nope2')
+    os.system('chmod 000 /tmp/nope?')
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/nope1')),
+             expected_out=[Error('nope1: Permission denied')])
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/nope?')),
+             expected_out=[Error('Permission denied'),
+                           Error('Permission denied')])
+    # Target dir must be absolute
+    TEST.run(test=lambda: run(upload('jao', 'dest', '/tmp/source/a')),
+             expected_err='Target directory must be absolute: dest')
+    # There must be at least one source
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest')),
+             expected_err='No qualifying paths')
+    # Copy fully-specified filenames
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/source/a', '/tmp/source/b')),
+             verification=lambda: run(ls('/tmp/dest', file=True) | map(lambda f: f.name)),
+             expected_out=['a', 'b'])
+    os.system('rm /tmp/dest/*')
+    # Filename with spaces
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/source/a b')),
+             verification=lambda: run(ls('/tmp/dest', file=True) | map(lambda f: f.name)),
+             expected_out=['a b'])
+    os.system('rm /tmp/dest/*')
+    # Wildcard
+    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/source/a*')),
+             verification=lambda: run(ls('/tmp/dest', file=True) | map(lambda f: f.name)),
+             expected_out=['a', 'a b'])
+    os.system('rm /tmp/dest/*')
 
 
 def test_api_run():
@@ -1154,6 +1205,7 @@ def main_stable():
     test_args()
     test_pos()
     test_tee()
+    test_upload()
     test_api_run()
     test_api_gather()
     test_api_first()

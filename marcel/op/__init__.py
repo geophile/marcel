@@ -21,6 +21,7 @@ public = [
     'delete',
     'difference',
     'dirs',
+    'download',
     'edit',
     'env',
     'expand',

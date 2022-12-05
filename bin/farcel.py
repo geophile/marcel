@@ -46,15 +46,15 @@ import marcel.version
 # on a thread so that stdin can be monitored for the kill signal and then acted upon.
 
 
-TRACE = marcel.util.Trace('/tmp/farcel.log', enabled=True)
+TRACE = marcel.util.Trace('/tmp/farcel.log', replace=True)
 
 
 class PythonVersionMismatch(Exception):
 
     def __init__(self, client_python_version, server_python_version):
-        super().__init__(f'Python version mismatch between client ('
-                         f'{PythonVersionMismatch.version_string(client_python_version)} and server '
-                         f'{PythonVersionMismatch.version_string(server_python_version)}.')
+        super().__init__(f'Python version mismatch between client '
+                         f'({PythonVersionMismatch.version_string(client_python_version)}) and server '
+                         f'({PythonVersionMismatch.version_string(server_python_version)}).')
 
     @staticmethod
     def version_string(v):
@@ -107,7 +107,8 @@ class PipelineRunner(threading.Thread):
             self.pipeline.flush()
         except BaseException as e:
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')
-            marcel.util.print_stack(file=TRACE.file)
+            with TRACE.open() as file:
+                marcel.util.print_stack(file)
             self.pickler.receive_error(marcel.object.error.Error(e))
         TRACE.write('PipelineRunner: Execution complete.')
 
@@ -131,10 +132,12 @@ def kill_descendents(signal_id):
             # process.kill(signal_id)
         except Exception as e:
             TRACE.write(f'Caught exception while killing process {pid} and descendents: {e}')
-            marcel.util.print_stack(TRACE.file)
+            with TRACE.open() as file:
+                marcel.util.print_stack(file)
     except BaseException as e:
         TRACE.write(f'Caught {type(e)} in kill_self_and_descendents: {e}')
-        marcel.util.print_stack(TRACE.file)
+        with TRACE.open() as file:
+            marcel.util.print_stack(file)
 
 
 # Adapted from Environment.read_config
@@ -196,7 +199,8 @@ def main():
         pipeline_runner.start()
     except Exception as e:
         TRACE.write(f'Caught {type(e)}: {e}')
-        marcel.util.print_stack(TRACE.file)
+        with TRACE.open() as file:
+            marcel.util.print_stack(file)
     try:
         signal_id = input.load()
         TRACE.write(f'Received signal {signal_id}')
@@ -210,7 +214,6 @@ def main():
         kill_descendents(signal.SIGTERM)
     finally:
         TRACE.write('Exiting')
-        TRACE.close()
 
 
 main()

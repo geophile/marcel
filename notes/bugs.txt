@@ -391,6 +391,8 @@ Traceback (most recent call last):
 FileNotFoundError: [Errno 2] No such file or directory: '/home/ec2-user/.config/marcel'
 [ec2-user@ip-172-31-29-105 ~]$ 
 
+----------------------------------------------------------------------
+
 176. Remote error not showing up correctly
 
 From test_api:
@@ -399,3 +401,35 @@ From test_api:
     TEST.run(lambda: run(fork('jao', ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
              # expected_err='No qualifying paths')
+
+----------------------------------------------------------------------
+
+177. Tab completion for filename doesn't add quotes or otherwise escape filenames
+
+----------------------------------------------------------------------
+
+178. Cannot start without internet
+
+No internet, started marcel:
+
+jao@cheese:~$ marcel
+Cannot start marcel: Cannot understand geophile.com as a host name or as an IP address.
+
+Should complain when the cluster is actually used.
+
+----------------------------------------------------------------------
+
+179. Fix references to ~/.marcel.py in help
+
+----------------------------------------------------------------------
+
+180. bash command doesn't work in marcel
+
+M 0.13.9 jao@cheese /tmp$ touch source/{a,b,c}
+[bash(args=['touch', 'source/{a'])] followed by excess tokens: Comma(,), String(b), Comma(,), String(c})
+
+----------------------------------------------------------------------
+
+181. help cluster is missing
+
+Referenced in "help upload".

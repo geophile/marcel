@@ -15,6 +15,7 @@
 
 import collections.abc
 import grp
+import os
 import pathlib
 import pwd
 import shlex
@@ -23,6 +24,7 @@ import subprocess
 import sys
 import time
 import traceback
+import threading
 
 import dill
 
@@ -213,26 +215,16 @@ class Stack:
 
 class Trace:
 
-    def __init__(self, tracefile, enabled=False):
+    def __init__(self, tracefile, replace=False):
         self.path = pathlib.Path(tracefile)
+        if replace:
+            self.path.unlink(missing_ok=True)
         self.path.touch(mode=0o666, exist_ok=True)
-        self.path.unlink()
-        self.file = None
-        if enabled:
-            self.enable()
-
-    def enable(self):
-        if self.file is None:
-            self.file = self.path.open(mode='w')
-
-    def disable(self):
-        self.close()
 
     def write(self, line):
-        if self.file:
-            print(f'{time.time()}: {line}', file=self.file, flush=True)
+        with self.path.open(mode='a') as file:
+            print(f'{os.getpid()} {threading.current_thread().name}: {line}', file=file, flush=True)
 
-    def close(self):
-        if self.file:
-            self.file.close()
-        self.file = None
+    # Caller is responsible for closing, e.g. with TRACE.open(...) as file ...
+    def open(self):
+        return self.path.open(mode='a')

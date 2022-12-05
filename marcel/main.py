@@ -232,7 +232,7 @@ class Main:
 
     @staticmethod
     def default_error_handler(env, error):
-        print(error.render_full(env.color_scheme()))
+        print(error.render_full(env.color_scheme()), flush=True)
 
     def run_immediate(self, pipeline):
         return (
