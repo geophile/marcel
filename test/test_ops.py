@@ -1513,11 +1513,7 @@ def test_upload():
 
 
 def test_download():
-    os.system('rm -rf /tmp/source')
-    os.system('mkdir /tmp/source')
-    os.system('touch /tmp/source/a /tmp/source/b "/tmp/source/a b"')
-    os.system('rm -rf /tmp/dest')
-    os.system('mkdir /tmp/dest')
+    pass
 
 
 def test_bug_126():
@@ -1628,7 +1624,46 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    os.system('rm -rf /tmp/source')
+    os.system('mkdir /tmp/source')
+    os.system('touch /tmp/source/a /tmp/source/b "/tmp/source/a b"')
+    os.system('rm -rf /tmp/dest')
+    os.system('mkdir /tmp/dest')
+    # No qualifying paths
+    TEST.run('download jao /tmp/dest /nosuchfile',
+             expected_out=[Error('No such file or directory')])
+    # # Qualifying paths exist but insufficient permission to read
+    # os.system('sudo touch /tmp/nope1')
+    # os.system('sudo rm /tmp/nope?')
+    # os.system('touch /tmp/nope1')
+    # os.system('touch /tmp/nope2')
+    # os.system('chmod 000 /tmp/nope?')
+    # TEST.run('upload jao /tmp/dest /tmp/nope1',
+    #          expected_out=[Error('nope1: Permission denied')])
+    # TEST.run('upload jao /tmp/dest /tmp/nope?',
+    #          expected_out=[Error('Permission denied'),
+    #                        Error('Permission denied')])
+    # # Target dir must be absolute
+    # TEST.run('upload jao dest /tmp/source/a',
+    #          expected_err='Target directory must be absolute: dest')
+    # # There must be at least one source
+    # TEST.run('upload jao /tmp/dest',
+    #          expected_err='No qualifying paths')
+    # # Copy fully-specified filenames
+    # TEST.run(test='upload jao /tmp/dest /tmp/source/a /tmp/source/b',
+    #          verification='ls -f /tmp/dest | (f: f.name)',
+    #          expected_out=['a', 'b'])
+    # os.system('rm /tmp/dest/*')
+    # # Filename with spaces
+    # TEST.run(test='upload jao /tmp/dest "/tmp/source/a b"',
+    #          verification='ls -f /tmp/dest | (f: f.name)',
+    #          expected_out=['a b'])
+    # os.system('rm /tmp/dest/*')
+    # # Wildcard
+    # TEST.run(test='upload jao /tmp/dest /tmp/source/a*',
+    #          verification='ls -f /tmp/dest | (f: f.name)',
+    #          expected_out=['a', 'a b'])
+    # os.system('rm /tmp/dest/*')
 
 
 def main():

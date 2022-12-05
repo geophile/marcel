@@ -79,7 +79,7 @@ class Upload(marcel.core.Op):
         self.fork_manager = None
 
     def __repr__(self):
-        return f'upload({self.cluster} {self.dir_arg} {self.filenames_arg})'
+        return f'upload({self.filenames_arg} -> {self.cluster}:{self.dir_arg})'
 
     def setup(self):
         self.dir = self.eval_function('dir_arg',

@@ -39,14 +39,14 @@ HELP = '''
 
 Copies remote files from each node of a cluster, to a local directory. The output stream is empty.
 
-{r:DIR} must be a  pre-exising directory.
+{r:DIR} must be a pre-exising directory.
 
 {r:CLUSTER} must be configured for marcel, (run {n:help cluster} for
 information on configuring clusters).
 
 The files to be copied are specified by one or more {r:FILENAME}s. Each
 {r:FILENAME} is a file name or a glob pattern, and must be an absolute path, (i.e., it must start with /).
-Files from host H will be downloaded to the directory {r:DIR}/H. 
+Files from host {n:H} will be downloaded to the directory {n:DIR/H}. 
 '''
 
 
