@@ -76,7 +76,7 @@ class Download(marcel.core.Op):
         self.fork_manager = None
 
     def __repr__(self):
-        return f'download({self.dir_arg} {self.cluster} {self.filenames_arg})'
+        return f'download({self.dir_arg} <- {self.cluster} {self.filenames_arg})'
 
     def setup(self):
         self.dir = self.eval_function('dir_arg',
@@ -113,7 +113,7 @@ class Download(marcel.core.Op):
         for source in sources:
             scp_command.append(f'{user}@{host}:{marcel.util.quote_files(source)}')
         scp_command.append(dest.as_posix())
-        print(scp_command)
+        print(' '.join(scp_command))
         return ' '.join(scp_command)
 
     def customize_pipeline(self, pipeline, host):

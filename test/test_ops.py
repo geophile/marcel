@@ -1630,8 +1630,9 @@ def main_dev():
     os.system('rm -rf /tmp/dest')
     os.system('mkdir /tmp/dest')
     # No qualifying paths
-    TEST.run('download jao /tmp/dest /nosuchfile',
-             expected_out=[Error('No such file or directory')])
+    TEST.run('download /tmp/dest jao /nosuchfile')
+    # TEST.run('download jao /tmp/dest /nosuchfile',
+    #          expected_out=[Error('No such file or directory')])
     # # Qualifying paths exist but insufficient permission to read
     # os.system('sudo touch /tmp/nope1')
     # os.system('sudo rm /tmp/nope?')

@@ -16,6 +16,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import atexit
+import datetime
 import getpass
 import os
 import pathlib
@@ -46,7 +47,7 @@ import marcel.version
 # on a thread so that stdin can be monitored for the kill signal and then acted upon.
 
 
-TRACE = marcel.util.Trace('/tmp/farcel.log', replace=True)
+TRACE = marcel.util.Trace(f'/tmp/farcel-{os.getuid()}.log')
 
 
 class PythonVersionMismatch(Exception):
@@ -177,6 +178,9 @@ def main():
         pass
 
     try:
+        TRACE.write('-' * 80)
+        TRACE.write(getpass.getuser())
+        TRACE.write(f'{datetime.datetime.now()}')
         namespace = marcel.nestednamespace.NestedNamespace(read_config())
         # Use sys.stdin.buffer because we want binary data, not the text version
         input = dill.Unpickler(sys.stdin.buffer)

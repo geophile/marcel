@@ -3554,3 +3554,19 @@ Then
     a
     b
     $ cat /tmp/f | args -a [x: (x)]
+
+----------------------------------------------------------------------
+
+FIXED
+
+182. sudo not working
+
+    M 0.13.10 jao@cheese ~$ ls /tmp/farcel.log 
+    -rw-r--r--   root   root        175   2022 Dec 05 10:56:49   farcel.log
+    M 0.13.10 jao@cheese ~$ sudo [rm /tmp/farcel.log]
+    M 0.13.10 jao@cheese ~$ ls /tmp/farcel.log 
+    -rw-r--r--   root   root        175   2022 Dec 05 10:57:42   farcel.log
+
+Why did sudo rm fail?
+
+If it failed, why was there no error message?

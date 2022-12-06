@@ -219,11 +219,12 @@ class Trace:
         self.path = pathlib.Path(tracefile)
         if replace:
             self.path.unlink(missing_ok=True)
-        self.path.touch(mode=0o666, exist_ok=True)
+        self.path.touch(exist_ok=True)
+        self.path.chmod(0o0666)
 
     def write(self, line):
         with self.path.open(mode='a') as file:
-            print(f'{os.getpid()} {threading.current_thread().name}: {line}', file=file, flush=True)
+            print(f'{os.getpid()}: {line}', file=file, flush=True)
 
     # Caller is responsible for closing, e.g. with TRACE.open(...) as file ...
     def open(self):

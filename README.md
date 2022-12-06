@@ -244,20 +244,25 @@ example, to list file names and sizes in `/home/jao`:
 from marcel.api import *
 
 for file, size in ls('/home/jao') | map(lambda f: (f, f.size)):
-    print(f'{file.name}: {size}')
+    print(f'{file.name}: {size}') 
 ```
-This code uses the `ls` and `map` functions, provided by `marcel.api`. These correspond to
-marcel operators that you can use on the command line. Output from the `ls` is a stream
-of `File`s, which are piped to `map`, which maps files to (file, file size) tuples. 
-`ls ... | map ...` defines a pipeline (just as on the command line). The Python
-class representing pipelines defines `__iter__`, so that the pipeline's output can be
-iterated over using the standard Python `for` loop.
+
+This code uses the `ls` and
+`map` functions, provided by `marcel.api`. These correspond to the
+marcel operators `ls` and `map` that you can use on the command
+line. Output from the `ls` is a stream of `File`s, which are piped
+to `map`, which maps files to (file, file size) tuples.  `ls ... |
+map ...` defines a pipeline (just as on the command line). The
+Python class representing pipelines defines `__iter__`, so that
+the pipeline's output can be iterated over using the standard
+Python `for` loop.
 
 
 Installation
 ------------
 
-To install marcel:
+To install marcel locally (i.e., available only to your username):
+
 ```shell script
 python3 -m pip install marcel
 ```

@@ -433,3 +433,34 @@ M 0.13.9 jao@cheese /tmp$ touch source/{a,b,c}
 181. help cluster is missing
 
 Referenced in "help upload".
+
+----------------------------------------------------------------------
+
+183. Remote execution failing
+
+    M 0.13.10 jao@cheese ~$ @all [ gen 3 ]
+    (localhost, 0)
+    (localhost, 1)
+    (localhost, 2)
+    Traceback (most recent call last):
+      File "/usr/local/bin/farcel.py", line 219, in <module>
+        main()
+      File "/usr/local/bin/farcel.py", line 205, in main
+        signal_id = input.load()
+      File "/usr/local/lib/python3.9/site-packages/dill/_dill.py", line 646, in load
+        obj = StockUnpickler.load(self)
+    _pickle.UnpicklingError: unpickling stack underflow
+
+On remote (acme), farcel.log says:
+
+    10727 MainThread: Caught <class 'TypeError'>: code() takes at most 16 arguments 
+    (19 given)
+    Caught <class 'TypeError'>: code() takes at most 16 arguments (19 given)
+      File "/usr/local/bin/farcel.py", line 186, in main
+        env = input.load()
+      File "/usr/local/lib/python3.9/site-packages/dill/_dill.py", line 646, in load
+        obj = StockUnpickler.load(self)
+      File "/usr/local/lib/python3.9/site-packages/dill/_dill.py", line 805, in _cre
+    ate_code
+        return CodeType(args[0], 0, 0, *args[1:])
+    10727 MainThread: Exiting
