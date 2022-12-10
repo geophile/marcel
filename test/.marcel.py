@@ -1,8 +1,16 @@
 from marcel.builtin import *
 
-jao = cluster(user='jao',
-              identity='/home/jao/.ssh/id_rsa',
-              host='localhost')
+# Convenient to have NODE1 precede NODE2 lexicographically
+NODE1 = '127.0.0.1'
+NODE2 = 'localhost'
+
+CLUSTER1 = cluster(user='jao',
+                   identity='/home/jao/.ssh/id_rsa',
+                   host=NODE1)
+
+CLUSTER2 = cluster(user='jao',
+                   identity='/home/jao/.ssh/id_rsa',
+                   hosts=[NODE1, NODE2])
 
 jdb = database(driver='psycopg2',
                dbname='jao',

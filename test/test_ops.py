@@ -17,6 +17,7 @@ TEST = test_base.TestConsole()
 
 SQL = False  # Until Postgres & psycopg2 are working again
 
+# Test cluster is configured in ~jao/.config/marcel/startup.py as follows:
 
 def test_no_such_op():
     TEST.run('gen 5 | abc', expected_err='is not executable')
@@ -556,29 +557,29 @@ def test_namespace():
 
 
 def test_remote():
-    localhost = marcel.object.cluster.Host('localhost', None)
-    TEST.run('@jao [ gen 3 ]',
-             expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
+    node1 = marcel.object.cluster.Host(TEST.env.getvar('NODE1'), None)
+    TEST.run('@CLUSTER1 [ gen 3 ]',
+             expected_out=[(node1, 0), (node1, 1), (node1, 2)])
     # Handling of remote error in execution
-    TEST.run('@jao [ gen 3 -1 | map (x: 5 / x) ]',
-             expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
+    TEST.run('@CLUSTER1 [ gen 3 -1 | map (x: 5 / x) ]',
+             expected_out=[(node1, -5.0), Error('division by zero'), (node1, 5.0)])
     # Handling of remote error in setup
-    TEST.run('@jao [ ls /nosuchfile ]',
+    TEST.run('@CLUSTER1 [ ls /nosuchfile ]',
              expected_out=[Error('No qualifying paths')])
     # Bug 4
-    TEST.run('@jao [ gen 3 ] | red . +',
-             expected_out=[(localhost, 3)])
-    TEST.run('@jao [ gen 10 | map (x: (x%2, x)) | red . + ]',
-             expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
+    TEST.run('@CLUSTER1 [ gen 3 ] | red . +',
+             expected_out=[(node1, 3)])
+    TEST.run('@CLUSTER1 [ gen 10 | map (x: (x%2, x)) | red . + ]',
+             expected_out=[(node1, 0, 20), (node1, 1, 25)])
     # Implied map
-    TEST.run('@jao[(419)]',
-             expected_out=[(localhost, 419)])
+    TEST.run('@CLUSTER1[(419)]',
+             expected_out=[(node1, 419)])
     # Bug 121
     TEST.run('@notacluster [ gen 3]',
              expected_err='notacluster is not a Cluster')
     # Use explicit 'remote'
-    TEST.run('remote jao [ gen 3 ]',
-             expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
+    TEST.run('remote CLUSTER1 [ gen 3 ]',
+             expected_out=[(node1, 0), (node1, 1), (node1, 2)])
 
 
 def test_fork():
@@ -1476,7 +1477,7 @@ def test_upload():
     os.system('rm -rf /tmp/dest')
     os.system('mkdir /tmp/dest')
     # No qualifying paths
-    TEST.run('upload jao /tmp/dest /nosuchfile',
+    TEST.run('upload CLUSTER1 /tmp/dest /nosuchfile',
              expected_err='No qualifying paths')
     # Qualifying paths exist but insufficient permission to read
     os.system('sudo touch /tmp/nope1')
@@ -1484,36 +1485,87 @@ def test_upload():
     os.system('touch /tmp/nope1')
     os.system('touch /tmp/nope2')
     os.system('chmod 000 /tmp/nope?')
-    TEST.run('upload jao /tmp/dest /tmp/nope1',
+    TEST.run('upload CLUSTER1 /tmp/dest /tmp/nope1',
              expected_out=[Error('nope1: Permission denied')])
-    TEST.run('upload jao /tmp/dest /tmp/nope?',
+    TEST.run('upload CLUSTER1 /tmp/dest /tmp/nope?',
              expected_out=[Error('Permission denied'),
                            Error('Permission denied')])
     # Target dir must be absolute
-    TEST.run('upload jao dest /tmp/source/a',
+    TEST.run('upload CLUSTER1 dest /tmp/source/a',
              expected_err='Target directory must be absolute: dest')
     # There must be at least one source
-    TEST.run('upload jao /tmp/dest',
+    TEST.run('upload CLUSTER1 /tmp/dest',
              expected_err='No qualifying paths')
     # Copy fully-specified filenames
-    TEST.run(test='upload jao /tmp/dest /tmp/source/a /tmp/source/b',
+    TEST.run(test='upload CLUSTER1 /tmp/dest /tmp/source/a /tmp/source/b',
              verification='ls -f /tmp/dest | (f: f.name)',
              expected_out=['a', 'b'])
     os.system('rm /tmp/dest/*')
     # Filename with spaces
-    TEST.run(test='upload jao /tmp/dest "/tmp/source/a b"',
+    TEST.run(test='upload CLUSTER1 /tmp/dest "/tmp/source/a b"',
              verification='ls -f /tmp/dest | (f: f.name)',
              expected_out=['a b'])
     os.system('rm /tmp/dest/*')
     # Wildcard
-    TEST.run(test='upload jao /tmp/dest /tmp/source/a*',
+    TEST.run(test='upload CLUSTER1 /tmp/dest /tmp/source/a*',
              verification='ls -f /tmp/dest | (f: f.name)',
              expected_out=['a', 'a b'])
     os.system('rm /tmp/dest/*')
 
 
 def test_download():
-    pass
+    node1 = TEST.env.getvar("NODE1")
+    node2 = TEST.env.getvar("NODE2")
+    os.system('rm -rf /tmp/source')
+    os.system('mkdir /tmp/source')
+    os.system('touch /tmp/source/a /tmp/source/b "/tmp/source/a b"')
+    os.system('rm -rf /tmp/dest')
+    os.system('mkdir /tmp/dest')
+    # No qualifying paths
+    TEST.run('download /tmp/dest CLUSTER2 /nosuchfile',
+             expected_out=[Error('No such file or directory'), Error('No such file or directory')])
+    # Qualifying paths exist but insufficient permission to read
+    os.system('sudo touch /tmp/nope1')
+    os.system('sudo rm /tmp/nope?')
+    os.system('touch /tmp/nope1')
+    os.system('touch /tmp/nope2')
+    os.system('chmod 000 /tmp/nope?')
+    TEST.run('download /tmp/dest CLUSTER2 /tmp/nope1',
+             expected_out=[Error('Permission denied'), Error('Permission denied')])
+    TEST.run('download /tmp/dest CLUSTER2 /tmp/nope?',
+             expected_out=[Error('Permission denied'), Error('Permission denied'),
+                           Error('Permission denied'), Error('Permission denied')])
+    # There must be at least one source specified (regardless of what actually exists remotely)
+    TEST.run('download /tmp/dest CLUSTER2',
+             expected_err='No remote files specified')
+    # Copy fully-specified filenames
+    TEST.run(test='download /tmp/dest CLUSTER2 /tmp/source/a /tmp/source/b',
+             verification='ls -fr /tmp/dest | (f: f.relative_to("/tmp/dest")) | sort',
+             expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
+    # Leave files in place, delete some of them, try downloading again
+    os.system(f'rm -rf /tmp/dest/{node1}')
+    os.system(f'rm -rf /tmp/dest/{node2}/*')
+    TEST.run(test='download /tmp/dest CLUSTER2 /tmp/source/a /tmp/source/b',
+             verification='ls -fr /tmp/dest | (f: f.relative_to("/tmp/dest")) | sort',
+             expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
+    os.system('rm -rf /tmp/dest/*')
+    # Filename with spaces
+    TEST.run(test='download /tmp/dest CLUSTER2 "/tmp/source/a\\ b"',
+             verification='ls -fr /tmp/dest | (f: f.relative_to("/tmp/dest")) | sort',
+             expected_out=[f'{node1}/a b', f'{node2}/a b'])
+    os.system('rm -rf /tmp/dest/*')
+    # # Relative directory
+    # TEST.run('cd /tmp')
+    # TEST.run(test='download dest jao /tmp/source/a /tmp/source/b',
+    #          verification='ls -f /tmp/dest | (f: f.name)',
+    #          expected_out=['a', 'b'])
+    # os.system('rm /tmp/dest/*')
+    # Wildcard
+    TEST.run(test='download /tmp/dest CLUSTER2 /tmp/source/a*',
+             verification='ls -fr /tmp/dest | (f: f.relative_to("/tmp/dest")) | sort',
+             expected_out=[f'{node1}/a', f'{node1}/a b',
+                           f'{node2}/a', f'{node2}/a b'])
+    os.system('rm -rf /tmp/dest/*')
 
 
 def test_bug_126():
@@ -1620,51 +1672,12 @@ def main_stable():
     test_pos()
     test_tee()
     test_upload()
+    test_download()
     test_bugs()
 
 
 def main_dev():
-    os.system('rm -rf /tmp/source')
-    os.system('mkdir /tmp/source')
-    os.system('touch /tmp/source/a /tmp/source/b "/tmp/source/a b"')
-    os.system('rm -rf /tmp/dest')
-    os.system('mkdir /tmp/dest')
-    # No qualifying paths
-    TEST.run('download /tmp/dest jao /nosuchfile')
-    # TEST.run('download jao /tmp/dest /nosuchfile',
-    #          expected_out=[Error('No such file or directory')])
-    # # Qualifying paths exist but insufficient permission to read
-    # os.system('sudo touch /tmp/nope1')
-    # os.system('sudo rm /tmp/nope?')
-    # os.system('touch /tmp/nope1')
-    # os.system('touch /tmp/nope2')
-    # os.system('chmod 000 /tmp/nope?')
-    # TEST.run('upload jao /tmp/dest /tmp/nope1',
-    #          expected_out=[Error('nope1: Permission denied')])
-    # TEST.run('upload jao /tmp/dest /tmp/nope?',
-    #          expected_out=[Error('Permission denied'),
-    #                        Error('Permission denied')])
-    # # Target dir must be absolute
-    # TEST.run('upload jao dest /tmp/source/a',
-    #          expected_err='Target directory must be absolute: dest')
-    # # There must be at least one source
-    # TEST.run('upload jao /tmp/dest',
-    #          expected_err='No qualifying paths')
-    # # Copy fully-specified filenames
-    # TEST.run(test='upload jao /tmp/dest /tmp/source/a /tmp/source/b',
-    #          verification='ls -f /tmp/dest | (f: f.name)',
-    #          expected_out=['a', 'b'])
-    # os.system('rm /tmp/dest/*')
-    # # Filename with spaces
-    # TEST.run(test='upload jao /tmp/dest "/tmp/source/a b"',
-    #          verification='ls -f /tmp/dest | (f: f.name)',
-    #          expected_out=['a b'])
-    # os.system('rm /tmp/dest/*')
-    # # Wildcard
-    # TEST.run(test='upload jao /tmp/dest /tmp/source/a*',
-    #          verification='ls -f /tmp/dest | (f: f.name)',
-    #          expected_out=['a', 'a b'])
-    # os.system('rm /tmp/dest/*')
+    pass
 
 
 def main():

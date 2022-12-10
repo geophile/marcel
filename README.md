@@ -1,68 +1,42 @@
 What's New
 ----------
 
-This release revisits the commands and syntax for storing and retrieving streams, in files and
-variables.
+This release adds commands to upload local files to all nodes of a cluster, and to download
+files from all nodes of a cluster.
 
-The commands for operating on files are `read` and `write`. (`out`, which was present in earlier
-releases, has been renamed to `write`). Both of these commands provide support for reading text,
-parsing CSV files (with command or tab delimiters), and for pickled data.
+Suppose that cluster `lab` has nodes `node1`, `node2`, `node3`, `node4`.
+This would have been configured in the marcel startup script, e.g.
 
-The commands for operating on variables are `load` and `store`. These commands store streams which
-cannot be accessed except via pipelines (sequences of commands). For this reason, the internal
-format is not specified, and no formatting options are supported.
-
-Marcel has had redirection syntax all along. The symbols `>` and `>>` were provided to operate
-on variables only. To operate on files, the `read` and `write` (formerly `out`) commands had to
-be used directly. This was confusing, as the use of `>` and `>>` for files is so ingrained for 
-the users of many shells.
-(Bash also uses the redirection symbol `<` to provide a process's stdin. So in bash you might
-write `foo < a > b`. The marcel equivalent would be `a > foo > b`.)
-
-In this release, the symbols `>` and `>>` are provided to operate on files, consistent with bash usage.
-To operate on variables, the equivalent symbols are `>$` and `>>$`.
-
-Examples:
-
-1) Generate the stream `[0, 1, 2]` and store it in variable `stream012`:
 ```shell
-gen 3 >$ stream012
+lab = cluster(user='qa',
+              identity='/home/qa/.ssh/id_rsa',
+              hosts=['node1', 'node2', 'node3', 'node4'])   
 ```
-The stream in `stream012` can now be fed into a pipeline, e.g.
+You could then upload the `scripts` directory to `/usr/local/foobar` in each of the nodes as follows:
 
 ```shell
-stream012 >$ map (x: (x, x ** (1/2))) 
+upload scripts lab /usr/local/foobar
 ```
 
-2) Generate the stream `[0, 1, 2]` and store it in file `/tmp/file012`:
+You could download log files from all nodes, to the `logs` directory as follows:
+
 ```shell
-gen 3 > /tmp/file012
+download logs lab /var/log/foobar/log* 
 ```
 
-There is now a file `/tmp/file012` containing 
+In the `logs` target directory, the `download` command will create one directory for each node
+of the cluster. So after this command, `logs` might contain the following (e.g., 
+`ls -fr dest | (f: f.relative_to('dest'))`)
 
 ```shell
-0
-1
-2
-```
-
-3) Generate a sequence of (x, sqrt(x)), for x = 1 through 20, and store it in the variable `f`.
-
-```shell
-gen 20 1 | (x: (x, x ** (1/2))) >$ f
-```
-
-4) Append more square roots, for x = 21 through 30.
-
-```shell
-gen 10 21 | (x: (x, x ** (1/2))) >>$ f
-```
-
-5) Format and print the contents of `f`
-
-```shell
-f >$ write --format 'sqrt({}) = {}'
+node1/log.1
+node1/log.2
+node1/log.3
+node2/log.1
+node2/log.2
+node2/log.3
+node2/log.4
+node2/log.5
 ```
 
 Marcel
@@ -253,7 +227,7 @@ marcel operators `ls` and `map` that you can use on the command
 line. Output from the `ls` is a stream of `File`s, which are piped
 to `map`, which maps files to (file, file size) tuples.  `ls ... |
 map ...` defines a pipeline (just as on the command line). The
-Python class representing pipelines defines `__iter__`, so that
+Python class representing pipelines defines ``iter``, so that
 the pipeline's output can be iterated over using the standard
 Python `for` loop.
 

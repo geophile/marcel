@@ -425,3 +425,14 @@ IDEA: Implement interactive usage by translating into API usage.
 ----------------------------------------------------------------------
 
 Resurrect SQL
+
+----------------------------------------------------------------------
+
+download isn't creating a directory per node.
+
+test_ls() is missing!
+
+Relative directory operations in api are broken/confused. Revisit, and
+then revive relative test in test_download().
+
+

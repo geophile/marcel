@@ -103,21 +103,27 @@ class Download(marcel.core.Op):
                                                               pipeline_template,
                                                               self.customize_pipeline)
         self.fork_manager.setup()
+        self.ensure_node_directories_exist()
 
     def run(self):
         self.fork_manager.run()
 
     @staticmethod
-    def scp_command(identity, sources, user, host, dest):
+    def scp_command(identity, sources, host, dest):
         scp_command = ['scp', '-Cpqr', '-i', identity]
         for source in sources:
-            scp_command.append(f'{user}@{host}:{marcel.util.quote_files(source)}')
-        scp_command.append(dest.as_posix())
-        print(' '.join(scp_command))
+            scp_command.append(f'{host.user}@{host.name}:{marcel.util.quote_files(source)}')
+        node_dir = dest / host.name
+        scp_command.append(node_dir.as_posix())
         return ' '.join(scp_command)
 
     def customize_pipeline(self, pipeline, host):
         host_pipeline = pipeline.copy()
-        scp_command = Download.scp_command(host.identity, self.filenames, host.user, host.name, self.dir)
+        scp_command = Download.scp_command(host.identity, self.filenames, host, self.dir)
         host_pipeline.append(marcel.opmodule.create_op(self.env(), 'bash', scp_command))
         return host_pipeline
+
+    def ensure_node_directories_exist(self):
+        for host in self.cluster:
+            host_dir = self.dir / host.name
+            host_dir.mkdir(exist_ok=True)

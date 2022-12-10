@@ -22,6 +22,7 @@ class TestBase:
     def __init__(self, config_file='./.marcel.py'):
         self.config_file = config_file
         self.main = None
+        self.env = None
         self.failures = 0
         self.reset_environment(config_file)
         self.test_stdout = None
@@ -29,6 +30,7 @@ class TestBase:
 
     def reset_environment(self, config_file='./.marcel.py'):
         self.main = marcel.main.Main(config_file, same_process=True, old_namespace=None)
+        self.env = self.main.env
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')
         os.chdir(TestConsole.start_dir)

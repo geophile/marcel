@@ -248,7 +248,7 @@ def test_red():
              expected_out=[0])
     TEST.run(test=lambda: run(gen(3) | red(r_count, incremental=True)),
              expected_out=[(0, 1), (1, 2), (2, 3)])
-    TEST.run(test=lambda: run(gen(5) | map(lambda x: (x//2, None)) | red(r_group, r_count) | sort()),
+    TEST.run(test=lambda: run(gen(5) | map(lambda x: (x // 2, None)) | red(r_group, r_count) | sort()),
              expected_out=[(0, 2), (1, 2), (2, 1)])
 
 
@@ -530,24 +530,24 @@ def test_namespace():
 
 
 def test_remote():
-    localhost = marcel.object.cluster.Host('localhost', None)
-    TEST.run(lambda: run(remote('jao', lambda: gen(3))),
-             expected_out=[(localhost, 0), (localhost, 1), (localhost, 2)])
+    node1 = marcel.object.cluster.Host(TEST.env.getvar('NODE1'), None)
+    TEST.run(lambda: run(remote('CLUSTER1', lambda: gen(3))),
+             expected_out=[(node1, 0), (node1, 1), (node1, 2)])
     # Handling of remote error in execution
-    TEST.run(lambda: run(remote('jao', lambda: gen(3, -1) | map(lambda x: 5 / x))),
-             expected_out=[(localhost, -5.0), Error('division by zero'), (localhost, 5.0)])
+    TEST.run(lambda: run(remote('CLUSTER1', lambda: gen(3, -1) | map(lambda x: 5 / x))),
+             expected_out=[(node1, -5.0), Error('division by zero'), (node1, 5.0)])
     # Handling of remote error in setup
     # TODO: Bug - should be expected_err
-    TEST.run(lambda: run(remote('jao', lambda: ls('/nosuchfile'))),
+    TEST.run(lambda: run(remote('CLUSTER1', lambda: ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
-             # expected_err='No qualifying paths')
+    # expected_err='No qualifying paths')
     # Bug 4
-    TEST.run(lambda: run(remote('jao',
+    TEST.run(lambda: run(remote('CLUSTER1',
                                 lambda: gen(3)) | red(None, r_plus)),
-             expected_out=[(localhost, 3)])
-    TEST.run(lambda: run(remote('jao',
+             expected_out=[(node1, 3)])
+    TEST.run(lambda: run(remote('CLUSTER1',
                                 lambda: gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
-             expected_out=[(localhost, 0, 20), (localhost, 1, 25)])
+             expected_out=[(node1, 0, 20), (node1, 1, 25)])
     # Bug 121
     TEST.run(test=lambda: run(remote('notacluster', lambda: gen(3))),
              expected_err='notacluster is not a Cluster')
@@ -573,7 +573,7 @@ def test_fork():
     TEST.run(lambda: run(fork('abc', lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
              expected_err='fork pipeline must have no more than one parameter')
     # Cluster forkgen
-    jao = TEST.main.env.cluster('jao')
+    jao = TEST.main.env.cluster('CLUSTER1')
     localhost = marcel.object.cluster.Host('localhost', None)
     TEST.run(lambda: run(fork(jao, lambda: gen(3, 100)) | sort()),
              expected_out=[100, 101, 102])
@@ -636,13 +636,12 @@ def test_join():
                               | join(x100)),
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
     # Handle non-hashable join keys
-    TEST.run(test=lambda: run(gen(3) | map(lambda x: ((x,), x)) | join(gen(3) | map(lambda x: ((x,), x*100)))),
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: ((x,), x)) | join(gen(3) | map(lambda x: ((x,), x * 100)))),
              expected_out=[((0,), 0, 0), ((1,), 1, 100), ((2,), 2, 200)])
-    TEST.run(test=lambda: run(gen(3) | map(lambda x: ([x], x)) | join(gen(3) | map(lambda x: ((x,), x*100)))),
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: ([x], x)) | join(gen(3) | map(lambda x: ((x,), x * 100)))),
              expected_err='not hashable')
-    TEST.run(test=lambda: run(gen(3) | map(lambda x: ((x,), x)) | join(gen(3) | map(lambda x: ([x], x*100)))),
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: ((x,), x)) | join(gen(3) | map(lambda x: ([x], x * 100)))),
              expected_err='not hashable')
-
 
 
 def test_pipeline_args():
@@ -962,7 +961,7 @@ def test_args():
     TEST.run(lambda: run(gen(4, 1) | args(lambda n: gen(10) | head(n))),
              expected_out=[0, 0, 1, 0, 1, 2, 0, 1, 2, 3])
     # tail
-    TEST.run(test=lambda: run(gen(4, 1) | args(lambda n: gen(10) | tail(n+1))),
+    TEST.run(test=lambda: run(gen(4, 1) | args(lambda n: gen(10) | tail(n + 1))),
              expected_out=[8, 9, 7, 8, 9, 6, 7, 8, 9, 5, 6, 7, 8, 9])
     # bash
     TEST.run(test=lambda: run(gen(5) | args(lambda n: bash('echo', f'X{n}Y'))),
@@ -985,7 +984,7 @@ def test_args():
                            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
                            (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)])
     # nested args
-    TEST.run(test=lambda: run(gen(3) | args(lambda i: gen(3, i+100) | args(lambda j: gen(3, j+1000)))),
+    TEST.run(test=lambda: run(gen(3) | args(lambda i: gen(3, i + 100) | args(lambda j: gen(3, j + 1000)))),
              expected_out=[1100, 1101, 1102, 1101, 1102, 1103, 1102, 1103, 1104,
                            1101, 1102, 1103, 1102, 1103, 1104, 1103, 1104, 1105,
                            1102, 1103, 1104, 1103, 1104, 1105, 1104, 1105, 1106])
@@ -996,7 +995,7 @@ def test_args():
     TEST.run(test=lambda: run(gen(4, 1) | args(lambda n: gen(n)) | window(lambda x: x == 0)),
              expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
     # Bug 116
-    g = lambda n: gen (n)
+    g = lambda n: gen(n)
     TEST.run(test=lambda: run(gen(3, 1) | args(lambda n: g(n))),
              expected_out=[0, 0, 1, 0, 1, 2])
 
@@ -1010,7 +1009,6 @@ def test_pos():
 
 
 def test_tee():
-    r = reservoir('r')
     TEST.run(test=lambda: run(gen(5, 1) | tee()),
              expected_err='No pipelines')
     a = reservoir('a')
@@ -1030,7 +1028,7 @@ def test_upload():
     os.system('rm -rf /tmp/dest')
     os.system('mkdir /tmp/dest')
     # No qualifying paths
-    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/nosuchfile')),
+    TEST.run(test=lambda: run(upload('CLUSTER1', '/tmp/dest', '/nosuchfile')),
              expected_err='No qualifying paths')
     # Qualifying paths exist but insufficient permission to read
     os.system('sudo touch /tmp/nope1')
@@ -1038,32 +1036,98 @@ def test_upload():
     os.system('touch /tmp/nope1')
     os.system('touch /tmp/nope2')
     os.system('chmod 000 /tmp/nope?')
-    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/nope1')),
+    TEST.run(test=lambda: run(upload('CLUSTER1', '/tmp/dest', '/tmp/nope1')),
              expected_out=[Error('nope1: Permission denied')])
-    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/nope?')),
+    TEST.run(test=lambda: run(upload('CLUSTER1', '/tmp/dest', '/tmp/nope?')),
              expected_out=[Error('Permission denied'),
                            Error('Permission denied')])
     # Target dir must be absolute
-    TEST.run(test=lambda: run(upload('jao', 'dest', '/tmp/source/a')),
+    TEST.run(test=lambda: run(upload('CLUSTER1', 'dest', '/tmp/source/a')),
              expected_err='Target directory must be absolute: dest')
     # There must be at least one source
-    TEST.run(test=lambda: run(upload('jao', '/tmp/dest')),
+    TEST.run(test=lambda: run(upload('CLUSTER1', '/tmp/dest')),
              expected_err='No qualifying paths')
     # Copy fully-specified filenames
-    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/source/a', '/tmp/source/b')),
+    TEST.run(test=lambda: run(upload('CLUSTER1', '/tmp/dest', '/tmp/source/a', '/tmp/source/b')),
              verification=lambda: run(ls('/tmp/dest', file=True) | map(lambda f: f.name)),
              expected_out=['a', 'b'])
     os.system('rm /tmp/dest/*')
     # Filename with spaces
-    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/source/a b')),
+    TEST.run(test=lambda: run(upload('CLUSTER1', '/tmp/dest', '/tmp/source/a b')),
              verification=lambda: run(ls('/tmp/dest', file=True) | map(lambda f: f.name)),
              expected_out=['a b'])
     os.system('rm /tmp/dest/*')
     # Wildcard
-    TEST.run(test=lambda: run(upload('jao', '/tmp/dest', '/tmp/source/a*')),
+    TEST.run(test=lambda: run(upload('CLUSTER1', '/tmp/dest', '/tmp/source/a*')),
              verification=lambda: run(ls('/tmp/dest', file=True) | map(lambda f: f.name)),
              expected_out=['a', 'a b'])
     os.system('rm /tmp/dest/*')
+
+
+def test_download():
+    node1 = TEST.env.getvar('NODE1')
+    node2 = TEST.env.getvar('NODE2')
+    cluster2 = TEST.env.getvar('CLUSTER2')
+    os.system('rm -rf /tmp/source')
+    os.system('mkdir /tmp/source')
+    os.system('touch /tmp/source/a /tmp/source/b "/tmp/source/a b"')
+    os.system('rm -rf /tmp/dest')
+    os.system('mkdir /tmp/dest')
+    # No qualifying paths
+    TEST.run(test=lambda: run(download('/tmp/dest', cluster2, '/nosuchfile')),
+             expected_out=[Error('No such file or directory'), Error('No such file or directory')])
+    # Qualifying paths exist but insufficient permission to read
+    os.system('sudo touch /tmp/nope1')
+    os.system('sudo rm /tmp/nope?')
+    os.system('touch /tmp/nope1')
+    os.system('touch /tmp/nope2')
+    os.system('chmod 000 /tmp/nope?')
+    TEST.run(test=lambda: run(download('/tmp/dest', 'CLUSTER2', '/tmp/nope1')),
+             expected_out=[Error('Permission denied'), Error('Permission denied')])
+    TEST.run(test=lambda: run(download('/tmp/dest', 'CLUSTER2', '/tmp/nope?')),
+             expected_out=[Error('Permission denied'), Error('Permission denied'),
+                           Error('Permission denied'), Error('Permission denied')])
+    # There must be at least one source specified (regardless of what actually exists remotely)
+    TEST.run(test=lambda: run(download('/tmp/dest', 'CLUSTER2')),
+             expected_err='No remote files specified')
+    # Copy fully-specified filenames
+    TEST.run(test=lambda: run(download('/tmp/dest', 'CLUSTER2', '/tmp/source/a', '/tmp/source/b')),
+             verification=lambda: run(ls('/tmp/dest', file=True, recursive=True) |
+                                      map(lambda f: f.relative_to('/tmp/dest')) |
+                                      sort()),
+             expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
+    # Leave files in place, delete some of them, try downloading again
+    os.system(f'rm -rf /tmp/dest/{node1}')
+    os.system(f'rm -rf /tmp/dest/{node2}/*')
+    TEST.run(test=lambda: run(download('/tmp/dest', cluster2, '/tmp/source/a', '/tmp/source/b')),
+             verification=lambda: run(ls('/tmp/dest', file=True, recursive=True) |
+                                      map(lambda f: f.relative_to("/tmp/dest")) |
+                                      sort()),
+             expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
+    os.system('rm -rf /tmp/dest/*')
+    # Filename with spaces
+    TEST.run(test=lambda: run(download('/tmp/dest', cluster2, '/tmp/source/a\\ b')),
+             verification=lambda: run(ls('/tmp/dest', file=True, recursive=True) |
+                                      map(lambda f: f.relative_to('/tmp/dest')) |
+                                      sort()),
+             expected_out=[f'{node1}/a b', f'{node2}/a b'])
+    os.system('rm -rf /tmp/dest/*')
+    # # Relative directory
+    # current_dir = os.getcwd()
+    # os.chdir('/tmp')
+    # TEST.run(test=lambda: run(download('dest', 'CLUSTER1', '/tmp/source/a', '/tmp/source/b')),
+    #          verification=lambda: run(ls('/tmp/dest', file=True) | map(lambda f: f.name)),
+    #          expected_out=['a', 'b'])
+    # os.system('rm /tmp/dest/*')
+    # os.chdir(current_dir)
+    # Wildcard
+    TEST.run(test=lambda: run(download('/tmp/dest', cluster2, '/tmp/source/a*')),
+             verification=lambda: run(ls('/tmp/dest', file=True, recursive=True) |
+                                      map(lambda f: f.relative_to('/tmp/dest')) |
+                                      sort()),
+             expected_out=[f'{node1}/a', f'{node1}/a b',
+                           f'{node2}/a', f'{node2}/a b'])
+    os.system('rm -rf /tmp/dest/*')
 
 
 def test_api_run():
@@ -1153,7 +1217,7 @@ def test_bug_126():
 
 
 def test_bug_136():
-    TEST.run(lambda: run(gen(3, 1) | args(lambda n: gen(2, 100) | map(lambda x: x+n)) | red(r_plus)),
+    TEST.run(lambda: run(gen(3, 1) | args(lambda n: gen(2, 100) | map(lambda x: x + n)) | red(r_plus)),
              expected_out=[615])
 
 
@@ -1206,6 +1270,7 @@ def main_stable():
     test_pos()
     test_tee()
     test_upload()
+    test_download()
     test_api_run()
     test_api_gather()
     test_api_first()
