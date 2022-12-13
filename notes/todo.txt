@@ -428,11 +428,20 @@ Resurrect SQL
 
 ----------------------------------------------------------------------
 
-download isn't creating a directory per node.
+test_ls(): See test_filename_ops. Interactive only, need API vesrion.
 
-test_ls() is missing!
+ls needs work on links. From bash:
 
-Relative directory operations in api are broken/confused. Revisit, and
-then revive relative test in test_download().
+-H, --dereference-command-line
 
+    follow symbolic links listed on the command line
 
+--dereference-command-line-symlink-to-dir
+
+    follow each command line symbolic link that points to a directory
+
+-L, --dereference
+
+    when showing file information for a symbolic link, show
+    information for the file the link references rather than for the
+    link itself

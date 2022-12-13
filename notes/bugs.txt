@@ -464,3 +464,20 @@ On remote (acme), farcel.log says:
     ate_code
         return CodeType(args[0], 0, 0, *args[1:])
     10727 MainThread: Exiting
+
+----------------------------------------------------------------------
+
+184. Relative directory operations broken
+
+Relative directory operations in api are broken/confused. Revisit, and
+then revive relative test in test_download().
+
+----------------------------------------------------------------------
+
+185. marcel var should mask executable
+
+E.g., defining "echo" doesn't prevent the echo executable from being found:
+
+M 0.14.0 jao@cheese ~/git/marcel/test$ echo = [n: gen (n) 100]
+M 0.14.0 jao@cheese ~/git/marcel/test$ echo 4
+4
