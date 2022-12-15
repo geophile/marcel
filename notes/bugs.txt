@@ -470,7 +470,16 @@ On remote (acme), farcel.log says:
 184. Relative directory operations broken
 
 Relative directory operations in api are broken/confused. Revisit, and
-then revive relative test in test_download().
+then revive relative tests in test_download(), test_source_filenames().
+
+test_source_filenames() calls filename_op_setup() to initialize. That
+function cds to test dir, and then some tests use relative paths. That
+works for Interactive, fails for API. So those versions of
+test_source_filenames() are currently different, with the API version
+using absolute paths.
+
+test_api test_ls, this section is broken: # 0/1/r flags with no files
+specified. Also: # Test f/d/s flags
 
 ----------------------------------------------------------------------
 
@@ -481,3 +490,28 @@ E.g., defining "echo" doesn't prevent the echo executable from being found:
 M 0.14.0 jao@cheese ~/git/marcel/test$ echo = [n: gen (n) 100]
 M 0.14.0 jao@cheese ~/git/marcel/test$ echo 4
 4
+
+----------------------------------------------------------------------
+
+186. Embedded expr not evaluated in API
+
+E.g. in test_ls:
+
+    TEST.env.setvar('TEST', 'test')
+    TEST.run(test=lambda: run(ls('/tmp/(TEST)', recursive=True) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['.',
+                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                  'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
+                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
+                                  ]))
+
+'/tmp/(TEST)' gets parsed properly in interactive usage. In API, the
+command line isn't parsed, so the expression isn't parsed, and the
+variable is not expanded. SHOULD IT BE? 
+
+Need to decide if env vars are in an Env object, or whether they are
+simply program variables. If it's the latter, then a correct
+formulation is
+
+    ls(f'/tmp/{TEST}', ...

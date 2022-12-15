@@ -20,6 +20,7 @@ SQL = False  # Until Postgres & psycopg2 are working again
 
 # Utilities for testing filename ops
 
+
 def relative(base, x):
     x_path = pathlib.Path(x)
     base_path = pathlib.Path(base)
@@ -616,11 +617,6 @@ def test_source_filenames():
              expected_out=sorted(['.', 'f', 'sf', 'lf', 'd', 'sd']))
     TEST.run('ls /tmp/test/d | map (f: f.render_compact())',
              expected_out=sorted(['.', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
-    # Glob
-    TEST.run('ls -0 s? | map (f: f.render_compact())',
-             expected_out=sorted(['sf', 'sd']))
-    TEST.run('ls -0 *f | map (f: f.render_compact())',
-             expected_out=sorted(['f', 'sf', 'lf']))
     # Glob in last part of path
     TEST.run('ls -0 /tmp/test/s? | map (f: f.render_compact())',
              expected_out=sorted(['sf', 'sd']))
@@ -734,7 +730,7 @@ def test_ls():
                            Error('Permission denied'),
                            'd4',
                            'd4/f4'])
-    # Flag-valued args
+    # Args with vars
     TEST.run('TEST = test')
     TEST.run('ls -r /tmp/(TEST) | map (f: f.render_compact())',
              expected_out=sorted(['.',
@@ -751,9 +747,6 @@ def test_ls():
                                   'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
                                   'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
                                   ]))
-    # No such file
-    TEST.run('ls /nosuchfile',
-             expected_err='No qualifying paths')
 
 
 # pushd, popd, dirs

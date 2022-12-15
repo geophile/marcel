@@ -1,5 +1,6 @@
 import os
 import pathlib
+import shutil
 import sys
 from math import pi
 
@@ -14,6 +15,55 @@ start_dir = os.getcwd()
 TEST = test_base.TestAPI()
 
 SQL = False  # Until Postgres & psycopg2 are working again
+
+
+# Utilities for testing filename ops
+
+def relative(base, x):
+    x_path = pathlib.Path(x)
+    base_path = pathlib.Path(base)
+    display_path = x_path.relative_to(base_path)
+    return display_path
+
+
+def absolute(base, x):
+    return pathlib.Path(base) / x
+
+
+def filename_op_setup(dir):
+    # test/
+    #     f (file)
+    #     sf (symlink to f)
+    #     lf (hard link to f)
+    #     d/ (dir)
+    #     sd (symlink to d)
+    #         df (file)
+    #         sdf (symlink to df)
+    #         ldf (hard link to df)
+    #         dd/ (dir)
+    #         sdd (symlink to dd)
+    #             ddf (file)
+    setup_script = [
+        'rm -rf /tmp/test',
+        'mkdir /tmp/test',
+        'mkdir /tmp/test/d',
+        'echo f > /tmp/test/f',
+        'ln -s /tmp/test/f /tmp/test/sf',
+        'ln /tmp/test/f /tmp/test/lf',
+        'ln -s /tmp/test/d /tmp/test/sd',
+        'echo df > /tmp/test/d/df',
+        'ln -s /tmp/test/d/df /tmp/test/d/sdf',
+        'ln /tmp/test/d/df /tmp/test/d/ldf',
+        'mkdir /tmp/test/d/dd',
+        'ln -s /tmp/test/d/dd /tmp/test/d/sdd',
+        'echo ddf > /tmp/test/d/dd/ddf']
+    # Start clean
+    TEST.cd('/tmp')
+    shutil.rmtree('/tmp/test', ignore_errors=True)
+    # Create test data
+    for x in setup_script:
+        os.system(x)
+    TEST.cd(dir)
 
 
 def test_gen():
@@ -527,6 +577,216 @@ def test_namespace():
              expected_out=['3.141592653589793'])
     # Reset environment
     TEST.reset_environment()
+
+
+def test_source_filenames():
+    filename_op_setup('/tmp/test')
+    # # Relative path
+    # TEST.run('ls . | map (f: f.render_compact())',
+    #          expected_out=sorted(['.', 'f', 'sf', 'lf', 'd', 'sd']))
+    # TEST.run('ls d | map (f: f.render_compact())',
+    #          expected_out=sorted(['.', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
+    # Absolute path
+    TEST.run(test=lambda: run(ls('/tmp/test') | map(lambda f: f.render_compact())),
+             expected_out=sorted(['.', 'f', 'sf', 'lf', 'd', 'sd']))
+    TEST.run(test=lambda: run(ls('/tmp/test/d') | map(lambda f: f.render_compact())),
+             expected_out=sorted(['.', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
+    # Glob in last part of path
+    TEST.run(test=lambda: run(ls('/tmp/test/s?', depth=0) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['sf', 'sd']))
+    TEST.run(test=lambda: run(ls('/tmp/test/*f', depth=0) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['f', 'sf', 'lf']))
+    # Glob in intermediate part of path
+    TEST.run(test=lambda: run(ls('/tmp/test/*d/*dd', depth=0) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['d/dd', 'd/sdd', 'sd/dd', 'sd/sdd']))
+    TEST.run(test=lambda: run(ls('/tmp/test/*f', depth=0) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['f', 'sf', 'lf']))
+    # Glob identifying duplicates
+    TEST.run(test=lambda: run(ls('/tmp/test/*f', '/tmp/test/s*', depth=0) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['f', 'sd', 'sf', 'lf']))
+    # No such file
+    TEST.run(test=lambda: run(ls('no_such_file', depth=0) | map(lambda f: f.render_compact())),
+             expected_err='No qualifying paths')
+    # No such file via glob
+    TEST.run(test=lambda: run(ls('tmp/test/no_such_file*', depth=0) | map(lambda f: f.render_compact())),
+             expected_err='No qualifying paths')
+    # ~ expansion
+    TEST.run(test=lambda: run(ls('~root', depth=0) | map(lambda f: f.path)),
+             expected_out=['/root'])
+
+
+def test_ls():
+    filename_op_setup('/tmp/test')
+    # # 0/1/r flags with no files specified.
+    # TEST.run(test=lambda: run(ls(depth=0) | map(lambda f: f.render_compact())),
+    #          expected_out=sorted(['.']))
+    # TEST.run(test=lambda: run(ls(depth=1) | map(lambda f: f.render_compact())),
+    #          expected_out=sorted(['.',
+    #                               'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+    #                               ]))
+    # TEST.run('ls -r | map (f: f.render_compact())',
+    #          expected_out=sorted(['.',
+    #                               'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+    #                               'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+    #                               'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
+    #                               'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
+    #                               ]))
+    # TEST.run('ls | map (f: f.render_compact())',
+    #          expected_out=sorted(['.',
+    #                               'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+    #                               ]))
+    # 0/1/r flags with file
+    TEST.run(test=lambda: run(ls('/tmp/test/f', depth=0) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['f']))
+    TEST.run(test=lambda: run(ls('/tmp/test/f', depth=1) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['f']))
+    TEST.run(test=lambda: run(ls('/tmp/test/f', recursive=True) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['f']))
+    # 0/1/r flags with directory
+    TEST.run(test=lambda: run(ls('/tmp/test', depth=0) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['.']))
+    TEST.run(test=lambda: run(ls('/tmp/test', depth=1) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['.', 'f', 'sf', 'lf', 'sd', 'd']))
+    TEST.run(test=lambda: run(ls('/tmp/test', recursive=True) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['.',
+                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                  'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
+                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
+                                  ]))
+    # # Test f/d/s flags
+    # TEST.run('ls -fr | map (f: f.render_compact())',
+    #          expected_out=sorted(['f', 'lf',  # Top-level
+    #                               'd/df', 'd/ldf',  # Contents of d
+    #                               'sd/df', 'sd/ldf',  # Also reachable via sd
+    #                               'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
+    #                               ]))
+    # TEST.run('ls -dr | map (f: f.render_compact())',
+    #          expected_out=sorted(['.',
+    #                               'd',  # Top-level
+    #                               'd/dd',  # Contents of d
+    #                               'sd/dd'  # Also reachable via sd
+    #                               ]))
+    # TEST.run('ls -sr | map (f: f.render_compact())',
+    #          expected_out=sorted(['sf', 'sd',  # Top-level
+    #                               'd/sdf', 'd/sdd',  # Contents of d
+    #                               'sd/sdf', 'sd/sdd'  # Also reachable via sd
+    #                               ]))
+    # Duplicates
+    TEST.run(test=lambda: run(ls('/tmp/test/*d', '/tmp/test/?', depth=0) | map(lambda f: f.render_compact())),
+             expected_out=sorted(['d', 'sd', 'f']))
+    # This should find d twice
+    expected = sorted(['.', 'f', 'sf', 'lf', 'd', 'sd'])
+    expected.extend(sorted(['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']))
+    TEST.run(test=lambda: run(ls('/tmp/test', '/tmp/test/d', depth=1) | map(lambda f: f.render_compact())),
+             expected_out=expected)
+    # ls should continue past permission error
+    os.system('sudo rm -rf /tmp/lstest')
+    os.system('mkdir /tmp/lstest')
+    os.system('mkdir /tmp/lstest/d1')
+    os.system('mkdir /tmp/lstest/d2')
+    os.system('mkdir /tmp/lstest/d3')
+    os.system('mkdir /tmp/lstest/d4')
+    os.system('touch /tmp/lstest/d1/f1')
+    os.system('touch /tmp/lstest/d2/f2')
+    os.system('touch /tmp/lstest/d3/f3')
+    os.system('touch /tmp/lstest/d4/f4')
+    os.system('sudo chown root.root /tmp/lstest/d2')
+    os.system('sudo chown root.root /tmp/lstest/d3')
+    os.system('sudo chmod 700 /tmp/lstest/d?')
+    TEST.run(test=lambda: run(ls('/tmp/lstest', recursive=True) | map(lambda f: f.render_compact())),
+             expected_out=['.',
+                           'd1',
+                           'd1/f1',
+                           'd2',
+                           Error('Permission denied'),
+                           'd3',
+                           Error('Permission denied'),
+                           'd4',
+                           'd4/f4'])
+    # # Args with vars -- see bug 186
+    # TEST.env.setvar('TEST', 'test')
+    # TEST.run(test=lambda: run(ls('/tmp/(TEST)', recursive=True) | map(lambda f: f.render_compact())),
+    #          expected_out=sorted(['.',
+    #                               'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+    #                               'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+    #                               'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
+    #                               'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
+    #                               ]))
+    # TEST.env.setvar('TMP', 'TMP')
+    # TEST.run(test=lambda: run(ls('/(TMP.lower())/(TEST)', recursive=True) | map(lambda f: f.render_compact())),
+    #          expected_out=sorted(['.',
+    #                               'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+    #                               'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+    #                               'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
+    #                               'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
+    #                               ]))
+
+
+# pushd, popd, dirs
+def test_dir_stack():
+    filename_op_setup('/tmp/test')
+    TEST.run('mkdir a b c')
+    TEST.run('rm -rf p')
+    TEST.run('mkdir p')
+    TEST.run('chmod 000 p')
+    TEST.run(test='pwd | map (f: f.path)',
+             expected_out=['/tmp/test'])
+    TEST.run(test='dirs | map (f: f.path)',
+             expected_out=['/tmp/test'])
+    TEST.run(test='pushd a | map (f: f.path)',
+             expected_out=['/tmp/test/a', '/tmp/test'])
+    TEST.run(test='dirs | map (f: f.path)',
+             expected_out=['/tmp/test/a', '/tmp/test'])
+    TEST.run(test='pushd ../b | map (f: f.path)',
+             expected_out=['/tmp/test/b', '/tmp/test/a', '/tmp/test'])
+    TEST.run(test='dirs | map (f: f.path)',
+             expected_out=['/tmp/test/b', '/tmp/test/a', '/tmp/test'])
+    TEST.run(test='pushd | map (f: f.path)',
+             expected_out=['/tmp/test/a', '/tmp/test/b', '/tmp/test'])
+    TEST.run(test='dirs | map (f: f.path)',
+             expected_out=['/tmp/test/a', '/tmp/test/b', '/tmp/test'])
+    TEST.run(test='popd | map (f: f.path)',
+             expected_out=['/tmp/test/b', '/tmp/test'])
+    TEST.run(test='pwd | map (f: f.path)',
+             expected_out=['/tmp/test/b'])
+    TEST.run(test='dirs | map (f: f.path)',
+             expected_out=['/tmp/test/b', '/tmp/test'])
+    TEST.run(test='dirs -c | map (f: f.path)',
+             expected_out=['/tmp/test/b'])
+    TEST.run(test='pushd | map (f: f.path)',
+             expected_out=['/tmp/test/b'])
+    # Dir operations when the destination cd does not exist or cannot be entered due to permissions
+    # cd
+    TEST.run('cd /tmp/test')
+    TEST.run(test='cd /tmp/test/doesnotexist',
+             expected_err='No such file or directory')
+    TEST.run(test='pwd | (f: str(f))',
+             expected_out='/tmp/test')
+    TEST.run(test='cd /tmp/test/p',
+             expected_err='Permission denied')
+    TEST.run(test='pwd | (f: str(f))',
+             expected_out='/tmp/test')
+    # pushd
+    TEST.run(test='pushd /tmp/test/doesnotexist',
+             expected_err='No such file or directory')
+    TEST.run(test='pwd | (f: str(f))',
+             expected_out='/tmp/test')
+    TEST.run(test='pushd /tmp/test/p',
+             expected_err='Permission denied')
+    TEST.run(test='pwd | (f: str(f))',
+             expected_out='/tmp/test')
+    # popd: Arrange for a deleted dir on the stack and try popding into it.
+    TEST.run('rm -rf x y')
+    TEST.run('mkdir x y')
+    TEST.run('cd x')
+    TEST.run('pushd ../y | (f: str(f))',
+             expected_out=['/tmp/test/y', '/tmp/test/x'])
+    TEST.run('rm -rf /tmp/test/x')
+    TEST.run('popd',
+             expected_err='directories have been removed')
+    TEST.run('dirs | (f: str(f))',
+             expected_out=['/tmp/test/y'])
 
 
 def test_remote():
@@ -1252,6 +1512,9 @@ def main_stable():
     test_window()
     test_bash()
     # test_namespace()
+    # test_source_filenames()
+    # test_ls()
+    # test_dir_stack()
     test_remote()
     # test_fork()
     test_sudo()
@@ -1279,7 +1542,10 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    # test_source_filenames()
+    test_ls()
+    # test_dir_stack()
+    # pass
 
 
 def main():
