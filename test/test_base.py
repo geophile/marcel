@@ -19,9 +19,9 @@ TEST_STDERR = '/tmp/test_stderr.txt'
 class TestBase:
     start_dir = os.getcwd()
 
-    def __init__(self, config_file='./.marcel.py'):
+    def __init__(self, config_file='./.marcel.py', main=None):
         self.config_file = config_file
-        self.main = None
+        self.main = main
         self.env = None
         self.failures = 0
         self.reset_environment(config_file)
@@ -29,7 +29,8 @@ class TestBase:
         self.test_stderr = None
 
     def reset_environment(self, config_file='./.marcel.py'):
-        self.main = marcel.main.Main(config_file, same_process=True, old_namespace=None)
+        if self.main is None:
+            self.main = marcel.main.Main(config_file, same_process=True, old_namespace=None)
         self.env = self.main.env
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')
@@ -181,8 +182,8 @@ class TestConsole(TestBase):
 
 class TestAPI(TestBase):
 
-    def __init__(self, config_file='./.marcel.py'):
-        super().__init__(config_file)
+    def __init__(self, config_file='./.marcel.py', main=None):
+        super().__init__(config_file=config_file, main=main)
 
     def run(self,
             test,

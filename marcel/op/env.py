@@ -62,8 +62,21 @@ the short flag names, {r:-cs} would get all symbols except the builtin ones.
 '''
 
 
-def env(env):
-    return Env(env), []
+def env(e, all=False, builtin=False, config=False, delete=None, session=False, vars=None):
+    args = []
+    if all:
+        args.append('-a')
+    if builtin:
+        args.append('-b')
+    if config:
+        args.append('-c')
+    if session:
+        args.append('-s')
+    if delete:
+        args.extend(['-d', delete])
+    if vars:
+        args.extend(['-v', vars])
+    return Env(e), args
 
 
 class EnvArgsParser(marcel.argsparser.ArgsParser):
@@ -121,7 +134,7 @@ class Env(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
-        if not(self.all or self.builtin or self.config or self.delete or self.session):
+        if not (self.all or self.builtin or self.config or self.delete or self.session):
             # No flags specified. Default behiavor is all.
             self.all = True
         if self.all:

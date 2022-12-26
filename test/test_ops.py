@@ -582,6 +582,8 @@ def test_bash():
 
 
 def test_namespace():
+    original_dir = os.getcwd()
+    original_config_file = TEST.config_file
     config_file = '/tmp/.marcel.py'
     config_path = pathlib.Path(config_file)
     # Default namespace has just __builtins__ and initial set of env vars.
@@ -598,11 +600,14 @@ def test_namespace():
     config_path.unlink()
     with open(config_file, 'w') as file:
         file.writelines('from math import *')
+    TEST.main = None
     TEST.reset_environment(config_file)
     TEST.run('map (pi)',
              expected_out=['3.141592653589793'])
     # Reset environment
-    TEST.reset_environment()
+    TEST.main = None
+    os.chdir(original_dir)
+    TEST.reset_environment(original_config_file)
 
 
 def test_source_filenames():

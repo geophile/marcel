@@ -3570,3 +3570,21 @@ FIXED
 Why did sudo rm fail?
 
 If it failed, why was there no error message?
+
+----------------------------------------------------------------------
+
+FIXED
+
+184. Relative directory operations broken
+
+Relative directory operations in api are broken/confused. Revisit, and
+then revive relative tests in test_download(), test_source_filenames().
+
+test_source_filenames() calls filename_op_setup() to initialize. That
+function cds to test dir, and then some tests use relative paths. That
+works for Interactive, fails for API. So those versions of
+test_source_filenames() are currently different, with the API version
+using absolute paths.
+
+test_api test_ls, this section is broken: # 0/1/r flags with no files
+specified. Also: # Test f/d/s flags

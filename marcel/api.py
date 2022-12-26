@@ -27,6 +27,7 @@ from marcel.op.cd import cd as _cd
 from marcel.op.difference import difference as _difference
 from marcel.op.dirs import dirs as _dirs
 from marcel.op.download import download as _download
+from marcel.op.env import env as _env
 from marcel.op.expand import expand as _expand
 from marcel.op.first import _first
 from marcel.op.fork import fork as _fork
@@ -69,10 +70,10 @@ from marcel.reduction import *
 _MAIN = _main.Main(_os.getenv('MARCEL_CONFIG', default=None),
                    same_process=True,
                    old_namespace=None)
-env = _MAIN.env
 # No colors for API
-env.set_color_scheme(None)
+_MAIN.env.set_color_scheme(None)
 _reservoir_counter = 0
+
 
 def args(*args, **kwargs): return _generate_op(_args, *args, **kwargs)
 def bash(*args, **kwargs): return _generate_op(_bash, *args, **kwargs)
@@ -80,6 +81,7 @@ def cd(*args, **kwargs): return _generate_op(_cd, *args, **kwargs)
 def difference(*args, **kwargs): return _generate_op(_difference, *args, **kwargs)
 def dirs(*args, **kwargs): return _generate_op(_dirs, *args, **kwargs)
 def download(*args, **kwargs): return _generate_op(_download, *args, **kwargs)
+def env(*args, **kwargs): return _generate_op(_env, *args, **kwargs)
 def expand(*args, **kwargs): return _generate_op(_expand, *args, **kwargs)
 def fork(*args, **kwargs): return _generate_op(_fork, *args, **kwargs)
 def gen(*args, **kwargs): return _generate_op(_gen, *args, **kwargs)
@@ -120,7 +122,7 @@ def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 # Utilities
 
 def _generate_op(f, *args, **kwargs):
-    op, arglist = f(env, *args, **kwargs)
+    op, arglist = f(_MAIN.env, *args, **kwargs)
     _MAIN.op_modules[op.op_name()].args_parser().parse(arglist, op)
     return op
 
