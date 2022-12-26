@@ -3588,3 +3588,9 @@ using absolute paths.
 
 test_api test_ls, this section is broken: # 0/1/r flags with no files
 specified. Also: # Test f/d/s flags
+
+----------------------------------------------------------------------
+
+FIXED
+
+187. API env missing all args from the interactive version

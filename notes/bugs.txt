@@ -502,10 +502,6 @@ formulation is
 
 ----------------------------------------------------------------------
 
-187. API env missing all args from the interactive version
-
-----------------------------------------------------------------------
-
 188. Marcel crashes on first startup if config directories are missing
 
 ~/.config and ~/.local/share are assumed. geophile.com didn't have
