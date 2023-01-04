@@ -84,7 +84,7 @@ For example, this command uses the `ls` and `map` operators to list the
 names and sizes of files in the `/home/jao` directory:
 
 ```shell script
-ls /home/jao | map (f: (f, f.size))
+ls /home/jao | map (lambda f: (f, f.size))
 ``` 
 
 * The `ls` operator produces a stream of `File` objects, representing the contents
@@ -104,7 +104,7 @@ For example, here is a pipeline, assigned to the variable `recent`, which select
 `File`s modified within the past day:
 
 ```shell script
-recent = [select (file: now() - file.mtime < hours(24))] 
+recent = [select (file: now() - file.mtime < days(1))] 
 ``` 
 
 * The pipeline being defined is bracketed by `[...]`. (Without the brackets, marcel would
@@ -116,8 +116,8 @@ parameter `file`.
 * `now()` is a function defined by marcel which gives the current time in seconds since
 the epoch, (i.e., it is just `time.time()`).
 * `File` objects have an `mtime` property, providing the time since the last content modification.
-* `hours()` is another function defined by marcel, which simply maps hours to seconds, i.e.,
-it multiplies by 3600.
+* `days()` is another function defined by marcel, which simply maps days to seconds, i.e.,
+it multiplies by 24 * 60 * 60.
 
 This pipeline can be used in conjunction with any pipeline yielding files. E.g., to locate
 the recently changed files in `~/git/myproject`:
@@ -130,7 +130,8 @@ Functions
 ---------
 
 As shown above, a number of operators, like `map` and `select`, take Python functions as 
-command-line arguments. Functions can also be invoked to provide function arguments.
+command-line arguments. Functions can also be invoked to obtain the value of an
+environment variable.
 For example, to list the contents of your home directory, you could write:
 
 ```shell script
@@ -139,7 +140,7 @@ ls /home/(USER)
 
 This concatenates the string `/home/` with the string resulting from the evaluation of
 the expression `lambda: USER`. `USER` is a marcel environment variable identifying the
-current user, so this command is equivalent to `ls ~`.
+current user, (so this command is equivalent to `ls ~`).
 
 If you simply want to evaluate a Python expression, you could use the `map` operator, e.g.
 
@@ -147,12 +148,14 @@ If you simply want to evaluate a Python expression, you could use the `map` oper
 map (5 + 6)
 ```  
 
-which prints `11`. In a situation like this, marcel also permits you to omit `map`; it is
-implied, so this also works:
+which prints `11`. Marcel permits the `map` operator to be inferred, 
+so this also works:
 
 ```shell script
 (5 + 6)
 ```
+
+In general, you can elide `map` from any pipeline.
 
 Executables
 -----------
@@ -172,14 +175,14 @@ the use of `xargs` and `echo`.
 cat /etc/passwd \
 | map (line: line.split(':')) \
 | select (*line: line[-1] == '/bin/bash') \
-| map (*line: line[0]) \
+| map (user, *_: user) \
 | xargs echo
 ```
 
 * `cat /etc/passwd`: Obtain the contents of the file. Lines are piped to subsequent commands.
 * `map (line: line.split(':'))`: Split the lines at the `:` separators, yielding 7-tuples.
 * `select (*line: line[-1] == '/bin/bash')`: select those lines in which the last field is `/bin/bash`.
-* `map (*line: line[0]) |`: Keep the username field of each input tuple.
+* `map (user, *_: user) |`: Keep the username field of each input tuple.
 * `xargs echo`: Combine the incoming usernames into a single line, which is printed to `stdout`.
 
 Shell Features

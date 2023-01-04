@@ -97,10 +97,11 @@ class Upload(marcel.core.Op):
         # Empty pipeline will be filled in by customize_pipeline
         pipeline_template = marcel.core.Pipeline()
         pipeline_template.set_error_handler(self.owner.error_handler)
-        self.fork_manager = marcel.op.forkmanager.ForkManager(self,
-                                                              self.cluster.hosts,
-                                                              pipeline_template,
-                                                              self.customize_pipeline)
+        self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,
+                                                              thread_ids=self.cluster.hosts,
+                                                              pipeline_arg=pipeline_template,
+                                                              max_pipeline_args=0,
+                                                              customize_pipeline=self.customize_pipeline)
         self.fork_manager.setup()
 
     def run(self):

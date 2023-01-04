@@ -822,7 +822,7 @@ def test_fork():
                            (1, 100), (1, 101), (1, 102),
                            (2, 100), (2, 101), (2, 102)])
     TEST.run(lambda: run(fork(3, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-             expected_err='fork pipeline must have no more than one parameter')
+             expected_err='Too many pipeline args')
     # iterable forkgen
     TEST.run(lambda: run(fork('abc', lambda: gen(3, 100)) | sort()),
              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
@@ -831,16 +831,16 @@ def test_fork():
                            ('b', 100), ('b', 101), ('b', 102),
                            ('c', 100), ('c', 101), ('c', 102)])
     TEST.run(lambda: run(fork('abc', lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-             expected_err='fork pipeline must have no more than one parameter')
+             expected_err='Too many pipeline args')
     # Cluster forkgen
     jao = TEST.main.env.cluster('CLUSTER1')
-    localhost = marcel.object.cluster.Host('localhost', None)
+    localhost = marcel.object.cluster.Host('127.0.0.1', None)
     TEST.run(lambda: run(fork(jao, lambda: gen(3, 100)) | sort()),
              expected_out=[100, 101, 102])
     TEST.run(lambda: run(fork(jao, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
              expected_out=[(localhost, 100), (localhost, 101), (localhost, 102)])
     TEST.run(lambda: run(fork(jao, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-             expected_err='fork pipeline must have no more than one parameter')
+             expected_err='Too many pipeline args')
 
 
 def test_sudo():
@@ -1516,7 +1516,7 @@ def main_stable():
     test_ls()
     test_dir_stack()
     test_remote()
-    # test_fork()
+    test_fork()
     test_sudo()
     test_version()
     test_assign()

@@ -27,11 +27,17 @@ import marcel.util
 
 class ForkManager(object):
 
-    def __init__(self, op, thread_ids, pipeline_arg, customize_pipeline=lambda pipeline, thread_id: pipeline):
+    def __init__(self,
+                 op,
+                 thread_ids,
+                 pipeline_arg,
+                 max_pipeline_args=0,
+                 customize_pipeline=lambda pipeline, thread_id: pipeline):
         self.op = op
         self.thread_ids = thread_ids
         self.customize_pipeline = customize_pipeline
         self.pipeline_arg = pipeline_arg
+        self.max_pipeline_args = max_pipeline_args
         self.workers = []
 
     def __repr__(self):
@@ -77,9 +83,8 @@ class ForkWorker(object):
                                                                    op.owner.error_handler,
                                                                    fork_manager.pipeline_arg,
                                                                    self.customize_pipeline)
-        if self.pipeline_wrapper.n_params() > 0:
-            raise marcel.exception.KillCommandException(
-                'remote pipeline must have no parameters.')
+        if self.pipeline_wrapper.n_params() > fork_manager.max_pipeline_args:
+            raise marcel.exception.KillCommandException('Too many pipeline args.')
         self.pipeline_wrapper.setup()
 
     def start_process(self):

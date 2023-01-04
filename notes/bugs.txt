@@ -467,16 +467,6 @@ On remote (acme), farcel.log says:
 
 ----------------------------------------------------------------------
 
-185. marcel var should mask executable
-
-E.g., defining "echo" doesn't prevent the echo executable from being found:
-
-M 0.14.0 jao@cheese ~/git/marcel/test$ echo = [n: gen (n) 100]
-M 0.14.0 jao@cheese ~/git/marcel/test$ echo 4
-4
-
-----------------------------------------------------------------------
-
 186. Embedded expr not evaluated in API
 
 E.g. in test_ls:
@@ -507,3 +497,9 @@ formulation is
 ~/.config and ~/.local/share are assumed. geophile.com didn't have
 them, and in face, does not have XDG vars set. Makes sense for a
 server, I guess. What is the Linuxy thing to do in this case?
+
+----------------------------------------------------------------------
+
+189. Auto-complete doesn't handle whitespace correctly
+
+Should quote or insert escapes.

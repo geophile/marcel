@@ -3593,4 +3593,16 @@ specified. Also: # Test f/d/s flags
 
 FIXED
 
+185. marcel var should mask executable
+
+E.g., defining "echo" doesn't prevent the echo executable from being found:
+
+M 0.14.0 jao@cheese ~/git/marcel/test$ echo = [n: gen (n) 100]
+M 0.14.0 jao@cheese ~/git/marcel/test$ echo 4
+4
+
+----------------------------------------------------------------------
+
+FIXED
+
 187. API env missing all args from the interactive version

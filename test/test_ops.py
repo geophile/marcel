@@ -69,7 +69,7 @@ def filename_op_setup(dir):
 
 
 def test_no_such_op():
-    TEST.run('gen 5 | abc', expected_err='is not executable')
+    TEST.run('gen 5 | abc', expected_err='is not defined')
 
 
 def test_gen():
@@ -855,7 +855,7 @@ def test_fork():
                            (1, 100), (1, 101), (1, 102),
                            (2, 100), (2, 101), (2, 102)])
     TEST.run('fork 3 [t, u: gen 3 100 | (x: (t, x))] | sort',
-             expected_err='fork pipeline must have no more than one parameter')
+             expected_err='Too many pipeline args')
     # iterable forkgen
     TEST.run('fork "abc" [gen 3 100] | sort',
              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
@@ -864,14 +864,14 @@ def test_fork():
                            ('b', 100), ('b', 101), ('b', 102),
                            ('c', 100), ('c', 101), ('c', 102)])
     TEST.run('fork "abc" [t, u: gen 3 100 | (x: (t, x))] | sort',
-             expected_err='fork pipeline must have no more than one parameter')
+             expected_err='Too many pipeline args')
     # Cluster forkgen
-    TEST.run('fork jao [gen 3 100]',
+    TEST.run('fork CLUSTER1 [gen 3 100]',
              expected_out=[100, 101, 102])
-    TEST.run('fork jao [t: gen 3 100 | (x: (str(t), x))]',
-             expected_out=[('localhost', 100), ('localhost', 101), ('localhost', 102)])
-    TEST.run('fork jao [t, u: gen 3 100 | (x: (str(t), x))]',
-             expected_err='fork pipeline must have no more than one parameter')
+    TEST.run('fork CLUSTER1 [t: gen 3 100 | (x: (str(t), x))]',
+             expected_out=[('127.0.0.1', 100), ('127.0.0.1', 101), ('127.0.0.1', 102)])
+    TEST.run('fork CLUSTER1 [t, u: gen 3 100 | (x: (str(t), x))]',
+             expected_err='Too many pipeline args')
 
 
 def test_sudo():
@@ -920,6 +920,10 @@ def test_assign():
     TEST.run('ls = abc')
     TEST.run('(ls)',
              expected_out=['abc'])
+    # Don't want the op ls masked by the variable ls
+    TEST.run(test='env -d ls',
+             verification='env -v ls',
+             expected_out=[])
 
 
 def test_join():
@@ -1054,6 +1058,8 @@ def test_import():
     TEST.run('(version)', expected_out=[sys.version])
     TEST.run('import os')
     TEST.run('(os.popen)', expected_out=[os.popen])
+    # Delete version var so that it does not mask the version op.
+    TEST.run('env -d version')
 
 
 def test_store_load():
@@ -1885,6 +1891,15 @@ def test_bug_168():
     os.system('rm -rf /tmp/hello')
 
 
+def test_bug_185():
+    # Unbound var
+    TEST.run('varop',
+             expected_err='oops')
+    # var masking executable
+    # var masking builtin
+    # Remove masking var
+
+
 # For bugs that aren't specific to a single op.
 def test_bugs():
     test_bug_10()
@@ -1915,7 +1930,7 @@ def main_stable():
     test_source_filenames()
     test_ls()
     test_dir_stack()
-    # test_fork()
+    test_fork()
     test_remote()
     test_sudo()
     test_version()

@@ -1046,11 +1046,13 @@ class Parser:
         raise SyntaxError(token, message)
 
     def create_op(self, op_token, arg_tokens):
-        op = self.create_op_builtin(op_token, arg_tokens)
+        op = self.create_op_variable(op_token, arg_tokens)
+        if op is None:
+            op = self.create_op_builtin(op_token, arg_tokens)
         if op is None:
             op = self.create_op_executable(op_token, arg_tokens)
         if op is None:
-            op = self.create_op_variable(op_token, arg_tokens)
+            raise marcel.exception.KillCommandException(f'{op_token.value(self)} is not defined.')
         return op
 
     def create_op_builtin(self, op_token, arg_tokens):
@@ -1081,6 +1083,8 @@ class Parser:
 
     def create_op_variable(self, op_token, arg_tokens):
         var = op_token.value(self)
+        if self.env.getvar(var) is None:
+            return None
         op = self.op_modules['runpipeline'].create_op()
         op.var = var
         if len(arg_tokens) > 0:

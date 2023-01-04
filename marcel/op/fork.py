@@ -148,7 +148,10 @@ class Fork(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'Iterable fork generator must not be empty.')
         else:
             raise marcel.exception.KillCommandException(f'Invalid fork generator.')
-        self.manager = marcel.op.forkmanager.ForkManager(self, self.thread_ids, pipeline_arg)
+        self.manager = marcel.op.forkmanager.ForkManager(op=self,
+                                                         thread_ids=self.thread_ids,
+                                                         pipeline_arg=pipeline_arg,
+                                                         max_pipeline_args=1)
         self.manager.setup()
 
     # Op
