@@ -490,6 +490,14 @@ formulation is
 
     ls(f'/tmp/{TEST}', ...
 
+[After thinking about it for a while]
+
+Program variables and environment variables are different. Using
+f'/tmp/{TEST}' is a reasonable approximation of '/tmp/(TEST)', but
+isn't a substitute. Program variables are part of Python, and not
+available on the marcel command line. Environment variables are part
+of marcel, and should be available through marcel.api.
+
 ----------------------------------------------------------------------
 
 188. Marcel crashes on first startup if config directories are missing
@@ -503,3 +511,40 @@ server, I guess. What is the Linuxy thing to do in this case?
 189. Auto-complete doesn't handle whitespace correctly
 
 Should quote or insert escapes.
+
+Problems:
+
+1.
+
+        touch "xxxx yyyy"
+        ls "xxx
+        
+    autocompletes to:
+
+        ls "xxxx yyyy "
+
+    -> extra space at end. This is correct WITHOUT the 2nd quote,
+       since we've unambiguously completed an actual filename. I.e.,
+       the space should be after the quote.
+
+2. 
+
+        ls xxx
+
+    autocompletes to
+
+        ls xxxx yyyy
+
+    -> Needs escape or quotes
+
+----------------------------------------------------------------------
+
+190. Some glob characters not working
+
+E.g. grep x[012]
+
+----------------------------------------------------------------------
+
+191. Protect env from deletion
+
+Don't allow deletion of some symbols. Which ones? COLOR_SCHEME is one example.

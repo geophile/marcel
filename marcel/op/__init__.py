@@ -15,6 +15,7 @@
 
 public = [
     'args',
+    'assign',
     'bash',
     'bg',
     'cd',
@@ -67,7 +68,6 @@ public = [
 ]
 
 all = public + [
-    'assign',
     'first',
     'gather',
     'runpipeline'

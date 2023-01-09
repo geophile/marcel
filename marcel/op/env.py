@@ -15,67 +15,50 @@
 
 import marcel.argsparser
 import marcel.core
+import marcel.exception
+import marcel.object.error
 
 HELP = '''
-{L,wrap=F}env [-a|--all] [-b|--builtin] [-c|--config] [-d|--delete var] [-s|--session] [-v|--vars STRING]
+{L,wrap=F}env 
+{L,wrap=F}env VAR
+{L,wrap=F}env -d|--delete VAR
+{L,wrap=F}env -p|--pattern PATTERN
 
-{L,indent=4:28}{r:-a}, {r:--all}               Output all symbols defined in the environment.
-
-{L,indent=4:28}{r:-b}, {r:--builtin}           Output only builtin symbols.
+{L,indent=4:28}{r:VAR}                     The name of an environment variable.
 
 {L,indent=4:28}{r:-d}, {r:--delete}            Output the named variable and its value, and remove the variable 
 from the environment.
 
-{L,indent=4:28}{r:-c}, {r:--config}            Output only symbols defined in the marcel configuration file, 
-(e.g. {n:~/.config/marcel/startup.py}).
+{L,indent=4:28}{r:-p}, {r:--pattern}           Output symbols whose variable name contains the string {r:PATTERN}
 
-{L,indent=4:28}{r:-s}, {r:--session}           Output only symbols defined during the current session.
-
-{L,indent=4:28}{r:-v}, {r:--vars}              Output symbols whose variable name contains the given {r:STRING}.
-
-Write the contents of the environment, (i.e., the marcel namespace), to the output stream.
-Each key/value pair is written to the output stream as a tuple,
-(key, value), sorted by key. Python's {n:__builtins__} is part of the marcel namespace, but is omitted
+Write some or all of the contents of the environment, (i.e., the marcel namespace), 
+to the output stream.
+Each variable/value pair is written to the output stream as a tuple,
+(variable, value), sorted by variable. Python's {n:__builtins__} is part of the marcel namespace, but is always omitted
 from output. 
 
-If the {r:--all} flag is provided, then all symbols in the environment (except those in Python's {n:__builtins__})
-are output. This is the default behavior. The {r:--all} flag cannot be combined with others. 
+If not arguments are provided, then all variables and their values are written to the output stream. 
+Specifying just {r:VAR} outputs the one variable with that name. An error is output if the variable is not defined. 
 
-If the {r:--builtin} flag is provided, then the symbols defined by marcel are output. This excludes symbols
-defined in the marcel configuration file 
-(e.g. {n:~/.config/marcel/startup.py}), and those defined in the current session, e.g. by assigning to
-a previously undefined environment variable.
-
-If the {r:--config} flag is provided, then the symbols defined in the marcel configuration file 
-(e.g. {n:~/.config/marcel/startup.py}) are output.
-
-If the {r:--session} flag is provided, then the symbols defined in the current session are provided. These are variables
-that obtain their value by assignment, (e.g. {n:answer = (42)}), or by storing a stream, (e.g. {n:ls -fr > files}).
+Specifying {r:VAR} and {r:VALUE} assigns the value to the variable, and outputs the updated variable.
 
 If the {r:--delete} flag is specified, the named variable and its current value
 are written to output, and the variable
 is removed from the environment.
 
-Default behavior, (i.e., no flags are specified) is the same as {r:--all}. This is also equivalent to specifying
-all of {r:--builtin}, {r:--config}, and {r:--session}. Those three flags can also be combined. E.g, using
-the short flag names, {r:-cs} would get all symbols except the builtin ones.
+If the {r:--pattern} flag is specified, then the variables output are those whose name contain the substring
+{r:PATTERN}.
 '''
 
 
-def env(e, all=False, builtin=False, config=False, delete=None, session=False, vars=None):
+def env(e, var=None, delete=None, pattern=None):
     args = []
-    if all:
-        args.append('-a')
-    if builtin:
-        args.append('-b')
-    if config:
-        args.append('-c')
-    if session:
-        args.append('-s')
     if delete:
         args.extend(['-d', delete])
-    if vars:
-        args.extend(['-v', vars])
+    if pattern:
+        args.extend(['-p', pattern])
+    if var:
+        args.append(var)
     return Env(e), args
 
 
@@ -83,24 +66,10 @@ class EnvArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('env', env)
-        self.add_flag_no_value('all', '-a', '--all')
-        self.add_flag_no_value('builtin', '-b', '--builtin')
-        self.add_flag_no_value('config', '-c', '--config')
         self.add_flag_one_value('delete', '-d', '--delete')
-        self.add_flag_no_value('session', '-s', '--session')
-        self.add_flag_one_value('vars', '-v', '--vars')
-        self.at_most_one('all', 'builtin')
-        self.at_most_one('all', 'config')
-        self.at_most_one('all', 'session')
-        self.at_most_one('all', 'vars')
-        self.at_most_one('vars', 'builtin')
-        self.at_most_one('vars', 'config')
-        self.at_most_one('vars', 'session')
-        self.at_most_one('delete', 'all')
-        self.at_most_one('delete', 'builtin')
-        self.at_most_one('delete', 'config')
-        self.at_most_one('delete', 'session')
-        self.at_most_one('delete', 'vars')
+        self.add_flag_one_value('pattern', '-p', '--pattern')
+        self.add_anon('var', default=None)
+        self.at_most_one('delete', 'var', 'pattern')
         self.validate()
 
 
@@ -109,58 +78,31 @@ class Env(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.all = None
-        self.builtin = None
-        self.config = None
         self.delete = None
-        self.session = None
         self.var = None
-        self.vars = None
+        self.pattern = None
+        self.list_all = None
 
     def __repr__(self):
-        flags = ''
-        if self.builtin:
-            flags += 'b'
-        if self.config:
-            flags += 'c'
-        if self.delete:
-            flags += 'd'
-        if self.session:
-            flags += 's'
-        if self.vars:
-            flags = f'vars={self.vars}'
-        return f'env({flags})'
+        return (f'env({self.var})' if self.var else
+                f'env(delete {self.delete})' if self.delete else
+                f'env(pattern {self.pattern})' if self.pattern else
+                'env()')
 
     # AbstractOp
 
     def setup(self):
-        if not (self.all or self.builtin or self.config or self.delete or self.session):
-            # No flags specified. Default behiavor is all.
-            self.all = True
-        if self.all:
-            self.builtin = True
-            self.config = True
-            self.session = True
+        self.list_all = self.var is None and self.delete is None and self.pattern is None
 
     def run(self):
-        if self.delete:
-            try:
-                value = self.env().vars().pop(self.delete)
-                self.send((self.delete, value))
-            except KeyError:
-                # var isn't present, nothing to do
-                pass
+        if self.var:
+            self.one_var()
+        elif self.delete:
+            self.delete_var()
+        elif self.pattern:
+            self.matching_vars()
         else:
-            builtin_symbols = self.env().builtin_symbols
-            config_symbols = self.env().config_symbols
-            for key, value in sorted(self.env().vars().items()):
-                if key not in Env.OMITTED and (self.vars is None or self.vars in key):
-                    key_builtin = key in builtin_symbols
-                    key_config = key in config_symbols
-                    if (self.builtin and key_builtin or
-                            self.config and key_config or
-                            self.session and not (key_builtin or key_config)):
-                        self.send((key, value))
+            self.all_vars()
 
     # Op
 
@@ -169,3 +111,42 @@ class Env(marcel.core.Op):
 
     def run_in_main_process(self):
         return True
+
+    # Implementation
+
+    def one_var(self):
+        assert self.var
+        value = self.env().getvar(self.var)
+        if value is None:
+            self.no_such_var(self.var)
+        else:
+            self.send((self.var, value))
+
+    def delete_var(self):
+        assert self.delete
+        value = self.env().delvar(self.delete)
+        if value is None:
+            self.no_such_var(self.var)
+        else:
+            self.send((self.delete, value))
+
+    def matching_vars(self):
+        assert self.pattern
+        output = []
+        for var, value in self.env().vars().items():
+            if var != '__builtins__' and self.pattern in var:
+                output.append((var, value))
+        for var, value in sorted(output):
+            self.send((var, value))
+
+    def all_vars(self):
+        output = []
+        for var, value in self.env().vars().items():
+            if var != '__builtins__':
+                output.append((var, value))
+        for var, value in sorted(output):
+            self.send((var, value))
+
+    def no_such_var(self, var):
+        error = marcel.object.error.Error(f'{var} is undefined')
+        self.send(error)

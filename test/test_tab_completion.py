@@ -74,6 +74,14 @@ def test_filenames():
              expected=['/tmp/bug147xxx/'])
 
 
+# Inspired by bug 189
+def test_filenames_with_whitespace():
+    os.system('rm -rf /tmp/test')
+    os.mkdir('/tmp/test')
+    os.system('touch "/tmp/test/space xx"')
+    os.system('touch "/tmp/test/tab\txx"')
+
+
 def test_pipeline_args():
     # Try (almost) every prefix of: ls --recursive -d | args [d: ls -fs (d)]
     all_files = ['a', 'b', 'c']
@@ -155,17 +163,19 @@ def main_stable():
     test_executables()
     test_flags()
     test_filenames()
+    test_filenames_with_whitespace()
     test_pipeline_args()
 
 
 def main_dev():
+    test_filenames_with_whitespace()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
 
 

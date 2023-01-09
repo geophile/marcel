@@ -922,7 +922,7 @@ def test_assign():
              expected_out=['abc'])
     # Don't want the op ls masked by the variable ls
     TEST.run(test='env -d ls',
-             verification='env -v ls',
+             verification='env -p ls',
              expected_out=[])
 
 
@@ -1701,29 +1701,32 @@ def test_args():
 
 
 def test_env():
-    TEST.cd(start_dir)
     TEST.reset_environment()
-    TEST.run('ko = [map (k, v: k)]')  # key only
-    TEST.run('env | ko')
-    TEST.run(test='env | ko >$ env_keys',
-             verification='env_keys >$ red count',
-             expected_out=[29])  # 2 of them were just defined: ko, env_keys
-    TEST.run('env -a | ko | difference [env_keys >$]',
-             expected_out=[])
-    TEST.run('env_keys >$ difference [env -a | ko]',
-             expected_out=[])
-    TEST.run('env -b | red count',
-             expected_out=[26])
-    TEST.run('env -c | ko',
-             expected_out=['DB_DEFAULT'])
-    TEST.run('env -s | ko',
-             expected_out=['env_keys', 'ko'])
-    TEST.run('env -bc | red count',
-             expected_out=[27])
-    TEST.run('env -bs | red count',
-             expected_out=[28])
-    TEST.run('env -bcs | red count',
-             expected_out=[29])
+    # Get all env vars, and check for things that should definitely be there.
+    # PATH, PWD are inherited from the process.
+    # NODE1, NODE2 come from the test config file, ./.marcel.py
+    TEST.run(test='env | (var, value: var) | select (var: var in ("NODE1", "NODE2", "PATH", "PWD"))',
+             expected_out=["NODE1", "NODE2", "PATH", "PWD"])
+    # Test some vars
+    TEST.run(test='env -p NODE | (var, value: var) | select (var: var in ("NODE1", "NODE2"))',
+             expected_out=["NODE1", "NODE2"])
+    # One var
+    TEST.run(test='env PATH | (var, value: var)',
+             expected_out=["PATH"])
+    # Missing var
+    TEST.run(test='env NOSUCHVAR | (var, value: var)',
+             expected_out=[Error('undefined')])
+    # Delete var
+    TEST.run('GARBAGE = asdf')
+    TEST.run(test='env GARBAGE',
+             expected_out=[('GARBAGE', 'asdf')])
+    TEST.run(test='env -d GARBAGE',
+             expected_out=[('GARBAGE', 'asdf')])
+    TEST.run(test='env GARBAGE',
+             expected_out=[Error('undefined')])
+    # Delete missing var
+    TEST.run(test='env -d GARBAGE',
+             expected_out=[Error('undefined')])
 
 
 def test_pos():
@@ -1950,7 +1953,7 @@ def main_stable():
     test_union()
     test_difference()
     test_args()
-    # test_env()
+    test_env()
     test_pos()
     test_tee()
     test_upload()

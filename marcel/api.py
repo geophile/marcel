@@ -22,6 +22,7 @@ import marcel.object.error as _error
 import marcel.reservoir as _reservoir
 
 from marcel.op.args import args as _args
+from marcel.op.assign import assign as _assign
 from marcel.op.bash import bash as _bash
 from marcel.op.cd import cd as _cd
 from marcel.op.difference import difference as _difference
@@ -76,6 +77,7 @@ _reservoir_counter = 0
 
 
 def args(*args, **kwargs): return _generate_op(_args, *args, **kwargs)
+def assign(*args, **kwargs): return _generate_op(_assign, *args, **kwargs)
 def bash(*args, **kwargs): return _generate_op(_bash, *args, **kwargs)
 def cd(*args, **kwargs): return _generate_op(_cd, *args, **kwargs)
 def difference(*args, **kwargs): return _generate_op(_difference, *args, **kwargs)

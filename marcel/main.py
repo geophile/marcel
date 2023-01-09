@@ -286,7 +286,7 @@ def args():
     return dill, mpstart, echo
 
 
-if __name__ == '__main__':
+def main():
     dill, mpstart, echo = args()
     old_namespace = None
     input = None
@@ -310,3 +310,7 @@ if __name__ == '__main__':
             # Piped-in script
             MAIN.run_script(sys.stdin.read())
             break
+
+
+if __name__ == '__main__':
+    main()

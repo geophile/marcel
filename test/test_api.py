@@ -862,12 +862,37 @@ def test_version():
 
 
 def test_assign():
-    a = 3
-    TEST.run(test=lambda: run(map(lambda: a)),
-             expected_out=[3])
+    TEST.run(test=lambda: run(assign('a', 3)),
+             verification=lambda: run(env(var='a')),
+             expected_out=[('a', 3)])
+    # This makes more sense in test_ops, where marcel (not Python) has to evalute the expression.
+    TEST.run(test=lambda: run(assign('a', 5 + 6)),
+             verification=lambda: run(env(var='a')),
+             expected_out=[('a', 11)])
+    TEST.run(test=lambda: run(assign('a', [419])),
+             verification=lambda: run(env(var='a')),
+             expected_out=[('a', [419])])
+    # test_ops assigns a pipeline to env var a and then uses the pipeline: gen 3 | a
+    # But in the API, env vars can't be referred to an a marcel command, so we have to use
+    # a program variable instead.
     a = map(lambda x: (x, -x))
     TEST.run(test=lambda: run(gen(3) | a),
              expected_out=[(0, 0), (1, -1), (2, -2)])
+    # Bug 61
+    a = gen(3)
+    TEST.run(test=lambda: run(a),
+             expected_out=[0, 1, 2])
+    b = a
+    TEST.run(test=lambda: run(b),
+             expected_out=[0, 1, 2])
+    # Bug 65
+    x = map(lambda: 5)
+    TEST.run(test=lambda: run(x),
+             expected_out=[5])
+    # Bug 165
+    ls = 'abc'
+    TEST.run(test=lambda: run(map(lambda: ls)),
+             expected_out=['abc'])
 
 
 def test_join():
@@ -1260,6 +1285,41 @@ def test_args():
              expected_out=[0, 0, 1, 0, 1, 2])
 
 
+def test_env():
+    TEST.reset_environment()
+    # Get all env vars, and check for things that should definitely be there.
+    # PATH, PWD are inherited from the process.
+    # NODE1, NODE2 come from the test config file, ./.marcel.py
+    TEST.run(test=lambda: run(env() |
+                              map(lambda var, value: var) |
+                              select (lambda var: var in ("NODE1", "NODE2", "PATH", "PWD"))),
+             expected_out=["NODE1", "NODE2", "PATH", "PWD"])
+    # Test some vars
+    TEST.run(test=lambda: run(env(pattern='NODE') |
+                              map(lambda var, value: var) |
+                              select (lambda var: var in ("NODE1", "NODE2"))),
+             expected_out=["NODE1", "NODE2"])
+    # One var
+    TEST.run(test=lambda: run(env(var='PATH') |
+                              map(lambda var, value: var)),
+             expected_out=["PATH"])
+    # Missing var
+    TEST.run(test=lambda: run(env(var='NOSUCHVAR') |
+                              map(lambda var, value: var)),
+             expected_out=[Error('undefined')])
+    # Delete var
+    TEST.run(lambda: run(assign('GARBAGE', 'asdf')))
+    TEST.run(test=lambda: run(env(var='GARBAGE')),
+             expected_out=[('GARBAGE', 'asdf')])
+    TEST.run(test=lambda: run(env(delete='GARBAGE')),
+             expected_out=[('GARBAGE', 'asdf')])
+    TEST.run(test=lambda: run(env(var='GARBAGE')),
+             expected_out=[Error('undefined')])
+    # Delete missing var
+    TEST.run(test=lambda: run(env(delete='GARBAGE')),
+             expected_out=[Error('undefined')])
+
+
 def test_pos():
     TEST.run(test=lambda: run(gen(5) |
                               map(lambda x: (x, pos())) |
@@ -1530,6 +1590,7 @@ def main_stable():
     test_union()
     test_difference()
     test_args()
+    test_env()
     test_pos()
     test_tee()
     test_upload()

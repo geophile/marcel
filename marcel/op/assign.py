@@ -18,6 +18,19 @@ import marcel.exception
 import marcel.function
 
 
+def assign(env, var, value):
+    return Assign(env), [var, value]
+
+
+class AssignArgsParser(marcel.argsparser.ArgsParser):
+
+    def __init__(self, env):
+        super().__init__(self, env)
+        self.add_anon('var')
+        self.add_anon('value')
+        self.validate()
+
+
 class Assign(marcel.core.Op):
 
     def __init__(self, env):
@@ -36,6 +49,10 @@ class Assign(marcel.core.Op):
     def setup(self):
         assert self.var is not None
         count = 0
+        if self.value is not None:
+            # Only self.value is set via API. Check first because CLI will should have string, pipeline or function
+            # field set, and the non-None one of those will be assigned to value.
+            count += 1
         if self.string is not None:
             assert type(self.string) is str, type(self.string)
             self.value = self.string
