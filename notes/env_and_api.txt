@@ -1,0 +1,46 @@
+The environment and the API
+
+The CLI operates on the environment as follows:
+
+- Assignment, e.g. X = (3)
+
+- The env op for retrieving env vars and their values. MISSING: A way
+  to get the value of a single env var.
+
+The API sort of relies on program variables as an alternative. E.g.,
+test_ops/test_assign tests env vars, while test_api/test_assign tests
+program variables. 
+
+But program variables are just different, not a replacement. E.g., all
+the env vars inherited from the bash shell (when marcel starts) don't
+show up in the program's globals. I guess they could be put there, but
+what's the point? Env vars are associated with process state, not
+python state.
+
+So the API for the environment needs to be built up:
+
+- The env command is already there.
+
+- Extend the env command to set vars. So assignment becomes syntactic
+  sugar for using this option.
+
+- Extend the env command to get the value of a single var.
+
+----------------------------------------------------------------------
+
+More problems:
+
+- RUN_ON_STARTUP is an ugly hack. What about replacing it by the name
+  of a script whose contents are executed?
+
+- env -bcs
+
+    - env -s includes symbols from RUN_ON_STARTUP, but they should
+      arguably be part of env -c (since they are defined, sort of, in the
+      config file)
+
+    - Are the bcs flags even useful? NO
+
+    - Get rid of these options
+
+- Since program vars != env vars, API needs assign().
