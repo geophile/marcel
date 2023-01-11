@@ -154,11 +154,12 @@ class Token(Source):
         REDIRECT_VAR_APPEND
     ]
 
-    def __init__(self, text, position, adjacent_to_previous):
+    def __init__(self, parser, text, position, adjacent_to_previous):
         super().__init__(text, position)
+        self.parser = parser
         self.adjacent_to_previous = adjacent_to_previous
 
-    def value(self, parser):
+    def value(self):
         return None
 
     def is_string(self):
@@ -216,15 +217,15 @@ class Token(Source):
 # https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals.
 class PythonString(Token):
 
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous)
+    def __init__(self, parser, text, position, adjacent_to_previous):
+        super().__init__(parser, text, position, adjacent_to_previous)
         self.string = None
         self.scan()
 
     def __repr__(self):
         return self.string
 
-    def value(self, parser):
+    def value(self):
         return self.string
 
     # TODO: string prefixes
@@ -285,17 +286,17 @@ class PythonString(Token):
 
 class Expression(Token):
 
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous)
+    def __init__(self, parser, text, position, adjacent_to_previous):
+        super().__init__(parser, text, position, adjacent_to_previous)
         self._source = None
         self._function = None
         self.scan()
 
-    def value(self, parser):
+    def value(self):
         try:
             if self._function is None:
                 source = self.source()
-                globals = parser.env.namespace
+                globals = self.parser.env.namespace
                 split = source.split()
                 if len(split) == 0:
                     raise marcel.exception.KillCommandException(f'Empty function definition.')
@@ -337,15 +338,15 @@ class Expression(Token):
             elif c == Token.CLOSE:
                 nesting -= 1
             elif c in Token.QUOTES:
-                self.end = PythonString(self.text, self.end - 1, False).end
+                self.end = PythonString(self.parser, self.text, self.end - 1, False).end
         if self.text[self.end - 1] != Token.CLOSE:
             raise LexerException(self, 'Malformed Python expression')
 
 
 class String(Token):
 
-    def __init__(self, op_modules, text, position=None, adjacent_to_previous=False):
-        super().__init__(text, 0 if position is None else position, adjacent_to_previous)
+    def __init__(self, parser, text, position=None, adjacent_to_previous=False):
+        super().__init__(parser, text, 0 if position is None else position, adjacent_to_previous)
         if position is None:
             # Text is fine as is.
             self.string = text
@@ -355,9 +356,9 @@ class String(Token):
             self.string = None
             self.scan()
         # op_modules is a dict, name -> OpModule
-        self.op_name = self.string if self.string in op_modules else None
+        self.op_name = self.string if self.string in parser.op_modules else None
 
-    def value(self, parser):
+    def value(self):
         return self.string
 
     def is_string(self):
@@ -412,12 +413,12 @@ class String(Token):
 
 class Run(Token):
 
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous)
+    def __init__(self, parser, text, position, adjacent_to_previous):
+        super().__init__(parser, text, position, adjacent_to_previous)
         self.symbol = None
         self.scan()  # Sets self.symbol
 
-    def value(self, parser):
+    def value(self):
         return self.symbol
 
     def is_bang(self):
@@ -443,19 +444,19 @@ class Run(Token):
 
 class Symbol(Token):
 
-    def __init__(self, text, position, adjacent_to_previous, symbol):
-        super().__init__(text, position, adjacent_to_previous)
+    def __init__(self, parser, text, position, adjacent_to_previous, symbol):
+        super().__init__(parser, text, position, adjacent_to_previous)
         self.symbol = symbol
         self.end += 1
 
-    def value(self, parser):
+    def value(self):
         return self.symbol
 
 
 class Pipe(Symbol):
 
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous, Token.PIPE)
+    def __init__(self, parser, text, position, adjacent_to_previous):
+        super().__init__(parser, text, position, adjacent_to_previous, Token.PIPE)
 
     def is_pipe(self):
         return True
@@ -463,8 +464,8 @@ class Pipe(Symbol):
 
 class Remote(Symbol):
 
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous, Token.REMOTE)
+    def __init__(self, parser, text, position, adjacent_to_previous):
+        super().__init__(parser, text, position, adjacent_to_previous, Token.REMOTE)
 
     def is_remote(self):
         return True
@@ -479,8 +480,8 @@ class Remote(Symbol):
 
 class Begin(Symbol):
 
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous, Token.BEGIN)
+    def __init__(self, parser, text, position, adjacent_to_previous):
+        super().__init__(parser, text, position, adjacent_to_previous, Token.BEGIN)
 
     def is_begin(self):
         return True
@@ -488,8 +489,8 @@ class Begin(Symbol):
 
 class End(Symbol):
 
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous, Token.END)
+    def __init__(self, parser, text, position, adjacent_to_previous):
+        super().__init__(parser, text, position, adjacent_to_previous, Token.END)
 
     def is_end(self):
         return True
@@ -497,8 +498,8 @@ class End(Symbol):
 
 class Assign(Symbol):
 
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous, Token.ASSIGN)
+    def __init__(self, parser, text, position, adjacent_to_previous):
+        super().__init__(parser, text, position, adjacent_to_previous, Token.ASSIGN)
 
     def is_assign(self):
         return True
@@ -509,8 +510,8 @@ class Assign(Symbol):
 
 class Comma(Symbol):
 
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous, Token.COMMA)
+    def __init__(self, parser, text, position, adjacent_to_previous):
+        super().__init__(parser, text, position, adjacent_to_previous, Token.COMMA)
 
     def is_comma(self):
         return True
@@ -518,8 +519,8 @@ class Comma(Symbol):
 
 class Colon(Symbol):
 
-    def __init__(self, text, position, adjacent_to_previous):
-        super().__init__(text, position, adjacent_to_previous, Token.COLON)
+    def __init__(self, parser, text, position, adjacent_to_previous):
+        super().__init__(parser, text, position, adjacent_to_previous, Token.COLON)
 
     def is_colon(self):
         return True
@@ -527,8 +528,8 @@ class Colon(Symbol):
 
 class Arrow(Symbol):
 
-    def __init__(self, text, position, adjacent_to_previous, symbol):
-        super().__init__(text, position, adjacent_to_previous, symbol)
+    def __init__(self, parser, text, position, adjacent_to_previous, symbol):
+        super().__init__(parser, text, position, adjacent_to_previous, symbol)
         assert symbol in (Token.REDIRECT_VAR, Token.REDIRECT_VAR_APPEND,
                           Token.REDIRECT_FILE, Token.REDIRECT_FILE_APPEND)
         self.end += len(symbol) - 1  # Symbol.__init__ already added one
@@ -549,7 +550,7 @@ class Arrow(Symbol):
 class ImpliedMap(Token):
 
     def __init__(self):
-        super().__init__(None, None, False)
+        super().__init__(None, None, None, False)
 
     def op_name(self):
         return 'map'
@@ -558,7 +559,7 @@ class ImpliedMap(Token):
 class LexerFailure(Token):
 
     def __init__(self, exception):
-        super().__init__(None, None, None)
+        super().__init__(None, None, None, None)
         self.exception = exception
 
     def is_lexer_failure(self):
@@ -578,9 +579,9 @@ class LexerException(marcel.exception.KillCommandException):
 
 class Lexer(Source):
 
-    def __init__(self, main, text):
+    def __init__(self, parser, text):
         super().__init__(text)
-        self.main = main
+        self.parser = parser
 
     def tokens(self):
         tokens = []
@@ -600,37 +601,37 @@ class Lexer(Source):
         if c is not None:
             adjacent_to_previous = self.end > 0 and skipped == 0
             if self.match(c, Token.OPEN):
-                token = Expression(self.text, self.end, adjacent_to_previous)
+                token = Expression(self.parser, self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.CLOSE):
                 raise ParseError('Unmatched )')
             elif self.match(c, Token.PIPE):
-                token = Pipe(self.text, self.end, adjacent_to_previous)
+                token = Pipe(self.parser, self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.BEGIN):
-                token = Begin(self.text, self.end, adjacent_to_previous)
+                token = Begin(self.parser, self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.END):
-                token = End(self.text, self.end, adjacent_to_previous)
+                token = End(self.parser, self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.REMOTE):
-                token = Remote(self.text, self.end, adjacent_to_previous)
+                token = Remote(self.parser, self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.BANG):
-                token = Run(self.text, self.end, adjacent_to_previous)
+                token = Run(self.parser, self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.ASSIGN):
-                token = Assign(self.text, self.end, adjacent_to_previous)
+                token = Assign(self.parser, self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.COMMA):
-                token = Comma(self.text, self.end, adjacent_to_previous)
+                token = Comma(self.parser, self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.COLON):
-                token = Colon(self.text, self.end, adjacent_to_previous)
+                token = Colon(self.parser, self.text, self.end, adjacent_to_previous)
             elif self.match(c, Token.COMMENT):
                 return None  # Ignore the rest of the line
             elif self.match(c, Token.REDIRECT_VAR_APPEND):
-                token = Arrow(self.text, self.end, adjacent_to_previous, Token.REDIRECT_VAR_APPEND)
+                token = Arrow(self.parser, self.text, self.end, adjacent_to_previous, Token.REDIRECT_VAR_APPEND)
             elif self.match(c, Token.REDIRECT_VAR):
-                token = Arrow(self.text, self.end, adjacent_to_previous, Token.REDIRECT_VAR)
+                token = Arrow(self.parser, self.text, self.end, adjacent_to_previous, Token.REDIRECT_VAR)
             elif self.match(c, Token.REDIRECT_FILE_APPEND):
-                token = Arrow(self.text, self.end, adjacent_to_previous, Token.REDIRECT_FILE_APPEND)
+                token = Arrow(self.parser, self.text, self.end, adjacent_to_previous, Token.REDIRECT_FILE_APPEND)
             elif self.match(c, Token.REDIRECT_FILE):
-                token = Arrow(self.text, self.end, adjacent_to_previous, Token.REDIRECT_FILE)
+                token = Arrow(self.parser, self.text, self.end, adjacent_to_previous, Token.REDIRECT_FILE)
             else:
-                token = String(self.main.op_modules, self.text, self.end, adjacent_to_previous)
+                token = String(self.parser, self.text, self.end, adjacent_to_previous)
             self.end = token.end
         return token
 
@@ -664,11 +665,11 @@ class Lexer(Source):
                     token = tokens[t]
                     t += 1
                     if token.is_string():
-                        buffer.append(token.value(None))
+                        buffer.append(token.value())
                     else:
                         buffer.extend(['{', token.source(), '}'])
                 buffer.append("''')")
-                token = Expression(''.join(buffer), 0, False)
+                token = Expression(self.parser, ''.join(buffer), 0, False)
             return token
 
         consolidated = []
@@ -803,7 +804,7 @@ class Parser:
         self.text = text
         self.env = main.env
         self.op_modules = main.op_modules
-        self.tokens = Lexer(main, text).tokens()
+        self.tokens = Lexer(self, text).tokens()
         self.t = 0
         self.token = None  # The current token
         self.current_pipelines = marcel.util.Stack()
@@ -817,7 +818,7 @@ class Parser:
     def command(self):
         if self.next_token(String, Assign):
             self.tab_completion_context.complete_disabled()
-            command = self.assignment(self.token.value(self))
+            command = self.assignment(self.token.value())
         else:
             self.tab_completion_context.complete_op()
             command = self.pipeline(None)
@@ -830,7 +831,7 @@ class Parser:
         self.next_token(Assign)
         arg = self.arg()
         if isinstance(arg, Token):
-            value = arg.value(self)
+            value = arg.value()
         elif type(arg) is marcel.core.Pipeline:
             value = arg
         elif arg is None:
@@ -854,10 +855,10 @@ class Parser:
                 if self.pipeline_end():
                     # op >
                     if arrow_token.is_var():
-                        raise SyntaxError(self.token, f'A variable must precede {arrow_token.value(self)}, '
+                        raise SyntaxError(self.token, f'A variable must precede {arrow_token.value()}, '
                                                       f'not an operator ({self.token.op_name})')
                     elif arrow_token.is_file():
-                        raise SyntaxError(self.token, f'A filename must precede {arrow_token.value(self)}, '
+                        raise SyntaxError(self.token, f'A filename must precede {arrow_token.value()}, '
                                                       f'not an operator ({self.token.op_name})')
                 elif self.pipeline_end(1):
                     if self.next_token(String):
@@ -866,9 +867,9 @@ class Parser:
                         store_op = self.redirect_in_op(arrow_token, self.token)
                         op_sequence = [op, store_op]
                     else:
-                        raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value(self)}')
+                        raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value()}')
                 else:
-                    raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value(self)}')
+                    raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value()}')
             else:
                 self.tab_completion_context.complete_disabled()
                 source = self.token
@@ -941,14 +942,14 @@ class Parser:
 
     def redirect_out_op(self, arrow_token, source=None):
         op_name = 'load' if arrow_token.is_var() else 'read'
-        return String(self.op_modules, op_name), [] if source is None else [source]
+        return String(self, op_name), [] if source is None else [source]
 
     def redirect_in_op(self, arrow_token, target):
         op_name = 'store' if arrow_token.is_var() else 'write'
-        return String(self.op_modules, op_name), ['--append', target] if arrow_token.is_append() else [target]
+        return String(self, op_name), ['--append', target] if arrow_token.is_append() else [target]
 
     def map_op(self, expr):
-        return String(self.op_modules, 'map'), [expr]
+        return String(self, 'map'), [expr]
 
     def op_sequence(self):
         op_args = [self.op_args()]
@@ -962,7 +963,7 @@ class Parser:
     def op_args(self):
         self.tab_completion_context.complete_op()
         if self.next_token(Expression):
-            op_args = (String(self.op_modules, 'map'), [self.token])
+            op_args = (String(self, 'map'), [self.token])
         else:
             op_token = self.op()
             arg_tokens = []
@@ -1004,7 +1005,7 @@ class Parser:
     def vars(self):
         vars = []
         while self.token.is_string():
-            vars.append(self.token.value(self))
+            vars.append(self.token.value())
             if self.next_token(Comma):
                 if not self.next_token(String):
                     self.next_token()
@@ -1052,7 +1053,7 @@ class Parser:
         if op is None:
             op = self.create_op_executable(op_token, arg_tokens)
         if op is None:
-            raise marcel.exception.KillCommandException(f'{op_token.value(self)} is not defined.')
+            raise marcel.exception.KillCommandException(f'{op_token.value()} is not defined.')
         return op
 
     def create_op_builtin(self, op_token, arg_tokens):
@@ -1066,23 +1067,23 @@ class Parser:
                 # !: Expect a command number
                 # !!: Don't expect a command number, run the previous command
                 # else: 'run' was entered
-                op.expected_args = (1 if op_token.value(self) == '!' else
-                                    0 if op_token.value(self) == '!!' else None)
+                op.expected_args = (1 if op_token.value() == '!' else
+                                    0 if op_token.value() == '!!' else None)
             args = []
             if op_name == 'bash':
                 for x in arg_tokens:
                     args.append(x.raw() if type(x) is String else
-                                x.value(self) if isinstance(x, Token) else
+                                x.value() if isinstance(x, Token) else
                                 x)
             else:
                 for x in arg_tokens:
-                    args.append(x.value(self) if isinstance(x, Token) else x)
+                    args.append(x.value() if isinstance(x, Token) else x)
                 self.tab_completion_context.set_op(op, op_module.args_parser().flags())
             op_module.args_parser().parse(args, op)
         return op
 
     def create_op_variable(self, op_token, arg_tokens):
-        var = op_token.value(self)
+        var = op_token.value()
         if self.env.getvar(var) is None:
             return None
         op = self.op_modules['runpipeline'].create_op()
@@ -1092,19 +1093,19 @@ class Parser:
             for token in arg_tokens:
                 pipeline_args.append(token
                                      if type(token) is marcel.core.Pipeline else
-                                     token.value(self))
+                                     token.value())
             args, kwargs = marcel.argsparser.PipelineArgsParser(var).parse_pipeline_args(pipeline_args)
             op.set_pipeline_args(args, kwargs)
         return op
 
     def create_op_executable(self, op_token, arg_tokens):
         op = None
-        name = op_token.value(self)
+        name = op_token.value()
         if marcel.util.is_executable(name):
             args = [name]
             for x in arg_tokens:
                 args.append(x.raw() if type(x) is String else
-                            x.value(self) if isinstance(x, Token) else
+                            x.value() if isinstance(x, Token) else
                             x)
             op = marcel.opmodule.create_op(self.env, 'bash', *args)
         return op

@@ -541,7 +541,30 @@ Problems:
 
 190. Some glob characters not working
 
-E.g. grep x[012]
+... when passed to bash
+
+In ~/git/marcel/test:
+
+    M 0.14.1 jao@cheese ~/git/marcel/test$ grep import bug_[23]*
+    23 is not defined.
+
+    M 0.14.1 jao@cheese ~/git/marcel/test$ grep import bug_\[23\]*
+    Error: ['grep: bug_[23]*: No such file or directory']
+
+    M 0.14.1 jao@cheese ~/git/marcel/test$ ls bug_[23]*
+    23 is not defined.
+
+    M 0.14.1 jao@cheese ~/git/marcel/test$ ls bug_\[23\]*
+    -rw-r--r--   jao    jao         837   2020 Jun 24 11:46:56   bug_28.py
+    -rw-r--r--   jao    jao        1378   2020 Jun 24 11:46:56   bug_29.py
+    -rw-r--r--   jao    jao         732   2020 Jun 24 11:46:56   bug_30.py
+    -rw-r--r--   jao    jao        1075   2022 May 02 14:26:04   bug_31.py
+    -rw-r--r--   jao    jao         652   2020 Jun 24 11:46:56   bug_33.py
+    -rw-r--r--   jao    jao         696   2020 Jun 24 11:46:56   bug_38.py
+    -rw-r--r--   jao    jao         955   2020 Jun 24 11:46:56   bug_39.py
+
+    M 0.14.1 jao@cheese ~/git/marcel/test$ bash ls bug_\[23\]*
+    Error: ["ls: cannot access 'bug_[23]*': No such file or directory"]
 
 ----------------------------------------------------------------------
 

@@ -1894,6 +1894,10 @@ def test_bug_168():
     os.system('rm -rf /tmp/hello')
 
 
+def test_bug_190():
+    TEST.run('grep import bug_\[23\]*.py')
+
+
 def test_bug_185():
     # Unbound var
     TEST.run('varop',
@@ -1911,6 +1915,7 @@ def test_bugs():
     test_bug_151()
     test_bug_154()
     test_bug_168()
+    test_bug_190()
 
 
 def main_stable():
@@ -1962,6 +1967,7 @@ def main_stable():
 
 
 def main_dev():
+    test_bug_190()
     pass
 
 
