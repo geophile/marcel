@@ -1967,7 +1967,25 @@ def main_stable():
 
 
 def main_dev():
-    test_bug_190()
+    # print('------------------------------------------------------------')
+    # print('grep import bug_[23]*')
+    # TEST.run('grep import bug_[23]*')
+    # print('------------------------------------------------------------')
+    # print('grep import bug_\[23\]*')
+
+    print('------------------------------------------------------------')
+    TEST.run('grep ab cd')
+    # TEST.run('grep import bug_[23]*')
+    # TEST.run('grep import bug_\[23\]*')
+    # TEST.run('grep import "bug_[23]*"')
+
+    # print('------------------------------------------------------------')
+    # print('ls bug_[23]*')
+    # TEST.run('ls bug_[23]*')
+    # print('------------------------------------------------------------')
+    # print('ls bug_\[23\]*')
+    # TEST.run('ls bug_\[23\]*')
+    # test_bug_190()
     pass
 
 

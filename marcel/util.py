@@ -191,28 +191,6 @@ def iterable(x):
     return isinstance(x, collections.abc.Iterable)
 
 
-class Stack:
-
-    def __init__(self):
-        self.contents = []
-
-    def push(self, x):
-        self.contents.append(x)
-
-    # Returns nth from the top
-    def top(self, n=0):
-        return self.contents[n - 1]
-
-    def pop(self):
-        return self.contents.pop()
-
-    def is_empty(self):
-        return len(self.contents) == 0
-
-    def size(self):
-        return len(self.contents)
-
-
 class Trace:
 
     def __init__(self, tracefile, replace=False):

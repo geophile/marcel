@@ -1,5 +1,5 @@
 # This file is part of Marcel.
-# 
+#
 # Marcel is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
 # Free Software Foundation, either version 3 of the License, or at your
@@ -87,13 +87,19 @@ class Source:
         self.end = position
 
     def __repr__(self):
-        name = self.__class__.__name__
-        if self.start is None or self.end is None:
-            text = '' if self.text is None else self.text
-        else:
-            assert self.text is not None
-            text = self.text[self.start:self.end]
-        return f'{name}({text})'
+        buffer = [self.__class__.__name__, '(']
+        if self.text is not None:
+            if self.start is not None and self.end is not None:
+                buffer.append('[')
+                buffer.append(str(self.start))
+                buffer.append(':')
+                buffer.append(str(self.end))
+                buffer.append(']')
+                buffer.append(self.text[self.start:self.end])
+            else:
+                buffer.append(self.text)
+        buffer.append(')')
+        return ''.join(buffer)
 
     def peek_char(self, n=1):
         c = None
@@ -165,6 +171,7 @@ class Token(Source):
     def is_string(self):
         return False
 
+    # Does this token represent a builtin op?
     def is_op(self):
         return False
 
@@ -380,6 +387,7 @@ class String(Token):
                     self.end -= 1
                     break
                 else:
+                    # quoted whitespace or character that would otherwise terminate the string
                     chars.append(c)
             elif c in Token.QUOTES:
                 if quote is None:
@@ -592,7 +600,7 @@ class Lexer(Source):
                 token = self.next_token()
         except LexerException as e:
             tokens.append(LexerFailure(e))
-        return self.consolidate_adjacent(tokens)
+        return self.parser.consolidate_adjacent(tokens)
 
     def next_token(self):
         token = None
@@ -647,47 +655,6 @@ class Lexer(Source):
         after = self.end
         return after - before
 
-    # Adjacent String and Expression tokens must be consolidated. Turn them into an Expression that concatenates
-    # the values.
-    def consolidate_adjacent(self, tokens):
-        def eligible(token):
-            return token.is_string() or token.is_expr()
-
-        def consolidate(start, end):
-            if end == start + 1:
-                token = tokens[start]
-            else:
-                # Generate a new Expression token that combines the strings and expressions into
-                # a Python f'...' string.
-                buffer = ["(f'''"]
-                t = start
-                while t < end:
-                    token = tokens[t]
-                    t += 1
-                    if token.is_string():
-                        buffer.append(token.value())
-                    else:
-                        buffer.extend(['{', token.source(), '}'])
-                buffer.append("''')")
-                token = Expression(self.parser, ''.join(buffer), 0, False)
-            return token
-
-        consolidated = []
-        n = len(tokens)
-        start = 0
-        while start < n:
-            while start < n and not eligible(tokens[start]):
-                consolidated.append(tokens[start])
-                start += 1
-            end = start + 1
-            while end < n and eligible(tokens[end]) and tokens[end].adjacent_to_previous:
-                end += 1
-            if start < n:
-                consolidated.append(consolidate(start, end))
-            start = end
-        return consolidated
-
-
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Parsing
@@ -703,7 +670,7 @@ class Lexer(Source):
 #    
 #     pipeline:
 #             var store var
-#             var > [op_sequence [store var]]
+#             var store [op_sequence [store var]]
 #             op_sequence [store var]
 #             store var
 #
@@ -713,7 +680,9 @@ class Lexer(Source):
 #
 #     store:
 #             >
+#             >$
 #             >>
+#             >>$
 #
 #     op_args:
 #             op arg*
@@ -807,7 +776,6 @@ class Parser:
         self.tokens = Lexer(self, text).tokens()
         self.t = 0
         self.token = None  # The current token
-        self.current_pipelines = marcel.util.Stack()
         self.tab_completion_context = TabCompletionContext()
 
     def parse(self):
@@ -844,7 +812,6 @@ class Parser:
     def pipeline(self, parameters):
         pipeline = marcel.core.Pipeline()
         pipeline.set_parameters(parameters)
-        self.current_pipelines.push(pipeline)
         if self.next_token(String, Arrow):
             if self.token.op_name:
                 op_token = self.token
@@ -937,7 +904,6 @@ class Parser:
         for op_args in op_sequence:
             # op_args is (op_token, list of arg tokens)
             pipeline.append(self.create_op(*op_args))
-        self.current_pipelines.pop()
         return pipeline
 
     def redirect_out_op(self, arrow_token, source=None):
@@ -969,11 +935,10 @@ class Parser:
             arg_tokens = []
             if op_token.is_followed_by_whitespace():
                 self.tab_completion_context.complete_arg(op_token)
-            if not self.at_end():
+            arg_token = self.arg()
+            while arg_token is not None:
+                arg_tokens.append(arg_token)
                 arg_token = self.arg()
-                while arg_token is not None:
-                    arg_tokens.append(arg_token)
-                    arg_token = self.arg()
             op_args = (op_token, arg_tokens)
         return op_args
 
@@ -1126,3 +1091,43 @@ class Parser:
         pipeline = marcel.core.Pipeline()
         pipeline.append(op)
         return pipeline
+
+    # Adjacent String and Expression tokens must be consolidated. Turn them into an Expression that concatenates
+    # the values.
+    def consolidate_adjacent(self, tokens):
+        def eligible(token):
+            return token.is_string() or token.is_expr()
+
+        def consolidate(start, end):
+            if end == start + 1:
+                token = tokens[start]
+            else:
+                # Generate a new Expression token that combines the strings and expressions into
+                # a Python f'...' string.
+                buffer = ["(f'''"]
+                t = start
+                while t < end:
+                    token = tokens[t]
+                    t += 1
+                    if token.is_string():
+                        buffer.append(token.value())
+                    else:
+                        buffer.extend(['{', token.source(), '}'])
+                buffer.append("''')")
+                token = Expression(self, ''.join(buffer), 0, False)
+            return token
+
+        consolidated = []
+        n = len(tokens)
+        start = 0
+        while start < n:
+            while start < n and not eligible(tokens[start]):
+                consolidated.append(tokens[start])
+                start += 1
+            end = start + 1
+            while end < n and eligible(tokens[end]) and tokens[end].adjacent_to_previous:
+                end += 1
+            if start < n:
+                consolidated.append(consolidate(start, end))
+            start = end
+        return consolidated

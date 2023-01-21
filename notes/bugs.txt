@@ -571,3 +571,21 @@ In ~/git/marcel/test:
 191. Protect env from deletion
 
 Don't allow deletion of some symbols. Which ones? COLOR_SCHEME is one example.
+
+----------------------------------------------------------------------
+
+192. Native command output loses ANSI escape codes
+
+Example:
+
+M 0.14.1 jao@cheese ~/git/marcel/test$ git branch
+  bug189
+* bug190
+  master
+M 0.14.1 jao@cheese ~/git/marcel/test$ bash
+jao@cheese:~/git/marcel/test$ git branch
+  bug189
+* bug190
+  master
+
+bash command output is colorized, marcel command output is not.
