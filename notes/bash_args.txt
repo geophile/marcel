@@ -1,0 +1,57 @@
+This is about bug 190.
+
+    grep import bug_[23]*.py
+
+Bash interprets [] as glob characters. Marcel interprets them as
+delimiting a pipeline. The correct interpretation can be made by
+examining the op. Grep is an executable, so that means that the bash
+interpretation should be used.
+
+It would be best to make this determination during lexing, before [ is
+turned into a Begin token, but that would require the lexer to keep
+track of context -- whether a given string is in the position of an
+op.
+
+op_args gathers the op and args. But arg parsing is recursive descent,
+so before the args of the top-level op (grep) can be processed, we're
+already processing "23" as an op in the nested pipeline. That's no
+good.
+
+Ideas:
+
+1) Add a new parse immediately after lexing, which looks for
+executable ops and fixes tokens.
+
+2) Replace tokens on the fly, e.g. Begin -> String('[')
+
+3) Parse twice. First pass notes executables. If there are any
+executables, then redo the affected tokens and parse again.
+(Processing args, and creating the bash op is kind of pointless. We
+already know it will have to be redone. Could reprocess the text
+immediately.)
+
+4) Interleave parsing and lexing. Then, Parser.arg() can know if it is
+working on an executable or not, and do marcel lexing or shell arg
+lexing.
+
+......................................................................
+
+Gotcha:
+
+    bash executable arg1 arg2 ...
+
+argi has to be parsed as shell arg. Might need to revisit 'bash' case
+in create_op_builtin.
+
+
+
+Tab completion operates on args, so it also needs to know about bash
+vs marcel arg processing.
+
+
+Test:
+
+Shell args inside assigned pipeline:
+
+    p = [grep import bug_[23]*]
+    p
