@@ -101,11 +101,13 @@ class Source:
         buffer.append(')')
         return ''.join(buffer)
 
-    def peek_char(self, n=1):
-        c = None
-        if self.end + n <= len(self.text):
-            c = self.text[self.end:self.end + n]
-        return c
+    def more(self):
+        return self.end < len(self.text)
+
+    def peek(self, n=1):
+        start = self.end
+        end = self.end + n
+        return self.text[start:end] if end <= len(self.text) else None
 
     def next_char(self):
         c = None
@@ -120,9 +122,16 @@ class Source:
     def raw(self):
         return self.text[self.start:self.end]
 
+    def mark(self):
+        return self.text, self.start, self.end
+
+    def reset(self, mark):
+        text, start, end = mark
+        assert self.text == text
+        self.start, self.end = start, end
+
 
 class Token(Source):
-
     # Special characters that need to be escaped for python strings
     ESCAPABLE = '''\\\'\"\a\b\f\n\r\t\v'''
     SINGLE_QUOTE = "'"
@@ -160,10 +169,10 @@ class Token(Source):
         REDIRECT_VAR_APPEND
     ]
 
-    def __init__(self, parser, text, position, adjacent_to_previous):
+    def __init__(self, parser, text, position):
         super().__init__(text, position)
         self.parser = parser
-        self.adjacent_to_previous = adjacent_to_previous
+        self.adjacent_to_next = False
 
     def value(self):
         return None
@@ -211,8 +220,8 @@ class Token(Source):
     def op_name(self):
         return None
 
-    def is_followed_by_whitespace(self):
-        return self.end < len(self.text) and self.text[self.end].isspace()
+    def mark_adjacent_to_next(self):
+        self.adjacent_to_next = True
 
 
 # PythonString isn't a top-level token that appears on a command line. An Expression is defined as
@@ -224,8 +233,8 @@ class Token(Source):
 # https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals.
 class PythonString(Token):
 
-    def __init__(self, parser, text, position, adjacent_to_previous):
-        super().__init__(parser, text, position, adjacent_to_previous)
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position)
         self.string = None
         self.scan()
 
@@ -293,8 +302,8 @@ class PythonString(Token):
 
 class Expression(Token):
 
-    def __init__(self, parser, text, position, adjacent_to_previous):
-        super().__init__(parser, text, position, adjacent_to_previous)
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position)
         self._source = None
         self._function = None
         self.scan()
@@ -345,15 +354,15 @@ class Expression(Token):
             elif c == Token.CLOSE:
                 nesting -= 1
             elif c in Token.QUOTES:
-                self.end = PythonString(self.parser, self.text, self.end - 1, False).end
+                self.end = PythonString(self.parser, self.text, self.end - 1).end
         if self.text[self.end - 1] != Token.CLOSE:
             raise LexerException(self, 'Malformed Python expression')
 
 
 class String(Token):
 
-    def __init__(self, parser, text, position=None, adjacent_to_previous=False):
-        super().__init__(parser, text, 0 if position is None else position, adjacent_to_previous)
+    def __init__(self, parser, text, position=None):
+        super().__init__(parser, text, 0 if position is None else position)
         if position is None:
             # Text is fine as is.
             self.string = text
@@ -421,8 +430,8 @@ class String(Token):
 
 class Run(Token):
 
-    def __init__(self, parser, text, position, adjacent_to_previous):
-        super().__init__(parser, text, position, adjacent_to_previous)
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position)
         self.symbol = None
         self.scan()  # Sets self.symbol
 
@@ -442,7 +451,7 @@ class Run(Token):
     def scan(self):
         c = self.next_char()
         assert c == Token.BANG
-        c = self.peek_char()
+        c = self.peek()
         if c == Token.BANG:
             self.next_char()
             self.symbol = '!!'
@@ -452,8 +461,8 @@ class Run(Token):
 
 class Symbol(Token):
 
-    def __init__(self, parser, text, position, adjacent_to_previous, symbol):
-        super().__init__(parser, text, position, adjacent_to_previous)
+    def __init__(self, parser, text, position, symbol):
+        super().__init__(parser, text, position)
         self.symbol = symbol
         self.end += 1
 
@@ -463,8 +472,8 @@ class Symbol(Token):
 
 class Pipe(Symbol):
 
-    def __init__(self, parser, text, position, adjacent_to_previous):
-        super().__init__(parser, text, position, adjacent_to_previous, Token.PIPE)
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position, Token.PIPE)
 
     def is_pipe(self):
         return True
@@ -472,8 +481,8 @@ class Pipe(Symbol):
 
 class Remote(Symbol):
 
-    def __init__(self, parser, text, position, adjacent_to_previous):
-        super().__init__(parser, text, position, adjacent_to_previous, Token.REMOTE)
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position, Token.REMOTE)
 
     def is_remote(self):
         return True
@@ -488,8 +497,8 @@ class Remote(Symbol):
 
 class Begin(Symbol):
 
-    def __init__(self, parser, text, position, adjacent_to_previous):
-        super().__init__(parser, text, position, adjacent_to_previous, Token.BEGIN)
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position, Token.BEGIN)
 
     def is_begin(self):
         return True
@@ -497,8 +506,8 @@ class Begin(Symbol):
 
 class End(Symbol):
 
-    def __init__(self, parser, text, position, adjacent_to_previous):
-        super().__init__(parser, text, position, adjacent_to_previous, Token.END)
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position, Token.END)
 
     def is_end(self):
         return True
@@ -506,8 +515,8 @@ class End(Symbol):
 
 class Assign(Symbol):
 
-    def __init__(self, parser, text, position, adjacent_to_previous):
-        super().__init__(parser, text, position, adjacent_to_previous, Token.ASSIGN)
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position, Token.ASSIGN)
 
     def is_assign(self):
         return True
@@ -518,8 +527,8 @@ class Assign(Symbol):
 
 class Comma(Symbol):
 
-    def __init__(self, parser, text, position, adjacent_to_previous):
-        super().__init__(parser, text, position, adjacent_to_previous, Token.COMMA)
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position, Token.COMMA)
 
     def is_comma(self):
         return True
@@ -527,8 +536,8 @@ class Comma(Symbol):
 
 class Colon(Symbol):
 
-    def __init__(self, parser, text, position, adjacent_to_previous):
-        super().__init__(parser, text, position, adjacent_to_previous, Token.COLON)
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position, Token.COLON)
 
     def is_colon(self):
         return True
@@ -536,8 +545,8 @@ class Colon(Symbol):
 
 class Arrow(Symbol):
 
-    def __init__(self, parser, text, position, adjacent_to_previous, symbol):
-        super().__init__(parser, text, position, adjacent_to_previous, symbol)
+    def __init__(self, parser, text, position, symbol):
+        super().__init__(parser, text, position, symbol)
         assert symbol in (Token.REDIRECT_VAR, Token.REDIRECT_VAR_APPEND,
                           Token.REDIRECT_FILE, Token.REDIRECT_FILE_APPEND)
         self.end += len(symbol) - 1  # Symbol.__init__ already added one
@@ -558,7 +567,7 @@ class Arrow(Symbol):
 class ImpliedMap(Token):
 
     def __init__(self):
-        super().__init__(None, None, None, False)
+        super().__init__(None, None, None)
 
     def op_name(self):
         return 'map'
@@ -567,7 +576,7 @@ class ImpliedMap(Token):
 class LexerFailure(Token):
 
     def __init__(self, exception):
-        super().__init__(None, None, None, None)
+        super().__init__(None, None, None)
         self.exception = exception
 
     def is_lexer_failure(self):
@@ -577,7 +586,6 @@ class LexerFailure(Token):
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Lexing
-
 
 class LexerException(marcel.exception.KillCommandException):
 
@@ -591,69 +599,130 @@ class Lexer(Source):
         super().__init__(text)
         self.parser = parser
 
-    def tokens(self):
-        tokens = []
-        try:
-            token = self.next_token()
-            while token is not None:
-                tokens.append(token)
-                token = self.next_token()
-        except LexerException as e:
-            tokens.append(LexerFailure(e))
-        return self.parser.consolidate_adjacent(tokens)
-
     def next_token(self):
-        token = None
-        skipped = self.skip_whitespace()
-        c = self.peek_char()
-        if c is not None:
-            adjacent_to_previous = self.end > 0 and skipped == 0
-            if self.match(c, Token.OPEN):
-                token = Expression(self.parser, self.text, self.end, adjacent_to_previous)
-            elif self.match(c, Token.CLOSE):
-                raise ParseError('Unmatched )')
-            elif self.match(c, Token.PIPE):
-                token = Pipe(self.parser, self.text, self.end, adjacent_to_previous)
-            elif self.match(c, Token.BEGIN):
-                token = Begin(self.parser, self.text, self.end, adjacent_to_previous)
-            elif self.match(c, Token.END):
-                token = End(self.parser, self.text, self.end, adjacent_to_previous)
-            elif self.match(c, Token.REMOTE):
-                token = Remote(self.parser, self.text, self.end, adjacent_to_previous)
-            elif self.match(c, Token.BANG):
-                token = Run(self.parser, self.text, self.end, adjacent_to_previous)
-            elif self.match(c, Token.ASSIGN):
-                token = Assign(self.parser, self.text, self.end, adjacent_to_previous)
-            elif self.match(c, Token.COMMA):
-                token = Comma(self.parser, self.text, self.end, adjacent_to_previous)
-            elif self.match(c, Token.COLON):
-                token = Colon(self.parser, self.text, self.end, adjacent_to_previous)
-            elif self.match(c, Token.COMMENT):
-                return None  # Ignore the rest of the line
-            elif self.match(c, Token.REDIRECT_VAR_APPEND):
-                token = Arrow(self.parser, self.text, self.end, adjacent_to_previous, Token.REDIRECT_VAR_APPEND)
-            elif self.match(c, Token.REDIRECT_VAR):
-                token = Arrow(self.parser, self.text, self.end, adjacent_to_previous, Token.REDIRECT_VAR)
-            elif self.match(c, Token.REDIRECT_FILE_APPEND):
-                token = Arrow(self.parser, self.text, self.end, adjacent_to_previous, Token.REDIRECT_FILE_APPEND)
-            elif self.match(c, Token.REDIRECT_FILE):
-                token = Arrow(self.parser, self.text, self.end, adjacent_to_previous, Token.REDIRECT_FILE)
+        def consolidatable(token):
+            return token.is_string() or token.is_expr()
+
+        token = self.next_unconsolidated_token()
+        adjacent_tokens = [token]
+        while token and token.adjacent_to_next and consolidatable(token):
+            # Don't consume the next token if it isn't going to be consollidated.
+            mark = self.mark()
+            token = self.next_unconsolidated_token()
+            if consolidatable(token):
+                adjacent_tokens.append(token)
             else:
-                token = String(self.parser, self.text, self.end, adjacent_to_previous)
-            self.end = token.end
+                # token is not consolidatable, so loop condition will be false.
+                self.reset(mark)
+        n_adjacent = len(adjacent_tokens)
+        consolidated = self.consolidate(adjacent_tokens) if n_adjacent > 1 else adjacent_tokens[0]
+        return consolidated
+
+    def consolidate(self, tokens):
+        # Generate a new Expression token that combines the strings and expressions into
+        # a Python f'...' string.
+        buffer = ["(f'''"]
+        for token in tokens:
+            if token.is_string():
+                buffer.append(token.value())
+            elif token.is_expr():
+                buffer.extend(['{', token.source(), '}'])
+            else:
+                assert False, token
+        buffer.append("''')")
+        token = Expression(self.parser, ''.join(buffer), 0)
+        # print(f'{tokens} -> {token}')
         return token
 
-    def match(self, c, symbol):
-        return self.peek_char(len(symbol)) == symbol
+    def next_unconsolidated_token(self):
+        token = None
+        self.skip_whitespace()
+        if self.more():
+            if self.match(Token.OPEN):
+                token = Expression(self.parser, self.text, self.end)
+            elif self.match(Token.CLOSE):
+                raise ParseError('Unmatched )')
+            elif self.match(Token.PIPE):
+                token = Pipe(self.parser, self.text, self.end)
+            elif self.match(Token.BEGIN):
+                token = Begin(self.parser, self.text, self.end)
+            elif self.match(Token.END):
+                token = End(self.parser, self.text, self.end)
+            elif self.match(Token.REMOTE):
+                token = Remote(self.parser, self.text, self.end)
+            elif self.match(Token.BANG):
+                token = Run(self.parser, self.text, self.end)
+            elif self.match(Token.ASSIGN):
+                token = Assign(self.parser, self.text, self.end)
+            elif self.match(Token.COMMA):
+                token = Comma(self.parser, self.text, self.end)
+            elif self.match(Token.COLON):
+                token = Colon(self.parser, self.text, self.end)
+            elif self.match(Token.COMMENT):
+                return None  # Ignore the rest of the line
+            elif self.match(Token.REDIRECT_VAR_APPEND):
+                token = Arrow(self.parser, self.text, self.end, Token.REDIRECT_VAR_APPEND)
+            elif self.match(Token.REDIRECT_VAR):
+                token = Arrow(self.parser, self.text, self.end, Token.REDIRECT_VAR)
+            elif self.match(Token.REDIRECT_FILE_APPEND):
+                token = Arrow(self.parser, self.text, self.end, Token.REDIRECT_FILE_APPEND)
+            elif self.match(Token.REDIRECT_FILE):
+                token = Arrow(self.parser, self.text, self.end, Token.REDIRECT_FILE)
+            else:
+                token = String(self.parser, self.text, self.end)
+            self.end = token.end
+            if self.more() and self.skip_whitespace() == 0:
+                token.mark_adjacent_to_next()
+        return token
+
+    def match(self, symbol):
+        return self.peek(len(symbol)) == symbol
 
     def skip_whitespace(self):
         before = self.end
-        c = self.peek_char()
+        c = self.peek()
         while c is not None and c.isspace():
             self.next_char()
-            c = self.peek_char()
+            c = self.peek()
         after = self.end
         return after - before
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+class Tokens(object):
+
+    def __init__(self, parser, text):
+        self.lexer = Lexer(parser, text)
+
+    def __repr__(self):
+        return str(self.lexer)
+
+    def next_token(self):
+        return self.lexer.next_token()
+
+    def mark(self):
+        return self.lexer.mark()
+
+    def reset(self, mark):
+        self.lexer.reset(mark)
+
+    # Return the next n tokens, but don't consume them. Return None if there aren't n tokens left.
+    def peek(self, n=1):
+        tokens = []
+        mark = self.mark()
+        for i in range(n):
+            token = self.next_token()
+            if token is None:
+                tokens = None
+                break
+            tokens.append(token)
+        self.reset(mark)
+        return tokens
+
+    def more(self):
+        return self.peek() is not None
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -773,13 +842,15 @@ class Parser:
         self.text = text
         self.env = main.env
         self.op_modules = main.op_modules
-        self.tokens = Lexer(self, text).tokens()
-        self.t = 0
+        self.tokens = Tokens(self, text)
         self.token = None  # The current token
         self.tab_completion_context = TabCompletionContext()
 
+    def __repr__(self):
+        return str(self.tokens)
+
     def parse(self):
-        if len(self.tokens) == 0:
+        if not self.tokens.more():
             raise EmptyCommand()
         return self.command()
 
@@ -791,8 +862,7 @@ class Parser:
             self.tab_completion_context.complete_op()
             command = self.pipeline(None)
         if not self.at_end():
-            excess = ', '.join([str(t) for t in self.tokens[self.t:]])
-            raise ParseError(f'{command} followed by excess tokens: {excess}')
+            raise ParseError(f'{command} followed by excess tokens')
         return command
 
     def assignment(self, var):
@@ -933,7 +1003,8 @@ class Parser:
         else:
             op_token = self.op()
             arg_tokens = []
-            if op_token.is_followed_by_whitespace():
+            if not op_token.adjacent_to_next:
+                # Token is followed by whitespace
                 self.tab_completion_context.complete_arg(op_token)
             arg_token = self.arg()
             while arg_token is not None:
@@ -983,29 +1054,28 @@ class Parser:
             raise SyntaxError(self.token, f'Expected comma or colon, found {self.token}')
         return vars
 
-    # Returns True if a qualifying token was found, and sets self.token to it.
-    # Returns False if a qualifying token was not found, and leaves self.token unchanged.
+    # Looks for a sequence of tokens matching the types listed in expected_token_types.
+    # Returns True if a sequence of qualifying token was found, and advances to the first of those.
+    # Returns False if a sequence of qualifying token was not found, and leaves the current token unchanged.
     def next_token(self, *expected_token_types):
-        if self.t < len(self.tokens) and self.tokens[self.t].is_lexer_failure():
-            raise self.tokens[self.t].exception
         n = len(expected_token_types)
-        if self.t + n <= len(self.tokens):
+        if n > 0:
+            tokens = self.tokens.peek(n)
+            if tokens is None:
+                return False
             for i in range(n):
-                if type(self.tokens[self.t + i]) is not expected_token_types[i]:
+                if type(tokens[i]) is not expected_token_types[i]:
                     return False
-            if self.t < len(self.tokens):
-                self.token = self.tokens[self.t]
-                self.t += 1
-                return True
-        return False
+        self.token = self.tokens.next_token()
+        return True
 
     # Does token t+n indicate the end of a pipeline?
     def pipeline_end(self, n=0):
-        p = self.t + n
-        return p == len(self.tokens) or self.tokens[p].is_end()
+        tokens = self.tokens.peek(n + 1)
+        return tokens is None or tokens[-1].is_end()
 
     def at_end(self):
-        return self.t >= len(self.tokens)
+        return self.tokens.peek() is None
 
     @staticmethod
     def raise_unexpected_token_error(token, message):
@@ -1091,43 +1161,3 @@ class Parser:
         pipeline = marcel.core.Pipeline()
         pipeline.append(op)
         return pipeline
-
-    # Adjacent String and Expression tokens must be consolidated. Turn them into an Expression that concatenates
-    # the values.
-    def consolidate_adjacent(self, tokens):
-        def eligible(token):
-            return token.is_string() or token.is_expr()
-
-        def consolidate(start, end):
-            if end == start + 1:
-                token = tokens[start]
-            else:
-                # Generate a new Expression token that combines the strings and expressions into
-                # a Python f'...' string.
-                buffer = ["(f'''"]
-                t = start
-                while t < end:
-                    token = tokens[t]
-                    t += 1
-                    if token.is_string():
-                        buffer.append(token.value())
-                    else:
-                        buffer.extend(['{', token.source(), '}'])
-                buffer.append("''')")
-                token = Expression(self, ''.join(buffer), 0, False)
-            return token
-
-        consolidated = []
-        n = len(tokens)
-        start = 0
-        while start < n:
-            while start < n and not eligible(tokens[start]):
-                consolidated.append(tokens[start])
-                start += 1
-            end = start + 1
-            while end < n and eligible(tokens[end]) and tokens[end].adjacent_to_previous:
-                end += 1
-            if start < n:
-                consolidated.append(consolidate(start, end))
-            start = end
-        return consolidated
