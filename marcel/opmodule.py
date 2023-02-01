@@ -31,6 +31,8 @@ class OpModule:
         self._args_parser = None
         self._args_parser_constructor = None
         self._help = None
+        # TODO: Check for FilenamesOp subclass
+        self._bashy_args = op_name in ('ls', 'read', 'bash')
         op_module = importlib.import_module(f'marcel.op.{op_name}')
         # Locate items in module needed during the lifecycle of an op.
         for k, v in op_module.__dict__.items():
@@ -43,12 +45,13 @@ class OpModule:
                 isclass = inspect.isclass(v)
                 if isclass:
                     parents = inspect.getmro(v)
-                    if isclass and marcel.core.Op in parents:
+                    if marcel.core.Op in parents:
+                        # self._bashy_args = marcel.op.filenamesop.FilenamesOp in parents
                         # The op class, e.g.
                         if op_name == v.__name__.lower():
                             self._op_constructor = v
                         # else: Another class in the same source
-                    elif isclass and marcel.argsparser.ArgsParser in parents:
+                    elif marcel.argsparser.ArgsParser in parents:
                         # E.g. LsArgsParser
                         self._args_parser_constructor = v
         # assert self._op_constructor is not None, op_name
@@ -74,6 +77,9 @@ class OpModule:
 
     def help(self):
         return self._help
+
+    def bashy_args(self):
+        return self._bashy_args
 
 
 def import_op_modules(env):

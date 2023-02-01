@@ -551,6 +551,46 @@ In ~/git/marcel/test:
     M 0.14.1 jao@cheese ~/git/marcel/test$ bash ls bug_\[23\]*
     Error: ["ls: cannot access 'bug_[23]*': No such file or directory"]
 
+......................................................................
+
+Parens are weird:
+
+- Marcel: expr
+
+- Bash single paren: paren ends arg, but is useless by itself.
+
+- Bash double paren: evaluate expr, e.g. $((4+5))
+
+So ((4,5)) is ambiguous:
+
+    marcel: ((4,5)) yields the tuple (4, 5)
+    bash: ((4,5)) yields 5
+
+Not sure this is right, but treat ( as marcel expr.
+
+......................................................................
+
+Notes:
+
+* Terminates shell arg
+
+    STRING_TERMINATING = [
+        * ( OPEN,
+        * ) CLOSE,
+        * | PIPE,
+          [ BEGIN,
+          ] END,
+          = ASSIGN,
+          # COMMENT,
+          , COMMA,
+          : COLON,
+        * > REDIRECT_FILE,
+        * >> REDIRECT_FILE_APPEND,
+        * >$ REDIRECT_VAR,
+        * >>$ REDIRECT_VAR_APPEND
+    ]
+
+
 ----------------------------------------------------------------------
 
 191. Protect env from deletion
@@ -582,3 +622,30 @@ bash command output is colorized, marcel command output is not.
 E.g. ls -r /bin/X11
 
 Needs to detect the cycle and stop.
+
+----------------------------------------------------------------------
+
+194. {...} not handled consistently (from a bash point of view)
+
+{} are not glob characters, they are bash characters. So
+
+    grep asdf a{1,2}*
+
+works, since this is evaluated by bash.
+
+But 
+
+    ls a{1,2}*
+
+does not work, because ls is a marcel op, and marcel doesn't support
+{}.
+
+----------------------------------------------------------------------
+
+195. Remote execution should work on a pipeline-valued expression
+
+E.g., these should work:
+
+g3 = [gen 3]
+@jao (g3)
+remote jao (g3)

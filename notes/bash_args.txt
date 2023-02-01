@@ -55,3 +55,35 @@ Shell args inside assigned pipeline:
 
     p = [grep import bug_[23]*]
     p
+
+----------------------------------------------------------------------
+
+Trying to disambiguate [...] based on context is tricky. 
+
+    ... args [x: ls (x)]
+
+ls takes shell args, so ] has no significance as a pipeline ending
+character and is interpreted as part of the first argument to ls. 
+
+    ... args [x: ls (x) ]
+
+Same! ] is interpreted as a second arg to ls.
+
+This is fixable if we track brackets. 
+
+Alternatively, use different syntax for pipelines.
+
+- @jao [: ... :]
+
+This looks bad for pipelines with args, e.g. ... | args [: n: ... :]
+
+- Parens would be nice, since I've decided not to worry about bash
+usage of them, but it leads to ambiguity. E.g. (ls) could be a
+pipeline running ls, or an expression returning the value of the ls
+variable.
+
+- {...}
+
+Same problem as [...], already has a bash meaning.
+
+- (| ... |)

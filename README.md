@@ -1,43 +1,24 @@
 What's New
 ----------
 
-This release adds commands to upload local files to all nodes of a cluster, and to download
-files from all nodes of a cluster.
+Marcel aims to be bash-like, and familiar to people comfortable with that shell. 
+In particular, it should be possible to issue simple bash commands via marcel. 
+One impediment to this goal is
+that some characters have different interpretations in bash and marcel. For example, `[...]` delimits a pipeline 
+in marcel. But in bash, the same symbols are used in glob patterns, e.g. `ls [0-9]*`. Prior to this release,
+marcel always interpreted `[` as the beginning of a pipeline, and this made the use of glob patterns difficult
+or impossible, (escaping the `[` and `]` characters worked in some situations).
 
-Suppose that cluster `lab` has nodes `node1`, `node2`, `node3`, `node4`.
-This would have been configured in the marcel startup script, e.g.
-
-```shell
-lab = cluster(user='qa',
-              identity='/home/qa/.ssh/id_rsa',
-              hosts=['node1', 'node2', 'node3', 'node4'])   
-```
-You could then upload the `scripts` directory to `/usr/local/foobar` in each of the nodes as follows:
+With this release, command line parsing is context-aware. If a host executable is being used, then argument parsing
+adjusts, using bash syntax rules. For example:
 
 ```shell
-upload scripts lab /usr/local/foobar
+grep foobar xyz[0-9]*
 ```
 
-You could download log files from all nodes, to the `logs` directory as follows:
-
-```shell
-download logs lab /var/log/foobar/log* 
-```
-
-In the `logs` target directory, the `download` command will create one directory for each node
-of the cluster. So after this command, `logs` might contain the following (e.g., 
-`ls -fr dest | (f: f.relative_to('dest'))`)
-
-```shell
-node1/log.1
-node1/log.2
-node1/log.3
-node2/log.1
-node2/log.2
-node2/log.3
-node2/log.4
-node2/log.5
-```
+Previously, `[` would have been assumed to be the beginning of a pipeline, and because `0-9` is not recognizable as
+anything that can be executed, marcel would have printed an error message. In this release, `grep` is known to be
+a host executable, and so the entire string `xyz[0-9]*` is passed as an argument to `grep`.
 
 Marcel
 ======

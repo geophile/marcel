@@ -1633,14 +1633,14 @@ def test_args():
     TEST.run('touch /tmp/a/d2/f2')
     TEST.run('touch /tmp/a/d3/f3')
     TEST.run('cd /tmp/a')
-    TEST.run('ls -d | args [d: ls -f (d)] | map (f: f.name)',
+    TEST.run('ls -d | args [d: ls -f (d) ] | map (f: f.name)',
              expected_out=['f1', 'f2', 'f3'])
     TEST.run('touch a_file')
     TEST.run('touch "a file"')
     TEST.run('touch "a file with a \' mark"')
     TEST.run('rm -rf d')
     TEST.run('mkdir d')
-    TEST.run(test='ls -f | args --all [files: mv -t d (quote_files(files))]',
+    TEST.run(test='ls -f | args --all [files: mv -t d (quote_files(files)) ]',
              verification='ls -f d | map (f: f.name)',
              expected_out=['a file', "a file with a ' mark", 'a_file'])
     # head
@@ -1650,7 +1650,8 @@ def test_args():
     TEST.run('gen 4 1 | args [n: gen 10 | tail (n+1)]',
              expected_out=[8, 9, 7, 8, 9, 6, 7, 8, 9, 5, 6, 7, 8, 9])
     # bash
-    TEST.run('gen 5 | args [n: echo X(n)Y]',
+    # Space between Y and ] is required, otherwise ] is lexed as part of the argument to echo.
+    TEST.run('gen 5 | args [n: echo X(n)Y ]',
              expected_out=['X0Y', 'X1Y', 'X2Y', 'X3Y', 'X4Y'])
     # expand
     TEST.run('gen 3 | args [x: (((1, 2), (3, 4), (5, 6))) | expand (x)]',
@@ -1894,10 +1895,6 @@ def test_bug_168():
     os.system('rm -rf /tmp/hello')
 
 
-def test_bug_190():
-    TEST.run('grep import bug_\[23\]*.py')
-
-
 def test_bug_185():
     # Unbound var
     TEST.run('varop',
@@ -1905,6 +1902,54 @@ def test_bug_185():
     # var masking executable
     # var masking builtin
     # Remove masking var
+
+
+def test_bug_190():
+    testdir = '/tmp/bug190'
+    os.system(f'rm -rf {testdir}')
+    os.system(f'mkdir {testdir}')
+    os.system(f'echo xa1 > {testdir}/a1')
+    os.system(f'echo xa2 > {testdir}/a2')
+    os.system(f'echo xb1 > {testdir}/b1')
+    os.system(f'echo xb2 > {testdir}/b2')
+    TEST.run(f'cd {testdir}')
+    # Test globbing for native executables
+    TEST.run('grep x [ab]2 | sort',
+             expected_out=['a2:xa2', 'b2:xb2'])
+    TEST.run('grep x a[1-2] | sort',
+             expected_out=['a1:xa1', 'a2:xa2'])
+    TEST.run('grep x [ab][1-2] | sort',
+             expected_out=['a1:xa1', 'a2:xa2', 'b1:xb1', 'b2:xb2'])
+    TEST.run('grep x a* | sort',
+             expected_out=['a1:xa1', 'a2:xa2'])
+    TEST.run('grep x *2 | sort',
+             expected_out=['a2:xa2', 'b2:xb2'])
+    TEST.run('grep x a? | sort',
+             expected_out=['a1:xa1', 'a2:xa2'])
+    TEST.run('grep x ?2 | sort',
+             expected_out=['a2:xa2', 'b2:xb2'])
+    # Test globbing for native executables run via explicit invocation of bash (which is a marcel op)
+    TEST.run('bash grep x [ab]2 | sort',
+             expected_out=['a2:xa2', 'b2:xb2'])
+    TEST.run('bash grep x a[1-2] | sort',
+             expected_out=['a1:xa1', 'a2:xa2'])
+    TEST.run('bash grep x [ab][1-2] | sort',
+             expected_out=['a1:xa1', 'a2:xa2', 'b1:xb1', 'b2:xb2'])
+    # Test globbing for ops that take shell args
+    TEST.run('ls [ab]2 | (f: f.name) | sort',
+             expected_out=['a2', 'b2'])
+    TEST.run('ls a[1-2] | (f: f.name) | sort',
+             expected_out=['a1', 'a2'])
+    TEST.run('ls [ab][1-2] | (f: f.name) | sort',
+             expected_out=['a1', 'a2', 'b1', 'b2'])
+    TEST.run('ls a* | (f: f.name) | sort',
+             expected_out=['a1', 'a2'])
+    TEST.run('ls *2 | (f: f.name) | sort',
+             expected_out=['a2', 'b2'])
+    TEST.run('ls a? | (f: f.name) | sort',
+             expected_out=['a1', 'a2'])
+    TEST.run('ls ?2 | (f: f.name) | sort',
+             expected_out=['a2', 'b2'])
 
 
 # For bugs that aren't specific to a single op.
@@ -1967,24 +2012,6 @@ def main_stable():
 
 
 def main_dev():
-    # print('------------------------------------------------------------')
-    # print('grep import bug_[23]*')
-    # TEST.run('grep import bug_[23]*')
-    # print('------------------------------------------------------------')
-    # print('grep import bug_\[23\]*')
-
-    # print('------------------------------------------------------------')
-    # TEST.run('grep import bug_[23]*')
-    # TEST.run('grep import bug_\[23\]*')
-    # TEST.run('grep import "bug_[23]*"')
-
-    # print('------------------------------------------------------------')
-    # print('ls bug_[23]*')
-    # TEST.run('ls bug_[23]*')
-    # print('------------------------------------------------------------')
-    # print('ls bug_\[23\]*')
-    # TEST.run('ls bug_\[23\]*')
-    # test_bug_190()
     pass
 
 

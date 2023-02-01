@@ -168,6 +168,15 @@ class Token(Source):
         REDIRECT_VAR,
         REDIRECT_VAR_APPEND
     ]
+    SHELL_STRING_TERMINATING = [
+        OPEN,
+        CLOSE,
+        PIPE,
+        REDIRECT_FILE,
+        REDIRECT_FILE_APPEND,
+        REDIRECT_VAR,
+        REDIRECT_VAR_APPEND
+    ]
 
     def __init__(self, parser, text, position):
         super().__init__(text, position)
@@ -361,16 +370,11 @@ class Expression(Token):
 
 class String(Token):
 
-    def __init__(self, parser, text, position=None):
-        super().__init__(parser, text, 0 if position is None else position)
-        if position is None:
-            # Text is fine as is.
-            self.string = text
-            self.end = len(text)
-        else:
-            # Text is from the input being parsed. Scan it to deal with escapes and quotes.
-            self.string = None
-            self.scan()
+    def __init__(self, parser, text, position, scan_termination):
+        assert position >= 0
+        super().__init__(parser, text, position)
+        self.string = None
+        self.scan(scan_termination)
         # op_modules is a dict, name -> OpModule
         self.op_name = self.string if self.string in parser.op_modules else None
 
@@ -383,14 +387,14 @@ class String(Token):
     def is_op(self):
         return self.op_name is not None
 
-    def scan(self):
+    def scan(self, scan_termination):
         quote = None
         chars = []
         while True:
             c = self.next_char()
             if c is None:
                 break
-            elif c.isspace() or c in Token.STRING_TERMINATING:
+            elif c.isspace() or c in scan_termination:
                 if quote is None:
                     # c is part of the next token
                     self.end -= 1
@@ -426,6 +430,29 @@ class String(Token):
             else:
                 chars.append(c)
         self.string = ''.join(chars)
+
+
+class MarcelString(String):
+
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position, Token.STRING_TERMINATING)
+
+
+class ShellString(String):
+
+    def __init__(self, parser, text, position):
+        super().__init__(parser, text, position, Token.SHELL_STRING_TERMINATING)
+
+
+class ConstructedString(String):
+
+    def __init__(self, parser, text):
+        super().__init__(parser, text, 0, '')
+        self.text = text
+        self.end = len(text)
+
+    def scan(self, scan_termination):
+        self.string = self.text
 
 
 class Run(Token):
@@ -635,6 +662,15 @@ class Lexer(Source):
         return token
 
     def next_unconsolidated_token(self):
+        # These symbols are significant for marcel args, but not bash args:
+        #     BEGIN
+        #     END
+        #     REMOTE
+        #     ASSIGN
+        #     COMMA
+        #     COLON
+        # So don't create tokens for them if we are doing marcel-mode parsing.
+        marcel_mode = not self.parser.shell_op
         token = None
         self.skip_whitespace()
         if self.more():
@@ -644,19 +680,19 @@ class Lexer(Source):
                 raise ParseError('Unmatched )')
             elif self.match(Token.PIPE):
                 token = Pipe(self.parser, self.text, self.end)
-            elif self.match(Token.BEGIN):
+            elif marcel_mode and self.match(Token.BEGIN):
                 token = Begin(self.parser, self.text, self.end)
-            elif self.match(Token.END):
+            elif marcel_mode and self.match(Token.END):
                 token = End(self.parser, self.text, self.end)
-            elif self.match(Token.REMOTE):
+            elif marcel_mode and self.match(Token.REMOTE):
                 token = Remote(self.parser, self.text, self.end)
             elif self.match(Token.BANG):
                 token = Run(self.parser, self.text, self.end)
-            elif self.match(Token.ASSIGN):
+            elif marcel_mode and self.match(Token.ASSIGN):
                 token = Assign(self.parser, self.text, self.end)
-            elif self.match(Token.COMMA):
+            elif marcel_mode and self.match(Token.COMMA):
                 token = Comma(self.parser, self.text, self.end)
-            elif self.match(Token.COLON):
+            elif marcel_mode and self.match(Token.COLON):
                 token = Colon(self.parser, self.text, self.end)
             elif self.match(Token.COMMENT):
                 return None  # Ignore the rest of the line
@@ -669,7 +705,8 @@ class Lexer(Source):
             elif self.match(Token.REDIRECT_FILE):
                 token = Arrow(self.parser, self.text, self.end, Token.REDIRECT_FILE)
             else:
-                token = String(self.parser, self.text, self.end)
+                token = (ShellString(self.parser, self.text, self.end) if self.parser.shell_op else
+                         MarcelString(self.parser, self.text, self.end))
             self.end = token.end
             if self.more() and self.skip_whitespace() == 0:
                 token.mark_adjacent_to_next()
@@ -838,6 +875,29 @@ class TabCompletionContext:
 
 class Parser:
 
+    class ShellOpContext(object):
+
+        def __init__(self, parser, op_token):
+            self.parser = parser
+            self.op_token = op_token
+            self.original_shell_op = None
+
+        def __enter__(self):
+            self.original_shell_op = self.parser.shell_op
+            self.parser.shell_op = self.shell_args()
+
+        def __exit__(self, ex_type, ex_value, ex_traceback):
+            self.parser.shell_op = self.original_shell_op
+
+        def shell_args(self):
+            op_name = self.op_token.value()
+            var = self.parser.env.getvar(op_name) is not None
+            builtin = self.op_token.is_op()
+            executable = marcel.util.is_executable(op_name)
+            op_module = self.parser.op_modules.get(op_name)
+            bashy_args = op_module and op_module.bashy_args()
+            return bashy_args or (not var and not builtin and executable)
+
     def __init__(self, text, main):
         self.text = text
         self.env = main.env
@@ -845,6 +905,7 @@ class Parser:
         self.tokens = Tokens(self, text)
         self.token = None  # The current token
         self.tab_completion_context = TabCompletionContext()
+        self.shell_op = False
 
     def __repr__(self):
         return str(self.tokens)
@@ -978,14 +1039,14 @@ class Parser:
 
     def redirect_out_op(self, arrow_token, source=None):
         op_name = 'load' if arrow_token.is_var() else 'read'
-        return String(self, op_name), [] if source is None else [source]
+        return ConstructedString(self, op_name), [] if source is None else [source]
 
     def redirect_in_op(self, arrow_token, target):
         op_name = 'store' if arrow_token.is_var() else 'write'
-        return String(self, op_name), ['--append', target] if arrow_token.is_append() else [target]
+        return ConstructedString(self, op_name), ['--append', target] if arrow_token.is_append() else [target]
 
     def map_op(self, expr):
-        return String(self, 'map'), [expr]
+        return ConstructedString(self, 'map'), [expr]
 
     def op_sequence(self):
         op_args = [self.op_args()]
@@ -999,18 +1060,21 @@ class Parser:
     def op_args(self):
         self.tab_completion_context.complete_op()
         if self.next_token(Expression):
-            op_args = (String(self, 'map'), [self.token])
+            op_args = (ConstructedString(self, 'map'), [self.token])
         else:
             op_token = self.op()
-            arg_tokens = []
-            if not op_token.adjacent_to_next:
-                # Token is followed by whitespace
-                self.tab_completion_context.complete_arg(op_token)
-            arg_token = self.arg()
-            while arg_token is not None:
-                arg_tokens.append(arg_token)
+            # ShellOpContext sets the parser to expect shell arg tokens (ShellString) or
+            # marcel arg tokens MarcelString.
+            with Parser.ShellOpContext(self, op_token):
+                arg_tokens = []
+                if not op_token.adjacent_to_next:
+                    # Token is followed by whitespace
+                    self.tab_completion_context.complete_arg(op_token)
                 arg_token = self.arg()
-            op_args = (op_token, arg_tokens)
+                while arg_token is not None:
+                    arg_tokens.append(arg_token)
+                    arg_token = self.arg()
+                op_args = (op_token, arg_tokens)
         return op_args
 
     def op(self):
@@ -1020,23 +1084,31 @@ class Parser:
             raise PrematureEndError(self.token)
 
     def arg(self):
-        if self.next_token(Begin):
-            self.tab_completion_context.complete_disabled()
-            # If the next tokens are var comma, or var colon, then we have
-            # pipeline variables being declared.
-            if self.next_token(String, Comma) or self.next_token(String, Colon):
-                pipeline_parameters = self.vars()
+        def marcel_arg():
+            if self.next_token(Begin):
+                self.tab_completion_context.complete_disabled()
+                # If the next tokens are var comma, or var colon, then we have
+                # pipeline variables being declared.
+                if self.next_token(String, Comma) or self.next_token(String, Colon):
+                    pipeline_parameters = self.vars()
+                else:
+                    pipeline_parameters = None
+                pipeline = self.pipeline(pipeline_parameters)
+                if self.next_token(End):
+                    return pipeline
+                else:
+                    raise PrematureEndError(self.token)
+            elif self.next_token(String) or self.next_token(Expression):
+                return self.token
             else:
-                pipeline_parameters = None
-            pipeline = self.pipeline(pipeline_parameters)
-            if self.next_token(End):
-                return pipeline
+                return None
+
+        def shell_arg():
+            if self.next_token(Expression) or self.next_token(ShellString):
+                return self.token
             else:
-                raise PrematureEndError(self.token)
-        elif self.next_token(String) or self.next_token(Expression):
-            return self.token
-        else:
-            return None
+                return None
+        return shell_arg() if self.shell_op else marcel_arg()
 
     def vars(self):
         vars = []
@@ -1064,7 +1136,7 @@ class Parser:
             if tokens is None:
                 return False
             for i in range(n):
-                if type(tokens[i]) is not expected_token_types[i]:
+                if not isinstance(tokens[i], expected_token_types[i]):
                     return False
         self.token = self.tokens.next_token()
         return True
@@ -1107,7 +1179,7 @@ class Parser:
             args = []
             if op_name == 'bash':
                 for x in arg_tokens:
-                    args.append(x.raw() if type(x) is String else
+                    args.append(x.raw() if isinstance(x, String) else
                                 x.value() if isinstance(x, Token) else
                                 x)
             else:
@@ -1139,7 +1211,7 @@ class Parser:
         if marcel.util.is_executable(name):
             args = [name]
             for x in arg_tokens:
-                args.append(x.raw() if type(x) is String else
+                args.append(x.raw() if isinstance(x, String) else
                             x.value() if isinstance(x, Token) else
                             x)
             op = marcel.opmodule.create_op(self.env, 'bash', *args)
