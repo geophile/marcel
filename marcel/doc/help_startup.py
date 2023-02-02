@@ -24,8 +24,8 @@ with one command per line, (so probably a triple-quoted string).
 Suppose {n:startup.py} defines {r:RUN_ON_STARTUP} as follows:
 
 {p,indent=4,wrap=F}RUN_ON_STARTUP = """
-ext = [e: select (f: f.suffix == '.' + e)]
-recent = [d: ls -fr | select (f: now() - f.mtime < days(float(d)))]
+ext = (| e: select (f: f.suffix == '.' + e) |)
+recent = (| d: ls -fr | select (f: now() - f.mtime < days(float(d))) |)
 """
 
 In your marcel session, you can now use the variables {r:ext} and {r:recent}.

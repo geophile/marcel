@@ -1,24 +1,25 @@
 What's New
 ----------
 
-Marcel aims to be bash-like, and familiar to people comfortable with that shell. 
+Marcel aims to be familiar to bash users. 
 In particular, it should be possible to issue simple bash commands via marcel. 
-One impediment to this goal is
-that some characters have different interpretations in bash and marcel. For example, `[...]` delimits a pipeline 
-in marcel. But in bash, the same symbols are used in glob patterns, e.g. `ls [0-9]*`. Prior to this release,
-marcel always interpreted `[` as the beginning of a pipeline, and this made the use of glob patterns difficult
-or impossible, (escaping the `[` and `]` characters worked in some situations).
+One impediment to this goal was
+that some characters have different interpretations in bash and marcel. For example, prior to this release,
+marcel used `[...]` delimit a pipeline. 
+But in bash, the same symbols are used in glob patterns, e.g. `ls [0-9]*`.
 
-With this release, command line parsing is context-aware. If a host executable is being used, then argument parsing
-adjusts, using bash syntax rules. For example:
+With this release, pipelines are delimited by `(|...|)`. This change is necessary because 
+it did not seem possible to completely disambiguate `[...]`. For example, suppose a command contains
 
 ```shell
-grep foobar xyz[0-9]*
+... [grep foobar a-z] ...
 ```
 
-Previously, `[` would have been assumed to be the beginning of a pipeline, and because `0-9` is not recognizable as
-anything that can be executed, marcel would have printed an error message. In this release, `grep` is known to be
-a host executable, and so the entire string `xyz[0-9]*` is passed as an argument to `grep`.
+One possibility is that grep is searching a file named `a-z` for lines containing `foobar`. But that's
+a very odd filename, and odd usage of grep. Perhaps there is a typo, and a glob was intended: `[a-z]`, and the
+actual pipeline terminating `]` appears later.
+
+Changing the pipeline delimiter to `(|...|)` avoids these problems.
 
 Marcel
 ======

@@ -20,7 +20,7 @@ Every marcel command amounts to the execution of a pipeline.
 {b:A pipeline can be an argument to an operator}
 
 A pipeline can also appear as an argument for some operators.
-In this case, the pipeline is bracketed: using {n:[...]} 
+In this case, the pipeline is bracketed: using {n:(|...|)} 
 For example, this pipeline lists the sum of file sizes under 
 {n:/tmp}:
 
@@ -30,13 +30,13 @@ For example, this pipeline lists the sum of file sizes under
 To run this command on a remote host named {n:fred}:
 
 {p,wrap=F}
-    @fred [ ls -fr /tmp | map (f: f.size) | red + ]
+    @fred (| ls -fr /tmp | map (f: f.size) | red + |)
 
 Comments:
 
 {L}- {r:@fred}: The name {r:fred} has been configured to refer to some host, and to 
 provide login credentials.
-{L}- {r:[...]}: The pipeline to be executed on {r:fred} is delimited by {r:[...]}
+{L}- {r:(|...|)}: The pipeline to be executed on {r:fred} is delimited by {r:(|...|)}
 {L}- The output includes the name of the host on which the command executed, e.g.
 {n:(fred, 1366422)}
 
@@ -44,7 +44,7 @@ The summation could also done locally, by returning the file sizes, and
 then doing the summation:
 
 {p,wrap=F}
-    @fred [ ls -fr /tmp ] | map (host, file: file.size) | red +
+    @fred (| ls -fr /tmp |) | map (host, file: file.size) | red +
 
 Comments:
 
@@ -59,7 +59,7 @@ A pipelines can also be assigned to a variable, essentially creating a
 new operator. For example, this command assigns a pipeline to the {r:recent}
 variable:
 
-{L,wrap=F}recent = [select (file: now() - file.mtime < days(1))]
+{L,wrap=F}recent = (| select (file: now() - file.mtime < days(1)) |)
 
 Explanation:
 
@@ -83,7 +83,7 @@ recursively, and prints out those that changed within the past day.
 Pipelines can be parameterized. So to generalize the {n:recent} pipeline to
 go back {n:d} days instead of 1:
 
-{L,wrap=F}recent = [d: select (file: now() - file.mtime < days(float(d)))]
+{L,wrap=F}recent = (| d: select (file: now() - file.mtime < days(float(d))) |)
 {L,wrap=F}ls -fr | recent 3
 
 '''
