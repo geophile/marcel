@@ -143,8 +143,8 @@ class Token(Source):
     PIPE = '|'
     BANG = '!'
     REMOTE = '@'
-    BEGIN = '['
-    END = ']'
+    BEGIN = '(|'
+    END = '|)'
     ASSIGN = '='
     COMMENT = '#'
     COMMA = ','
@@ -491,7 +491,7 @@ class Symbol(Token):
     def __init__(self, parser, text, position, symbol):
         super().__init__(parser, text, position)
         self.symbol = symbol
-        self.end += 1
+        self.end += len(symbol)
 
     def value(self):
         return self.symbol
@@ -576,7 +576,6 @@ class Arrow(Symbol):
         super().__init__(parser, text, position, symbol)
         assert symbol in (Token.REDIRECT_VAR, Token.REDIRECT_VAR_APPEND,
                           Token.REDIRECT_FILE, Token.REDIRECT_FILE_APPEND)
-        self.end += len(symbol) - 1  # Symbol.__init__ already added one
 
     def is_arrow(self):
         return True
@@ -674,16 +673,20 @@ class Lexer(Source):
         token = None
         self.skip_whitespace()
         if self.more():
-            if self.match(Token.OPEN):
+            # BEGIN is (|, OPEN is (
+            # END IS |), CLOSE is )
+            # And PIPE is |
+            # So look for BEGIN and END before those other symbols.
+            if marcel_mode and self.match(Token.BEGIN):
+                token = Begin(self.parser, self.text, self.end)
+            elif marcel_mode and self.match(Token.END):
+                token = End(self.parser, self.text, self.end)
+            elif self.match(Token.OPEN):
                 token = Expression(self.parser, self.text, self.end)
             elif self.match(Token.CLOSE):
                 raise ParseError('Unmatched )')
             elif self.match(Token.PIPE):
                 token = Pipe(self.parser, self.text, self.end)
-            elif marcel_mode and self.match(Token.BEGIN):
-                token = Begin(self.parser, self.text, self.end)
-            elif marcel_mode and self.match(Token.END):
-                token = End(self.parser, self.text, self.end)
             elif marcel_mode and self.match(Token.REMOTE):
                 token = Remote(self.parser, self.text, self.end)
             elif self.match(Token.BANG):
