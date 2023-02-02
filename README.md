@@ -86,10 +86,10 @@ For example, here is a pipeline, assigned to the variable `recent`, which select
 `File`s modified within the past day:
 
 ```shell script
-recent = [select (file: now() - file.mtime < days(1))] 
+recent = (| select (file: now() - file.mtime < days(1)) |) 
 ``` 
 
-* The pipeline being defined is bracketed by `[...]`. (Without the brackets, marcel would
+* The pipeline being defined is bracketed by `(|...|)`. (Without the brackets, marcel would
 attempt to evaluate the pipeline immediately, and then complain because the parameter
 `file` is not bound.)
 * The pipeline contains a single operator, `select`, which uses a function to define
