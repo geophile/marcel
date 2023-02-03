@@ -661,7 +661,7 @@ class Lexer(Source):
         return token
 
     def next_unconsolidated_token(self):
-        # These symbols are significant for marcel args, but not bash args:
+        # These symbols have special significance during marcel parsing, but not bash:
         #     BEGIN
         #     END
         #     REMOTE
@@ -675,7 +675,7 @@ class Lexer(Source):
         if self.more():
             # BEGIN is (|, OPEN is (
             # END IS |), CLOSE is )
-            # And PIPE is |
+            # PIPE is |
             # So look for BEGIN and END before those other symbols.
             if marcel_mode and self.match(Token.BEGIN):
                 token = Begin(self.parser, self.text, self.end)

@@ -6,7 +6,9 @@ In particular, it should be possible to issue simple bash commands via marcel.
 One impediment to this goal was
 that some characters have different interpretations in bash and marcel. For example, prior to this release,
 marcel used `[...]` delimit a pipeline. 
-But in bash, the same symbols are used in glob patterns, e.g. `ls [0-9]*`.
+But in bash, the same symbols are used in glob patterns, e.g. `ls [0-9]*`. 
+As a result, marcel commands relying on globs often failed. Escaping the
+brackets helped but not in all cases.
 
 With this release, pipelines are delimited by `(|...|)`. This change is necessary because 
 it did not seem possible to completely disambiguate `[...]`. For example, suppose a command contains
@@ -16,8 +18,11 @@ it did not seem possible to completely disambiguate `[...]`. For example, suppos
 ```
 
 One possibility is that grep is searching a file named `a-z` for lines containing `foobar`. But that's
-a very odd filename, and odd usage of grep. Perhaps there is a typo, and a glob was intended: `[a-z]`, and the
-actual pipeline terminating `]` appears later.
+a very odd filename, and an odd usage of grep. Perhaps there is a typo, and a glob was intended: `[a-z]`, and the
+actual pipeline terminating `]` appears later. Deciding whether the `]`
+terminates a glob pattern or a marcel pipeline involves keeping track of
+both uses of `[`, and would result in probably confusing error messages in case
+of mismatches. 
 
 Changing the pipeline delimiter to `(|...|)` avoids these problems.
 
