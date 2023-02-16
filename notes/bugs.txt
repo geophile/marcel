@@ -554,6 +554,13 @@ E.g. ls -r /bin/X11
 
 Needs to detect the cycle and stop.
 
+......................................................................
+
+Hard links are not a problem. They link only to files.
+
+For symbolic links: always show the link, but don't recurse if the
+target has already been visited.
+
 ----------------------------------------------------------------------
 
 194. {...} not handled consistently (from a bash point of view)

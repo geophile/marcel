@@ -38,13 +38,13 @@ def filename_op_setup(dir):
     #     sf (symlink to f)
     #     lf (hard link to f)
     #     d/ (dir)
-    #     sd (symlink to d)
     #         df (file)
     #         sdf (symlink to df)
     #         ldf (hard link to df)
     #         dd/ (dir)
     #         sdd (symlink to dd)
     #             ddf (file)
+    #     sd (symlink to d)
     setup_script = [
         'rm -rf /tmp/test',
         'mkdir /tmp/test',
@@ -2012,6 +2012,14 @@ def main_stable():
 
 
 def main_dev():
+    filename_op_setup('/tmp/test')
+    # Duplicates
+    # TEST.run('ls -0 *d ? | map (f: f.render_compact())',
+    #          expected_out=sorted(['d', 'sd', 'f']))
+    expected = sorted(['.', 'f', 'sf', 'lf', 'd', 'sd'])
+    expected.extend(sorted(['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']))
+    TEST.run('ls -1 . d | map (f: f.render_compact())',
+             expected_out=expected)
     pass
 
 

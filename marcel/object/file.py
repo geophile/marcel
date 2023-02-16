@@ -183,6 +183,7 @@ class File(marcel.object.renderable.Renderable):
     def _lstat(self):
         if self.lstat is None:
             try:
+                # pathlib.lstat() returns a symlink's info instead of the target's.
                 self.lstat = self.path.lstat()
             except FileNotFoundError:
                 raise marcel.exception.KillAndResumeException(f'{self.path} does not exist.')

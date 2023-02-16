@@ -445,3 +445,7 @@ ls needs work on links. From bash:
     when showing file information for a symbolic link, show
     information for the file the link references rather than for the
     link itself
+
+----------------------------------------------------------------------
+
+union, intersect, join should allow for multiple inputs.
