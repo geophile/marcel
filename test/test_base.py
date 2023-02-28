@@ -28,8 +28,8 @@ class TestBase:
         self.test_stdout = None
         self.test_stderr = None
 
-    def reset_environment(self, config_file='./.marcel.py'):
-        if self.main is None:
+    def reset_environment(self, config_file='./.marcel.py', new_main=False):
+        if self.main is None or new_main:
             self.main = marcel.main.Main(config_file, same_process=True, old_namespace=None)
         self.env = self.main.env
         os.system('sudo touch /tmp/farcel.log')

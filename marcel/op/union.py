@@ -21,12 +21,12 @@ import marcel.object.error
 import marcel.util
 
 HELP = '''
-{L,wrap=F}union PIPELINE
+{L,wrap=F}union PIPELINE ...
 
 {L,indent=4:28}{r:PIPELINE}                The second input to the union.
 
 The output stream represents the union of the tuples in the input stream, and the tuples
-from the {r:PIPELINE} argument.
+from the {r:PIPELINE} arguments.
 
 Duplicates are maintained. If a given tuple appears {n:n} times in one input, and {n:m} times in
 the other, then the output stream will contain {n:m+n} occurrences. The order of tuples in the
@@ -34,9 +34,12 @@ output is unspecified.
 '''
 
 
-def union(env, pipeline):
-    assert isinstance(pipeline, marcel.core.Pipelineable)
-    return Union(env), [pipeline.create_pipeline()]
+def union(env, *pipelines):
+    x = []
+    for p in pipelines:
+        assert isinstance(p, marcel.core.Pipelineable)
+        x.append(p.create_pipeline())
+    return Union(env), x
 
 
 class UnionArgsParser(marcel.argsparser.ArgsParser):
@@ -44,7 +47,7 @@ class UnionArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('union', env)
         # str: To accommodate var names
-        self.add_anon('pipeline', convert=self.check_str_or_pipeline)
+        self.add_anon_list('pipelines', convert=self.check_str_or_pipeline, target='pipelines_arg')
         self.validate()
 
 
@@ -52,8 +55,8 @@ class Union(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.pipeline = None
-        self.pipeline_copy = None
+        self.pipelines_arg = None
+        self.pipelines = None
 
     def __repr__(self):
         return 'union()'
@@ -61,10 +64,14 @@ class Union(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
-        env = self.env()
-        self.pipeline_copy = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
-        self.pipeline_copy.set_error_handler(self.owner.error_handler)
-        self.pipeline_copy.last_op().receiver = self.receiver
+        self.pipelines = []
+        for pipeline_arg in self.pipelines_arg:
+            pipeline = marcel.core.PipelineWrapper.create(self.env(),
+                                                          self.owner.error_handler,
+                                                          pipeline_arg,
+                                                          self.customize_pipeline)
+            pipeline.setup()
+            self.pipelines.append(pipeline)
 
     # Op
 
@@ -72,7 +79,36 @@ class Union(marcel.core.Op):
         self.send(x)
 
     def flush(self):
-        if self.pipeline_copy is not None:
-            marcel.core.Command(self.env(), None, self.pipeline_copy).execute()
-            self.pipeline_copy = None
+        for pipeline in self.pipelines:
+            # marcel.core.Command(self.env(), None, pipeline).execute()
+            pipeline.run_pipeline(None)
+        self.pipelines.clear()
         self.propagate_flush()
+
+    # Internal
+
+    def customize_pipeline(self, pipeline):
+        # Union is implemented by passing the input stream along in receive(), and then having each pipeline
+        # arg send its output via flush. This depends on all the pipeline args having the same receiver as the
+        # union op itself. However, we only want one flush after everything is done. PropagateFlushFromLast
+        # makes sure that only the last pipeline propagates the flush.
+        last = len(self.pipelines) == len(self.pipelines_arg) - 1
+        pipeline.append(PropagateFlushFromLast(self.env(), last))
+        pipeline.last_op().receiver = self.receiver
+        return pipeline
+
+
+class PropagateFlushFromLast(marcel.core.Op):
+
+    def __init__(self, env, last):
+        super().__init__(env)
+        self.last = last
+
+    # Op
+
+    def receive(self, x):
+        self.send(x)
+
+    def flush(self):
+        if self.last:
+            self.propagate_flush()

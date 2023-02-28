@@ -53,8 +53,7 @@ class DifferenceArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('difference', env)
-        # str: To accommodate var names
-        self.add_anon('pipeline', convert=self.check_str_or_pipeline)
+        self.add_anon('pipeline', convert=self.check_str_or_pipeline, target='pipeline_arg')
         self.validate()
 
 
@@ -62,27 +61,21 @@ class Difference(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.pipeline = None
+        self.pipeline_arg = None
         self.right = None  # Right input, tuple -> count
 
     def __repr__(self):
-        return 'difference()'
+        return f'difference({self.pipeline_arg})'
 
     # AbstractOp
 
     def setup(self):
-        def load_right(*x):
-            try:
-                count = self.right.get(x, None)
-                self.right[x] = 1 if count is None else count + 1
-            except TypeError:
-                raise marcel.exception.KillCommandException(f'{x} is not hashable')
-        env = self.env()
-        self.right = {}
-        pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
-        pipeline.set_error_handler(self.owner.error_handler)
-        pipeline.append(marcel.opmodule.create_op(env, 'map', load_right))
-        marcel.core.Command(env, None, pipeline).execute()
+        pipeline = marcel.core.PipelineWrapper.create(self.env(),
+                                                      self.owner.error_handler,
+                                                      self.pipeline_arg,
+                                                      self.customize_pipeline)
+        pipeline.setup()
+        pipeline.run_pipeline(None)
 
     def receive(self, x):
         try:
@@ -97,3 +90,16 @@ class Difference(marcel.core.Op):
         except TypeError:
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
+    # Internal
+
+    def customize_pipeline(self, pipeline):
+        def load_right(*x):
+            try:
+                count = self.right.get(x, None)
+                self.right[x] = 1 if count is None else count + 1
+            except TypeError:
+                raise marcel.exception.KillCommandException(f'{x} is not hashable')
+
+        self.right = {}
+        pipeline.append(marcel.opmodule.create_op(self.env(), 'map', load_right))
+        return pipeline

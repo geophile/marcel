@@ -489,6 +489,9 @@ class PipelineIterator:
         pass
 
 
+# For the CLI, pipeline syntax is parsed and a Pipeline is created. For the API, a pipeline is a function whose
+# body is a marcel expression. PipelineWrapper provides a uniform interface for dealing with pipelines, regardless
+# of which interface created is in use.
 class PipelineWrapper(object):
 
     # customize_pipeline takes pipeline as an argument, returns None
@@ -497,6 +500,7 @@ class PipelineWrapper(object):
         self.error_handler = error_handler
         self.pipeline_arg = pipeline_arg
         self.customize_pipeline = customize_pipeline
+        self.pipeline = None
 
     def __repr__(self):
         return f'PipelineWrapper({self.pipeline_arg})'
@@ -505,10 +509,19 @@ class PipelineWrapper(object):
         assert False
 
     def n_params(self):
-        return self.pipeline_arg.n_params()
+        assert False
 
     def run_pipeline(self, args):
         assert False
+
+    def receive(self, x):
+        self.pipeline.receive(x)
+
+    def flush(self):
+        self.pipeline.flush()
+
+    def cleanup(self):
+        self.pipeline.cleanup()
 
     @staticmethod
     def create(env, error_handler, pipeline_arg, customize_pipeline):
@@ -523,19 +536,21 @@ class PipelineInteractive(PipelineWrapper):
         super().__init__(env, error_handler, pipeline_arg, customize_pipeline)
         self.params = None
         self.scope = None
-        self.pipeline = None
 
     def setup(self):
-        self.params = self.pipeline_arg.parameters()
-        if self.params is None:
-            self.params = []
         self.pipeline = marcel.core.Op.pipeline_arg_value(self.env, self.pipeline_arg).copy()
         self.pipeline.set_error_handler(self.error_handler)
         self.pipeline = self.customize_pipeline(self.pipeline)
         assert self.pipeline is not None
         self.scope = {}
+        self.params = self.pipeline.parameters()
+        if self.params is None:
+            self.params = []
         for param in self.params:
             self.scope[param] = None
+
+    def n_params(self):
+        return self.pipeline.n_params()
 
     def run_pipeline(self, args):
         env = self.env
@@ -547,14 +562,21 @@ class PipelineInteractive(PipelineWrapper):
         finally:
             env.vars().pop_scope()
 
+    def prepare_to_receive(self):
+        self.pipeline.setup()
+
 
 class PipelineAPI(PipelineWrapper):
 
     def __init__(self, env, error_handler, pipeline_arg, customize_pipeline):
         super().__init__(env, error_handler, pipeline_arg, customize_pipeline)
+        self.pipeline = None
 
     def setup(self):
         pass
+
+    def n_params(self):
+        return self.pipeline_arg.n_params()
 
     def run_pipeline(self, args):
         # Through the API, a pipeline is expressed as a Python function which, when evaluated,
@@ -565,5 +587,12 @@ class PipelineAPI(PipelineWrapper):
                     if self.n_params() > 0 else
                     self.pipeline_arg.create_pipeline())
         pipeline.set_error_handler(self.error_handler)
-        pipeline = self.customize_pipeline(pipeline)
-        marcel.core.Command(self.env, None, pipeline).execute()
+        self.pipeline = self.customize_pipeline(pipeline)
+        marcel.core.Command(self.env, None, self.pipeline).execute()
+
+    def prepare_to_receive(self):
+        assert self.n_params() == 0
+        pipeline = self.pipeline_arg.create_pipeline()
+        pipeline.set_error_handler(self.error_handler)
+        self.pipeline = self.customize_pipeline(pipeline)
+        self.pipeline.setup()

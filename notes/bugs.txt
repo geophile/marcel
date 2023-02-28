@@ -573,10 +573,59 @@ does not work, because ls is a marcel op, and marcel doesn't support
 
 ----------------------------------------------------------------------
 
-195. Remote execution should work on a pipeline-valued expression
+196. Parsing after pipeline var is broken
 
-E.g., these should work:
+    M 0.15.0 jao@cheese ~/git/marcel/test$ g = (| gen 3 |)
+    M 0.15.0 jao@cheese ~/git/marcel/test$ g 3
+    0
+    1
+    2
 
-g3 = [gen 3]
-@jao (g3)
-remote jao (g3)
+"g 3" is a parse error
+
+But this works:
+
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gn = (| n: gen (int(n)) |)
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gn 3
+    0
+    1
+    2
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gn 3 4
+    Provided 2 arguments, but there are only 1 pipeline parameters
+
+Is the fix to have pipeline, even without args, check arg count?
+
+----------------------------------------------------------------------
+
+197. runpipeline, used as an op, crashes marcel
+
+It isn't a public op, but if you try calling it marcel crashes.
+
+    M 0.15.0 jao@cheese ~/git/marcel/test$ runpipeline
+    Traceback (most recent call last):
+      File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+        return _run_code(code, main_globals, None,
+      File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+        exec(code, run_globals)
+      File "/home/jao/git/marcel/marcel/main.py", line 316, in <module>
+        main()
+      File "/home/jao/git/marcel/marcel/main.py", line 303, in main
+        MAIN.run()
+      File "/home/jao/git/marcel/marcel/main.py", line 133, in run
+        self.run_command(self.input)
+      File "/home/jao/git/marcel/marcel/main.py", line 145, in run_command
+        pipeline = parser.parse()
+      File "/home/jao/git/marcel/marcel/parser.py", line 919, in parse
+        return self.command()
+      File "/home/jao/git/marcel/marcel/parser.py", line 927, in command
+        command = self.pipeline(None)
+      File "/home/jao/git/marcel/marcel/parser.py", line 1040, in pipeline
+        pipeline.append(self.create_op(*op_args))
+      File "/home/jao/git/marcel/marcel/parser.py", line 1162, in create_op
+        op = self.create_op_builtin(op_token, arg_tokens)
+      File "/home/jao/git/marcel/marcel/parser.py", line 1191, in create_op_builtin
+        self.tab_completion_context.set_op(op, op_module.args_parser().flags())
+      File "/home/jao/git/marcel/marcel/opmodule.py", line 74, in args_parser
+        assert self._args_parser_constructor is not None
+    AssertionError
+    jao@cheese:~/git/marcel/test$ 

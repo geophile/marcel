@@ -3695,4 +3695,15 @@ Notes:
         * >>$ REDIRECT_VAR_APPEND
     ]
 
+----------------------------------------------------------------------
+
+FIXED
+
+195. Remote execution should work on a pipeline-valued expression
+
+E.g., these should work:
+
+g3 = [gen 3]
+@jao (g3)
+remote jao (g3)
 

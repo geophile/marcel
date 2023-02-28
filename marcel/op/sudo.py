@@ -82,6 +82,8 @@ class Sudo(marcel.core.Op):
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('Missing pipeline')
         self.pipeline = self.args.pop()
+        if type(self.pipeline) is str:
+            self.pipeline = marcel.core.Op.pipeline_arg_value(self.env(), self.pipeline).copy()
         if not isinstance(self.pipeline, marcel.core.Pipeline):
             raise marcel.exception.KillCommandException('Last argument to sudo must be a pipeline')
 

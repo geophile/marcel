@@ -25,7 +25,7 @@ class IfBaseArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env, op_name):
         super().__init__(op_name, env)
         self.add_anon('predicate', convert=self.function)
-        self.add_anon('then', convert=self.check_str_or_pipeline)
+        self.add_anon('then', convert=self.check_str_or_pipeline, target='then_arg')
         self.validate()
 
 
@@ -34,22 +34,21 @@ class IfBase(marcel.core.Op):
     def __init__(self, env):
         super().__init__(env)
         self.predicate = None
+        self.then_arg = None
         self.then = None
 
     def __repr__(self):
-        return f'{self.op_name()})({self.predicate.snippet()} {self.then})'
+        return f'{self.op_name()})({self.predicate.snippet()} {self.then_arg})'
 
     # AbstractOp
 
     def setup(self):
-        # Copy in case caller depends on internal state
-        self.then = self.then.copy()
-        self.then.set_error_handler(self.owner.error_handler)
+        self.then = marcel.core.PipelineWrapper.create(self.env(),
+                                                       self.owner.error_handler,
+                                                       self.then_arg,
+                                                       lambda pipeline: pipeline)
         self.then.setup()
-
-    def set_env(self, env):
-        super().set_env(env)
-        self.then.set_env(env)
+        self.then.prepare_to_receive()
 
     def receive(self, x):
         assert False

@@ -82,7 +82,7 @@ class JoinArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('join', env)
         self.add_flag_no_value('keep', '-k', '--keep')
         # str: To accommodate var names
-        self.add_anon('pipeline', convert=self.check_str_or_pipeline)
+        self.add_anon('pipeline', convert=self.check_str_or_pipeline, target='pipeline_arg')
         self.validate()
 
 
@@ -90,39 +90,22 @@ class Join(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.pipeline = None
+        self.pipeline_arg = None
         self.keep = None
         self.inner = None  # Map containing contents of pipeline, keyed by join value
 
     def __repr__(self):
-        return 'join(keep)' if self.keep else 'join()'
+        return f'join(keep, {self.pipeline_arg})' if self.keep else f'join({self.pipeline_arg})'
 
     # AbstractOp
 
     def setup(self):
-        def load_inner(*x):
-            assert len(x) > 0
-            x = tuple(x)
-            join_value = x[0]
-            try:
-                match = self.inner.get(join_value, None)
-                if match is None:
-                    self.inner[join_value] = x
-                elif type(match) is list:
-                    match.append(x)
-                else:
-                    # match is first value associated with join_value, x is the second. Need a list.
-                    self.inner[join_value] = [match, x]
-            except TypeError:
-                raise marcel.exception.KillCommandException(f'{x} is not hashable')
-        super().setup()
-        env = self.env()
-        self.inner = {}
-        pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
-        pipeline.set_error_handler(self.owner.error_handler)
-        map = marcel.opmodule.create_op(env, 'map', load_inner)
-        pipeline.append(map)
-        marcel.core.Command(env, None, pipeline).execute()
+        pipeline = marcel.core.PipelineWrapper.create(self.env(),
+                                                      self.owner.error_handler,
+                                                      self.pipeline_arg,
+                                                      self.customize_pipeline)
+        pipeline.setup()
+        pipeline.run_pipeline(None)
 
     def receive(self, x):
         x = tuple(x)
@@ -139,3 +122,27 @@ class Join(marcel.core.Op):
                 self.send(x + m[1:])
         else:
             self.send(x + match[1:])
+
+    # Internal
+
+    def customize_pipeline(self, pipeline):
+        def load_inner(*x):
+            assert len(x) > 0
+            x = tuple(x)
+            join_value = x[0]
+            try:
+                match = self.inner.get(join_value, None)
+                if match is None:
+                    self.inner[join_value] = x
+                elif type(match) is list:
+                    match.append(x)
+                else:
+                    # match is first value associated with join_value, x is the second. Need a list.
+                    self.inner[join_value] = [match, x]
+            except TypeError:
+                raise marcel.exception.KillCommandException(f'{x} is not hashable')
+
+        self.inner = {}
+        map = marcel.opmodule.create_op(self.env(), 'map', load_inner)
+        pipeline.append(map)
+        return pipeline
