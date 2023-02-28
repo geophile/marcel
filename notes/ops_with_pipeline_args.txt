@@ -1,0 +1,298 @@
+Ops with pipeline args are handled inconsistently and maybe with
+unexpected semantics.
+
+
+This doesn't work:
+
+    p = (| ... |)
+    ... | union p
+
+because union doesn't lookup the value of p.
+
+But
+
+    p
+
+works. So does this:
+
+    ... | union (| p |)
+
+Is this bad? Handling of "p" is inconsistent, but in the same way as a
+lisp function. In lisp (+ 3 4) is 7, but (... + ...) doesn't do
+addition, because + isn't in the first position.
+
+But it is reasonable to expect that the args to union *are*
+executable.
+
+Similarly, 
+
+    @cluster (| ... |)
+
+works, but
+
+    @cluster p
+
+doesn't, and might be expected to. This works too:
+
+    @cluster (| p |)
+
+----------------------------------------------------------------------
+
+Handling of pipeline vars by ops with pipeline args
+
+Survey handling and use of PipelineWrapper (which might help in
+uniform handling of pipeline args).
+
+......................................................................
+
+FIXED (already worked?!)
+
+args
+
+Fails with AssertionError
+
+    M 0.15.0 jao@cheese ~/git/marcel/test$ (xy)
+    [x, y: map(lambda: x+y)]
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 10 | args xy
+    Process Process-23:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+        child_namespace_changes = command.execute(self.env)
+      File "/home/jao/git/marcel/marcel/core.py", line 263, in execute
+        self.pipeline.setup()
+      File "/home/jao/git/marcel/marcel/core.py", line 410, in setup
+        op.setup()
+      File "/home/jao/git/marcel/marcel/op/args.py", line 76, in setup
+        assert isinstance(pipeline_arg, marcel.core.Pipelineable)
+    AssertionError
+    
+Implementation uses PipelineWrapper, but asserts that pipeline_arg is
+Pipelineable. I.e. a var (type str) isn't allowed, and fails if the
+assertion is disabled:
+
+    Traceback (most recent call last):
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+        child_namespace_changes = command.execute(self.env)
+      File "/home/jao/git/marcel/marcel/core.py", line 263, in execute
+        self.pipeline.setup()
+      File "/home/jao/git/marcel/marcel/core.py", line 410, in setup
+        op.setup()
+      File "/home/jao/git/marcel/marcel/op/args.py", line 81, in setup
+        self.n_params = pipeline_arg.n_params()
+    AttributeError: 'str' object has no attribute 'n_params'
+
+
+......................................................................
+
+FIXED
+
+difference
+
+Pipeline var works!
+
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 5 1 | difference (| gen 5 3 |)
+    1
+    2
+    M 0.15.0 jao@cheese ~/git/marcel/test$ g53 = (| gen 5 3 |)
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 5 1 | difference g53
+    1
+    2
+
+Implementation does not use PW, but it does evaluate the arg using
+marcel.core.Op.pipeline_arg_value.
+
+......................................................................
+
+FIXED
+
+ifelse, ifthen
+
+Pipeline var doesn't work.
+
+    M 0.15.0 jao@cheese ~/git/marcel/test$ (a)
+    [map(lambda x: x+1000) | write()]
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 6 | ifelse (x: x%2==0) a | select (x: False)
+    Process Process-22:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+        child_namespace_changes = command.execute(self.env)
+      File "/home/jao/git/marcel/marcel/core.py", line 263, in execute
+        self.pipeline.setup()
+      File "/home/jao/git/marcel/marcel/core.py", line 410, in setup
+        op.setup()
+      File "/home/jao/git/marcel/marcel/op/ifbase.py", line 46, in setup
+        self.then = self.then.copy()
+    AttributeError: 'str' object has no attribute 'copy'
+
+Doesn't use PW.
+
+(Same for ifthen)
+
+......................................................................
+
+FIXED
+
+intersect
+
+Works, for the same reason as difference.
+
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 6 1 | intersect (| gen 6 4 |)
+    4
+    5
+    6
+    M 0.15.0 jao@cheese ~/git/marcel/test$ g64 = (| gen 6 4 |)
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 6 1 | intersect g64
+    4
+    5
+    6
+
+
+......................................................................
+
+FIXED
+
+join
+
+Works, same as intersect and difference
+
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 3 1 | (x: (x, x * 1000)) | join (| gen 3 1 | (x: (x, -x)) |)
+    (1, 1000, -1)
+    (2, 2000, -2)
+    (3, 3000, -3)
+    M 0.15.0 jao@cheese ~/git/marcel/test$ (p)
+    [gen(count=3, start=1) | map(lambda x: (x, -x))]
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 3 1 | (x: (x, x * 1000)) | join p
+    (1, 1000, -1)
+    (2, 2000, -2)
+
+......................................................................
+
+FIXED
+
+remote
+
+remote (and the special @ syntax) can't handle pipeline vars:
+
+    M 0.15.0 jao@cheese ~/git/marcel/test$ (g3)
+    [gen(count=3, start=0)]
+    M 0.15.0 jao@cheese ~/git/marcel/test$ remote jao g3
+    Process Process-39:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+        child_namespace_changes = command.execute(self.env)
+      File "/home/jao/git/marcel/marcel/core.py", line 263, in execute
+        self.pipeline.setup()
+      File "/home/jao/git/marcel/marcel/core.py", line 410, in setup
+        op.setup()
+      File "/home/jao/git/marcel/marcel/op/remote.py", line 195, in setup
+        assert isinstance(self.pipeline_arg, marcel.core.Pipelineable)
+    AssertionError
+
+......................................................................
+
+FIXED
+
+sudo
+
+Pipeline var doesn't work, but fails cleanly
+
+    M 0.15.0 jao@cheese ~/git/marcel/test$ sudo (| gen 3 |)
+    0
+    1
+    2
+    M 0.15.0 jao@cheese ~/git/marcel/test$ sudo g3
+    Last argument to sudo must be a pipeline
+
+......................................................................
+
+tee
+
+Pipeline vars fail
+
+    M 0.15.0 jao@cheese ~/git/marcel/test$ a = (| (x: x + 1000) | write |)
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 3 | a
+    1000
+    1000
+    1001
+    1001
+    1002
+    1002
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 3 | tee a
+    Process Process-14:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+        child_namespace_changes = command.execute(self.env)
+      File "/home/jao/git/marcel/marcel/core.py", line 263, in execute
+        self.pipeline.setup()
+      File "/home/jao/git/marcel/marcel/core.py", line 410, in setup
+        op.setup()
+      File "/home/jao/git/marcel/marcel/op/tee.py", line 60, in setup
+        p = p.copy()
+    AttributeError: 'str' object has no attribute 'copy'
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 3 | tee (| a |)
+    1000
+    0
+    1001
+    1
+    1002
+    2
+
+......................................................................
+
+FIXED
+
+union
+
+Union fails, unlike intersect, difference
+
+    M 0.15.0 jao@cheese ~/git/marcel/test$ a = (| gen 3 100 |)
+    M 0.15.0 jao@cheese ~/git/marcel/test$ a
+    100
+    101
+    102
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 3 | union a
+    Process Process-19:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+        child_namespace_changes = command.execute(self.env)
+      File "/home/jao/git/marcel/marcel/core.py", line 263, in execute
+        self.pipeline.setup()
+      File "/home/jao/git/marcel/marcel/core.py", line 410, in setup
+        op.setup()
+      File "/home/jao/git/marcel/marcel/op/union.py", line 69, in setup
+        pipeline = pipeline.copy()
+    AttributeError: 'str' object has no attribute 'copy'
+    M 0.15.0 jao@cheese ~/git/marcel/test$ gen 3 | union (| a |)
+    0
+    1
+    2
+    100
+    101
+    102
+
+----------------------------------------------------------------------
+
