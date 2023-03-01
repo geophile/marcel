@@ -366,7 +366,7 @@ class Pipeline(AbstractOp):
         for op in self.ops:
             op_buffer.append(str(op))
         ops = ' | '.join(op_buffer)
-        return f'[{params}: {ops}]' if params else f'[{ops}]'
+        return f'(| {params}: {ops} |)' if params else f'(| {ops} |)'
 
     def dump(self, label):
         print(f'{label}: {id(self)}  {self}')

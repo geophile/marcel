@@ -1446,6 +1446,32 @@ def test_read():
     file.writelines(['hello,world\n',
                      'goodbye\n'])
     file.close()
+    file = open('/tmp/read/headings.csv', 'w')
+    file.writelines(['c1, c2,c3 \n',  # various whitespace paddings
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
+    file = open('/tmp/read/headings_tricky_data.csv', 'w')
+    file.writelines(['c1,c2,c3\n',
+                     'a,b\n',
+                     'c,d,e,f\n'
+                     ',\n'])
+    file.close()
+    file = open('/tmp/read/headings_fixable.csv', 'w')
+    file.writelines(['c 1, c$#2,c+3- \n',
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
+    file = open('/tmp/read/headings_unfixable_1.csv', 'w')
+    file.writelines(['c1,c1,c3\n',
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
+    file = open('/tmp/read/headings_unfixable_2.csv', 'w')
+    file.writelines(['c_1,c$1,c3\n',
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
     # Files
     TEST.run('cd /tmp/read')
     TEST.run('ls f1.csv f3.txt | read',
@@ -1465,25 +1491,25 @@ def test_read():
     # CSV
     TEST.run('cd /tmp/read')
     TEST.run('ls f1.csv | read -c',
-             expected_out=[['1', '2.3', 'ab'],
-                           ['2', '3.4', 'xy'],
-                           ['3', '4.5', 'm,n']])
+             expected_out=[('1', '2.3', 'ab'),
+                           ('2', '3.4', 'xy'),
+                           ('3', '4.5', 'm,n')])
     # CSV with labels
     TEST.run('cd /tmp/read')
-    TEST.run('ls f1.csv | read -cl | map (f, x, y, z: [str(f), x, y, z])',
-             expected_out=[['f1.csv', '1', '2.3', 'ab'],
-                           ['f1.csv', '2', '3.4', 'xy'],
-                           ['f1.csv', '3', '4.5', 'm,n']])
+    TEST.run('ls f1.csv | read -cl | map (f, x, y, z: (str(f), x, y, z))',
+             expected_out=[('f1.csv', '1', '2.3', 'ab'),
+                           ('f1.csv', '2', '3.4', 'xy'),
+                           ('f1.csv', '3', '4.5', 'm,n')])
     # TSV
     TEST.run('cd /tmp/read')
     TEST.run('ls f2.tsv | read -t',
-             expected_out=[['1', '2.3', 'ab'],
-                           ['2', '3.4', 'xy']])
+             expected_out=[('1', '2.3', 'ab'),
+                           ('2', '3.4', 'xy')])
     # TSV with labels
     TEST.run('cd /tmp/read')
-    TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: [str(f), x, y, z])',
-             expected_out=[['f2.tsv', '1', '2.3', 'ab'],
-                           ['f2.tsv', '2', '3.4', 'xy']])
+    TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: (str(f), x, y, z))',
+             expected_out=[('f2.tsv', '1', '2.3', 'ab'),
+                           ('f2.tsv', '2', '3.4', 'xy')])
     # --pickle testing is done in test_write()
     # Filenames on commandline
     TEST.run('cd /tmp/read')
@@ -1494,7 +1520,7 @@ def test_read():
                            '1\t2.3\tab', '2\t3.4\txy',
                            'hello,world', 'goodbye'])
     # Flags inherited from FilenamesOp
-    TEST.run(test='read -lr /tmp/read/* | (f, l: (str(f), l))',
+    TEST.run(test='read -lr /tmp/read/f[1-3]* | (f, l: (str(f), l))',
              expected_out=[('f1.csv', '1,2.3,ab'),
                            ('f1.csv', '2,3.4,xy'),
                            ('f1.csv', '3,4.5,"m,n"'),
@@ -1514,6 +1540,32 @@ def test_read():
              expected_out=['1,2.3,ab',
                            '2,3.4,xy',
                            '3,4.5,"m,n"'])
+    # Column headings
+    TEST.run('read -h /tmp/read/f3.txt',
+             expected_err='-h|--heading can only be specified with')
+    TEST.run('read -hp /tmp/read/f3.txt',
+             expected_err='-h|--heading can only be specified with')
+    TEST.run('read -ch /tmp/read/headings.csv | (t: (t.c1, t.c2, t.c3))',
+             expected_out=[('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
+    TEST.run('read -chl /tmp/read/headings.csv | (t: (str(t.LABEL), t.c1, t.c2, t.c3))',
+             expected_out=[('headings.csv', 'a', 'b', 'c'),
+                           ('headings.csv', 'd', 'e', 'f')])
+    TEST.run('read -ch /tmp/read/headings_tricky_data.csv | (t: (t.c1, t.c2, t.c3))',
+             expected_out=[('a', 'b', None),
+                           Error('Incompatible with headings'),
+                           ('', '', None)])
+    TEST.run('read -ch /tmp/read/headings_fixable.csv | (t: (t.c_1, t.c__2, t.c_3_))',
+             expected_out=[('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
+    TEST.run('read -ch /tmp/read/headings_unfixable_1.csv',
+             expected_out=[Error('Cannot generate identifiers from headings'),
+                           ('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
+    TEST.run('read -ch /tmp/read/headings_unfixable_2.csv',
+             expected_out=[Error('Cannot generate identifiers from headings'),
+                           ('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
 
 
 def test_intersect():

@@ -1042,6 +1042,32 @@ def test_read():
     file.writelines(['hello,world\n',
                      'goodbye\n'])
     file.close()
+    file = open('/tmp/read/headings.csv', 'w')
+    file.writelines(['c1, c2,c3 \n',  # various whitespace paddings
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
+    file = open('/tmp/read/headings_tricky_data.csv', 'w')
+    file.writelines(['c1,c2,c3\n',
+                     'a,b\n',
+                     'c,d,e,f\n'
+                     ',\n'])
+    file.close()
+    file = open('/tmp/read/headings_fixable.csv', 'w')
+    file.writelines(['c 1, c$#2,c+3- \n',
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
+    file = open('/tmp/read/headings_unfixable_1.csv', 'w')
+    file.writelines(['c1,c1,c3\n',
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
+    file = open('/tmp/read/headings_unfixable_2.csv', 'w')
+    file.writelines(['c_1,c$1,c3\n',
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
     # Files
     TEST.run(lambda: run(ls('/tmp/read/f1.csv', '/tmp/read/f3.txt') | read()),
              expected_out=['1,2.3,ab',
@@ -1060,9 +1086,9 @@ def test_read():
                            ('f3.txt', 'goodbye')])
     # CSV
     TEST.run(lambda: run(ls('/tmp/read/f1.csv') | read(csv=True)),
-             expected_out=[['1', '2.3', 'ab'],
-                           ['2', '3.4', 'xy'],
-                           ['3', '4.5', 'm,n']])
+             expected_out=[('1', '2.3', 'ab'),
+                           ('2', '3.4', 'xy'),
+                           ('3', '4.5', 'm,n')])
     # CSV with labels
     TEST.run(lambda: run(ls('/tmp/read/f1.csv') |
                          read(csv=True, label=True) |
@@ -1072,8 +1098,8 @@ def test_read():
                            ('f1.csv', '3', '4.5', 'm,n')])
     # TSV
     TEST.run(lambda: run(ls('/tmp/read/f2.tsv') | read(tsv=True)),
-             expected_out=[['1', '2.3', 'ab'],
-                           ['2', '3.4', 'xy']])
+             expected_out=[('1', '2.3', 'ab'),
+                           ('2', '3.4', 'xy')])
     # TSV with labels
     TEST.run(lambda: run(ls('/tmp/read/f2.tsv') |
                          read(label=True, tsv=True) |
@@ -1089,7 +1115,7 @@ def test_read():
                            '1\t2.3\tab', '2\t3.4\txy',
                            'hello,world', 'goodbye'])
     # Flags inherited from FilenamesOp
-    TEST.run(lambda: run(read('/tmp/read/*', label=True, recursive=True) | map(lambda f, l: (str(f), l))),
+    TEST.run(lambda: run(read('/tmp/read/f[1-3]*', label=True, recursive=True) | map(lambda f, l: (str(f), l))),
              expected_out=[('f1.csv', '1,2.3,ab'),
                            ('f1.csv', '2,3.4,xy'),
                            ('f1.csv', '3,4.5,"m,n"'),
@@ -1109,6 +1135,35 @@ def test_read():
              expected_out=['1,2.3,ab',
                            '2,3.4,xy',
                            '3,4.5,"m,n"'])
+    # Column headings
+    TEST.run(lambda: run(read('/tmp/read/f3.txt', headings=True)),
+             expected_err='-h|--heading can only be specified with')
+    TEST.run(lambda: run(read('/tmp/read/f3.txt', headings=True, pickle=True)),
+             expected_err='-h|--heading can only be specified with')
+    TEST.run(lambda: run(read('/tmp/read/headings.csv', csv=True, headings=True) | map(lambda t: (t.c1, t.c2, t.c3))),
+             expected_out=[('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
+    TEST.run(lambda: run(read('/tmp/read/headings.csv', csv=True, headings=True, label=True) |
+                         map(lambda t: (str(t.LABEL), t.c1, t.c2, t.c3))),
+             expected_out=[('headings.csv', 'a', 'b', 'c'),
+                           ('headings.csv', 'd', 'e', 'f')])
+    TEST.run(lambda: run(read('/tmp/read/headings_tricky_data.csv', csv=True, headings=True) |
+                         map(lambda t: (t.c1, t.c2, t.c3))),
+             expected_out=[('a', 'b', None),
+                           Error('Incompatible with headings'),
+                           ('', '', None)])
+    TEST.run(lambda: run(read('/tmp/read/headings_fixable.csv', csv=True, headings=True) |
+                         map(lambda t: (t.c_1, t.c__2, t.c_3_))),
+             expected_out=[('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
+    TEST.run(lambda: run(read('/tmp/read/headings_unfixable_1.csv', csv=True, headings=True)),
+             expected_out=[Error('Cannot generate identifiers from headings'),
+                           ('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
+    TEST.run(lambda: run(read('/tmp/read/headings_unfixable_2.csv', csv=True, headings=True)),
+             expected_out=[Error('Cannot generate identifiers from headings'),
+                           ('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
 
 
 def test_intersect():
