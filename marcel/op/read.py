@@ -25,7 +25,7 @@ import marcel.util
 File = marcel.object.file.File
 
 HELP = '''
-{L,wrap=F}read [[-01] [-r|--recursive]] [-c|--csv] [-t|--tsv] [-h|--headings] [-p|--pickle] [-l|--label] [FILENAME ...]
+{L,wrap=F}read [[-01] [-r|--recursive]] [-c|--csv] [-t|--tsv] [-h|--headings] [-s|--skip-headings] [-p|--pickle] [-l|--label] [FILENAME ...]
 
 {L,indent=4:28}{r:-0}                      Include only files matching the specified FILENAMEs, (i.e., depth 0).
 
@@ -40,6 +40,8 @@ to any depth.
 {L,indent=4:28}{r:-t}, {r:--tsv}               Parse CSV-formatted lines with tab delimiter.
 
 {L,indent=4:28}{r:-h}, {r:--headings}          First line of CSV or TSV file contains column headings.
+
+{L,indent=4:28}{r:-s}, {r:--skip-headings}     Skip first line of CSV or TSV file, which presumably contains headings.
 
 {L,indent=4:28}{r:-p}, {r:--pickle}            Parse pickle format
 
@@ -63,9 +65,13 @@ lines are assumed to be in the CSV format with a tab delimiter.
 the first line of input is a set of column headings, and that these headings should be used to
 identify columns through the use of named tuples. If a column heading
 is not a valid Python identifier, an attempt will be made to generate a Python identifier,
-replacing invalid characters by _. If one of the lines of the input has fewer fields
+replacing invalid characters by {r:_}. If one of the lines of the input has fewer fields
 than there are headings, the corresponding tuple will be padded with None. If an input line has more
 fields than there are headings, an {r:Error} is generated.
+
+{r:-s|--skip-headings} can only be used in conjunction with {r:--csv} or {r:--tsv}. 
+This option causes the first line of the file to be skipped, presumably because it contains headings
+which are not of interest.  
 
 If {r:--pickle} is specified, the input is assumed to be in pickle format.
 If none of these are specified, then each input is assumed to be a line of text. End-of-line
@@ -86,6 +92,7 @@ def read(env, *filenames,
          csv=False,
          tsv=False,
          headings=False,
+         skip_headings=False,
          pickle=False,
          label=False):
     args = []
@@ -101,6 +108,8 @@ def read(env, *filenames,
         args.append('--tsv')
     if headings:
         args.append('--headings')
+    if skip_headings:
+        args.append('--skip-headings')
     if pickle:
         args.append('--pickle')
     if label:
@@ -116,9 +125,11 @@ class ReadArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
         self.add_flag_no_value('csv', '-c', '--csv')
         self.add_flag_no_value('tsv', '-t', '--tsv')
         self.add_flag_no_value('headings', '-h', '--headings')
+        self.add_flag_no_value('skip_headings', '-s', '--skip-headings')
         self.add_flag_no_value('pickle', '-p', '--pickle')
         self.add_flag_no_value('label', '-l', '--label')
         self.at_most_one('csv', 'tsv', 'pickle')
+        self.at_most_one('headings', 'skip_headings')
         self.validate()
 
 
@@ -129,6 +140,7 @@ class Read(marcel.op.filenamesop.FilenamesOp):
         self.csv = None
         self.tsv = None
         self.headings = None
+        self.skip_headings = None
         self.pickle = None
         self.label = None
         self.reader = None
@@ -159,7 +171,10 @@ class Read(marcel.op.filenamesop.FilenamesOp):
     def setup(self):
         if self.headings and not (self.csv or self.tsv):
             raise marcel.exception.KillCommandException(
-                '-h|--heading can only be specified with -c|--csv or -t|--tsv')
+                '-h|--headings can only be specified with -c|--csv or -t|--tsv')
+        if self.skip_headings and not (self.csv or self.tsv):
+            raise marcel.exception.KillCommandException(
+                '-s|--skip-headings can only be specified with -c|--csv or -t|--tsv')
         self.file = True
         super().setup()
         self.reader = (CSVReader(self, COMMA) if self.csv else
@@ -243,6 +258,7 @@ class CSVReader(Reader):
         self.input = InputIterator(self)
         self.reader = csv.reader(self.input, delimiter=delimiter)
         self.headings = op.headings
+        self.skip_headings = op.skip_headings
         # For --headings
         self.named_tuple = None
         self.n_columns = None
@@ -256,14 +272,15 @@ class CSVReader(Reader):
                     line = line.rstrip('\r\n')
                     self.input.set_current(line)
                     out = tuple(next(self.reader))
-                    if first and self.headings:
-                        try:
-                            headings = self.extract_headings(out)
-                            self.named_tuple = namedtuple('csvtuple', headings)
-                            self.n_columns = len(headings)
-                        except ValueError as e:
-                            self.op.non_fatal_error(line,
-                                                    f'Cannot generate identifiers from headings: {e}')
+                    if first and (self.headings or self.skip_headings):
+                        if self.headings:
+                            try:
+                                headings = self.extract_headings(out)
+                                self.named_tuple = namedtuple('csvtuple', headings)
+                                self.n_columns = len(headings)
+                            except ValueError as e:
+                                self.op.non_fatal_error(line,
+                                                        f'Cannot generate identifiers from headings: {e}')
                     else:
                         if label:
                             out = label + tuple(out)

@@ -1137,9 +1137,15 @@ def test_read():
                            '3,4.5,"m,n"'])
     # Column headings
     TEST.run(lambda: run(read('/tmp/read/f3.txt', headings=True)),
-             expected_err='-h|--heading can only be specified with')
+             expected_err='-h|--headings can only be specified with')
     TEST.run(lambda: run(read('/tmp/read/f3.txt', headings=True, pickle=True)),
-             expected_err='-h|--heading can only be specified with')
+             expected_err='-h|--headings can only be specified with')
+    TEST.run(lambda: run(read('/tmp/read/f3.txt', skip_headings=True)),
+             expected_err='-s|--skip-headings can only be specified with')
+    TEST.run(lambda: run(read('/tmp/read/f3.txt', skip_headings=True, pickle=True)),
+             expected_err='-s|--skip-headings can only be specified with')
+    TEST.run(lambda: run(read('/tmp/read/f3.txt', headings=True, skip_headings=True)),
+             expected_err='Cannot specify more than one of')
     TEST.run(lambda: run(read('/tmp/read/headings.csv', csv=True, headings=True) | map(lambda t: (t.c1, t.c2, t.c3))),
              expected_out=[('a', 'b', 'c'),
                            ('d', 'e', 'f')])
@@ -1147,6 +1153,9 @@ def test_read():
                          map(lambda t: (str(t.LABEL), t.c1, t.c2, t.c3))),
              expected_out=[('headings.csv', 'a', 'b', 'c'),
                            ('headings.csv', 'd', 'e', 'f')])
+    TEST.run(lambda: run(read('/tmp/read/headings.csv', csv=True, skip_headings=True)),
+             expected_out=[('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
     TEST.run(lambda: run(read('/tmp/read/headings_tricky_data.csv', csv=True, headings=True) |
                          map(lambda t: (t.c1, t.c2, t.c3))),
              expected_out=[('a', 'b', None),

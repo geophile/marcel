@@ -1542,15 +1542,24 @@ def test_read():
                            '3,4.5,"m,n"'])
     # Column headings
     TEST.run('read -h /tmp/read/f3.txt',
-             expected_err='-h|--heading can only be specified with')
+             expected_err='-h|--headings can only be specified with')
     TEST.run('read -hp /tmp/read/f3.txt',
-             expected_err='-h|--heading can only be specified with')
+             expected_err='-h|--headings can only be specified with')
+    TEST.run('read -s /tmp/read/f3.txt',
+             expected_err='-s|--skip-headings can only be specified with')
+    TEST.run('read -sp /tmp/read/f3.txt',
+             expected_err='-s|--skip-headings can only be specified with')
+    TEST.run('read -hs /tmp/read/f3.txt',
+             expected_err='Cannot specify more than one of')
     TEST.run('read -ch /tmp/read/headings.csv | (t: (t.c1, t.c2, t.c3))',
              expected_out=[('a', 'b', 'c'),
                            ('d', 'e', 'f')])
     TEST.run('read -chl /tmp/read/headings.csv | (t: (str(t.LABEL), t.c1, t.c2, t.c3))',
              expected_out=[('headings.csv', 'a', 'b', 'c'),
                            ('headings.csv', 'd', 'e', 'f')])
+    TEST.run('read -cs /tmp/read/headings.csv',
+             expected_out=[('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
     TEST.run('read -ch /tmp/read/headings_tricky_data.csv | (t: (t.c1, t.c2, t.c3))',
              expected_out=[('a', 'b', None),
                            Error('Incompatible with headings'),
