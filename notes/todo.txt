@@ -445,8 +445,3 @@ ls needs work on links. From bash:
     when showing file information for a symbolic link, show
     information for the file the link references rather than for the
     link itself
-
-----------------------------------------------------------------------
-
-Labeled columns for csv. Allow first row to specify column names, and
-use these to form typed columns.
