@@ -18,18 +18,17 @@ import marcel.core
 import marcel.exception
 import marcel.opmodule
 import marcel.object.error
-import marcel.util
 
 HELP = '''
-{L,wrap=F}intersect PIPELINE
+{L,wrap=F}intersect PIPELINE ...
 
 {L,indent=4:28}{r:PIPELINE}                The second input to the intersection.
 
 The output stream represents the intersection of the tuples in the input stream, and the tuples
-from the {r:PIPELINE} argument. The tuples must be hashable, which requires that every element
+from the {r:PIPELINE} arguments. The tuples must be hashable, which requires that every element
 of each tuple must be hashable.
 
-Input elements from the two input pipelines are considered to be the same if they are equal (in
+Input elements from the input pipelines are considered to be the same if they are equal (in
 the Python sense).
 
 Because the input pipelines may contain duplicates, the {r:intersect} operator actually computes
@@ -48,45 +47,65 @@ class IntersectArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('intersect', env)
-        # str: To accommodate var names
-        self.add_anon('pipeline', convert=self.check_str_or_pipeline)
+        self.add_anon_list('pipelines', convert=self.check_str_or_pipeline, target='pipelines_arg')
         self.validate()
 
 
 class Intersect(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
-        self.pipeline = None
-        self.right = None  # Right input, tuple -> count
-
-    def __repr__(self):
-        return f'intersect({self.pipeline})'
-
     # AbstractOp
 
+    def __init__(self, env):
+        super().__init__(env)
+        self.pipelines_arg = None
+        self.common = None  # item -> count: Accumulated intersection
+        self.input = None   # item -> count: From one of the pipeline args
+
+    def __repr__(self):
+        return f'intersect({self.pipelines_arg})'
+
     def setup(self):
-        def load_right(*x):
-            try:
-                count = self.right.get(x, None)
-                self.right[x] = 1 if count is None else count + 1
-            except TypeError:
-                raise marcel.exception.KillCommandException(f'{x} is not hashable')
-        env = self.env()
-        self.right = {}
-        pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
-        pipeline.set_error_handler(self.owner.error_handler)
-        pipeline.append(marcel.opmodule.create_op(env, 'map', load_right))
-        marcel.core.Command(env, None, pipeline).execute()
+        for pipeline_arg in self.pipelines_arg:
+            pipeline = marcel.core.PipelineWrapper.create(self.env(),
+                                                          self.owner.error_handler,
+                                                          pipeline_arg,
+                                                          self.customize_pipeline)
+            # pipeline.setup() will store item counts in self.input.
+            self.input = {}
+            pipeline.setup()
+            pipeline.run_pipeline(None)
+            # Merge input with common
+            if self.common is None:
+                self.common = self.input
+            else:
+                # Deletion has to be done after the loop. Can't modify self.common while it is being iterated.
+                deleted = []
+                for item, count in self.common.items():
+                    input_count = self.input.get(item, 0)
+                    if input_count == 0:
+                        deleted.append(item)
+                    elif input_count < count:
+                        self.common[item] = input_count
+                for item in deleted:
+                    del self.common[item]
 
     def receive(self, x):
         try:
-            count = self.right.get(x, None)
-            if count is not None:
+            count = self.common.get(x, 0)
+            if count > 0:
+                self.common[x] -= 1
                 self.send(x)
-                if count == 1:
-                    del self.right[x]
-                else:
-                    self.right[x] = count - 1
         except TypeError:
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
+    # Internal
+
+    def customize_pipeline(self, pipeline):
+        def count_inputs(*x):
+            try:
+                input[x] = input.get(x, 0) + 1
+            except TypeError:
+                raise marcel.exception.KillCommandException(f'{x} is not hashable')
+
+        input = self.input
+        pipeline.append(marcel.opmodule.create_op(self.env(), 'map', count_inputs))
+        return pipeline

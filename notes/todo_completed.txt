@@ -877,3 +877,8 @@ env -d: Delete var
 ----------------------------------------------------------------------
 
 Move history to xdg directory
+
+----------------------------------------------------------------------
+
+Labeled columns for csv. Allow first row to specify column names, and
+use these to form typed columns.

@@ -24,7 +24,6 @@ import subprocess
 import sys
 import time
 import traceback
-import threading
 
 import dill
 

@@ -83,9 +83,9 @@ class ForkWorker(object):
                                                                    op.owner.error_handler,
                                                                    fork_manager.pipeline_arg,
                                                                    self.customize_pipeline)
+        self.pipeline_wrapper.setup()
         if self.pipeline_wrapper.n_params() > fork_manager.max_pipeline_args:
             raise marcel.exception.KillCommandException('Too many pipeline args.')
-        self.pipeline_wrapper.setup()
 
     def start_process(self):
         def run_pipeline_in_child():

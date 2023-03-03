@@ -18,6 +18,7 @@ TEST = test_base.TestConsole()
 
 SQL = False  # Until Postgres & psycopg2 are working again
 
+
 # Utilities for testing filename ops
 
 
@@ -601,7 +602,7 @@ def test_namespace():
     with open(config_file, 'w') as file:
         file.writelines('from math import *')
     TEST.main = None
-    TEST.reset_environment(config_file)
+    TEST.reset_environment(config_file=config_file)
     TEST.run('map (pi)',
              expected_out=['3.141592653589793'])
     # Reset environment
@@ -875,16 +876,13 @@ def test_fork():
 
 
 def test_sudo():
-    TEST.run(test='sudo (| gen 3 |)',
-             expected_out=[0, 1, 2])
+    TEST.run(test='sudo (| gen 3 |)', expected_out=[0, 1, 2])
     os.system('sudo rm -rf /tmp/sudotest')
     os.system('sudo mkdir /tmp/sudotest')
     os.system('sudo touch /tmp/sudotest/f')
     os.system('sudo chmod 400 /tmp/sudotest')
-    TEST.run(test='ls -f /tmp/sudotest',
-             expected_out=[Error('Permission denied')])
-    TEST.run(test='sudo (| ls -f /tmp/sudotest | map (f: f.render_compact()) |)',
-             expected_out=['f'])
+    TEST.run(test='ls -f /tmp/sudotest', expected_out=[Error('Permission denied')])
+    TEST.run(test='sudo (| ls -f /tmp/sudotest | map (f: f.render_compact()) |)', expected_out=['f'])
 
 
 def test_version():
@@ -1448,6 +1446,32 @@ def test_read():
     file.writelines(['hello,world\n',
                      'goodbye\n'])
     file.close()
+    file = open('/tmp/read/headings.csv', 'w')
+    file.writelines(['c1, c2,c3 \n',  # various whitespace paddings
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
+    file = open('/tmp/read/headings_tricky_data.csv', 'w')
+    file.writelines(['c1,c2,c3\n',
+                     'a,b\n',
+                     'c,d,e,f\n'
+                     ',\n'])
+    file.close()
+    file = open('/tmp/read/headings_fixable.csv', 'w')
+    file.writelines(['c 1, c$#2,c+3- \n',
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
+    file = open('/tmp/read/headings_unfixable_1.csv', 'w')
+    file.writelines(['c1,c1,c3\n',
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
+    file = open('/tmp/read/headings_unfixable_2.csv', 'w')
+    file.writelines(['c_1,c$1,c3\n',
+                     'a,b,c\n',
+                     'd,e,f\n'])
+    file.close()
     # Files
     TEST.run('cd /tmp/read')
     TEST.run('ls f1.csv f3.txt | read',
@@ -1467,25 +1491,25 @@ def test_read():
     # CSV
     TEST.run('cd /tmp/read')
     TEST.run('ls f1.csv | read -c',
-             expected_out=[['1', '2.3', 'ab'],
-                           ['2', '3.4', 'xy'],
-                           ['3', '4.5', 'm,n']])
+             expected_out=[('1', '2.3', 'ab'),
+                           ('2', '3.4', 'xy'),
+                           ('3', '4.5', 'm,n')])
     # CSV with labels
     TEST.run('cd /tmp/read')
-    TEST.run('ls f1.csv | read -cl | map (f, x, y, z: [str(f), x, y, z])',
-             expected_out=[['f1.csv', '1', '2.3', 'ab'],
-                           ['f1.csv', '2', '3.4', 'xy'],
-                           ['f1.csv', '3', '4.5', 'm,n']])
+    TEST.run('ls f1.csv | read -cl | map (f, x, y, z: (str(f), x, y, z))',
+             expected_out=[('f1.csv', '1', '2.3', 'ab'),
+                           ('f1.csv', '2', '3.4', 'xy'),
+                           ('f1.csv', '3', '4.5', 'm,n')])
     # TSV
     TEST.run('cd /tmp/read')
     TEST.run('ls f2.tsv | read -t',
-             expected_out=[['1', '2.3', 'ab'],
-                           ['2', '3.4', 'xy']])
+             expected_out=[('1', '2.3', 'ab'),
+                           ('2', '3.4', 'xy')])
     # TSV with labels
     TEST.run('cd /tmp/read')
-    TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: [str(f), x, y, z])',
-             expected_out=[['f2.tsv', '1', '2.3', 'ab'],
-                           ['f2.tsv', '2', '3.4', 'xy']])
+    TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: (str(f), x, y, z))',
+             expected_out=[('f2.tsv', '1', '2.3', 'ab'),
+                           ('f2.tsv', '2', '3.4', 'xy')])
     # --pickle testing is done in test_write()
     # Filenames on commandline
     TEST.run('cd /tmp/read')
@@ -1496,7 +1520,7 @@ def test_read():
                            '1\t2.3\tab', '2\t3.4\txy',
                            'hello,world', 'goodbye'])
     # Flags inherited from FilenamesOp
-    TEST.run(test='read -lr /tmp/read/* | (f, l: (str(f), l))',
+    TEST.run(test='read -lr /tmp/read/f[1-3]* | (f, l: (str(f), l))',
              expected_out=[('f1.csv', '1,2.3,ab'),
                            ('f1.csv', '2,3.4,xy'),
                            ('f1.csv', '3,4.5,"m,n"'),
@@ -1516,6 +1540,41 @@ def test_read():
              expected_out=['1,2.3,ab',
                            '2,3.4,xy',
                            '3,4.5,"m,n"'])
+    # Column headings
+    TEST.run('read -h /tmp/read/f3.txt',
+             expected_err='-h|--headings can only be specified with')
+    TEST.run('read -hp /tmp/read/f3.txt',
+             expected_err='-h|--headings can only be specified with')
+    TEST.run('read -s /tmp/read/f3.txt',
+             expected_err='-s|--skip-headings can only be specified with')
+    TEST.run('read -sp /tmp/read/f3.txt',
+             expected_err='-s|--skip-headings can only be specified with')
+    TEST.run('read -hs /tmp/read/f3.txt',
+             expected_err='Cannot specify more than one of')
+    TEST.run('read -ch /tmp/read/headings.csv | (t: (t.c1, t.c2, t.c3))',
+             expected_out=[('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
+    TEST.run('read -chl /tmp/read/headings.csv | (t: (str(t.LABEL), t.c1, t.c2, t.c3))',
+             expected_out=[('headings.csv', 'a', 'b', 'c'),
+                           ('headings.csv', 'd', 'e', 'f')])
+    TEST.run('read -cs /tmp/read/headings.csv',
+             expected_out=[('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
+    TEST.run('read -ch /tmp/read/headings_tricky_data.csv | (t: (t.c1, t.c2, t.c3))',
+             expected_out=[('a', 'b', None),
+                           Error('Incompatible with headings'),
+                           ('', '', None)])
+    TEST.run('read -ch /tmp/read/headings_fixable.csv | (t: (t.c_1, t.c__2, t.c_3_))',
+             expected_out=[('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
+    TEST.run('read -ch /tmp/read/headings_unfixable_1.csv',
+             expected_out=[Error('Cannot generate identifiers from headings'),
+                           ('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
+    TEST.run('read -ch /tmp/read/headings_unfixable_2.csv',
+             expected_out=[Error('Cannot generate identifiers from headings'),
+                           ('a', 'b', 'c'),
+                           ('d', 'e', 'f')])
 
 
 def test_intersect():
@@ -1556,6 +1615,35 @@ def test_intersect():
              expected_err='not hashable')
     TEST.run('gen 2 | (x: (x, (x, x))) | intersect (|gen 2 1 | (x: (x, [x, x]))|)',
              expected_err='not hashable')
+    # Multiple pipelines
+    TEST.run('g41 = (| gen 4 1 |)')
+    TEST.run('g42 = (| gen 4 2 |)')
+    TEST.run('g43 = (| gen 4 3 |)')
+    TEST.run('g41 | intersect g42 g43', expected_out=[3, 4])
+    TEST.run('g41 | intersect g43 g42', expected_out=[3, 4])
+    TEST.run('g42 | intersect g41 g43', expected_out=[3, 4])
+    TEST.run('g42 | intersect g43 g41', expected_out=[3, 4])
+    TEST.run('g43 | intersect g41 g42', expected_out=[3, 4])
+    TEST.run('g43 | intersect g42 g41', expected_out=[3, 4])
+    # Test duplicate handling
+    TEST.run('x0 = (| (["x"] * 0) | expand |)')
+    TEST.run('x1 = (| (["x"] * 1) | expand |)')
+    TEST.run('x2 = (| (["x"] * 2) | expand |)')
+    TEST.run('x3 = (| (["x"] * 3) | expand |)')
+    TEST.run('x1 | intersect x2', expected_out=['x'])
+    TEST.run('x2 | intersect x1', expected_out=['x'])
+    TEST.run('x1 | intersect x3', expected_out=['x'])
+    TEST.run('x3 | intersect x1', expected_out=['x'])
+    TEST.run('x2 | intersect x3', expected_out=['x', 'x'])
+    TEST.run('x3 | intersect x2', expected_out=['x', 'x'])
+    TEST.run('x1 | intersect x2 x3', expected_out=['x'])
+    TEST.run('x1 | intersect x3 x2', expected_out=['x'])
+    TEST.run('x2 | intersect x1 x3', expected_out=['x'])
+    TEST.run('x2 | intersect x3 x1', expected_out=['x'])
+    TEST.run('x3 | intersect x1 x2', expected_out=['x'])
+    TEST.run('x3 | intersect x2 x1', expected_out=['x'])
+    TEST.run('x0 | intersect x2 x3', expected_out=[])
+    TEST.run('x2 | intersect x3 x0', expected_out=[])
 
 
 def test_union():
@@ -1577,6 +1665,11 @@ def test_union():
     # Composite elements
     TEST.run('gen 4 | map (x: (x, x*100)) | union (|gen 4 2 | map (x: (x, x*100))|) | sort',
              expected_out=[(0, 0), (1, 100), (2, 200), (2, 200), (3, 300), (3, 300), (4, 400), (5, 500)])
+    # Multiple inputs
+    TEST.run('gen 3 100 | union (|gen 3 200|) | sort',
+             expected_out=[100, 101, 102, 200, 201, 202])
+    TEST.run('gen 3 100 | union (|gen 3 200|) (|gen 3 300|) | sort',
+             expected_out=[100, 101, 102, 200, 201, 202, 300, 301, 302])
 
 
 def test_difference():
@@ -1952,6 +2045,55 @@ def test_bug_190():
              expected_out=['a2', 'b2'])
 
 
+# Generalization of bug 195
+def test_pipeline_vars():
+    TEST.reset_environment(new_main=True)
+    # union
+    TEST.run('genn = (| n: gen (int(n)) |)')
+    TEST.run('g_3_100 = (| gen 3 100 |)')
+    TEST.run('gen 3 | union g_3_100', expected_out=[0, 1, 2, 100, 101, 102])
+    TEST.run('gen 3 | union g_3_100 (| genn 4 |)', expected_out=[0, 1, 2, 100, 101, 102, 0, 1, 2, 3])
+    # intersection
+    TEST.run('g41 = (| gen 4 1 |)')
+    TEST.run('g43 = (| gen 4 3 |)')
+    TEST.run('g41 | intersect g43', expected_out=[3, 4])
+    # difference
+    TEST.run('g61 = (| gen 6 1 |)')
+    TEST.run('g64 = (| gen 6 4 |)')
+    TEST.run('g61 | difference g64', expected_out=[1, 2, 3])
+    # args
+    TEST.run('p = (| args (| n: gen 3 100 | (x: (n, x)) |) |)')
+    TEST.run('gen 3 1 | p',
+             expected_out=[(1, 100), (1, 101), (1, 102),
+                           (2, 100), (2, 101), (2, 102),
+                           (3, 100), (3, 101), (3, 102)])
+    TEST.run('q = (| args (| x, y: (x + y) |) |)')
+    TEST.run('gen 10 | q', expected_out=[1, 5, 9, 13, 17])
+    # ifelse, ifthen
+    TEST.run('a = (| (x: x + 1000) | write |)')
+    TEST.run('gen 6 | ifelse (x: x % 2 == 0) a', expected_out=[1000, 1, 1002, 3, 1004, 5])
+    TEST.run('gen 6 | ifthen (x: x % 2 == 0) a', expected_out=[1000, 0, 1, 1002, 2, 3, 1004, 4, 5])
+    # join
+    TEST.run('x100 = (| gen 3 1 | (x: (x, x * 100)) |)')
+    TEST.run('x1000 = (| gen 3 1 | (x: (x, x * 1000)) |)')
+    TEST.run('gen 3 1 | (x: (x, x * 10)) | join x100 | join x1000',
+             expected_out=[(1, 10, 100, 1000), (2, 20, 200, 2000), (3, 30, 300, 3000)])
+    # remote
+    node1 = marcel.object.cluster.Host(TEST.env.getvar('NODE1'), None)
+    TEST.run('g3 = (| gen 3 |)')
+    TEST.run('@CLUSTER1 g3', expected_out=[(node1, 0), (node1, 1), (node1, 2)])
+    # sudo
+    TEST.run('g = (| gen 3 |)')
+    TEST.run('sudo g', expected_out=[0, 1, 2])
+    # tee
+    TEST.run('save_sum = (| red + >$ sum |)')
+    TEST.run('save_prod = (| red * >$ prod |)')
+    TEST.run('gen 5 1 | tee save_sum save_prod',
+             expected_out=[1, 2, 3, 4, 5])
+    TEST.run('sum >$', expected_out=[15])
+    TEST.run('prod >$', expected_out=[120])
+
+
 # For bugs that aren't specific to a single op.
 def test_bugs():
     test_bug_10()
@@ -2008,6 +2150,7 @@ def main_stable():
     test_tee()
     test_upload()
     test_download()
+    test_pipeline_vars()
     test_bugs()
 
 

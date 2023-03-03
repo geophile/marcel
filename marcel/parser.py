@@ -818,9 +818,9 @@ class Tokens(object):
 #
 #     str: String
 #
-#     begin: [
+#     begin: (|
 #
-#     end: ]
+#     end: |)
 #
 # Notes:
 #

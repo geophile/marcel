@@ -35,7 +35,7 @@ class TeeArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('tee', env)
-        self.add_anon_list('pipeline', convert=self.check_str_or_pipeline)
+        self.add_anon_list('pipelines', convert=self.check_str_or_pipeline, target='pipelines_arg')
         self.validate()
 
 
@@ -43,8 +43,8 @@ class Tee(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
-        self.pipeline = None  # Arg
-        self.pipelines = None  # Copies that are executed
+        self.pipelines_arg = None
+        self.pipelines = None
 
     def __repr__(self):
         pipelines = [str(p) for p in self.pipelines]
@@ -53,14 +53,17 @@ class Tee(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
-        if len(self.pipeline) == 0:
+        if len(self.pipelines_arg) == 0:
             raise marcel.exception.KillCommandException('No pipelines given.')
         self.pipelines = []
-        for p in self.pipeline:
-            p = p.copy()
-            p.set_error_handler(self.owner.error_handler)
-            p.setup()
-            self.pipelines.append(p)
+        for pipeline in self.pipelines_arg:
+            pipeline = marcel.core.PipelineWrapper.create(self.env(),
+                                                          self.owner.error_handler,
+                                                          pipeline,
+                                                          lambda pipeline: pipeline)
+            pipeline.setup()
+            pipeline.prepare_to_receive()
+            self.pipelines.append(pipeline)
 
     def receive(self, x):
         for pipeline in self.pipelines:

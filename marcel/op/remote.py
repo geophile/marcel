@@ -192,7 +192,6 @@ class Remote(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
-        assert isinstance(self.pipeline_arg, marcel.core.Pipelineable)
         self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,
                                                               thread_ids=self.cluster.hosts,
                                                               pipeline_arg=self.pipeline_arg,

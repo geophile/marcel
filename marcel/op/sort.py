@@ -68,7 +68,8 @@ class Sort(marcel.core.Op):
     # Op
 
     def receive(self, x):
-        self.contents.append(x)
+        if self.contents is not None:
+            self.contents.append(x)
 
     def flush(self):
         if self.contents is not None:
@@ -79,6 +80,8 @@ class Sort(marcel.core.Op):
                     self.contents.sort()
                 for x in self.contents:
                     self.send(x)
+                # Reusing a sort after flush produces non-sorted data! So just clearing self.contents is inadequate.
+                # Setting self.contents to None will result in an obvious failure if this is attempted.
                 self.contents = None
             except TypeError as e:
                 raise marcel.exception.KillCommandException(e)
