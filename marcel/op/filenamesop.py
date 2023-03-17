@@ -101,8 +101,10 @@ class FilenamesOp(marcel.core.Op):
     def visit(self, root, level):
         file = File(root, self.base, self.metadata_cache)
         self.action(self, file)
-        if root.is_dir() and ((level == 0 and (self.d1 or self.dr)) or self.dr):
+        if root.is_dir() and ((level == 0 and (self.d1 or self.dr)) or self.dr) and not self.dir_already_visited(root):
             try:
+                root_stat = root.stat()
+                self.visited_dirs.add((root_stat.st_dev, root_stat.st_ino))
                 sorted_dir_contents = sorted(root.iterdir())
                 for file in sorted_dir_contents:
                     try:
@@ -111,9 +113,6 @@ class FilenamesOp(marcel.core.Op):
                         self.non_fatal_error(input=file, message='Permission denied')
                     except FileNotFoundError:
                         self.non_fatal_error(input=file, message='No such file or directory')
-                    finally:
-                        file_stat = file.stat()
-                        self.visited_dirs.add((file_stat.st_dev, file_stat.st_ino))
             except PermissionError:
                 self.non_fatal_error(input=root, message='Permission denied')
             except FileNotFoundError:

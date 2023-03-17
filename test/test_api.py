@@ -628,9 +628,7 @@ def test_ls():
              expected_out=sorted(['.',
                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
                                   'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
-                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
-                                  ]))
+                                  'd/dd/ddf']))
     TEST.run(test=lambda: run(ls() | map(lambda f: f.render_compact())),
              expected_out=sorted(['.',
                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
@@ -651,26 +649,19 @@ def test_ls():
              expected_out=sorted(['.',
                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
                                   'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
-                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
-                                  ]))
+                                  'd/dd/ddf']))
     # Test f/d/s flags
     TEST.run(test=lambda: run(ls(file=True, recursive=True) | map(lambda f: f.render_compact())),
              expected_out=sorted(['f', 'lf',  # Top-level
                                   'd/df', 'd/ldf',  # Contents of d
-                                  'sd/df', 'sd/ldf',  # Also reachable via sd
-                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
-                                  ]))
+                                  'd/dd/ddf']))
     TEST.run(test=lambda: run(ls(dir=True, recursive=True) | map(lambda f: f.render_compact())),
              expected_out=sorted(['.',
                                   'd',  # Top-level
-                                  'd/dd',  # Contents of d
-                                  'sd/dd'  # Also reachable via sd
-                                  ]))
+                                  'd/dd']))  # Contents of d
     TEST.run(test=lambda: run(ls(symlink=True, recursive=True) | map(lambda f: f.render_compact())),
              expected_out=sorted(['sf', 'sd',  # Top-level
-                                  'd/sdf', 'd/sdd',  # Contents of d
-                                  'sd/sdf', 'sd/sdd'  # Also reachable via sd
+                                  'd/sdf', 'd/sdd'  # Contents of d
                                   ]))
     # Duplicates
     TEST.run(test=lambda: run(ls('/tmp/test/*d', '/tmp/test/?', depth=0) | map(lambda f: f.render_compact())),
@@ -1667,13 +1658,14 @@ def main_stable():
 
 
 def main_dev():
+    test_ls()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    # main_dev()
+    # main_stable()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

@@ -3699,6 +3699,24 @@ Notes:
 
 FIXED
 
+193. ls doesn't handle recursion well
+
+E.g. ls -r /bin/X11
+
+Needs to detect the cycle and stop.
+
+......................................................................
+
+Hard links are not a problem. They link only to files.
+
+For symbolic links: always show the link, but don't recurse if the
+target has already been visited.
+
+
+----------------------------------------------------------------------
+
+FIXED
+
 195. Remote execution should work on a pipeline-valued expression
 
 E.g., these should work:

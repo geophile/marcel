@@ -660,9 +660,7 @@ def test_ls():
              expected_out=sorted(['.',
                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
                                   'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
-                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
-                                  ]))
+                                  'd/dd/ddf']))
     TEST.run('ls | map (f: f.render_compact())',
              expected_out=sorted(['.',
                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
@@ -683,26 +681,19 @@ def test_ls():
              expected_out=sorted(['.',
                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
                                   'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
-                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
-                                  ]))
+                                  'd/dd/ddf']))
     # Test f/d/s flags
     TEST.run('ls -fr | map (f: f.render_compact())',
              expected_out=sorted(['f', 'lf',  # Top-level
                                   'd/df', 'd/ldf',  # Contents of d
-                                  'sd/df', 'sd/ldf',  # Also reachable via sd
-                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
-                                  ]))
+                                  'd/dd/ddf']))
     TEST.run('ls -dr | map (f: f.render_compact())',
              expected_out=sorted(['.',
                                   'd',  # Top-level
-                                  'd/dd',  # Contents of d
-                                  'sd/dd'  # Also reachable via sd
-                                  ]))
+                                  'd/dd']))  # Contents of d
     TEST.run('ls -sr | map (f: f.render_compact())',
              expected_out=sorted(['sf', 'sd',  # Top-level
-                                  'd/sdf', 'd/sdd',  # Contents of d
-                                  'sd/sdf', 'sd/sdd'  # Also reachable via sd
+                                  'd/sdf', 'd/sdd'  # Contents of d
                                   ]))
     # Duplicates
     TEST.run('ls -0 *d ? | map (f: f.render_compact())',
@@ -742,17 +733,13 @@ def test_ls():
              expected_out=sorted(['.',
                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
                                   'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
-                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
-                                  ]))
+                                  'd/dd/ddf']))
     TEST.run('TMP = TMP')
     TEST.run('ls -r /(TMP.lower())/(TEST) | map (f: f.render_compact())',
              expected_out=sorted(['.',
                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
                                   'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                  'sd/df', 'sd/sdf', 'sd/ldf', 'sd/dd', 'sd/sdd',  # Also reachable via sd
-                                  'd/dd/ddf', 'd/sdd/ddf', 'sd/dd/ddf', 'sd/sdd/ddf'  # All paths to ddf
-                                  ]))
+                                  'd/dd/ddf']))
 
 
 # pushd, popd, dirs
@@ -2155,8 +2142,6 @@ def main_stable():
 
 
 def main_dev():
-    test_redirect_file()
-    test_ls()
     pass
 
 
