@@ -13,12 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import pathlib
 import stat
 
 import marcel.object.error
 import marcel.object.file
 import marcel.op.filenamesop
+import marcel.util
 
 File = marcel.object.file.File
 
@@ -119,19 +121,19 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
     @staticmethod
     def send_path(op, file):
         assert type(file) is File, f'{type(file)} {file}'
-        mode = file.path.lstat().st_mode
+        file_stat = file.path.lstat()
+        mode = file_stat.st_mode
         s = stat.S_ISLNK(mode)
         f = stat.S_ISREG(mode) and not s
         d = stat.S_ISDIR(mode) and not s
-        if ((op.file and f) or (op.dir and d) or (op.symlink and s)) and file.path not in op.emitted:
+        if ((op.file and f) or (op.dir and d) or (op.symlink and s)) and file.path not in op.emitted_paths:
             try:
                 op.send(file)
             except ValueError as e:
-                import marcel.util
                 marcel.util.print_stack()
                 message = (f'Caught {e.__class__.__name__} on file with '
                            f'device = {file.device} and '
                            f'inode = {file.inode}, '
                            f'(file name may not be printable).')
                 op.non_fatal_error(None, message)
-            op.emitted.add(file.path)
+            op.emitted_paths.add(file.path)

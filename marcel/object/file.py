@@ -121,6 +121,7 @@ class File(marcel.object.renderable.Renderable):
         if self._is_symlink():
             line.append('->')
             link_target = pathlib.Path(os.readlink(self.path))
+            # TODO: Shouldn't colorization be done later, after all the file path handling?
             link_target = marcel.util.colorize(link_target,
                                                self._highlight_color(link_target, color_scheme))
             if isinstance(link_target, pathlib.Path):

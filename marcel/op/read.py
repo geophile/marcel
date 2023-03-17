@@ -199,14 +199,15 @@ class Read(marcel.op.filenamesop.FilenamesOp):
             file = x[0]
             if type(file) is not File:
                 self.fatal_error(x, 'Input to read must be a File.')
-            self.read_file(file)
+            Read.read_file(self, file)
 
     # Internal
 
-    def read_file(self, file):
+    @staticmethod
+    def read_file(op, file):
         assert type(file) is File, f'{type(file)} {file}'
         if file.is_file():
-            self.reader.read_file(file, (file,) if self.label else None)
+            op.reader.read_file(file, (file,) if op.label else None)
 
 
 class Reader:

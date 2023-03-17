@@ -882,3 +882,10 @@ Move history to xdg directory
 
 Labeled columns for csv. Allow first row to specify column names, and
 use these to form typed columns.
+
+----------------------------------------------------------------------
+
+union, intersect, join should allow for multiple inputs.
+
+(Not join: join --keep can produce ambiguous results with multiple
+inputs).

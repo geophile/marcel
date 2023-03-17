@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import pathlib
+import types
 
 import marcel.argsparser
 import marcel.core
@@ -40,6 +41,11 @@ class FilenamesOp(marcel.core.Op):
 
     def __init__(self, env, action):
         super().__init__(env)
+        # A method's type would be MethodType. We don't want a method of this class, e.g. self.foobar. self
+        # would be bound to the current instance, and that might not be the instance that gets executed later,
+        # due to possible pipeline copying. The action should not be a method, e.g. it could be a staticmethod,
+        # whose type is FunctionType.
+        assert(isinstance(action, types.FunctionType))
         self.action = action
         self.d0 = False
         self.d1 = False
@@ -52,7 +58,12 @@ class FilenamesOp(marcel.core.Op):
         self.current_dir = None
         self.roots = None
         self.base = None
-        self.emitted = None
+        # emitted_paths is maintained to avoid visiting the same path repeatedly, as might happen
+        # with roots containing wildcards. E.g., a? and ?x would both identify a file names ax.
+        self.emitted_paths = None
+        # Set of visited directories, used to avoid revisiting directories via symlinks. Directories
+        # are identified by (stat.st_dev, stat.st_ino).
+        self.visited_dirs = None
         self.metadata_cache = None
 
     # AbstractOp
@@ -65,7 +76,8 @@ class FilenamesOp(marcel.core.Op):
         if len(self.filenames) > 0 and len(self.roots) == 0:
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
-        self.emitted = set()
+        self.emitted_paths = set()
+        self.visited_dirs = set()
         if len(self.roots) == 0:
             self.roots = [self.current_dir]
         if not (self.d0 or self.d1 or self.dr):
@@ -91,8 +103,17 @@ class FilenamesOp(marcel.core.Op):
         self.action(self, file)
         if root.is_dir() and ((level == 0 and (self.d1 or self.dr)) or self.dr):
             try:
-                for file in sorted(root.iterdir()):
-                    self.visit(file, level + 1)
+                sorted_dir_contents = sorted(root.iterdir())
+                for file in sorted_dir_contents:
+                    try:
+                        self.visit(file, level + 1)
+                    except PermissionError:
+                        self.non_fatal_error(input=file, message='Permission denied')
+                    except FileNotFoundError:
+                        self.non_fatal_error(input=file, message='No such file or directory')
+                    finally:
+                        file_stat = file.stat()
+                        self.visited_dirs.add((file_stat.st_dev, file_stat.st_ino))
             except PermissionError:
                 self.non_fatal_error(input=root, message='Permission denied')
             except FileNotFoundError:
@@ -116,3 +137,15 @@ class FilenamesOp(marcel.core.Op):
         self.base = pathlib.Path('/' + '/'.join(nca_parts[1:nca]))
         if self.base.is_file():
             self.base = self.base.parent
+
+    def dir_already_visited(self, path):
+        # There could be multiple paths to a directory due to symlinks. Check if path is a symlink to a directory
+        # that has already been visited.
+        assert path.is_dir(), path
+        if path.is_symlink():
+            target = path.resolve()
+            target_stat = target.stat()
+            target_id = (target_stat.st_dev, target_stat.st_ino)
+            if target_id in self.visited_dirs:
+                return True
+        return False

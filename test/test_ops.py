@@ -2155,14 +2155,8 @@ def main_stable():
 
 
 def main_dev():
-    filename_op_setup('/tmp/test')
-    # Duplicates
-    # TEST.run('ls -0 *d ? | map (f: f.render_compact())',
-    #          expected_out=sorted(['d', 'sd', 'f']))
-    expected = sorted(['.', 'f', 'sf', 'lf', 'd', 'sd'])
-    expected.extend(sorted(['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']))
-    TEST.run('ls -1 . d | map (f: f.render_compact())',
-             expected_out=expected)
+    test_redirect_file()
+    test_ls()
     pass
 
 

@@ -636,3 +636,28 @@ It isn't a public op, but if you try calling it marcel crashes.
         assert self._args_parser_constructor is not None
     AssertionError
     jao@cheese:~/git/marcel/test$ 
+
+----------------------------------------------------------------------
+
+198. Crash when trying to create a file in place of an exiting directory
+
+/media/backup/daily $ find /media/backup/daily/2023.03.09 -links 1 | args (| f: ls (f) | (f: (f.size, f)) |) > /tmp/x
+Process Process-1:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/usr/local/lib/python3.10/dist-packages/marcel/core.py", line 263, in execute
+    self.pipeline.setup()
+  File "/usr/local/lib/python3.10/dist-packages/marcel/core.py", line 410, in setup
+    op.setup()
+  File "/usr/local/lib/python3.10/dist-packages/marcel/op/write.py", line 144, in setup
+    DefaultWriter(self))
+  File "/usr/local/lib/python3.10/dist-packages/marcel/op/write.py", line 240, in __init__
+    super().__init__(op)
+  File "/usr/local/lib/python3.10/dist-packages/marcel/op/write.py", line 196, in __init__
+    self.output = open(path, mode='a' if op.append else 'w')
+IsADirectoryError: [Errno 21] Is a directory: '/tmp/x'

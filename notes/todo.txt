@@ -448,4 +448,17 @@ ls needs work on links. From bash:
 
 ----------------------------------------------------------------------
 
-union, intersect, join should allow for multiple inputs.
+Args unwraps input, and tp definition has to deal with it:
+
+tp = (| head 1 | \
+        args (| x: \
+            ((x,) if type(x) is not tuple else x) | \
+            (*x: tuple([type(y) for y in x])) \
+        |) \
+     |)
+
+Should the unwrapping by args be unconditional?
+
+----------------------------------------------------------------------
+
+Extend COLOR_SCHEME, adding a color for commands (i.e., user input).
