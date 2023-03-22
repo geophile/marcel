@@ -359,14 +359,18 @@ class Pipeline(AbstractOp):
         self.ops = []
         # Parameters declared for a pipeline
         self.params = None
+        self.source = None
 
     def __repr__(self):
-        params = ', '.join(self.params) if self.params else None
-        op_buffer = []
-        for op in self.ops:
-            op_buffer.append(str(op))
-        ops = ' | '.join(op_buffer)
-        return f'(| {params}: {ops} |)' if params else f'(| {ops} |)'
+        if self.source:
+            return self.source
+        else:
+            params = ', '.join(self.params) if self.params else None
+            op_buffer = []
+            for op in self.ops:
+                op_buffer.append(str(op))
+            ops = ' | '.join(op_buffer)
+            return f'(| {params}: {ops} |)' if params else f'(| {ops} |)'
 
     def dump(self, label):
         print(f'{label}: {id(self)}  {self}')

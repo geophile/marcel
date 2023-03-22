@@ -1038,6 +1038,7 @@ class Parser:
         for op_args in op_sequence:
             # op_args is (op_token, list of arg tokens)
             pipeline.append(self.create_op(*op_args))
+        pipeline.source = self.text
         return pipeline
 
     def redirect_out_op(self, arrow_token, source=None):
