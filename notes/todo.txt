@@ -56,6 +56,8 @@ History commands
 - If history were in the namespace, then edited_command wouldn't need
   special handling.
 
+But keeping the whole history in memory is a waste of memory.
+
 ----------------------------------------------------------------------
 
 Not all ops can be used in API, e.g. edit, help. What about fork? remote?
