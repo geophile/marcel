@@ -41,7 +41,7 @@ along with its uid and gid:
 {r:stat()} returns an {n:os.stat_result} object, which
 has the uid and gid in positions 4 and 5.
 
-{n:File} also has convenience function so that you don't have to invoke {r:stat()} directly
+{n:File} also has convenience functions so that you don't have to invoke {r:stat()} directly
 and then figure out how to obtain the metadata of interest from an {n:os.stat_result} object.
 So the same result can be obtained as follows:
 

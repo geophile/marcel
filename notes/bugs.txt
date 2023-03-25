@@ -646,3 +646,30 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.10/dist-packages/marcel/op/write.py", line 196, in __init__
     self.output = open(path, mode='a' if op.append else 'w')
 IsADirectoryError: [Errno 21] Is a directory: '/tmp/x'
+
+----------------------------------------------------------------------
+
+199. Execution of pipeline var does not work after >
+
+    x = (| write -f '<<<{}>>>' |)
+    gen 3 | x
+
+Works, we see the formatted output.
+
+Save the gen output:
+
+    gen 3 > g
+    g >
+
+This:
+
+    g > x
+
+produces no output.
+
+But this does:
+
+    g > (*x: x) | x
+
+So pipeline var execution works after |, but not after >.
+

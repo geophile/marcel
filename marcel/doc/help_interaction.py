@@ -22,7 +22,7 @@ background.
 {b:Running commands}
 
 Marcel can accept a command when the prompt is present. Otherwise, a command is
-running. You can kill a (oreground command at any time by pressing Ctrl-C.
+running. You can kill a foreground command at any time by pressing Ctrl-C.
 
 In general, the traditional keyboard interactions for a Linux shell can be used,
 e.g.
