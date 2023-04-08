@@ -464,3 +464,8 @@ Should the unwrapping by args be unconditional?
 ----------------------------------------------------------------------
 
 Extend COLOR_SCHEME, adding a color for commands (i.e., user input).
+
+----------------------------------------------------------------------
+
+CSV handling: add options for specifying quote and delimiter. Can then
+drop the distinction between CSV and TSV.

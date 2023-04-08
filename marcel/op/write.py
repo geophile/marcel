@@ -211,8 +211,8 @@ class CSVWriter(TextWriter):
         super().__init__(op)
         self.writer = csv.writer(self,
                                  delimiter=delimiter,
-                                 quotechar="'",
-                                 quoting=csv.QUOTE_MINIMAL,
+                                 quotechar='"',
+                                 quoting=csv.QUOTE_NONNUMERIC,
                                  lineterminator='')
         self.row = None
 

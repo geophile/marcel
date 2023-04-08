@@ -2032,6 +2032,39 @@ def test_bug_190():
              expected_out=['a2', 'b2'])
 
 
+def test_bug_200():
+    dir = '/tmp/bug200'
+    source = f'{dir}/source.csv'
+    target = f'{dir}/target.csv'
+    target2 = f'{dir}/target2.csv'
+    os.system(f'rm -rf {dir}')
+    os.system(f'mkdir {dir}')
+    # number, unquoted string, single-quoted string
+    os.system(f'''echo "123,a,'b,c'" > {source}''')
+    # double-quoted string
+    os.system(f'''echo '"d,e"' >> {source}''')
+    # Check source
+    TEST.run(f'read {source}',
+             expected_out=["""123,a,'b,c'""", '''"d,e"'''])
+    TEST.run(f'read -c {source}',
+             expected_out=[('123', 'a', "'b", "c'"),
+                           'd,e'])
+    # Test that --csv reading and writing
+    TEST.run(f'read -c {source} | write -c {target}')
+    TEST.run(f'read {target}',
+             expected_out=['''"123","a","'b","c'"''', '"d,e"'])
+    TEST.run(f'read -c {target}',
+             expected_out=[('123', 'a', "'b", "c'"),
+                           'd,e'])
+    # Test whether write -c output followed by read -c/write -c is a fixed point.
+    TEST.run(f'read -c {target} | write -c {target2}')
+    TEST.run(f'read {target2}',
+             expected_out=['''"123","a","'b","c'"''', '"d,e"'])
+    TEST.run(f'read -c {target2}',
+             expected_out=[('123', 'a', "'b", "c'"),
+                           'd,e'])
+
+
 # Generalization of bug 195
 def test_pipeline_vars():
     TEST.reset_environment(new_main=True)
@@ -2090,6 +2123,7 @@ def test_bugs():
     test_bug_154()
     test_bug_168()
     test_bug_190()
+    test_bug_200()
 
 
 def main_stable():
