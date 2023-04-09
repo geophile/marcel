@@ -7,8 +7,10 @@ from math import pi
 import marcel.object.error
 import marcel.object.cluster
 import marcel.version
-import test_base
 from marcel.api import *
+
+import test_base
+timeit = test_base.timeit
 
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
@@ -66,6 +68,7 @@ def filename_op_setup(dir):
     TEST.cd(dir)
 
 
+@timeit
 def test_gen():
     # Explicit out
     TEST.run(test=lambda: run(gen(5) | write()),
@@ -105,6 +108,7 @@ def test_gen():
              expected_out=['010', '011', '012', '013', '014'])
 
 
+@timeit
 def test_write():
     output_filename = '/tmp/out.txt'
     # Write to stdout
@@ -172,6 +176,7 @@ def test_write():
              file=output_filename)
 
 
+@timeit
 def test_sort():
     TEST.run(test=lambda: run(gen(5) | sort()),
              expected_out=[0, 1, 2, 3, 4])
@@ -188,6 +193,7 @@ def test_sort():
     TEST.run(test=lambda: run(sort()), expected_err='sort cannot be the first operator in a pipeline')
 
 
+@timeit
 def test_map():
     TEST.run(test=lambda: run(gen(5) | map(lambda x: -x)),
              expected_out=[0, -1, -2, -3, -4])
@@ -200,6 +206,7 @@ def test_map():
              expected_out=[1.0, Error('division by zero'), -1.0])
 
 
+@timeit
 def test_select():
     TEST.run(lambda: run(gen(5) | select(lambda x: True)),
              expected_out=[0, 1, 2, 3, 4])
@@ -214,6 +221,7 @@ def test_select():
              expected_err='function argument must be a function')
 
 
+@timeit
 def test_red():
     # Test function symbols
     TEST.run(lambda: run(gen(5, 1) | red(r_plus)),
@@ -302,6 +310,7 @@ def test_red():
              expected_out=[(0, 2), (1, 2), (2, 1)])
 
 
+@timeit
 def test_expand():
     # Test singletons
     TEST.run(lambda: run(gen(5) | expand()),
@@ -384,6 +393,7 @@ def test_expand():
              expected_out=[111, 222, 222, 333, 333, 333])
 
 
+@timeit
 def test_head():
     TEST.run(lambda: run(gen(100) | head(0)),
              expected_err="must not be 0")
@@ -411,6 +421,7 @@ def test_head():
              expected_out=[0, 1, 2])
 
 
+@timeit
 def test_tail():
     TEST.run(lambda: run(gen(100) | tail(0)),
              expected_err="must not be 0")
@@ -438,6 +449,7 @@ def test_tail():
              expected_out=[0, 1, 2])
 
 
+@timeit
 def test_reverse():
     TEST.run(lambda: run(gen(5) | select(lambda x: False) | reverse()),
              expected_out=[])
@@ -445,6 +457,7 @@ def test_reverse():
              expected_out=[4, 3, 2, 1, 0])
 
 
+@timeit
 def test_squish():
     TEST.run(lambda: run(gen(5) | squish()),
              expected_out=[0, 1, 2, 3, 4])
@@ -468,6 +481,7 @@ def test_squish():
                            [-4, 4, -4, 4]])
 
 
+@timeit
 def test_unique():
     TEST.run(lambda: run(gen(10) | unique()),
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -485,6 +499,7 @@ def test_unique():
              expected_out=[0, 1, 2])
 
 
+@timeit
 def test_window():
     TEST.run(lambda: run(gen(10) | window(lambda x: False)),
              expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)])
@@ -538,6 +553,7 @@ def test_window():
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
 
+@timeit
 def test_bash():
     # Two space between hello and world not preserved.
     TEST.run(lambda: run(bash('echo', 'hello', 'world')),
@@ -551,6 +567,7 @@ def test_bash():
              expected_out=['hello  world'])
 
 
+@timeit
 def test_namespace():
     config_file = '/tmp/.marcel.py'
     config_path = pathlib.Path(config_file)
@@ -579,6 +596,7 @@ def test_namespace():
     TEST.reset_environment()
 
 
+@timeit
 def test_source_filenames():
     filename_op_setup('/tmp/test')
     # # Relative path
@@ -615,6 +633,7 @@ def test_source_filenames():
              expected_out=['/root'])
 
 
+@timeit
 def test_ls():
     filename_op_setup('/tmp/test')
     # 0/1/r flags with no files specified.
@@ -715,6 +734,7 @@ def test_ls():
 
 
 # pushd, popd, dirs
+@timeit
 def test_dir_stack():
     filename_op_setup('/tmp/test')
     os.system('mkdir a b c')
@@ -780,6 +800,7 @@ def test_dir_stack():
              expected_out=['/tmp/test/y'])
 
 
+@timeit
 def test_remote():
     node1 = marcel.object.cluster.Host(TEST.env.getvar('NODE1'), None)
     TEST.run(lambda: run(remote('CLUSTER1', lambda: gen(3))),
@@ -804,6 +825,7 @@ def test_remote():
              expected_err='notacluster is not a Cluster')
 
 
+@timeit
 def test_fork():
     # int forkgen
     TEST.run(lambda: run(fork(3, lambda: gen(3, 100)) | sort()),
@@ -834,6 +856,7 @@ def test_fork():
              expected_err='Too many pipeline args')
 
 
+@timeit
 def test_sudo():
     TEST.run(test=lambda: run(sudo(gen(3))),
              expected_out=[0, 1, 2])
@@ -847,11 +870,13 @@ def test_sudo():
              expected_out=['f'])
 
 
+@timeit
 def test_version():
     TEST.run(test=lambda: run(version()),
              expected_out=[marcel.version.VERSION])
 
 
+@timeit
 def test_assign():
     TEST.run(test=lambda: run(assign('a', 3)),
              verification=lambda: run(env(var='a')),
@@ -886,6 +911,7 @@ def test_assign():
              expected_out=['abc'])
 
 
+@timeit
 def test_join():
     # Join losing right inputs
     TEST.run(test=lambda: run(gen(4) | map(lambda x: (x, -x)) | join(gen(3) | map(lambda x: (x, x * 100)))),
@@ -920,6 +946,7 @@ def test_join():
              expected_err='not hashable')
 
 
+@timeit
 def test_pipeline_args():
     add = lambda a: map(lambda x: (x, x + a))
     TEST.run(test=lambda: run(gen(3) | add(100)),
@@ -943,6 +970,7 @@ def test_pipeline_args():
              expected_out=[(0, 10), (1, 110), (2, 210)])
 
 
+@timeit
 def test_sql():
     if not SQL:
         return
@@ -975,6 +1003,7 @@ def test_sql():
     # TODO: sql types
 
 
+@timeit
 def test_store_load():
     # Load
     x = reservoir('x')
@@ -1004,6 +1033,7 @@ def test_store_load():
              expected_err='is not a Python identifier')
 
 
+@timeit
 def test_if():
     even = reservoir('even')
     TEST.run(test=lambda: run(gen(10) | ifthen(lambda x: x % 2 == 0, store(even))),
@@ -1017,6 +1047,7 @@ def test_if():
              expected_out=[0, 3, 6, 9])
 
 
+@timeit
 def test_read():
     os.system('rm -rf /tmp/read')
     os.system('mkdir /tmp/read')
@@ -1166,6 +1197,7 @@ def test_read():
                            ('d', 'e', 'f')])
 
 
+@timeit
 def test_intersect():
     # Empty inputs
     empty = reservoir('empty')
@@ -1207,6 +1239,7 @@ def test_intersect():
              expected_err='not hashable')
 
 
+@timeit
 def test_union():
     # Empty inputs
     empty = reservoir('empty')
@@ -1228,6 +1261,7 @@ def test_union():
         expected_out=[(0, 0), (1, 100), (2, 200), (2, 200), (3, 300), (3, 300), (4, 400), (5, 500)])
 
 
+@timeit
 def test_difference():
     # Empty inputs
     empty = reservoir('empty')
@@ -1270,6 +1304,7 @@ def test_difference():
              expected_err='not hashable')
 
 
+@timeit
 def test_args():
     # gen
     TEST.run(test=lambda: run(gen(5, 1) | args(lambda n: gen(n)) | map(lambda x: -x)),
@@ -1340,6 +1375,7 @@ def test_args():
              expected_out=[0, 0, 1, 0, 1, 2])
 
 
+@timeit
 def test_env():
     TEST.reset_environment()
     # Get all env vars, and check for things that should definitely be there.
@@ -1375,6 +1411,7 @@ def test_env():
              expected_out=[Error('undefined')])
 
 
+@timeit
 def test_pos():
     TEST.run(test=lambda: run(gen(5) |
                               map(lambda x: (x, pos())) |
@@ -1383,6 +1420,7 @@ def test_pos():
              expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
 
 
+@timeit
 def test_tee():
     TEST.run(test=lambda: run(gen(5, 1) | tee()),
              expected_err='No pipelines')
@@ -1396,6 +1434,7 @@ def test_tee():
     TEST.run(test=lambda: run(load(b)), expected_out=[120])
 
 
+@timeit
 def test_upload():
     os.system('rm -rf /tmp/source')
     os.system('mkdir /tmp/source')
@@ -1439,6 +1478,7 @@ def test_upload():
     os.system('rm /tmp/dest/*')
 
 
+@timeit
 def test_download():
     node1 = TEST.env.getvar('NODE1')
     node2 = TEST.env.getvar('NODE2')
@@ -1505,6 +1545,7 @@ def test_download():
     os.system('rm -rf /tmp/dest/*')
 
 
+@timeit
 def test_api_run():
     # Error-free output, just an op
     TEST.run(test=lambda: run(gen(3)),
@@ -1517,6 +1558,7 @@ def test_api_run():
              expected_out=[-1.0, Error('division by zero'), 1.0])
 
 
+@timeit
 def test_api_gather():
     # Default gather behavior
     TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x)),
@@ -1545,6 +1587,7 @@ def test_api_gather():
              expected_err='Specify at most one of the errors and error_handler arguments')
 
 
+@timeit
 def test_api_first():
     # Default first behavior
     TEST.run(test=lambda: first(gen(3, -1) | map(lambda x: 1 / x)),
@@ -1576,6 +1619,7 @@ def test_api_first():
              expected_err='Specify at most one of the errors and error_handler arguments')
 
 
+@timeit
 def test_api_iterator():
     TEST.run(test=lambda: list(gen(3)),
              expected_return=[0, 1, 2])
@@ -1583,6 +1627,7 @@ def test_api_iterator():
              expected_return=[-1.0, Error('division by zero'), 1.0])
 
 
+@timeit
 def test_bug_126():
     f = reservoir('f')
     fact = lambda x: gen(x, 1) | args(lambda n: gen(n, 1) | red(r_times) | map(lambda f: (n, f)))
@@ -1591,11 +1636,13 @@ def test_bug_126():
              expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
 
 
+@timeit
 def test_bug_136():
     TEST.run(lambda: run(gen(3, 1) | args(lambda n: gen(2, 100) | map(lambda x: x + n)) | red(r_plus)),
              expected_out=[615])
 
 
+@timeit
 def test_bug_10():
     TEST.run(lambda: run(sort()), expected_err='cannot be the first operator in a pipeline')
     TEST.run(lambda: run(unique()), expected_err='cannot be the first operator in a pipeline')
@@ -1605,11 +1652,18 @@ def test_bug_10():
 
 
 # For bugs that aren't specific to a single op.
+@timeit
 def test_bugs():
     test_bug_126()
     test_bug_136()
     test_bug_10()
 
+
+def main_slow_tests():
+    TEST.reset_environment()
+    test_upload()
+    test_remote()
+    test_download()
 
 def main_stable():
     test_gen()
@@ -1630,7 +1684,6 @@ def main_stable():
     test_source_filenames()
     test_ls()
     test_dir_stack()
-    test_remote()
     test_fork()
     test_sudo()
     test_version()
@@ -1648,8 +1701,6 @@ def main_stable():
     test_env()
     test_pos()
     test_tee()
-    test_upload()
-    test_download()
     test_api_run()
     test_api_gather()
     test_api_first()
@@ -1658,14 +1709,14 @@ def main_stable():
 
 
 def main_dev():
-    test_ls()
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    main_dev()
+    main_stable()
+    main_slow_tests()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

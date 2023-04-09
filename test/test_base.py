@@ -3,6 +3,7 @@ import os
 import pathlib
 import sys
 import shutil
+import time
 
 import dill.source
 
@@ -14,6 +15,17 @@ import marcel.util
 
 TEST_STDOUT = '/tmp/test_stdout.txt'
 TEST_STDERR = '/tmp/test_stderr.txt'
+TEST_TIMING = False
+
+
+def timeit(f):
+    def timetest():
+        start = time.time()
+        f()
+        stop = time.time()
+        usec = (stop - start) * 1000000
+        print(f'TEST TIMING -- {f.__name__}: {usec}')
+    return timetest if TEST_TIMING else f
 
 
 class TestBase:
