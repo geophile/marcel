@@ -100,7 +100,7 @@ class PipelineRunner(threading.Thread):
 
     def run(self):
         try:
-            self.check_python_version()
+            # self.check_python_version()
             TRACE.write(f'PipelineRunner: About to setup {self.pipeline}')
             self.pipeline.setup()
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
