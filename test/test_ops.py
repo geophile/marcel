@@ -1805,10 +1805,12 @@ def test_args():
     TEST.run('gen 3 | select (x: False) | args --all (|n: map (x: -x)|)',
              expected_out=[])
     # negative testing
-    TEST.run('gen 3 | args (|gen 3|)',
-             expected_err='The args pipeline must be parameterized')
-    TEST.run('gen 10 | args --all (|a, b: gen (a) (b)|)',
-             expected_err='the pipeline must have a single parameter')
+    TEST.run('gen 3 | args --all (|x, y: (123) |)',
+             expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
+    TEST.run('gen 3 | args --all (| (123) |)',
+             expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
+    TEST.run('gen 3 | args (| (123) |)',
+             expected_err="The args pipeline must be parameterized")
     # Bug 94
     TEST.run('gen 4 1 | args (|n: gen (n)|) | window (x: x == 0)',
              expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
@@ -2238,14 +2240,15 @@ def main_stable():
 
 
 def main_dev():
+    main_stable()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    main_slow_tests()
-    # main_dev()
+    # main_stable()
+    # main_slow_tests()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

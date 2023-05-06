@@ -33,10 +33,13 @@ from the input stream.
 
 Items in the input stream to {r:args} will be bound to the {r:PIPELINE}s parameters. 
 
-If the {r:PIPELINE}
+If {r:--all} is not specified, and the {r:PIPELINE}
 has {i:n} parameters, then {i:n} items from the input stream will be used on each execution of {r:PIPELINE}.
 If the input stream is exhausted after providing at least 1 but less than {i:n} arguments, remaining parameters
 will be bound to {n:None}. 
+
+If {r:--all} is specified, then the {r:PIPELINE} must have exactly one parameter. All inputs will be
+accumulated into a list and bound to that parameter.
 '''
 
 
@@ -102,10 +105,10 @@ class Args(marcel.core.Op):
 
     def check_args(self):
         error = None
-        if self.n_params == 0:
+        if self.all and self.n_params != 1:
+            error = 'With -a|--all option, the pipeline must have exactly one parameter.'
+        elif self.n_params == 0:
             error = 'The args pipeline must be parameterized.'
-        if self.all and self.n_params > 1:
-            error = 'With -a|--all option, the pipeline must have a single parameter.'
         if error:
             raise marcel.exception.KillCommandException(error)
 
