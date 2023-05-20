@@ -3725,3 +3725,32 @@ g3 = [gen 3]
 @jao (g3)
 remote jao (g3)
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+199. Execution of pipeline var does not work after >
+
+    x = (| write -f '<<<{}>>>' |)
+    gen 3 | x
+
+Works, we see the formatted output.
+
+Save the gen output:
+
+    gen 3 > g
+    g >
+
+This:
+
+    g > x
+
+produces no output.
+
+But this does:
+
+    g > (*x: x) | x
+
+So pipeline var execution works after |, but not after >.
+
