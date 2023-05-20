@@ -1385,7 +1385,7 @@ AttributeError: 'NoneType' object has no attribute 'as_posix'
 
 FIXED
 
-73. Parsing error involving pipe and/or pipeline args with load syntax
+73.Parsing error involving pipe and/or pipeline args with load syntax
 
 Pipe before the last join is rejected
 
@@ -3431,9 +3431,9 @@ Plan:
 
 + Parser.pipeline does this:
 
-    if self.next_token(Op, Arrow)
+    if self.next_token(Op, Gt)
         ...
-    elif self.next_token(String, Arrow)
+    elif self.next_token(String, Gt)
 
   Easy to fix. Similar thing later: 
 
@@ -3724,4 +3724,33 @@ E.g., these should work:
 g3 = [gen 3]
 @jao (g3)
 remote jao (g3)
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+199. Execution of pipeline var does not work after >
+
+    x = (| write -f '<<<{}>>>' |)
+    gen 3 | x
+
+Works, we see the formatted output.
+
+Save the gen output:
+
+    gen 3 > g
+    g >
+
+This:
+
+    g > x
+
+produces no output.
+
+But this does:
+
+    g > (*x: x) | x
+
+So pipeline var execution works after |, but not after >.
 

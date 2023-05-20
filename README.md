@@ -1,30 +1,53 @@
 What's New
 ----------
 
-Marcel aims to be familiar to bash users. 
-In particular, it should be possible to issue simple bash commands via marcel. 
-One impediment to this goal was
-that some characters have different interpretations in bash and marcel. For example, prior to this release,
-marcel used `[...]` delimit a pipeline. 
-But in bash, the same symbols are used in glob patterns, e.g. `ls [0-9]*`. 
-As a result, marcel commands relying on globs often failed. Escaping the
-brackets helped, but not in all cases.
+Marcel offers bash-like redirection syntax. `>` saves a stream in a file,
+while `>>` appends a stream to a file. Marcel also offers `>$` and `>>$` for writing or appending
+to an environment variable.
 
-With this release, pipelines are delimited by `(|...|)`. This change is necessary because 
-it did not seem possible to completely disambiguate `[...]`. For example, suppose a command contains
+Marcel also tried to overload `>` and `>$` to read a stream from a file or variable. Example:
 
 ```shell
-... [grep foobar a-z] ...
+gen 3 1 > /tmp/x  # Store the sequence 1, 2, 3 in the file /tmp/x
+/tmp/x > (n: -n)  # Load the stream from /tmp/x and negate each number
 ```
 
-One possibility is that grep is searching a file named `a-z` for lines containing `foobar`. But that's
-a very odd filename, and an odd usage of grep. Perhaps there is a typo, and a glob was intended: `[a-z]`, and the
-actual pipeline-terminating `]` appears later. Deciding whether the `]`
-terminates a glob pattern or a marcel pipeline involves keeping track of
-both uses of `[`, and would result in confusing error messages in case
-of mismatches. 
+In other words, this code is equivalent to
 
-Changing the pipeline delimiter to `(|...|)` avoids these problems.
+```shell
+gen 3 1 | write /tmp/x
+read /tmp/x | (n: -n)
+```
+
+So the first occurrence of `>` means `write` while the second occurrence means `read`. While there are
+various clues to determine the correct interpretation of `>`, it was impossible 
+to make this work correctly in general. 
+For example, what does this mean:
+
+```shell
+ls > reverse
+```
+
+This could mean: run the `ls` operator and store the results in a file named `reverse`.
+Or maybe there is a variable named `ls` storing a stream, in which case this might mean
+that the stream should be piped to the `reverse` operator. Or maybe it means that the stream should be 
+written to a file named `reverse`. Or maybe `ls` is bound to a pipeline, in which case we should run
+the pipeline and then store the resulting stream in a file named `reverse`.
+
+This is just unworkable. 
+
+So, inspired by bash (yet again), in this release marcel introduces  `<` to read from a file, and `<$` to
+read from a variable.
+
+Examples:
+
+```shell
+gen 10 >$ a  # Store the stream 0, 1, ..., 9 into variable a.
+gen 10 5 >$ b  # Store the stream 5, 6, ... 14 into variable b.
+a <& (n: -n) >$ c  # Negate each element in a, storing the stream in variable c
+a <& intersect (| b <$ |) >$ a_int_b  # Store the intersection of a and b in a_int_b
+a_int_b <$  # Print the contents of a_int_b
+```
 
 Marcel
 ======

@@ -149,10 +149,12 @@ class Token(Source):
     COMMENT = '#'
     COMMA = ','
     COLON = ':'
-    REDIRECT_FILE = '>'
-    REDIRECT_FILE_APPEND = '>>'
-    REDIRECT_VAR = '>$'
-    REDIRECT_VAR_APPEND = '>>$'
+    WRITE_FILE = '>'
+    WRITE_FILE_APPEND = '>>'
+    WRITE_VAR = '>$'
+    WRITE_VAR_APPEND = '>>$'
+    READ_FILE = '<'
+    READ_VAR = '<$'
     STRING_TERMINATING = [
         OPEN,
         CLOSE,
@@ -163,19 +165,23 @@ class Token(Source):
         COMMENT,
         COMMA,
         COLON,
-        REDIRECT_FILE,
-        REDIRECT_FILE_APPEND,
-        REDIRECT_VAR,
-        REDIRECT_VAR_APPEND
+        READ_FILE,
+        READ_VAR,
+        WRITE_FILE,
+        WRITE_FILE_APPEND,
+        WRITE_VAR,
+        WRITE_VAR_APPEND
     ]
     SHELL_STRING_TERMINATING = [
         OPEN,
         CLOSE,
         PIPE,
-        REDIRECT_FILE,
-        REDIRECT_FILE_APPEND,
-        REDIRECT_VAR,
-        REDIRECT_VAR_APPEND
+        READ_FILE,
+        READ_VAR,
+        WRITE_FILE,
+        WRITE_FILE_APPEND,
+        WRITE_VAR,
+        WRITE_VAR_APPEND
     ]
 
     def __init__(self, parser, text, position):
@@ -191,6 +197,12 @@ class Token(Source):
 
     # Does this token represent a builtin op?
     def is_op(self):
+        return False
+
+    def is_var(self):
+        return False
+
+    def is_executable(self):
         return False
 
     def is_remote(self):
@@ -220,7 +232,10 @@ class Token(Source):
     def is_colon(self):
         return False
 
-    def is_arrow(self):
+    def is_gt(self):
+        return False
+
+    def is_lt(self):
         return False
 
     def is_lexer_failure(self):
@@ -386,6 +401,12 @@ class String(Token):
 
     def is_op(self):
         return self.op_name is not None
+
+    def is_var(self):
+        return self.parser.env.getvar(self.string) is not None
+
+    def is_executable(self):
+        return marcel.util.is_executable(self.string)
 
     def scan(self, scan_termination):
         quote = None
@@ -570,24 +591,40 @@ class Colon(Symbol):
         return True
 
 
-class Arrow(Symbol):
+class Gt(Symbol):
 
     def __init__(self, parser, text, position, symbol):
         super().__init__(parser, text, position, symbol)
-        assert symbol in (Token.REDIRECT_VAR, Token.REDIRECT_VAR_APPEND,
-                          Token.REDIRECT_FILE, Token.REDIRECT_FILE_APPEND)
+        assert symbol in (Token.WRITE_VAR, Token.WRITE_VAR_APPEND,
+                          Token.WRITE_FILE, Token.WRITE_FILE_APPEND)
 
-    def is_arrow(self):
+    def is_gt(self):
         return True
 
     def is_var(self):
-        return self.symbol in (Token.REDIRECT_VAR, Token.REDIRECT_VAR_APPEND)
+        return self.symbol in (Token.WRITE_VAR, Token.WRITE_VAR_APPEND)
 
     def is_file(self):
-        return self.symbol in (Token.REDIRECT_FILE, Token.REDIRECT_FILE_APPEND)
+        return self.symbol in (Token.WRITE_FILE, Token.WRITE_FILE_APPEND)
 
     def is_append(self):
-        return self.symbol in (Token.REDIRECT_VAR_APPEND, Token.REDIRECT_FILE_APPEND)
+        return self.symbol in (Token.WRITE_VAR_APPEND, Token.WRITE_FILE_APPEND)
+    
+    
+class Lt(Symbol):
+
+    def __init__(self, parser, text, position, symbol):
+        super().__init__(parser, text, position, symbol)
+        assert symbol in (Token.READ_VAR, Token.READ_FILE)
+
+    def is_lt(self):
+        return True
+
+    def is_var(self):
+        return self.symbol == Token.READ_VAR
+
+    def is_file(self):
+        return self.symbol == Token.READ_FILE
 
 
 class ImpliedMap(Token):
@@ -699,14 +736,18 @@ class Lexer(Source):
                 token = Colon(self.parser, self.text, self.end)
             elif self.match(Token.COMMENT):
                 return None  # Ignore the rest of the line
-            elif self.match(Token.REDIRECT_VAR_APPEND):
-                token = Arrow(self.parser, self.text, self.end, Token.REDIRECT_VAR_APPEND)
-            elif self.match(Token.REDIRECT_VAR):
-                token = Arrow(self.parser, self.text, self.end, Token.REDIRECT_VAR)
-            elif self.match(Token.REDIRECT_FILE_APPEND):
-                token = Arrow(self.parser, self.text, self.end, Token.REDIRECT_FILE_APPEND)
-            elif self.match(Token.REDIRECT_FILE):
-                token = Arrow(self.parser, self.text, self.end, Token.REDIRECT_FILE)
+            elif self.match(Token.WRITE_VAR_APPEND):
+                token = Gt(self.parser, self.text, self.end, Token.WRITE_VAR_APPEND)
+            elif self.match(Token.WRITE_VAR):
+                token = Gt(self.parser, self.text, self.end, Token.WRITE_VAR)
+            elif self.match(Token.WRITE_FILE_APPEND):
+                token = Gt(self.parser, self.text, self.end, Token.WRITE_FILE_APPEND)
+            elif self.match(Token.WRITE_FILE):
+                token = Gt(self.parser, self.text, self.end, Token.WRITE_FILE)
+            elif self.match(Token.READ_VAR):
+                token = Lt(self.parser, self.text, self.end, Token.READ_VAR)
+            elif self.match(Token.READ_FILE):
+                token = Lt(self.parser, self.text, self.end, Token.READ_FILE)
             else:
                 token = (ShellString(self.parser, self.text, self.end) if self.parser.shell_op else
                          MarcelString(self.parser, self.text, self.end))
@@ -775,21 +816,30 @@ class Tokens(object):
 #             pipeline
 #    
 #     assignment:
-#             var = arg
+#             str = arg
 #    
 #     pipeline:
-#             var store var
-#             var store [op_sequence [store var]]
-#             op_sequence [store var]
-#             store var
+#             op_sequence [gt str]
+#             str lt gt str
+#             str lt [op_sequence [gt str]]
+#             gt str
 #
 #     op_sequence:
 #             op_args | op_sequence
 #             op_args
 #
-#     store:
+#     lt:
+#             <
+#             <$
+#     gt:
+#             gt1
+#             gt2
+#
+#     gt1:
 #             >
 #             >$
+#
+#     gt2:
 #             >>
 #             >>$
 #
@@ -809,10 +859,8 @@ class Tokens(object):
 #             begin [vars :] pipeline end
 #
 #     vars:
-#             vars, var
-#             var
-#
-#     var: str
+#             vars, str
+#             str
 #
 #     expr: Expression
 #
@@ -821,12 +869,23 @@ class Tokens(object):
 #     begin: (|
 #
 #     end: |)
+# 
+# Pipeline parsing semantics:
 #
-# Notes:
+# store means either Write or Store, depending on the arrow, e.g. > or >$).
+# Similarly, read means either Read or Load.
 #
-# - An op can be a str, i.e., the name of an operator. It can also be a var, but that's a str
-#   also.
-
+# - op_sequence [arrow str]
+#
+#     Equivalent to: op_sequence | store str
+#
+# - str arrow1 arrow str:
+#
+#     Equivalent to: read str | write str
+#
+# - str arrow1 [op_sequence [arrow str]]:
+#
+#     Equivalent to: read str | [op_sequence [| store str]]
 
 class TabCompletionContext:
     COMPLETE_OP = 'COMPLETE_OP'
@@ -942,110 +1001,70 @@ class Parser:
             assert False, arg
         op = self.create_assignment(var, value)
         return op
-
+    
     def pipeline(self, parameters):
-        pipeline = marcel.core.Pipeline()
-        pipeline.set_parameters(parameters)
-        if self.next_token(String, Arrow):
-            if self.token.op_name:
-                op_token = self.token
-                self.tab_completion_context.complete_disabled()
-                found_arrow = self.next_token(Arrow)
-                assert found_arrow
-                arrow_token = self.token
-                if self.pipeline_end():
-                    # op >
-                    if arrow_token.is_var():
-                        raise SyntaxError(self.token, f'A variable must precede {arrow_token.value()}, '
-                                                      f'not an operator ({self.token.op_name})')
-                    elif arrow_token.is_file():
-                        raise SyntaxError(self.token, f'A filename must precede {arrow_token.value()}, '
-                                                      f'not an operator ({self.token.op_name})')
-                elif self.pipeline_end(1):
-                    if self.next_token(String):
-                        # op > x
-                        op = (op_token, [])
-                        store_op = self.redirect_in_op(arrow_token, self.token)
-                        op_sequence = [op, store_op]
-                    else:
-                        raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value()}')
+        def pipeline_str_lt():
+            source = self.token  # var or file, depending on arrow type
+            found_lt = self.next_token(Lt)
+            assert found_lt
+            lt = self.token
+            if self.next_token(Gt):
+                # str lt gt str
+                gt = self.token
+                if self.next_token(String):
+                    target = self.token
+                    op_sequence = [self.redirect_in_op(lt, source),
+                                   self.redirect_out_op(gt, target)]
                 else:
-                    raise SyntaxError(arrow_token, f'Incorrect use of {arrow_token.value()}')
+                    raise SyntaxError(self.token, 'Invalid redirection target')
             else:
-                self.tab_completion_context.complete_disabled()
-                source = self.token
-                found_arrow = self.next_token(Arrow)
-                assert found_arrow
-                self.tab_completion_context.complete_disabled()
-                arrow_token = self.token
-                load_op = self.redirect_out_op(arrow_token, source)
-                if self.pipeline_end():
-                    # x >
-                    if arrow_token.is_append():
-                        raise SyntaxError(arrow_token, 'Append not permitted here.')
-                    op_sequence = [load_op]
-                elif self.pipeline_end(1):
-                    if self.next_token(String):
-                        if self.token.op_name:
-                            # x > op
-                            if arrow_token.is_append():
-                                raise SyntaxError(arrow_token, 'Append not permitted here.')
-                            op = (self.token, [])
-                            op_sequence = [load_op, op]
-                        else:
-                            # x > y
-                            store_op = self.redirect_in_op(arrow_token, self.token)
-                            op_sequence = [load_op, store_op]
-                    elif self.next_token(Expression):
-                        # map is implied
-                        if arrow_token.is_append():
-                            raise SyntaxError(arrow_token, 'Append not permitted here.')
-                        map_op = self.map_op(self.token)
-                        op_sequence = [load_op, map_op]
-                    else:
-                        assert False
-                else:
-                    op_sequence = [load_op] + self.op_sequence()
-                    if self.next_token(Arrow, String):
-                        # x > op_sequence > y
-                        arrow_token = self.token
+                # str lt [op_sequence [gt str]]
+                op_sequence = [self.redirect_in_op(lt, source)]
+                if not self.pipeline_end():
+                    op_sequence.extend(self.op_sequence())
+                    if self.next_token(Gt, String):
+                        gt = self.token
                         found_string = self.next_token(String)
                         assert found_string
-                        store_op = self.redirect_in_op(arrow_token, self.token)
-                        op_sequence.append(store_op)
-                    else:
-                        # x > op_sequence
-                        if arrow_token.is_append():
-                            raise SyntaxError(arrow_token, 'Append not permitted here.')
-        elif self.next_token(Arrow, String):
-            self.tab_completion_context.complete_disabled()
-            # > x
-            arrow_token = self.token
-            found_string = self.next_token(String)
-            assert found_string
-            store_op = self.redirect_in_op(arrow_token, self.token)
-            op_sequence = [store_op]
-        else:
+                        target = self.token
+                        op_sequence.append(self.redirect_out_op(gt, target))
+            return op_sequence
+
+        def pipeline_gt_str():
+            gt = self.token
+            if self.next_token(String):
+                op_sequence = [self.redirect_out_op(gt, self.token)]
+            else:
+                raise SyntaxError(self.token, 'Invalid redirection target')
+            return op_sequence
+
+        def pipeline_op_sequence():
             op_sequence = self.op_sequence()
-            if self.next_token(Arrow, String):
+            if self.next_token(Gt, String):
                 # op_sequence > x
                 arrow_token = self.token
                 found_string = self.next_token(String)
                 assert found_string
-                store_op = self.redirect_in_op(arrow_token, self.token)
+                store_op = self.redirect_out_op(arrow_token, self.token)
                 op_sequence.append(store_op)
             # else:  op_sequence is OK as is
+            return op_sequence
+
+        pipeline = marcel.core.Pipeline()
+        pipeline.set_parameters(parameters)
+        op_sequence = (pipeline_str_lt() if self.next_token(String, Lt) else
+                       pipeline_gt_str() if self.next_token(Gt, String) else
+                       pipeline_op_sequence())
         for op_args in op_sequence:
-            # op_args is (op_token, list of arg tokens)
             pipeline.append(self.create_op(*op_args))
         pipeline.source = self.text
         return pipeline
 
-    def redirect_out_op(self, arrow_token, source=None):
+    def redirect_in_op(self, arrow_token, source=None):
         op_name = 'load' if arrow_token.is_var() else 'read'
         return ConstructedString(self, op_name), [] if source is None else [source]
 
-    def redirect_in_op(self, arrow_token, target):
+    def redirect_out_op(self, arrow_token, target):
         op_name = 'store' if arrow_token.is_var() else 'write'
         return ConstructedString(self, op_name), ['--append', target] if arrow_token.is_append() else [target]
 
@@ -1164,7 +1183,8 @@ class Parser:
         if op is None:
             op = self.create_op_executable(op_token, arg_tokens)
         if op is None:
-            raise marcel.exception.KillCommandException(f'{op_token.value()} is not defined.')
+            raise marcel.exception.KillCommandException(
+                f'{op_token.value()} is not a variable, operator, or executable.')
         return op
 
     def create_op_builtin(self, op_token, arg_tokens):
@@ -1194,25 +1214,26 @@ class Parser:
         return op
 
     def create_op_variable(self, op_token, arg_tokens):
-        var = op_token.value()
-        if self.env.getvar(var) is None:
+        if op_token.is_var():
+            var = op_token.value()
+            op = self.op_modules['runpipeline'].create_op()
+            op.var = var
+            if len(arg_tokens) > 0:
+                pipeline_args = []
+                for token in arg_tokens:
+                    pipeline_args.append(token
+                                         if type(token) is marcel.core.Pipeline else
+                                         token.value())
+                args, kwargs = marcel.argsparser.PipelineArgsParser(var).parse_pipeline_args(pipeline_args)
+                op.set_pipeline_args(args, kwargs)
+            return op
+        else:
             return None
-        op = self.op_modules['runpipeline'].create_op()
-        op.var = var
-        if len(arg_tokens) > 0:
-            pipeline_args = []
-            for token in arg_tokens:
-                pipeline_args.append(token
-                                     if type(token) is marcel.core.Pipeline else
-                                     token.value())
-            args, kwargs = marcel.argsparser.PipelineArgsParser(var).parse_pipeline_args(pipeline_args)
-            op.set_pipeline_args(args, kwargs)
-        return op
 
     def create_op_executable(self, op_token, arg_tokens):
         op = None
-        name = op_token.value()
-        if marcel.util.is_executable(name):
+        if op_token.is_executable():
+            name = op_token.value()
             args = [name]
             for x in arg_tokens:
                 args.append(x.raw() if isinstance(x, String) else

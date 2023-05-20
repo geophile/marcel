@@ -72,7 +72,7 @@ def filename_op_setup(dir):
 
 @timeit
 def test_no_such_op():
-    TEST.run('gen 5 | abc', expected_err='is not defined')
+    TEST.run('gen 5 | abc', expected_err='is not a variable, operator, or executable')
 
 
 @timeit
@@ -1114,105 +1114,92 @@ def test_store_load():
 @timeit
 def test_redirect_file():
     # ------------------------ Test all the paths through Parser.pipeline() for files
-    # file >
+    # file <
     TEST.delete_files('/tmp/p1')
     TEST.run(test='gen 3 | write /tmp/p1',
-             verification='/tmp/p1 >',
+             verification='/tmp/p1 <',
              expected_out=[0, 1, 2])
-    # file >> (error)
-    TEST.delete_files('/tmp/p2')
-    TEST.run(test='gen 3 | write /tmp/p2',
-             verification='/tmp/p2 >>',
-             expected_err='Append not permitted here')
-    # file > file
+    # file < > file
     TEST.delete_files('/tmp/p3', '/tmp/p4')
     TEST.run('gen 3 | write /tmp/p3')
-    TEST.run(test='/tmp/p3 > /tmp/p4',
-             verification='/tmp/p4 >',
+    TEST.run(test='/tmp/p3 < > /tmp/p4',
+             verification='/tmp/p4 <',
              expected_out=[0, 1, 2])
-    # file >> file
+    # file < >> file
     TEST.delete_files('/tmp/p5', '/tmp/p6', '/tmp/p7')
     TEST.run('gen 3 | write /tmp/p5')
     TEST.run('gen 3 | map (x: x + 100) | write /tmp/p6')
-    TEST.run(test='/tmp/p5 >> /tmp/p7',
-             verification='/tmp/p7 >',
+    TEST.run(test='/tmp/p5 < >> /tmp/p7',
+             verification='/tmp/p7 <',
              expected_out=[0, 1, 2])
-    TEST.run(test='/tmp/p6 >> /tmp/p7',
-             verification='/tmp/p7 >',
+    TEST.run(test='/tmp/p6 < >> /tmp/p7',
+             verification='/tmp/p7 <',
              expected_out=[0, 1, 2, 100, 101, 102])
-    # file > op_sequence
+    # file < op_sequence
     TEST.delete_files('/tmp/p8')
     TEST.run('gen 3 | write /tmp/p8')
-    TEST.run(test='/tmp/p8 > map (x: int(x) + 100)',
+    TEST.run(test='/tmp/p8 < map (x: int(x) + 100)',
              expected_out=[100, 101, 102])
-    # file >> op_sequence (error)
-    TEST.delete_files('tmp/p9')
-    TEST.run('gen 3 | write /tmp/p9')
-    TEST.run(test='/tmp/p9 >> map (x: x + 100)',
-             expected_err='Append not permitted here')
-    # file > op_sequence > file
+    # file < op_sequence > file
     TEST.delete_files('/tmp/p10', '/tmp/p11')
     TEST.run('gen 3 | write /tmp/p10')
-    TEST.run(test='/tmp/p10 > map (x: int(x) + 100) > /tmp/p11',
-             verification='/tmp/p11 >',
+    TEST.run(test='/tmp/p10 < map (x: int(x) + 100) > /tmp/p11',
+             verification='/tmp/p11 <',
              expected_out=[100, 101, 102])
-    # file > op_sequence >> file
+    # file < op_sequence >> file
     TEST.delete_files('/tmp/p12', '/tmp/p13')
     TEST.run('gen 3 | write /tmp/p12')
-    TEST.run(test='/tmp/p12 > map (x: int(x) + 100) >> /tmp/p13',
-             verification='/tmp/p13 >',
+    TEST.run(test='/tmp/p12 < map (x: int(x) + 100) >> /tmp/p13',
+             verification='/tmp/p13 <',
              expected_out=[100, 101, 102])
-    TEST.run(test='/tmp/p12 > map (x: int(x) + 1000) >> /tmp/p13',
-             verification='/tmp/p13 >',
+    TEST.run(test='/tmp/p12 < map (x: int(x) + 1000) >> /tmp/p13',
+             verification='/tmp/p13 <',
              expected_out=[100, 101, 102, 1000, 1001, 1002])
     # op_sequence -- tested adequately elsewhere
     # op_sequence > file
     TEST.delete_files('/tmp/p14')
     TEST.run(test='gen 3 > /tmp/p14',
-             verification='/tmp/p14 >',
+             verification='/tmp/p14 <',
              expected_out=[0, 1, 2])
     # op_sequence >> file
     TEST.delete_files('/tmp/p15')
     TEST.run(test='gen 3 >> /tmp/p15',
-             verification='/tmp/p15 >',
+             verification='/tmp/p15 <',
              expected_out=[0, 1, 2])
     TEST.run(test='gen 3 | map (x: int(x) + 100) >> /tmp/p15',
-             verification='/tmp/p15 >',
+             verification='/tmp/p15 <',
              expected_out=[0, 1, 2, 100, 101, 102])
     # > file
     TEST.delete_files('/tmp/p16')
     TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) (|> /tmp/p16|) | select (x: False)',
-             verification='/tmp/p16 >',
+             verification='/tmp/p16 <',
              expected_out=[0, 2, 4])
     # >> file
     TEST.delete_files('/tmp/p17')
     TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) (|>> /tmp/p17|) | select (x: False)',
-             verification='/tmp/p17 >',
+             verification='/tmp/p17 <',
              expected_out=[0, 2, 4])
     TEST.run(test='gen 6 | ifthen (x: x % 2 == 1) (|>> /tmp/p17|) | select (x: False)',
-             verification='/tmp/p17 >',
+             verification='/tmp/p17 <',
              expected_out=[0, 2, 4, 1, 3, 5])
     # ---------------------------------------------------------------------
     # Ops that look confusingly like files from context
-    # op >
-    TEST.run(test='pwd >',
-             expected_err='A filename must precede >')
-    # op >>
-    TEST.run(test='pwd >>',
-             expected_err='A filename must precede >>')
+    # op <
+    TEST.run(test='pwd <',
+             expected_err='No qualifying paths')
     # op > file
     TEST.delete_files('/tmp/o1')
     version = marcel.version.VERSION
     TEST.run(test='version > /tmp/o1',
-             verification='/tmp/o1 > map (v: f"v{v}")',
+             verification='/tmp/o1 < map (v: f"v{v}")',
              expected_out=[f"v{version}"])
     # op >> file
     TEST.delete_files('/tmp/o2')
     TEST.run(test='version >> /tmp/o2',
-             verification='/tmp/o2 > map (v: f"v{v}")',
+             verification='/tmp/o2 < map (v: f"v{v}")',
              expected_out=[f"v{version}"])
     TEST.run(test='version >> /tmp/o2',
-             verification='/tmp/o2 > map (v: f"v{v}")',
+             verification='/tmp/o2 < map (v: f"v{v}")',
              expected_out=[f"v{version}", f"v{version}"])
     # ---------------------------------------------------------------------
     # Store at end of top-level pipeline
@@ -1241,119 +1228,113 @@ def test_redirect_file():
     # Load at beginning of top-level pipeline
     TEST.delete_files('/tmp/g4')
     TEST.run(test='gen 4 > /tmp/g4',
-             verification='/tmp/g4 > map (x: -int(x))',
+             verification='/tmp/g4 < map (x: -int(x))',
              expected_out=[0, -1, -2, -3])
     # Load in pipeline arg
     TEST.delete_files('/tmp/x10', '/tmp/x100')
     TEST.run('gen 4 | map (x: (x, x * 10)) > /tmp/x10')
     TEST.run('gen 4 | map (x: (x, x * 100)) > /tmp/x100')
-    TEST.run('/tmp/x10 > map (x: eval(x)) | join (|/tmp/x100 > map (x: eval(x))|)',
+    TEST.run('/tmp/x10 < map (x: eval(x)) | join (|/tmp/x100 < map (x: eval(x))|)',
              expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
     # Bug 73
     TEST.delete_files('/tmp/a', '/tmp/b', '/tmp/c')
     TEST.run('gen 3 | map (x: (x, x*10)) > /tmp/a')
     TEST.run('gen 3 | map (x: (x, x*100)) > /tmp/b')
     TEST.run('gen 3 | map (x: (x, x*1000)) > /tmp/c')
-    TEST.run('/tmp/a > (x: eval(x)) | join (|/tmp/b > (x: eval(x))|) | join (|/tmp/c > (x: eval(x))|)',
+    TEST.run('/tmp/a < (x: eval(x)) | join (|/tmp/b < (x: eval(x))|) | join (|/tmp/c < (x: eval(x))|)',
              expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
     # Bug 74
     TEST.delete_files('/tmp/a', '/tmp/b', '/tmp/c', '/tmp/d')
     TEST.run('gen 3 | map (x: (x, x*10)) > /tmp/a')
     TEST.run('gen 3 | map (x: (x, x*100)) > /tmp/b')
     TEST.run('gen 3 | map (x: (x, x*1000)) > /tmp/c')
-    TEST.run('/tmp/a > (x: eval(x)) | join (|/tmp/b > (x: eval(x))|) | join (|/tmp/c > (x: eval(x))|) > /tmp/d')
-    TEST.run('/tmp/d >',
+    TEST.run('/tmp/a < (x: eval(x)) | join (|/tmp/b < (x: eval(x))|) | join (|/tmp/c < (x: eval(x))|) > /tmp/d')
+    TEST.run('/tmp/d <',
              expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
-
+    # ---------------------------------------------------------------------
+    # Erroneous syntax
+    TEST.run('/tmp/a >',
+             expected_err='not a variable, operator, or executable')
+    TEST.run('gen 3 < (x: x)',
+             expected_err='excess tokens')
 
 @timeit
 def test_redirect_var():
     # ------------------------ Test all the paths through Parser.pipeline() for vars
-    # var >$
+    # var <$
     TEST.run(test='gen 3 | store p1',
-             verification='p1 >$',
+             verification='p1 <$',
              expected_out=[0, 1, 2])
-    # var >>$ (error)
-    TEST.run(test='gen 3 | store p2',
-             verification='p2 >>',
-             expected_err='Append not permitted here')
-    # file >$ file
+    # var <$ >$ var
     TEST.run('gen 3 | store p3')
-    TEST.run(test='p3 >$ p4',
-             verification='p4 >$',
+    TEST.run(test='p3 <$ >$ p4',
+             verification='p4 <$',
              expected_out=[0, 1, 2])
-    # var >> var4
+    # var <$ >>$ var
     TEST.run('gen 3 | store p5')
-    TEST.run('gen 3 | map (x: x + 100) | store p6')
-    TEST.run(test='p5 >>$ p7',
-             verification='p7 >$',
+    TEST.run('gen 3 | (x: x + 100) | store p6')
+    TEST.run('p5 <$ >>$ p7',
+             verification='p7 <$',
              expected_out=[0, 1, 2])
-    TEST.run(test='p6 >>$ p7',
-             verification='p7 >$',
+    TEST.run('p6 <$ >>$ p7',
+             verification='p7 <$',
              expected_out=[0, 1, 2, 100, 101, 102])
-    # var >$ op_sequence
+    # var <$ op_sequence
     TEST.run('gen 3 | store p8')
-    TEST.run(test='p8 >$ map (x: x + 100)',
+    TEST.run(test='p8 <$ map (x: x + 100)',
              expected_out=[100, 101, 102])
-    # var >>$ op_sequence (error)
-    TEST.run('gen 3 | store p9')
-    TEST.run(test='p9 >>$ map (x: x + 100)',
-             expected_err='Append not permitted here')
-    # var >$ op_sequence >$ var
+    # var <$ op_sequence >$ var
     TEST.run('gen 3 | store p10')
-    TEST.run(test='p10 >$ map (x: x + 100) >$ p11',
-             verification='p11 >$',
+    TEST.run(test='p10 <$ map (x: x + 100) >$ p11',
+             verification='p11 <$',
              expected_out=[100, 101, 102])
-    # var >$ op_sequence >>$ var
+    # var <$ op_sequence >>$ var
     TEST.run('gen 3 | store p12')
-    TEST.run(test='p12 >$ map (x: x + 100) >>$ p13',
-             verification='p13 >$',
+    TEST.run(test='p12 <$ map (x: x + 100) >>$ p13',
+             verification='p13 <$',
              expected_out=[100, 101, 102])
-    TEST.run(test='p12 >$ map (x: x + 1000) >>$ p13',
-             verification='p13 >$',
+    TEST.run(test='p12 <$ map (x: x + 1000) >>$ p13',
+             verification='p13 <$',
              expected_out=[100, 101, 102, 1000, 1001, 1002])
     # op_sequence -- tested adequately elsewhere
     # op_sequence >$ var
     TEST.run(test='gen 3 >$ p14',
-             verification='p14 >$',
+             verification='p14 <$',
              expected_out=[0, 1, 2])
     # op_sequence >>$ var
     TEST.run(test='gen 3 >>$ p15',
-             verification='p15 >$',
+             verification='p15 <$',
              expected_out=[0, 1, 2])
     TEST.run(test='gen 3 | map (x: x + 100) >>$ p15',
-             verification='p15 >$',
+             verification='p15 <$',
              expected_out=[0, 1, 2, 100, 101, 102])
     # >$ var
     TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) (|>$ p16|) | select (x: False)',
-             verification='p16 >$',
+             verification='p16 <$',
              expected_out=[0, 2, 4])
     # >>$ var
     TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) (|>>$ p17|) | select (x: False)',
-             verification='p17 >$',
+             verification='p17 <$',
              expected_out=[0, 2, 4])
     TEST.run(test='gen 6 | ifthen (x: x % 2 == 1) (|>>$ p17|) | select (x: False)',
-             verification='p17 >$',
+             verification='p17 <$',
              expected_out=[0, 2, 4, 1, 3, 5])
     # ---------------------------------------------------------------------
     # Ops that look confusingly like files from context
-    # op >$
-    TEST.run(test='pwd >$',
-             expected_err='A variable must precede >$')
-    # op >>$
-    TEST.run(test='pwd >>$',
-             expected_err='A variable must precede >>$')
+    # op <$
+    TEST.run(test='pwd <$',
+             expected_err='Variable pwd is undefined')
     # op >$ var
     version = marcel.version.VERSION
     TEST.run(test='version >$ o1',
-             verification='o1 >$ map (v: f"v{v}")',
+             verification='o1 <$ map (v: f"v{v}")',
              expected_out=[f"v{version}"])
     # op >>$ var
     TEST.run(test='version >>$ o2',
-             verification='o2 >$ map (v: f"v{v}")',
+             verification='o2 <$ map (v: f"v{v}")',
              expected_out=[f"v{version}"])
     TEST.run(test='version >>$ o2',
-             verification='o2 >$ map (v: f"v{v}")',
+             verification='o2 <$ map (v: f"v{v}")',
              expected_out=[f"v{version}", f"v{version}"])
     # ---------------------------------------------------------------------
     # Store at end of top-level pipeline
@@ -1365,7 +1346,6 @@ def test_redirect_var():
              verification='load e10x10',
              expected_out=[0, 20, 40, 60, 80])
     # Store as the entire pipeline arg
-    TEST.delete_files('e10')
     TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) (|>$ e10|)',
              verification='load e10',
              expected_out=[0, 2, 4, 6, 8])
@@ -1378,27 +1358,37 @@ def test_redirect_var():
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     # Load at beginning of top-level pipeline
     TEST.run(test='gen 4 >$ g4',
-             verification='g4 >$ map (x: -x)',
+             verification='g4 <$ map (x: -x)',
              expected_out=[0, -1, -2, -3])
     # Load in pipeline arg
     TEST.run('gen 4 | map (x: (x, x * 10)) >$ x10')
     TEST.run('gen 4 | map (x: (x, x * 100)) >$ x100')
-    TEST.run('x10 >$ join (|x100 >$|)',
+    TEST.run('x10 <$ join (|x100 <$|)',
              expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
     # Bug 73
     TEST.run('gen 3 | map (x: (x, x*10)) >$ a')
     TEST.run('gen 3 | map (x: (x, x*100)) >$ b')
     TEST.run('gen 3 | map (x: (x, x*1000)) >$ c')
-    TEST.run('a >$ join (|b >$|) | join (|c >$|)',
+    TEST.run('a <$ join (|b <$|) | join (|c <$|)',
              expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
     # Bug 74
-    TEST.delete_files('a', 'b', 'c', 'd')
     TEST.run('gen 3 | map (x: (x, x*10)) >$ a')
     TEST.run('gen 3 | map (x: (x, x*100)) >$ b')
     TEST.run('gen 3 | map (x: (x, x*1000)) >$ c')
-    TEST.run('a >$ join (|b >$|) | join (|c >$|) >$ d')
-    TEST.run('d >$',
+    TEST.run('a <$ join (|b <$|) | join (|c <$|) >$ d')
+    TEST.run('d <$',
              expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
+    # Erroneous syntax
+    # Var undefined
+    TEST.run('env -d z')
+    TEST.run('z >$',
+             expected_err='not a variable, operator, or executable')
+    # Var defined
+    TEST.run('z = (| gen 3 |)')
+    TEST.run('z >$',
+             expected_err='followed by excess tokens')
+    TEST.run('gen 3 < (x: x)',
+             expected_err='excess tokens')
 
 
 @timeit
@@ -1606,11 +1596,11 @@ def test_intersect():
     TEST.reset_environment()
     # Empty inputs
     TEST.run('gen 1 | select (*x: False) >$ empty')
-    TEST.run('gen 3 | intersect (|empty >$|)',
+    TEST.run('gen 3 | intersect (|empty <$|)',
              expected_out=[])
-    TEST.run('empty >$ intersect (|empty >$|)',
+    TEST.run('empty <$ intersect (|empty <$|)',
              expected_out=[])
-    TEST.run('empty >$ intersect (|gen 3|)',
+    TEST.run('empty <$ intersect (|gen 3|)',
              expected_out=[])
     # Non-empty inputs, empty intersection
     TEST.run('gen 3 | intersect (|gen 3|)',
@@ -1620,7 +1610,7 @@ def test_intersect():
     # Duplicates
     TEST.run('gen 5 | map (x: [x] * x) | expand >$ a')
     TEST.run('gen 5 | map (x: [x] * 2) | expand >$ b')
-    TEST.run('a >$ intersect (|b >$|) | sort',
+    TEST.run('a <$ intersect (|b <$|) | sort',
              expected_out=[1, 2, 2, 3, 3, 4, 4])
     # Composite elements
     TEST.run('gen 3 2 | '
@@ -1676,11 +1666,11 @@ def test_union():
     TEST.reset_environment()
     # Empty inputs
     TEST.run('gen 1 | select (*x: False) >$ empty')
-    TEST.run('empty >$ union (|empty >$|)',
+    TEST.run('empty <$ union (|empty <$|)',
              expected_out=[])
-    TEST.run('gen 3 | union (|empty >$|) | sort',
+    TEST.run('gen 3 | union (|empty <$|) | sort',
              expected_out=[0, 1, 2])
-    TEST.run('empty >$ union (|gen 3|) | sort',
+    TEST.run('empty <$ union (|gen 3|) | sort',
              expected_out=[0, 1, 2])
     # Non-empty inputs4
     TEST.run('gen 3 | union (|gen 3 100|) | sort',
@@ -1703,11 +1693,11 @@ def test_difference():
     TEST.reset_environment()
     # Empty inputs
     TEST.run('gen 1 | select (*x: False) >$ empty')
-    TEST.run('empty >$ difference (|empty >$|)',
+    TEST.run('empty <$ difference (|empty <$|)',
              expected_out=[])
-    TEST.run('gen 3 | difference (|empty >$|) | sort',
+    TEST.run('gen 3 | difference (|empty <$|) | sort',
              expected_out=[0, 1, 2])
-    TEST.run('empty >$ difference (|gen 3|)',
+    TEST.run('empty <$ difference (|gen 3|)',
              expected_out=[])
     # Non-empty inputs
     TEST.run('gen 6 | difference (|gen 6 100|) | sort',
@@ -1805,10 +1795,12 @@ def test_args():
     TEST.run('gen 3 | select (x: False) | args --all (|n: map (x: -x)|)',
              expected_out=[])
     # negative testing
-    TEST.run('gen 3 | args (|gen 3|)',
-             expected_err='The args pipeline must be parameterized')
-    TEST.run('gen 10 | args --all (|a, b: gen (a) (b)|)',
-             expected_err='the pipeline must have a single parameter')
+    TEST.run('gen 3 | args --all (|x, y: (123) |)',
+             expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
+    TEST.run('gen 3 | args --all (| (123) |)',
+             expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
+    TEST.run('gen 3 | args (| (123) |)',
+             expected_err="The args pipeline must be parameterized")
     # Bug 94
     TEST.run('gen 4 1 | args (|n: gen (n)|) | window (x: x == 0)',
              expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
@@ -1864,8 +1856,8 @@ def test_tee():
              expected_err='No pipelines')
     TEST.run('gen 5 1 | tee (|red + >$ a|) (|red * >$ b|)',
              expected_out=[1, 2, 3, 4, 5])
-    TEST.run('a >$', expected_out=[15])
-    TEST.run('b >$', expected_out=[120])
+    TEST.run('a <$', expected_out=[15])
+    TEST.run('b <$', expected_out=[120])
 
 
 @timeit
@@ -1972,7 +1964,7 @@ def test_download():
 def test_bug_126():
     TEST.run('fact = (|x: gen (x) 1 | args (|n: gen (n) 1 | red * | map (f: (n, f))|)|)')
     TEST.run(test='fact (5) >$ f',
-             verification='f >$',
+             verification='f <$',
              expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
 
 
@@ -1987,9 +1979,9 @@ def test_bug_151():
     TEST.run('bytime = (|sort (f: f.mtime)|)')
     TEST.run('ls | bytime >$ a')
     TEST.run('ls | sort (f: f.mtime) >$ b')
-    TEST.run('a >$ difference (|b >$|) | red count',
+    TEST.run('a <$ difference (|b <$|) | red count',
              expected_out=[0])
-    TEST.run('b >$ difference (|a >$|) | red count',
+    TEST.run('b <$ difference (|a <$|) | red count',
              expected_out=[0])
 
 
@@ -2012,8 +2004,7 @@ def test_bug_10():
 def test_bug_154():
     TEST.reset_environment()
     TEST.run('gen 3 >$ x')
-    TEST.run('x >>$ (y: -y)', expected_err='Append not permitted')
-    TEST.run('x >$ (y: -y)', expected_out=[0, -1, -2])
+    TEST.run('x <$ (y: -y)', expected_out=[0, -1, -2])
 
 
 @timeit
@@ -2167,8 +2158,8 @@ def test_pipeline_vars():
     TEST.run('save_prod = (| red * >$ prod |)')
     TEST.run('gen 5 1 | tee save_sum save_prod',
              expected_out=[1, 2, 3, 4, 5])
-    TEST.run('sum >$', expected_out=[15])
-    TEST.run('prod >$', expected_out=[120])
+    TEST.run('sum <$', expected_out=[15])
+    TEST.run('prod <$', expected_out=[120])
 
 
 def main_slow_tests():

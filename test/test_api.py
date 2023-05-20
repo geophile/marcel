@@ -1364,6 +1364,14 @@ def test_args():
                            1101, 1102, 1103, 1102, 1103, 1104, 1103, 1104, 1105,
                            1102, 1103, 1104, 1103, 1104, 1105, 1104, 1105, 1106])
     # negative testing
+    TEST.run(test=lambda: run(gen(3) | args(lambda x, y: 123, all=True)),
+             expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
+    TEST.run(test=lambda: run(gen(3) | args(lambda: 123, all=True)),
+             expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
+    TEST.run(test=lambda: run(gen(3) | args(lambda: 123)),
+             expected_err="The args pipeline must be parameterized")
+
+
     TEST.run(test=lambda: run(gen(3) | args(lambda: gen(3))),
              expected_err='The args pipeline must be parameterized')
     # Bug 94

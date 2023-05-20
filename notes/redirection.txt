@@ -198,3 +198,225 @@ Syntactic sugar:
     var > ...           in --pickle var | ...
 
     ./file > ...        in --text --file ./file | ...
+
+----------------------------------------------------------------------
+
+4/13/23
+
+Ambiguities in redirection syntax
+
+
+Bug 199 has to do with confusion about redirection syntax.
+
+    x = (| write -f '<<<{}>>>' |)
+    gen 3 | x
+
+Works, we see the formatted output.
+
+Save the gen output:
+
+    gen 3 > g
+    g >
+
+Stream g into pipeline:
+
+    g > (*x: x) | x
+
+works. But this:
+
+    g > x
+
+produces no output.
+
+The problem is that there is that the parser has special handling of
+"var > var", and there is no recognition of the fact that x is a
+pipeline.
+
+This can be handled. Detect what is bound to the tokens on either side
+of >. So for
+
+    a > b
+
+- a is file: 
+
+    - b is file: Copy contents of a into b. I.e., "a >" -> read a,
+      while "> b" (the same >) -> write b. So equivalent to: 
+      read a | write b.
+
+    - b is pipeline: read a and stream into p. Equivalent to: 
+      read a | b
+  
+- a is pipeline:
+
+    - b is file: Equivalent to a | write b
+
+    - b is pipeline: Illegal
+
+
+And the reasoning is similar for >$ operating on vars instead of
+files.
+
+But what about: 
+
+    file > var
+
+    var > file
+
+    file >$ var
+
+    var >$ file
+
+None of these are correct, due to the syntactic trick of binding the
+redirect syntax (> or >$) twice, (left and right). I.e., "var >"
+doesn't make sense because > requires a file.
+
+......................................................................
+
+To fix this:
+
+- Get rid of "a > b" special syntax. 
+
+- New special syntax:
+
+    - a > >$ b: Copy file to var
+
+    - a >$ > b: Copy var to file
+
+BUT THE SYNTAX CAN'T BE REMOVED! Because pipeline > var is a
+legitimate thing to do, for example.
+
+x > y
+
+- x is pipeline, y is var: x | write y
+
+- x is var, y is pipeline: read x | y
+
+So parsing can't decide what to do. 
+
+    p = (| x > y |)
+
+has different meanings depending on types of x and y.
+
+Also, testing type of var is gross.
+
+What about different syntax for reading and writing? E.g. < for read.
+
+So:
+
+- x | write y would be: x > y
+
+- read x | y would be: x < y, which just looks weird and unlike what
+  is actually happening. What about y < x? E.g.
+
+     y < x | ...
+
+  <x binds tightly to y, so it is equivalent to: read x | y | ...
+
+  Bash-like.
+
+......................................................................
+
+What about this:
+
+- a > means: read a
+
+- a > b | ... means: read a | b | ...
+
+- Copying done by a > > b. Translates to read a | write b
+
+*** a > b is just ambiguous. Define it to mean: a | write b. To get
+  read a | b, write it explicitly, avoid > syntax.
+
+......................................................................
+
+Decision:
+
+    pipeline:
+            op_sequence [arrow str]
+            arrow str
+            str arrow1 arrow str
+            str arrow1 [op_sequence [arrow str]]
+            str arrow str
+            arrow str
+
+store means either Write or Store, depending on the arrow, e.g. > or >$).
+Similarly, read means either Read or Load.
+
+- op_sequence [arrow str]
+    Equivalent to: op_sequence | store str
+
+- str arrow1 arrow str:
+    Equivalent to: read str | write str
+
+- str arrow1 [op_sequence [arrow str]]:
+    Equivalent to: read str | [op_sequence [| store str]]
+
+- str arrow str:
+    Equivalent to: str | write str. The first str is the name of a var
+    containing a pipeline.
+
+- arrow str:
+    Equivalent to: write str. Useful in a nested pipeline, e.g.
+    ... | tee (| > x |) (| ... |)
+
+
+Parsing cases
+
+    str arrow
+        str: str arrow str
+        arrow str: str arrow arrow str
+        end: str arrow1
+        op_sequence
+            end: str arrow op_sequence
+            arrow str: str arrow op_sequence arrow str
+
+    arrow str
+        end: arrow str
+
+    else (op_sequence [arrow str])
+
+Doesn't work.
+
+    ls > p
+
+ls is an op, so it's equivalent to: ls | store p.
+
+Or ls could be a file, so: read ls | p, where p is a pipeline var.
+
+----------------------------------------------------------------------
+
+I give up. Disambiguating > is just not working. Try this:
+
+    > for write
+    < for read
+
+Pipeline grammar:
+
+    lt: <
+    gt1: >
+    gt2: >>
+    gt: 
+        gt1
+        gt2
+
+    op_sequence [gt str]
+    str lt gt str
+    str lt [op_sequence [gt str]]
+
+
+Examples:
+
+op_sequence [gt str]
+
+    ls > files.txt
+
+
+lt str gt str
+
+    source < > target
+
+lt str [op_sequence [gt str]]
+
+    x.csv < parse --csv | do | some | stuff > out.txt
+
+    ... | join (| a < |) (| b < |)

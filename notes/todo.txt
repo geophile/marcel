@@ -333,34 +333,6 @@ https://cameronnokes.com/blog/working-with-json-in-bash-using-jq/
 
 ----------------------------------------------------------------------
 
-Unbundle csv/tsv/pickle options from read and write?
-
-This:
-
-    read --csv foobar
-
-would become:
-
-    read foobar | parse --csv
-
-or 
-
-    foobar > parse --csv
-
-This:
-
-    ... | write --csv foobar
-
-would become:
-
-    ... | format --csv | write foobar
-
-or
-
-    ... | format --csv > foobar
-
-----------------------------------------------------------------------
-
 
 - Get rid of Environment.cluster(self, name). Fork should call getvar
   instead, and then ensure that the returned value is iterable. (Use
@@ -422,7 +394,7 @@ inherited from Pipeline.copy()?
 
 ----------------------------------------------------------------------
 
-IDEA: Implement interactive usage by translating into API usage.
+IDEA: Implement interactive usage by translating into API.
 
 ----------------------------------------------------------------------
 
@@ -469,3 +441,58 @@ Extend COLOR_SCHEME, adding a color for commands (i.e., user input).
 
 CSV handling: add options for specifying quote and delimiter. Can then
 drop the distinction between CSV and TSV.
+
+----------------------------------------------------------------------
+
+Unbundle csv/tsv/pickle options from read and write?
+
+This:
+
+    read --csv foobar
+
+would become:
+
+    read foobar | parse --csv
+
+or 
+
+    foobar > parse --csv
+
+This:
+
+    ... | write --csv foobar
+
+would become:
+
+    ... | format --csv | write foobar
+
+or
+
+    ... | format --csv > foobar
+
+----------------------------------------------------------------------
+
+Command history ideas:
+
+https://www.reddit.com/r/linuxquestions/comments/12rux3h/why_are_commands_preceded_with_space_not_logged/?utm_source=share&utm_medium=ios_app&utm_name=ioscss&utm_content=1&utm_term=1
+
+----------------------------------------------------------------------
+
+Binding of vars in pipelines
+
+e.g. x = (| p |)
+
+- Should it be assumed that p is a pipeline var? 
+
+- OK to depend on the value?
+
+- What if p is rebound? Not to a pipeline? Does x bind p's name? p's value?
+
+----------------------------------------------------------------------
+
+Tab completion for executables.
+
+----------------------------------------------------------------------
+
+"marcel < script.m" runs a script of marcel commands. How to pipe
+input to it?
