@@ -1723,7 +1723,7 @@ def main_dev():
 def main():
     TEST.reset_environment()
     main_stable()
-    # main_slow_tests()
+    main_slow_tests()
     # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
