@@ -2,10 +2,11 @@ What's New
 ----------
 
 Marcel offers bash-like redirection syntax. `>` saves a stream in a file,
-while `>>` appends a stream to a file. Marcel also offers `>$` and `>>$` for writing or appending
-to an environment variable.
+while `>>` appends a stream to a file. `>$` and `>>$` write or append 
+to an environment variable instead of a file.
 
-Marcel also tried to overload `>` and `>$` to read a stream from a file or variable. Example:
+In previous releases, marcel tried to overload `>` and `>$` to read a
+stream from a file or variable. Example:
 
 ```shell
 gen 3 1 > /tmp/x  # Store the sequence 1, 2, 3 in the file /tmp/x
@@ -19,10 +20,12 @@ gen 3 1 | write /tmp/x
 read /tmp/x | (n: -n)
 ```
 
-So the first occurrence of `>` means `write` while the second occurrence means `read`. While there are
-various clues to determine the correct interpretation of `>`, it was impossible 
-to make this work correctly in general. 
-For example, what does this mean:
+So the first occurrence of `>` means `write` while the second
+occurrence means `read`. While there are various clues to determine
+the correct interpretation of `>`, it was impossible to make this work
+correctly in general, and the attempts to get it write depended on
+checking the types or values of variables. In other words, it wasn't
+just a parsing problem.  For example, what does this mean:
 
 ```shell
 ls > reverse
@@ -36,8 +39,8 @@ the pipeline and then store the resulting stream in a file named `reverse`.
 
 This is just unworkable. 
 
-So, inspired by bash (yet again), in this release marcel introduces  `<` to read from a file, and `<$` to
-read from a variable.
+So, inspired by bash (yet again), this release introduces `<` to read
+from a file, and `<$` to read from a variable.
 
 Examples:
 
@@ -45,8 +48,8 @@ Examples:
 gen 10 >$ a  # Store the stream 0, 1, ..., 9 into variable a.
 gen 10 5 >$ b  # Store the stream 5, 6, ... 14 into variable b.
 a <& (n: -n) >$ c  # Negate each element in a, storing the stream in variable c
-a <& intersect (| b <$ |) >$ a_int_b  # Store the intersection of a and b in a_int_b
-a_int_b <$  # Print the contents of a_int_b
+a <& intersect (| b <$ |) >$ d  # Store the intersection of a and b in d
+d <$  # Print the contents of d
 ```
 
 Marcel
