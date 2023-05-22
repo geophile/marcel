@@ -89,7 +89,6 @@ class Main:
     def __init__(self, config_file, same_process, old_namespace):
         # sys.argv sets config_path, dill
         self.dill = True
-        self.echo = False
         self.main_pid = os.getpid()
         #
         self.same_process = same_process
@@ -126,8 +125,6 @@ class Main:
                 try:
                     if self.input is None:
                         self.input = self.reader.input(*self.env.prompts())
-                        if self.echo:
-                            print(self.input)
                     # else: Restarted main, and self.line was from the previous incarnation.
                     self.check_for_config_update()
                     self.run_command(self.input)
@@ -254,12 +251,10 @@ def fail(message):
 
 # --dill: bool
 # --mpstart: fork/spawn/forkserver. Use fork if not specified
-# --echo: bool, indicates whether the command should be echoed. Useful when debugging scripts.
 def args():
-    flags = ('--dill', '--mpstart', '--echo')
+    flags = ('--dill', '--mpstart')
     dill = True
     mpstart = 'fork'
-    echo = False
     flag = None
     for arg in sys.argv[1:]:
         if arg in flags:
@@ -267,8 +262,6 @@ def args():
             # For a boolean flag, set to True. A different value may be specified by a later arg.
             if flag == '--dill':
                 dill = True
-            elif flag == '--echo':
-                echo = True
         elif arg.startswith('-'):
             fail(f'Unrecognized flag {arg}')
         else:
@@ -280,14 +273,12 @@ def args():
                     mpstart = arg
                 else:
                     fail(f'Set --mpstart to fork (default), forkserver, or spawn')
-            elif flag == '--echo':
-                echo = arg.lower() in ('t', 'true')
             flag = None
-    return dill, mpstart, echo
+    return dill, mpstart
 
 
 def main():
-    dill, mpstart, echo = args()
+    dill, mpstart = args()
     old_namespace = None
     input = None
     if mpstart is not None:
@@ -296,7 +287,6 @@ def main():
         MAIN = Main(None, same_process=False, old_namespace=old_namespace)
         MAIN.input = input
         MAIN.dill = dill
-        MAIN.echo = echo
         if os.isatty(sys.stdin.fileno()):
             # Interactive
             try:
