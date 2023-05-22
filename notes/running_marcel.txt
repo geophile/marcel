@@ -1,0 +1,45 @@
+"marcel < script.m" runs a script of marcel commands. How to pipe
+input to it?
+
+----------------------------------------------------------------------
+
+Normal invocation:
+
+    marcel [--dill[BOOL]] [--echo[BOOL]] [--mpstart={fork,spawn,forkserver}]
+
+BOOK: t/true for True, anything else is False. Case insensitive
+
+Defaults: 
+
+- dill = True (Alternative: default serialization)
+- echo = False
+- mpstart = fork
+
+* Why is echo useful?
+
+Arg parsing is ad hoc, not using a standard arg parsing package.
+
+main tests for interactive usage. For non-interactive, script comes
+from stdin:
+
+        if os.isatty(sys.stdin.fileno()):
+            # Interactive
+            try:
+                MAIN.run()
+                break
+            except ReloadConfigException:
+                input = MAIN.input
+                old_namespace = MAIN.shutdown(restart=True)
+                pass
+        else:
+            # Piped-in script
+            MAIN.run_script(sys.stdin.read())
+            break
+
+----------------------------------------------------------------------
+
+Fixes:
+
+- Get rid of echo
+
+- Pass script as optional arg, not stdin. Frees stdin for use by the script.
