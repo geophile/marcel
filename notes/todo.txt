@@ -491,8 +491,3 @@ e.g. x = (| p |)
 ----------------------------------------------------------------------
 
 Tab completion for executables.
-
-----------------------------------------------------------------------
-
-"marcel < script.m" runs a script of marcel commands. How to pipe
-input to it?

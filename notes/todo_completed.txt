@@ -889,3 +889,8 @@ union, intersect, join should allow for multiple inputs.
 
 (Not join: join --keep can produce ambiguous results with multiple
 inputs).
+
+----------------------------------------------------------------------
+
+"marcel < script.m" runs a script of marcel commands. How to pipe
+input to it?

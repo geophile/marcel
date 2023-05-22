@@ -255,6 +255,7 @@ def args():
     flags = ('--dill', '--mpstart')
     dill = True
     mpstart = 'fork'
+    script = None
     flag = None
     for arg in sys.argv[1:]:
         if arg in flags:
@@ -265,20 +266,24 @@ def args():
         elif arg.startswith('-'):
             fail(f'Unrecognized flag {arg}')
         else:
-            # arg is a flag value
-            if flag == '--dill':
-                dill = arg.lower() in ('t', 'true')
-            elif flag == '--mpstart':
-                if arg in ('fork', 'spawn', 'forkserver'):
-                    mpstart = arg
-                else:
-                    fail(f'Set --mpstart to fork (default), forkserver, or spawn')
-            flag = None
-    return dill, mpstart
+            if flag is None:
+                # arg must be a script name
+                script = arg
+            else:
+                # arg is a flag value
+                if flag == '--dill':
+                    dill = arg.lower() in ('t', 'true')
+                elif flag == '--mpstart':
+                    if arg in ('fork', 'spawn', 'forkserver'):
+                        mpstart = arg
+                    else:
+                        fail(f'Set --mpstart to fork (default), forkserver, or spawn')
+                flag = None
+    return dill, mpstart, script
 
 
 def main():
-    dill, mpstart = args()
+    dill, mpstart, script = args()
     old_namespace = None
     input = None
     if mpstart is not None:
@@ -287,7 +292,7 @@ def main():
         MAIN = Main(None, same_process=False, old_namespace=old_namespace)
         MAIN.input = input
         MAIN.dill = dill
-        if os.isatty(sys.stdin.fileno()):
+        if script is None:
             # Interactive
             try:
                 MAIN.run()
@@ -297,8 +302,12 @@ def main():
                 old_namespace = MAIN.shutdown(restart=True)
                 pass
         else:
-            # Piped-in script
-            MAIN.run_script(sys.stdin.read())
+            # Script
+            try:
+                with open(script, 'r') as script_file:
+                    MAIN.run_script(script_file.read())
+            except FileNotFoundError:
+                print(f'File not found: {script}', file=sys.stderr)
             break
 
 
