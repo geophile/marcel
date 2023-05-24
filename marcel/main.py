@@ -307,7 +307,7 @@ def main():
                 with open(script, 'r') as script_file:
                     MAIN.run_script(script_file.read())
             except FileNotFoundError:
-                print(f'File not found: {script}', file=sys.stderr)
+                fail(f'File not found: {script}')
             break
 
 

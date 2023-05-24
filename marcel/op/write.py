@@ -51,7 +51,7 @@ tuples are formatted and written to stdout or to the specified {r:FILENAME}.
 If {r:FILENAME} already exists, its contents will be replaced, unless {r:--append} is specified,
 in which case the stream will be appended. {r:--append} is not permitted for writing to stdout.
  
-The formatting options {r:--csv}, {r:-tsv} {r:--pickle}, and {r:FORMAT} options are mutually exclusive.
+The formatting options {r:--csv}, {r:-tsv} {r:--pickle}, and {r:--format} options are mutually exclusive.
 If no formatting options are specified, then the default rendering is used, except
 that 1-tuples are unwrapped. (Note that for certain objects, including
 {r:File} and {r:Process}, the default rendering is specified by the {n:render_compact()}
