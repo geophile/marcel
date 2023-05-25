@@ -16,6 +16,7 @@
 from collections import namedtuple
 import csv
 
+import marcel.core
 import marcel.exception
 import marcel.object.file
 import marcel.op.filenamesop
@@ -225,7 +226,9 @@ class TextReader(Reader):
         super().__init__(op)
 
     def read_file(self, file, label):
-        with open(file.path, 'r') as input:
+        with marcel.util.open_file(file.path,
+                                   'r',
+                                   marcel.core.kill_and_resume_on_file_open_error) as input:
             try:
                 line = input.readline()
                 while len(line) > 0:
@@ -265,7 +268,9 @@ class CSVReader(Reader):
         self.n_columns = None
 
     def read_file(self, file, label):
-        with open(file.path, 'r') as input:
+        with marcel.util.open_file(file.path,
+                                   'r',
+                                   marcel.core.kill_and_resume_on_file_open_error) as input:
             try:
                 first = True
                 line = input.readline()

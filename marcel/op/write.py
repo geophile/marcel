@@ -24,6 +24,7 @@ import marcel.exception
 import marcel.object.error
 import marcel.object.renderable
 import marcel.picklefile
+import marcel.util
 
 Renderable = marcel.object.renderable.Renderable
 
@@ -193,7 +194,9 @@ class TextWriter(Writer):
         super().__init__(op)
         if op.filename:
             path = pathlib.Path(os.path.normpath(op.filename)).expanduser()
-            self.output = open(path, mode='a' if op.append else 'w')
+            self.output = marcel.util.open_file(path,
+                                                'a' if op.append else 'w',
+                                                marcel.core.kill_command_on_file_open_error)
         else:
             self.output = sys.stdout
 

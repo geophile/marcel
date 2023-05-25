@@ -25,6 +25,14 @@ import marcel.util
 Error = marcel.object.error.Error
 
 
+def kill_command_on_file_open_error(path, mode, error):
+    raise marcel.exception.KillCommandException(f'Unable to open {path} with mode {mode}: {str(error)}')
+
+
+def kill_and_resume_on_file_open_error(path, mode, error):
+    raise marcel.exception.KillAndResumeException(f'Unable to open {path} with mode {mode}: {str(error)}')
+
+
 class Pipelineable:
 
     def n_params(self):

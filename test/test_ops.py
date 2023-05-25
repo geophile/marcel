@@ -2079,6 +2079,19 @@ def test_bug_190():
 
 
 @timeit
+def test_bug_198():
+    os.system('rm -rf /tmp/bug198')
+    os.system('mkdir /tmp/bug198')
+    # IsADirectoryError
+    TEST.run('gen 3 > /tmp/bug198', expected_err='Is a directory')
+    os.system('touch /tmp/bug198/cannot_write')
+    # PermissionError
+    os.system('chmod 000 /tmp/bug198/cannot_write')
+    TEST.run('gen 3 > /tmp/bug198/cannot_write', expected_err='Permission denied')
+    # FileExistsError: Can't happen?
+
+
+@timeit
 def test_bug_200():
     dir = '/tmp/bug200'
     source = f'{dir}/source.csv'
@@ -2180,6 +2193,7 @@ def test_bugs():
     test_bug_154()
     test_bug_168()
     test_bug_190()
+    test_bug_198()
     test_bug_200()
 
 

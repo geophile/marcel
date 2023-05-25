@@ -1651,6 +1651,21 @@ def test_bug_136():
 
 
 @timeit
+def test_bug_198():
+    os.system('rm -rf /tmp/bug198')
+    os.system('mkdir /tmp/bug198')
+    # IsADirectoryError
+    TEST.run(test=lambda: run(gen(3) | write('/tmp/bug198')),
+             expected_err='Is a directory')
+    os.system('touch /tmp/bug198/cannot_write')
+    # PermissionError
+    os.system('chmod 000 /tmp/bug198/cannot_write')
+    TEST.run(test=lambda: run(gen(3) | write('/tmp/bug198/cannot_write')),
+             expected_err='Permission denied')
+    # FileExistsError: Can't happen?
+
+
+@timeit
 def test_bug_10():
     TEST.run(lambda: run(sort()), expected_err='cannot be the first operator in a pipeline')
     TEST.run(lambda: run(unique()), expected_err='cannot be the first operator in a pipeline')
@@ -1665,6 +1680,7 @@ def test_bugs():
     test_bug_126()
     test_bug_136()
     test_bug_10()
+    test_bug_198()
 
 
 def main_slow_tests():
@@ -1717,7 +1733,7 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_bug_198()
 
 
 def main():

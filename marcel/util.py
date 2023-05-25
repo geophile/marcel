@@ -190,6 +190,17 @@ def iterable(x):
     return isinstance(x, collections.abc.Iterable)
 
 
+def open_file(path, mode, error_handler=None):
+    try:
+        return open(path, mode)
+    # FileNotFoundError should not occur. Missing files handled by FilenamesOp.
+    except (IsADirectoryError, FileExistsError, PermissionError) as e:
+        if error_handler:
+            error_handler(path, mode, e)
+        else:
+            raise
+
+
 class Trace:
 
     def __init__(self, tracefile, replace=False):
