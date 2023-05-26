@@ -19,12 +19,11 @@ import marcel.exception
 import marcel.object.db
 
 HELP = '''
-{L,wrap=F}sql [-d|--db DB_PROFILE] [-c|--commit UPDATE_COUNT] [-a|--autocommit] 
-[-u|--update-counts] STATEMENT [ARG ...]
+{L,indent=4:8}sql [-d|--db DB_PROFILE] [-c|--commit UPDATE_COUNT] [-a|--autocommit] [-u|--update-counts] STATEMENT [ARG ...]
 
 {L,indent=4:28,wrap=T}{r:-d}, {r:--db}                Access the database whose profile is named 
 {r:DB_PROFILE}, in the marcel configuration file
-{e.g. n:~/.config/marcel/startup.py}. If omitted, use the default profile, specified by the 
+e.g. {n:~/.config/marcel/startup.py}. If omitted, use the default profile, specified by the 
 environment variable {n:DB_DEFAULT}.
 
 {L,indent=4:28}{r:-c}, {r:--commit}            Commit after {r:UPDATE_COUNT} rows have been updated, 

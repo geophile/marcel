@@ -25,7 +25,7 @@ import marcel.util
 File = marcel.object.file.File
 
 HELP = '''
-{L,wrap=F}ls [[-01] [-r|--recursive]] [-f|--file] [-d|--dir] [-s|--symlink] [FILENAME ...]
+{L,indent=4:7}ls [[-01] [-r|--recursive]] [-f|--file] [-d|--dir] [-s|--symlink] [FILENAME ...]
 
 {L,indent=4:28}{r:-0}                      Include only files matching the specified FILENAMEs, (i.e., depth 0).
 

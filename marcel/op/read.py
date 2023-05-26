@@ -26,7 +26,7 @@ import marcel.util
 File = marcel.object.file.File
 
 HELP = '''
-{L,wrap=F}read [[-01] [-r|--recursive]] [-c|--csv] [-t|--tsv] [-h|--headings] [-s|--skip-headings] [-p|--pickle] [-l|--label] [FILENAME ...]
+{L,indent=4:9}read [[-01] [-r|--recursive]] [-c|--csv] [-t|--tsv] [-h|--headings] [-s|--skip-headings] [-p|--pickle] [-l|--label] [FILENAME ...]
 
 {L,indent=4:28}{r:-0}                      Include only files matching the specified FILENAMEs, (i.e., depth 0).
 

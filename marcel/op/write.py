@@ -29,7 +29,7 @@ import marcel.util
 Renderable = marcel.object.renderable.Renderable
 
 HELP = '''
-{L,wrap=F}write [-c|--csv] [-t|--tsv] [-p|--pickle] [-f|--format FORMAT] [-a|--append] [FILENAME]
+{L,indent=4:10}write [-c|--csv] [-t|--tsv] [-p|--pickle] [-f|--format FORMAT] [-a|--append] [FILENAME]
 
 {L,indent=4:28}{r:-c}, {r:--csv}               Format output as comma-separated values.
 
