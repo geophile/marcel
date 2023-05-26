@@ -1195,6 +1195,29 @@ def test_read():
              expected_out=[Error('Cannot generate identifiers from headings'),
                            ('a', 'b', 'c'),
                            ('d', 'e', 'f')])
+    # Resume after error
+    os.system('rm -rf /tmp/r')
+    os.system('mkdir /tmp/r')
+    TEST.run(test=lambda: run(cd('/tmp/r')))
+    TEST.run(test=lambda: run(bash('echo aaa > a')))
+    TEST.run(test=lambda: run(bash('echo aaa > aa')))
+    TEST.run(test=lambda: run(bash('echo bbb > b')))
+    TEST.run(test=lambda: run(bash('echo ccc > c')))
+    TEST.run(test=lambda: run(bash('echo ccc > cc')))
+    TEST.run(test=lambda: run(bash('echo ddd > d')))
+    TEST.run(test=lambda: run(bash('chmod 000 aa b cc d')))
+    TEST.run(test=lambda: run(read('*', label=True) | map(lambda f, line: (f.name, line))),
+             expected_out=[('a', 'aaa'),
+                           ('c', 'ccc')])
+    TEST.run(test=lambda: run(read('a*', 'c*', label=True) | map(lambda f, line: (f.name, line))),
+             expected_out=[('a', 'aaa'),
+                           ('c', 'ccc')])
+    TEST.run(test=lambda: run(ls('*', file=True) | read(label=True) | map(lambda f, line: (f.name, line))),
+             expected_out=[('a', 'aaa'),
+                           ('c', 'ccc')])
+    TEST.run(test=lambda: run(ls('a*', 'c*', file=True) | read(label=True) | map(lambda f, line: (f.name, line))),
+             expected_out=[('a', 'aaa'),
+                           ('c', 'ccc')])
 
 
 @timeit
@@ -1733,7 +1756,7 @@ def main_stable():
 
 
 def main_dev():
-    test_bug_198()
+    pass
 
 
 def main():

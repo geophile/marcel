@@ -94,7 +94,10 @@ class FilenamesOp(marcel.core.Op):
 
     def run(self):
         for root in self.roots:
-            self.visit(root, 0)
+            try:
+                self.visit(root, 0)
+            except marcel.exception.KillAndResumeException:
+                pass
 
     # For use by this class
 
@@ -113,10 +116,14 @@ class FilenamesOp(marcel.core.Op):
                         self.non_fatal_error(input=file, message='Permission denied')
                     except FileNotFoundError:
                         self.non_fatal_error(input=file, message='No such file or directory')
+                    except marcel.exception.KillAndResumeException:
+                        pass
             except PermissionError:
                 self.non_fatal_error(input=root, message='Permission denied')
             except FileNotFoundError:
                 self.non_fatal_error(input=root, message='No such file or directory')
+            except marcel.exception.KillAndResumeException:
+                pass
 
     def determine_base(self):
         # nca: nearest common ancestor

@@ -1589,6 +1589,29 @@ def test_read():
              expected_out=[Error('Cannot generate identifiers from headings'),
                            ('a', 'b', 'c'),
                            ('d', 'e', 'f')])
+    # Resume after error
+    os.system('rm -rf /tmp/r')
+    os.system('mkdir /tmp/r')
+    TEST.run('cd /tmp/r')
+    TEST.run('echo aaa > a')
+    TEST.run('echo aaa > aa')
+    TEST.run('echo bbb > b')
+    TEST.run('echo ccc > c')
+    TEST.run('echo ccc > cc')
+    TEST.run('echo ddd > d')
+    TEST.run('chmod 000 aa b cc d')
+    TEST.run('read -l * | (f, line: (f.name, line))',
+             expected_out=[('a', 'aaa'),
+                           ('c', 'ccc')])
+    TEST.run('read -l a* c* | (f, line: (f.name, line))',
+             expected_out=[('a', 'aaa'),
+                           ('c', 'ccc')])
+    TEST.run('ls -f * | read -l | (f, line: (f.name, line))',
+             expected_out=[('a', 'aaa'),
+                           ('c', 'ccc')])
+    TEST.run('ls -f a* c* | read -l | (f, line: (f.name, line))',
+             expected_out=[('a', 'aaa'),
+                           ('c', 'ccc')])
 
 
 @timeit
