@@ -1,0 +1,86 @@
+
+Unbundle csv/tsv/pickle options from read and write?
+
+This:
+
+    read --csv foobar
+
+would become:
+
+    read foobar | parse --csv
+
+or 
+
+    foobar > parse --csv
+
+This:
+
+    ... | write --csv foobar
+
+would become:
+
+    ... | format --csv | write foobar
+
+or
+
+    ... | format --csv > foobar
+
+
+Problem:
+
+- Write a pickle formatted file:
+
+M 0.16.1 jao@cheese ~/git/marcel/test$ gen 5 | (x: [x] * x) | write -p /tmp/g.p
+
+- It can be read as a pickled file:
+
+M 0.16.1 jao@cheese ~/git/marcel/test$ read -p /tmp/g.p
+[]
+1
+[2, 2]
+[3, 3, 3]
+[4, 4, 4, 4]
+
+because it is opened as a binary file.
+
+But the default reader assumes text and blows up:
+
+
+M 0.16.1 jao@cheese ~/git/marcel/test$ read /tmp/g.p
+Process Process-16:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 273, in execute
+    self.pipeline.run()
+  File "/home/jao/git/marcel/marcel/core.py", line 431, in run
+    self.ops[0].run()
+  File "/home/jao/git/marcel/marcel/op/read.py", line 190, in run
+    return super().run()
+  File "/home/jao/git/marcel/marcel/op/filenamesop.py", line 98, in run
+    self.visit(root, 0)
+  File "/home/jao/git/marcel/marcel/op/filenamesop.py", line 106, in visit
+    self.action(self, file)
+  File "/home/jao/git/marcel/marcel/op/read.py", line 211, in read_file
+    op.reader.read_file(file, (file,) if op.label else None)
+  File "/home/jao/git/marcel/marcel/op/read.py", line 233, in read_file
+    line = input.readline()
+  File "/usr/lib/python3.10/codecs.py", line 322, in decode
+    (result, consumed) = self._buffer_decode(data, self.errors, final)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x80 in position 0: invalid start byte
+
+
+This creates problems for unbundling read and parse. This unbundling
+can go one of two ways:
+
+1) read always reads a binary file, and parse then has to specify
+text. But that means a parse op is always required, which is clunky.
+
+2) read needs an option to read binary. But then redirection syntax
+won't work (since that probably has to assume text).
+
+Or just don't unbundle?

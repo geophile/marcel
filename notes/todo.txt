@@ -444,34 +444,6 @@ drop the distinction between CSV and TSV.
 
 ----------------------------------------------------------------------
 
-Unbundle csv/tsv/pickle options from read and write?
-
-This:
-
-    read --csv foobar
-
-would become:
-
-    read foobar | parse --csv
-
-or 
-
-    foobar > parse --csv
-
-This:
-
-    ... | write --csv foobar
-
-would become:
-
-    ... | format --csv | write foobar
-
-or
-
-    ... | format --csv > foobar
-
-----------------------------------------------------------------------
-
 Command history ideas:
 
 https://www.reddit.com/r/linuxquestions/comments/12rux3h/why_are_commands_preceded_with_space_not_logged/?utm_source=share&utm_medium=ios_app&utm_name=ioscss&utm_content=1&utm_term=1
