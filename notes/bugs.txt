@@ -565,30 +565,6 @@ does not work, because ls is a marcel op, and marcel doesn't support
 
 ----------------------------------------------------------------------
 
-196. Parsing after pipeline var is broken
-
-    M 0.15.0 jao@cheese ~/git/marcel/test$ g = (| gen 3 |)
-    M 0.15.0 jao@cheese ~/git/marcel/test$ g 3
-    0
-    1
-    2
-
-"g 3" is a parse error
-
-But this works:
-
-    M 0.15.0 jao@cheese ~/git/marcel/test$ gn = (| n: gen (int(n)) |)
-    M 0.15.0 jao@cheese ~/git/marcel/test$ gn 3
-    0
-    1
-    2
-    M 0.15.0 jao@cheese ~/git/marcel/test$ gn 3 4
-    Provided 2 arguments, but there are only 1 pipeline parameters
-
-Is the fix to have pipeline, even without args, check arg count?
-
-----------------------------------------------------------------------
-
 197. runpipeline, used as an op, crashes marcel
 
 It isn't a public op, but if you try calling it marcel crashes.

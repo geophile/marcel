@@ -2102,6 +2102,16 @@ def test_bug_190():
 
 
 @timeit
+def test_bug_196():
+    TEST.run('g = (| gen 3 |)')
+    TEST.run('g 5', expected_err='Wrong number of arguments')
+    TEST.run('gn = (| n: gen (int(n)) |)')
+    TEST.run('gn', expected_err='Wrong number of arguments')
+    TEST.run('gn 3', expected_out=[0, 1, 2])
+    TEST.run('gn 3 4', expected_err='Wrong number of arguments')
+
+
+@timeit
 def test_bug_198():
     os.system('rm -rf /tmp/bug198')
     os.system('mkdir /tmp/bug198')
@@ -2216,6 +2226,7 @@ def test_bugs():
     test_bug_154()
     test_bug_168()
     test_bug_190()
+    test_bug_196()
     test_bug_198()
     test_bug_200()
 

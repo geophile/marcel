@@ -15,6 +15,7 @@
 
 import marcel.core
 import marcel.exception
+import marcel.util
 
 
 class RunPipeline(marcel.core.Op):
@@ -43,6 +44,11 @@ class RunPipeline(marcel.core.Op):
         if not isinstance(self.pipeline, marcel.core.Pipeline):
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is not bound to anything executable.')
+        n_params = 0 if self.pipeline.parameters() is None else len(self.pipeline.parameters())
+        if n_params != ((0 if self.args is None else len(self.args)) +
+                        (0 if self.kwargs is None else len(self.kwargs))):
+            raise marcel.exception.KillCommandException(
+                f'Wrong number of arguments for {self.var} pipeline: {self.pipeline}')
         # Why copy: A pipeline can be used twice in a command, e.g.
         #    x = [a: ... ]
         #    x (1) | join [x (2)]
