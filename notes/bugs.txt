@@ -597,3 +597,29 @@ It isn't a public op, but if you try calling it marcel crashes.
         assert self._args_parser_constructor is not None
     AssertionError
     jao@cheese:~/git/marcel/test$ 
+
+----------------------------------------------------------------------
+
+200. Pipeline definition should not rely on early variable bindings
+
+A pipeline cannot be defined if it references an undefined variable:
+
+    M 0.16.1 jao@cheese ~/git/marcel/test$ p = (| x |)
+    x is not a variable, operator, or executable.
+
+Define x to be a pipeline (works):
+
+    M 0.16.1 jao@cheese ~/git/marcel/test$ x = (| gen 3 |)
+    M 0.16.1 jao@cheese ~/git/marcel/test$ p = (| x |)
+    M 0.16.1 jao@cheese ~/git/marcel/test$ p
+    0
+    1
+    2
+
+Define x to be something other than a pipeline (works):
+
+    M 0.16.1 jao@cheese ~/git/marcel/test$ x = 4
+    M 0.16.1 jao@cheese ~/git/marcel/test$ p
+    The variable x is not bound to anything executable.
+
+
