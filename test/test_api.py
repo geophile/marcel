@@ -1439,7 +1439,7 @@ def test_env():
              expected_out=[Error('undefined')])
     # Delete missing var
     TEST.run(test=lambda: run(env(delete='GARBAGE')),
-             expected_out=[Error('undefined')])
+             expected_out=[])
 
 
 @timeit
@@ -1756,14 +1756,15 @@ def main_stable():
 
 
 def main_dev():
+    test_env()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    main_slow_tests()
-    # main_dev()
+    # main_stable()
+    # main_slow_tests()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

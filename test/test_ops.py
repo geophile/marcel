@@ -1019,7 +1019,7 @@ def test_pipeline_args():
     TEST.run('gen 3 | f -b (10) -a (100) -a (200)',
              expected_err='Flag a given more than once')
     TEST.run('gen 3 | f -b (10)',
-             expected_err='Expected arguments: 2, given: 1')
+             expected_err='Wrong number of arguments')
     # Long flags
     TEST.run('foobar = (|foo, bar: map (x: x * foo) | select (x: x < bar)|)')
     TEST.run('gen 10 | foobar --foo (10) --bar (45)',
@@ -1029,7 +1029,7 @@ def test_pipeline_args():
     # Insufficient args
     # Bug 105 --  # Depends on ext being defined in .marcel.py
     TEST.run('ext',
-             expected_err='Expected arguments: 1, given: 0')
+             expected_err='Wrong number of arguments')
 
 
 @timeit
@@ -1864,7 +1864,7 @@ def test_env():
              expected_out=[Error('undefined')])
     # Delete missing var
     TEST.run(test='env -d GARBAGE',
-             expected_out=[Error('undefined')])
+             expected_out=[])
 
 
 @timeit

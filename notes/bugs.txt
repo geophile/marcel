@@ -621,5 +621,3 @@ Define x to be something other than a pipeline (works):
     M 0.16.1 jao@cheese ~/git/marcel/test$ x = 4
     M 0.16.1 jao@cheese ~/git/marcel/test$ p
     The variable x is not bound to anything executable.
-
-

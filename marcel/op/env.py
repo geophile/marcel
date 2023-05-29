@@ -124,11 +124,11 @@ class Env(marcel.core.Op):
 
     def delete_var(self):
         assert self.delete
-        value = self.env().delvar(self.delete)
-        if value is None:
-            self.no_such_var(self.var)
-        else:
+        try:
+            value = self.env().delvar(self.delete)
             self.send((self.delete, value))
+        except KeyError:
+            pass
 
     def matching_vars(self):
         assert self.pattern

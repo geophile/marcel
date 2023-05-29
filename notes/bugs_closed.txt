@@ -3806,3 +3806,20 @@ But this does:
 
 So pipeline var execution works after |, but not after >.
 
+
+----------------------------------------------------------------------
+
+201. Deleting non-existent var from environment should not cause an error
+
+    M 0.16.1 jao@cheese ~/git/marcel/test$ x = 1
+    M 0.16.1 jao@cheese ~/git/marcel/test$ env x
+    ('x', '1')
+    M 0.16.1 jao@cheese ~/git/marcel/test$ env -d x
+    ('x', '1')
+    M 0.16.1 jao@cheese ~/git/marcel/test$ env -d x
+    Error: None is undefined
+
+Even if we wanted an error, that's not a good one.
+
+Produce no output in this case.
+

@@ -263,10 +263,7 @@ class Environment:
 
     def delvar(self, var):
         assert var is not None
-        value = self.namespace.pop(var, None)
-        if type(value) is marcel.reservoir.Reservoir:
-            value.ensure_deleted()
-        return value
+        return self.namespace.pop(var)
 
     def vars(self):
         return self.namespace
