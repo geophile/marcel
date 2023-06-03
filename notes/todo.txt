@@ -463,3 +463,53 @@ e.g. x = (| p |)
 ----------------------------------------------------------------------
 
 Tab completion for executables.
+
+----------------------------------------------------------------------
+
+Why does marcel lose colorization?
+
+Running grep from bash colorizes (run the command to see):
+
+jao@cheese:~$ grep MiniM /var/log/syslog
+May 28 03:00:01 cheese MiniMachete: Mounting backup
+May 28 03:00:07 cheese MiniMachete: backup to localhost: Backup starting
+May 28 03:35:17 cheese MiniMachete: backup to localhost: Backup finished
+May 28 03:35:17 cheese MiniMachete: Unmounting backup
+May 28 03:35:40 cheese MiniMachete: backup to acme: Backup starting
+May 28 05:16:20 cheese MiniMachete: backup to acme: Backup finished
+May 29 03:00:01 cheese MiniMachete: Mounting backup
+May 29 03:00:06 cheese MiniMachete: backup to localhost: Backup starting
+May 29 03:33:07 cheese MiniMachete: backup to localhost: Backup finished
+May 29 03:33:07 cheese MiniMachete: Unmounting backup
+May 29 03:33:28 cheese MiniMachete: backup to acme: Backup starting
+May 29 04:40:02 cheese MiniMachete: backup to acme: Backup finished
+May 30 03:00:01 cheese MiniMachete: Mounting backup
+May 30 03:00:05 cheese MiniMachete: backup to localhost: Backup starting
+May 30 03:32:38 cheese MiniMachete: backup to localhost: Backup finished
+May 30 03:32:38 cheese MiniMachete: Unmounting backup
+May 30 03:33:09 cheese MiniMachete: backup to acme: Backup starting
+May 30 04:33:51 cheese MiniMachete: backup to acme: Backup finished
+
+But running the same command through marcel does not.
+
+jao@cheese:~$ marcel
+M 0.16.1 jao@cheese ~$ grep MiniM /var/log/syslog
+May 28 03:00:01 cheese MiniMachete: Mounting backup
+May 28 03:00:07 cheese MiniMachete: backup to localhost: Backup starting
+May 28 03:35:17 cheese MiniMachete: backup to localhost: Backup finished
+May 28 03:35:17 cheese MiniMachete: Unmounting backup
+May 28 03:35:40 cheese MiniMachete: backup to acme: Backup starting
+May 28 05:16:20 cheese MiniMachete: backup to acme: Backup finished
+May 29 03:00:01 cheese MiniMachete: Mounting backup
+May 29 03:00:06 cheese MiniMachete: backup to localhost: Backup starting
+May 29 03:33:07 cheese MiniMachete: backup to localhost: Backup finished
+May 29 03:33:07 cheese MiniMachete: Unmounting backup
+May 29 03:33:28 cheese MiniMachete: backup to acme: Backup starting
+May 29 04:40:02 cheese MiniMachete: backup to acme: Backup finished
+May 30 03:00:01 cheese MiniMachete: Mounting backup
+May 30 03:00:05 cheese MiniMachete: backup to localhost: Backup starting
+May 30 03:32:38 cheese MiniMachete: backup to localhost: Backup finished
+May 30 03:32:38 cheese MiniMachete: Unmounting backup
+May 30 03:33:09 cheese MiniMachete: backup to acme: Backup starting
+May 30 04:33:51 cheese MiniMachete: backup to acme: Backup finished
+M 0.16.1 jao@cheese ~$ 

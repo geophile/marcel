@@ -48,10 +48,10 @@ class RunPipeline(marcel.core.Op):
         if n_params != ((0 if self.args is None else len(self.args)) +
                         (0 if self.kwargs is None else len(self.kwargs))):
             raise marcel.exception.KillCommandException(
-                f'Wrong number of arguments for {self.var} pipeline: {self.pipeline}')
+                f'Wrong number of arguments for pipeline {self.var} = {self.pipeline}')
         # Why copy: A pipeline can be used twice in a command, e.g.
-        #    x = [a: ... ]
-        #    x (1) | join [x (2)]
+        #    x = (| a: ... |)
+        #    x (1) | join (| x (2) |)
         # Without copying the identical ops comprising x would be used twice in the same
         # command. This potentially breaks the use of Op state during execution, and also
         # breaks the structure of the pipeline, e.g. Op.receiver.

@@ -72,7 +72,7 @@ def filename_op_setup(dir):
 
 @timeit
 def test_no_such_op():
-    TEST.run('gen 5 | abc', expected_err='is not a variable, operator, or executable')
+    TEST.run('gen 5 | abc', expected_err='not executable')
 
 
 @timeit
@@ -1254,7 +1254,7 @@ def test_redirect_file():
     # ---------------------------------------------------------------------
     # Erroneous syntax
     TEST.run('/tmp/a >',
-             expected_err='not a variable, operator, or executable')
+             expected_err='excess tokens')
     TEST.run('gen 3 < (x: x)',
              expected_err='excess tokens')
 
@@ -1382,7 +1382,7 @@ def test_redirect_var():
     # Var undefined
     TEST.run('env -d z')
     TEST.run('z >$',
-             expected_err='not a variable, operator, or executable')
+             expected_err='excess tokens')
     # Var defined
     TEST.run('z = (| gen 3 |)')
     TEST.run('z >$',
@@ -2142,7 +2142,7 @@ def test_bug_200():
     TEST.run(f'read -c {source}',
              expected_out=[('123', 'a', "'b", "c'"),
                            'd,e'])
-    # Test that --csv reading and writing
+    # Test --csv reading and writing
     TEST.run(f'read -c {source} | write -c {target}')
     TEST.run(f'read {target}',
              expected_out=['''"123","a","'b","c'"''', '"d,e"'])
@@ -2156,6 +2156,21 @@ def test_bug_200():
     TEST.run(f'read -c {target2}',
              expected_out=[('123', 'a', "'b", "c'"),
                            'd,e'])
+
+
+@timeit
+def test_bug_202():
+    TEST.run('env -d x | select (*x: False)')
+    TEST.run('p = (| x |)')
+    TEST.run('p', expected_err="not executable")
+    TEST.run('p 4', expected_err='Wrong number of arguments')
+    TEST.run('x = (| gen 3 |)')
+    TEST.run('p 4', expected_err='Wrong number of arguments')
+    TEST.run('p', expected_out=[0, 1, 2])
+    TEST.run('p = (| x 4 |)')
+    TEST.run('x = (| n: gen (int(n)) |)')
+    TEST.run('p', expected_out=[0, 1, 2, 3])
+    TEST.run('p 6', expected_err='Wrong number of arguments')
 
 
 # Generalization of bug 195
@@ -2229,6 +2244,7 @@ def test_bugs():
     test_bug_196()
     test_bug_198()
     test_bug_200()
+    test_bug_202()
 
 
 def main_stable():
@@ -2283,7 +2299,7 @@ def main_dev():
 def main():
     TEST.reset_environment()
     main_stable()
-    main_slow_tests()
+    # main_slow_tests()
     # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)

@@ -935,7 +935,7 @@ class TabCompletionContext:
         return self._flags
 
 
-class Parser:
+class Parser(object):
 
     class ShellOpContext(object):
 
@@ -959,6 +959,25 @@ class Parser:
             op_module = self.parser.op_modules.get(op_name)
             bashy_args = op_module and op_module.bashy_args()
             return bashy_args or (not var and not builtin and executable)
+
+    class PipelineSourceTracker(object):
+
+        def __init__(self, parser, pipeline):
+            self.parser = parser
+            self.pipeline = pipeline
+            self.start_position = None
+
+        def __enter__(self):
+            self.start_position = self._current_position()
+            return self
+
+        def __exit__(self, ex_type, ex_value, ex_traceback):
+            end_position = self._current_position()
+            self.pipeline.source = self.parser.text[self.start_position:end_position]
+
+        def _current_position(self):
+            # Lexer.mark() returns text, start, end
+            return self.parser.tokens.lexer.mark()[2]
 
     def __init__(self, text, main):
         self.text = text
@@ -1052,12 +1071,12 @@ class Parser:
 
         pipeline = marcel.core.Pipeline()
         pipeline.set_parameters(parameters)
-        op_sequence = (pipeline_str_lt() if self.next_token(String, Lt) else
-                       pipeline_gt_str() if self.next_token(Gt, String) else
-                       pipeline_op_sequence())
-        for op_args in op_sequence:
-            pipeline.append(self.create_op(*op_args))
-        pipeline.source = self.text
+        with Parser.PipelineSourceTracker(self, pipeline) as pipeline_source_tracker:
+            op_sequence = (pipeline_str_lt() if self.next_token(String, Lt) else
+                           pipeline_gt_str() if self.next_token(Gt, String) else
+                           pipeline_op_sequence())
+            for op_args in op_sequence:
+                pipeline.append(self.create_op(*op_args))
         return pipeline
 
     def redirect_in_op(self, arrow_token, source=None):
@@ -1183,8 +1202,11 @@ class Parser:
         if op is None:
             op = self.create_op_executable(op_token, arg_tokens)
         if op is None:
-            raise marcel.exception.KillCommandException(
-                f'{op_token.value()} is not a variable, operator, or executable.')
+            # op is not a variable, operator, or executable. Assume that it's an undefined variable,
+            # whose value will make sense at execution time, (e.g. xyz in p = (| xyz ... |)). In other
+            # contexts, the undefined variable will need to be detected during command execution, e.g.
+            # executing xyz ...
+            op = self.create_op_variable(op_token, arg_tokens, undefined_var_ok=True)
         return op
 
     def create_op_builtin(self, op_token, arg_tokens):
@@ -1213,8 +1235,8 @@ class Parser:
             op_module.args_parser().parse(args, op)
         return op
 
-    def create_op_variable(self, op_token, arg_tokens):
-        if op_token.is_var():
+    def create_op_variable(self, op_token, arg_tokens, undefined_var_ok=False):
+        if op_token.is_var() or undefined_var_ok:
             var = op_token.value()
             op = self.op_modules['runpipeline'].create_op()
             op.var = var

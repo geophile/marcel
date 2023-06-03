@@ -1689,6 +1689,40 @@ def test_bug_198():
 
 
 @timeit
+def test_bug_200():
+    dir = '/tmp/bug200'
+    source = f'{dir}/source.csv'
+    target = f'{dir}/target.csv'
+    target2 = f'{dir}/target2.csv'
+    os.system(f'rm -rf {dir}')
+    os.system(f'mkdir {dir}')
+    # number, unquoted string, single-quoted string
+    os.system(f'''echo "123,a,'b,c'" > {source}''')
+    # double-quoted string
+    os.system(f'''echo '"d,e"' >> {source}''')
+    # Check source
+    TEST.run(test=lambda: run(read(source)),
+             expected_out=["""123,a,'b,c'""", '''"d,e"'''])
+    TEST.run(test=lambda: run(read(source, csv=True)),
+             expected_out=[('123', 'a', "'b", "c'"),
+                           'd,e'])
+    # Test --csv reading and writing
+    TEST.run(test=lambda: run(read(source, csv=True) | write(target, csv=True)))
+    TEST.run(test=lambda: run(read(target)),
+             expected_out=['''"123","a","'b","c'"''', '"d,e"'])
+    TEST.run(test=lambda: run(read(target, csv=True)),
+             expected_out=[('123', 'a', "'b", "c'"),
+                           'd,e'])
+    # Test whether write -c output followed by read -c/write -c is a fixed point.
+    TEST.run(test=lambda: run(read(target, csv=True) | write(target2, csv=True)))
+    TEST.run(test=lambda: run(read(target2)),
+             expected_out=['''"123","a","'b","c'"''', '"d,e"'])
+    TEST.run(test=lambda: run(read(target2, csv=True)),
+             expected_out=[('123', 'a', "'b", "c'"),
+                           'd,e'])
+
+
+@timeit
 def test_bug_10():
     TEST.run(lambda: run(sort()), expected_err='cannot be the first operator in a pipeline')
     TEST.run(lambda: run(unique()), expected_err='cannot be the first operator in a pipeline')
@@ -1704,6 +1738,7 @@ def test_bugs():
     test_bug_136()
     test_bug_10()
     test_bug_198()
+    test_bug_200()
 
 
 def main_slow_tests():
@@ -1756,15 +1791,14 @@ def main_stable():
 
 
 def main_dev():
-    test_env()
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
-    # main_slow_tests()
-    main_dev()
+    main_stable()
+    main_slow_tests()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
