@@ -1659,6 +1659,15 @@ def test_api_iterator():
 
 
 @timeit
+def test_bug_10():
+    TEST.run(lambda: run(sort()), expected_err='cannot be the first operator in a pipeline')
+    TEST.run(lambda: run(unique()), expected_err='cannot be the first operator in a pipeline')
+    TEST.run(lambda: run(window(overlap=2)), expected_err='cannot be the first operator in a pipeline')
+    TEST.run(lambda: run(map(lambda: 3)), expected_out=[3])
+    TEST.run(lambda: run(args(lambda x: gen(3))), expected_err='cannot be the first operator in a pipeline')
+
+
+@timeit
 def test_bug_126():
     f = reservoir('f')
     fact = lambda x: gen(x, 1) | args(lambda n: gen(n, 1) | red(r_times) | map(lambda f: (n, f)))
@@ -1722,21 +1731,12 @@ def test_bug_200():
                            'd,e'])
 
 
-@timeit
-def test_bug_10():
-    TEST.run(lambda: run(sort()), expected_err='cannot be the first operator in a pipeline')
-    TEST.run(lambda: run(unique()), expected_err='cannot be the first operator in a pipeline')
-    TEST.run(lambda: run(window(overlap=2)), expected_err='cannot be the first operator in a pipeline')
-    TEST.run(lambda: run(map(lambda: 3)), expected_out=[3])
-    TEST.run(lambda: run(args(lambda x: gen(3))), expected_err='cannot be the first operator in a pipeline')
-
-
 # For bugs that aren't specific to a single op.
 @timeit
 def test_bugs():
+    test_bug_10()
     test_bug_126()
     test_bug_136()
-    test_bug_10()
     test_bug_198()
     test_bug_200()
 
@@ -1746,6 +1746,7 @@ def main_slow_tests():
     test_upload()
     test_remote()
     test_download()
+
 
 def main_stable():
     test_gen()
