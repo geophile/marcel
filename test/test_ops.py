@@ -2112,6 +2112,11 @@ def test_bug_196():
 
 
 @timeit
+def test_bug_197():
+    TEST.run('runpipeline', expected_err='not executable')
+
+
+@timeit
 def test_bug_198():
     os.system('rm -rf /tmp/bug198')
     os.system('mkdir /tmp/bug198')
@@ -2242,6 +2247,7 @@ def test_bugs():
     test_bug_168()
     test_bug_190()
     test_bug_196()
+    test_bug_197()
     test_bug_198()
     test_bug_200()
     test_bug_202()

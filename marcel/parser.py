@@ -391,7 +391,8 @@ class String(Token):
         self.string = None
         self.scan(scan_termination)
         # op_modules is a dict, name -> OpModule
-        self.op_name = self.string if self.string in parser.op_modules else None
+        op_module = parser.op_modules.get(self.string, None)
+        self.op_name = self.string if op_module and op_module.public_op() else None
 
     def value(self):
         return self.string

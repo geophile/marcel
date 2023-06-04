@@ -23,9 +23,10 @@ import marcel.op
 
 class OpModule:
 
-    def __init__(self, op_name, env):
+    def __init__(self, op_name, env, public_op):
         self._op_name = op_name
         self._env = env
+        self._public_op = public_op
         self._api = None  # For creating op instances from the api
         self._op_constructor = None
         self._args_parser = None
@@ -60,6 +61,9 @@ class OpModule:
     def env(self):
         return self._env
 
+    def public_op(self):
+        return self._public_op
+
     def op_name(self):
         return self._op_name
 
@@ -85,7 +89,7 @@ class OpModule:
 def import_op_modules(env):
     op_modules = {}
     for op_name in marcel.op.all:
-        op_modules[op_name] = OpModule(op_name, env)
+        op_modules[op_name] = OpModule(op_name, env, public_op=(op_name in marcel.op.public))
     env.op_modules = op_modules
     return op_modules
 
