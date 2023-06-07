@@ -189,22 +189,6 @@ https://pymotw.com/2/subprocess/#process-groups-sessions
 
 ----------------------------------------------------------------------
 
-Pipelines:
-
-- In parser, the create_op_variable check is useless. The variable
-  value could change before execution, and may even cease to
-  exist. Make create_op_variable the last resort, and then at runtime,
-  complain if the var isn't defined, or if it's value is of the wrong
-  type.
-
-- Allow [...] to delimit a pipeline, even when not necessary. (Like {
-  ... } around single statement if, in C.)
-
-
-Should assign allow assignment of pipeline without brackets?
-
-----------------------------------------------------------------------
-
 Should a var hide an op by the same name?
 
 ----------------------------------------------------------------------
@@ -447,18 +431,6 @@ drop the distinction between CSV and TSV.
 Command history ideas:
 
 https://www.reddit.com/r/linuxquestions/comments/12rux3h/why_are_commands_preceded_with_space_not_logged/?utm_source=share&utm_medium=ios_app&utm_name=ioscss&utm_content=1&utm_term=1
-
-----------------------------------------------------------------------
-
-Binding of vars in pipelines
-
-e.g. x = (| p |)
-
-- Should it be assumed that p is a pipeline var? 
-
-- OK to depend on the value?
-
-- What if p is rebound? Not to a pipeline? Does x bind p's name? p's value?
 
 ----------------------------------------------------------------------
 

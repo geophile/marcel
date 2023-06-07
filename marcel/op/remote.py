@@ -42,7 +42,7 @@ with the node's name.
 Example:
 
 {p,indent=4,wrap=F}
-remote lab [gen 3]
+remote lab (| gen 3 |)
 
 {r:lab} is a cluster, configured in the marcel startup script. The pipeline {r:gen 3}
 is run on each node of this cluster. The output from each node is returned, and a label

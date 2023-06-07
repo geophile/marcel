@@ -894,3 +894,17 @@ inputs).
 
 "marcel < script.m" runs a script of marcel commands. How to pipe
 input to it?
+
+----------------------------------------------------------------------
+
+Binding of vars in pipelines
+
+e.g. x = (| p |)
+
+- Should it be assumed that p is a pipeline var? 
+
+- OK to depend on the value?
+
+- What if p is rebound? Not to a pipeline? Does x bind p's name? p's value?
+
+Resolved as bug 202
