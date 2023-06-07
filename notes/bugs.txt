@@ -564,3 +564,13 @@ But
 
 does not work, because ls is a marcel op, and marcel doesn't support
 {}.
+
+----------------------------------------------------------------------
+
+203: Pipeline source should include brackets and args
+
+    p = (| n: gen (int(n)) | (x: -x) |)
+    M 0.16.1 jao@cheese ~/git/marcel$ (p)
+    gen (int(n)) | (x: -x) 
+
+Should be (| n: ... |)
