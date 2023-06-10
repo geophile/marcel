@@ -2178,6 +2178,14 @@ def test_bug_202():
     TEST.run('p 6', expected_err='Wrong number of arguments')
 
 
+@timeit
+def test_bug_203():
+    TEST.run('p = (| gen 3 |)')
+    TEST.run('(p)', expected_out=['gen 3'])
+    TEST.run('p = (| n: gen (int(n)) |)')
+    TEST.run('(p)', expected_out=['n: gen (int(n))'])
+
+
 # Generalization of bug 195
 @timeit
 def test_pipeline_vars():
@@ -2251,6 +2259,7 @@ def test_bugs():
     test_bug_198()
     test_bug_200()
     test_bug_202()
+    test_bug_203()
 
 
 def main_stable():

@@ -567,10 +567,12 @@ does not work, because ls is a marcel op, and marcel doesn't support
 
 ----------------------------------------------------------------------
 
-203: Pipeline source should include brackets and args
+204. Suppress prompts when running script
 
-    p = (| n: gen (int(n)) | (x: -x) |)
-    M 0.16.1 jao@cheese ~/git/marcel$ (p)
-    gen (int(n)) | (x: -x) 
+If a script is run like this:
 
-Should be (| n: ... |)
+    marcel <<EOF
+    ...
+    EOF
+
+then a bunch of marcel prompts are printed. They shouldn't be.

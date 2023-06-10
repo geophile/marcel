@@ -974,7 +974,7 @@ class Parser(object):
 
         def __exit__(self, ex_type, ex_value, ex_traceback):
             end_position = self._current_position()
-            self.pipeline.source = self.parser.text[self.start_position:end_position]
+            self.pipeline.source = self.parser.text[self.start_position:end_position].strip()
 
         def _current_position(self):
             # Lexer.mark() returns text, start, end
@@ -1003,7 +1003,7 @@ class Parser(object):
             command = self.assignment(self.token.value())
         else:
             self.tab_completion_context.complete_op()
-            command = self.pipeline(None)
+            command = self.pipeline()
         if not self.at_end():
             raise ParseError(f'{command} followed by excess tokens')
         return command
@@ -1022,7 +1022,7 @@ class Parser(object):
         op = self.create_assignment(var, value)
         return op
     
-    def pipeline(self, parameters):
+    def pipeline(self):
         def pipeline_str_lt():
             source = self.token  # var or file, depending on arrow type
             found_lt = self.next_token(Lt)
@@ -1071,8 +1071,14 @@ class Parser(object):
             return op_sequence
 
         pipeline = marcel.core.Pipeline()
-        pipeline.set_parameters(parameters)
         with Parser.PipelineSourceTracker(self, pipeline) as pipeline_source_tracker:
+            # If the next tokens are var comma, or var colon, then we have
+            # pipeline variables being declared.
+            if self.next_token(String, Comma) or self.next_token(String, Colon):
+                parameters = self.vars()
+            else:
+                parameters = None
+            pipeline.set_parameters(parameters)
             op_sequence = (pipeline_str_lt() if self.next_token(String, Lt) else
                            pipeline_gt_str() if self.next_token(Gt, String) else
                            pipeline_op_sequence())
@@ -1130,13 +1136,7 @@ class Parser(object):
         def marcel_arg():
             if self.next_token(Begin):
                 self.tab_completion_context.complete_disabled()
-                # If the next tokens are var comma, or var colon, then we have
-                # pipeline variables being declared.
-                if self.next_token(String, Comma) or self.next_token(String, Colon):
-                    pipeline_parameters = self.vars()
-                else:
-                    pipeline_parameters = None
-                pipeline = self.pipeline(pipeline_parameters)
+                pipeline = self.pipeline()
                 if self.next_token(End):
                     return pipeline
                 else:
