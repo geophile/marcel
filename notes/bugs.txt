@@ -564,15 +564,3 @@ But
 
 does not work, because ls is a marcel op, and marcel doesn't support
 {}.
-
-----------------------------------------------------------------------
-
-204. Suppress prompts when running script
-
-If a script is run like this:
-
-    marcel <<EOF
-    ...
-    EOF
-
-then a bunch of marcel prompts are printed. They shouldn't be.

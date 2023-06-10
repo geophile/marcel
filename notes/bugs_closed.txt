@@ -3909,3 +3909,17 @@ FIXED
     gen (int(n)) | (x: -x) 
 
 Should be n: ...
+
+----------------------------------------------------------------------
+
+FIXED
+
+204. Suppress prompts when running script
+
+If a script is run like this:
+
+    marcel <<EOF
+    ...
+    EOF
+
+then a bunch of marcel prompts are printed. They shouldn't be.

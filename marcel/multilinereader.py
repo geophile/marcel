@@ -57,7 +57,8 @@ class MultiLineReader:
         then additional lines are requested, using the continuation prompt."""
         lines = []
         while True:
-            line = input(prompt if len(lines) == 0 else continuation_prompt)
+            line = (input() if prompt is None and continuation_prompt is None else
+                    input(prompt if len(lines) == 0 else continuation_prompt))
             # The len(lines) > 0 check is needed to fix bug 41.
             if len(line) > 0 or len(lines) > 0:
                 history_length = readline.get_current_history_length()

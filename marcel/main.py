@@ -119,12 +119,13 @@ class Main:
     def __setstate__(self, state):
         assert False
 
-    def run(self):
+    def run(self, print_prompt):
         try:
             while True:
                 try:
                     if self.input is None:
-                        self.input = self.reader.input(*self.env.prompts())
+                        prompts = self.env.prompts() if print_prompt else (None, None)
+                        self.input = self.reader.input(*prompts)
                     # else: Restarted main, and self.line was from the previous incarnation.
                     self.check_for_config_update()
                     self.run_command(self.input)
@@ -292,10 +293,11 @@ def main():
         MAIN = Main(None, same_process=False, old_namespace=old_namespace)
         MAIN.input = input
         MAIN.dill = dill
+        print_prompt = sys.stdin.isatty()
         if script is None:
             # Interactive
             try:
-                MAIN.run()
+                MAIN.run(print_prompt)
                 break
             except ReloadConfigException:
                 input = MAIN.input
