@@ -48,7 +48,7 @@ Examples:
 gen 10 >$ a  # Store the stream 0, 1, ..., 9 into variable a.
 gen 10 5 >$ b  # Store the stream 5, 6, ... 14 into variable b.
 a <$ (n: -n) >$ c  # Negate each element in a, storing the stream in variable c
-a <& intersect (| b <$ |) >$ d  # Store the intersection of a and b in d
+a <$ intersect (| b <$ |) >$ d  # Store the intersection of a and b in d
 d <$  # Print the contents of d
 ```
 
