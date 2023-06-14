@@ -1264,6 +1264,31 @@ _pickle.PicklingError: Can't pickle <function <lambda> at 0x7f75c4a4b550>: attri
 
 ----------------------------------------------------------------------
 
+NOT A BUG
+
+67. Pipeline syntax needs to be generalized
+
+    M-0.9.15 jao@cheese:~/git/marcel$ gen 3 | map (x: x + 5)
+    5
+    6
+    7
+    M-0.9.15 jao@cheese:~/git/marcel$ gen 3 | [x: map (x + 5)]
+    Parsing error at position 8 of "...gen 3 | [x: map (x + 5)]...": Unexpected token type: Begin([)
+
+This syntax:
+
+    ... | [ ... ]
+
+is rejected by the parser, which means we can't have pipelines with
+parameters as literals. Fix the parser.
+
+......................................................................
+
+This no longer produces a parsing error, but the semantics are
+wrong. gen 3 | args |( x: ... |) is correct and works.
+
+----------------------------------------------------------------------
+
 FIXED
 
 68. Help formatting broken -- indent vs. wrap
@@ -1506,6 +1531,28 @@ use see the color scheme.
 
 ----------------------------------------------------------------------
 
+NOT A BUG
+
+87. Assign pipeline without brackets
+
+Should it be allowed? If not, this failure mode is pretty bad:
+
+    M-0.10.8 jao@cheese:~/git/marcel/marcel/object$ g = gen 5
+    M-0.10.8 jao@cheese:~/git/marcel/marcel/object$ (g)
+    gen
+
+The string "gen" is assigned and the rest is ignored.
+
+......................................................................
+
+Reasonable syntax error:
+
+M 0.16.4 jao@cheese ~/git/marcel/test$ g = gen 5
+(| assign(g, None) |) followed by excess tokens
+
+
+----------------------------------------------------------------------
+
 FIXED
 
 88. Crash on ifelse operating on processes
@@ -1663,6 +1710,25 @@ Notes:
 - Parser.arg calls self.next_token(End) but doesn't check that it's there. Allows 
   things like this to work: "sudo [ls". FIXED
 
+----------------------------------------------------------------------
+
+NOT A BUG
+
+99. Redirection doesn't work for executables
+
+This works, putting a list of Files into x:
+
+    ls > x
+
+This does not work:
+
+    date > x
+
+Error message: Variable date is undefined.
+
+......................................................................
+
+Works now.
 
 ----------------------------------------------------------------------
 

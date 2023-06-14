@@ -45,6 +45,7 @@ HELP = '''
 
 Note that GROUP is followed by } instead of ]. That seemed to put 
 help into an infinite loop.
+
 ----------------------------------------------------------------------
 
 66. Parsing error due to whitespace
@@ -57,24 +58,6 @@ Error: Running map(lambda: f'''map{x: x+1}''') on (2,): <lambda>() takes 0 posit
 Lexer.consolidate_tokens consolidates map and (...
 
 IS THIS A BUG?
-
-----------------------------------------------------------------------
-
-67. Pipeline syntax needs to be generalized
-
-    M-0.9.15 jao@cheese:~/git/marcel$ gen 3 | map (x: x + 5)
-    5
-    6
-    7
-    M-0.9.15 jao@cheese:~/git/marcel$ gen 3 | [x: map (x + 5)]
-    Parsing error at position 8 of "...gen 3 | [x: map (x + 5)]...": Unexpected token type: Begin([)
-
-This syntax:
-
-    ... | [ ... ]
-
-is rejected by the parser, which means we can't have pipelines with
-parameters as literals. Fix the parser.
 
 ----------------------------------------------------------------------
 
@@ -124,18 +107,6 @@ Even important ones, like PROMPT. Some of them need to be protected.
 
 ----------------------------------------------------------------------
 
-87. Assign pipeline without brackets
-
-Should it be allowed? If not, this failure mode is pretty bad:
-
-    M-0.10.8 jao@cheese:~/git/marcel/marcel/object$ g = gen 5
-    M-0.10.8 jao@cheese:~/git/marcel/marcel/object$ (g)
-    gen
-
-The string "gen" is assigned and the rest is ignored.
-
-----------------------------------------------------------------------
-
 89. Be able to execute marcel script from inside marcel
 
 Don't require use of host shell.
@@ -156,20 +127,6 @@ None
 97. ... | args [n: sql 'insert ... values(%s) (n)' does, essentially, autocommit
 
 The problem is that each invocation of the pipeline does sql setup, receive, receive_complete.
-
-----------------------------------------------------------------------
-
-99. Redirection doesn't work for executables
-
-This works, putting a list of Files into x:
-
-    ls > x
-
-This does not work:
-
-    date > x
-
-Error message: Variable date is undefined.
 
 ----------------------------------------------------------------------
 
