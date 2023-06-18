@@ -1,0 +1,33 @@
+Input
+
+The Python json package will do the obvious conversion of a JSON
+object into Python: 
+
+json.JSONDecoder().decode(...))
+
+----------------------------------------------------------------------
+
+Output
+
+There is an encoder:
+
+json.JSONEncoder().encode(...)
+
+----------------------------------------------------------------------
+
+Processing
+
+Model after jq:
+
+- Select key: .key
+
+- index array: .[n], and python slice syntax is supported. Always
+  yields array.
+
+- Keys: keys
+
+- length: length
+
+- flatten: flatten. It's recursive, doesn't do anything with dicts.
+
+- unique. Uniques lists and dicts too

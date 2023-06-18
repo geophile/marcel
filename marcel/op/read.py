@@ -21,12 +21,14 @@ import marcel.exception
 import marcel.object.file
 import marcel.op.filenamesop
 import marcel.picklefile
+import marcel.jsonutil
 import marcel.util
 
 File = marcel.object.file.File
 
 HELP = '''
-{L,indent=4:9}read [[-01] [-r|--recursive]] [-c|--csv] [-t|--tsv] [-h|--headings] [-s|--skip-headings] [-p|--pickle] [-l|--label] [FILENAME ...]
+{L,indent=4:9}read [[-01] [-r|--recursive]] [-c|--csv] [-t|--tsv] [-h|--headings] [-s|--skip-headings] [-p|--pickle] 
+ [-j|--json] [-l|--label] [FILENAME ...]
 
 {L,indent=4:28}{r:-0}                      Include only files matching the specified FILENAMEs, (i.e., depth 0).
 
@@ -95,6 +97,7 @@ def read(env, *filenames,
          headings=False,
          skip_headings=False,
          pickle=False,
+         json=False,
          label=False):
     args = []
     if depth == 0:
@@ -113,6 +116,8 @@ def read(env, *filenames,
         args.append('--skip-headings')
     if pickle:
         args.append('--pickle')
+    if json:
+        args.append('--json')
     if label:
         args.append('--label')
     args.extend(filenames)
@@ -128,8 +133,9 @@ class ReadArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
         self.add_flag_no_value('headings', '-h', '--headings')
         self.add_flag_no_value('skip_headings', '-s', '--skip-headings')
         self.add_flag_no_value('pickle', '-p', '--pickle')
+        self.add_flag_no_value('json', '-j', '--json')
         self.add_flag_no_value('label', '-l', '--label')
-        self.at_most_one('csv', 'tsv', 'pickle')
+        self.at_most_one('csv', 'tsv', 'pickle', 'json')
         self.at_most_one('headings', 'skip_headings')
         self.validate()
 
@@ -143,6 +149,7 @@ class Read(marcel.op.filenamesop.FilenamesOp):
         self.headings = None
         self.skip_headings = None
         self.pickle = None
+        self.json = None
         self.label = None
         self.reader = None
 
@@ -161,6 +168,8 @@ class Read(marcel.op.filenamesop.FilenamesOp):
             options.append('headings')
         if self.pickle:
             options.append('pickle')
+        if self.json:
+            options.append('json')
         if self.filenames:
             filenames = [str(p) for p in self.filenames]
             return f'read({",".join(options)}, filenames={filenames})'
@@ -181,6 +190,7 @@ class Read(marcel.op.filenamesop.FilenamesOp):
         self.reader = (CSVReader(self, COMMA) if self.csv else
                        CSVReader(self, TAB) if self.tsv else
                        PickleReader(self) if self.pickle else
+                       JSONReader(self) if self.json else
                        TextReader(self))
 
     # Op
@@ -252,6 +262,22 @@ class PickleReader(Reader):
                     self.op.send((label, x) if label else x)
             except EOFError:
                 pass
+
+
+class JSONReader(Reader):
+
+    def __init__(self, op):
+        super().__init__(op)
+
+    def read_file(self, file, label):
+        lines = None
+        with marcel.util.open_file(file.path,
+                                   'r',
+                                   marcel.core.kill_and_resume_on_file_open_error) as input:
+            lines = input.readlines()
+        assert lines is not None
+        json = marcel.jsonutil.JSONUtil().decoder.decode(' '.join(lines))
+        self.op.send(json)
 
 
 class CSVReader(Reader):

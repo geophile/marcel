@@ -165,6 +165,8 @@ Need to review how errors and exceptions are reported from farcel.
 
 The env var isn't there, but the temp file is.
 
+IS THIS A BUG?
+
 ----------------------------------------------------------------------
 
 127. API env missing symbols

@@ -2308,14 +2308,15 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('read -j /tmp/x.json | (j: (j.a, j.c.d, j.c.e))')
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_stable()
-    main_slow_tests()
-    # main_dev()
+    # main_stable()
+    # main_slow_tests()
+    main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
