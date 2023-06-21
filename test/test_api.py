@@ -10,6 +10,7 @@ import marcel.version
 from marcel.api import *
 
 import test_base
+
 timeit = test_base.timeit
 
 Error = marcel.object.error.Error
@@ -1394,7 +1395,6 @@ def test_args():
     TEST.run(test=lambda: run(gen(3) | args(lambda: 123)),
              expected_err="The args pipeline must be parameterized")
 
-
     TEST.run(test=lambda: run(gen(3) | args(lambda: gen(3))),
              expected_err='The args pipeline must be parameterized')
     # Bug 94
@@ -1414,12 +1414,12 @@ def test_env():
     # NODE1, NODE2 come from the test config file, ./.marcel.py
     TEST.run(test=lambda: run(env() |
                               map(lambda var, value: var) |
-                              select (lambda var: var in ("NODE1", "NODE2", "PATH", "PWD"))),
+                              select(lambda var: var in ("NODE1", "NODE2", "PATH", "PWD"))),
              expected_out=["NODE1", "NODE2", "PATH", "PWD"])
     # Test some vars
     TEST.run(test=lambda: run(env(pattern='NODE') |
                               map(lambda var, value: var) |
-                              select (lambda var: var in ("NODE1", "NODE2"))),
+                              select(lambda var: var in ("NODE1", "NODE2"))),
              expected_out=["NODE1", "NODE2"])
     # One var
     TEST.run(test=lambda: run(env(var='PATH') |
@@ -1463,6 +1463,86 @@ def test_tee():
              expected_out=[1, 2, 3, 4, 5])
     TEST.run(test=lambda: run(load(a)), expected_out=[15])
     TEST.run(test=lambda: run(load(b)), expected_out=[120])
+
+
+@timeit
+def test_json():
+    def test_json_parse():
+        # Scalars
+        TEST.run(test=lambda: run(map(lambda: '"a"') | map(lambda j: json_parse(j))),
+                 expected_out=['a'])
+        TEST.run(test=lambda: run(map(lambda: '123') | map(lambda j: json_parse(j))),
+                 expected_out=[123])
+        TEST.run(test=lambda: run(map(lambda: '4.5') | map(lambda j: json_parse(j))),
+                 expected_out=[4.5])
+        TEST.run(test=lambda: run(map(lambda: 'true') | map(lambda j: json_parse(j))),
+                 expected_out=[True])
+        TEST.run(test=lambda: run(map(lambda: 'false') | map(lambda j: json_parse(j))),
+                 expected_out=[False])
+        TEST.run(test=lambda: run(map(lambda: 'null') | map(lambda j: json_parse(j))),
+                 expected_out=[None])
+        TEST.run(test=lambda: run(map(lambda: 'abc') | map(lambda j: json_parse(j))),  # Unquoted string
+                 expected_out=[Error('Expecting value')])
+        TEST.run(test=lambda: run(map(lambda: '--3') | map(lambda j: json_parse(j))),  # Malformed integer
+                 expected_out=[Error('Expecting value')])
+        TEST.run(test=lambda: run(map(lambda: '1.2.3') | map(lambda j: json_parse(j))),  # Malformed float
+                 expected_out=[Error('Extra data')])
+        # Structures (flat)
+        TEST.run(test=lambda: run(map(lambda: '[]') | map(lambda j: json_parse(j))),
+                 expected_out=[[]])
+        TEST.run(test=lambda: run(map(lambda: '["a", 1]') | map(lambda j: json_parse(j))),
+                 expected_out=[['a', 1]])
+        TEST.run(test=lambda: run(map(lambda: '{}') | map(lambda j: json_parse(j))),
+                 expected_out=[{}])
+        TEST.run(test=lambda: run(map(lambda: '{"a": 1, "b": 2, "c c": 3.3}') | map(lambda j: json_parse(j))),
+                 expected_out=[{'a': 1, 'b': 2, 'c c': 3.3}])
+        # Structures (nested)
+        TEST.run(test=lambda: run(map(lambda: '["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]')
+                                  | map(lambda j: json_parse(j))),
+                 expected_out=[['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}]])
+        TEST.run(test=lambda: run(map(lambda: '{"q": ["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]}')
+                                  | map(lambda j: json_parse(j))),
+                 expected_out=[{'q': ['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}]}])
+        TEST.run(test=lambda: run(map(lambda: '[1, 2') | map(lambda j: json_parse(j))),
+                 expected_out=[Error("Expecting ',' delimiter")])
+        TEST.run(test=lambda: run(map(lambda: '[1, ') | map(lambda j: json_parse(j))),
+                 expected_out=[Error("Expecting value")])
+        TEST.run(test=lambda: run(map(lambda: '{"a": 1,}') | map(lambda j: json_parse(j))),
+                 expected_out=[Error("Expecting property name")])
+        TEST.run(test=lambda: run(map(lambda: '{"a": 1') | map(lambda j: json_parse(j))),
+                 expected_out=[Error("delimiter: ")])
+        TEST.run(test=lambda: run(map(lambda: '{"a", 1}') | map(lambda j: json_parse(j))),
+                 expected_out=[Error("delimiter: ")])
+        # Structure access
+        TEST.run(test=lambda: run(map(lambda: '["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}, "g g": 7.7}]}]')
+                                  | map(lambda j: json_parse(j))
+                                  | map(lambda *j: (j[0], j[1].b, j[1].c[1], j[1].c[2].d, j[1].c[2]['g g']))),
+                 expected_out=[('a', 2, 4, 5, 7.7)])
+
+    def test_json_format():
+        # Scalars
+        TEST.run(test=lambda: run(map(lambda: ['a']) | map(lambda j: json_format(j))),
+                 expected_out=['"a"'])
+        TEST.run(test=lambda: run(map(lambda: [123]) | map(lambda j: json_format(j))),
+                 expected_out=['123'])
+        TEST.run(test=lambda: run(map(lambda: [4.5]) | map(lambda j: json_format(j))),
+                 expected_out=['4.5'])
+        TEST.run(test=lambda: run(map(lambda: [True]) | map(lambda j: json_format(j))),
+                 expected_out=['true'])
+        TEST.run(test=lambda: run(map(lambda: [False]) | map(lambda j: json_format(j))),
+                 expected_out=['false'])
+        TEST.run(test=lambda: run(map(lambda: [None]) | map(lambda j: json_format(j))),
+                 expected_out=['null'])
+        # Structures (nested)
+        TEST.run(test=lambda: run(map(lambda: ['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}])
+                                  | map(lambda *j: json_format(j))),
+                 expected_out=["""["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]"""])
+        TEST.run(test=lambda: run(map(lambda: {'q': ['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}]})
+                                  | map(lambda *j: json_format(j))),
+                 expected_out=["""[{"q": ["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]}]"""])
+
+    test_json_parse()
+    test_json_format()
 
 
 @timeit
@@ -1784,6 +1864,7 @@ def main_stable():
     test_env()
     test_pos()
     test_tee()
+    test_json()
     test_api_run()
     test_api_gather()
     test_api_first()
