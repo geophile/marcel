@@ -31,3 +31,119 @@ Model after jq:
 - flatten: flatten. It's recursive, doesn't do anything with dicts.
 
 - unique. Uniques lists and dicts too
+
+- join: select keys, concatenate with given separator. E.g.
+
+    echo '{ "firstName": "Cameron", "lastName": "Nokes" }' | jq '[.firstName, .lastName] | join(" ")'
+    # Cameron Nokes
+
+
+Design:
+
+- Map object to a class (recursively). Any class instance has a
+  __dict__ which supports dot notation. E.g.
+
+    class C(object):
+        pass
+    
+    x = C()
+    x.a = 1
+    x.b = 2
+    print(x.__dict__)
+
+Output: {'a': 1, 'b': 2}
+
+
+- Adding --json option is inadequate. A predominant usage of JSON is
+  call to remote APIs returning json. Need a "parse --json" op.
+
+......................................................................
+
+Revisiting the parse op
+
+read has many options: csv, tsv, pickle, text, and now maybe json.
+
+Thought about separating it into read (with no format options) and a
+new parse op, which would understand the formats.
+
+But this doesn't work because pickle, unlike the others, requires
+reading raw instead of text, and read won't know how to open the file
+(raw or text).
+
+See "Unbundle csv/tsv/pickle options from read and write?" in
+todo_bad_ideas.txt.
+
+But what about delaying the open? Read could wrap files in a new
+Readable class, and just emit Readable objects. But then Read is
+basically Ls, passing Readables instead of Files. Parse would then be
+prepared to accept a stream of strings, or a stream of Files. For
+Files, open the file and parse its contents.
+
+But here's the difference:
+
+    ls abc* | write
+
+Write receives the File and renders each File using render_full(). But
+this:
+
+    read abc* | write
+
+would receive the Readable and render's each file's contents.
+
+This is workable IF parse always follows read, but it doesn't. E.g.
+
+    read abc*.txt | select (...) | ...
+
+select is expecting lines, not a Readable. 
+
+Fixable by analysing the pipeline and interposing an op to read the
+file. Yech. Could also have stuck with the original approach, (read
+actually opens and reads the file), analysed the pipeline, and
+propagated back to read the open mode, binary or text. Also yech.
+
+----------------------------------------------------------------------
+
+What about a json_to_python() function?
+
+Takes json-formatted string as input, outputs python equivalent.
+
+Read json text:
+
+     read x.json | (j: json_to_python(j))
+
+Json from an executable:
+
+     dig ... | jc --dig | (j: json_to_python(j))
+
+Why not do this for all formatting? E.g. csv
+
+    read x.csv | (line: csv(line))
+
+But what about csv/tsv options?
+
+--headings: Difficult to replace
+
+--skip-headings: Replace with "head -1"
+
+Doesn't work for pickle.
+
+
+Actually, read x.json | (j: json_parse(j)) doesn't work. It has to be
+
+    read x.json | red + ...
+
+to combine the lines into one string.
+
+*** Could have a read arg do that, e.g. read -m|--merge. Replace \n
+    by ' '.
+
+
+Both directions:
+
+
+(File('/tmp/j').read()) | (j: json_parse(j)) | (*x: json_format(x))
+["a", "b", {"x": 1, "y": 2}, ["c", {"p": 10, "q": {"r": 11}}]]
+
+
+Note that *x is needed for json_format in case the top-level structure
+is a list.

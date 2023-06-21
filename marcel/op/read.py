@@ -77,7 +77,8 @@ This option causes the first line of the file to be skipped, presumably because 
 which are not of interest.  
 
 If {r:--pickle} is specified, the input is assumed to be in pickle format.
-If none of these are specified, then each input is assumed to be a line of text. End-of-line
+
+If none of these formats are specified, then each input is assumed to be a line of text. End-of-line
 characters are removed.
 
 If {r:--label} is specified, then the input {n:File} is included in the output, in the first

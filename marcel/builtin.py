@@ -24,6 +24,10 @@ from marcel.object.file import File
 from marcel.object.process import Process
 from marcel.util import username, groupname, quote_files
 
+# Needed hereddd but we don't want them public
+from marcel.jsonutil import JSONUtil as _JSONUtil
+_JSON_UTIL = _JSONUtil()
+
 _COMMANDS = '''
 #    read = [map (f: f.readlines()) | expand]
 '''
@@ -51,3 +55,11 @@ def epoch(year, month, day, hour=0, minute=0, sec=0, usec=0):
 
 def database(driver, dbname, user, password=None, host=None, port=None):
     return Database(driver, dbname, user, password, host, port)
+
+
+def json_parse(x):
+    return _JSON_UTIL.decoder.decode(x)
+
+
+def json_format(x):
+    return _JSON_UTIL.encoder.encode(x)

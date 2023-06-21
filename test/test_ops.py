@@ -1884,6 +1884,94 @@ def test_tee():
 
 
 @timeit
+def test_json():
+    def test_json_parse():
+        # Scalars
+        TEST.run("""('"a"') | (j: json_parse(j))""",
+                 expected_out=['a'])
+        TEST.run("""('123') | (j: json_parse(j))""",
+                 expected_out=[123])
+        TEST.run("""('4.5') | (j: json_parse(j))""",
+                 expected_out=[4.5])
+        TEST.run("""('true') | (j: json_parse(j))""",
+                 expected_out=[True])
+        TEST.run("""('false') | (j: json_parse(j))""",
+                 expected_out=[False])
+        TEST.run("""('null') | (j: json_parse(j))""",
+                 expected_out=[None])
+        TEST.run("""('abc') | (j: json_parse(j))""",    # Unquoted string
+                 expected_out=[Error('Expecting value')])
+        TEST.run("""('--3') | (j: json_parse(j))""",    # Malformed integer
+                 expected_out=[Error('Expecting value')])
+        TEST.run("""('1.2.3') | (j: json_parse(j))""",    # Malformed float
+                 expected_out=[Error('Extra data')])
+        # Structures (flat)
+        TEST.run("""('[]') | (j: json_parse(j))""",
+                 expected_out=[[]])
+        TEST.run("""('["a", 1]') | (j: json_parse(j))""",
+                 expected_out=[['a', 1]])
+        TEST.run("""('{}') | (j: json_parse(j))""",
+                 expected_out=[{}])
+        TEST.run("""('{"a": 1, "b": 2, "c c": 3.3}') | (j: json_parse(j))""",
+                 expected_out=[{'a': 1, 'b': 2, 'c c': 3.3}])
+        # Structures (nested)
+        TEST.run("""('["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]') | (j: json_parse(j))""",
+                 expected_out=[['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}]])
+        TEST.run("""('{"q": ["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]}') | (j: json_parse(j))""",
+                 expected_out=[{'q': ['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}]}])
+        TEST.run("""('[1, 2') | (j: json_parse(j))""",    # Malformed list
+                 expected_out=[Error("Expecting ',' delimiter")])
+        TEST.run("""('[1, ') | (j: json_parse(j))""",    # Malformed list
+                 expected_out=[Error("Expecting value")])
+        TEST.run("""('[1, ]') | (j: json_parse(j))""",    # Malformed list
+                 expected_out=[Error("Expecting value")])
+        TEST.run("""('{"a": 1,}') | (j: json_parse(j))""",    # Malformed dict
+                 expected_out=[Error("Expecting property name")])
+        TEST.run("""('{"a": 1') | (j: json_parse(j))""",    # Malformed dict
+                 expected_out=[Error("delimiter: ")])
+        TEST.run("""('{"a", 1}') | (j: json_parse(j))""",    # Malformed dict
+                 expected_out=[Error("delimiter: ")])
+        # Structure access
+        TEST.run("""('["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}, "g g": 7.7}]}]') 
+        | (j: json_parse(j)) 
+        | (*j: (j[0], j[1].b, j[1].c[1], j[1].c[2].d, j[1].c[2]['g g']))""",
+                 expected_out=[('a', 2, 4, 5, 7.7)])
+        # Broken JSON
+    def test_json_format():
+        # Scalars
+        TEST.run("""(['a']) | (j: json_format(j))""",
+                 expected_out=['"a"'])
+        TEST.run("""([123]) | (j: json_format(j))""",
+                 expected_out=['123'])
+        TEST.run("""([4.5]) | (j: json_format(j))""",
+                 expected_out=['4.5'])
+        TEST.run("""([True]) | (j: json_format(j))""",
+                 expected_out=['true'])
+        TEST.run("""([False]) | (j: json_format(j))""",
+                 expected_out=['false'])
+        TEST.run("""([None]) | (j: json_format(j))""",
+                 expected_out=['null'])
+        TEST.run("""(['a]) | (j: json_format(j))""",
+                 expected_err='Not a python string')
+        # Structures (flat)
+        TEST.run("""([]) | (*j: json_format(j))""",
+                 expected_out=['[]'])
+        TEST.run("""(['a', 1]) | (*j: json_format(j))""",
+                 expected_out=['["a", 1]'])
+        TEST.run("""({}) | (j: json_format(j))""",
+                 expected_out=['{}'])
+        TEST.run("""({'a': 1, 'b': 2, 'c c': 3.3}) | (j: json_format(j))""",
+                 expected_out=['{"a": 1, "b": 2, "c c": 3.3}'])
+        # Structures (nested)
+        TEST.run("""(['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}]) | (*j: json_format(j))""",
+                 expected_out=["""["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]"""])
+        TEST.run("""({'q': ['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}]}) | (j: json_format(j))""",
+                 expected_out=["""{"q": ["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]}"""])
+    test_json_parse()
+    test_json_format()
+
+
+@timeit
 def test_upload():
     os.system('rm -rf /tmp/source')
     os.system('mkdir /tmp/source')
@@ -2304,19 +2392,19 @@ def main_stable():
     test_env()
     test_pos()
     test_tee()
+    test_json()
     test_bugs()
 
 
 def main_dev():
-    TEST.run('read -j /tmp/x.json | (j: (j.a, j.c.d, j.c.e))')
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_stable()
+    main_stable()
     # main_slow_tests()
-    main_dev()
+    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

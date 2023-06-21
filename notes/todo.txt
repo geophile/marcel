@@ -485,3 +485,9 @@ May 30 03:32:38 cheese MiniMachete: Unmounting backup
 May 30 03:33:09 cheese MiniMachete: backup to acme: Backup starting
 May 30 04:33:51 cheese MiniMachete: backup to acme: Backup finished
 M 0.16.1 jao@cheese ~$ 
+
+----------------------------------------------------------------------
+
+Have expand work on maps?
+
+E.g. expand {'a': 1, 'b': 2} -> ('a', 1), ('b', 2)
