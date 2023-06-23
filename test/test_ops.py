@@ -1967,6 +1967,8 @@ def test_json():
                  expected_out=["""["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]"""])
         TEST.run("""({'q': ['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}]}) | (j: json_format(j))""",
                  expected_out=["""{"q": ["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]}"""])
+        # Format anything with a __dict__
+
     test_json_parse()
     test_json_format()
 

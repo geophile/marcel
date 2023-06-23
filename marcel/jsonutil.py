@@ -38,6 +38,8 @@ class JSONUtil(object):
 
     @staticmethod
     def object_to_dict(x):
-        return ({k: JSONUtil.object_to_dict(v) for (k, v) in x.__dict__.items()}
-                if type(x) is _O
-                else x)
+        try:
+            return {k: JSONUtil.object_to_dict(v) for (k, v) in x.__dict__.items()}
+        except AttributeError:
+            return x
+

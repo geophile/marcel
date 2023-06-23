@@ -20,7 +20,7 @@ import marcel.exception
 import marcel.util
 
 
-class Host:
+class Host(object):
 
     def __init__(self, host, cluster):
         self.host = host
@@ -70,7 +70,7 @@ class Host:
                         f'Cannot understand {self.host} as a host name or as an IP address.')
 
 
-class Cluster:
+class Cluster(object):
 
     def __init__(self, user, identity=None, host=None, hosts=None):
         if (host is None) == (hosts is None):

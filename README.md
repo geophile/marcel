@@ -1,55 +1,32 @@
 What's New
 ----------
 
-Marcel offers bash-like redirection syntax. `>` saves a stream in a file,
-while `>>` appends a stream to a file. `>$` and `>>$` write or append 
-to an environment variable instead of a file.
+Marcel now supports JSON input and output.
 
-In previous releases, marcel tried to overload `>` and `>$` to read a
-stream from a file or variable. Example:
+To convert a JSON document into a Python structure, use the `parse_json()` function.
+A contrived example:
 
 ```shell
-gen 3 1 > /tmp/x  # Store the sequence 1, 2, 3 in the file /tmp/x
-/tmp/x > (n: -n)  # Load the stream from /tmp/x and negate each number
+bash ps | jc --ps | (p: json_parse(p)) | expand | (j: (j.pid, j.cmd))
 ```
+* `bash ps | jc --ps` runs the bash `ps` command and then uses `jc --ps` to convert the output into a JSON document.
+* `(p: json_parse(p))` converts the JSON into a Python structure.
+* `expand` is a marcel operator that breaks a list into its elements. I.e., the input stream has one list with all the process info, and the output stream has a stream of structures each describing one process. Each structure has an object with fields describing process properties, e.g. `pid` and `cmd`.
+* `(j: (j.pid, j.cmd))` extracts the `pid` and `cmd` of each process.
 
-In other words, this code is equivalent to
+(This example is contrived because it can be done far more simply in marcel without JSON, 
+e.g. `ps | (p: (p.pid, p.command))`)
 
-```shell
-gen 3 1 | write /tmp/x
-read /tmp/x | (n: -n)
-```
+The mapping from JSON to Python is done by the Python `json` module. Consult documentation on
+that module for details of the mapping.
 
-So the first occurrence of `>` means `write` while the second
-occurrence means `read`. While there are various clues to determine
-the correct interpretation of `>`, it was impossible to make this work
-correctly in general, and the attempts to get it write depended on
-checking the types or values of variables. In other words, it wasn't
-just a parsing problem.  For example, what does this mean:
-
-```shell
-ls > reverse
-```
-
-This could mean: run the `ls` operator and store the results in a file named `reverse`.
-Or maybe there is a variable named `ls` storing a stream, in which case this might mean
-that the stream should be piped to the `reverse` operator. Or maybe it means that the stream should be 
-written to a file named `reverse`. Or maybe `ls` is bound to a pipeline, in which case we should run
-the pipeline and then store the resulting stream in a file named `reverse`.
-
-This is just unworkable. 
-
-So, inspired by bash (yet again), this release introduces `<` to read
-from a file, and `<$` to read from a variable.
-
-Examples:
+Conversion of Python structures to JSON is done by the `json_format()` function. In this example,
+maps of the form `{x: [x, x, x]}` are generated, for x = 0 ... 4. The structure is converted to a
+JSON-formatted string by passing the stream, as a single list, to `json_format`. (By declaring the
+parameter as `*m` instead of `m`, the stream of dicts is concatenated into a list of dicts.)
 
 ```shell
-gen 10 >$ a  # Store the stream 0, 1, ..., 9 into variable a.
-gen 10 5 >$ b  # Store the stream 5, 6, ... 14 into variable b.
-a <$ (n: -n) >$ c  # Negate each element in a, storing the stream in variable c
-a <$ intersect (| b <$ |) >$ d  # Store the intersection of a and b in d
-d <$  # Print the contents of d
+({x: [x, x, x] for x in range(5)}) | (*m: json_format(m))
 ```
 
 Marcel
