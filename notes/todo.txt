@@ -311,12 +311,6 @@ harm. As long as we don't get stuck waiting forever.
 
 ----------------------------------------------------------------------
 
-json
-
-https://cameronnokes.com/blog/working-with-json-in-bash-using-jq/
-
-----------------------------------------------------------------------
-
 
 - Get rid of Environment.cluster(self, name). Fork should call getvar
   instead, and then ensure that the returned value is iterable. (Use

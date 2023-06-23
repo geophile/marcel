@@ -4,30 +4,76 @@ What's New
 Marcel now supports JSON input and output.
 
 To convert a JSON document into a Python structure, use the `parse_json()` function.
-A contrived example:
+Example:
 
 ```shell
-bash ps | jc --ps | (p: json_parse(p)) | expand | (j: (j.pid, j.cmd))
+convert (File('IMG_7079.jpg')) json: \
+| red + \
+| (j: json_parse(j))
 ```
-* `bash ps | jc --ps` runs the bash `ps` command and then uses `jc --ps` to convert the output into a JSON document.
-* `(p: json_parse(p))` converts the JSON into a Python structure.
-* `expand` is a marcel operator that breaks a list into its elements. I.e., the input stream has one list with all the process info, and the output stream has a stream of structures each describing one process. Each structure has an object with fields describing process properties, e.g. `pid` and `cmd`.
-* `(j: (j.pid, j.cmd))` extracts the `pid` and `cmd` of each process.
 
-(This example is contrived because it can be done far more simply in marcel without JSON, 
-e.g. `ps | (p: (p.pid, p.command))`)
+* `File('IMG_7079.jpg')` accesses the named file in the current directory, and creates a marcel `File` object.
+* `convert ... json:` uses ImageMagick's `convert` executable to extract the file's EXIF metadata and format it as a multi-line JSON document. 
+* `red +` concatenates the lines into a single string.
+* `(j: json_parse(j))` parses the JSON string, yielding a Python structure.
 
 The mapping from JSON to Python is done by the Python `json` module. Consult documentation on
-that module for details of the mapping.
+that module for details of the mapping, but the main points are that JSON objects are mapped to 
+Python dicts, and arrays are mapped to lists. Scalar values translate in the obvious ways. 
 
-Conversion of Python structures to JSON is done by the `json_format()` function. In this example,
-maps of the form `{x: [x, x, x]}` are generated, for x = 0 ... 4. The structure is converted to a
-JSON-formatted string by passing the stream, as a single list, to `json_format`. (By declaring the
-parameter as `*m` instead of `m`, the stream of dicts is concatenated into a list of dicts.)
+Access to the Python rendering of a JSON document is similar to what is supported in 
+[jq](https://jqlang.github.io/jq/). In particular, an object can be accessed using dot notation,
+and arrays can be accessed with subscript and slice notation. 
+Continuing the previous example, the image's name and 
+properties can be extracted (only the last line is new):
 
 ```shell
-({x: [x, x, x] for x in range(5)}) | (*m: json_format(m))
+convert (File('IMG_7079.jpg')) json: \
+| red + \
+| (x: json_parse(x)) \
+| (i: (i.image.name, i.image.properties))
 ```
+
+Or, if only the modification date property is of interest:
+
+```shell
+convert (File('IMG_7079.jpg')) json: \
+| red + \
+| (x: json_parse(x)) \
+| (i: (i.image.name, i.image.properties['date:modify']))
+```
+
+Note that `date:modify` is not valid
+as a Python identifier, so dict lookup notation is used instead of dot notation. (EXIF metadata 
+converted to 
+JSON has no arrays, but array access can be done using subscript and slice notation as in jq.) 
+
+To make the example a bit more realistic, here is the marcel code to extract the name and 
+modification date metadata for all `jpg` files in the current directory:
+
+```shell
+ls *.jpg | args (| f: \
+    convert (f) json: \
+    | red + \
+    | (x: json_parse(x)) \
+    | (i: (i.image.name, i.image.properties['date:modify'])) |)
+```
+
+Conversion of Python structures to JSON is done by the `json_format()` function. To complete the running
+example, this code generates the extracted metadata as another JSON document:
+
+```shell
+ls *.jpg | args (| f: \
+    convert (f) json: \
+    | red + \
+    | (x: json_parse(x)) \
+    | (i: {'name': i.image.name, 'mod': i.image.properties['date:modify']}) |) \
+| args --all (| name_mod: (json_format(name_mod)) |)
+```
+
+The 2nd-last line generates dicts instead of tuples. The last line gathers up all the
+dicts and formats them into a single JSON document.
+
 
 Marcel
 ======
