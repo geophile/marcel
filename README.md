@@ -8,13 +8,12 @@ To convert a JSON document into a Python structure, use the `json_parse()` funct
 Example:
 
 ```shell
-convert (File('IMG_7079.jpg')) json: \
+convert 'IMG_7079.jpg' json: \
 | red + \
 | (j: json_parse(j))
 ```
 
-* `File('IMG_7079.jpg')` accesses the named file in the current directory, and creates a marcel `File` object.
-* `convert ... json:` uses ImageMagick's `convert` executable to extract the file's EXIF metadata and format it as a multi-line JSON document. 
+* `convert IMG_7079.jpg json:` uses ImageMagick's `convert` executable to extract the file's EXIF metadata and format it as a multi-line JSON document. 
 * `red +` concatenates the lines into a single string.
 * `(j: json_parse(j))` parses the JSON string, yielding a Python structure.
 
@@ -30,7 +29,7 @@ Continuing the previous example, the image's name and
 properties can be extracted (only the last line is new):
 
 ```shell
-convert (File('IMG_7079.jpg')) json: \
+convert 'IMG_7079.jpg' json: \
 | red + \
 | (x: json_parse(x)) \
 | (i: (i.image.name, i.image.properties))
@@ -39,7 +38,7 @@ convert (File('IMG_7079.jpg')) json: \
 Or, if only the modification date property is of interest:
 
 ```shell
-convert (File('IMG_7079.jpg')) json: \
+convert 'IMG_7079.jpg' json: \
 | red + \
 | (x: json_parse(x)) \
 | (i: (i.image.name, i.image.properties['date:modify']))
