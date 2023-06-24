@@ -1,9 +1,10 @@
 What's New
 ----------
 
-Marcel now supports JSON input and output.
+Marcel now supports JSON input, output, and translation to and from Python
+data structures.
 
-To convert a JSON document into a Python structure, use the `parse_json()` function.
+To convert a JSON document into a Python structure, use the `json_parse()` function.
 Example:
 
 ```shell
@@ -17,7 +18,8 @@ convert (File('IMG_7079.jpg')) json: \
 * `red +` concatenates the lines into a single string.
 * `(j: json_parse(j))` parses the JSON string, yielding a Python structure.
 
-The mapping from JSON to Python is done by the Python `json` module. Consult documentation on
+`json_parse` uses the Python `json` module to convert the JSON string to a Python
+structure. Consult documentation on
 that module for details of the mapping, but the main points are that JSON objects are mapped to 
 Python dicts, and arrays are mapped to lists. Scalar values translate in the obvious ways. 
 
