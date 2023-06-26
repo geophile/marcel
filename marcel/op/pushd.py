@@ -19,6 +19,7 @@ import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.object.file
+import marcel.op.filenames
 
 
 HELP = '''
@@ -41,7 +42,7 @@ class PushdArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('pushd', env)
-        self.add_anon('directory', convert=self.check_str, default=None)
+        self.add_anon('directory', convert=self.check_str_or_file, default=None, target='directory_arg')
         self.validate()
 
 
@@ -49,6 +50,7 @@ class Pushd(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.directory_arg = None
         self.directory = None
 
     def __repr__(self):
@@ -57,8 +59,16 @@ class Pushd(marcel.core.Op):
     # AbstractOp
 
     def setup(self):
-        if self.directory is not None:
-            self.directory = pathlib.Path(self.directory).expanduser()
+        dir_arg = self.eval_function('directory_arg', str, pathlib.Path, pathlib.PosixPath, marcel.object.file.File)
+        if dir_arg is None:
+            self.directory = None
+        else:
+            dirs = marcel.op.filenames.Filenames(self.env(), [pathlib.Path(dir_arg)]).normalize()
+            if len(dirs) == 0:
+                raise marcel.exception.KillCommandException('No qualifying path')
+            elif len(dirs) > 1:
+                raise marcel.exception.KillCommandException('Too many paths')
+            self.directory = dirs[0]
 
     def run(self):
         try:
@@ -69,11 +79,3 @@ class Pushd(marcel.core.Op):
             raise marcel.exception.KillCommandException(e)
         for dir in self.env().dir_state().dirs():
             self.send(marcel.object.file.File(dir))
-
-    # Op
-
-    def must_be_first_in_pipeline(self):
-        return True
-
-    def run_in_main_process(self):
-        return True

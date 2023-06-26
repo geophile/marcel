@@ -18,7 +18,8 @@ import pathlib
 import marcel.argsparser
 import marcel.core
 import marcel.exception
-
+import marcel.object.file
+import marcel.op.filenames
 
 HELP = '''
 {L}cd [DIRECTORY]
@@ -38,7 +39,7 @@ class CdArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('cd', env)
-        self.add_anon('directory', convert=self.check_str, default='~')
+        self.add_anon('directory', convert=self.check_str_or_file, default='~', target='directory_arg')
         self.validate()
 
 
@@ -46,6 +47,7 @@ class Cd(marcel.core.Op):
 
     def __init__(self, env):
         super().__init__(env)
+        self.directory_arg = None
         self.directory = None
 
     def __repr__(self):
@@ -53,8 +55,16 @@ class Cd(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self,):
-        self.directory = pathlib.Path(self.directory)
+    def setup(self):
+        dir_arg = pathlib.Path(self.eval_function('directory_arg',
+                                                  str,
+                                                  pathlib.Path, pathlib.PosixPath, marcel.object.file.File))
+        dirs = marcel.op.filenames.Filenames(self.env(), [dir_arg]).normalize()
+        if len(dirs) == 0:
+            raise marcel.exception.KillCommandException('No qualifying path')
+        elif len(dirs) > 1:
+            raise marcel.exception.KillCommandException('Too many paths')
+        self.directory = dirs[0]
 
     def run(self):
         try:

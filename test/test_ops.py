@@ -11,6 +11,7 @@ import marcel.object.error
 import marcel.version
 
 import test_base
+
 timeit = test_base.timeit
 
 Error = marcel.object.error.Error
@@ -799,7 +800,7 @@ def test_dir_stack():
     # cd
     TEST.run('cd /tmp/test')
     TEST.run(test='cd /tmp/test/doesnotexist',
-             expected_err='No such file or directory')
+             expected_err='No qualifying path')
     TEST.run(test='pwd | (f: str(f))',
              expected_out='/tmp/test')
     TEST.run(test='cd /tmp/test/p',
@@ -808,7 +809,7 @@ def test_dir_stack():
              expected_out='/tmp/test')
     # pushd
     TEST.run(test='pushd /tmp/test/doesnotexist',
-             expected_err='No such file or directory')
+             expected_err='No qualifying path')
     TEST.run(test='pwd | (f: str(f))',
              expected_out='/tmp/test')
     TEST.run(test='pushd /tmp/test/p',
@@ -1257,6 +1258,7 @@ def test_redirect_file():
              expected_err='excess tokens')
     TEST.run('gen 3 < (x: x)',
              expected_err='excess tokens')
+
 
 @timeit
 def test_redirect_var():
@@ -1899,11 +1901,11 @@ def test_json():
                  expected_out=[False])
         TEST.run("""('null') | (j: json_parse(j))""",
                  expected_out=[None])
-        TEST.run("""('abc') | (j: json_parse(j))""",    # Unquoted string
+        TEST.run("""('abc') | (j: json_parse(j))""",  # Unquoted string
                  expected_out=[Error('Expecting value')])
-        TEST.run("""('--3') | (j: json_parse(j))""",    # Malformed integer
+        TEST.run("""('--3') | (j: json_parse(j))""",  # Malformed integer
                  expected_out=[Error('Expecting value')])
-        TEST.run("""('1.2.3') | (j: json_parse(j))""",    # Malformed float
+        TEST.run("""('1.2.3') | (j: json_parse(j))""",  # Malformed float
                  expected_out=[Error('Extra data')])
         # Structures (flat)
         TEST.run("""('[]') | (j: json_parse(j))""",
@@ -1919,17 +1921,17 @@ def test_json():
                  expected_out=[['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}]])
         TEST.run("""('{"q": ["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]}') | (j: json_parse(j))""",
                  expected_out=[{'q': ['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}]}])
-        TEST.run("""('[1, 2') | (j: json_parse(j))""",    # Malformed list
+        TEST.run("""('[1, 2') | (j: json_parse(j))""",  # Malformed list
                  expected_out=[Error("Expecting ',' delimiter")])
-        TEST.run("""('[1, ') | (j: json_parse(j))""",    # Malformed list
+        TEST.run("""('[1, ') | (j: json_parse(j))""",  # Malformed list
                  expected_out=[Error("Expecting value")])
-        TEST.run("""('[1, ]') | (j: json_parse(j))""",    # Malformed list
+        TEST.run("""('[1, ]') | (j: json_parse(j))""",  # Malformed list
                  expected_out=[Error("Expecting value")])
-        TEST.run("""('{"a": 1,}') | (j: json_parse(j))""",    # Malformed dict
+        TEST.run("""('{"a": 1,}') | (j: json_parse(j))""",  # Malformed dict
                  expected_out=[Error("Expecting property name")])
-        TEST.run("""('{"a": 1') | (j: json_parse(j))""",    # Malformed dict
+        TEST.run("""('{"a": 1') | (j: json_parse(j))""",  # Malformed dict
                  expected_out=[Error("delimiter: ")])
-        TEST.run("""('{"a", 1}') | (j: json_parse(j))""",    # Malformed dict
+        TEST.run("""('{"a", 1}') | (j: json_parse(j))""",  # Malformed dict
                  expected_out=[Error("delimiter: ")])
         # Structure access
         TEST.run("""('["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}, "g g": 7.7}]}]') 
@@ -1937,6 +1939,7 @@ def test_json():
         | (*j: (j[0], j[1].b, j[1].c[1], j[1].c[2].d, j[1].c[2]['g g']))""",
                  expected_out=[('a', 2, 4, 5, 7.7)])
         # Broken JSON
+
     def test_json_format():
         # Scalars
         TEST.run("""(['a']) | (j: json_format(j))""",
@@ -2276,6 +2279,65 @@ def test_bug_203():
     TEST.run('(p)', expected_out=['n: gen (int(n))'])
 
 
+@timeit
+def test_bug_206():
+    base = '/tmp/test_cd_pushd'
+    home = pathlib.Path('~').expanduser().absolute()
+    os.system(f'mkdir {base}')
+    TEST.run(test=f'cd {base}',
+             verification='pwd | (d: str(d))',
+             expected_out=base)
+    TEST.run(test='mkdir "a b" x1 x2',
+             verification='ls -fd | sort | (d: str(d))',
+             expected_out=['.', 'a b', 'x1', 'x2'])
+    # Wildcard
+    TEST.run(test='cd a*',
+             verification='pwd | (d: str(d))',
+             expected_out=f'{base}/a b')
+    TEST.run(test='cd ..',
+             verification='pwd | (d: str(d))',
+             expected_out=base)
+    TEST.run(test='pushd *b',
+             verification='pwd | (d: str(d))',
+             expected_out=f'{base}/a b')
+    TEST.run(test='popd',
+             verification='pwd | (d: str(d))',
+             expected_out=base)
+    # Default
+    TEST.run(test='cd',
+             verification='pwd | (d: str(d))',
+             expected_out=home)
+    TEST.run(test=f'cd {base}',
+             verification='pwd | (d: str(d))',
+             expected_out=base)
+    # Errors
+    TEST.run('cd x*',
+             expected_err='Too many paths')
+    TEST.run("pwd | (d: str(d))",
+             expected_out=base)
+    TEST.run('pushd x*',
+             expected_err='Too many paths')
+    TEST.run("pwd | (d: str(d))",
+             expected_out=base)
+    TEST.run('cd no_such_dir',
+             expected_err='No qualifying path')
+    TEST.run("pwd | (d: str(d))",
+             expected_out=base)
+    TEST.run('pushd no_such_dir',
+             expected_err='No qualifying path')
+    TEST.run("pwd | (d: str(d))",
+             expected_out=base)
+    TEST.run('cd no_such_dir*',
+             expected_err='No qualifying path')
+    TEST.run("pwd | (d: str(d))",
+             expected_out=base)
+    TEST.run('pushd no_such_dir*',
+             expected_err='No qualifying path')
+    TEST.run("pwd | (d: str(d))",
+             expected_out=base)
+    os.system(f'rm -rf {base}')
+
+
 # Generalization of bug 195
 @timeit
 def test_pipeline_vars():
@@ -2350,6 +2412,7 @@ def test_bugs():
     test_bug_200()
     test_bug_202()
     test_bug_203()
+    test_bug_206()
 
 
 def main_stable():
