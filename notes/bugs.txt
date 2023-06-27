@@ -533,10 +533,3 @@ There is a file named "ab c".
     M 0.17.1 jao@cheese /tmp$ cat (File('ab c'))
     Error: ['cat: ab: No such file or directory']
     Error: ['cat: c: No such file or directory']
-
-----------------------------------------------------------------------
-
-206. cd foobar* is broken
-
-M 0.17.1 jao@cheese /tmp$ cd ~/Desktop/photos/Relo*
-[Errno 2] No such file or directory: '/home/jao/Desktop/photos/Relo*'

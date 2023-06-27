@@ -3989,3 +3989,12 @@ If a script is run like this:
     EOF
 
 then a bunch of marcel prompts are printed. They shouldn't be.
+
+----------------------------------------------------------------------
+
+FIXED
+
+206. cd foobar* is broken
+
+M 0.17.1 jao@cheese /tmp$ cd ~/Desktop/photos/Relo*
+[Errno 2] No such file or directory: '/home/jao/Desktop/photos/Relo*'
