@@ -2335,6 +2335,7 @@ def test_bug_206():
              expected_err='No qualifying path')
     TEST.run("pwd | (d: str(d))",
              expected_out=base)
+    TEST.run('cd /tmp')
     os.system(f'rm -rf {base}')
 
 
@@ -2467,9 +2468,9 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
+    main_dev()
     main_stable()
     main_slow_tests()
-    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

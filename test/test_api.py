@@ -772,7 +772,7 @@ def test_dir_stack():
     # cd
     TEST.run(test=lambda: run(cd('/tmp/test')))
     TEST.run(test=lambda: run(cd('/tmp/test/doesnotexist')),
-             expected_err='No such file or directory')
+             expected_err='No qualifying path')
     TEST.run(test=lambda: run(pwd() | map(lambda f: str(f))),
              expected_out='/tmp/test')
     TEST.run(test=lambda: run(cd('/tmp/test/p')),
@@ -781,7 +781,7 @@ def test_dir_stack():
              expected_out='/tmp/test')
     # pushd
     TEST.run(test=lambda: run(pushd('/tmp/test/doesnotexist')),
-             expected_err='No such file or directory')
+             expected_err='No qualifying path')
     TEST.run(test=lambda: run(pwd() | map(lambda f: str(f))),
              expected_out='/tmp/test')
     TEST.run(test=lambda: run(pushd('/tmp/test/p')),
@@ -1811,6 +1811,66 @@ def test_bug_200():
                            'd,e'])
 
 
+@timeit
+def test_bug_206():
+    base = '/tmp/test_cd_pushd'
+    home = pathlib.Path('~').expanduser().absolute()
+    os.system(f'mkdir {base}')
+    TEST.run(test=lambda: run(cd(base)),
+             verification=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=base)
+    TEST.run(test=lambda: run(bash('mkdir "a b" x1 x2')),
+             verification=lambda: run(ls(file=True, dir=True) | sort() | map(lambda d: str(d))),
+             expected_out=['.', 'a b', 'x1', 'x2'])
+    # Wildcard
+    TEST.run(test=lambda: run(cd('a*')),
+             verification=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=f'{base}/a b')
+    TEST.run(test=lambda: run(cd('..')),
+             verification=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=base)
+    TEST.run(test=lambda: run(pushd('*b')),
+             verification=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=f'{base}/a b')
+    TEST.run(test=lambda: run(popd()),
+             verification=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=base)
+    # Default
+    TEST.run(test=lambda: run(cd()),
+             verification=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=home)
+    TEST.run(test=lambda: run(cd(base)),
+             verification=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=base)
+    # Errors
+    TEST.run(test=lambda: run(cd('x*')),
+             expected_err='Too many paths')
+    TEST.run(test=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=base)
+    TEST.run(test=lambda: run(pushd('x*')),
+             expected_err='Too many paths')
+    TEST.run(test=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=base)
+    TEST.run(test=lambda: run(cd('no_such_dir')),
+             expected_err='No qualifying path')
+    TEST.run(test=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=base)
+    TEST.run(test=lambda: run(pushd('no_such_dir')),
+             expected_err='No qualifying path')
+    TEST.run(test=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=base)
+    TEST.run(test=lambda: run(cd('no_such_dir*')),
+             expected_err='No qualifying path')
+    TEST.run(test=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=base)
+    TEST.run(test=lambda: run(pushd('no_such_dir*')),
+             expected_err='No qualifying path')
+    TEST.run(test=lambda: run(pwd() | map(lambda d: str(d))),
+             expected_out=base)
+    TEST.run(test=lambda: run(cd('/tmp')))
+    os.system(f'rm -rf {base}')
+
+
 # For bugs that aren't specific to a single op.
 @timeit
 def test_bugs():
@@ -1819,6 +1879,7 @@ def test_bugs():
     test_bug_136()
     test_bug_198()
     test_bug_200()
+    test_bug_206()
 
 
 def main_slow_tests():
@@ -1878,9 +1939,9 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
+    main_dev()
     main_stable()
     main_slow_tests()
-    # main_dev()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
