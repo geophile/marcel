@@ -3,6 +3,7 @@ import os
 import pathlib
 import sys
 import shutil
+import tempfile
 import time
 
 import dill.source
@@ -317,3 +318,17 @@ class TestTabCompletion(TestBase):
                 print(f'    Expected: {sorted(expected)}')
                 print(f'    Actual:   {sorted(actual)}')
                 self.failures += 1
+
+
+class TestDir(object):
+
+    def __init__(self):
+        self.original_dir = os.getcwd()
+        self.test_dir = pathlib.Path(tempfile.mkdtemp())
+
+    def __enter__(self):
+        return self.test_dir
+
+    def __exit__(self, *_):
+        os.chdir(self.original_dir)
+        os.system(f'rm -rf {self.test_dir.absolute()}')

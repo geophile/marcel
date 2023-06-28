@@ -533,3 +533,26 @@ There is a file named "ab c".
     M 0.17.1 jao@cheese /tmp$ cat (File('ab c'))
     Error: ['cat: ab: No such file or directory']
     Error: ['cat: c: No such file or directory']
+
+----------------------------------------------------------------------
+
+207. fork op handling cluster names incorrectly
+
+@ works for an unknown cluster, fork does not. Treats the string as an
+iterable and runs the pipeline len(string) times.
+
+M 0.17.3 jao@cheese ~$ @asdf (| gen 3 |)
+Operator remote: asdf is not a Cluster
+M 0.17.3 jao@cheese ~$ fork asdf (| gen 3 |)
+0
+1
+2
+0
+1
+2
+0
+1
+2
+0
+1
+2

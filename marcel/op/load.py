@@ -22,28 +22,28 @@ import marcel.reservoir
 
 HELP = '''
 {L,wrap=F}load VAR
-{L,wrap=F}VAR >$
+{L,wrap=F}VAR <$
 
-{L,indent=4:28}{r:VAR}                        An environment variable or file.
+{L,indent=4:28}{r:VAR}                        An environment variable.
 
 Write the contents of the environment variable {r:VAR} to the output stream.
 
-There is special optional syntax for the {r:load} operator: {r:load VAR} can be written as {r:VAR >$}. 
-With this alternative syntax, the {r:>} acts as a pipe ({r:|}). So, for example, the following command:
+There is special optional syntax for the {r:load} operator: {r:load VAR} can be written as {r:VAR <$}. 
+With this alternative syntax, the {r:<} acts as a pipe ({r:|}). So, for example, the following command:
 
 {L,wrap=F}load foobar | map (x, y: (y, x))  
 
 is equivalent to:
 
-{L,wrap=F}foobar >$ map (x, y: (y, x))
+{L,wrap=F}foobar <$ map (x, y: (y, x))
 
-{r:foobar >$} is valid at the beginning of a pipeline since it produces a stream of tuples, just like
-any other pipeline. So, for example the command line {r:foobar >$} prints the contents of foobar,
+{r:foobar <$} is valid at the beginning of a pipeline since it produces a stream of tuples, just like
+any other pipeline. So, for example the command line {r:foobar <$} prints the contents of foobar,
 (since the {r:write} operator is applied at the end of a top-level pipeline if not explicitly provided).
 
 This syntax can be used in any pipeline, e.g.
 
-{L,wrap=F}abc >$ join [def >$]
+{L,wrap=F}abc <$ join [def <$]
 
 This loads {r:abc} into the pipeline carrying data to the {r:join} operator. The other
 input to {r:join} comes from loading {r:def}.

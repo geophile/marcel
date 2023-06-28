@@ -1,7 +1,6 @@
 import math
 import os
 import pathlib
-import shutil
 import sys
 
 import marcel.main
@@ -35,8 +34,8 @@ def absolute(base, x):
     return pathlib.Path(base) / x
 
 
-def filename_op_setup(dir):
-    # test/
+def filename_op_setup(testdir):
+    # testdir contents:
     #     f (file)
     #     sf (symlink to f)
     #     lf (hard link to f)
@@ -49,26 +48,23 @@ def filename_op_setup(dir):
     #             ddf (file)
     #     sd (symlink to d)
     setup_script = [
-        'rm -rf /tmp/test',
-        'mkdir /tmp/test',
-        'mkdir /tmp/test/d',
-        'echo f > /tmp/test/f',
-        'ln -s /tmp/test/f /tmp/test/sf',
-        'ln /tmp/test/f /tmp/test/lf',
-        'ln -s /tmp/test/d /tmp/test/sd',
-        'echo df > /tmp/test/d/df',
-        'ln -s /tmp/test/d/df /tmp/test/d/sdf',
-        'ln /tmp/test/d/df /tmp/test/d/ldf',
-        'mkdir /tmp/test/d/dd',
-        'ln -s /tmp/test/d/dd /tmp/test/d/sdd',
-        'echo ddf > /tmp/test/d/dd/ddf']
-    # Start clean
-    TEST.cd('/tmp')
-    shutil.rmtree('/tmp/test', ignore_errors=True)
+        f'rm -rf {testdir}',
+        f'mkdir {testdir}',
+        f'mkdir {testdir}/d',
+        f'echo f > {testdir}/f',
+        f'ln -s {testdir}/f {testdir}/sf',
+        f'ln {testdir}/f {testdir}/lf',
+        f'ln -s {testdir}/d {testdir}/sd',
+        f'echo df > {testdir}/d/df',
+        f'ln -s {testdir}/d/df {testdir}/d/sdf',
+        f'ln {testdir}/d/df {testdir}/d/ldf',
+        f'mkdir {testdir}/d/dd',
+        f'ln -s {testdir}/d/dd {testdir}/d/sdd',
+        f'echo ddf > {testdir}/d/dd/ddf']
     # Create test data
     for x in setup_script:
         os.system(x)
-    TEST.cd(dir)
+    TEST.cd(f'{testdir}')
 
 
 @timeit
@@ -120,7 +116,6 @@ def test_gen():
 
 @timeit
 def test_write():
-    output_filename = '/tmp/out.txt'
     # Write to stdout
     TEST.run('gen 3 | (x: (x, -x))',
              expected_out=[(0, 0), (1, -1), (2, -2)])
@@ -143,69 +138,71 @@ def test_write():
     TEST.run('gen 3 | (x: (x, -x)) | write --csv --tsv',
              expected_err='Cannot specify more than one of')
     # Write to file
-    TEST.run('gen 3 | (x: (x, -x)) | write ' + output_filename,
-             expected_out=[(0, 0), (1, -1), (2, -2)],
-             file=output_filename)
-    TEST.run('gen 3 | (x: (x, -x)) | write --format "{}~{}" ' + output_filename,
-             expected_out=['0~0', '1~-1', '2~-2'],
-             file=output_filename)
-    TEST.run('gen 3 | (x: (x, -x)) | write -f "{}~{}" ' + output_filename,
-             expected_out=['0~0', '1~-1', '2~-2'],
-             file=output_filename)
-    TEST.run('gen 3 | (x: (x, -x)) | write --csv ' + output_filename,
-             expected_out=['0,0', '1,-1', '2,-2'],
-             file=output_filename)
-    TEST.run('gen 3 | (x: (x, -x)) | write -c ' + output_filename,
-             expected_out=['0,0', '1,-1', '2,-2'],
-             file=output_filename)
-    TEST.run('gen 3 | (x: (x, -x)) | write --tsv ' + output_filename,
-             expected_out=['0\t0', '1\t-1', '2\t-2'],
-             file=output_filename)
-    TEST.run('gen 3 | (x: (x, -x)) | write -t ' + output_filename,
-             expected_out=['0\t0', '1\t-1', '2\t-2'],
-             file=output_filename)
-    TEST.run('gen 3 | (x: (x, -x)) | write --pickle ' + output_filename,
-             verification=f'read --pickle {output_filename}',
-             expected_out=[(0, 0), (1, -1), (2, -2)])
-    TEST.run('gen 3 | (x: (x, -x)) | write -p ' + output_filename,
-             verification=f'read --pickle {output_filename}',
-             expected_out=[(0, 0), (1, -1), (2, -2)])
-    # Append
-    TEST.run('gen 3 | write --append',
-             expected_err='--append incompatible with stdout')
-    TEST.run('gen 3 | write -a',
-             expected_err='--append incompatible with stdout')
-    TEST.delete_files(output_filename)
-    TEST.run('gen 3 | write --append ' + output_filename,
-             verification='read ' + output_filename,
-             expected_out=[0, 1, 2])
-    TEST.run('gen 3 3 | write --append ' + output_filename,
-             verification='read ' + output_filename,
-             expected_out=[0, 1, 2, 3, 4, 5])
-    TEST.delete_files(output_filename)
-    TEST.run('gen 3 | (x: (x, -x)) | write --csv --append ' + output_filename,
-             expected_out=['0,0', '1,-1', '2,-2'],
-             file=output_filename)
-    TEST.run('gen 3 | (x: (x, -x)) | write --tsv --append ' + output_filename,
-             expected_out=['0,0', '1,-1', '2,-2',
-                           '0\t0', '1\t-1', '2\t-2'],
-             file=output_filename)
-    TEST.run('gen 3 | (x: (x, -x)) | write --append ' + output_filename,
-             expected_out=['0,0', '1,-1', '2,-2',
-                           '0\t0', '1\t-1', '2\t-2',
-                           (0, 0), (1, -1), (2, -2)],
-             file=output_filename)
-    TEST.delete_files(output_filename)
-    TEST.run('gen 3 | (x: (x, -x)) | write --pickle --append ' + output_filename,
-             verification='read --pickle ' + output_filename,
-             expected_out=[(0, 0), (1, -1), (2, -2)])
-    TEST.run('gen 3 3 | (x: (x, -x)) | write --pickle --append ' + output_filename,
-             verification='read --pickle ' + output_filename,
-             expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4), (5, -5)])
-    # Function-valued filename
-    TEST.run(f'gen 3 | write ("{output_filename}")',
-             expected_out=[0, 1, 2],
-             file=output_filename)
+    with test_base.TestDir() as testdir:
+        output_filename = f'{testdir}/out.txt'
+        TEST.run('gen 3 | (x: (x, -x)) | write ' + output_filename,
+                 expected_out=[(0, 0), (1, -1), (2, -2)],
+                 file=output_filename)
+        TEST.run('gen 3 | (x: (x, -x)) | write --format "{}~{}" ' + output_filename,
+                 expected_out=['0~0', '1~-1', '2~-2'],
+                 file=output_filename)
+        TEST.run('gen 3 | (x: (x, -x)) | write -f "{}~{}" ' + output_filename,
+                 expected_out=['0~0', '1~-1', '2~-2'],
+                 file=output_filename)
+        TEST.run('gen 3 | (x: (x, -x)) | write --csv ' + output_filename,
+                 expected_out=['0,0', '1,-1', '2,-2'],
+                 file=output_filename)
+        TEST.run('gen 3 | (x: (x, -x)) | write -c ' + output_filename,
+                 expected_out=['0,0', '1,-1', '2,-2'],
+                 file=output_filename)
+        TEST.run('gen 3 | (x: (x, -x)) | write --tsv ' + output_filename,
+                 expected_out=['0\t0', '1\t-1', '2\t-2'],
+                 file=output_filename)
+        TEST.run('gen 3 | (x: (x, -x)) | write -t ' + output_filename,
+                 expected_out=['0\t0', '1\t-1', '2\t-2'],
+                 file=output_filename)
+        TEST.run('gen 3 | (x: (x, -x)) | write --pickle ' + output_filename,
+                 verification=f'read --pickle {output_filename}',
+                 expected_out=[(0, 0), (1, -1), (2, -2)])
+        TEST.run('gen 3 | (x: (x, -x)) | write -p ' + output_filename,
+                 verification=f'read --pickle {output_filename}',
+                 expected_out=[(0, 0), (1, -1), (2, -2)])
+        # Append
+        TEST.run('gen 3 | write --append',
+                 expected_err='--append incompatible with stdout')
+        TEST.run('gen 3 | write -a',
+                 expected_err='--append incompatible with stdout')
+        TEST.delete_files(output_filename)
+        TEST.run('gen 3 | write --append ' + output_filename,
+                 verification='read ' + output_filename,
+                 expected_out=[0, 1, 2])
+        TEST.run('gen 3 3 | write --append ' + output_filename,
+                 verification='read ' + output_filename,
+                 expected_out=[0, 1, 2, 3, 4, 5])
+        TEST.delete_files(output_filename)
+        TEST.run('gen 3 | (x: (x, -x)) | write --csv --append ' + output_filename,
+                 expected_out=['0,0', '1,-1', '2,-2'],
+                 file=output_filename)
+        TEST.run('gen 3 | (x: (x, -x)) | write --tsv --append ' + output_filename,
+                 expected_out=['0,0', '1,-1', '2,-2',
+                               '0\t0', '1\t-1', '2\t-2'],
+                 file=output_filename)
+        TEST.run('gen 3 | (x: (x, -x)) | write --append ' + output_filename,
+                 expected_out=['0,0', '1,-1', '2,-2',
+                               '0\t0', '1\t-1', '2\t-2',
+                               (0, 0), (1, -1), (2, -2)],
+                 file=output_filename)
+        TEST.delete_files(output_filename)
+        TEST.run('gen 3 | (x: (x, -x)) | write --pickle --append ' + output_filename,
+                 verification='read --pickle ' + output_filename,
+                 expected_out=[(0, 0), (1, -1), (2, -2)])
+        TEST.run('gen 3 3 | (x: (x, -x)) | write --pickle --append ' + output_filename,
+                 verification='read --pickle ' + output_filename,
+                 expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4), (5, -5)])
+        # Function-valued filename
+        TEST.run(f'gen 3 | write ("{output_filename}")',
+                 expected_out=[0, 1, 2],
+                 file=output_filename)
 
 
 @timeit
@@ -631,202 +628,210 @@ def test_namespace():
 
 @timeit
 def test_source_filenames():
-    filename_op_setup('/tmp/test')
-    # Relative path
-    TEST.run('ls . | map (f: f.render_compact())',
-             expected_out=sorted(['.', 'f', 'sf', 'lf', 'd', 'sd']))
-    TEST.run('ls d | map (f: f.render_compact())',
-             expected_out=sorted(['.', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
-    # Absolute path
-    TEST.run('ls /tmp/test | map (f: f.render_compact())',
-             expected_out=sorted(['.', 'f', 'sf', 'lf', 'd', 'sd']))
-    TEST.run('ls /tmp/test/d | map (f: f.render_compact())',
-             expected_out=sorted(['.', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
-    # Glob in last part of path
-    TEST.run('ls -0 /tmp/test/s? | map (f: f.render_compact())',
-             expected_out=sorted(['sf', 'sd']))
-    TEST.run('ls -0 /tmp/test/*f | map (f: f.render_compact())',
-             expected_out=sorted(['f', 'sf', 'lf']))
-    # Glob in intermediate part of path
-    TEST.run('ls -0 /tmp/test/*d/*dd | map (f: f.render_compact())',
-             expected_out=sorted(['d/dd', 'd/sdd', 'sd/dd', 'sd/sdd']))
-    TEST.run('ls -0 /tmp/test/*f | map (f: f.render_compact())',
-             expected_out=sorted(['f', 'sf', 'lf']))
-    # Glob identifying duplicates
-    TEST.run('ls -0 *f s* | map (f: f.render_compact())',
-             expected_out=sorted(['f', 'sd', 'sf', 'lf']))
-    # No such file
-    TEST.run('ls -0 x | map (f: f.render_compact())',
-             expected_err='No qualifying paths')
-    # No such file via glob
-    TEST.run('ls -0 x* | map (f: f.render_compact())',
-             expected_err='No qualifying paths')
-    # ~ expansion
-    TEST.run('ls -0 ~root | map (f: f.path)',
-             expected_out=['/root'])
+    with test_base.TestDir() as testdir:
+        filename_op_setup(testdir)
+        # Relative path
+        TEST.run('ls . | map (f: f.render_compact())',
+                 expected_out=sorted(['.', 'f', 'sf', 'lf', 'd', 'sd']))
+        TEST.run('ls d | map (f: f.render_compact())',
+                 expected_out=sorted(['.', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
+        # Absolute path
+        TEST.run(f'ls {testdir} | map (f: f.render_compact())',
+                 expected_out=sorted(['.', 'f', 'sf', 'lf', 'd', 'sd']))
+        TEST.run(f'ls {testdir}/d | map (f: f.render_compact())',
+                 expected_out=sorted(['.', 'df', 'sdf', 'ldf', 'dd', 'sdd']))
+        # Glob in last part of path
+        TEST.run(f'ls -0 {testdir}/s? | map (f: f.render_compact())',
+                 expected_out=sorted(['sf', 'sd']))
+        TEST.run(f'ls -0 {testdir}/*f | map (f: f.render_compact())',
+                 expected_out=sorted(['f', 'sf', 'lf']))
+        # Glob in intermediate part of path
+        TEST.run(f'ls -0 {testdir}/*d/*dd | map (f: f.render_compact())',
+                 expected_out=sorted(['d/dd', 'd/sdd', 'sd/dd', 'sd/sdd']))
+        TEST.run(f'ls -0 {testdir}/*f | map (f: f.render_compact())',
+                 expected_out=sorted(['f', 'sf', 'lf']))
+        # Glob identifying duplicates
+        TEST.run('ls -0 *f s* | map (f: f.render_compact())',
+                 expected_out=sorted(['f', 'sd', 'sf', 'lf']))
+        # No such file
+        TEST.run('ls -0 x | map (f: f.render_compact())',
+                 expected_err='No qualifying paths')
+        # No such file via glob
+        TEST.run('ls -0 x* | map (f: f.render_compact())',
+                 expected_err='No qualifying paths')
+        # ~ expansion
+        TEST.run('ls -0 ~root | map (f: f.path)',
+                 expected_out=['/root'])
 
 
 @timeit
 def test_ls():
-    filename_op_setup('/tmp/test')
-    # 0/1/r flags with no files specified.
-    TEST.run('ls -0 | map (f: f.render_compact())',
-             expected_out=sorted(['.']))
-    TEST.run('ls -1 | map (f: f.render_compact())',
-             expected_out=sorted(['.',
-                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-                                  ]))
-    TEST.run('ls -r | map (f: f.render_compact())',
-             expected_out=sorted(['.',
-                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-                                  'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                  'd/dd/ddf']))
-    TEST.run('ls | map (f: f.render_compact())',
-             expected_out=sorted(['.',
-                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-                                  ]))
-    # 0/1/r flags with file
-    TEST.run('ls -0 f | map (f: f.render_compact())',
-             expected_out=sorted(['f']))
-    TEST.run('ls -1 f | map (f: f.render_compact())',
-             expected_out=sorted(['f']))
-    TEST.run('ls -r f | map (f: f.render_compact())',
-             expected_out=sorted(['f']))
-    # 0/1/r flags with directory
-    TEST.run('ls -0 /tmp/test | map (f: f.render_compact())',
-             expected_out=sorted(['.']))
-    TEST.run('ls -1 /tmp/test | map (f: f.render_compact())',
-             expected_out=sorted(['.', 'f', 'sf', 'lf', 'sd', 'd']))
-    TEST.run('ls -r /tmp/test | map (f: f.render_compact())',
-             expected_out=sorted(['.',
-                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-                                  'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                  'd/dd/ddf']))
-    # Test f/d/s flags
-    TEST.run('ls -fr | map (f: f.render_compact())',
-             expected_out=sorted(['f', 'lf',  # Top-level
-                                  'd/df', 'd/ldf',  # Contents of d
-                                  'd/dd/ddf']))
-    TEST.run('ls -dr | map (f: f.render_compact())',
-             expected_out=sorted(['.',
-                                  'd',  # Top-level
-                                  'd/dd']))  # Contents of d
-    TEST.run('ls -sr | map (f: f.render_compact())',
-             expected_out=sorted(['sf', 'sd',  # Top-level
-                                  'd/sdf', 'd/sdd'  # Contents of d
-                                  ]))
-    # Duplicates
-    TEST.run('ls -0 *d ? | map (f: f.render_compact())',
-             expected_out=sorted(['d', 'sd', 'f']))
-    # This should find d twice
-    expected = sorted(['.', 'f', 'sf', 'lf', 'd', 'sd'])
-    expected.extend(sorted(['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']))
-    TEST.run('ls -1 . d | map (f: f.render_compact())',
-             expected_out=expected)
-    # ls should continue past permission error
-    os.system('sudo rm -rf /tmp/lstest')
-    os.system('mkdir /tmp/lstest')
-    os.system('mkdir /tmp/lstest/d1')
-    os.system('mkdir /tmp/lstest/d2')
-    os.system('mkdir /tmp/lstest/d3')
-    os.system('mkdir /tmp/lstest/d4')
-    os.system('touch /tmp/lstest/d1/f1')
-    os.system('touch /tmp/lstest/d2/f2')
-    os.system('touch /tmp/lstest/d3/f3')
-    os.system('touch /tmp/lstest/d4/f4')
-    os.system('sudo chown root.root /tmp/lstest/d2')
-    os.system('sudo chown root.root /tmp/lstest/d3')
-    os.system('sudo chmod 700 /tmp/lstest/d?')
-    TEST.run(test='ls -r /tmp/lstest | map (f: f.render_compact())',
-             expected_out=['.',
-                           'd1',
-                           'd1/f1',
-                           'd2',
-                           Error('Permission denied'),
-                           'd3',
-                           Error('Permission denied'),
-                           'd4',
-                           'd4/f4'])
-    # Args with vars
-    TEST.run('TEST = test')
-    TEST.run('ls -r /tmp/(TEST) | map (f: f.render_compact())',
-             expected_out=sorted(['.',
-                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-                                  'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                  'd/dd/ddf']))
-    TEST.run('TMP = TMP')
-    TEST.run('ls -r /(TMP.lower())/(TEST) | map (f: f.render_compact())',
-             expected_out=sorted(['.',
-                                  'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-                                  'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                  'd/dd/ddf']))
+    with test_base.TestDir() as testdir:
+        filename_op_setup(testdir)
+        # 0/1/r flags with no files specified.
+        TEST.run('ls -0 | map (f: f.render_compact())',
+                 expected_out=sorted(['.']))
+        TEST.run('ls -1 | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                      ]))
+        TEST.run('ls -r | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                      'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                      'd/dd/ddf']))
+        TEST.run('ls | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                      ]))
+        # 0/1/r flags with file
+        TEST.run('ls -0 f | map (f: f.render_compact())',
+                 expected_out=sorted(['f']))
+        TEST.run('ls -1 f | map (f: f.render_compact())',
+                 expected_out=sorted(['f']))
+        TEST.run('ls -r f | map (f: f.render_compact())',
+                 expected_out=sorted(['f']))
+        # 0/1/r flags with directory
+        TEST.run(f'ls -0 {testdir} | map (f: f.render_compact())',
+                 expected_out=sorted(['.']))
+        TEST.run(f'ls -1 {testdir} | map (f: f.render_compact())',
+                 expected_out=sorted(['.', 'f', 'sf', 'lf', 'sd', 'd']))
+        TEST.run(f'ls -r {testdir} | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                      'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                      'd/dd/ddf']))
+        # Test f/d/s flags
+        TEST.run('ls -fr | map (f: f.render_compact())',
+                 expected_out=sorted(['f', 'lf',  # Top-level
+                                      'd/df', 'd/ldf',  # Contents of d
+                                      'd/dd/ddf']))
+        TEST.run('ls -dr | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'd',  # Top-level
+                                      'd/dd']))  # Contents of d
+        TEST.run('ls -sr | map (f: f.render_compact())',
+                 expected_out=sorted(['sf', 'sd',  # Top-level
+                                      'd/sdf', 'd/sdd'  # Contents of d
+                                      ]))
+        # Duplicates
+        TEST.run('ls -0 *d ? | map (f: f.render_compact())',
+                 expected_out=sorted(['d', 'sd', 'f']))
+        # This should find d twice
+        expected = sorted(['.', 'f', 'sf', 'lf', 'd', 'sd'])
+        expected.extend(sorted(['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']))
+        TEST.run('ls -1 . d | map (f: f.render_compact())',
+                 expected_out=expected)
+    with test_base.TestDir() as testdir:
+        # ls should continue past permission error
+        os.system(f'mkdir {testdir}/d1')
+        os.system(f'mkdir {testdir}/d2')
+        os.system(f'mkdir {testdir}/d3')
+        os.system(f'mkdir {testdir}/d4')
+        os.system(f'touch {testdir}/d1/f1')
+        os.system(f'touch {testdir}/d2/f2')
+        os.system(f'touch {testdir}/d3/f3')
+        os.system(f'touch {testdir}/d4/f4')
+        os.system(f'sudo chown root.root {testdir}/d2')
+        os.system(f'sudo chown root.root {testdir}/d3')
+        os.system(f'sudo chmod 700 {testdir}/d?')
+        TEST.run(test=f'ls -r {testdir} | map (f: f.render_compact())',
+                 expected_out=['.',
+                               'd1',
+                               'd1/f1',
+                               'd2',
+                               Error('Permission denied'),
+                               'd3',
+                               Error('Permission denied'),
+                               'd4',
+                               'd4/f4'])
+        # Restore owners so that cleanup can proceed
+        me = os.getlogin()
+        os.system(f'sudo chown {me}.{me} {testdir}/d2')
+        os.system(f'sudo chown {me}.{me} {testdir}/d3')
+        # Args with vars
+    with test_base.TestDir() as testdir:
+        filename_op_setup(f'{testdir}/vartest')
+        TEST.run('VARTEST = vartest')
+        TEST.run(f'ls -r {testdir}/(VARTEST) | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                      'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                      'd/dd/ddf']))
+        TEST.run(f'TESTDIR = {str(testdir).upper()}')
+        TEST.run('ls -r (TESTDIR.lower())/(VARTEST) | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                      'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                      'd/dd/ddf']))
 
 
 # pushd, popd, dirs
 @timeit
 def test_dir_stack():
-    filename_op_setup('/tmp/test')
-    TEST.run('mkdir a b c')
-    TEST.run('rm -rf p')
-    TEST.run('mkdir p')
-    TEST.run('chmod 000 p')
-    TEST.run(test='pwd | map (f: f.path)',
-             expected_out=['/tmp/test'])
-    TEST.run(test='dirs | map (f: f.path)',
-             expected_out=['/tmp/test'])
-    TEST.run(test='pushd a | map (f: f.path)',
-             expected_out=['/tmp/test/a', '/tmp/test'])
-    TEST.run(test='dirs | map (f: f.path)',
-             expected_out=['/tmp/test/a', '/tmp/test'])
-    TEST.run(test='pushd ../b | map (f: f.path)',
-             expected_out=['/tmp/test/b', '/tmp/test/a', '/tmp/test'])
-    TEST.run(test='dirs | map (f: f.path)',
-             expected_out=['/tmp/test/b', '/tmp/test/a', '/tmp/test'])
-    TEST.run(test='pushd | map (f: f.path)',
-             expected_out=['/tmp/test/a', '/tmp/test/b', '/tmp/test'])
-    TEST.run(test='dirs | map (f: f.path)',
-             expected_out=['/tmp/test/a', '/tmp/test/b', '/tmp/test'])
-    TEST.run(test='popd | map (f: f.path)',
-             expected_out=['/tmp/test/b', '/tmp/test'])
-    TEST.run(test='pwd | map (f: f.path)',
-             expected_out=['/tmp/test/b'])
-    TEST.run(test='dirs | map (f: f.path)',
-             expected_out=['/tmp/test/b', '/tmp/test'])
-    TEST.run(test='dirs -c | map (f: f.path)',
-             expected_out=['/tmp/test/b'])
-    TEST.run(test='pushd | map (f: f.path)',
-             expected_out=['/tmp/test/b'])
-    # Dir operations when the destination cd does not exist or cannot be entered due to permissions
-    # cd
-    TEST.run('cd /tmp/test')
-    TEST.run(test='cd /tmp/test/doesnotexist',
-             expected_err='No qualifying path')
-    TEST.run(test='pwd | (f: str(f))',
-             expected_out='/tmp/test')
-    TEST.run(test='cd /tmp/test/p',
-             expected_err='Permission denied')
-    TEST.run(test='pwd | (f: str(f))',
-             expected_out='/tmp/test')
-    # pushd
-    TEST.run(test='pushd /tmp/test/doesnotexist',
-             expected_err='No qualifying path')
-    TEST.run(test='pwd | (f: str(f))',
-             expected_out='/tmp/test')
-    TEST.run(test='pushd /tmp/test/p',
-             expected_err='Permission denied')
-    TEST.run(test='pwd | (f: str(f))',
-             expected_out='/tmp/test')
-    # popd: Arrange for a deleted dir on the stack and try popding into it.
-    TEST.run('rm -rf x y')
-    TEST.run('mkdir x y')
-    TEST.run('cd x')
-    TEST.run('pushd ../y | (f: str(f))',
-             expected_out=['/tmp/test/y', '/tmp/test/x'])
-    TEST.run('rm -rf /tmp/test/x')
-    TEST.run('popd',
-             expected_err='directories have been removed')
-    TEST.run('dirs | (f: str(f))',
-             expected_out=['/tmp/test/y'])
+    with test_base.TestDir() as testdir:
+        filename_op_setup(testdir)
+        TEST.run('mkdir a b c')
+        TEST.run('rm -rf p')
+        TEST.run('mkdir p')
+        TEST.run('chmod 000 p')
+        TEST.run(test='pwd | map (f: f.path)',
+                 expected_out=[testdir])
+        TEST.run(test='dirs | map (f: f.path)',
+                 expected_out=[f'{testdir}'])
+        TEST.run(test='pushd a | map (f: f.path)',
+                 expected_out=[f'{testdir}/a', f'{testdir}'])
+        TEST.run(test='dirs | map (f: f.path)',
+                 expected_out=[f'{testdir}/a', f'{testdir}'])
+        TEST.run(test='pushd ../b | map (f: f.path)',
+                 expected_out=[f'{testdir}/b', f'{testdir}/a', f'{testdir}'])
+        TEST.run(test='dirs | map (f: f.path)',
+                 expected_out=[f'{testdir}/b', f'{testdir}/a', f'{testdir}'])
+        TEST.run(test='pushd | map (f: f.path)',
+                 expected_out=[f'{testdir}/a', f'{testdir}/b', f'{testdir}'])
+        TEST.run(test='dirs | map (f: f.path)',
+                 expected_out=[f'{testdir}/a', f'{testdir}/b', f'{testdir}'])
+        TEST.run(test='popd | map (f: f.path)',
+                 expected_out=[f'{testdir}/b', f'{testdir}'])
+        TEST.run(test='pwd | map (f: f.path)',
+                 expected_out=[f'{testdir}/b'])
+        TEST.run(test='dirs | map (f: f.path)',
+                 expected_out=[f'{testdir}/b', f'{testdir}'])
+        TEST.run(test='dirs -c | map (f: f.path)',
+                 expected_out=[f'{testdir}/b'])
+        TEST.run(test='pushd | map (f: f.path)',
+                 expected_out=[f'{testdir}/b'])
+        # Dir operations when the destination cd does not exist or cannot be entered due to permissions
+        # cd
+        TEST.run(f'cd {testdir}')
+        TEST.run(test=f'cd {testdir}/doesnotexist',
+                 expected_err='No qualifying path')
+        TEST.run(test='pwd | (f: str(f))',
+                 expected_out=f'{testdir}')
+        TEST.run(test=f'cd {testdir}/p',
+                 expected_err='Permission denied')
+        TEST.run(test='pwd | (f: str(f))',
+                 expected_out=f'{testdir}')
+        # pushd
+        TEST.run(test=f'pushd {testdir}/doesnotexist',
+                 expected_err='No qualifying path')
+        TEST.run(test='pwd | (f: str(f))',
+                 expected_out=f'{testdir}')
+        TEST.run(test=f'pushd {testdir}/p',
+                 expected_err='Permission denied')
+        TEST.run(test='pwd | (f: str(f))',
+                 expected_out=f'{testdir}')
+        # popd: Arrange for a deleted dir on the stack and try popding into it.
+        TEST.run('rm -rf x y')
+        TEST.run('mkdir x y')
+        TEST.run('cd x')
+        TEST.run('pushd ../y | (f: str(f))',
+                 expected_out=[f'{testdir}/y', f'{testdir}/x'])
+        TEST.run(f'rm -rf {testdir}/x')
+        TEST.run('popd',
+                 expected_err='directories have been removed')
+        TEST.run('dirs | (f: str(f))',
+                 expected_out=[f'{testdir}/y'])
 
 
 @timeit
@@ -887,13 +892,14 @@ def test_fork():
 
 @timeit
 def test_sudo():
-    TEST.run(test='sudo (| gen 3 |)', expected_out=[0, 1, 2])
-    os.system('sudo rm -rf /tmp/sudotest')
-    os.system('sudo mkdir /tmp/sudotest')
-    os.system('sudo touch /tmp/sudotest/f')
-    os.system('sudo chmod 400 /tmp/sudotest')
-    TEST.run(test='ls -f /tmp/sudotest', expected_out=[Error('Permission denied')])
-    TEST.run(test='sudo (| ls -f /tmp/sudotest | map (f: f.render_compact()) |)', expected_out=['f'])
+    with test_base.TestDir() as testdir:
+        TEST.run(test='sudo (| gen 3 |)', expected_out=[0, 1, 2])
+        os.system(f'sudo mkdir {testdir}/sudotest')
+        os.system(f'sudo touch {testdir}/sudotest/f')
+        os.system(f'sudo chmod 400 {testdir}/sudotest')
+        TEST.run(test=f'ls -f {testdir}/sudotest', expected_out=[Error('Permission denied')])
+        TEST.run(test=f'sudo (| ls -f {testdir}/sudotest | map (f: f.render_compact()) |)', expected_out=['f'])
+        os.system(f'sudo rm -rf {testdir}/sudotest')
 
 
 @timeit
@@ -967,12 +973,12 @@ def test_join():
     TEST.run('xn = (|n: gen 3 | map (x: (x, x * n))|)')
     TEST.run(test='gen 4 | map (x: (x, -x)) | join (|xn (100)|)',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
-    os.system('rm -f /tmp/?.csv')
-    TEST.run('gen 3 | map (x: (x, x*10)) | write /tmp/a.csv')
-    TEST.run('gen 3 | map (x: (x, x*100)) | write /tmp/b.csv')
-    TEST.run('get = (|f: (File(f).readlines()) | expand | map (x: eval(x))|)')
-    TEST.run('get /tmp/a.csv | join (|get /tmp/b.csv|)',
-             expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200)])
+    with test_base.TestDir() as testdir:
+        TEST.run(f'gen 3 | map (x: (x, x*10)) | write {testdir}/a.csv')
+        TEST.run(f'gen 3 | map (x: (x, x*100)) | write {testdir}/b.csv')
+        TEST.run(f'get = (|f: (File(f).readlines()) | expand | map (x: eval(x))|)')
+        TEST.run(f'get {testdir}/a.csv | join (|get {testdir}/b.csv|)',
+                 expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200)])
     # Handle non-hashable join keys
     TEST.run('gen 3 | (x: ((x,), x)) | join (|gen 3 | (x: ((x,), x*100))|)',
              expected_out=[((0,), 0, 0), ((1,), 1, 100), ((2,), 2, 200)])
@@ -1114,150 +1120,133 @@ def test_store_load():
 
 @timeit
 def test_redirect_file():
-    # ------------------------ Test all the paths through Parser.pipeline() for files
-    # file <
-    TEST.delete_files('/tmp/p1')
-    TEST.run(test='gen 3 | write /tmp/p1',
-             verification='/tmp/p1 <',
-             expected_out=[0, 1, 2])
-    # file < > file
-    TEST.delete_files('/tmp/p3', '/tmp/p4')
-    TEST.run('gen 3 | write /tmp/p3')
-    TEST.run(test='/tmp/p3 < > /tmp/p4',
-             verification='/tmp/p4 <',
-             expected_out=[0, 1, 2])
-    # file < >> file
-    TEST.delete_files('/tmp/p5', '/tmp/p6', '/tmp/p7')
-    TEST.run('gen 3 | write /tmp/p5')
-    TEST.run('gen 3 | map (x: x + 100) | write /tmp/p6')
-    TEST.run(test='/tmp/p5 < >> /tmp/p7',
-             verification='/tmp/p7 <',
-             expected_out=[0, 1, 2])
-    TEST.run(test='/tmp/p6 < >> /tmp/p7',
-             verification='/tmp/p7 <',
-             expected_out=[0, 1, 2, 100, 101, 102])
-    # file < op_sequence
-    TEST.delete_files('/tmp/p8')
-    TEST.run('gen 3 | write /tmp/p8')
-    TEST.run(test='/tmp/p8 < map (x: int(x) + 100)',
-             expected_out=[100, 101, 102])
-    # file < op_sequence > file
-    TEST.delete_files('/tmp/p10', '/tmp/p11')
-    TEST.run('gen 3 | write /tmp/p10')
-    TEST.run(test='/tmp/p10 < map (x: int(x) + 100) > /tmp/p11',
-             verification='/tmp/p11 <',
-             expected_out=[100, 101, 102])
-    # file < op_sequence >> file
-    TEST.delete_files('/tmp/p12', '/tmp/p13')
-    TEST.run('gen 3 | write /tmp/p12')
-    TEST.run(test='/tmp/p12 < map (x: int(x) + 100) >> /tmp/p13',
-             verification='/tmp/p13 <',
-             expected_out=[100, 101, 102])
-    TEST.run(test='/tmp/p12 < map (x: int(x) + 1000) >> /tmp/p13',
-             verification='/tmp/p13 <',
-             expected_out=[100, 101, 102, 1000, 1001, 1002])
-    # op_sequence -- tested adequately elsewhere
-    # op_sequence > file
-    TEST.delete_files('/tmp/p14')
-    TEST.run(test='gen 3 > /tmp/p14',
-             verification='/tmp/p14 <',
-             expected_out=[0, 1, 2])
-    # op_sequence >> file
-    TEST.delete_files('/tmp/p15')
-    TEST.run(test='gen 3 >> /tmp/p15',
-             verification='/tmp/p15 <',
-             expected_out=[0, 1, 2])
-    TEST.run(test='gen 3 | map (x: int(x) + 100) >> /tmp/p15',
-             verification='/tmp/p15 <',
-             expected_out=[0, 1, 2, 100, 101, 102])
-    # > file
-    TEST.delete_files('/tmp/p16')
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) (|> /tmp/p16|) | select (x: False)',
-             verification='/tmp/p16 <',
-             expected_out=[0, 2, 4])
-    # >> file
-    TEST.delete_files('/tmp/p17')
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) (|>> /tmp/p17|) | select (x: False)',
-             verification='/tmp/p17 <',
-             expected_out=[0, 2, 4])
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 1) (|>> /tmp/p17|) | select (x: False)',
-             verification='/tmp/p17 <',
-             expected_out=[0, 2, 4, 1, 3, 5])
-    # ---------------------------------------------------------------------
-    # Ops that look confusingly like files from context
-    # op <
-    TEST.run(test='pwd <',
-             expected_err='No qualifying paths')
-    # op > file
-    TEST.delete_files('/tmp/o1')
-    version = marcel.version.VERSION
-    TEST.run(test='version > /tmp/o1',
-             verification='/tmp/o1 < map (v: f"v{v}")',
-             expected_out=[f"v{version}"])
-    # op >> file
-    TEST.delete_files('/tmp/o2')
-    TEST.run(test='version >> /tmp/o2',
-             verification='/tmp/o2 < map (v: f"v{v}")',
-             expected_out=[f"v{version}"])
-    TEST.run(test='version >> /tmp/o2',
-             verification='/tmp/o2 < map (v: f"v{v}")',
-             expected_out=[f"v{version}", f"v{version}"])
-    # ---------------------------------------------------------------------
-    # Store at end of top-level pipeline
-    TEST.delete_files('/tmp/g5')
-    TEST.run(test='gen 5 > /tmp/g5',
-             verification='read /tmp/g5',
-             expected_out=[0, 1, 2, 3, 4])
-    # Store at end of pipeline arg
-    TEST.delete_files('/tmp/e10x10')
-    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) (|map (x: x * 10) > /tmp/e10x10|)',
-             verification='read /tmp/e10x10',
-             expected_out=[0, 20, 40, 60, 80])
-    # Store as the entire pipeline arg
-    TEST.delete_files('/tmp/e10')
-    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) (|> /tmp/e10|)',
-             verification='read /tmp/e10',
-             expected_out=[0, 2, 4, 6, 8])
-    # Append
-    TEST.delete_files('/tmp/g10')
-    TEST.run(test='gen 5 > /tmp/g10',
-             verification='read /tmp/g10',
-             expected_out=[0, 1, 2, 3, 4])
-    TEST.run(test='gen 5 5 >> /tmp/g10',
-             verification='read /tmp/g10',
-             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-    # Load at beginning of top-level pipeline
-    TEST.delete_files('/tmp/g4')
-    TEST.run(test='gen 4 > /tmp/g4',
-             verification='/tmp/g4 < map (x: -int(x))',
-             expected_out=[0, -1, -2, -3])
-    # Load in pipeline arg
-    TEST.delete_files('/tmp/x10', '/tmp/x100')
-    TEST.run('gen 4 | map (x: (x, x * 10)) > /tmp/x10')
-    TEST.run('gen 4 | map (x: (x, x * 100)) > /tmp/x100')
-    TEST.run('/tmp/x10 < map (x: eval(x)) | join (|/tmp/x100 < map (x: eval(x))|)',
-             expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
-    # Bug 73
-    TEST.delete_files('/tmp/a', '/tmp/b', '/tmp/c')
-    TEST.run('gen 3 | map (x: (x, x*10)) > /tmp/a')
-    TEST.run('gen 3 | map (x: (x, x*100)) > /tmp/b')
-    TEST.run('gen 3 | map (x: (x, x*1000)) > /tmp/c')
-    TEST.run('/tmp/a < (x: eval(x)) | join (|/tmp/b < (x: eval(x))|) | join (|/tmp/c < (x: eval(x))|)',
-             expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
-    # Bug 74
-    TEST.delete_files('/tmp/a', '/tmp/b', '/tmp/c', '/tmp/d')
-    TEST.run('gen 3 | map (x: (x, x*10)) > /tmp/a')
-    TEST.run('gen 3 | map (x: (x, x*100)) > /tmp/b')
-    TEST.run('gen 3 | map (x: (x, x*1000)) > /tmp/c')
-    TEST.run('/tmp/a < (x: eval(x)) | join (|/tmp/b < (x: eval(x))|) | join (|/tmp/c < (x: eval(x))|) > /tmp/d')
-    TEST.run('/tmp/d <',
-             expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
-    # ---------------------------------------------------------------------
-    # Erroneous syntax
-    TEST.run('/tmp/a >',
-             expected_err='excess tokens')
-    TEST.run('gen 3 < (x: x)',
-             expected_err='excess tokens')
+    with test_base.TestDir() as testdir:
+        # ------------------------ Test all the paths through Parser.pipeline() for files
+        # file <
+        TEST.run(test=f'gen 3 | write {testdir}/p1',
+                 verification=f'{testdir}/p1 <',
+                 expected_out=[0, 1, 2])
+        # file < > file
+        TEST.run(f'gen 3 | write {testdir}/p3')
+        TEST.run(test=f'{testdir}/p3 < > {testdir}/p4',
+                 verification=f'{testdir}/p4 <',
+                 expected_out=[0, 1, 2])
+        # file < >> file
+        TEST.run(f'gen 3 | write {testdir}/p5')
+        TEST.run(f'gen 3 | map (x: x + 100) | write {testdir}/p6')
+        TEST.run(test=f'{testdir}/p5 < >> {testdir}/p7',
+                 verification=f'{testdir}/p7 <',
+                 expected_out=[0, 1, 2])
+        TEST.run(test=f'{testdir}/p6 < >> {testdir}/p7',
+                 verification=f'{testdir}/p7 <',
+                 expected_out=[0, 1, 2, 100, 101, 102])
+        # file < op_sequence
+        TEST.run(f'gen 3 | write {testdir}/p8')
+        TEST.run(test=f'{testdir}/p8 < map (x: int(x) + 100)',
+                 expected_out=[100, 101, 102])
+        # file < op_sequence > file
+        TEST.run(f'gen 3 | write {testdir}/p10')
+        TEST.run(test=f'{testdir}/p10 < map (x: int(x) + 100) > {testdir}/p11',
+                 verification=f'{testdir}/p11 <',
+                 expected_out=[100, 101, 102])
+        # file < op_sequence >> file
+        TEST.run(f'gen 3 | write {testdir}/p12')
+        TEST.run(test=f'{testdir}/p12 < map (x: int(x) + 100) >> {testdir}/p13',
+                 verification=f'{testdir}/p13 <',
+                 expected_out=[100, 101, 102])
+        TEST.run(test=f'{testdir}/p12 < map (x: int(x) + 1000) >> {testdir}/p13',
+                 verification=f'{testdir}/p13 <',
+                 expected_out=[100, 101, 102, 1000, 1001, 1002])
+        # op_sequence -- tested adequately elsewhere
+        # op_sequence > file
+        TEST.run(test=f'gen 3 > {testdir}/p14',
+                 verification=f'{testdir}/p14 <',
+                 expected_out=[0, 1, 2])
+        # op_sequence >> file
+        TEST.delete_files(f'{testdir}/p15')
+        TEST.run(test=f'gen 3 >> {testdir}/p15',
+                 verification=f'{testdir}/p15 <',
+                 expected_out=[0, 1, 2])
+        TEST.run(test=f'gen 3 | map (x: int(x) + 100) >> {testdir}/p15',
+                 verification=f'{testdir}/p15 <',
+                 expected_out=[0, 1, 2, 100, 101, 102])
+        # > file
+        TEST.run(test=f'gen 6 | ifthen (x: x % 2 == 0) (|> {testdir}/p16|) | select (x: False)',
+                 verification=f'{testdir}/p16 <',
+                 expected_out=[0, 2, 4])
+        # >> file
+        TEST.run(test=f'gen 6 | ifthen (x: x % 2 == 0) (|>> {testdir}/p17|) | select (x: False)',
+                 verification=f'{testdir}/p17 <',
+                 expected_out=[0, 2, 4])
+        TEST.run(test=f'gen 6 | ifthen (x: x % 2 == 1) (|>> {testdir}/p17|) | select (x: False)',
+                 verification=f'{testdir}/p17 <',
+                 expected_out=[0, 2, 4, 1, 3, 5])
+        # ---------------------------------------------------------------------
+        # Ops that look confusingly like files from context
+        # op <
+        TEST.run(test='pwd <',
+                 expected_err='No qualifying paths')
+        # op > file
+        version = marcel.version.VERSION
+        TEST.run(test=f'version > {testdir}/o1',
+                 verification=f'{testdir}/o1 < map (v: f"v{version}")',
+                 expected_out=[f"v{version}"])
+        # op >> file
+        TEST.run(test=f'version >> {testdir}/o2',
+                 verification=f'{testdir}/o2 < map (v: f"v{version}")',
+                 expected_out=[f"v{version}"])
+        TEST.run(test=f'version >> {testdir}/o2',
+                 verification=f'{testdir}/o2 < map (v: f"v{version}")',
+                 expected_out=[f"v{version}", f"v{version}"])
+        # ---------------------------------------------------------------------
+        # Store at end of top-level pipeline
+        TEST.run(test=f'gen 5 > {testdir}/g5',
+                 verification=f'read {testdir}/g5',
+                 expected_out=[0, 1, 2, 3, 4])
+        # Store at end of pipeline arg
+        TEST.run(test=f'gen 10 | ifthen (x: x % 2 == 0) (|map (x: x * 10) > {testdir}/e10x10|)',
+                 verification=f'read {testdir}/e10x10',
+                 expected_out=[0, 20, 40, 60, 80])
+        # Store as the entire pipeline arg
+        TEST.run(test=f'gen 10 | ifthen (x: x % 2 == 0) (|> {testdir}/e10|)',
+                 verification=f'read {testdir}/e10',
+                 expected_out=[0, 2, 4, 6, 8])
+        # Append
+        TEST.run(test=f'gen 5 > {testdir}/g10',
+                 verification=f'read {testdir}/g10',
+                 expected_out=[0, 1, 2, 3, 4])
+        TEST.run(test=f'gen 5 5 >> {testdir}/g10',
+                 verification=f'read {testdir}/g10',
+                 expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+        # Load at beginning of top-level pipeline
+        TEST.run(test=f'gen 4 > {testdir}/g4',
+                 verification=f'{testdir}/g4 < map (x: -int(x))',
+                 expected_out=[0, -1, -2, -3])
+        # Load in pipeline arg
+        TEST.run(f'gen 4 | map (x: (x, x * 10)) > {testdir}/x10')
+        TEST.run(f'gen 4 | map (x: (x, x * 100)) > {testdir}/x100')
+        TEST.run(f'{testdir}/x10 < map (x: eval(x)) | join (|{testdir}/x100 < map (x: eval(x))|)',
+                 expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
+        # Bug 73
+        TEST.run(f'gen 3 | map (x: (x, x*10)) > {testdir}/a')
+        TEST.run(f'gen 3 | map (x: (x, x*100)) > {testdir}/b')
+        TEST.run(f'gen 3 | map (x: (x, x*1000)) > {testdir}/c')
+        TEST.run(f'{testdir}/a < (x: eval(x)) | join (|{testdir}/b < (x: eval(x))|) | join (|{testdir}/c < (x: eval(x))|)',
+                 expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
+        # Bug 74
+        TEST.delete_files(f'{testdir}/a', f'{testdir}/b', f'{testdir}/c', f'{testdir}/d')
+        TEST.run(f'gen 3 | map (x: (x, x*10)) > {testdir}/a')
+        TEST.run(f'gen 3 | map (x: (x, x*100)) > {testdir}/b')
+        TEST.run(f'gen 3 | map (x: (x, x*1000)) > {testdir}/c')
+        TEST.run(f'{testdir}/a < (x: eval(x)) | join (|{testdir}/b < (x: eval(x))|) | join (|{testdir}/c < (x: eval(x))|) > {testdir}/d')
+        TEST.run(f'{testdir}/d <',
+                 expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
+        # ---------------------------------------------------------------------
+        # Erroneous syntax
+        TEST.run(f'{testdir}/a >',
+                 expected_err='excess tokens')
+        TEST.run('gen 3 < (x: x)',
+                 expected_err='excess tokens')
 
 
 @timeit
@@ -1447,173 +1436,171 @@ def test_delete():
 
 @timeit
 def test_read():
-    os.system('rm -rf /tmp/read')
-    os.system('mkdir /tmp/read')
-    file = open('/tmp/read/f1.csv', 'w')
-    file.writelines(['1,2.3,ab\n',
-                     '2,3.4,xy\n',
-                     '3,4.5,"m,n"\n'])
-    file.close()
-    file = open('/tmp/read/f2.tsv', 'w')
-    file.writelines(['1\t2.3\tab\n',
-                     '2\t3.4\txy\n'])
-    file.close()
-    file = open('/tmp/read/f3.txt', 'w')
-    file.writelines(['hello,world\n',
-                     'goodbye\n'])
-    file.close()
-    file = open('/tmp/read/headings.csv', 'w')
-    file.writelines(['c1, c2,c3 \n',  # various whitespace paddings
-                     'a,b,c\n',
-                     'd,e,f\n'])
-    file.close()
-    file = open('/tmp/read/headings_tricky_data.csv', 'w')
-    file.writelines(['c1,c2,c3\n',
-                     'a,b\n',
-                     'c,d,e,f\n'
-                     ',\n'])
-    file.close()
-    file = open('/tmp/read/headings_fixable.csv', 'w')
-    file.writelines(['c 1, c$#2,c+3- \n',
-                     'a,b,c\n',
-                     'd,e,f\n'])
-    file.close()
-    file = open('/tmp/read/headings_unfixable_1.csv', 'w')
-    file.writelines(['c1,c1,c3\n',
-                     'a,b,c\n',
-                     'd,e,f\n'])
-    file.close()
-    file = open('/tmp/read/headings_unfixable_2.csv', 'w')
-    file.writelines(['c_1,c$1,c3\n',
-                     'a,b,c\n',
-                     'd,e,f\n'])
-    file.close()
-    # Files
-    TEST.run('cd /tmp/read')
-    TEST.run('ls f1.csv f3.txt | read',
-             expected_out=['1,2.3,ab',
-                           '2,3.4,xy',
-                           '3,4.5,"m,n"',
-                           'hello,world',
-                           'goodbye'])
-    # Files with labels
-    TEST.run('cd /tmp/read')
-    TEST.run('ls f1.csv f3.txt | read -l | map (path, line: (str(path), line))',
-             expected_out=[('f1.csv', '1,2.3,ab'),
-                           ('f1.csv', '2,3.4,xy'),
-                           ('f1.csv', '3,4.5,"m,n"'),
-                           ('f3.txt', 'hello,world'),
-                           ('f3.txt', 'goodbye')])
-    # CSV
-    TEST.run('cd /tmp/read')
-    TEST.run('ls f1.csv | read -c',
-             expected_out=[('1', '2.3', 'ab'),
-                           ('2', '3.4', 'xy'),
-                           ('3', '4.5', 'm,n')])
-    # CSV with labels
-    TEST.run('cd /tmp/read')
-    TEST.run('ls f1.csv | read -cl | map (f, x, y, z: (str(f), x, y, z))',
-             expected_out=[('f1.csv', '1', '2.3', 'ab'),
-                           ('f1.csv', '2', '3.4', 'xy'),
-                           ('f1.csv', '3', '4.5', 'm,n')])
-    # TSV
-    TEST.run('cd /tmp/read')
-    TEST.run('ls f2.tsv | read -t',
-             expected_out=[('1', '2.3', 'ab'),
-                           ('2', '3.4', 'xy')])
-    # TSV with labels
-    TEST.run('cd /tmp/read')
-    TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: (str(f), x, y, z))',
-             expected_out=[('f2.tsv', '1', '2.3', 'ab'),
-                           ('f2.tsv', '2', '3.4', 'xy')])
-    # --pickle testing is done in test_write()
-    # Filenames on commandline
-    TEST.run('cd /tmp/read')
-    TEST.run('read f1.csv',
-             expected_out=['1,2.3,ab', '2,3.4,xy', '3,4.5,"m,n"'])
-    TEST.run('read f?.*',
-             expected_out=['1,2.3,ab', '2,3.4,xy', '3,4.5,"m,n"',
-                           '1\t2.3\tab', '2\t3.4\txy',
-                           'hello,world', 'goodbye'])
-    # Flags inherited from FilenamesOp
-    TEST.run(test='read -lr /tmp/read/f[1-3]* | (f, l: (str(f), l))',
-             expected_out=[('f1.csv', '1,2.3,ab'),
-                           ('f1.csv', '2,3.4,xy'),
-                           ('f1.csv', '3,4.5,"m,n"'),
-                           ('f2.tsv', '1\t2.3\tab'),
-                           ('f2.tsv', '2\t3.4\txy'),
-                           ('f3.txt', 'hello,world'),
-                           ('f3.txt', 'goodbye')])
-    # File does not exist
-    TEST.run(test='read /tmp/read/nosuchfile',
-             expected_err='No qualifying paths')
-    # directory
-    TEST.run(test='read -0 /tmp/read',
-             expected_out=[])
-    # symlink
-    os.system('ln -s /tmp/read/f1.csv /tmp/read/symlink_f1.csv')
-    TEST.run('read /tmp/read/symlink_f1.csv',
-             expected_out=['1,2.3,ab',
-                           '2,3.4,xy',
-                           '3,4.5,"m,n"'])
-    # Column headings
-    TEST.run('read -h /tmp/read/f3.txt',
-             expected_err='-h|--headings can only be specified with')
-    TEST.run('read -hp /tmp/read/f3.txt',
-             expected_err='-h|--headings can only be specified with')
-    TEST.run('read -s /tmp/read/f3.txt',
-             expected_err='-s|--skip-headings can only be specified with')
-    TEST.run('read -sp /tmp/read/f3.txt',
-             expected_err='-s|--skip-headings can only be specified with')
-    TEST.run('read -hs /tmp/read/f3.txt',
-             expected_err='Cannot specify more than one of')
-    TEST.run('read -ch /tmp/read/headings.csv | (t: (t.c1, t.c2, t.c3))',
-             expected_out=[('a', 'b', 'c'),
-                           ('d', 'e', 'f')])
-    TEST.run('read -chl /tmp/read/headings.csv | (t: (str(t.LABEL), t.c1, t.c2, t.c3))',
-             expected_out=[('headings.csv', 'a', 'b', 'c'),
-                           ('headings.csv', 'd', 'e', 'f')])
-    TEST.run('read -cs /tmp/read/headings.csv',
-             expected_out=[('a', 'b', 'c'),
-                           ('d', 'e', 'f')])
-    TEST.run('read -ch /tmp/read/headings_tricky_data.csv | (t: (t.c1, t.c2, t.c3))',
-             expected_out=[('a', 'b', None),
-                           Error('Incompatible with headings'),
-                           ('', '', None)])
-    TEST.run('read -ch /tmp/read/headings_fixable.csv | (t: (t.c_1, t.c__2, t.c_3_))',
-             expected_out=[('a', 'b', 'c'),
-                           ('d', 'e', 'f')])
-    TEST.run('read -ch /tmp/read/headings_unfixable_1.csv',
-             expected_out=[Error('Cannot generate identifiers from headings'),
-                           ('a', 'b', 'c'),
-                           ('d', 'e', 'f')])
-    TEST.run('read -ch /tmp/read/headings_unfixable_2.csv',
-             expected_out=[Error('Cannot generate identifiers from headings'),
-                           ('a', 'b', 'c'),
-                           ('d', 'e', 'f')])
+    with test_base.TestDir() as testdir:
+        file = open(f'{testdir}/f1.csv', 'w')
+        file.writelines(['1,2.3,ab\n',
+                         '2,3.4,xy\n',
+                         '3,4.5,"m,n"\n'])
+        file.close()
+        file = open(f'{testdir}/f2.tsv', 'w')
+        file.writelines(['1\t2.3\tab\n',
+                         '2\t3.4\txy\n'])
+        file.close()
+        file = open(f'{testdir}/f3.txt', 'w')
+        file.writelines(['hello,world\n',
+                         'goodbye\n'])
+        file.close()
+        file = open(f'{testdir}/headings.csv', 'w')
+        file.writelines(['c1, c2,c3 \n',  # various whitespace paddings
+                         'a,b,c\n',
+                         'd,e,f\n'])
+        file.close()
+        file = open(f'{testdir}/headings_tricky_data.csv', 'w')
+        file.writelines(['c1,c2,c3\n',
+                         'a,b\n',
+                         'c,d,e,f\n'
+                         ',\n'])
+        file.close()
+        file = open(f'{testdir}/headings_fixable.csv', 'w')
+        file.writelines(['c 1, c$#2,c+3- \n',
+                         'a,b,c\n',
+                         'd,e,f\n'])
+        file.close()
+        file = open(f'{testdir}/headings_unfixable_1.csv', 'w')
+        file.writelines(['c1,c1,c3\n',
+                         'a,b,c\n',
+                         'd,e,f\n'])
+        file.close()
+        file = open(f'{testdir}/headings_unfixable_2.csv', 'w')
+        file.writelines(['c_1,c$1,c3\n',
+                         'a,b,c\n',
+                         'd,e,f\n'])
+        file.close()
+        # Files
+        TEST.run(f'cd {testdir}')
+        TEST.run('ls f1.csv f3.txt | read',
+                 expected_out=['1,2.3,ab',
+                               '2,3.4,xy',
+                               '3,4.5,"m,n"',
+                               'hello,world',
+                               'goodbye'])
+        # Files with labels
+        TEST.run(f'cd {testdir}')
+        TEST.run('ls f1.csv f3.txt | read -l | map (path, line: (str(path), line))',
+                 expected_out=[('f1.csv', '1,2.3,ab'),
+                               ('f1.csv', '2,3.4,xy'),
+                               ('f1.csv', '3,4.5,"m,n"'),
+                               ('f3.txt', 'hello,world'),
+                               ('f3.txt', 'goodbye')])
+        # CSV
+        TEST.run(f'cd {testdir}')
+        TEST.run('ls f1.csv | read -c',
+                 expected_out=[('1', '2.3', 'ab'),
+                               ('2', '3.4', 'xy'),
+                               ('3', '4.5', 'm,n')])
+        # CSV with labels
+        TEST.run(f'cd {testdir}')
+        TEST.run('ls f1.csv | read -cl | map (f, x, y, z: (str(f), x, y, z))',
+                 expected_out=[('f1.csv', '1', '2.3', 'ab'),
+                               ('f1.csv', '2', '3.4', 'xy'),
+                               ('f1.csv', '3', '4.5', 'm,n')])
+        # TSV
+        TEST.run(f'cd {testdir}')
+        TEST.run('ls f2.tsv | read -t',
+                 expected_out=[('1', '2.3', 'ab'),
+                               ('2', '3.4', 'xy')])
+        # TSV with labels
+        TEST.run(f'cd {testdir}')
+        TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: (str(f), x, y, z))',
+                 expected_out=[('f2.tsv', '1', '2.3', 'ab'),
+                               ('f2.tsv', '2', '3.4', 'xy')])
+        # --pickle testing is done in test_write()
+        # Filenames on commandline
+        TEST.run(f'cd {testdir}')
+        TEST.run('read f1.csv',
+                 expected_out=['1,2.3,ab', '2,3.4,xy', '3,4.5,"m,n"'])
+        TEST.run('read f?.*',
+                 expected_out=['1,2.3,ab', '2,3.4,xy', '3,4.5,"m,n"',
+                               '1\t2.3\tab', '2\t3.4\txy',
+                               'hello,world', 'goodbye'])
+        # Flags inherited from FilenamesOp
+        TEST.run(test=f'read -lr {testdir}/f[1-3]* | (f, l: (str(f), l))',
+                 expected_out=[('f1.csv', '1,2.3,ab'),
+                               ('f1.csv', '2,3.4,xy'),
+                               ('f1.csv', '3,4.5,"m,n"'),
+                               ('f2.tsv', '1\t2.3\tab'),
+                               ('f2.tsv', '2\t3.4\txy'),
+                               ('f3.txt', 'hello,world'),
+                               ('f3.txt', 'goodbye')])
+        # File does not exist
+        TEST.run(test=f'read {testdir}/nosuchfile',
+                 expected_err='No qualifying paths')
+        # directory
+        TEST.run(test=f'read -0 {testdir}',
+                 expected_out=[])
+        # symlink
+        os.system(f'ln -s {testdir}/f1.csv {testdir}/symlink_f1.csv')
+        TEST.run(f'read {testdir}/symlink_f1.csv',
+                 expected_out=['1,2.3,ab',
+                               '2,3.4,xy',
+                               '3,4.5,"m,n"'])
+        # Column headings
+        TEST.run(f'read -h {testdir}/f3.txt',
+                 expected_err='-h|--headings can only be specified with')
+        TEST.run(f'read -hp {testdir}/f3.txt',
+                 expected_err='-h|--headings can only be specified with')
+        TEST.run(f'read -s {testdir}/f3.txt',
+                 expected_err='-s|--skip-headings can only be specified with')
+        TEST.run(f'read -sp {testdir}/f3.txt',
+                 expected_err='-s|--skip-headings can only be specified with')
+        TEST.run(f'read -hs {testdir}/f3.txt',
+                 expected_err='Cannot specify more than one of')
+        TEST.run(f'read -ch {testdir}/headings.csv | (t: (t.c1, t.c2, t.c3))',
+                 expected_out=[('a', 'b', 'c'),
+                               ('d', 'e', 'f')])
+        TEST.run(f'read -chl {testdir}/headings.csv | (t: (str(t.LABEL), t.c1, t.c2, t.c3))',
+                 expected_out=[('headings.csv', 'a', 'b', 'c'),
+                               ('headings.csv', 'd', 'e', 'f')])
+        TEST.run(f'read -cs {testdir}/headings.csv',
+                 expected_out=[('a', 'b', 'c'),
+                               ('d', 'e', 'f')])
+        TEST.run(f'read -ch {testdir}/headings_tricky_data.csv | (t: (t.c1, t.c2, t.c3))',
+                 expected_out=[('a', 'b', None),
+                               Error('Incompatible with headings'),
+                               ('', '', None)])
+        TEST.run(f'read -ch {testdir}/headings_fixable.csv | (t: (t.c_1, t.c__2, t.c_3_))',
+                 expected_out=[('a', 'b', 'c'),
+                               ('d', 'e', 'f')])
+        TEST.run(f'read -ch {testdir}/headings_unfixable_1.csv',
+                 expected_out=[Error('Cannot generate identifiers from headings'),
+                               ('a', 'b', 'c'),
+                               ('d', 'e', 'f')])
+        TEST.run(f'read -ch {testdir}/headings_unfixable_2.csv',
+                 expected_out=[Error('Cannot generate identifiers from headings'),
+                               ('a', 'b', 'c'),
+                               ('d', 'e', 'f')])
     # Resume after error
-    os.system('rm -rf /tmp/r')
-    os.system('mkdir /tmp/r')
-    TEST.run('cd /tmp/r')
-    TEST.run('echo aaa > a')
-    TEST.run('echo aaa > aa')
-    TEST.run('echo bbb > b')
-    TEST.run('echo ccc > c')
-    TEST.run('echo ccc > cc')
-    TEST.run('echo ddd > d')
-    TEST.run('chmod 000 aa b cc d')
-    TEST.run('read -l * | (f, line: (f.name, line))',
-             expected_out=[('a', 'aaa'),
-                           ('c', 'ccc')])
-    TEST.run('read -l a* c* | (f, line: (f.name, line))',
-             expected_out=[('a', 'aaa'),
-                           ('c', 'ccc')])
-    TEST.run('ls -f * | read -l | (f, line: (f.name, line))',
-             expected_out=[('a', 'aaa'),
-                           ('c', 'ccc')])
-    TEST.run('ls -f a* c* | read -l | (f, line: (f.name, line))',
-             expected_out=[('a', 'aaa'),
-                           ('c', 'ccc')])
+    with test_base.TestDir() as testdir:
+        TEST.run(f'cd {testdir}')
+        TEST.run('echo aaa > a')
+        TEST.run('echo aaa > aa')
+        TEST.run('echo bbb > b')
+        TEST.run('echo ccc > c')
+        TEST.run('echo ccc > cc')
+        TEST.run('echo ddd > d')
+        TEST.run('chmod 000 aa b cc d')
+        TEST.run('read -l * | (f, line: (f.name, line))',
+                 expected_out=[('a', 'aaa'),
+                               ('c', 'ccc')])
+        TEST.run('read -l a* c* | (f, line: (f.name, line))',
+                 expected_out=[('a', 'aaa'),
+                               ('c', 'ccc')])
+        TEST.run('ls -f * | read -l | (f, line: (f.name, line))',
+                 expected_out=[('a', 'aaa'),
+                               ('c', 'ccc')])
+        TEST.run('ls -f a* c* | read -l | (f, line: (f.name, line))',
+                 expected_out=[('a', 'aaa'),
+                               ('c', 'ccc')])
 
 
 @timeit
@@ -1760,25 +1747,24 @@ def test_args():
     TEST.run('gen 6 1 | args (|count, start: gen (count) (start)|)',
              expected_out=[2, 4, 5, 6, 6, 7, 8, 9, 10])
     # ls
-    TEST.run('rm -rf /tmp/a')
-    TEST.run('mkdir /tmp/a')
-    TEST.run('mkdir /tmp/a/d1')
-    TEST.run('mkdir /tmp/a/d2')
-    TEST.run('mkdir /tmp/a/d3')
-    TEST.run('touch /tmp/a/d1/f1')
-    TEST.run('touch /tmp/a/d2/f2')
-    TEST.run('touch /tmp/a/d3/f3')
-    TEST.run('cd /tmp/a')
-    TEST.run('ls -d | args (|d: ls -f (d) |) | map (f: f.name)',
-             expected_out=['f1', 'f2', 'f3'])
-    TEST.run('touch a_file')
-    TEST.run('touch "a file"')
-    TEST.run('touch "a file with a \' mark"')
-    TEST.run('rm -rf d')
-    TEST.run('mkdir d')
-    TEST.run(test='ls -f | args --all (|files: mv -t d (quote_files(files)) |)',
-             verification='ls -f d | map (f: f.name)',
-             expected_out=['a file', "a file with a ' mark", 'a_file'])
+    with test_base.TestDir() as testdir:
+        TEST.run(f'mkdir {testdir}/d1')
+        TEST.run(f'mkdir {testdir}/d2')
+        TEST.run(f'mkdir {testdir}/d3')
+        TEST.run(f'touch {testdir}/d1/f1')
+        TEST.run(f'touch {testdir}/d2/f2')
+        TEST.run(f'touch {testdir}/d3/f3')
+        TEST.run(f'cd {testdir}')
+        TEST.run(f'ls -d | args (|d: ls -f (d) |) | map (f: f.name)',
+                 expected_out=['f1', 'f2', 'f3'])
+        TEST.run(f'touch a_file')
+        TEST.run(f'touch "a file"')
+        TEST.run(f'touch "a file with a \' mark"')
+        TEST.run(f'rm -rf d')
+        TEST.run(f'mkdir d')
+        TEST.run(test=f'ls -f | args --all (|files: mv -t d (quote_files(files)) |)',
+                 verification='ls -f d | map (f: f.name)',
+                 expected_out=['a file', "a file with a ' mark", 'a_file'])
     # head
     TEST.run('gen 4 1 | args (|n: gen 10 | head (n)|)',
              expected_out=[0, 0, 1, 0, 1, 2, 0, 1, 2, 3])
@@ -1834,9 +1820,10 @@ def test_args():
     TEST.run('gen 3 1 | args (|n: g (n)|)',
              expected_out=[0, 0, 1, 0, 1, 2])
     # Bug 167
-    os.system('rm -rf /tmp/hello')
-    os.system('echo hello > /tmp/hello')
-    os.system('echo hello >> /tmp/hello')
+    with test_base.TestDir() as testdir:
+        os.system(f'rm -rf {testdir}/hello')
+        os.system(f'echo hello > {testdir}/hello')
+        os.system(f'echo hello >> {testdir}/hello')
 
 
 @timeit
@@ -2093,8 +2080,8 @@ def test_bug_136():
 @timeit
 def test_bug_151():
     TEST.run('bytime = (|sort (f: f.mtime)|)')
-    TEST.run('ls | bytime >$ a')
-    TEST.run('ls | sort (f: f.mtime) >$ b')
+    TEST.run('ls ~ | bytime >$ a')
+    TEST.run('ls ~ | sort (f: f.mtime) >$ b')
     TEST.run('a <$ difference (|b <$|) | red count',
              expected_out=[0])
     TEST.run('b <$ difference (|a <$|) | red count',
