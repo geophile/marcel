@@ -12,6 +12,7 @@ import marcel.version
 import test_base
 
 timeit = test_base.timeit
+TestDir = test_base.TestDir
 
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
@@ -138,7 +139,7 @@ def test_write():
     TEST.run('gen 3 | (x: (x, -x)) | write --csv --tsv',
              expected_err='Cannot specify more than one of')
     # Write to file
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         output_filename = f'{testdir}/out.txt'
         TEST.run('gen 3 | (x: (x, -x)) | write ' + output_filename,
                  expected_out=[(0, 0), (1, -1), (2, -2)],
@@ -628,7 +629,7 @@ def test_namespace():
 
 @timeit
 def test_source_filenames():
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         filename_op_setup(testdir)
         # Relative path
         TEST.run('ls . | map (f: f.render_compact())',
@@ -666,7 +667,7 @@ def test_source_filenames():
 
 @timeit
 def test_ls():
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         filename_op_setup(testdir)
         # 0/1/r flags with no files specified.
         TEST.run('ls -0 | map (f: f.render_compact())',
@@ -722,8 +723,8 @@ def test_ls():
         expected.extend(sorted(['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']))
         TEST.run('ls -1 . d | map (f: f.render_compact())',
                  expected_out=expected)
-    with test_base.TestDir() as testdir:
-        # ls should continue past permission error
+    # ls should continue past permission error
+    with TestDir() as testdir:
         os.system(f'mkdir {testdir}/d1')
         os.system(f'mkdir {testdir}/d2')
         os.system(f'mkdir {testdir}/d3')
@@ -750,7 +751,7 @@ def test_ls():
         os.system(f'sudo chown {me}.{me} {testdir}/d2')
         os.system(f'sudo chown {me}.{me} {testdir}/d3')
         # Args with vars
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         filename_op_setup(f'{testdir}/vartest')
         TEST.run('VARTEST = vartest')
         TEST.run(f'ls -r {testdir}/(VARTEST) | map (f: f.render_compact())',
@@ -769,7 +770,7 @@ def test_ls():
 # pushd, popd, dirs
 @timeit
 def test_dir_stack():
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         filename_op_setup(testdir)
         TEST.run('mkdir a b c')
         TEST.run('rm -rf p')
@@ -892,7 +893,7 @@ def test_fork():
 
 @timeit
 def test_sudo():
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         TEST.run(test='sudo (| gen 3 |)', expected_out=[0, 1, 2])
         os.system(f'sudo mkdir {testdir}/sudotest')
         os.system(f'sudo touch {testdir}/sudotest/f')
@@ -973,7 +974,7 @@ def test_join():
     TEST.run('xn = (|n: gen 3 | map (x: (x, x * n))|)')
     TEST.run(test='gen 4 | map (x: (x, -x)) | join (|xn (100)|)',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         TEST.run(f'gen 3 | map (x: (x, x*10)) | write {testdir}/a.csv')
         TEST.run(f'gen 3 | map (x: (x, x*100)) | write {testdir}/b.csv')
         TEST.run(f'get = (|f: (File(f).readlines()) | expand | map (x: eval(x))|)')
@@ -1120,7 +1121,7 @@ def test_store_load():
 
 @timeit
 def test_redirect_file():
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         # ------------------------ Test all the paths through Parser.pipeline() for files
         # file <
         TEST.run(test=f'gen 3 | write {testdir}/p1',
@@ -1436,7 +1437,7 @@ def test_delete():
 
 @timeit
 def test_read():
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         file = open(f'{testdir}/f1.csv', 'w')
         file.writelines(['1,2.3,ab\n',
                          '2,3.4,xy\n',
@@ -1580,7 +1581,7 @@ def test_read():
                                ('a', 'b', 'c'),
                                ('d', 'e', 'f')])
     # Resume after error
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         TEST.run(f'cd {testdir}')
         TEST.run('echo aaa > a')
         TEST.run('echo aaa > aa')
@@ -1747,7 +1748,7 @@ def test_args():
     TEST.run('gen 6 1 | args (|count, start: gen (count) (start)|)',
              expected_out=[2, 4, 5, 6, 6, 7, 8, 9, 10])
     # ls
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         TEST.run(f'mkdir {testdir}/d1')
         TEST.run(f'mkdir {testdir}/d2')
         TEST.run(f'mkdir {testdir}/d3')
@@ -1820,7 +1821,7 @@ def test_args():
     TEST.run('gen 3 1 | args (|n: g (n)|)',
              expected_out=[0, 0, 1, 0, 1, 2])
     # Bug 167
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         os.system(f'rm -rf {testdir}/hello')
         os.system(f'echo hello > {testdir}/hello')
         os.system(f'echo hello >> {testdir}/hello')
@@ -1965,7 +1966,7 @@ def test_json():
 
 @timeit
 def test_upload():
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         os.system(f'mkdir {testdir}/source')
         os.system(f'touch {testdir}/source/a {testdir}/source/b "{testdir}/source/a b"')
         os.system(f'mkdir {testdir}/dest')
@@ -2008,7 +2009,7 @@ def test_upload():
 
 @timeit
 def test_download():
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         node1 = TEST.env.getvar("NODE1")
         node2 = TEST.env.getvar("NODE2")
         os.system(f'mkdir {testdir}/source')
@@ -2133,7 +2134,7 @@ def test_bug_185():
 
 @timeit
 def test_bug_190():
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         os.system(f'echo xa1 > {testdir}/a1')
         os.system(f'echo xa2 > {testdir}/a2')
         os.system(f'echo xb1 > {testdir}/b1')
@@ -2195,7 +2196,7 @@ def test_bug_197():
 
 @timeit
 def test_bug_198():
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         # IsADirectoryError
         TEST.run(f'gen 3 > {testdir}', expected_err='Is a directory')
         os.system(f'touch {testdir}/cannot_write')
@@ -2207,7 +2208,7 @@ def test_bug_198():
 
 @timeit
 def test_bug_200():
-    with test_base.TestDir() as testdir:
+    with TestDir() as testdir:
         source = f'{testdir}/source.csv'
         target = f'{testdir}/target.csv'
         target2 = f'{testdir}/target2.csv'
