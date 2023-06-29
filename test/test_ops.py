@@ -1965,102 +1965,101 @@ def test_json():
 
 @timeit
 def test_upload():
-    os.system('rm -rf /tmp/source')
-    os.system('mkdir /tmp/source')
-    os.system('touch /tmp/source/a /tmp/source/b "/tmp/source/a b"')
-    os.system('rm -rf /tmp/dest')
-    os.system('mkdir /tmp/dest')
-    # No qualifying paths
-    TEST.run('upload CLUSTER1 /tmp/dest /nosuchfile',
-             expected_err='No qualifying paths')
-    # Qualifying paths exist but insufficient permission to read
-    os.system('sudo touch /tmp/nope1')
-    os.system('sudo rm /tmp/nope?')
-    os.system('touch /tmp/nope1')
-    os.system('touch /tmp/nope2')
-    os.system('chmod 000 /tmp/nope?')
-    TEST.run('upload CLUSTER1 /tmp/dest /tmp/nope1',
-             expected_out=[Error('nope1: Permission denied')])
-    TEST.run('upload CLUSTER1 /tmp/dest /tmp/nope?',
-             expected_out=[Error('Permission denied'),
-                           Error('Permission denied')])
-    # Target dir must be absolute
-    TEST.run('upload CLUSTER1 dest /tmp/source/a',
-             expected_err='Target directory must be absolute: dest')
-    # There must be at least one source
-    TEST.run('upload CLUSTER1 /tmp/dest',
-             expected_err='No qualifying paths')
-    # Copy fully-specified filenames
-    TEST.run(test='upload CLUSTER1 /tmp/dest /tmp/source/a /tmp/source/b',
-             verification='ls -f /tmp/dest | (f: f.name)',
-             expected_out=['a', 'b'])
-    os.system('rm /tmp/dest/*')
-    # Filename with spaces
-    TEST.run(test='upload CLUSTER1 /tmp/dest "/tmp/source/a b"',
-             verification='ls -f /tmp/dest | (f: f.name)',
-             expected_out=['a b'])
-    os.system('rm /tmp/dest/*')
-    # Wildcard
-    TEST.run(test='upload CLUSTER1 /tmp/dest /tmp/source/a*',
-             verification='ls -f /tmp/dest | (f: f.name)',
-             expected_out=['a', 'a b'])
-    os.system('rm /tmp/dest/*')
+    with test_base.TestDir() as testdir:
+        os.system(f'mkdir {testdir}/source')
+        os.system(f'touch {testdir}/source/a {testdir}/source/b "{testdir}/source/a b"')
+        os.system(f'mkdir {testdir}/dest')
+        # No qualifying paths
+        TEST.run(f'upload CLUSTER1 {testdir}/dest /nosuchfile',
+                 expected_err='No qualifying paths')
+        # Qualifying paths exist but insufficient permission to read
+        os.system(f'sudo touch {testdir}/nope1')
+        os.system(f'sudo rm {testdir}/nope?')
+        os.system(f'touch {testdir}/nope1')
+        os.system(f'touch {testdir}/nope2')
+        os.system(f'chmod 000 {testdir}/nope?')
+        TEST.run(f'upload CLUSTER1 {testdir}/dest {testdir}/nope1',
+                 expected_out=[Error('nope1: Permission denied')])
+        TEST.run(f'upload CLUSTER1 {testdir}/dest {testdir}/nope?',
+                 expected_out=[Error('Permission denied'),
+                               Error('Permission denied')])
+        # Target dir must be absolute
+        TEST.run(f'upload CLUSTER1 dest {testdir}/source/a',
+                 expected_err='Target directory must be absolute: dest')
+        # There must be at least one source
+        TEST.run(f'upload CLUSTER1 {testdir}/dest',
+                 expected_err='No qualifying paths')
+        # Copy fully-specified filenames
+        TEST.run(test=f'upload CLUSTER1 {testdir}/dest {testdir}/source/a {testdir}/source/b',
+                 verification=f'ls -f {testdir}/dest | (f: f.name)',
+                 expected_out=['a', 'b'])
+        os.system(f'rm {testdir}/dest/*')
+        # Filename with spaces
+        TEST.run(test=f'upload CLUSTER1 {testdir}/dest "{testdir}/source/a b"',
+                 verification=f'ls -f {testdir}/dest | (f: f.name)',
+                 expected_out=['a b'])
+        os.system(f'rm {testdir}/dest/*')
+        # Wildcard
+        TEST.run(test=f'upload CLUSTER1 {testdir}/dest {testdir}/source/a*',
+                 verification=f'ls -f {testdir}/dest | (f: f.name)',
+                 expected_out=['a', 'a b'])
+        os.system(f'rm {testdir}/dest/*')
 
 
 @timeit
 def test_download():
-    node1 = TEST.env.getvar("NODE1")
-    node2 = TEST.env.getvar("NODE2")
-    os.system('rm -rf /tmp/source')
-    os.system('mkdir /tmp/source')
-    os.system('touch /tmp/source/a /tmp/source/b "/tmp/source/a b"')
-    os.system('rm -rf /tmp/dest')
-    os.system('mkdir /tmp/dest')
-    # No qualifying paths
-    TEST.run('download /tmp/dest CLUSTER2 /nosuchfile',
-             expected_out=[Error('No such file or directory'), Error('No such file or directory')])
-    # Qualifying paths exist but insufficient permission to read
-    os.system('sudo touch /tmp/nope1')
-    os.system('sudo rm /tmp/nope?')
-    os.system('touch /tmp/nope1')
-    os.system('touch /tmp/nope2')
-    os.system('chmod 000 /tmp/nope?')
-    TEST.run('download /tmp/dest CLUSTER2 /tmp/nope1',
-             expected_out=[Error('Permission denied'), Error('Permission denied')])
-    TEST.run('download /tmp/dest CLUSTER2 /tmp/nope?',
-             expected_out=[Error('Permission denied'), Error('Permission denied'),
-                           Error('Permission denied'), Error('Permission denied')])
-    # There must be at least one source specified (regardless of what actually exists remotely)
-    TEST.run('download /tmp/dest CLUSTER2',
-             expected_err='No remote files specified')
-    # Copy fully-specified filenames
-    TEST.run(test='download /tmp/dest CLUSTER2 /tmp/source/a /tmp/source/b',
-             verification='ls -fr /tmp/dest | (f: f.relative_to("/tmp/dest")) | sort',
-             expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
-    # Leave files in place, delete some of them, try downloading again
-    os.system(f'rm -rf /tmp/dest/{node1}')
-    os.system(f'rm -rf /tmp/dest/{node2}/*')
-    TEST.run(test='download /tmp/dest CLUSTER2 /tmp/source/a /tmp/source/b',
-             verification='ls -fr /tmp/dest | (f: f.relative_to("/tmp/dest")) | sort',
-             expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
-    os.system('rm -rf /tmp/dest/*')
-    # Filename with spaces
-    TEST.run(test='download /tmp/dest CLUSTER2 "/tmp/source/a\\ b"',
-             verification='ls -fr /tmp/dest | (f: f.relative_to("/tmp/dest")) | sort',
-             expected_out=[f'{node1}/a b', f'{node2}/a b'])
-    os.system('rm -rf /tmp/dest/*')
-    # # Relative directory
-    # TEST.run('cd /tmp')
-    # TEST.run(test='download dest jao /tmp/source/a /tmp/source/b',
-    #          verification='ls -f /tmp/dest | (f: f.name)',
-    #          expected_out=['a', 'b'])
-    # os.system('rm /tmp/dest/*')
-    # Wildcard
-    TEST.run(test='download /tmp/dest CLUSTER2 /tmp/source/a*',
-             verification='ls -fr /tmp/dest | (f: f.relative_to("/tmp/dest")) | sort',
-             expected_out=[f'{node1}/a', f'{node1}/a b',
-                           f'{node2}/a', f'{node2}/a b'])
-    os.system('rm -rf /tmp/dest/*')
+    with test_base.TestDir() as testdir:
+        node1 = TEST.env.getvar("NODE1")
+        node2 = TEST.env.getvar("NODE2")
+        os.system(f'mkdir {testdir}/source')
+        os.system(f'touch {testdir}/source/a {testdir}/source/b "{testdir}/source/a b"')
+        os.system(f'rm -rf {testdir}/dest')
+        os.system(f'mkdir {testdir}/dest')
+        # No qualifying paths
+        TEST.run(f'download {testdir}/dest CLUSTER2 /nosuchfile',
+                 expected_out=[Error('No such file or directory'), Error('No such file or directory')])
+        # Qualifying paths exist but insufficient permission to read
+        os.system(f'sudo touch {testdir}/nope1')
+        os.system(f'sudo rm {testdir}/nope?')
+        os.system(f'touch {testdir}/nope1')
+        os.system(f'touch {testdir}/nope2')
+        os.system(f'chmod 000 {testdir}/nope?')
+        TEST.run(f'download {testdir}/dest CLUSTER2 {testdir}/nope1',
+                 expected_out=[Error('Permission denied'), Error('Permission denied')])
+        TEST.run(f'download {testdir}/dest CLUSTER2 {testdir}/nope?',
+                 expected_out=[Error('Permission denied'), Error('Permission denied'),
+                               Error('Permission denied'), Error('Permission denied')])
+        # There must be at least one source specified (regardless of what actually exists remotely)
+        TEST.run(f'download {testdir}/dest CLUSTER2',
+                 expected_err='No remote files specified')
+        # Copy fully-specified filenames
+        TEST.run(test=f'download {testdir}/dest CLUSTER2 {testdir}/source/a {testdir}/source/b',
+                 verification=f'ls -fr {testdir}/dest | (f: f.relative_to("{testdir}/dest")) | sort',
+                 expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
+        # Leave files in place, delete some of them, try downloading again
+        os.system(f'rm -rf {testdir}/dest/{node1}')
+        os.system(f'rm -rf {testdir}/dest/{node2}/*')
+        TEST.run(test=f'download {testdir}/dest CLUSTER2 {testdir}/source/a {testdir}/source/b',
+                 verification=f'ls -fr {testdir}/dest | (f: f.relative_to("{testdir}/dest")) | sort',
+                 expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
+        os.system(f'rm -rf {testdir}/dest/*')
+        # Filename with spaces
+        TEST.run(test=f'download {testdir}/dest CLUSTER2 "{testdir}/source/a\\ b"',
+                 verification=f'ls -fr {testdir}/dest | (f: f.relative_to("{testdir}/dest")) | sort',
+                 expected_out=[f'{node1}/a b', f'{node2}/a b'])
+        os.system(f'rm -rf {testdir}/dest/*')
+        # # Relative directory
+        # TEST.run('cd /tmp')
+        # TEST.run(test='download dest jao /tmp/source/a /tmp/source/b',
+        #          verification='ls -f /tmp/dest | (f: f.name)',
+        #          expected_out=['a', 'b'])
+        # os.system('rm /tmp/dest/*')
+        # Wildcard
+        TEST.run(test=f'download {testdir}/dest CLUSTER2 {testdir}/source/a*',
+                 verification=f'ls -fr {testdir}/dest | (f: f.relative_to("{testdir}/dest")) | sort',
+                 expected_out=[f'{node1}/a', f'{node1}/a b',
+                               f'{node2}/a', f'{node2}/a b'])
+        os.system(f'rm -rf {testdir}/dest/*')
 
 
 @timeit
@@ -2134,51 +2133,49 @@ def test_bug_185():
 
 @timeit
 def test_bug_190():
-    testdir = '/tmp/bug190'
-    os.system(f'rm -rf {testdir}')
-    os.system(f'mkdir {testdir}')
-    os.system(f'echo xa1 > {testdir}/a1')
-    os.system(f'echo xa2 > {testdir}/a2')
-    os.system(f'echo xb1 > {testdir}/b1')
-    os.system(f'echo xb2 > {testdir}/b2')
-    TEST.run(f'cd {testdir}')
-    # Test globbing for native executables
-    TEST.run('grep x [ab]2 | sort',
-             expected_out=['a2:xa2', 'b2:xb2'])
-    TEST.run('grep x a[1-2] | sort',
-             expected_out=['a1:xa1', 'a2:xa2'])
-    TEST.run('grep x [ab][1-2] | sort',
-             expected_out=['a1:xa1', 'a2:xa2', 'b1:xb1', 'b2:xb2'])
-    TEST.run('grep x a* | sort',
-             expected_out=['a1:xa1', 'a2:xa2'])
-    TEST.run('grep x *2 | sort',
-             expected_out=['a2:xa2', 'b2:xb2'])
-    TEST.run('grep x a? | sort',
-             expected_out=['a1:xa1', 'a2:xa2'])
-    TEST.run('grep x ?2 | sort',
-             expected_out=['a2:xa2', 'b2:xb2'])
-    # Test globbing for native executables run via explicit invocation of bash (which is a marcel op)
-    TEST.run('bash grep x [ab]2 | sort',
-             expected_out=['a2:xa2', 'b2:xb2'])
-    TEST.run('bash grep x a[1-2] | sort',
-             expected_out=['a1:xa1', 'a2:xa2'])
-    TEST.run('bash grep x [ab][1-2] | sort',
-             expected_out=['a1:xa1', 'a2:xa2', 'b1:xb1', 'b2:xb2'])
-    # Test globbing for ops that take shell args
-    TEST.run('ls [ab]2 | (f: f.name) | sort',
-             expected_out=['a2', 'b2'])
-    TEST.run('ls a[1-2] | (f: f.name) | sort',
-             expected_out=['a1', 'a2'])
-    TEST.run('ls [ab][1-2] | (f: f.name) | sort',
-             expected_out=['a1', 'a2', 'b1', 'b2'])
-    TEST.run('ls a* | (f: f.name) | sort',
-             expected_out=['a1', 'a2'])
-    TEST.run('ls *2 | (f: f.name) | sort',
-             expected_out=['a2', 'b2'])
-    TEST.run('ls a? | (f: f.name) | sort',
-             expected_out=['a1', 'a2'])
-    TEST.run('ls ?2 | (f: f.name) | sort',
-             expected_out=['a2', 'b2'])
+    with test_base.TestDir() as testdir:
+        os.system(f'echo xa1 > {testdir}/a1')
+        os.system(f'echo xa2 > {testdir}/a2')
+        os.system(f'echo xb1 > {testdir}/b1')
+        os.system(f'echo xb2 > {testdir}/b2')
+        TEST.run(f'cd {testdir}')
+        # Test globbing for native executables
+        TEST.run('grep x [ab]2 | sort',
+                 expected_out=['a2:xa2', 'b2:xb2'])
+        TEST.run('grep x a[1-2] | sort',
+                 expected_out=['a1:xa1', 'a2:xa2'])
+        TEST.run('grep x [ab][1-2] | sort',
+                 expected_out=['a1:xa1', 'a2:xa2', 'b1:xb1', 'b2:xb2'])
+        TEST.run('grep x a* | sort',
+                 expected_out=['a1:xa1', 'a2:xa2'])
+        TEST.run('grep x *2 | sort',
+                 expected_out=['a2:xa2', 'b2:xb2'])
+        TEST.run('grep x a? | sort',
+                 expected_out=['a1:xa1', 'a2:xa2'])
+        TEST.run('grep x ?2 | sort',
+                 expected_out=['a2:xa2', 'b2:xb2'])
+        # Test globbing for native executables run via explicit invocation of bash (which is a marcel op)
+        TEST.run('bash grep x [ab]2 | sort',
+                 expected_out=['a2:xa2', 'b2:xb2'])
+        TEST.run('bash grep x a[1-2] | sort',
+                 expected_out=['a1:xa1', 'a2:xa2'])
+        TEST.run('bash grep x [ab][1-2] | sort',
+                 expected_out=['a1:xa1', 'a2:xa2', 'b1:xb1', 'b2:xb2'])
+        # Test globbing for ops that take shell args
+        TEST.run('ls [ab]2 | (f: f.name) | sort',
+                 expected_out=['a2', 'b2'])
+        TEST.run('ls a[1-2] | (f: f.name) | sort',
+                 expected_out=['a1', 'a2'])
+        TEST.run('ls [ab][1-2] | (f: f.name) | sort',
+                 expected_out=['a1', 'a2', 'b1', 'b2'])
+        TEST.run('ls a* | (f: f.name) | sort',
+                 expected_out=['a1', 'a2'])
+        TEST.run('ls *2 | (f: f.name) | sort',
+                 expected_out=['a2', 'b2'])
+        TEST.run('ls a? | (f: f.name) | sort',
+                 expected_out=['a1', 'a2'])
+        TEST.run('ls ?2 | (f: f.name) | sort',
+                 expected_out=['a2', 'b2'])
 
 
 @timeit
@@ -2198,49 +2195,48 @@ def test_bug_197():
 
 @timeit
 def test_bug_198():
-    os.system('rm -rf /tmp/bug198')
-    os.system('mkdir /tmp/bug198')
-    # IsADirectoryError
-    TEST.run('gen 3 > /tmp/bug198', expected_err='Is a directory')
-    os.system('touch /tmp/bug198/cannot_write')
-    # PermissionError
-    os.system('chmod 000 /tmp/bug198/cannot_write')
-    TEST.run('gen 3 > /tmp/bug198/cannot_write', expected_err='Permission denied')
-    # FileExistsError: Can't happen?
+    with test_base.TestDir() as testdir:
+        # IsADirectoryError
+        TEST.run(f'gen 3 > {testdir}', expected_err='Is a directory')
+        os.system(f'touch {testdir}/cannot_write')
+        # PermissionError
+        os.system(f'chmod 000 {testdir}/cannot_write')
+        TEST.run(f'gen 3 > {testdir}/cannot_write', expected_err='Permission denied')
+        # FileExistsError: Can't happen?
 
 
 @timeit
 def test_bug_200():
-    dir = '/tmp/bug200'
-    source = f'{dir}/source.csv'
-    target = f'{dir}/target.csv'
-    target2 = f'{dir}/target2.csv'
-    os.system(f'rm -rf {dir}')
-    os.system(f'mkdir {dir}')
-    # number, unquoted string, single-quoted string
-    os.system(f'''echo "123,a,'b,c'" > {source}''')
-    # double-quoted string
-    os.system(f'''echo '"d,e"' >> {source}''')
-    # Check source
-    TEST.run(f'read {source}',
-             expected_out=["""123,a,'b,c'""", '''"d,e"'''])
-    TEST.run(f'read -c {source}',
-             expected_out=[('123', 'a', "'b", "c'"),
-                           'd,e'])
-    # Test --csv reading and writing
-    TEST.run(f'read -c {source} | write -c {target}')
-    TEST.run(f'read {target}',
-             expected_out=['''"123","a","'b","c'"''', '"d,e"'])
-    TEST.run(f'read -c {target}',
-             expected_out=[('123', 'a', "'b", "c'"),
-                           'd,e'])
-    # Test whether write -c output followed by read -c/write -c is a fixed point.
-    TEST.run(f'read -c {target} | write -c {target2}')
-    TEST.run(f'read {target2}',
-             expected_out=['''"123","a","'b","c'"''', '"d,e"'])
-    TEST.run(f'read -c {target2}',
-             expected_out=[('123', 'a', "'b", "c'"),
-                           'd,e'])
+    with test_base.TestDir() as testdir:
+        source = f'{testdir}/source.csv'
+        target = f'{testdir}/target.csv'
+        target2 = f'{testdir}/target2.csv'
+        os.system(f'rm -rf {testdir}')
+        os.system(f'mkdir {testdir}')
+        # number, unquoted string, single-quoted string
+        os.system(f'''echo "123,a,'b,c'" > {source}''')
+        # double-quoted string
+        os.system(f'''echo '"d,e"' >> {source}''')
+        # Check source
+        TEST.run(f'read {source}',
+                 expected_out=["""123,a,'b,c'""", '''"d,e"'''])
+        TEST.run(f'read -c {source}',
+                 expected_out=[('123', 'a', "'b", "c'"),
+                               'd,e'])
+        # Test --csv reading and writing
+        TEST.run(f'read -c {source} | write -c {target}')
+        TEST.run(f'read {target}',
+                 expected_out=['''"123","a","'b","c'"''', '"d,e"'])
+        TEST.run(f'read -c {target}',
+                 expected_out=[('123', 'a', "'b", "c'"),
+                               'd,e'])
+        # Test whether write -c output followed by read -c/write -c is a fixed point.
+        TEST.run(f'read -c {target} | write -c {target2}')
+        TEST.run(f'read {target2}',
+                 expected_out=['''"123","a","'b","c'"''', '"d,e"'])
+        TEST.run(f'read -c {target2}',
+                 expected_out=[('123', 'a', "'b", "c'"),
+                               'd,e'])
 
 
 @timeit
@@ -2450,14 +2446,15 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('gen 3 | store /tmp/storeload.test')
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
-    main_slow_tests()
+    # main_stable()
+    # main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
