@@ -67,11 +67,7 @@ class StoreArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('store', env)
         self.add_flag_no_value('append', '-a', '--append')
-        # init_target actually creates the target file or reservoir if it doesn't exist. This would 
-        # normally be done by setup. However, for commands that don't terminate for a while, (e.g. ls -r / > x),
-        # we want the variable available immediately. This allows the long-running command to be run in background,
-        # monitoring progress, e.g. x > tail 5.
-        self.add_anon('var', convert=self.init_var)
+        self.add_anon('var')
         self.validate()
 
 
@@ -99,6 +95,9 @@ class Store(marcel.core.Op):
             # Interactive: string is a filename or environment variable name.
             if self.var.isidentifier():
                 self.picklefile = self.getvar(self.var)
+                if self.picklefile is None:
+                    self.picklefile = marcel.reservoir.Reservoir(self.var)
+                    self.env().setvar(self.var, self.picklefile)
                 if type(self.picklefile) is not marcel.reservoir.Reservoir:
                     if self.append:
                         raise marcel.exception.KillCommandException(

@@ -234,22 +234,6 @@ class ArgsParser:
             else:
                 raise ArgsError(arg.op_name, f'{x} is not a Cluster')
 
-    def init_var(self, arg, x):
-        if type(x) is marcel.reservoir.Reservoir:
-            # API set the arg to a Reservoir already
-            pass
-        elif x.isidentifier():
-            # Target is an environment variable
-            if self.env.getvar(x) is None:
-                self.env.setvar(x, marcel.reservoir.Reservoir(x))
-        else:
-            # Target is a filename. Create it if it doesn't exist.
-            path = pathlib.Path(x)
-            if not path.exists():
-                # It could exist if it is created between path.exists() and path.touch(). In that case, bail out.
-                path.touch(exist_ok=False)
-        return x
-
     # An ArgsParser subclass uses this function as the value of convert, to validate
     # Python expressions, (parser.Expression). x is function source for console usage,
     # a callable for API usage.
