@@ -1116,10 +1116,10 @@ class Parser(object):
             # marcel arg tokens MarcelString.
             with Parser.ShellOpContext(self, op_token):
                 arg_tokens = []
-                if not op_token.adjacent_to_next:
+                arg_token = self.arg()
+                if arg_token and not op_token.adjacent_to_next:
                     # Token is followed by whitespace
                     self.tab_completion_context.complete_arg(op_token)
-                arg_token = self.arg()
                 while arg_token is not None:
                     arg_tokens.append(arg_token)
                     arg_token = self.arg()

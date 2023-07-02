@@ -303,7 +303,7 @@ class TestTabCompletion(TestBase):
     def __init__(self, config_file='./.marcel.py'):
         super().__init__(config_file)
 
-    def reset_environment(self, config_file='./.marcel.py'):
+    def reset_environment(self, config_file='./.marcel.py', new_main=False):
         self.main = marcel.main.Main(config_file, same_process=True, old_namespace=None)
 
     def run(self, line, text=None, expected=None):
