@@ -167,7 +167,7 @@ class TestConsole(TestBase):
                     self.check_substring(test, expected_err, actual_err)
             except Exception as e:
                 print(f'{self.description(test)}: Terminated by uncaught exception: {e}', file=sys.__stdout__)
-                marcel.util.print_stack()
+                marcel.util.print_stack_of_current_exception()
                 self.failures += 1
             except marcel.exception.KillCommandException as e:
                 print(f'{self.description(test)}: Terminated by KillCommandException: {e}', file=sys.__stderr__)
@@ -249,7 +249,7 @@ class TestAPI(TestBase):
                     self.failures += 1
                 elif expected_exception not in str(e):
                     print(f'{self.description(test)}: Terminated by unexpected exception: {e}', file=sys.__stdout__)
-                    marcel.util.print_stack()
+                    marcel.util.print_stack_of_current_exception()
                     self.failures += 1
 
     def run_and_capture_output(self, command):

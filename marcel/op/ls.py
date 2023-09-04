@@ -130,7 +130,7 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
             try:
                 op.send(file)
             except ValueError as e:
-                marcel.util.print_stack()
+                marcel.util.print_stack_of_current_exception()
                 message = (f'Caught {e.__class__.__name__} on file with '
                            f'device = {file.device} and '
                            f'inode = {file.inode}, '

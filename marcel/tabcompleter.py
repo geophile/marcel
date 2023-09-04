@@ -149,38 +149,34 @@ class TabCompleter:
             parser = marcel.parser.Parser(line, self.main)
             try:
                 parser.parse()
-                debug(f'parse succeeded, context: {parser.tab_completion_context}')
-            except Exception as e:
-                debug(f'caught {type(e)}: {e}')
-                # Don't do tab completion
-                candidates = None
-                return
             except marcel.exception.KillCommandException as e:
                 # Parse may have failed because of an unrecognized op, for example. Normal continuation should
                 # do the right thing.
                 debug(f'Caught KillCommandException: {e}')
+            except Exception as e:
+                debug(f'caught {type(e)}: {e}')
+                # Don't do tab completion
+                return
             except BaseException as e:
                 debug(f'Something went really wrong: {e}')
-                marcel.util.print_stack()
-            context = parser.tab_completion_context
-            if context.is_complete_op():
-                op = context.op()
-                if op is None:
-                    # Could be a partial op name, an executable name (or partial), or just gibberish
-                    candidates = self.complete_op(text)
-                elif op.op_name() == 'help':
+                marcel.util.print_stack_of_current_exception()
+            else:
+                debug('No exception')
+            debug(f'TabCompleter.candidates, is token op: {parser.expect_op()}')
+            if parser.expect_op():
+                op = parser.token
+                if op.op_name == 'help':
                     candidates = self.complete_help(text)
                 else:
-                    # Could be a partial op name, an executable name (or partial), or just gibberish
                     candidates = self.complete_op(text)
-            elif context.is_complete_arg():
+            else:
                 if len(text) == 0:
                     candidates = self.complete_filename(text)
                 elif text[-1].isspace():
                     text = ''
                     candidates = self.complete_filename(text)
                 elif text.startswith('-'):
-                    candidates = self.complete_flag(text, context.flags())
+                    candidates = self.complete_flag(text, parser.flags())
                 else:
                     candidates = self.complete_filename(text)
         return candidates

@@ -58,7 +58,7 @@ class Tail(marcel.core.Op):
     def setup(self):
         n = self.eval_function('n_arg', int)
         if n == 0:
-            raise marcel.exception.KillCommandException('Argument to head must not be 0.')
+            raise marcel.exception.KillCommandException('Argument to tail must not be 0.')
         self.impl = TailKeepN(self, n) if n > 0 else TailSkipN(self, -n)
 
     def receive(self, x):

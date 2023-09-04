@@ -628,15 +628,6 @@ class Lt(Symbol):
         return self.symbol == Token.READ_FILE
 
 
-class ImpliedMap(Token):
-
-    def __init__(self):
-        super().__init__(None, None, None)
-
-    def op_name(self):
-        return 'map'
-
-
 class LexerFailure(Token):
 
     def __init__(self, exception):
@@ -888,54 +879,6 @@ class Tokens(object):
 #
 #     Equivalent to: read str | [op_sequence [| store str]]
 
-class TabCompletionContext:
-    COMPLETE_OP = 'COMPLETE_OP'
-    COMPLETE_ARG = 'COMPLETE_ARG'
-    COMPLETE_DISABLED = 'COMPLETE_DISABLED'
-
-    def __init__(self):
-        self._complete = TabCompletionContext.COMPLETE_OP
-        self._op_token = None
-        self._op = None
-        self._flags = None
-
-    def __repr__(self):
-        return ('op' if self._complete == TabCompletionContext.COMPLETE_OP else
-                f'arg({self._op_token})' if self._complete == TabCompletionContext.COMPLETE_ARG else
-                f'disabled')
-
-    def complete_op(self):
-        self._complete = TabCompletionContext.COMPLETE_OP
-        self._op_token = None
-
-    def complete_arg(self, op_token):
-        self._complete = TabCompletionContext.COMPLETE_ARG
-        self._op_token = op_token
-
-    def complete_disabled(self):
-        self._complete = TabCompletionContext.COMPLETE_DISABLED
-        self._op_token = None
-
-    def is_complete_op(self):
-        return self._complete is TabCompletionContext.COMPLETE_OP
-
-    def is_complete_arg(self):
-        return self._complete is TabCompletionContext.COMPLETE_ARG
-
-    def is_complete_disabled(self):
-        return self._complete is TabCompletionContext.COMPLETE_DISABLED
-
-    def set_op(self, op, flags):
-        self._op = op
-        self._flags = flags
-
-    def op(self):
-        return self._op
-
-    def flags(self):
-        return self._flags
-
-
 class Parser(object):
 
     class ShellOpContext(object):
@@ -967,14 +910,21 @@ class Parser(object):
             self.parser = parser
             self.pipeline = pipeline
             self.start_position = None
+            self.arg_count = 0
+            self.op_token = None
 
         def __enter__(self):
+            self.parser.pipeline_stack.append(self)
             self.start_position = self._current_position()
             return self
 
         def __exit__(self, ex_type, ex_value, ex_traceback):
-            end_position = self._current_position()
-            self.pipeline.source = self.parser.text[self.start_position:end_position].strip()
+            if self.parser.tokens.more():
+                assert self.parser.current_pipeline() == self
+                self.parser.pipeline_stack.pop()
+                end_position = self._current_position()
+                self.pipeline.source = self.parser.text[self.start_position:end_position].strip()
+            # else: Keep the stack as is, for tab completion
 
         def _current_position(self):
             # Lexer.mark() returns text, start, end
@@ -986,8 +936,8 @@ class Parser(object):
         self.op_modules = main.op_modules
         self.tokens = Tokens(self, text)
         self.token = None  # The current token
-        self.tab_completion_context = TabCompletionContext()
         self.shell_op = False
+        self.pipeline_stack = []  # Contains PipelineSourceTrackers
 
     def __repr__(self):
         return str(self.tokens)
@@ -999,10 +949,8 @@ class Parser(object):
 
     def command(self):
         if self.next_token(String, Assign):
-            self.tab_completion_context.complete_disabled()
             command = self.assignment(self.token.value())
         else:
-            self.tab_completion_context.complete_op()
             command = self.pipeline()
         if not self.at_end():
             raise ParseError(f'{command} followed by excess tokens')
@@ -1071,7 +1019,7 @@ class Parser(object):
             return op_sequence
 
         pipeline = marcel.core.Pipeline()
-        with Parser.PipelineSourceTracker(self, pipeline) as pipeline_source_tracker:
+        with Parser.PipelineSourceTracker(self, pipeline):
             # If the next tokens are var comma, or var colon, then we have
             # pipeline variables being declared.
             if self.next_token(String, Comma) or self.next_token(String, Colon):
@@ -1100,31 +1048,28 @@ class Parser(object):
     def op_sequence(self):
         op_args = [self.op_args()]
         if self.next_token(Pipe):
-            self.tab_completion_context.complete_disabled()
             return op_args + self.op_sequence()
         else:
             return op_args
 
     # Returns (op name, list of arg tokens)
     def op_args(self):
-        self.tab_completion_context.complete_op()
+        self.start_counting_args()
         if self.next_token(Expression):
-            op_args = (ConstructedString(self, 'map'), [self.token])
+            op_token = ConstructedString(self, 'map')
+            arg_tokens = [self.token]
         else:
             op_token = self.op()
+            arg_tokens = []
             # ShellOpContext sets the parser to expect shell arg tokens (ShellString) or
             # marcel arg tokens MarcelString.
             with Parser.ShellOpContext(self, op_token):
-                arg_tokens = []
                 arg_token = self.arg()
-                if arg_token and not op_token.adjacent_to_next:
-                    # Token is followed by whitespace
-                    self.tab_completion_context.complete_arg(op_token)
                 while arg_token is not None:
                     arg_tokens.append(arg_token)
                     arg_token = self.arg()
-                op_args = (op_token, arg_tokens)
-        return op_args
+        self.current_pipeline().op_token = op_token
+        return op_token, arg_tokens
 
     def op(self):
         if self.next_token(String) or self.next_token(Remote) or self.next_token(Run):
@@ -1135,7 +1080,6 @@ class Parser(object):
     def arg(self):
         def marcel_arg():
             if self.next_token(Begin):
-                self.tab_completion_context.complete_disabled()
                 pipeline = self.pipeline()
                 if self.next_token(End):
                     return pipeline
@@ -1151,7 +1095,10 @@ class Parser(object):
                 return self.token
             else:
                 return None
-        return shell_arg() if self.shell_op else marcel_arg()
+
+        self.count_arg()
+        arg = shell_arg() if self.shell_op else marcel_arg()
+        return arg
 
     def vars(self):
         vars = []
@@ -1232,7 +1179,6 @@ class Parser(object):
             else:
                 for x in arg_tokens:
                     args.append(x.value() if isinstance(x, Token) else x)
-                self.tab_completion_context.set_op(op, op_module.args_parser().flags())
             op_module.args_parser().parse(args, op)
         return op
 
@@ -1281,3 +1227,39 @@ class Parser(object):
         pipeline = marcel.core.Pipeline()
         pipeline.append(op)
         return pipeline
+
+    # Tab completion support
+
+    def current_pipeline(self):
+        return self.pipeline_stack[-1] if len(self.pipeline_stack) > 0 else None
+
+    def start_counting_args(self):
+        self.current_pipeline().arg_count = -1
+
+    def count_arg(self):
+        pipeline = self.current_pipeline()
+        if pipeline:
+            pipeline.arg_count += 1
+
+    def expect_op(self):
+        pipeline = self.current_pipeline()
+        if pipeline:
+            if pipeline.arg_count == 0:
+                return (self.token.is_string() and
+                        self.token.value().isidentifier() and
+                        not self.text[-1].isspace())
+            elif pipeline.arg_count < 0:
+                return True
+        return False
+
+    def flags(self):
+        flags = []
+        pipeline = self.current_pipeline()
+        if pipeline and pipeline.op_token:
+            flag_args = self.op_modules[pipeline.op_token.value()].args_parser().flag_args
+            for flag in flag_args:
+                if flag.short:
+                    flags.append(flag.short)
+                if flag.long:
+                    flags.append(flag.long)
+        return flags

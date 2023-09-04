@@ -172,7 +172,7 @@ class Remote(marcel.core.Op):
                 except EOFError as e:
                     self.propagate_flush()
             except BaseException as e:
-                marcel.util.print_stack()
+                marcel.util.print_stack_of_current_exception()
                 print(e)
 
         # Op

@@ -3998,3 +3998,60 @@ FIXED
 
 M 0.17.1 jao@cheese /tmp$ cd ~/Desktop/photos/Relo*
 [Errno 2] No such file or directory: '/home/jao/Desktop/photos/Relo*'
+
+----------------------------------------------------------------------
+
+FIXED
+
+211. Crash in complex pipeline
+
+M 0.17.3 jao@loon ~/consulting/jamie/downloads$ (['NWSTAT', 'NWSTAT']) | expand | args (| x: \
+    read -l */*.sps | \
+    select (file, line: x in line) | \
+    map (file, line: (file, line.split())) | \
+    expand 1 | \
+    select (file, token: token.startswith(x)) | \
+    map (file, token: (file, int(token[6:]))) | \
+    red . max | \
+    map (file, m: (x, m)) | \
+    red . max \
+|)
+('NWSTAT', 20)
+Process Process-47:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 273, in execute
+    self.pipeline.run()
+  File "/home/jao/git/marcel/marcel/core.py", line 431, in run
+    self.ops[0].run()
+  File "/home/jao/git/marcel/marcel/op/map.py", line 67, in run
+    self.send(self.call(self.function))
+  File "/home/jao/git/marcel/marcel/core.py", line 89, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 120, in receive_input
+    self.receive(x if type(x) in (tuple, list) else
+  File "/home/jao/git/marcel/marcel/op/expand.py", line 102, in receive
+    self.expander.receive(x)
+  File "/home/jao/git/marcel/marcel/op/expand.py", line 135, in receive
+    self.op.send(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 89, in send
+    receiver.receive_input(x)
+  File "/home/jao/git/marcel/marcel/core.py", line 120, in receive_input
+    self.receive(x if type(x) in (tuple, list) else
+  File "/home/jao/git/marcel/marcel/op/args.py", line 92, in receive
+    self.pipeline_wrapper.run_pipeline(self.args)
+  File "/home/jao/git/marcel/marcel/core.py", line 573, in run_pipeline
+    marcel.core.Command(env, None, self.pipeline).execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 271, in execute
+    self.pipeline.setup()
+  File "/home/jao/git/marcel/marcel/core.py", line 422, in setup
+    op.setup()
+  File "/home/jao/git/marcel/marcel/op/red.py", line 150, in setup
+    if function.is_grouping():
+AttributeError: 'NoneType' object has no attribute 'is_grouping'
+M 0.17.3 jao@loon ~/consulting/jamie/downloads$ 

@@ -117,10 +117,10 @@ def copy(x):
     except Exception as e:
         sys.stdout.flush()
         print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__, flush=True)
-        print_stack(sys.__stderr__)
+        print_stack_of_current_exception(sys.__stderr__)
 
 
-def print_stack(file=None):
+def print_stack_of_current_exception(file=None):
     if file is None:
         file = sys.__stderr__
     exception_type, exception, trace = sys.exc_info()

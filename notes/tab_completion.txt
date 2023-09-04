@@ -137,3 +137,77 @@ Sometimes there's a space when there shouldn't be, and vice versa.
 
 Check ops, args, filenames.
 
+----------------------------------------------------------------------
+
+July 2023
+
+Tab completion broken again. test_tab_completion.py had disabled
+tests! There's been bitrot. TabCompletionContext tracking is easy to
+break. It gets maintained at random places in the parse code, it's not
+systematic. Parsing code gets changed, tab context isn't maintained
+(and apparently has not been tested).
+
+What *should* happen:
+
+Line           Completion       Completion
+               type
+
+<tab> (1)      none             <none>
+
+l<tab>         op               ls, load
+
+ls<tab>        op               "ls "
+
+ls <tab>       arg              <local files>
+
+ls x<tab>      arg              <local files beginning with x>
+
+ls (<tab>      none             Inside an expression, don't do any completion
+
+ls -<tab>      arg              short and long flags of ls
+
+ls --<tab>     arg              long flags of ls
+
+ls |<tab> (1)  none
+
+ls | <tab> (2) none
+
+ls | args [<tab>        text=<>, token=Begin([), KCE (premature end)
+
+
+(1) bash does not do tab completion on empty line
+
+(2) bash does do completion on line with only whitespace. Seems to
+show all executables as well as legal bash symbols. Doesn't seem very
+useful, so don't bother.
+
+......................................................................
+
+
+     op     arg      
+A    B CD   E  F G   
+
+A: Before op: no TC (tab completion)
+
+B: Inside op: TC for op
+
+C: op complete but no whitespace yet: TC for op (should be just the op
+   itself, unless the op is a prefix of another).
+
+D: Before arg: TC for arg
+
+E: Inside arg: TC for arg
+
+F: TC for arg
+
+G: TC for (next) arg
+
+----------------------------------------------------------------------
+
+Information needed to determine tab completion:
+
+- Which token, 1st or subsequent?
+
+- Is last char whitespace? Determines whether to complete last string
+  or find candidates for empty string of next token.
+

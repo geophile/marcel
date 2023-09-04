@@ -556,3 +556,93 @@ M 0.17.3 jao@cheese ~$ fork asdf (| gen 3 |)
 0
 1
 2
+
+----------------------------------------------------------------------
+
+208. cd crashes
+
+M 0.17.3 jao@cheese ~/Dropbox$ ls
+drwx------   jao    jao        4096   2023 Jul 05 17:52:03   .
+-rw-r--r--   jao    jao          41   2023 Mar 16 11:24:41   .dropbox
+drwxr-xr-x   jao    jao        4096   2023 Mar 16 11:24:41   .dropbox.cache
+-rw-r--r--   jao    jao          29   2023 Jul 02 11:51:33   transfer.txt
+M 0.17.3 jao@cheese ~/Dropbox$ more .dropbox
+{"tag":"dropbox","ns":117078224,"n":true}
+M 0.17.3 jao@cheese ~/Dropbox$ cd .dropbox
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 317, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 300, in main
+    MAIN.run(print_prompt)
+  File "/home/jao/git/marcel/marcel/main.py", line 131, in run
+    self.run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 153, in run_command
+    command.execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 273, in execute
+    self.pipeline.run()
+  File "/home/jao/git/marcel/marcel/core.py", line 431, in run
+    self.ops[0].run()
+  File "/home/jao/git/marcel/marcel/op/cd.py", line 71, in run
+    self.env().dir_state().cd(self.directory)
+  File "/home/jao/git/marcel/marcel/env.py", line 115, in cd
+    os.chdir(new_dir)
+NotADirectoryError: [Errno 20] Not a directory: '/home/jao/Dropbox/.dropbox'
+
+----------------------------------------------------------------------
+
+209: Farcel crashes if ~/.config/marcel doesn't exist
+
+24261: Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/.config/marcel'
+Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/.config/marcel'
+  File "/usr/local/bin/farcel.py", line 184, in main
+    namespace = marcel.nestednamespace.NestedNamespace(read_config())
+  File "/usr/local/bin/farcel.py", line 160, in read_config
+    config_path = locations.config_path()
+  File "/usr/local/lib/python3.10/dist-packages/marcel/locations.py", line 28, in config_path
+    return self._dir('XDG_CONFIG_HOME', '.config') / 'startup.py'
+  File "/usr/local/lib/python3.10/dist-packages/marcel/locations.py", line 49, in _dir
+    dir.mkdir(exist_ok=False)
+  File "/usr/lib/python3.10/pathlib.py", line 1175, in mkdir
+    self._accessor.mkdir(self, mode)
+24261: Exiting
+
+----------------------------------------------------------------------
+
+210: types crashes on input from jobs
+
+M 0.17.3 jao@loon ~$ jobs | types
+Process Process-7:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 273, in execute
+    self.pipeline.run()
+  File "/home/jao/git/marcel/marcel/core.py", line 431, in run
+    self.ops[0].run()
+  File "/home/jao/git/marcel/marcel/op/jobs.py", line 59, in run
+    for job in marcel.job.JobControl.only.jobs():
+  File "/home/jao/git/marcel/marcel/job.py", line 245, in jobs
+    self.remove_completed()
+  File "/home/jao/git/marcel/marcel/job.py", line 299, in remove_completed
+    if job.process is not None and job.process.is_alive():
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 160, in is_alive
+    assert self._parent_pid == os.getpid(), 'can only test a child process'
+AssertionError: can only test a child process
+
+
+Also happens on jobs >& x
+
+----------------------------------------------------------------------
+
+212. Looking for op_modules on Environment
+
+M 0.17.3 jao@loon ~/git/marcel$ sudo (| gen 3 | args (| x: ((x, -x)) |) |)
+Error: 'Environment' object has no attribute 'op_modules'

@@ -93,7 +93,7 @@ def _default_exception_handler(exception, op, command_input, thread=None):
     buffer.append(': ')
     buffer.append(str(exception))
     print(''.join(buffer), file=sys.stderr)
-    marcel.util.print_stack()
+    marcel.util.print_stack_of_current_exception()
 
 
 def set_exception_handler(handler):

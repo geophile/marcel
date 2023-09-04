@@ -31,7 +31,7 @@ any tuples for which {r:PREDICATE} evaluates to True are passed to the {r:THEN_P
 
 {b:Example}
 
-{L,indent=4,wrap=F}gen 100 | ifthen (x: x % 7 == 0) [store div7] | store all100
+{L,indent=4,wrap=F}gen 100 | ifthen (x: x % 7 == 0) (| store div7 |) | store all100
 
 {r:gen 100} generates a stream of integers, 0, ..., 99.
 The predicate is True for integers divisible by 7. These integers are

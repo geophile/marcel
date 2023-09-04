@@ -109,7 +109,7 @@ class PipelineRunner(threading.Thread):
         except BaseException as e:
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')
             with TRACE.open() as file:
-                marcel.util.print_stack(file)
+                marcel.util.print_stack_of_current_exception(file)
             self.pickler.receive_error(marcel.object.error.Error(e))
         TRACE.write('PipelineRunner: Execution complete.')
 
@@ -134,11 +134,11 @@ def kill_descendents(signal_id):
         except Exception as e:
             TRACE.write(f'Caught exception while killing process {pid} and descendents: {e}')
             with TRACE.open() as file:
-                marcel.util.print_stack(file)
+                marcel.util.print_stack_of_current_exception(file)
     except BaseException as e:
         TRACE.write(f'Caught {type(e)} in kill_self_and_descendents: {e}')
         with TRACE.open() as file:
-            marcel.util.print_stack(file)
+            marcel.util.print_stack_of_current_exception(file)
 
 
 # Adapted from Environment.read_config
@@ -204,7 +204,7 @@ def main():
     except Exception as e:
         TRACE.write(f'Caught {type(e)}: {e}')
         with TRACE.open() as file:
-            marcel.util.print_stack(file)
+            marcel.util.print_stack_of_current_exception(file)
     try:
         signal_id = input.load()
         TRACE.write(f'Received signal {signal_id}')

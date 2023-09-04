@@ -149,7 +149,6 @@ class Red(marcel.core.Op):
             function = self.functions[i]
             if function.is_grouping():
                 grouping_positions.append(i)
-                self.functions[i] = None
             else:
                 data_positions.append(i)
         if len(grouping_positions) == 0:
@@ -236,7 +235,7 @@ class GroupingReducer(Reducer):
             self.accumulators[group] = accumulator
         for i in range(self.n):
             reducer = op.functions[i]
-            accumulator[i] = op.call(reducer, accumulator[i], x[i]) if reducer else x[i]
+            accumulator[i] = x[i] if reducer.is_grouping() else op.call(reducer, accumulator[i], x[i])
         if op.incremental:
             op.send(x + tuple(self.data(accumulator)))
 
