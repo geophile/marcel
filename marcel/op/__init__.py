@@ -19,7 +19,6 @@ public = [
     'bash',
     'bg',
     'cd',
-    'delete',
     'difference',
     'dirs',
     'download',

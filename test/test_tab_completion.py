@@ -5,7 +5,7 @@ import test_base
 TEST = test_base.TestTabCompletion()
 TestDir = test_base.TestDir
 
-ALL_OPS = ['args', 'assign', 'bash', 'bg', 'cd', 'delete', 'difference', 'dirs', 'download', 'edit', 'env', 'expand',
+ALL_OPS = ['args', 'assign', 'bash', 'bg', 'cd', 'difference', 'dirs', 'download', 'edit', 'env', 'expand',
            'fg', 'fork', 'gen', 'head', 'help', 'history', 'ifelse', 'ifthen', 'import', 'intersect', 'jobs', 'join',
            'load', 'ls', 'map', 'popd', 'ps', 'pushd', 'pwd', 'read', 'red', 'remote', 'reverse', 'run', 'select',
            'sort', 'sql', 'squish', 'store', 'sudo', 'tail', 'tee', 'timer', 'union', 'unique', 'upload', 'version',
@@ -125,7 +125,7 @@ def test_pipeline_args():
         TEST.run(line='ls --recursive -d | args (|', text='',
                  expected=ALL_OPS)
         TEST.run(line='ls --recursive -d | args (|d', text='d',
-                 expected=['delete', 'difference', 'dirs', 'download'])
+                 expected=['difference', 'dirs', 'download'])
         # Not sure why, but Python's input invokes the completer with text = '' in this case
         TEST.run(line='ls --recursive -d | args (|d:', text='',
                  expected=ALL_OPS)

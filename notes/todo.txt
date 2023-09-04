@@ -488,10 +488,6 @@ E.g. expand {'a': 1, 'b': 2} -> ('a', 1), ('b', 2)
 
 ----------------------------------------------------------------------
 
-Don't need both the delete op and env -d.
-
-----------------------------------------------------------------------
-
 Reduction to form a list is clunky. Need to enclose the items to be
 gathered into lists before reduction with +.
 

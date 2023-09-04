@@ -908,3 +908,8 @@ e.g. x = (| p |)
 - What if p is rebound? Not to a pipeline? Does x bind p's name? p's value?
 
 Resolved as bug 202
+
+
+----------------------------------------------------------------------
+
+Don't need both the delete op and env -d.

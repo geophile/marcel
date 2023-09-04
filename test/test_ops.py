@@ -1415,27 +1415,6 @@ def test_if():
 
 
 @timeit
-def test_delete():
-    TEST.run(test='a = (1)',
-             verification='env | select (k, v: k == "a")',
-             expected_out=[('a', 1)])
-    TEST.run(test='delete a',
-             verification='env | select (k, v: k == "a")',
-             expected_out=[])
-    TEST.run(test='delete not_a_variable',
-             expected_err='not defined')
-    # Multiple deletes
-    TEST.run('a = (1)')
-    TEST.run('b = two')
-    TEST.run('c = (3.0)')
-    TEST.run(test='env | select (k, v: k in ["a", "b", "c"]) | map (k, v: k) | sort',
-             expected_out=['a', 'b', 'c'])
-    TEST.run(test='delete a c',
-             verification='env | select (k, v: k in ["a", "b", "c"]) | map (k, v: k) | sort',
-             expected_out=['b'])
-
-
-@timeit
 def test_read():
     with TestDir() as testdir:
         file = open(f'{testdir}/f1.csv', 'w')
@@ -2433,7 +2412,6 @@ def main_stable():
     test_redirect_file()
     test_redirect_var()
     test_if()
-    test_delete()
     test_read()
     test_intersect()
     test_union()
