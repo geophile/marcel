@@ -34,12 +34,12 @@ output is unspecified.
 '''
 
 
-def union(env, *pipelines):
+def union(*pipelines):
     x = []
     for p in pipelines:
         assert isinstance(p, marcel.core.Pipelineable)
         x.append(p.create_pipeline())
-    return Union(env), x
+    return Union(), x
 
 
 class UnionArgsParser(marcel.argsparser.ArgsParser):
@@ -53,8 +53,8 @@ class UnionArgsParser(marcel.argsparser.ArgsParser):
 
 class Union(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.pipelines_arg = None
         self.pipelines = None
 
@@ -63,52 +63,50 @@ class Union(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         self.pipelines = []
         for pipeline_arg in self.pipelines_arg:
-            pipeline = marcel.core.PipelineWrapper.create(self.env(),
-                                                          self.owner.error_handler,
+            pipeline = marcel.core.PipelineWrapper.create(self.owner.error_handler,
                                                           pipeline_arg,
                                                           self.customize_pipeline)
-            pipeline.setup()
+            pipeline.setup(env)
             self.pipelines.append(pipeline)
 
     # Op
 
-    def receive(self, x):
-        self.send(x)
+    def receive(self, env, x):
+        self.send(env, x)
 
-    def flush(self):
+    def flush(self, env):
         for pipeline in self.pipelines:
-            # marcel.core.Command(self.env(), None, pipeline).execute()
-            pipeline.run_pipeline(None)
+            pipeline.run_pipeline(env, None)
         self.pipelines.clear()
-        self.propagate_flush()
+        self.propagate_flush(env)
 
     # Internal
 
-    def customize_pipeline(self, pipeline):
+    def customize_pipeline(self, env, pipeline):
         # Union is implemented by passing the input stream along in receive(), and then having each pipeline
         # arg send its output via flush. This depends on all the pipeline args having the same receiver as the
         # union op itself. However, we only want one flush after everything is done. PropagateFlushFromLast
         # makes sure that only the last pipeline propagates the flush.
         last = len(self.pipelines) == len(self.pipelines_arg) - 1
-        pipeline.append(PropagateFlushFromLast(self.env(), last))
+        pipeline.append(PropagateFlushFromLast(last))
         pipeline.last_op().receiver = self.receiver
         return pipeline
 
 
 class PropagateFlushFromLast(marcel.core.Op):
 
-    def __init__(self, env, last):
-        super().__init__(env)
+    def __init__(self, last):
+        super().__init__()
         self.last = last
 
     # Op
 
-    def receive(self, x):
-        self.send(x)
+    def receive(self, env, x):
+        self.send(env, x)
 
-    def flush(self):
+    def flush(self, env):
         if self.last:
-            self.propagate_flush()
+            self.propagate_flush(env)

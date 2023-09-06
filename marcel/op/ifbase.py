@@ -31,8 +31,8 @@ class IfBaseArgsParser(marcel.argsparser.ArgsParser):
 
 class IfBase(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.predicate = None
         self.then_arg = None
         self.then = None
@@ -42,20 +42,19 @@ class IfBase(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        self.then = marcel.core.PipelineWrapper.create(self.env(),
-                                                       self.owner.error_handler,
+    def setup(self, env):
+        self.then = marcel.core.PipelineWrapper.create(self.owner.error_handler,
                                                        self.then_arg,
-                                                       lambda pipeline: pipeline)
-        self.then.setup()
-        self.then.prepare_to_receive()
+                                                       lambda env, pipeline: pipeline)
+        self.then.setup(env)
+        self.then.prepare_to_receive(env)
 
-    def receive(self, x):
+    def receive(self, env, x):
         assert False
 
-    def flush(self):
-        self.then.flush()
-        self.propagate_flush()
+    def flush(self, env):
+        self.then.flush(env)
+        self.propagate_flush(env)
 
     def cleanup(self):
         self.then.cleanup()

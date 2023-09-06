@@ -43,10 +43,10 @@ accumulated into a list and bound to that parameter.
 '''
 
 
-def args(env, pipeline_function, all=False):
+def args(pipeline_function, all=False):
     op_args = ['--all'] if all else []
     op_args.append(marcel.core.PipelineFunction(pipeline_function))
-    return (Args(env)), op_args
+    return (Args()), op_args
 
 
 class ArgsArgsParser(marcel.argsparser.ArgsParser):
@@ -60,8 +60,8 @@ class ArgsArgsParser(marcel.argsparser.ArgsParser):
 
 class Args(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.all = None
         self.pipeline_arg = None
         self.n_params = None
@@ -74,34 +74,33 @@ class Args(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         pipeline_arg = self.pipeline_arg
         assert isinstance(pipeline_arg, marcel.core.Pipelineable)
-        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(self.env(),
-                                                                   self.owner.error_handler,
+        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(self.owner.error_handler,
                                                                    pipeline_arg,
                                                                    self.customize_pipeline)
         self.n_params = pipeline_arg.n_params()
         self.check_args()
         self.args = []
-        self.pipeline_wrapper.setup()
+        self.pipeline_wrapper.setup(env)
 
-    def receive(self, x):
+    def receive(self, env, x):
         self.args.append(unwrap_op_output(x))
         if not self.all and len(self.args) == self.n_params:
-            self.pipeline_wrapper.run_pipeline(self.args)
+            self.pipeline_wrapper.run_pipeline(env, self.args)
             self.args.clear()
 
-    def flush(self):
+    def flush(self, env):
         if len(self.args) > 0:
             if self.all:
                 self.args = [self.args]
             else:
                 while len(self.args) < self.n_params:
                     self.args.append(None)
-            self.pipeline_wrapper.run_pipeline(self.args)
+            self.pipeline_wrapper.run_pipeline(env, self.args)
             self.args.clear()
-        self.propagate_flush()
+        self.propagate_flush(env)
 
     def check_args(self):
         error = None
@@ -112,13 +111,10 @@ class Args(marcel.core.Op):
         if error:
             raise marcel.exception.KillCommandException(error)
 
-    def customize_pipeline(self, pipeline):
-        # By appending map(self.send_pipeline_output) to the pipeline, we relay pipeline output
+    def customize_pipeline(self, env, pipeline):
+        # By appending this map invocation to the pipeline, we relay pipeline output
         # to arg's downstream operator. But flush is a dead end, it doesn't propagate
         # to arg's downstream, which was the issue in bug 136.
-        pipeline.append(marcel.opmodule.create_op(self.env(), 'map', self.send_pipeline_output))
+        pipeline.append(marcel.opmodule.create_op(env, 'map', lambda *x: self.send(env, x)))
         return pipeline
-
-    def send_pipeline_output(self, *x):
-        self.send(x)
 

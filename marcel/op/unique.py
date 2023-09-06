@@ -34,8 +34,8 @@ is specified.
 '''
 
 
-def unique(env, consecutive=False):
-    return Unique(env), ['--consecutive'] if consecutive else []
+def unique(consecutive=False):
+    return Unique(), ['--consecutive'] if consecutive else []
 
 
 class UniqueArgsParser(marcel.argsparser.ArgsParser):
@@ -48,8 +48,8 @@ class UniqueArgsParser(marcel.argsparser.ArgsParser):
 
 class Unique(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.consecutive = None
         self.uniquer = None
 
@@ -58,16 +58,16 @@ class Unique(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         self.uniquer = ConsecutiveUniquer(self) if self.consecutive else GeneralUniquer(self)
 
-    def receive(self, x):
-        self.uniquer.receive(x)
+    def receive(self, env, x):
+        self.uniquer.receive(env, x)
 
 
 class Uniquer:
 
-    def receive(self, x):
+    def receive(self, env, x):
         assert False
 
 
@@ -77,12 +77,12 @@ class GeneralUniquer(Uniquer):
         self.op = op
         self.unique = set()
 
-    def receive(self, x):
+    def receive(self, env, x):
         x = marcel.util.wrap_op_input(x)  # convert list to tuple
         try:
             if x not in self.unique:
                 self.unique.add(x)
-                self.op.send(x)
+                self.op.send(env, x)
         except TypeError:
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
@@ -93,7 +93,7 @@ class ConsecutiveUniquer(Uniquer):
         self.op = op
         self.current = None
 
-    def receive(self, x):
+    def receive(self, env, x):
         if self.current != x:
-            self.op.send(x)
+            self.op.send(env, x)
             self.current = x

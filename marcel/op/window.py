@@ -96,7 +96,7 @@ tuples:
 '''
 
 
-def window(env, predicate=None, overlap=None, disjoint=None):
+def window(predicate=None, overlap=None, disjoint=None):
     args = []
     if overlap is not None:
         args.extend(['--overlap', overlap])
@@ -104,7 +104,7 @@ def window(env, predicate=None, overlap=None, disjoint=None):
         args.extend(['--disjoint', disjoint])
     if predicate:
         args.append(predicate)
-    return Window(env), args
+    return Window(), args
 
 
 class WindowArgsParser(marcel.argsparser.ArgsParser):
@@ -120,8 +120,8 @@ class WindowArgsParser(marcel.argsparser.ArgsParser):
 
 class Window(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.predicate = None
         self.overlap_arg = None
         self.overlap = None
@@ -146,9 +146,9 @@ class Window(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        self.overlap = self.eval_function('overlap_arg', int)
-        self.disjoint = self.eval_function('disjoint_arg', int)
+    def setup(self, env):
+        self.overlap = self.eval_function(env, 'overlap_arg', int)
+        self.disjoint = self.eval_function(env, 'disjoint_arg', int)
         if self.predicate:
             self.window_generator = PredicateWindow(self)
         elif self.overlap:
@@ -161,20 +161,17 @@ class Window(marcel.core.Op):
                               'disjoint', 'must be a non-negative int')
             self.window_generator = DisjointWindow(self)
             self.n = self.disjoint
-
-    def set_env(self, env):
-        super().set_env(env)
         if self.predicate:
             self.predicate.set_globals(env.vars())
 
     # Op
 
-    def receive(self, x):
-        self.window_generator.receive(x)
+    def receive(self, env, x):
+        self.window_generator.receive(env, x)
 
-    def flush(self):
+    def flush(self, env):
         if self.window_generator is not None:
-            self.window_generator.flush()
+            self.window_generator.flush(env)
 
 
 class WindowBase:
@@ -183,15 +180,15 @@ class WindowBase:
         self.op = op
         self.window = []
 
-    def receive(self, x):
+    def receive(self, env, x):
         assert False
 
-    def flush(self):
+    def flush(self, env):
         assert False
 
-    def flush_window(self):
+    def flush_window(self, env):
         if len(self.window) > 0:
-            self.op.send(tuple(self.window))
+            self.op.send(env, tuple(self.window))
             self.window = []
 
 
@@ -200,14 +197,14 @@ class PredicateWindow(WindowBase):
     def __init__(self, op):
         super().__init__(op)
 
-    def receive(self, x):
-        if self.op.call(self.op.predicate, *x):
-            self.flush_window()
+    def receive(self, env, x):
+        if self.op.call(env, self.op.predicate, *x):
+            self.flush_window(env)
         self.window.append(marcel.util.unwrap_op_output(x))
 
-    def flush(self):
-        self.flush_window()
-        self.op.propagate_flush()
+    def flush(self, env):
+        self.flush_window(env)
+        self.op.propagate_flush(env)
 
 
 class OverlapWindow(WindowBase):
@@ -215,25 +212,25 @@ class OverlapWindow(WindowBase):
     def __init__(self, op):
         super().__init__(op)
 
-    def receive(self, x):
+    def receive(self, env, x):
         if len(self.window) == self.op.n:
             self.window = self.window[1:]
         self.window.append(marcel.util.unwrap_op_output(x))
         if len(self.window) == self.op.n:
-            self.op.send(tuple(self.window))
+            self.op.send(env, tuple(self.window))
 
-    def flush(self):
+    def flush(self, env):
         if len(self.window) > 0:
             padding = None
             if len(self.window) < self.op.n:
                 while len(self.window) < self.op.n:
                     self.window.append(padding)
-                self.op.send(tuple(self.window))
+                self.op.send(env, tuple(self.window))
             for i in range(self.op.n - 1):
                 self.window = self.window[1:]
                 self.window.append(padding)
-                self.op.send(tuple(self.window))
-            self.op.propagate_flush()
+                self.op.send(env, tuple(self.window))
+            self.op.propagate_flush(env)
 
 
 class DisjointWindow(WindowBase):
@@ -241,16 +238,16 @@ class DisjointWindow(WindowBase):
     def __init__(self, op):
         super().__init__(op)
 
-    def receive(self, x):
+    def receive(self, env, x):
         self.window.append(marcel.util.unwrap_op_output(x))
         if len(self.window) == self.op.n:
-            self.flush_window()
+            self.flush_window(env)
 
-    def flush(self):
+    def flush(self, env):
         if len(self.window) > 0:
             padding = None
             while len(self.window) < self.op.n:
                 self.window.append(padding)
-            self.flush_window()
-        self.op.propagate_flush()
+            self.flush_window(env)
+        self.op.propagate_flush(env)
 

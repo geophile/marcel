@@ -112,10 +112,10 @@ the first {n:n} will be ignored.
 '''
 
 
-def red(env, *functions, incremental=False):
+def red(*functions, incremental=False):
     args = ['--incremental'] if incremental else []
     args.extend([marcel.reduction.r_group if f is None else f for f in functions])
-    return Red(env), args
+    return Red(), args
 
 
 class RedArgsParser(marcel.argsparser.ArgsParser):
@@ -129,8 +129,8 @@ class RedArgsParser(marcel.argsparser.ArgsParser):
 
 class Red(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.incremental = None
         self.functions = None
         self.reducer = None
@@ -142,7 +142,7 @@ class Red(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         grouping_positions = []
         data_positions = []
         for i in range(len(self.functions)):
@@ -155,20 +155,17 @@ class Red(marcel.core.Op):
             self.reducer = NonGroupingReducer(self)
         else:
             self.reducer = GroupingReducer(self, grouping_positions, data_positions)
-
-    def set_env(self, env):
-        super().set_env(env)
         for function in self.functions:
             if isinstance(function, marcel.function.Function):
                 function.set_globals(env.vars())
 
     # Op
 
-    def receive(self, x):
-        self.reducer.receive(x)
+    def receive(self, env, x):
+        self.reducer.receive(env, x)
 
-    def flush(self):
-        self.reducer.flush()
+    def flush(self, env):
+        self.reducer.flush(env)
 
 
 class Reducer:
@@ -177,10 +174,10 @@ class Reducer:
         self.op = op
         self.n = len(self.op.functions)
 
-    def receive(self, x):
+    def receive(self, env, x):
         assert False
 
-    def flush(self):
+    def flush(self, env):
         assert False
 
 
@@ -194,26 +191,26 @@ class NonGroupingReducer(Reducer):
             if self.op.functions[i].is_count():
                 self.accumulator[i] = 0
 
-    def receive(self, x):
+    def receive(self, env, x):
         op = self.op
         if len(x) < self.n:
-            op.fatal_error(x, 'Input too short.')
+            op.fatal_error(env, x, 'Input too short.')
         accumulator = self.accumulator
         functions = op.functions
         for i in range(self.n):
             assert functions is not None
             assert accumulator is not None
             assert x is not None
-            accumulator[i] = op.call(functions[i], accumulator[i], x[i])
+            accumulator[i] = op.call(env, functions[i], accumulator[i], x[i])
         if op.incremental:
-            op.send(x + tuple(accumulator))
+            op.send(env, x + tuple(accumulator))
 
-    def flush(self):
+    def flush(self, env):
         op = self.op
         if not op.incremental and self.accumulator is not None:
-            op.send(tuple(self.accumulator))
+            op.send(env, tuple(self.accumulator))
             self.accumulator = None
-        op.propagate_flush()
+        op.propagate_flush(env)
 
 
 class GroupingReducer(Reducer):
@@ -224,10 +221,10 @@ class GroupingReducer(Reducer):
         self.data_positions = data_positions
         self.accumulators = {}  # group -> accumulator
 
-    def receive(self, x):
+    def receive(self, env, x):
         op = self.op
         if len(x) < self.n:
-            op.fatal_error(x, 'Input too short.')
+            op.fatal_error(env, x, 'Input too short.')
         group = tuple(self.group(x))
         accumulator = self.accumulators.get(group, None)
         if accumulator is None:
@@ -235,17 +232,17 @@ class GroupingReducer(Reducer):
             self.accumulators[group] = accumulator
         for i in range(self.n):
             reducer = op.functions[i]
-            accumulator[i] = x[i] if reducer.is_grouping() else op.call(reducer, accumulator[i], x[i])
+            accumulator[i] = x[i] if reducer.is_grouping() else op.call(env, reducer, accumulator[i], x[i])
         if op.incremental:
-            op.send(x + tuple(self.data(accumulator)))
+            op.send(env, x + tuple(self.data(accumulator)))
 
-    def flush(self):
+    def flush(self, env):
         op = self.op
         if not op.incremental and self.accumulators is not None:
             for _, data in self.accumulators.items():
-                op.send(tuple(data))
+                op.send(env, tuple(data))
                 self.accumulators = None
-        op.propagate_flush()
+        op.propagate_flush(env)
 
     def group(self, x):
         group = []

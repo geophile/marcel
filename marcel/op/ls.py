@@ -56,7 +56,7 @@ Run {n:help file} for more information on {n:File} objects.
 '''
 
 
-def ls(env, *paths, depth=None, recursive=False, file=False, dir=False, symlink=False):
+def ls(*paths, depth=None, recursive=False, file=False, dir=False, symlink=False):
     args = []
     if depth == 0:
         args.append('-0')
@@ -71,7 +71,7 @@ def ls(env, *paths, depth=None, recursive=False, file=False, dir=False, symlink=
     if symlink:
         args.append('--symlink')
     args.extend(paths)
-    return Ls(env), args
+    return Ls(), args
 
 
 class LsArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
@@ -86,8 +86,8 @@ class LsArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
 
 class Ls(marcel.op.filenamesop.FilenamesOp):
 
-    def __init__(self, env):
-        super().__init__(env, Ls.send_path)
+    def __init__(self):
+        super().__init__(Ls.send_path)
 
     def __repr__(self):
         if self.d0:
@@ -119,7 +119,7 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
     # For use by this class
 
     @staticmethod
-    def send_path(op, file):
+    def send_path(op, env, file):
         assert type(file) is File, f'{type(file)} {file}'
         file_stat = file.path.lstat()
         mode = file_stat.st_mode
@@ -128,12 +128,12 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
         d = stat.S_ISDIR(mode) and not s
         if ((op.file and f) or (op.dir and d) or (op.symlink and s)) and file.path not in op.emitted_paths:
             try:
-                op.send(file)
+                op.send(env, file)
             except ValueError as e:
                 marcel.util.print_stack_of_current_exception()
                 message = (f'Caught {e.__class__.__name__} on file with '
                            f'device = {file.device} and '
                            f'inode = {file.inode}, '
                            f'(file name may not be printable).')
-                op.non_fatal_error(None, message)
+                op.non_fatal_error(env, None, message)
             op.emitted_paths.add(file.path)

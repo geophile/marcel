@@ -38,9 +38,9 @@ output is unspecified.
 '''
 
 
-def intersect(env, pipeline):
+def intersect(pipeline):
     assert isinstance(pipeline, marcel.core.Pipelineable)
-    return Intersect(env), [pipeline.create_pipeline()]
+    return Intersect(), [pipeline.create_pipeline()]
 
 
 class IntersectArgsParser(marcel.argsparser.ArgsParser):
@@ -55,8 +55,8 @@ class Intersect(marcel.core.Op):
 
     # AbstractOp
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.pipelines_arg = None
         self.common = None  # item -> count: Accumulated intersection
         self.input = None   # item -> count: From one of the pipeline args
@@ -64,16 +64,15 @@ class Intersect(marcel.core.Op):
     def __repr__(self):
         return f'intersect({self.pipelines_arg})'
 
-    def setup(self):
+    def setup(self, env):
         for pipeline_arg in self.pipelines_arg:
-            pipeline = marcel.core.PipelineWrapper.create(self.env(),
-                                                          self.owner.error_handler,
+            pipeline = marcel.core.PipelineWrapper.create(self.owner.error_handler,
                                                           pipeline_arg,
                                                           self.customize_pipeline)
             # pipeline.setup() will store item counts in self.input.
             self.input = {}
-            pipeline.setup()
-            pipeline.run_pipeline(None)
+            pipeline.setup(env)
+            pipeline.run_pipeline(env, None)
             # Merge input with common
             if self.common is None:
                 self.common = self.input
@@ -89,17 +88,17 @@ class Intersect(marcel.core.Op):
                 for item in deleted:
                     del self.common[item]
 
-    def receive(self, x):
+    def receive(self, env, x):
         try:
             count = self.common.get(x, 0)
             if count > 0:
                 self.common[x] -= 1
-                self.send(x)
+                self.send(env, x)
         except TypeError:
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
     # Internal
 
-    def customize_pipeline(self, pipeline):
+    def customize_pipeline(self, env, pipeline):
         def count_inputs(*x):
             try:
                 input[x] = input.get(x, 0) + 1
@@ -107,5 +106,5 @@ class Intersect(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
         input = self.input
-        pipeline.append(marcel.opmodule.create_op(self.env(), 'map', count_inputs))
+        pipeline.append(marcel.opmodule.create_op(env, 'map', count_inputs))
         return pipeline

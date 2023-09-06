@@ -208,9 +208,9 @@ class Remote(marcel.core.Op):
 
     #
 
-    def customize_pipeline(self, pipeline, host):
-        remote = Remote.RunRemote(self.env(), host, pipeline)
-        label_thread = Remote.LabelThread(self.env(), host)
+    def customize_pipeline(self, env, pipeline, host):
+        remote = Remote.RunRemote(env, host, pipeline)
+        label_thread = Remote.LabelThread(env, host)
         label_thread.receiver = self.receiver
         wrapped_pipeline = marcel.core.Pipeline()
         wrapped_pipeline.set_error_handler(pipeline.error_handler)

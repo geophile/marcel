@@ -50,8 +50,8 @@ replacing the value, e.g. {r:gen 5 >>$ x}.
 '''
 
 
-def store(env, var, append=False):
-    store = Store(env)
+def store(var, append=False):
+    store = Store()
     args = []
     if append:
         args.append('--append')
@@ -73,8 +73,8 @@ class StoreArgsParser(marcel.argsparser.ArgsParser):
 
 class Store(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.var = None
         self.append = None
         self.picklefile = None
@@ -86,7 +86,7 @@ class Store(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         if type(self.var) is marcel.reservoir.Reservoir:
             # API
             self.picklefile = self.var
@@ -94,10 +94,10 @@ class Store(marcel.core.Op):
             # API: string is a filename.
             # Interactive: string is a filename or environment variable name.
             if self.var.isidentifier():
-                self.picklefile = self.getvar(self.var)
+                self.picklefile = env.getvar(self.var)
                 if self.picklefile is None:
                     self.picklefile = marcel.reservoir.Reservoir(self.var)
-                    self.env().setvar(self.var, self.picklefile)
+                    env.setvar(self.var, self.picklefile)
                 if type(self.picklefile) is not marcel.reservoir.Reservoir:
                     if self.append:
                         raise marcel.exception.KillCommandException(
@@ -105,8 +105,8 @@ class Store(marcel.core.Op):
                             f'it stores a value of type {type(self.picklefile)}.')
                     else:
                         self.picklefile = marcel.reservoir.Reservoir(self.var)
-                        self.env().setvar(self.var, self.picklefile)
-                self.env().mark_possibly_changed(self.var)
+                        env.setvar(self.var, self.picklefile)
+                env.mark_possibly_changed(self.var)
             else:
                 raise marcel.exception.KillCommandException(f'{self.var} is not a Python identifier.')
         elif self.var is None:
@@ -115,9 +115,9 @@ class Store(marcel.core.Op):
             raise marcel.exception.KillCommandException(
                 f'{self.var} is not usable as a reservoir, it stores a value of type {type(self.picklefile)}.')
         self.writer = self.picklefile.writer(self.append)
-        self.nesting = self.env().vars().n_scopes()
+        self.nesting = env.vars().n_scopes()
 
-    def receive(self, x):
+    def receive(self, env, x):
         try:
             self.writer.write(x)
         except:

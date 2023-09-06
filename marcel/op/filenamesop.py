@@ -39,8 +39,8 @@ class FilenamesOpArgsParser(marcel.argsparser.ArgsParser):
 
 class FilenamesOp(marcel.core.Op):
 
-    def __init__(self, env, action):
-        super().__init__(env)
+    def __init__(self, action):
+        super().__init__()
         # A method's type would be MethodType. We don't want a method of this class, e.g. self.foobar. self
         # would be bound to the current instance, and that might not be the instance that gets executed later,
         # due to possible pipeline copying. The action should not be a method, e.g. it could be a staticmethod,
@@ -68,11 +68,11 @@ class FilenamesOp(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        self.filenames = self.eval_function('filenames_arg', str, pathlib.Path, pathlib.PosixPath, File)
+    def setup(self, env):
+        self.filenames = self.eval_function(env, 'filenames_arg', str, pathlib.Path, pathlib.PosixPath, File)
         self.roots = []
-        self.current_dir = self.env().dir_state().pwd()
-        self.roots = marcel.op.filenames.Filenames(self.env(), self.filenames).normalize()
+        self.current_dir = env.dir_state().pwd()
+        self.roots = marcel.op.filenames.Filenames(env, self.filenames).normalize()
         if len(self.filenames) > 0 and len(self.roots) == 0:
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
@@ -92,18 +92,18 @@ class FilenamesOp(marcel.core.Op):
 
     # Op
 
-    def run(self):
+    def run(self, env):
         for root in self.roots:
             try:
-                self.visit(root, 0)
+                self.visit(env, root, 0)
             except marcel.exception.KillAndResumeException:
                 pass
 
     # For use by this class
 
-    def visit(self, root, level):
+    def visit(self, env, root, level):
         file = File(root, self.base, self.metadata_cache)
-        self.action(self, file)
+        self.action(self, env, file)
         if root.is_dir() and ((level == 0 and (self.d1 or self.dr)) or self.dr) and not self.dir_already_visited(root):
             try:
                 root_stat = root.stat()
@@ -111,17 +111,17 @@ class FilenamesOp(marcel.core.Op):
                 sorted_dir_contents = sorted(root.iterdir())
                 for file in sorted_dir_contents:
                     try:
-                        self.visit(file, level + 1)
+                        self.visit(env, file, level + 1)
                     except PermissionError:
-                        self.non_fatal_error(input=file, message='Permission denied')
+                        self.non_fatal_error(env, input=file, message='Permission denied')
                     except FileNotFoundError:
-                        self.non_fatal_error(input=file, message='No such file or directory')
+                        self.non_fatal_error(env, input=file, message='No such file or directory')
                     except marcel.exception.KillAndResumeException:
                         pass
             except PermissionError:
-                self.non_fatal_error(input=root, message='Permission denied')
+                self.non_fatal_error(env, input=root, message='Permission denied')
             except FileNotFoundError:
-                self.non_fatal_error(input=root, message='No such file or directory')
+                self.non_fatal_error(env, input=root, message='No such file or directory')
             except marcel.exception.KillAndResumeException:
                 pass
 

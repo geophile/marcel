@@ -40,10 +40,10 @@ Running the command via {r:sudo} would work:
 '''
 
 
-def sudo(env, pipeline, *args):
+def sudo(pipeline, *args):
     args = list(args)
     args.append(pipeline.create_pipeline())
-    return Sudo(env), args
+    return Sudo(), args
 
 
 # The sudo command has 0 or more flags and arguments for the native sudo command, followed by a pipeline.
@@ -68,8 +68,8 @@ class SudoArgsParser(marcel.argsparser.ArgsParser):
 
 class Sudo(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.args = None
         self.pipeline = None
 
@@ -78,22 +78,18 @@ class Sudo(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('Missing pipeline')
         self.pipeline = self.args.pop()
         if type(self.pipeline) is str:
-            self.pipeline = marcel.core.Op.pipeline_arg_value(self.env(), self.pipeline).copy()
+            self.pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
         if not isinstance(self.pipeline, marcel.core.Pipeline):
             raise marcel.exception.KillCommandException('Last argument to sudo must be a pipeline')
 
-    def set_env(self, env):
-        super().set_env(env)
-        self.pipeline.set_env(env)
-
     # Op
 
-    def run(self):
+    def run(self, env):
         # Start the remote process
         command = ' '.join(['sudo'] + self.args + ['farcel.py'])
         self.process = subprocess.Popen(command,
@@ -106,7 +102,7 @@ class Sudo(marcel.core.Op):
         # Send the python version, environment and pipeline, (as in Remote)
         buffer = io.BytesIO()
         pickler = dill.Pickler(buffer)
-        pickler.dump(self.env().python_version())
+        pickler.dump(env.python_version())
         pickler.dump(self.pipeline)
         buffer.seek(0)
         stdout, stderr = self.process.communicate(input=buffer.getvalue())
@@ -123,9 +119,9 @@ class Sudo(marcel.core.Op):
         input = dill.Unpickler(io.BytesIO(stdout))
         try:
             while True:
-                self.send(input.load())
+                self.send(env, input.load())
         except EOFError:
-            self.propagate_flush()
+            self.propagate_flush(env)
 
     def must_be_first_in_pipeline(self):
         return True

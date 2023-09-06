@@ -34,8 +34,8 @@ and the current directory is changed to the new top directory on the stack.
 '''
 
 
-def pushd(env, directory=None):
-    return Pushd(env), [] if directory is None else [directory]
+def pushd(directory=None):
+    return Pushd(), [] if directory is None else [directory]
 
 
 class PushdArgsParser(marcel.argsparser.ArgsParser):
@@ -48,8 +48,8 @@ class PushdArgsParser(marcel.argsparser.ArgsParser):
 
 class Pushd(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.directory_arg = None
         self.directory = None
 
@@ -58,24 +58,29 @@ class Pushd(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        dir_arg = self.eval_function('directory_arg', str, pathlib.Path, pathlib.PosixPath, marcel.object.file.File)
+    def setup(self, env):
+        dir_arg = self.eval_function(env,
+                                     'directory_arg',
+                                     str,
+                                     pathlib.Path,
+                                     pathlib.PosixPath,
+                                     marcel.object.file.File)
         if dir_arg is None:
             self.directory = None
         else:
-            dirs = marcel.op.filenames.Filenames(self.env(), [pathlib.Path(dir_arg)]).normalize()
+            dirs = marcel.op.filenames.Filenames(env, [pathlib.Path(dir_arg)]).normalize()
             if len(dirs) == 0:
                 raise marcel.exception.KillCommandException('No qualifying path')
             elif len(dirs) > 1:
                 raise marcel.exception.KillCommandException('Too many paths')
             self.directory = dirs[0]
 
-    def run(self):
+    def run(self, env):
         try:
-            self.env().dir_state().pushd(self.directory)
+            env.dir_state().pushd(self.directory)
         except PermissionError as e:
             raise marcel.exception.KillCommandException(e)
         except FileNotFoundError as e:
             raise marcel.exception.KillCommandException(e)
-        for dir in self.env().dir_state().dirs():
-            self.send(marcel.object.file.File(dir))
+        for dir in env.dir_state().dirs():
+            self.send(env, marcel.object.file.File(dir))

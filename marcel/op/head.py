@@ -30,8 +30,8 @@ If {r:N} < 0, then skip the first {r:N} tuples of the input stream, and output t
 '''
 
 
-def head(env, n):
-    return Head(env), [n]
+def head(n):
+    return Head(), [n]
 
 
 class HeadArgsParser(marcel.argsparser.ArgsParser):
@@ -44,8 +44,8 @@ class HeadArgsParser(marcel.argsparser.ArgsParser):
 
 class Head(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.n_arg = None
         self.impl = None
 
@@ -54,14 +54,14 @@ class Head(marcel.core.Op):
 
     # AbstractOp
     
-    def setup(self):
-        n = self.eval_function('n_arg', int)
+    def setup(self, env):
+        n = self.eval_function(env, 'n_arg', int)
         if n == 0:
             raise marcel.exception.KillCommandException('Argument to head must not be 0.')
         self.impl = HeadKeepN(self, n) if n > 0 else HeadSkipN(self, -n)
 
-    def receive(self, x):
-        self.impl.receive(x)
+    def receive(self, env, x):
+        self.impl.receive(env, x)
 
 
 class HeadImpl:
@@ -77,10 +77,10 @@ class HeadKeepN(HeadImpl):
     def __init__(self, op, n):
         super().__init__(op, n)
 
-    def receive(self, x):
+    def receive(self, env, x):
         self.received += 1
         if self.n >= self.received:
-            self.op.send(x)
+            self.op.send(env, x)
 
 
 class HeadSkipN(HeadImpl):
@@ -88,7 +88,7 @@ class HeadSkipN(HeadImpl):
     def __init__(self, op, n):
         super().__init__(op, n)
 
-    def receive(self, x):
+    def receive(self, env, x):
         self.received += 1
         if self.n < self.received:
-            self.op.send(x)
+            self.op.send(env, x)

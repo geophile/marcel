@@ -69,8 +69,8 @@ Note that an empty nested sequence (as in the last input tuple) results in no ou
 '''
 
 
-def expand(env, position=None):
-    return Expand(env), [] if position is None else [position]
+def expand(position=None):
+    return Expand(), [] if position is None else [position]
 
 
 class ExpandArgsParser(marcel.argsparser.ArgsParser):
@@ -83,8 +83,8 @@ class ExpandArgsParser(marcel.argsparser.ArgsParser):
 
 class Expand(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.position_arg = None
         self.position = None
         self.expander = None
@@ -94,12 +94,12 @@ class Expand(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        self.position = self.eval_function('position_arg', int)
+    def setup(self, env):
+        self.position = self.eval_function(env, 'position_arg', int)
         self.expander = SequenceExpander(self) if self.position is None else ComponentExpander(self)
 
-    def receive(self, x):
-        self.expander.receive(x)
+    def receive(self, env, x):
+        self.expander.receive(env, x)
 
 
 class Expander:
@@ -107,7 +107,7 @@ class Expander:
     def __init__(self, op):
         self.op = op
 
-    def receive(self, sequence):
+    def receive(self, env, sequence):
         assert False
 
     @staticmethod
@@ -130,9 +130,9 @@ class SequenceExpander(Expander):
     def __init__(self, op):
         super().__init__(op)
 
-    def receive(self, sequence):
+    def receive(self, env, sequence):
         for x in Expander.expand(sequence):
-            self.op.send(x)
+            self.op.send(env, x)
 
 
 class ComponentExpander(Expander):
@@ -141,9 +141,9 @@ class ComponentExpander(Expander):
         super().__init__(op)
         self.position = op.position
 
-    def receive(self, sequence):
+    def receive(self, env, sequence):
         if self.position >= len(sequence):
-            self.op.send(sequence)
+            self.op.send(env, sequence)
         else:
             assert self.position >= 0
             assert self.position < len(sequence)
@@ -151,7 +151,7 @@ class ComponentExpander(Expander):
             post = sequence[(self.position + 1):]
             send = self.op.send
             for x in Expander.expand([sequence[self.position]]):
-                send(pre + (x,) + post)
+                send(env, pre + (x,) + post)
 
 
 class NotExpandableException(Exception):

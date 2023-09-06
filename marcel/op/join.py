@@ -69,11 +69,11 @@ If the {r:--keep} flag were included, the output would have two additional rows:
 '''
 
 
-def join(env, pipeline, keep=False):
+def join(pipeline, keep=False):
     assert isinstance(pipeline, marcel.core.Pipelineable)
     args = ['--keep'] if keep else []
     args.append(pipeline.create_pipeline())
-    return Join(env), args
+    return Join(), args
 
 
 class JoinArgsParser(marcel.argsparser.ArgsParser):
@@ -88,8 +88,8 @@ class JoinArgsParser(marcel.argsparser.ArgsParser):
 
 class Join(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.pipeline_arg = None
         self.keep = None
         self.inner = None  # Map containing contents of pipeline, keyed by join value
@@ -99,15 +99,14 @@ class Join(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        pipeline = marcel.core.PipelineWrapper.create(self.env(),
-                                                      self.owner.error_handler,
+    def setup(self, env):
+        pipeline = marcel.core.PipelineWrapper.create(self.owner.error_handler,
                                                       self.pipeline_arg,
                                                       self.customize_pipeline)
-        pipeline.setup()
-        pipeline.run_pipeline(None)
+        pipeline.setup(env)
+        pipeline.run_pipeline(env, None)
 
-    def receive(self, x):
+    def receive(self, env, x):
         x = tuple(x)
         join_value = x[0]
         try:
@@ -116,16 +115,16 @@ class Join(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
         if match is None:
             if self.keep:
-                self.send(x)
+                self.send(env, x)
         elif type(match) is list:
             for m in match:
-                self.send(x + m[1:])
+                self.send(env, x + m[1:])
         else:
-            self.send(x + match[1:])
+            self.send(env, x + match[1:])
 
     # Internal
 
-    def customize_pipeline(self, pipeline):
+    def customize_pipeline(self, env, pipeline):
         def load_inner(*x):
             assert len(x) > 0
             x = tuple(x)
@@ -143,6 +142,6 @@ class Join(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
         self.inner = {}
-        map = marcel.opmodule.create_op(self.env(), 'map', load_inner)
+        map = marcel.opmodule.create_op(env, 'map', load_inner)
         pipeline.append(map)
         return pipeline

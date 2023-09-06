@@ -44,9 +44,9 @@ output is unspecified.
 '''
 
 
-def difference(env, pipeline):
+def difference(pipeline):
     assert isinstance(pipeline, marcel.core.Pipelineable)
-    return Difference(env), [pipeline.create_pipeline()]
+    return Difference(), [pipeline.create_pipeline()]
 
 
 class DifferenceArgsParser(marcel.argsparser.ArgsParser):
@@ -59,8 +59,8 @@ class DifferenceArgsParser(marcel.argsparser.ArgsParser):
 
 class Difference(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.pipeline_arg = None
         self.right = None  # Right input, tuple -> count
 
@@ -69,15 +69,14 @@ class Difference(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        pipeline = marcel.core.PipelineWrapper.create(self.env(),
-                                                      self.owner.error_handler,
+    def setup(self, env):
+        pipeline = marcel.core.PipelineWrapper.create(self.owner.error_handler,
                                                       self.pipeline_arg,
                                                       self.customize_pipeline)
-        pipeline.setup()
-        pipeline.run_pipeline(None)
+        pipeline.setup(env, )
+        pipeline.run_pipeline(env, None)
 
-    def receive(self, x):
+    def receive(self, env, x):
         try:
             count = self.right.get(x, None)
             if count is not None:
@@ -86,13 +85,13 @@ class Difference(marcel.core.Op):
                 else:
                     self.right[x] = count - 1
             else:
-                self.send(x)
+                self.send(env, x)
         except TypeError:
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
     # Internal
 
-    def customize_pipeline(self, pipeline):
+    def customize_pipeline(self, env, pipeline):
         def load_right(*x):
             try:
                 count = self.right.get(x, None)
@@ -101,5 +100,5 @@ class Difference(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
         self.right = {}
-        pipeline.append(marcel.opmodule.create_op(self.env(), 'map', load_right))
+        pipeline.append(marcel.opmodule.create_op(env, 'map', load_right))
         return pipeline

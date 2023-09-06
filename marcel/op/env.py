@@ -51,7 +51,7 @@ If the {r:--pattern} flag is specified, then the variables output are those whos
 '''
 
 
-def env(e, var=None, delete=None, pattern=None):
+def env(var=None, delete=None, pattern=None):
     args = []
     if delete:
         args.extend(['-d', delete])
@@ -59,7 +59,7 @@ def env(e, var=None, delete=None, pattern=None):
         args.extend(['-p', pattern])
     if var:
         args.append(var)
-    return Env(e), args
+    return Env(), args
 
 
 class EnvArgsParser(marcel.argsparser.ArgsParser):
@@ -76,8 +76,8 @@ class EnvArgsParser(marcel.argsparser.ArgsParser):
 class Env(marcel.core.Op):
     OMITTED = ['__builtins__']
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.delete = None
         self.var = None
         self.pattern = None
@@ -91,18 +91,18 @@ class Env(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         self.list_all = self.var is None and self.delete is None and self.pattern is None
 
-    def run(self):
+    def run(self, env):
         if self.var:
-            self.one_var()
+            self.one_var(env)
         elif self.delete:
-            self.delete_var()
+            self.delete_var(env)
         elif self.pattern:
-            self.matching_vars()
+            self.matching_vars(env)
         else:
-            self.all_vars()
+            self.all_vars(env)
 
     # Op
 
@@ -114,39 +114,39 @@ class Env(marcel.core.Op):
 
     # Implementation
 
-    def one_var(self):
+    def one_var(self, env):
         assert self.var
-        value = self.env().getvar(self.var)
+        value = env.getvar(self.var)
         if value is None:
-            self.no_such_var(self.var)
+            self.no_such_var(env, self.var)
         else:
-            self.send((self.var, value))
+            self.send(env, (self.var, value))
 
-    def delete_var(self):
+    def delete_var(self, env):
         assert self.delete
         try:
-            value = self.env().delvar(self.delete)
-            self.send((self.delete, value))
+            value = env.delvar(self.delete)
+            self.send(env, (self.delete, value))
         except KeyError:
             pass
 
-    def matching_vars(self):
+    def matching_vars(self, env):
         assert self.pattern
         output = []
-        for var, value in self.env().vars().items():
+        for var, value in env.vars().items():
             if var != '__builtins__' and self.pattern in var:
                 output.append((var, value))
         for var, value in sorted(output):
-            self.send((var, value))
+            self.send(env, (var, value))
 
-    def all_vars(self):
+    def all_vars(self, env):
         output = []
-        for var, value in self.env().vars().items():
+        for var, value in env.vars().items():
             if var != '__builtins__':
                 output.append((var, value))
         for var, value in sorted(output):
-            self.send((var, value))
+            self.send(env, (var, value))
 
-    def no_such_var(self, var):
+    def no_such_var(self, env, var):
         error = marcel.object.error.Error(f'{var} is undefined')
-        self.send(error)
+        self.send(env, error)

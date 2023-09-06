@@ -33,8 +33,8 @@ Otherwise, ordering is based on the values computed by applying {r:KEY} to each 
 '''
 
 
-def sort(env, key=None):
-    return Sort(env), [] if key is None else [key]
+def sort(key=None):
+    return Sort(), [] if key is None else [key]
 
 
 class SortArgsParser(marcel.argsparser.ArgsParser):
@@ -47,8 +47,8 @@ class SortArgsParser(marcel.argsparser.ArgsParser):
 
 class Sort(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.key = None
         self.contents = None
 
@@ -57,32 +57,29 @@ class Sort(marcel.core.Op):
 
     # AbstractOp
     
-    def setup(self):
+    def setup(self, env):
         self.contents = []
-
-    def set_env(self, env):
-        super().set_env(env)
         if self.key:
             self.key.set_globals(env.vars())
 
     # Op
 
-    def receive(self, x):
+    def receive(self, env, x):
         if self.contents is not None:
             self.contents.append(x)
 
-    def flush(self):
+    def flush(self, env):
         if self.contents is not None:
             try:
                 if self.key:
-                    self.contents.sort(key=(lambda t: self.call(self.key, *t)))
+                    self.contents.sort(key=(lambda t: self.call(env, self.key, *t)))
                 else:
                     self.contents.sort()
                 for x in self.contents:
-                    self.send(x)
+                    self.send(env, x)
                 # Reusing a sort after flush produces non-sorted data! So just clearing self.contents is inadequate.
                 # Setting self.contents to None will result in an obvious failure if this is attempted.
                 self.contents = None
             except TypeError as e:
                 raise marcel.exception.KillCommandException(e)
-        self.propagate_flush()
+        self.propagate_flush(env)

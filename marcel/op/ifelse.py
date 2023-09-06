@@ -42,8 +42,8 @@ variable.
 '''
 
 
-def ifelse(env, predicate, then):
-    return Ifelse(env), [predicate, then.create_pipeline()]
+def ifelse(predicate, then):
+    return Ifelse(), [predicate, then.create_pipeline()]
 
 
 class IfelseArgsParser(marcel.op.ifbase.IfBaseArgsParser):
@@ -54,13 +54,13 @@ class IfelseArgsParser(marcel.op.ifbase.IfBaseArgsParser):
 
 class Ifelse(marcel.op.ifbase.IfBase):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
 
     # AbstractOp
 
-    def receive(self, x):
-        if self.call(self.predicate, *x):
-            self.then.receive(x)
+    def receive(self, env, x):
+        if self.call(env, self.predicate, *x):
+            self.then.receive(env, x)
         else:
-            self.send(x)
+            self.send(env, x)

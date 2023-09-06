@@ -34,8 +34,8 @@ the {r:map} operator was intended.
 '''
 
 
-def map(env, function):
-    return Map(env), [] if function is None else [function]
+def map(function):
+    return Map(), [] if function is None else [function]
 
 
 class MapArgsParser(marcel.argsparser.ArgsParser):
@@ -48,23 +48,20 @@ class MapArgsParser(marcel.argsparser.ArgsParser):
 
 class Map(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.function = None
 
     def __repr__(self):
         return f'map({self.function.snippet()})'
 
-    # AbstractOp
-
-    def set_env(self, env):
-        super().set_env(env)
-        self.function.set_globals(env.vars())
-
     # Op
 
-    def run(self):
-        self.send(self.call(self.function))
+    def setup(self, env):
+        self.function.set_globals(env.vars())
+
+    def run(self, env):
+        self.send(env, self.call(env, self.function))
     
-    def receive(self, x):
-        self.send(self.call(self.function, *x))
+    def receive(self, env, x):
+        self.send(env, self.call(env, self.function, *x))

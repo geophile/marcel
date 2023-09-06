@@ -61,8 +61,8 @@ class ImportArgsParser(marcel.argsparser.ArgsParser):
 
 class Import(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.module = None
         self.symbol = None
         self.name = None
@@ -78,18 +78,18 @@ class Import(marcel.core.Op):
 
     # AbstractOp
     
-    def setup(self):
+    def setup(self, env):
         if self.symbol and not (self.symbol == '*' or self.symbol.isidentifier()):
             raise marcel.exception.KillCommandException(f'symbol must be * or a valid identifier: {self.symbol}')
         if self.name and not self.name.isidentifier():
             raise marcel.exception.KillCommandException(f'name is not a valid identifier: {self.name}')
 
-    def run(self):
-        env = self.env()
+    def run(self, env):
         try:
             module = importlib.import_module(self.module)
         except ModuleNotFoundError:
             self.fatal_error(None, f'Module {self.module} not found.')
+            assert False
         if self.symbol is None:
             env.setvar(self.module, module)
         elif self.symbol == '*':

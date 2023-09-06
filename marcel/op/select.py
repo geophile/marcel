@@ -31,8 +31,8 @@ True are written to the output stream.
 '''
 
 
-def select(env, function):
-    return Select(env), [] if function is None else [function]
+def select(function):
+    return Select(), [] if function is None else [function]
 
 
 class SelectArgsParser(marcel.argsparser.ArgsParser):
@@ -45,8 +45,8 @@ class SelectArgsParser(marcel.argsparser.ArgsParser):
 
 class Select(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.function = None
 
     def __repr__(self):
@@ -54,14 +54,14 @@ class Select(marcel.core.Op):
 
     # AbstractOp
 
-    def set_env(self, env):
+    def setup(self, env):
         self.function.set_globals(env.vars())
 
     # Op
 
-    def receive(self, x):
-        fx = (self.call(self.function)
+    def receive(self, env, x):
+        fx = (self.call(env, self.function)
               if x is None else
-              self.call(self.function, *x))
+              self.call(env, self.function, *x))
         if fx:
-            self.send(x)
+            self.send(env, x)

@@ -118,10 +118,10 @@ class Download(marcel.core.Op):
         scp_command.append(node_dir.as_posix())
         return ' '.join(scp_command)
 
-    def customize_pipeline(self, pipeline, host):
+    def customize_pipeline(self, env, pipeline, host):
         host_pipeline = pipeline.copy()
         scp_command = Download.scp_command(host.identity, self.filenames, host, self.dir)
-        host_pipeline.append(marcel.opmodule.create_op(self.env(), 'bash', scp_command))
+        host_pipeline.append(marcel.opmodule.create_op(env, 'bash', scp_command))
         return host_pipeline
 
     def ensure_node_directories_exist(self):

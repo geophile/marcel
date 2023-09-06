@@ -50,8 +50,8 @@ input to {r:join} comes from loading {r:def}.
 '''
 
 
-def load(env, target):
-    load = Load(env)
+def load(target):
+    load = Load()
     if type(target) not in (str, marcel.reservoir.Reservoir):
         raise marcel.exception.KillCommandException(f'{target} is not a Reservoir: {type(target)}')
     return load, [target]
@@ -67,8 +67,8 @@ class LoadArgsParser(marcel.argsparser.ArgsParser):
 
 class Load(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.var = None
         self.picklefile = None
         self.reader = None
@@ -78,19 +78,19 @@ class Load(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         if type(self.var) is marcel.reservoir.Reservoir:
             # API
             self.picklefile = self.var
         elif type(self.var) is str:
             # Interactive
             if self.var.isidentifier():
-                self.picklefile = self.getvar(self.var)
+                self.picklefile = env.getvar(self.var)
                 if self.picklefile is None:
                     raise marcel.exception.KillCommandException(f'Variable {self.var} is undefined.')
                 if type(self.picklefile) is not marcel.reservoir.Reservoir:
                     raise marcel.exception.KillCommandException(f'Variable {self.var} is not a Reservoir.')
-                self.env().mark_possibly_changed(self.var)
+                env.mark_possibly_changed(self.var)
             else:
                 raise marcel.exception.KillCommandException(f'{self.var} is not a Python identifier.')
         elif self.var is not None:
@@ -98,10 +98,10 @@ class Load(marcel.core.Op):
                 f'The type of {self.var} is {type(self.var)}. Only a Reservoir can be loaded')
         self.reader = iter(self.picklefile)
 
-    def run(self):
+    def run(self, env):
         try:
             while True:
-                self.send(next(self.reader))
+                self.send(env, next(self.reader))
         except StopIteration:
             self.reader.close()
         except:

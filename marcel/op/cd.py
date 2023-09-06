@@ -31,8 +31,8 @@ If {r:DIRECTORY} is omitted, then change the current directory to the home direc
 '''
 
 
-def cd(env, directory=None):
-    return Cd(env), [] if directory is None else [directory]
+def cd(directory=None):
+    return Cd(), [] if directory is None else [directory]
 
 
 class CdArgsParser(marcel.argsparser.ArgsParser):
@@ -45,8 +45,8 @@ class CdArgsParser(marcel.argsparser.ArgsParser):
 
 class Cd(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.directory_arg = None
         self.directory = None
 
@@ -55,20 +55,21 @@ class Cd(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        dir_arg = pathlib.Path(self.eval_function('directory_arg',
+    def setup(self, env):
+        dir_arg = pathlib.Path(self.eval_function(env,
+                                                  'directory_arg',
                                                   str,
                                                   pathlib.Path, pathlib.PosixPath, marcel.object.file.File))
-        dirs = marcel.op.filenames.Filenames(self.env(), [dir_arg]).normalize()
+        dirs = marcel.op.filenames.Filenames(env, [dir_arg]).normalize()
         if len(dirs) == 0:
             raise marcel.exception.KillCommandException('No qualifying path')
         elif len(dirs) > 1:
             raise marcel.exception.KillCommandException('Too many paths')
         self.directory = dirs[0]
 
-    def run(self):
+    def run(self, env):
         try:
-            self.env().dir_state().cd(self.directory)
+            env.dir_state().cd(self.directory)
         except PermissionError as e:
             raise marcel.exception.KillCommandException(e)
         except FileNotFoundError as e:

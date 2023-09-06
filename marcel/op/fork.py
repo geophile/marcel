@@ -101,11 +101,11 @@ using the {n:upload} or {n:download} operators, or remote execution syntax, e.g.
 '''
 
 
-def fork(env, forkgen, pipeline):
+def fork(forkgen, pipeline):
     # callable: Through API.
     # not callable: Interactive.
     pipeline_arg = marcel.core.PipelineFunction(pipeline) if callable(pipeline) else pipeline
-    return Fork(env), [forkgen, pipeline_arg]
+    return Fork(), [forkgen, pipeline_arg]
 
 
 # For API
@@ -120,8 +120,8 @@ class ForkArgsParser(marcel.argsparser.ArgsParser):
 
 class Fork(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.forkgen = None
         self.thread_ids = None
         self.pipeline_arg = None
@@ -133,10 +133,10 @@ class Fork(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         pipeline_arg = self.pipeline_arg
         assert isinstance(pipeline_arg, marcel.core.Pipelineable)
-        forkgen = self.eval_function('forkgen') if callable(self.forkgen) else self.forkgen
+        forkgen = self.eval_function(env, 'forkgen') if callable(self.forkgen) else self.forkgen
         if type(forkgen) is int:
             if forkgen > 0:
                 self.thread_ids = list(range(forkgen))
@@ -152,12 +152,12 @@ class Fork(marcel.core.Op):
                                                          thread_ids=self.thread_ids,
                                                          pipeline_arg=pipeline_arg,
                                                          max_pipeline_args=1)
-        self.manager.setup()
+        self.manager.setup(env)
 
     # Op
 
-    def run(self):
-        self.manager.run()
+    def run(self, env):
+        self.manager.run(env)
 
     def must_be_first_in_pipeline(self):
         return True

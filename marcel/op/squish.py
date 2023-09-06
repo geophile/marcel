@@ -40,8 +40,8 @@ If no {r:FUNCTION} is provided, then {n:+} is assumed.
 '''
 
 
-def squish(env, function=r_plus):
-    return Squish(env), [] if function is None else [function]
+def squish(function=r_plus):
+    return Squish(), [] if function is None else [function]
 
 
 class SquishArgsParser(marcel.argsparser.ArgsParser):
@@ -54,8 +54,8 @@ class SquishArgsParser(marcel.argsparser.ArgsParser):
 
 class Squish(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.function = None
 
     def __repr__(self):
@@ -63,15 +63,14 @@ class Squish(marcel.core.Op):
 
     # AbstractOp
     
-    def setup(self):
+    def setup(self, env):
         if self.function is None:
             self.function = marcel.function.SymbolFunction('+')
-
-    def set_env(self, env):
-        super().set_env(env)
         self.function.set_globals(env.vars())
 
     # Op
 
-    def receive(self, x):
-        self.send(functools.reduce(lambda *args, **kwargs: self.call(self.function, *args, **kwargs), x, None))
+    def receive(self, env, x):
+        self.send(env, functools.reduce(lambda *args, **kwargs: self.call(env, self.function, *args, **kwargs),
+                                        x,
+                                        None))

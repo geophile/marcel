@@ -23,8 +23,8 @@ The input stream is output in reverse order.
 '''
 
 
-def reverse(env):
-    return Reverse(env), []
+def reverse():
+    return Reverse(), []
 
 
 class ReverseArgsParser(marcel.argsparser.ArgsParser):
@@ -36,19 +36,19 @@ class ReverseArgsParser(marcel.argsparser.ArgsParser):
 
 class Reverse(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.contents = []
 
     # AbstractOp
 
-    def receive(self, x):
+    def receive(self, env, x):
         self.contents.append(x)
 
-    def flush(self):
+    def flush(self, env):
         if self.contents is not None:
             self.contents.reverse()
             for x in self.contents:
-                self.send(x)
+                self.send(env, x)
             self.contents = None
-        self.propagate_flush()
+        self.propagate_flush(env)

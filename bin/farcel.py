@@ -65,17 +65,17 @@ class PythonVersionMismatch(Exception):
 
 class PickleOutput(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.pickler = dill.Pickler(sys.stdout.buffer)
 
     def __repr__(self):
         return 'pickleoutput()'
 
-    def setup(self):
+    def setup(self, env):
         pass
 
-    def receive(self, x):
+    def receive(self, env, x):
         TRACE.write(f'Pickling: ({type(x)}) {x}')
         self.pickler.dump(x)
 
@@ -95,7 +95,7 @@ class PipelineRunner(threading.Thread):
         super().__init__()
         self.client_python_version = client_python_version
         self.env = env
-        self.pickler = PickleOutput(env)
+        self.pickler = PickleOutput()
         pipeline.append(self.pickler)
         self.pipeline = pipeline
 
@@ -103,10 +103,10 @@ class PipelineRunner(threading.Thread):
         try:
             # self.check_python_version()
             TRACE.write(f'PipelineRunner: About to setup {self.pipeline}')
-            self.pipeline.setup()
+            self.pipeline.setup(self.env)
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
-            self.pipeline.first_op().run()
-            self.pipeline.flush()
+            self.pipeline.first_op().run(self.env)
+            self.pipeline.flush(self.env)
         except BaseException as e:
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')
             with TRACE.open() as file:
@@ -157,7 +157,7 @@ def read_config():
         'COLOR_SCHEME': marcel.object.color.ColorScheme(),
         'Color': marcel.object.color.Color,
     }
-    locations = marcel.locations.Locations(marcel.env.Environment())
+    locations = marcel.locations.Locations(marcel.env.Environment())  # Pass in env from caller
     config_path = locations.config_path()
     if config_path.exists():
         with open(config_path.as_posix()) as config_file:
@@ -199,7 +199,6 @@ def main():
         TRACE.write(f'Marcel version {version}')
         TRACE.write(f'pipeline: {pipeline}')
         atexit.register(shutdown)
-        pipeline.set_env(env)
         pipeline.set_error_handler(noop_error_handler)
         pipeline_runner = PipelineRunner(client_python_version, env, pipeline)
         pipeline_runner.start()

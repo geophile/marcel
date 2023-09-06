@@ -20,8 +20,8 @@ import marcel.util
 
 class RunPipeline(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.var = None
         self.args_arg = None
         self.args = None
@@ -34,10 +34,10 @@ class RunPipeline(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        self.args = self.eval_function('args_arg')
-        self.kwargs = self.eval_function('kwargs_arg')
-        self.pipeline = self.getvar(self.var)
+    def setup(self, env):
+        self.args = self.eval_function(env, 'args_arg')
+        self.kwargs = self.eval_function(env, 'kwargs_arg')
+        self.pipeline = env.getvar(self.var)
         if self.pipeline is None:
             raise marcel.exception.KillCommandException(
                 f'{self.var} is not executable.')
@@ -58,32 +58,31 @@ class RunPipeline(marcel.core.Op):
         self.pipeline = self.pipeline.copy()
         self.pipeline.set_error_handler(self.owner.error_handler)
         self.pipeline.last_op().receiver = self.receiver
-        self.env().vars().push_scope(self.pipeline_args())
+        env.vars().push_scope(self.pipeline_args())
         try:
-            self.pipeline.setup()
-            self.pipeline.set_env(self.env())
+            self.pipeline.setup(env)
         finally:
-            self.env().vars().pop_scope()
+            env.vars().pop_scope()
 
     # Op
 
-    def run(self):
-        self.env().vars().push_scope(self.pipeline_args())
+    def run(self, env):
+        env.vars().push_scope(self.pipeline_args())
         try:
-            self.pipeline.run()
+            self.pipeline.run(env)
         finally:
-            self.env().vars().pop_scope()
+            env.vars().pop_scope()
 
-    def receive(self, x):
-        self.env().vars().push_scope(self.pipeline_args())
+    def receive(self, env, x):
+        env.vars().push_scope(self.pipeline_args())
         try:
-            self.pipeline.receive(x)
+            self.pipeline.receive(env, x)
         finally:
-            self.env().vars().pop_scope()
+            env.vars().pop_scope()
 
-    def flush(self):
-        self.pipeline.flush()
-        self.propagate_flush()
+    def flush(self, env):
+        self.pipeline.flush(env)
+        self.propagate_flush(env)
 
     # RunPipeline
 

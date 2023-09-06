@@ -25,8 +25,8 @@ Write the current directory to the output stream, as a {n:File}.
 '''
 
 
-def pwd(env):
-    return Pwd(env), []
+def pwd():
+    return Pwd(), []
 
 
 class PwdArgsParser(marcel.argsparser.ArgsParser):
@@ -38,16 +38,16 @@ class PwdArgsParser(marcel.argsparser.ArgsParser):
 
 class Pwd(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
 
     def __repr__(self):
         return 'pwd()'
 
     # AbstractOp
 
-    def run(self):
-        self.send(marcel.object.file.File(self.env().dir_state().pwd()))
+    def run(self, env):
+        self.send(env, marcel.object.file.File(env.dir_state().pwd()))
 
     # Op
 

@@ -26,8 +26,8 @@ Pop the directory stack, and cd to the new top directory. The current directory 
 '''
 
 
-def popd(env):
-    return Popd(env), []
+def popd():
+    return Popd(), []
 
 
 class PopdArgsParser(marcel.argsparser.ArgsParser):
@@ -39,23 +39,23 @@ class PopdArgsParser(marcel.argsparser.ArgsParser):
 
 class Popd(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
 
     def __repr__(self):
         return 'popd()'
 
     # AbstractOp
 
-    def run(self):
+    def run(self, env):
         try:
-            self.env().dir_state().popd()
+            env.dir_state().popd()
         except PermissionError as e:
             raise marcel.exception.KillCommandException(e)
         except FileNotFoundError as e:
             raise marcel.exception.KillCommandException(e)
-        for dir in self.env().dir_state().dirs():
-            self.send(marcel.object.file.File(dir))
+        for dir in env.dir_state().dirs():
+            self.send(env, marcel.object.file.File(dir))
 
     # Op
 

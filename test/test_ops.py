@@ -2385,7 +2385,7 @@ def test_bugs():
     test_bug_202()
     test_bug_203()
     test_bug_206()
-    # test_bug_212()
+    test_bug_212()
 
 
 def main_stable():
@@ -2434,17 +2434,15 @@ def main_stable():
 
 
 def main_dev():
-    # TEST.run('import sys *')
-    # TEST.run('sudo (| gen 3 | args (| x: ((x, -x)) |) |)',
-    #          expected_out=[(0, 0), (1, -1), (2, -2)])
+    test_pos()
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_dev()
-    main_stable()
-    main_slow_tests()
+    main_dev()
+    # main_stable()
+    # main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

@@ -31,8 +31,8 @@ output all but the last {r:N} tuples.)
 '''
 
 
-def tail(env, n):
-    return Tail(env), [n]
+def tail(n):
+    return Tail(), [n]
 
 
 class TailArgsParser(marcel.argsparser.ArgsParser):
@@ -45,8 +45,8 @@ class TailArgsParser(marcel.argsparser.ArgsParser):
 
 class Tail(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.n_arg = None
         self.impl = None
 
@@ -55,17 +55,17 @@ class Tail(marcel.core.Op):
 
     # AbstractOp
     
-    def setup(self):
-        n = self.eval_function('n_arg', int)
+    def setup(self, env):
+        n = self.eval_function(env, 'n_arg', int)
         if n == 0:
             raise marcel.exception.KillCommandException('Argument to tail must not be 0.')
         self.impl = TailKeepN(self, n) if n > 0 else TailSkipN(self, -n)
 
-    def receive(self, x):
-        self.impl.receive(x)
+    def receive(self, env, x):
+        self.impl.receive(env, x)
 
-    def flush(self):
-        self.impl.flush()
+    def flush(self, env):
+        self.impl.flush(env)
 
 
 class TailImpl:
@@ -76,10 +76,10 @@ class TailImpl:
         self.queue = []  # Circular queue
         self.end = 0  # End of the queue
 
-    def receive(self, x):
+    def receive(self, env, x):
         assert False
 
-    def flush(self):
+    def flush(self, env):
         pass
 
 
@@ -88,23 +88,23 @@ class TailKeepN(TailImpl):
     def __init__(self, op, n):
         super().__init__(op, n)
 
-    def receive(self, x):
+    def receive(self, env, x):
         if len(self.queue) < self.n:
             self.queue.append(x)
         else:
             self.queue[self.end] = x
             self.end = (self.end + 1) % self.n
 
-    def flush(self):
+    def flush(self, env):
         p = self.end
         count = min(self.n, len(self.queue))
         while count > 0:
             x = self.queue[p]
             if x is not None:
-                self.op.send(x)
+                self.op.send(env, x)
             p = (p + 1) % self.n
             count -= 1
-        self.op.propagate_flush()
+        self.op.propagate_flush(env)
         self.queue.clear()
 
 
@@ -113,10 +113,10 @@ class TailSkipN(TailImpl):
     def __init__(self, op, n):
         super().__init__(op, n)
 
-    def receive(self, x):
+    def receive(self, env, x):
         if len(self.queue) < self.n:
             self.queue.append(x)
         else:
-            self.op.send(self.queue[self.end])
+            self.op.send(env, self.queue[self.end])
             self.queue[self.end] = x
             self.end = (self.end + 1) % self.n

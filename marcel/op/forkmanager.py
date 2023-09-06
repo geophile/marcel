@@ -32,7 +32,7 @@ class ForkManager(object):
                  thread_ids,
                  pipeline_arg,
                  max_pipeline_args=0,
-                 customize_pipeline=lambda pipeline, thread_id: pipeline):
+                 customize_pipeline=lambda env, pipeline, thread_id: pipeline):
         self.op = op
         self.thread_ids = thread_ids
         self.customize_pipeline = customize_pipeline
@@ -43,11 +43,11 @@ class ForkManager(object):
     def __repr__(self):
         return f'forkmanager({self.thread_ids})'
 
-    def setup(self):
+    def setup(self, env):
         for thread_id in self.thread_ids:
-            self.workers.append(ForkWorker(self, thread_id))
+            self.workers.append(ForkWorker(env, self, thread_id))
 
-    def run(self):
+    def run(self, env):
         for worker in self.workers:
             worker.start_process()
         for worker in self.workers:
@@ -58,20 +58,21 @@ class ForkWorker(object):
 
     class SendToParent(marcel.core.Op):
 
-        def __init__(self, env, parent):
-            super().__init__(env)
+        def __init__(self, parent):
+            super().__init__()
             self.parent = parent
 
         def __repr__(self):
             return 'sendtoparent()'
 
-        def receive(self, x):
+        def receive(self, env, x):
             self.parent.send(dill.dumps(x))
 
         def receive_error(self, error):
             self.parent.send(dill.dumps(error))
 
-    def __init__(self, fork_manager, thread_id):
+    def __init__(self, env, fork_manager, thread_id):
+        self.env = env
         self.fork_manager = fork_manager
         op = fork_manager.op
         self.thread_id = thread_id
@@ -79,18 +80,17 @@ class ForkWorker(object):
         # duplex=False: child writes to parent when function completes execution.
         # No need to communicate in the other direction
         self.reader, self.writer = mp.Pipe(duplex=False)
-        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(op.env(),
-                                                                   op.owner.error_handler,
+        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(op.owner.error_handler,
                                                                    fork_manager.pipeline_arg,
                                                                    self.customize_pipeline)
-        self.pipeline_wrapper.setup()
+        self.pipeline_wrapper.setup(env)
         if self.pipeline_wrapper.n_params() > fork_manager.max_pipeline_args:
             raise marcel.exception.KillCommandException('Too many pipeline args.')
 
     def start_process(self):
         def run_pipeline_in_child():
             try:
-                self.pipeline_wrapper.run_pipeline([self.thread_id])
+                self.pipeline_wrapper.run_pipeline(self.env, [self.thread_id])
             except BaseException as e:
                 self.writer.send(dill.dumps(e))
             self.writer.close()
@@ -105,15 +105,15 @@ class ForkWorker(object):
             while True:
                 input = self.reader.recv()
                 x = dill.loads(input)
-                op.send(x)
+                op.send(self.env, x)
         except EOFError:
             pass
         while self.process.is_alive():
             self.process.join(0.1)
+        self.env = None
 
-    def customize_pipeline(self, pipeline):
-        op = self.fork_manager.op
-        pipeline = self.fork_manager.customize_pipeline(pipeline, self.thread_id)
-        send_to_parent = ForkWorker.SendToParent(op.env(), self.writer)
+    def customize_pipeline(self, env, pipeline):
+        pipeline = self.fork_manager.customize_pipeline(env, pipeline, self.thread_id)
+        send_to_parent = ForkWorker.SendToParent(self.writer)
         pipeline.append(send_to_parent)
         return pipeline

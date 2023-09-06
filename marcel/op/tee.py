@@ -27,8 +27,8 @@ Tuples arriving in the input stream are passed to each {r:PIPELINE} and to the o
 '''
 
 
-def tee(env, *pipeline):
-    return Tee(env), [p.create_pipeline() for p in pipeline]
+def tee(*pipeline):
+    return Tee(), [p.create_pipeline() for p in pipeline]
 
 
 class TeeArgsParser(marcel.argsparser.ArgsParser):
@@ -41,8 +41,8 @@ class TeeArgsParser(marcel.argsparser.ArgsParser):
 
 class Tee(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.pipelines_arg = None
         self.pipelines = None
 
@@ -52,28 +52,27 @@ class Tee(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         if len(self.pipelines_arg) == 0:
             raise marcel.exception.KillCommandException('No pipelines given.')
         self.pipelines = []
         for pipeline in self.pipelines_arg:
-            pipeline = marcel.core.PipelineWrapper.create(self.env(),
-                                                          self.owner.error_handler,
+            pipeline = marcel.core.PipelineWrapper.create(self.owner.error_handler,
                                                           pipeline,
-                                                          lambda pipeline: pipeline)
-            pipeline.setup()
-            pipeline.prepare_to_receive()
+                                                          lambda env, pipeline: pipeline)
+            pipeline.setup(env)
+            pipeline.prepare_to_receive(env)
             self.pipelines.append(pipeline)
 
-    def receive(self, x):
+    def receive(self, env, x):
         for pipeline in self.pipelines:
-            pipeline.receive(x)
-        self.send(x)
+            pipeline.receive(env, x)
+        self.send(env, x)
 
-    def flush(self):
+    def flush(self, env):
         for pipeline in self.pipelines:
-            pipeline.flush()
-        self.propagate_flush()
+            pipeline.flush(env)
+        self.propagate_flush(env)
 
     def cleanup(self):
         for pipeline in self.pipelines:

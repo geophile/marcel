@@ -28,8 +28,8 @@ Write the entries in the directory stack to the output stream, top first.
 '''
 
 
-def dirs(env, clear=None):
-    return Dirs(env), [] if clear is None else ['--clear']
+def dirs(clear=None):
+    return Dirs(), [] if clear is None else ['--clear']
 
 
 class DirsArgsParser(marcel.argsparser.ArgsParser):
@@ -42,8 +42,8 @@ class DirsArgsParser(marcel.argsparser.ArgsParser):
 
 class Dirs(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.clear = None
 
     def __repr__(self):
@@ -51,11 +51,11 @@ class Dirs(marcel.core.Op):
 
     # AbstractOp
 
-    def run(self):
+    def run(self, env):
         if self.clear:
-            self.env().dir_state().reset_dir_stack()
-        for dir in self.env().dir_state().dirs():
-            self.send(marcel.object.file.File(dir))
+            env.dir_state().reset_dir_stack()
+        for dir in env.dir_state().dirs():
+            self.send(env, marcel.object.file.File(dir))
 
     # Op
 

@@ -90,7 +90,7 @@ COMMA = ','
 TAB = '\t'
 
 
-def read(env, *filenames,
+def read(*filenames,
          depth=None,
          recursive=False,
          csv=False,
@@ -122,7 +122,7 @@ def read(env, *filenames,
     if label:
         args.append('--label')
     args.extend(filenames)
-    return Read(env), args
+    return Read(), args
 
 
 class ReadArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
@@ -143,8 +143,8 @@ class ReadArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
 
 class Read(marcel.op.filenamesop.FilenamesOp):
 
-    def __init__(self, env):
-        super().__init__(env, Read.read_file)
+    def __init__(self):
+        super().__init__(Read.read_file)
         self.csv = None
         self.tsv = None
         self.headings = None
@@ -179,7 +179,7 @@ class Read(marcel.op.filenamesop.FilenamesOp):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         if self.headings and not (self.csv or self.tsv):
             raise marcel.exception.KillCommandException(
                 '-h|--headings can only be specified with -c|--csv or -t|--tsv')
@@ -187,7 +187,7 @@ class Read(marcel.op.filenamesop.FilenamesOp):
             raise marcel.exception.KillCommandException(
                 '-s|--skip-headings can only be specified with -c|--csv or -t|--tsv')
         self.file = True
-        super().setup()
+        super().setup(env)
         self.reader = (CSVReader(self, COMMA) if self.csv else
                        CSVReader(self, TAB) if self.tsv else
                        PickleReader(self) if self.pickle else
@@ -196,30 +196,30 @@ class Read(marcel.op.filenamesop.FilenamesOp):
 
     # Op
 
-    def run(self):
+    def run(self, env):
         if self.filenames:
-            return super().run()
+            return super().run(env)
         else:
-            return self.receive(None)
+            return self.receive(env, None)
 
-    def receive(self, x):
+    def receive(self, env, x):
         if x is None:
-            super().receive(None)
+            super().receive(env, None)
         else:
             if len(x) != 1:
-                self.fatal_error(x, 'Input to read must be a single value.')
+                self.fatal_error(env, x, 'Input to read must be a single value.')
             file = x[0]
             if type(file) is not File:
-                self.fatal_error(x, 'Input to read must be a File.')
-            Read.read_file(self, file)
+                self.fatal_error(env, x, 'Input to read must be a File.')
+            Read.read_file(self, env, file)
 
     # Internal
 
     @staticmethod
-    def read_file(op, file):
+    def read_file(op, env, file):
         assert type(file) is File, f'{type(file)} {file}'
         if file.is_file():
-            op.reader.read_file(file, (file,) if op.label else None)
+            op.reader.read_file(env, file, (file,) if op.label else None)
 
 
 class Reader:
@@ -227,7 +227,7 @@ class Reader:
     def __init__(self, op):
         self.op = op
 
-    def read_file(self, file, label):
+    def read_file(self, env, file, label):
         assert False
 
 
@@ -236,7 +236,7 @@ class TextReader(Reader):
     def __init__(self, op):
         super().__init__(op)
 
-    def read_file(self, file, label):
+    def read_file(self, env, file, label):
         with marcel.util.open_file(file.path,
                                    'r',
                                    marcel.core.kill_and_resume_on_file_open_error) as input:
@@ -244,7 +244,7 @@ class TextReader(Reader):
                 line = input.readline()
                 while len(line) > 0:
                     line = line.rstrip('\r\n')
-                    self.op.send(label + (line,) if label else line)
+                    self.op.send(env, label + (line,) if label else line)
                     line = input.readline()
             except StopIteration:
                 pass
@@ -255,12 +255,12 @@ class PickleReader(Reader):
     def __init__(self, op):
         super().__init__(op)
 
-    def read_file(self, file, label):
+    def read_file(self, env, file, label):
         with marcel.picklefile.PickleFile(file.path).reader() as input:
             try:
                 while True:
                     x = input.read()
-                    self.op.send((label, x) if label else x)
+                    self.op.send(env, (label, x) if label else x)
             except EOFError:
                 pass
 
@@ -270,7 +270,7 @@ class JSONReader(Reader):
     def __init__(self, op):
         super().__init__(op)
 
-    def read_file(self, file, label):
+    def read_file(self, env, file, label):
         lines = None
         with marcel.util.open_file(file.path,
                                    'r',
@@ -278,7 +278,7 @@ class JSONReader(Reader):
             lines = input.readlines()
         assert lines is not None
         json = marcel.jsonutil.JSONUtil().decoder.decode(' '.join(lines))
-        self.op.send(json)
+        self.op.send(env, json)
 
 
 class CSVReader(Reader):
@@ -294,7 +294,7 @@ class CSVReader(Reader):
         self.named_tuple = None
         self.n_columns = None
 
-    def read_file(self, file, label):
+    def read_file(self, env, file, label):
         with marcel.util.open_file(file.path,
                                    'r',
                                    marcel.core.kill_and_resume_on_file_open_error) as input:
@@ -312,7 +312,8 @@ class CSVReader(Reader):
                                 self.named_tuple = namedtuple('csvtuple', headings)
                                 self.n_columns = len(headings)
                             except ValueError as e:
-                                self.op.non_fatal_error(line,
+                                self.op.non_fatal_error(env,
+                                                        line,
                                                         f'Cannot generate identifiers from headings: {e}')
                     else:
                         if label:
@@ -323,12 +324,13 @@ class CSVReader(Reader):
                                     out = out + ((None,) * (self.n_columns - len(out)))
                                 out = self.named_tuple(*out)
                             except Exception as e:
-                                self.op.non_fatal_error(line,
+                                self.op.non_fatal_error(env,
+                                                        line,
                                                         'Incompatible with headings, '
                                                         '(probably too many fields).')
                                 out = None
                         if out is not None:
-                            self.op.send(out)
+                            self.op.send(env, out)
                     line = input.readline()
                     first = False
             except StopIteration:

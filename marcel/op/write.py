@@ -66,7 +66,7 @@ COMMA = ','
 TAB = '\t'
 
 
-def write(env, filename=None, csv=False, tsv=False, pickle=False, format=None, append=False):
+def write(filename=None, csv=False, tsv=False, pickle=False, format=None, append=False):
     args = []
     if csv:
         args.append('--csv')
@@ -80,7 +80,7 @@ def write(env, filename=None, csv=False, tsv=False, pickle=False, format=None, a
         args.append('--append')
     if filename:
         args.append(filename)
-    return Write(env), args
+    return Write(), args
 
 
 class WriteArgsParser(marcel.argsparser.ArgsParser):
@@ -99,8 +99,8 @@ class WriteArgsParser(marcel.argsparser.ArgsParser):
 
 class Write(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.csv = False
         self.tsv = False
         self.pickle = False
@@ -130,8 +130,8 @@ class Write(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        self.filename = self.eval_function('filename_arg', str)
+    def setup(self, env):
+        self.filename = self.eval_function(env, 'filename_arg', str)
         if self.pickle and self.filename is None:
             raise marcel.exception.KillCommandException(
                 '--pickle incompatible with stdout.')
@@ -142,17 +142,17 @@ class Write(marcel.core.Op):
                        CSVWriter(self, COMMA) if self.csv else
                        CSVWriter(self, TAB) if self.tsv else
                        PickleWriter(self) if self.pickle else
-                       DefaultWriter(self))
+                       DefaultWriter(self, env.color_scheme()))
 
-    def receive(self, x):
+    def receive(self, env, x):
         try:
             self.writer.receive(x)
         except marcel.exception.KillAndResumeException as e:
-            self.non_fatal_error(input=x, message=str(e))
+            self.non_fatal_error(env, input=x, message=str(e))
         except Exception as e:  # E.g. UnicodeEncodeError
-            self.non_fatal_error(input=x, message=str(e))
+            self.non_fatal_error(env, input=x, message=str(e))
         finally:
-            self.send(x)
+            self.send(env, x)
 
     def cleanup(self):
         self.writer.cleanup()
@@ -239,9 +239,9 @@ class PythonWriter(TextWriter):
 
 class DefaultWriter(TextWriter):
 
-    def __init__(self, op):
+    def __init__(self, op, color_scheme):
         super().__init__(op)
-        self.color_scheme = (op.env().color_scheme()
+        self.color_scheme = (color_scheme
                              if self.output == sys.__stdout__ else
                              None)
 

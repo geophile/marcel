@@ -36,11 +36,11 @@ permitted if the stream does not terminate, or if {r:START} is negative.
 '''
 
 
-def gen(env, count=0, start=0, pad=None):
+def gen(count=0, start=0, pad=None):
     args = ['--pad', pad] if pad else []
     args.append(count)
     args.append(start)
-    return Gen(env), args
+    return Gen(), args
 
 
 class GenArgsParser(marcel.argsparser.ArgsParser):
@@ -55,8 +55,8 @@ class GenArgsParser(marcel.argsparser.ArgsParser):
 
 class Gen(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.count_arg = None
         self.start_arg = None
         self.pad_arg = None
@@ -75,10 +75,10 @@ class Gen(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        pad = self.eval_function('pad_arg', int)
-        self.count = self.eval_function('count_arg', int)
-        self.start = self.eval_function('start_arg', int)
+    def setup(self, env):
+        pad = self.eval_function(env, 'pad_arg', int)
+        self.count = self.eval_function(env, 'count_arg', int)
+        self.start = self.eval_function(env, 'start_arg', int)
         if pad is not None:
             if self.count == 0:
                 raise marcel.exception.KillCommandException(f'Padding {pad} incompatible with unbounded output.')
@@ -89,15 +89,15 @@ class Gen(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'Padding {pad} too small.')
             self.format = '{:>0' + str(pad) + '}'
 
-    def run(self):
+    def run(self, env):
         if self.count is None or self.count == 0:
             x = self.start
             while True:
-                self.send(self.apply_padding(x))
+                self.send(env, self.apply_padding(x))
                 x += 1
         else:
             for x in range(self.start, self.start + self.count):
-                self.send(self.apply_padding(x))
+                self.send(env, self.apply_padding(x))
 
     # Op
 

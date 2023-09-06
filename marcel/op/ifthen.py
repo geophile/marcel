@@ -41,8 +41,8 @@ the numbers in the variable {r:all100}.
 '''
 
 
-def ifthen(env, predicate, then):
-    return Ifthen(env), [predicate, then.create_pipeline()]
+def ifthen(predicate, then):
+    return Ifthen(), [predicate, then.create_pipeline()]
 
 
 class IfthenArgsParser(marcel.op.ifbase.IfBaseArgsParser):
@@ -53,12 +53,12 @@ class IfthenArgsParser(marcel.op.ifbase.IfBaseArgsParser):
 
 class Ifthen(marcel.op.ifbase.IfBase):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
 
     # AbstractOp
 
-    def receive(self, x):
-        if self.call(self.predicate, *x):
-            self.then.receive(x)
-        self.send(x)
+    def receive(self, env, x):
+        if self.call(env, self.predicate, *x):
+            self.then.receive(env, x)
+        self.send(env, x)

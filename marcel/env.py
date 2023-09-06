@@ -200,7 +200,6 @@ class Environment:
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
             'Color': marcel.object.color.Color,
-            # EXPERIMENT
             'pos': lambda: env.current_op.pos()
         })
         if editor:
@@ -237,6 +236,8 @@ class Environment:
         self.reader = None
         # For tracking env var changes made by job
         self.modified_vars = None
+        # Support for pos()
+        self.current_op = None
 
     def __getstate__(self):
         return {'namespace': self.namespace,

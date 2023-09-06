@@ -13,13 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.function
 
 
-def assign(env, var, value):
-    return Assign(env), [var, value]
+def assign(var, value):
+    return Assign(), [var, value]
 
 
 class AssignArgsParser(marcel.argsparser.ArgsParser):
@@ -33,8 +34,8 @@ class AssignArgsParser(marcel.argsparser.ArgsParser):
 
 class Assign(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.var = None
         self.string = None
         self.pipeline = None
@@ -46,7 +47,7 @@ class Assign(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         assert self.var is not None
         count = 0
         if self.value is not None:
@@ -63,17 +64,14 @@ class Assign(marcel.core.Op):
             count += 1
         if self.function is not None:
             assert isinstance(self.function, marcel.function.Function), type(self.function)
-            self.value = self.call(self.function)
+            self.value = self.call(env, self.function)
             count += 1
         assert count == 1, count
-
-    def set_env(self, env):
-        super().set_env(env)
         if isinstance(self.value, marcel.function.Function):
             self.value.set_globals(env.vars())
 
-    def run(self):
-        self.env().setvar(self.var, self.value)
+    def run(self, env):
+        env.setvar(self.var, self.value)
 
     # Op
 

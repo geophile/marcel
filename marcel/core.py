@@ -44,18 +44,14 @@ class Pipelineable:
 
 class AbstractOp(Pipelineable):
 
-    def setup(self):
-        pass
-
-    def set_env(self, env):
+    def setup(self, env):
         pass
 
 
 class Op(AbstractOp):
 
-    def __init__(self, env):
+    def __init__(self):
         super().__init__()
-        self._env = env
         # The following fields are set and have defined values only during the execution of a pipeline
         # containing this op.
         # The op receiving this op's output
@@ -75,28 +71,23 @@ class Op(AbstractOp):
         pipeline.append(self)
         return pipeline
 
-    # AbstractOp
-
-    def set_env(self, env):
-        self._env = env
-
     # Op
 
-    def send(self, x):
+    def send(self, env, x):
         receiver = self.receiver
         if receiver:
-            receiver.receive_input(x)
+            receiver.receive_input(env, x)
 
     def send_error(self, error):
         assert isinstance(error, Error)
         if self.receiver:
             self.receiver.receive_error(error)
 
-    def propagate_flush(self):
+    def propagate_flush(self, env):
         if self.receiver:
-            self.receiver.flush()
+            self.receiver.flush(env)
 
-    def call(self, function, *args, **kwargs):
+    def call(self, env, function, *args, **kwargs):
         try:
             return function(*args, **kwargs)
         except Exception as e:
@@ -106,57 +97,53 @@ class Op(AbstractOp):
             if kwargs and len(kwargs) > 0:
                 function_input.append(str(kwargs))
             args_description = None if len(function_input) == 0 else ', '.join(function_input)
-            self.fatal_error(args_description, str(e))
+            self.fatal_error(env, args_description, str(e))
 
     # This function is performance-critical, so assertions are commented out,
     # and util.wrap_op_input is inlined.
-    def receive_input(self, x):
+    def receive_input(self, env, x):
         # assert x is not None
         # assert not isinstance(x, Error)
-        self._env.current_op = self
         try:
+            env.current_op = self
             self._count += 1
-            self.receive(x if type(x) in (tuple, list) else
-                         (x,))
+            self.receive(env, x if type(x) in (tuple, list) else (x,))
         except marcel.exception.KillAndResumeException as e:
             self.receive_error(Error(e))
 
     def pos(self):
         return self._count
 
-    def run(self):
+    def run(self, env):
         raise marcel.exception.KillCommandException(f'{self.op_name()} cannot be the first operator in a pipeline')
 
-    def receive(self, x):
+    def receive(self, env, x):
         pass
 
     def receive_error(self, error):
         assert isinstance(error, Error)
         self.send_error(error)
 
-    def flush(self):
-        self.propagate_flush()
+    def flush(self, env):
+        self.propagate_flush(env)
 
     def cleanup(self):
         pass
 
-    def env(self):
-        return self._env
-
     def copy(self):
-        copy = self.__class__(self.env())
+        copy = self.__class__()
         copy.__dict__.update(self.__dict__)
         return copy
 
-    def non_fatal_error(self, input=None, message=None, error=None):
+    def non_fatal_error(self, env, input=None, message=None, error=None):
         assert (message is None) != (error is None)
         if error is None:
             error = self.error(input, message)
-        self.owner.handle_error(error)
+        self.owner.handle_error(env, error)
 
-    def fatal_error(self, input, message):
+    def fatal_error(self, env, input, message):
         error = self.error(input=input, message=message)
-        self.owner.handle_error(error)
+        self.owner.handle_error(env, error)
         raise marcel.exception.KillAndResumeException(message)
 
     def must_be_first_in_pipeline(self):
@@ -177,10 +164,6 @@ class Op(AbstractOp):
     def __iter__(self):
         return PipelineIterator(self.create_pipeline())
 
-    # For use by subclasses
-
-    def getvar(self, var):
-        return self._env.getvar(var)
 
     # arg is a Pipeline, Pipelineable, or a var bound to a pipeline. Deal with all of these possibilities
     # and come up with the pipeline itself.
@@ -203,11 +186,11 @@ class Op(AbstractOp):
     # Examine the named field, which is a single- or list-valued attr of self.
     # Evaluate any functions found, and then check that the resulting type is
     # one of the given types.
-    def eval_function(self, field, *types):
+    def eval_function(self, env, field, *types):
         def call(x):
             try:
                 if isinstance(x, marcel.function.Function):
-                    x = self.call(x)
+                    x = self.call(env, x)
                 else:
                     x = x()
             except marcel.exception.KillAndResumeException as e:
@@ -256,28 +239,26 @@ class Op(AbstractOp):
 
 class Command:
 
-    def __init__(self, env, source, pipeline):
-        self.env = env
+    def __init__(self, source, pipeline):
         self.source = source
         self.pipeline = pipeline
 
     def __repr__(self):
         return str(self.pipeline)
 
-    def execute(self, api=False):
-        depth = self.env.vars().n_scopes()
-        self.env.clear_changes()
-        self.pipeline.setup()
-        self.pipeline.set_env(self.env)
-        self.pipeline.run()
-        self.pipeline.flush()
+    def execute(self, env, api=False):
+        depth = env.vars().n_scopes()
+        env.clear_changes()
+        self.pipeline.setup(env)
+        self.pipeline.run(env)
+        self.pipeline.flush(env)
         self.pipeline.cleanup()
         # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.
-        assert self.env.vars().n_scopes() == depth, self.env.vars().n_scopes()
+        assert env.vars().n_scopes() == depth, env.vars().n_scopes()
         # An interactive Command is executed by a multiprocessing.Process.
         # Need to transmit the Environment's vars relating to the directory, to the parent
         # process, because they may have changed. This doesn't apply to API usage.
-        return self.env.changes() if api else None
+        return env.changes() if api else None
 
 
 # Used to represent a function yielding a Node tree (which then yields a Pipeline).
@@ -384,14 +365,11 @@ class Pipeline(AbstractOp):
         for op in self.ops:
             print(f'    {id(op)}  {op}')
 
-    def env(self):
-        return self.ops[0].env()
-
     def set_error_handler(self, error_handler):
         self.error_handler = error_handler
 
-    def handle_error(self, error):
-        self.error_handler(self.env(), error)
+    def handle_error(self, env, error):
+        self.error_handler(env, error)
 
     # Pipelineable
 
@@ -404,7 +382,7 @@ class Pipeline(AbstractOp):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         assert self.error_handler is not None, f'{self} has no error handler'
         prev_op = None
         for op in self.ops:
@@ -418,26 +396,22 @@ class Pipeline(AbstractOp):
                 prev_op.receiver = op
             prev_op = op
         for op in self.ops:
-            op.setup()
-
-    def set_env(self, env):
-        for op in self.ops:
-            op.set_env(env)
+            op.setup(env)
 
     # Pipeline
 
-    def run(self):
-        self.ops[0].run()
+    def run(self, env):
+        self.ops[0].run(env)
 
-    def receive(self, x):
+    def receive(self, env, x):
         op = self.ops[0]
         if x is None:
-            op.run()
+            op.run(env)
         else:
-            op.receive_input(x)
+            op.receive_input(env, x)
 
-    def flush(self):
-        self.ops[0].flush()
+    def flush(self, env):
+        self.ops[0].flush(env)
 
     def cleanup(self):
         for op in self.ops:
@@ -478,7 +452,6 @@ class Pipeline(AbstractOp):
 class PipelineIterator:
 
     def __init__(self, pipeline):
-        env = pipeline.env()
         # Errors go to output, so no other error handling is needed
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
         output = []
@@ -486,7 +459,7 @@ class PipelineIterator:
         pipeline.append(gather_op)
         command = Command(env, None, pipeline)
         try:
-            command.execute()
+            command.execute(env)
         except marcel.exception.KillCommandException as e:
             marcel.util.print_to_stderr(e, env)
         finally:
@@ -506,8 +479,7 @@ class PipelineIterator:
 class PipelineWrapper(object):
 
     # customize_pipeline takes pipeline as an argument, returns None
-    def __init__(self, env, error_handler, pipeline_arg, customize_pipeline):
-        self.env = env
+    def __init__(self, error_handler, pipeline_arg, customize_pipeline):
         self.error_handler = error_handler
         self.pipeline_arg = pipeline_arg
         self.customize_pipeline = customize_pipeline
@@ -516,42 +488,42 @@ class PipelineWrapper(object):
     def __repr__(self):
         return f'PipelineWrapper({self.pipeline_arg})'
 
-    def setup(self):
+    def setup(self, env):
         assert False
 
     def n_params(self):
         assert False
 
-    def run_pipeline(self, args):
+    def run_pipeline(self, env, args):
         assert False
 
-    def receive(self, x):
-        self.pipeline.receive(x)
+    def receive(self, env, x):
+        self.pipeline.receive(env, x)
 
-    def flush(self):
-        self.pipeline.flush()
+    def flush(self, env):
+        self.pipeline.flush(env)
 
     def cleanup(self):
         self.pipeline.cleanup()
 
     @staticmethod
-    def create(env, error_handler, pipeline_arg, customize_pipeline):
-        return (PipelineAPI(env, error_handler, pipeline_arg, customize_pipeline)
+    def create(error_handler, pipeline_arg, customize_pipeline):
+        return (PipelineAPI(error_handler, pipeline_arg, customize_pipeline)
                 if type(pipeline_arg) is PipelineFunction
-                else PipelineInteractive(env, error_handler, pipeline_arg, customize_pipeline))
+                else PipelineInteractive(error_handler, pipeline_arg, customize_pipeline))
 
 
 class PipelineInteractive(PipelineWrapper):
 
-    def __init__(self, env, error_handler, pipeline_arg, customize_pipeline):
-        super().__init__(env, error_handler, pipeline_arg, customize_pipeline)
+    def __init__(self, error_handler, pipeline_arg, customize_pipeline):
+        super().__init__(error_handler, pipeline_arg, customize_pipeline)
         self.params = None
         self.scope = None
 
-    def setup(self):
-        self.pipeline = marcel.core.Op.pipeline_arg_value(self.env, self.pipeline_arg).copy()
+    def setup(self, env):
+        self.pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline_arg).copy()
         self.pipeline.set_error_handler(self.error_handler)
-        self.pipeline = self.customize_pipeline(self.pipeline)
+        self.pipeline = self.customize_pipeline(env, self.pipeline)
         assert self.pipeline is not None
         self.scope = {}
         self.params = self.pipeline.parameters()
@@ -563,33 +535,32 @@ class PipelineInteractive(PipelineWrapper):
     def n_params(self):
         return self.pipeline.n_params()
 
-    def run_pipeline(self, args):
-        env = self.env
+    def run_pipeline(self, env, args):
         env.vars().push_scope(self.scope)
         for i in range(len(self.params)):
             env.setvar(self.params[i], args[i])
         try:
-            marcel.core.Command(env, None, self.pipeline).execute()
+            marcel.core.Command(None, self.pipeline).execute(env)
         finally:
             env.vars().pop_scope()
 
-    def prepare_to_receive(self):
-        self.pipeline.setup()
+    def prepare_to_receive(self, env):
+        self.pipeline.setup(env)
 
 
 class PipelineAPI(PipelineWrapper):
 
-    def __init__(self, env, error_handler, pipeline_arg, customize_pipeline):
-        super().__init__(env, error_handler, pipeline_arg, customize_pipeline)
+    def __init__(self, error_handler, pipeline_arg, customize_pipeline):
+        super().__init__(error_handler, pipeline_arg, customize_pipeline)
         self.pipeline = None
 
-    def setup(self):
+    def setup(self, env):
         pass
 
     def n_params(self):
         return self.pipeline_arg.n_params()
 
-    def run_pipeline(self, args):
+    def run_pipeline(self, env, args):
         # Through the API, a pipeline is expressed as a Python function which, when evaluated,
         # yields a pipeline composed of op.core.Nodes. This function is the value of the op's
         # pipeline_arg field. So op.pipeline_arg(*args) evaluates the function (using the current
@@ -598,12 +569,12 @@ class PipelineAPI(PipelineWrapper):
                     if self.n_params() > 0 else
                     self.pipeline_arg.create_pipeline())
         pipeline.set_error_handler(self.error_handler)
-        self.pipeline = self.customize_pipeline(pipeline)
-        marcel.core.Command(self.env, None, self.pipeline).execute()
+        self.pipeline = self.customize_pipeline(env, pipeline)
+        marcel.core.Command(None, self.pipeline).execute(env)
 
-    def prepare_to_receive(self):
+    def prepare_to_receive(self, env):
         assert self.n_params() == 0
         pipeline = self.pipeline_arg.create_pipeline()
         pipeline.set_error_handler(self.error_handler)
-        self.pipeline = self.customize_pipeline(pipeline)
-        self.pipeline.setup()
+        self.pipeline = self.customize_pipeline(env, pipeline)
+        self.pipeline.setup(env)
