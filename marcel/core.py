@@ -62,7 +62,6 @@ class Op(AbstractOp):
         self.receiver = None
         # The pipeline to which this op belongs
         self.owner = None
-        # EXPERIMENT
         self._count = -1
 
     def __repr__(self):

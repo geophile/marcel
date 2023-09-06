@@ -18,7 +18,7 @@
 # function evaluation uses __getitem__. Defining __setitem__ seems to make a mess of pickling, so it's important
 # to avoid overriding it.
 #
-# A NestedNamespace is a dict (superclass) and the set of params defined in that scope (introduced by a
+# A NestedNamespace is a dict, and the set of params defined in that scope (introduced by a
 # parameterized pipeline). scopes stores outer namespaces, so scopes[0] is the namespace containing the current one,
 # and scope[-1] is the topmost namespace, (the marcel namespace).
 

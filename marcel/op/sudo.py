@@ -107,7 +107,6 @@ class Sudo(marcel.core.Op):
         buffer = io.BytesIO()
         pickler = dill.Pickler(buffer)
         pickler.dump(self.env().python_version())
-        pickler.dump(self.env())
         pickler.dump(self.pipeline)
         buffer.seek(0)
         stdout, stderr = self.process.communicate(input=buffer.getvalue())

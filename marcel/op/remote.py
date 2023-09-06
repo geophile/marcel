@@ -149,7 +149,6 @@ class Remote(marcel.core.Op):
             buffer = io.BytesIO()
             pickler = dill.Pickler(buffer)
             pickler.dump(self.env().python_version())
-            pickler.dump(self.env().without_reservoirs())
             pickler.dump(self.pipeline_wrapper)
             buffer.seek(0)
             try:

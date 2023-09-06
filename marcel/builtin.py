@@ -24,7 +24,7 @@ from marcel.object.file import File
 from marcel.object.process import Process
 from marcel.util import username, groupname, quote_files
 
-# Needed hereddd but we don't want them public
+# Needed here but we don't want them public
 from marcel.jsonutil import JSONUtil as _JSONUtil
 _JSON_UTIL = _JSONUtil()
 

@@ -34,6 +34,7 @@ import marcel.exception
 import marcel.locations
 import marcel.object.color
 import marcel.object.error
+import marcel.opmodule
 import marcel.nestednamespace
 import marcel.util
 import marcel.version
@@ -142,7 +143,7 @@ def kill_descendents(signal_id):
 
 
 # Adapted from Environment.read_config
-def read_config(config_path=None):
+def read_config():
     current_dir = pathlib.Path.cwd().resolve()
     namespace = {
         'USER': getpass.getuser(),
@@ -181,16 +182,17 @@ def main():
         TRACE.write('-' * 80)
         TRACE.write(getpass.getuser())
         TRACE.write(f'{datetime.datetime.now()}')
-        namespace = marcel.nestednamespace.NestedNamespace(read_config())
+        # env
+        env = marcel.env.Environment()
+        env.namespace = marcel.nestednamespace.NestedNamespace(read_config())
+        env.directory_state = marcel.env.DirectoryState(env)
+        env.modified_vars = set()
+        env.main_pid = os.getpid()
+        marcel.opmodule.import_op_modules(env)
         # Use sys.stdin.buffer because we want binary data, not the text version
         input = dill.Unpickler(sys.stdin.buffer)
         # Python version from client
         client_python_version = input.load()
-        # env from client
-        env = input.load()
-        namespace.update(env.namespace)
-        env.namespace = namespace
-        env.main_pid = os.getpid()
         # pipeline from client
         pipeline = input.load()
         version = env.getvar('MARCEL_VERSION')

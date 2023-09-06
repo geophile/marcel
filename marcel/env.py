@@ -209,8 +209,6 @@ class Environment:
             if not key.startswith('_'):
                 initial_namespace[key] = value
         env.namespace = marcel.nestednamespace.NestedNamespace(initial_namespace)
-        env.builtin_symbols = set(env.namespace.keys())
-        env.config_symbols = None  # Set by compute_config_symbols() after startup script is run
         env.locations = marcel.locations.Locations(env)
         env.config_path = env.read_config(config_file)
         env.directory_state = DirectoryState(env)
@@ -222,15 +220,22 @@ class Environment:
         return env
 
     def __init__(self):
+        # The marcel namespace is split between namespace and modules. These are separated to avoid
+        # serializing and deserializing modules, but logically they are one namespace.
         self.namespace = {}
-        self.builtin_symbols = None
-        self.config_symbols = None
+        # Standard locations of files important to marcel: config, history
         self.locations = None
+        # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
+        # Directory stack, including current directory
         self.directory_state = None
+        # Used during readline editing
         self.edited_command = None
+        # Source of ops and arg parsers
         self.op_modules = None
+        # readline wrapper
         self.reader = None
+        # For tracking env var changes made by job
         self.modified_vars = None
 
     def __getstate__(self):
@@ -315,14 +320,6 @@ class Environment:
                 type(interactive_executables) in (tuple, list) and
                 x in interactive_executables)
 
-    # Remove Reservoirs, which can be arbitrarily large.
-    def without_reservoirs(self):
-        remote_env = marcel.util.copy(self)
-        for var, value in self.namespace.items():
-            if type(value) is marcel.reservoir.Reservoir:
-                del remote_env.namespace[var]
-        return remote_env
-
     def read_config(self, config_path=None):
         if config_path is None:
             config_path = self.locations.config_path()
@@ -339,7 +336,6 @@ class Environment:
         # will then be added to self.namespace, for use in the execution of op functions.
         exec(config_source, self.namespace, locals)
         self.namespace.update(locals)
-        self.config_symbols = set(locals.keys())
         return config_path
 
     def prompt_string(self, prompt_pieces):

@@ -2302,6 +2302,14 @@ def test_bug_206():
     os.system(f'rm -rf {base}')
 
 
+@timeit
+def test_bug_212():
+    TEST.run('gen 3 | args (| x: ((x, -x)) |)',
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    TEST.run('sudo (| gen 3 | args (| x: ((x, -x)) |) |)',
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+
+
 # Generalization of bug 195
 @timeit
 def test_pipeline_vars():
@@ -2377,6 +2385,7 @@ def test_bugs():
     test_bug_202()
     test_bug_203()
     test_bug_206()
+    # test_bug_212()
 
 
 def main_stable():
@@ -2425,12 +2434,15 @@ def main_stable():
 
 
 def main_dev():
+    # TEST.run('import sys *')
+    # TEST.run('sudo (| gen 3 | args (| x: ((x, -x)) |) |)',
+    #          expected_out=[(0, 0), (1, -1), (2, -2)])
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_dev()
+    # main_dev()
     main_stable()
     main_slow_tests()
     print(f'Test failures: {TEST.failures}')

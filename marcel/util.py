@@ -116,7 +116,7 @@ def copy(x):
         return dill.loads(dill.dumps(x))
     except Exception as e:
         sys.stdout.flush()
-        print(f'Cloning error: ({type(e)}) {e}', file=sys.__stderr__, flush=True)
+        print(f'Cloning error on {type(x)}: ({type(e)}) {e}', file=sys.__stderr__, flush=True)
         print_stack_of_current_exception(sys.__stderr__)
 
 
