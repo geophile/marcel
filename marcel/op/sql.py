@@ -69,7 +69,7 @@ Note that the {r:--commit} and {r:--autocommit} flags are mutually exclusive.
 '''
 
 
-def sql(env, *args, db=None, autocommit=None, update_counts=None, commit=None):
+def sql(*args, db=None, autocommit=None, update_counts=None, commit=None):
     if len(args) == 0:
         raise marcel.exception.KillCommandException('No sql statement provided')
     statement = args[0]
@@ -84,9 +84,9 @@ def sql(env, *args, db=None, autocommit=None, update_counts=None, commit=None):
     op_args.append(statement)
     if args:
         op_args.extend(args)
-    op = Sql(env)
+    op = Sql()
     op.db = db
-    return Sql(env), op_args
+    return op, op_args
 
 
 class SqlArgsParser(marcel.argsparser.ArgsParser):
@@ -105,8 +105,8 @@ class SqlArgsParser(marcel.argsparser.ArgsParser):
 
 class Sql(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.dbvar = None
         self.db = None
         self.autocommit = None
@@ -125,15 +125,14 @@ class Sql(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        self.statement = self.eval_function('statement_arg', str)
-        self.args = self.eval_function('args_arg')
+    def setup(self, env):
+        self.statement = self.eval_function(env, 'statement_arg', str)
+        self.args = self.eval_function(env, 'args_arg')
         if self.commit is None:
             self.commit = 0  # Commit only in flush
         elif self.commit < 0:
             raise marcel.exception.KillCommandException(f'--commit value must be a positive integer: {self.commit}')
         self.total_update_count = 0
-        env = self.env()
         if type(self.db) is not marcel.object.db.Database:
             # Interactive usage
             self.db = env.db(self.dbvar) if self.dbvar is not None else env.getvar('DB_DEFAULT')
@@ -149,17 +148,17 @@ class Sql(marcel.core.Op):
             self.connection.set_autocommit(True)
         self.delegate = self.classify_statement()(self.connection, self)
 
-    def run(self):
-        self.receive(None)
+    def run(self, env):
+        self.receive(env, None)
 
-    def receive(self, x):
+    def receive(self, env, x):
         try:
             self.delegate.receive(x)
         except Exception as e:
             self.connection.rollback()
             raise marcel.exception.KillCommandException(e)
 
-    def flush(self):
+    def flush(self, env):
         try:
             self.delegate.flush()
             self.connection.commit()
@@ -168,7 +167,7 @@ class Sql(marcel.core.Op):
             raise marcel.exception.KillCommandException(e)
         finally:
             self.connection.close()
-            self.propagate_flush()
+            self.propagate_flush(env)
 
     # For use by this class
 

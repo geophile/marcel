@@ -82,8 +82,8 @@ class Uninitialized:
 _UNINITIALIZED = Uninitialized()
 
 
-def ps(env, user=_UNINITIALIZED, group=_UNINITIALIZED, pid=_UNINITIALIZED, command=_UNINITIALIZED):
-    op = Ps(env)
+def ps(user=_UNINITIALIZED, group=_UNINITIALIZED, pid=_UNINITIALIZED, command=_UNINITIALIZED):
+    op = Ps()
     op.user = user
     op.group = group
     op.pid = pid
@@ -105,8 +105,8 @@ class PsArgsParser(marcel.argsparser.ArgsParser):
 
 class Ps(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.user_arg = _UNINITIALIZED
         self.user = None
         self.group_arg = _UNINITIALIZED
@@ -122,11 +122,11 @@ class Ps(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        self.user = self.eval_function('user_arg', int, str)
-        self.group = self.eval_function('group_arg', int, str)
-        self.pid = self.eval_function('pid_arg', int)
-        self.command = self.eval_function('command_arg', str)
+    def setup(self, env):
+        self.user = self.eval_function(env, 'user_arg', int, str)
+        self.group = self.eval_function(env, 'group_arg', int, str)
+        self.pid = self.eval_function(env, 'pid_arg', int)
+        self.command = self.eval_function(env, 'command_arg', str)
         # user, group can be name or id. A name can be numeric, and in that case, the name interpretation
         # takes priority. Convert name to uid, since that is a cheaper lookup on a Project.
         # If user or group is None, no user/group was specified, so use this user/group.
@@ -153,11 +153,11 @@ class Ps(marcel.core.Op):
                                                                                 [self.command in x for x in p.cmdline],
                                                                                 False))
 
-    def run(self):
+    def run(self, env):
         for proc in psutil.process_iter(PROC_ATTRS):
             process = marcel.object.process.Process(proc)
             if self.filter(process):
-                self.send(process)
+                self.send(env, process)
 
     # Op
 

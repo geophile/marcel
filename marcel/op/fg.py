@@ -36,8 +36,8 @@ class FgArgsValidator(marcel.op.jobop.JobOpArgsParser):
 
 class Fg(marcel.op.jobop.JobOp):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
 
     def __repr__(self):
         return f'fg(job={self.jid})' if self.jid is not None else f'fg(pid={self.pid})'

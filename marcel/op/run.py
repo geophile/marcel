@@ -40,8 +40,8 @@ For more information on command history, run {n:help history}.
 '''
 
 
-def run(env):
-    return Run(env)
+def run():
+    return Run()
 
 
 class RunArgsParser(marcel.argsparser.ArgsParser):
@@ -54,8 +54,8 @@ class RunArgsParser(marcel.argsparser.ArgsParser):
 
 class Run(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.expected_args = None  # Set during parse. ! -> 1, !! -> 0
         self.n = None
         self.editor = None
@@ -66,18 +66,18 @@ class Run(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         if self.expected_args == 1 and self.n is None:
             raise marcel.exception.KillCommandException('History command number required following !')
         elif self.expected_args == 0 and self.n is not None:
             raise marcel.exception.KillCommandException('No arguments permitted after !!')
 
-    def run(self):
+    def run(self, env):
         # Remove the run command from history
         readline.remove_history_item(readline.get_current_history_length() - 1)
         if self.n is None:
             self.n = readline.get_current_history_length() - 1
-        self.env().edited_command = readline.get_history_item(self.n + 1)  # 1-based
+        env.edited_command = readline.get_history_item(self.n + 1)  # 1-based
 
     # Op
 

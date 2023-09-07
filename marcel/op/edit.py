@@ -37,8 +37,8 @@ will be on the command line. (Hit enter to run the command, as usual.)
 '''
 
 
-def edit(env, n=None):
-    return Edit(env), [] if n is None else [n]
+def edit(n=None):
+    return Edit(), [] if n is None else [n]
 
 
 class EditArgsParser(marcel.argsparser.ArgsParser):
@@ -51,8 +51,8 @@ class EditArgsParser(marcel.argsparser.ArgsParser):
 
 class Edit(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.n = None
         self.editor = None
         self.tmp_file = None
@@ -62,14 +62,14 @@ class Edit(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
-        self.editor = self.env().getvar('EDITOR')
+    def setup(self, env):
+        self.editor = env.getvar('EDITOR')
         if self.editor is None:
             raise marcel.exception.KillCommandException(
                 'Specify editor in the EDITOR environment variable')
         _, self.tmp_file = tempfile.mkstemp(text=True)
 
-    def run(self):
+    def run(self, env):
         # Remove the edit command from history
         readline.remove_history_item(readline.get_current_history_length() - 1)
         if self.n is None:
@@ -88,14 +88,14 @@ class Edit(marcel.core.Op):
             command_lines = input.readlines()
         # Make sure that each new line after the first is preceded by a continuation string.
         continued_correctly = []
-        correct_termination = self.env().reader.continuation + '\n'
+        correct_termination = env.reader.continuation + '\n'
         for line in command_lines[:-1]:
             if not line.endswith(correct_termination):
                 assert line[-1] == '\n', line
                 line = line[:-1] + correct_termination
             continued_correctly.append(line)
         continued_correctly.append(command_lines[-1])
-        self.env().edited_command = ''.join(continued_correctly)
+        env.edited_command = ''.join(continued_correctly)
         os.remove(self.tmp_file)
 
     # Op

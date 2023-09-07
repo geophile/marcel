@@ -38,8 +38,8 @@ are selected.)
 '''
 
 
-def history(env):
-    return History(env)
+def history():
+    return History()
 
 
 class HistoryArgsParser(marcel.argsparser.ArgsParser):
@@ -53,8 +53,8 @@ class HistoryArgsParser(marcel.argsparser.ArgsParser):
 
 class History(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.command = None
         self.n = None
 
@@ -69,8 +69,8 @@ class History(marcel.core.Op):
 
     # AbstractOp
 
-    def run(self):
-        history = self.env().reader.history()
+    def run(self, env):
+        history = env.reader.history()
         selected = []
         for i in range(len(history)):
             if self.command is None or self.command in history[i]:
@@ -79,7 +79,7 @@ class History(marcel.core.Op):
                   if self.n is None else
                   selected[-self.n:])
         for record in output:
-            self.send(record)
+            self.send(env, record)
 
     # Op
 

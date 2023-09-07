@@ -37,8 +37,8 @@ class BgArgsValidator(marcel.op.jobop.JobOpArgsParser):
 
 class Bg(marcel.op.jobop.JobOp):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
 
     def __repr__(self):
         return f'bg(job={self.jid})' if self.jid is not None else f'bg(pid={self.pid})'

@@ -32,8 +32,8 @@ class JobOpArgsParser(marcel.argsparser.ArgsParser):
 
 class JobOp(marcel.core.Op):
     
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.jid = None
         self.pid = None
         self.job_id = None
@@ -41,7 +41,7 @@ class JobOp(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         job_control = marcel.job.JobControl.only
         if self.job_id is not None:
             self.jid = self.job_id
@@ -49,7 +49,7 @@ class JobOp(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'There is no job {self.jid}')
         self.job = job_control.job(jid=self.jid, pid=self.pid)
 
-    def run(self):
+    def run(self, env):
         self.action()
 
     # Op

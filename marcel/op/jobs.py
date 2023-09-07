@@ -33,8 +33,8 @@ The job number can be used in conjunction with the {r:bg} and {r:fg} commands.
 '''
 
 
-def jobs(env):
-    return Jobs(env)
+def jobs():
+    return Jobs()
 
 
 class JobsArgsParser(marcel.argsparser.ArgsParser):
@@ -46,20 +46,20 @@ class JobsArgsParser(marcel.argsparser.ArgsParser):
 
 class Jobs(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
 
     def __repr__(self):
         return f'jobs'
 
     # AbstractOp
     
-    def run(self):
+    def run(self, env):
         job_id = 0
         for job in marcel.job.JobControl.only.jobs():
             # TODO: If job were a marcel.object, then it would have render_compact/full methods.
             description = f'{job_id}({job.state_symbol()}): {job.process.pid}  {job.command.source}'
-            self.send(description)
+            self.send(env, description)
             job_id += 1
 
     # Op
