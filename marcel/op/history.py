@@ -15,6 +15,7 @@
 
 import marcel.argsparser
 import marcel.core
+import marcel.exception
 import marcel.object.historyrecord
 
 
@@ -68,6 +69,11 @@ class History(marcel.core.Op):
         return f'history({args_description})'
 
     # AbstractOp
+
+    def setup(self, env):
+        self.n = self.eval_function(env, 'n', int)
+        if self.n < 1:
+            raise marcel.exception.KillCommandException('n must be a posiive integer')
 
     def run(self, env):
         history = env.reader.history()

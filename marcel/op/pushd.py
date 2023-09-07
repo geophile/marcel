@@ -84,3 +84,11 @@ class Pushd(marcel.core.Op):
             raise marcel.exception.KillCommandException(e)
         for dir in env.dir_state().dirs():
             self.send(env, marcel.object.file.File(dir))
+
+    # Op
+
+    def must_be_first_in_pipeline(self):
+        return True
+
+    def run_in_main_process(self):
+        return True
