@@ -50,8 +50,8 @@ Files from host {n:H} will be downloaded to the directory {n:DIR/H}.
 '''
 
 
-def download(env, dir, cluster, *paths):
-    return Download(env), [dir, cluster] + list(paths)
+def download(dir, cluster, *paths):
+    return Download(), [dir, cluster] + list(paths)
 
 
 class DownloadArgsParser(marcel.argsparser.ArgsParser):
@@ -66,8 +66,8 @@ class DownloadArgsParser(marcel.argsparser.ArgsParser):
 
 class Download(marcel.core.Op):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.dir_arg = None
         self.dir = None
         self.cluster = None
@@ -78,17 +78,19 @@ class Download(marcel.core.Op):
     def __repr__(self):
         return f'download({self.dir_arg} <- {self.cluster} {self.filenames_arg})'
 
-    def setup(self):
-        self.dir = self.eval_function('dir_arg',
+    def setup(self, env):
+        self.dir = self.eval_function(env,
+                                      'dir_arg',
                                       str,
                                       pathlib.Path, pathlib.PosixPath, File)
         self.dir = pathlib.Path(self.dir)
-        self.dir = marcel.op.filenames.Filenames(self.env(), [self.dir]).normalize()
+        self.dir = marcel.op.filenames.Filenames(env, [self.dir]).normalize()
         if len(self.dir) == 0:
             raise marcel.exception.KillCommandException(f'Target directory does not exist: {self.dir_arg}')
         else:
             self.dir = self.dir[0]
-        self.filenames = self.eval_function('filenames_arg',
+        self.filenames = self.eval_function(env,
+                                            'filenames_arg',
                                             str, pathlib.Path, pathlib.PosixPath, File)
         if len(self.filenames) == 0:
             raise marcel.exception.KillCommandException('No remote files specified')
@@ -103,11 +105,11 @@ class Download(marcel.core.Op):
                                                               pipeline_arg=pipeline_template,
                                                               max_pipeline_args=0,
                                                               customize_pipeline=self.customize_pipeline)
-        self.fork_manager.setup()
+        self.fork_manager.setup(env)
         self.ensure_node_directories_exist()
 
-    def run(self):
-        self.fork_manager.run()
+    def run(self, env):
+        self.fork_manager.run(env)
 
     @staticmethod
     def scp_command(identity, sources, host, dest):

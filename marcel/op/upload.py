@@ -51,8 +51,8 @@ must have permission to write to the directory.
 '''
 
 
-def upload(env, cluster, dir, *paths):
-    return Upload(env), [cluster, dir] + list(paths)
+def upload(cluster, dir, *paths):
+    return Upload(), [cluster, dir] + list(paths)
 
 
 class UploadArgsParser(marcel.argsparser.ArgsParser):
@@ -69,8 +69,8 @@ class Upload(marcel.core.Op):
 
     SCP_COMMAND = 'scp -Cpqr -i {identity} {sources} {user}@{host}:{dest}'
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.cluster = None
         self.dir_arg = None
         self.dir = None
@@ -81,16 +81,18 @@ class Upload(marcel.core.Op):
     def __repr__(self):
         return f'upload({self.filenames_arg} -> {self.cluster}:{self.dir_arg})'
 
-    def setup(self):
-        self.dir = self.eval_function('dir_arg',
+    def setup(self, env):
+        self.dir = self.eval_function(env,
+                                      'dir_arg',
                                       str,
                                       pathlib.Path, pathlib.PosixPath, File)
         self.dir = pathlib.Path(self.dir)
         if not self.dir.is_absolute():
             raise marcel.exception.KillCommandException(f'Target directory must be absolute: {self.dir}')
-        self.filenames = self.eval_function('filenames_arg',
+        self.filenames = self.eval_function(env,
+                                            'filenames_arg',
                                             str, pathlib.Path, pathlib.PosixPath, File)
-        self.filenames = marcel.op.filenames.Filenames(self.env(), self.filenames).normalize()
+        self.filenames = marcel.op.filenames.Filenames(env, self.filenames).normalize()
         if len(self.filenames) == 0:
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
@@ -102,10 +104,10 @@ class Upload(marcel.core.Op):
                                                               pipeline_arg=pipeline_template,
                                                               max_pipeline_args=0,
                                                               customize_pipeline=self.customize_pipeline)
-        self.fork_manager.setup()
+        self.fork_manager.setup(env)
 
-    def run(self):
-        self.fork_manager.run()
+    def run(self, env):
+        self.fork_manager.run(env)
 
     @staticmethod
     def scp_command(identity, sources, user, host, dest):

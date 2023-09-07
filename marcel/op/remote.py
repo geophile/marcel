@@ -60,11 +60,11 @@ the output might look like this:
 '''
 
 
-def remote(env, cluster, pipeline):
+def remote(cluster, pipeline):
     # callable: Through API.
     # not callable: Interactive.
     pipeline_arg = marcel.core.PipelineFunction(pipeline) if callable(pipeline) else pipeline
-    return Remote(env), [cluster, pipeline_arg]
+    return Remote(), [cluster, pipeline_arg]
 
 
 # For API
@@ -83,8 +83,8 @@ class Remote(marcel.core.Op):
 
         ID_COUNTER = 0
 
-        def __init__(self, env, label):
-            super().__init__(env)
+        def __init__(self, label):
+            super().__init__()
             self.label_list = [label]
             self.label_tuple = (label,)
             self.id = Remote.LabelThread.next_id()
@@ -96,10 +96,8 @@ class Remote(marcel.core.Op):
 
         # AbstractOp
 
-        def receive(self, x):
-            self.send(self.label_tuple + x
-                      if type(x) is tuple
-                      else self.label_list + x)
+        def receive(self, env, x):
+            self.send(env, self.label_tuple + x if type(x) is tuple else self.label_list + x)
 
         def receive_error(self, error):
             error.set_label(self.label_tuple[0])
@@ -115,8 +113,8 @@ class Remote(marcel.core.Op):
 
     class RunRemote(marcel.core.Op):
 
-        def __init__(self, env, host, pipeline_wrapper):
-            super().__init__(env)
+        def __init__(self, host, pipeline_wrapper):
+            super().__init__()
             self.host = host
             self.pipeline_wrapper = pipeline_wrapper
             self.process = None
@@ -126,10 +124,10 @@ class Remote(marcel.core.Op):
 
         # AbstractOp
 
-        def setup(self):
+        def setup(self, env):
             pass
 
-        def run(self):
+        def run(self, env):
             # Start the remote process
             command = ' '.join([
                 'ssh',
@@ -148,7 +146,7 @@ class Remote(marcel.core.Op):
                                             universal_newlines=False)
             buffer = io.BytesIO()
             pickler = dill.Pickler(buffer)
-            pickler.dump(self.env().python_version())
+            pickler.dump(env.python_version())
             pickler.dump(self.pipeline_wrapper)
             buffer.seek(0)
             try:
@@ -167,9 +165,9 @@ class Remote(marcel.core.Op):
                         if isinstance(x, marcel.object.error.Error):
                             self.send_error(x)
                         else:
-                            self.send(x)
+                            self.send(env, x)
                 except EOFError as e:
-                    self.propagate_flush()
+                    self.propagate_flush(env)
             except BaseException as e:
                 marcel.util.print_stack_of_current_exception()
                 print(e)
@@ -179,8 +177,8 @@ class Remote(marcel.core.Op):
         def must_be_first_in_pipeline(self):
             return True
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self):
+        super().__init__()
         self.cluster = None
         self.pipeline_arg = None
         self.fork_manager = None
@@ -190,18 +188,18 @@ class Remote(marcel.core.Op):
 
     # AbstractOp
 
-    def setup(self):
+    def setup(self, env):
         self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,
                                                               thread_ids=self.cluster.hosts,
                                                               pipeline_arg=self.pipeline_arg,
                                                               max_pipeline_args=0,
                                                               customize_pipeline=self.customize_pipeline)
-        self.fork_manager.setup()
+        self.fork_manager.setup(env)
 
     # Op
 
-    def run(self):
-        self.fork_manager.run()
+    def run(self, env):
+        self.fork_manager.run(env)
 
     def must_be_first_in_pipeline(self):
         return True
@@ -209,8 +207,8 @@ class Remote(marcel.core.Op):
     #
 
     def customize_pipeline(self, env, pipeline, host):
-        remote = Remote.RunRemote(env, host, pipeline)
-        label_thread = Remote.LabelThread(env, host)
+        remote = Remote.RunRemote(host, pipeline)
+        label_thread = Remote.LabelThread(host)
         label_thread.receiver = self.receiver
         wrapped_pipeline = marcel.core.Pipeline()
         wrapped_pipeline.set_error_handler(pipeline.error_handler)

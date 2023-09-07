@@ -525,3 +525,8 @@ https://github.com/ashvardanian/Stringzilla
 Tab completion:
 
 After op, provide both flags and filenames.
+
+----------------------------------------------------------------------
+
+env no longer sent to farcel via pipeline. But what about function globals?
+
