@@ -59,6 +59,11 @@ class Op(AbstractOp):
         # The pipeline to which this op belongs
         self.owner = None
         self._count = -1
+        # Used temporarily by API, to convey env to PipelineIterator. For the API, a Pipeline is built from
+        # a single Op, or from Nodes containing two or more ops. Node construction takes the env, and clears
+        # it in its inputs. So by the time an Op or tree of Nodes is turned into a Pipeline, only the root of
+        # the tree has an env.
+        self.env = None
 
     def __repr__(self):
         assert False, self.op_name()
@@ -162,7 +167,10 @@ class Op(AbstractOp):
         return Node(self, other)
 
     def __iter__(self):
-        return PipelineIterator(self.create_pipeline())
+        env = self.env
+        self.env = None
+        assert env is not None
+        return PipelineIterator(env, self.create_pipeline())
 
 
     # arg is a Pipeline, Pipelineable, or a var bound to a pipeline. Deal with all of these possibilities
@@ -285,7 +293,12 @@ class PipelineFunction(Pipelineable):
 
 class Node(Pipelineable):
 
+    # See comment on Op.env for discussion of env handling
+
     def __init__(self, left, right):
+        self.env = left.env
+        left.env = None
+        right.env = None
         self.left = left
         self.right = right
 
@@ -294,8 +307,11 @@ class Node(Pipelineable):
         return Node(self, other)
 
     def __iter__(self):
+        env = self.env
+        self.env = None
+        assert env is not None
         pipeline = self.create_pipeline()
-        return PipelineIterator(pipeline)
+        return PipelineIterator(env, pipeline)
 
     # Pipelineable
 
@@ -451,13 +467,13 @@ class Pipeline(AbstractOp):
 
 class PipelineIterator:
 
-    def __init__(self, pipeline):
+    def __init__(self, env, pipeline):
         # Errors go to output, so no other error handling is needed
         pipeline.set_error_handler(PipelineIterator.noop_error_handler)
         output = []
         gather_op = env.op_modules['gather'].api_function()(output)
         pipeline.append(gather_op)
-        command = Command(env, None, pipeline)
+        command = Command(None, pipeline)
         try:
             command.execute(env)
         except marcel.exception.KillCommandException as e:

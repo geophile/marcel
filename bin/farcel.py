@@ -39,6 +39,8 @@ import marcel.nestednamespace
 import marcel.util
 import marcel.version
 
+from marcel.api import *
+
 # stdin carries the following from the client process:
 #   - The client's python version (checked to match server's, see bug 169.)
 #   - The client's environment
@@ -103,6 +105,7 @@ class PipelineRunner(threading.Thread):
         try:
             # self.check_python_version()
             TRACE.write(f'PipelineRunner: About to setup {self.pipeline}')
+            self.pipeline.set_error_handler(noop_error_handler)
             self.pipeline.setup(self.env)
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
             self.pipeline.first_op().run(self.env)
@@ -174,10 +177,11 @@ def shutdown():
     pass
 
 
-def main():
-    def noop_error_handler(env, error):
-        pass
+def noop_error_handler(env, error):
+    TRACE.write(f'Pipeline encountered error: {error}')
 
+
+def main():
     try:
         TRACE.write('-' * 80)
         TRACE.write(getpass.getuser())
@@ -199,7 +203,6 @@ def main():
         TRACE.write(f'Marcel version {version}')
         TRACE.write(f'pipeline: {pipeline}')
         atexit.register(shutdown)
-        pipeline.set_error_handler(noop_error_handler)
         pipeline_runner = PipelineRunner(client_python_version, env, pipeline)
         pipeline_runner.start()
     except Exception as e:

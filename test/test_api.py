@@ -1692,7 +1692,7 @@ def test_api_gather():
     # error handler
     errors = []
     TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x),
-                                 error_handler=lambda env, error: errors.append(error)),
+                                 error_handler=lambda error: errors.append(error)),
              expected_return=[-1.0, 1.0],
              expected_errors=[Error('division by zero')],
              actual_errors=errors)
@@ -1724,7 +1724,7 @@ def test_api_first():
     # error handler
     errors = []
     TEST.run(test=lambda: first(gen(3) | map(lambda x: x // 2) | map(lambda x: 1 / x),
-                                error_handler=lambda env, error: errors.append(error)),
+                                error_handler=lambda error: errors.append(error)),
              expected_return=1.0,
              expected_errors=[Error('division by zero'), Error('division by zero')],
              actual_errors=errors)
@@ -1732,7 +1732,7 @@ def test_api_first():
     errors = []
     TEST.run(test=lambda: first(gen(3, -1) | map(lambda x: 1 / x),
                                 errors=[],
-                                error_handler=lambda env, error: errors.append(error)),
+                                error_handler=lambda error: errors.append(error)),
              expected_err='Specify at most one of the errors and error_handler arguments')
 
 
@@ -1875,6 +1875,15 @@ def test_bug_206():
         os.system(f'rm -rf {testdir}')
 
 
+@timeit
+def test_bug_212():
+    TEST.run(test=lambda: run(gen(3) | args(lambda x: map(lambda: (x, -x)))),
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+    TEST.run(test=lambda: run(sudo(gen(3) | args(lambda x: map(lambda: (x, -x))))),
+             expected_out=[(0, 0), (1, -1), (2, -2)])
+
+
+
 # For bugs that aren't specific to a single op.
 @timeit
 def test_bugs():
@@ -1884,6 +1893,7 @@ def test_bugs():
     test_bug_198()
     test_bug_200()
     test_bug_206()
+    test_bug_212()
 
 
 def main_slow_tests():
@@ -1943,7 +1953,7 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    main_dev()
+    # main_dev()
     main_stable()
     main_slow_tests()
     print(f'Test failures: {TEST.failures}')

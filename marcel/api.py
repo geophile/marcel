@@ -124,8 +124,9 @@ def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 # Utilities
 
 def _generate_op(f, *args, **kwargs):
-    op, arglist = f(_MAIN.env, *args, **kwargs)
+    op, arglist = f(*args, **kwargs)
     _MAIN.op_modules[op.op_name()].args_parser().parse(arglist, op)
+    op.env = _MAIN.env
     return op
 
 
@@ -141,6 +142,7 @@ def _prepare_pipeline(x):
 
 
 def run(x):
+    x.env = None  # See comment on Op.env
     pipeline = _prepare_pipeline(x)
     if not isinstance(pipeline.last_op(), _Write):
         pipeline.append(write())
@@ -149,6 +151,7 @@ def run(x):
 
 
 def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
+    x.env = None  # See comment on Op.env
     pipeline = _prepare_pipeline(x)
     output = []
     terminal_op = _gather(output=output,
@@ -162,6 +165,7 @@ def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
 
 
 def first(x, unwrap_singleton=True, errors=None, error_handler=None):
+    x.env = None  # See comment on Op.env
     pipeline = _prepare_pipeline(x)
     output = []
     terminal_op = _first(output=output,
