@@ -513,6 +513,11 @@ def gather(acc, x):
 
 This appends to an accumulating list instead of creating a new list
 each time, so linear.
+
+
+In reduction.py, r_concat does exactly this, so that red . concat works.
+
+But the reduction function must be hardwired. Why not open it up?
             
 ----------------------------------------------------------------------
 
