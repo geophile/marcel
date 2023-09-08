@@ -36,7 +36,7 @@ runs in its own implicit transaction.
 {L,indent=4:28}{r:-u}, {r:--update-counts}     Write update counts to output stream. 
 (Default behavior is to not write update counts.)
 
-{L,indent=4:28}{r:STATEMENT}               A SQL statement. Consistent with Python's DBAPI specification,
+{L,indent=4:28}{r:STATEMENT}               A SQL statement enclosed in quotation marks. Consistent with Python's DBAPI specification,
 parameters are indicated using %s.
 
 {L,indent=4:28}{r:ARG}                     An expression whose value will be bound to a variable in a SQL statement.
@@ -153,7 +153,7 @@ class Sql(marcel.core.Op):
 
     def receive(self, env, x):
         try:
-            self.delegate.receive(x)
+            self.delegate.receive(env, x)
         except Exception as e:
             self.connection.rollback()
             raise marcel.exception.KillCommandException(e)
@@ -191,7 +191,7 @@ class SqlStatement:
         self.connection = connection
         self.op = op
 
-    def receive(self, x):
+    def receive(self, env, x):
         pass
 
     def flush(self):
@@ -212,11 +212,11 @@ class SqlSelect(SqlStatement):
     def __init__(self, connection, op):
         super().__init__(connection, op)
 
-    def receive(self, x):
+    def receive(self, env, x):
         op = self.op
         args = op.args if x is None else x
         for row in self.connection.query(op.statement, args):
-            op.send(row)
+            op.send(env, row)
 
 
 class SqlInsert(SqlStatement):
@@ -224,13 +224,13 @@ class SqlInsert(SqlStatement):
     def __init__(self, connection, op):
         super().__init__(connection, op)
 
-    def receive(self, x):
+    def receive(self, env, x):
         op = self.op
         args = op.args if x is None else x
         update_count = self.connection.insert(op.statement, args)
         self.commit_if_necessary(update_count)
         if op.update_counts:
-            op.send(update_count)
+            op.send(env, update_count)
 
 
 class SqlOther(SqlStatement):
@@ -238,10 +238,10 @@ class SqlOther(SqlStatement):
     def __init__(self, connection, op):
         super().__init__(connection, op)
 
-    def receive(self, x):
+    def receive(self, env, x):
         op = self.op
         args = op.args if x is None else x
         update_count = self.connection.execute(op.statement, args)
         self.commit_if_necessary(update_count)
         if op.update_counts:
-            op.send(update_count)
+            op.send(env, update_count)

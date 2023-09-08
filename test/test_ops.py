@@ -18,7 +18,7 @@ Error = marcel.object.error.Error
 start_dir = os.getcwd()
 TEST = test_base.TestConsole()
 
-SQL = False  # Until Postgres & psycopg2 are working again
+SQL = True
 
 
 # Utilities for testing filename ops
@@ -2437,7 +2437,6 @@ def main_stable():
 
 
 def main_dev():
-    test_dir_stack()
     pass
 
 

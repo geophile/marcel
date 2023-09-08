@@ -18,7 +18,7 @@ Error = marcel.object.error.Error
 start_dir = os.getcwd()
 TEST = test_base.TestAPI(main=marcel.api._MAIN)
 
-SQL = False  # Until Postgres & psycopg2 are working again
+SQL = True
 
 
 # Utilities for testing filename ops

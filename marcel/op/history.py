@@ -72,7 +72,7 @@ class History(marcel.core.Op):
 
     def setup(self, env):
         self.n = self.eval_function(env, 'n', int)
-        if self.n < 1:
+        if self.n is not None and self.n < 1:
             raise marcel.exception.KillCommandException('n must be a posiive integer')
 
     def run(self, env):
