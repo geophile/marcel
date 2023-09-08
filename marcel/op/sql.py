@@ -50,7 +50,7 @@ these arguments:
 to the SQL statement's parameters, and then the statement is executed.
 
 If the SQL statement is {n:SELECT} then rows returned from the query are written to the output stream.
-In other cases, the update count is written to the output stream.
+In other cases, the update count is written to the output stream if {r:--update} is specified.
 
 Commit is handled in one of three ways:
 

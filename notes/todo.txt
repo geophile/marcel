@@ -535,3 +535,9 @@ After op, provide both flags and filenames.
 
 env no longer sent to farcel via pipeline. But what about function globals?
 
+----------------------------------------------------------------------
+
+Sql uses %s formatting to set vars from upstream data, e.g.
+
+    sql 'insert into proc values(%s, %s, %s)'
+
