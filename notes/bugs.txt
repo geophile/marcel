@@ -609,33 +609,3 @@ Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/
   File "/usr/lib/python3.10/pathlib.py", line 1175, in mkdir
     self._accessor.mkdir(self, mode)
 24261: Exiting
-
-----------------------------------------------------------------------
-
-210: types crashes on input from jobs
-
-M 0.17.3 jao@loon ~$ jobs | types
-Process Process-7:
-Traceback (most recent call last):
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
-    child_namespace_changes = command.execute(self.env)
-  File "/home/jao/git/marcel/marcel/core.py", line 273, in execute
-    self.pipeline.run()
-  File "/home/jao/git/marcel/marcel/core.py", line 431, in run
-    self.ops[0].run()
-  File "/home/jao/git/marcel/marcel/op/jobs.py", line 59, in run
-    for job in marcel.job.JobControl.only.jobs():
-  File "/home/jao/git/marcel/marcel/job.py", line 245, in jobs
-    self.remove_completed()
-  File "/home/jao/git/marcel/marcel/job.py", line 299, in remove_completed
-    if job.process is not None and job.process.is_alive():
-  File "/usr/lib/python3.10/multiprocessing/process.py", line 160, in is_alive
-    assert self._parent_pid == os.getpid(), 'can only test a child process'
-AssertionError: can only test a child process
-
-
-Also happens on jobs >& x

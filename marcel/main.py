@@ -236,13 +236,10 @@ class Main:
         return (
                 # For the execution of tests and scripts
                 self.same_process or
-                # Exactly one op in pipeline ...
-                pipeline.first_op() is pipeline.last_op() and (
-                    # ... and it should run in the main process, or
-                    pipeline.first_op().run_in_main_process() or
-                    # ... the op is map. I.e. (python expression). This takes care of
-                    # side effects we want to keep, e.g. (INTERACTIVE_EXECUTABLES.append(...))
-                    pipeline.first_op().op_name() == 'map'))
+                pipeline.first_op().run_in_main_process() or
+                # This takes care of # side effects we want to keep,
+                # e.g. (INTERACTIVE_EXECUTABLES.append(...))
+                pipeline.first_op().op_name() == 'map')
 
 
 def fail(message):
