@@ -767,12 +767,13 @@ def test_ls():
                                       'd/dd/ddf']))
 
 
-# pushd, popd, dirs
+# pushd, popd, dirs, cd
 @timeit
 def test_dir_stack():
     with TestDir() as testdir:
         filename_op_setup(testdir)
         TEST.run('mkdir a b c')
+        TEST.run('touch f')
         TEST.run('rm -rf p')
         TEST.run('mkdir p')
         TEST.run('chmod 000 p')
@@ -813,6 +814,8 @@ def test_dir_stack():
                  expected_err='Permission denied')
         TEST.run(test='pwd | (f: str(f))',
                  expected_out=f'{testdir}')
+        TEST.run(test='cd f',
+                 expected_err='is not a directory')
         # pushd
         TEST.run(test=f'pushd {testdir}/doesnotexist',
                  expected_err='No qualifying path')
@@ -2434,6 +2437,7 @@ def main_stable():
 
 
 def main_dev():
+    test_dir_stack()
     pass
 
 

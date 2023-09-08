@@ -65,6 +65,8 @@ class Cd(marcel.core.Op):
             raise marcel.exception.KillCommandException('No qualifying path')
         elif len(dirs) > 1:
             raise marcel.exception.KillCommandException('Too many paths')
+        elif not dirs[0].is_dir():
+            raise marcel.exception.KillCommandException(f'{dirs[0]} is not a directory')
         self.directory = dirs[0]
 
     def run(self, env):

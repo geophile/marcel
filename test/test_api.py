@@ -740,12 +740,13 @@ def test_ls():
         os.system(f'sudo chown {me}.{me} {testdir}/d3')
 
 
-# pushd, popd, dirs
+# pushd, popd, dirs, cd
 @timeit
 def test_dir_stack():
     with TestDir() as testdir:
         filename_op_setup(testdir)
         os.system('mkdir a b c')
+        os.system('touch f')
         os.system('rm -rf p')
         os.system('mkdir p')
         os.system('chmod 000 p')
@@ -786,6 +787,9 @@ def test_dir_stack():
                  expected_err='Permission denied')
         TEST.run(test=lambda: run(pwd() | map(lambda f: str(f))),
                  expected_out=testdir)
+        TEST.run(test=lambda: run(cd(f'{testdir}/f')),
+                 expected_err='is not a directory')
+
         # pushd
         TEST.run(test=lambda: run(pushd(f'{testdir}/doesnotexist')),
                  expected_err='No qualifying path')

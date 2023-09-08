@@ -4003,6 +4003,43 @@ M 0.17.1 jao@cheese /tmp$ cd ~/Desktop/photos/Relo*
 
 FIXED
 
+208. cd crashes
+
+M 0.17.3 jao@cheese ~/Dropbox$ ls
+drwx------   jao    jao        4096   2023 Jul 05 17:52:03   .
+-rw-r--r--   jao    jao          41   2023 Mar 16 11:24:41   .dropbox
+drwxr-xr-x   jao    jao        4096   2023 Mar 16 11:24:41   .dropbox.cache
+-rw-r--r--   jao    jao          29   2023 Jul 02 11:51:33   transfer.txt
+M 0.17.3 jao@cheese ~/Dropbox$ more .dropbox
+{"tag":"dropbox","ns":117078224,"n":true}
+M 0.17.3 jao@cheese ~/Dropbox$ cd .dropbox
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 317, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 300, in main
+    MAIN.run(print_prompt)
+  File "/home/jao/git/marcel/marcel/main.py", line 131, in run
+    self.run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 153, in run_command
+    command.execute()
+  File "/home/jao/git/marcel/marcel/core.py", line 273, in execute
+    self.pipeline.run()
+  File "/home/jao/git/marcel/marcel/core.py", line 431, in run
+    self.ops[0].run()
+  File "/home/jao/git/marcel/marcel/op/cd.py", line 71, in run
+    self.env().dir_state().cd(self.directory)
+  File "/home/jao/git/marcel/marcel/env.py", line 115, in cd
+    os.chdir(new_dir)
+NotADirectoryError: [Errno 20] Not a directory: '/home/jao/Dropbox/.dropbox'
+
+----------------------------------------------------------------------
+
+FIXED
+
 210: types crashes on input from jobs
 
 Make sure there are some jobs, e.g. 
