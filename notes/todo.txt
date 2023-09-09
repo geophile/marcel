@@ -541,3 +541,54 @@ Sql uses %s formatting to set vars from upstream data, e.g.
 
     sql 'insert into proc values(%s, %s, %s)'
 
+Using a function:
+
+    sql (x, y, z: 'insert into proc values((x), (y), (z))')
+
+Or
+
+    sql (x, y, z: f'insert into proc values({x}, {y}, {z})')
+
+----------------------------------------------------------------------
+
+head n (n > 0) should terminate after n. Otherwise, might need to
+wait for a very long time.
+
+But how to terminate? Throwing an exception back up to Command.execute is wrong, e.g.
+
+    ... | ifthen (*x: ...) (| head 3 | ... |) ...
+
+head can't terminate the entire command, but should be able to
+terminate the pipeline it belongs to.
+
+Idea:
+
+- Throw TruncateInputStreamException
+
+- Caught by Command.execute (or maybe Pipeline.run) and suppressed.
+
+- Subclass receive or run can catch it and do something else. E.g. ifthen is currently:
+
+    def receive(self, env, x):
+        if self.call(env, self.predicate, *x):
+            self.then.receive(env, x)
+        self.send(env, x)
+
+  Modification:
+
+    def setup(self, env):
+        ...
+        self.then_active = True
+        self.downstream_active = True
+
+    def receive(self, env, x):
+        if self.then_active and self.call(env, self.predicate, *x):
+            try:
+                self.then.receive(env, x)
+            except TruncateInputStreamException:
+                self.then_active = False
+        if self.downstream_active:
+            try:
+                self.send(env, x)
+            else:
+                self.downstream_active = False
