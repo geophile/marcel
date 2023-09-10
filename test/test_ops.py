@@ -1745,7 +1745,7 @@ def test_args():
         TEST.run(f'touch "a file with a \' mark"')
         TEST.run(f'rm -rf d')
         TEST.run(f'mkdir d')
-        TEST.run(test=f'ls -f | args --all (|files: mv -t d (quote_files(files)) |)',
+        TEST.run(test=f'ls -f | args --all (|files: mv -t d (quote_files(*files)) |)',
                  verification='ls -f d | map (f: f.name)',
                  expected_out=['a file', "a file with a ' mark", 'a_file'])
     # head
@@ -2255,17 +2255,17 @@ def test_bug_206():
              expected_out=base)
     TEST.run(test='mkdir "a b" x1 x2',
              verification='ls -fd | sort | (d: str(d))',
-             expected_out=['.', 'a b', 'x1', 'x2'])
+             expected_out=['.', "'a b'", 'x1', 'x2'])
     # Wildcard
     TEST.run(test='cd a*',
              verification='pwd | (d: str(d))',
-             expected_out=f'{base}/a b')
+             expected_out=f"'{base}/a b'")
     TEST.run(test='cd ..',
              verification='pwd | (d: str(d))',
              expected_out=base)
     TEST.run(test='pushd *b',
              verification='pwd | (d: str(d))',
-             expected_out=f'{base}/a b')
+             expected_out=f"'{base}/a b'")
     TEST.run(test='popd',
              verification='pwd | (d: str(d))',
              expected_out=base)

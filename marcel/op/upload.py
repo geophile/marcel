@@ -111,7 +111,7 @@ class Upload(marcel.core.Op):
 
     @staticmethod
     def scp_command(identity, sources, user, host, dest):
-        sources = marcel.util.quote_files(sources)
+        sources = marcel.util.quote_files(*sources)
         return Upload.SCP_COMMAND.format(identity=identity,
                                          sources=sources,
                                          user=user,

@@ -592,3 +592,9 @@ Idea:
                 self.send(env, x)
             else:
                 self.downstream_active = False
+
+
+Hmm. This will get very complicated. Would need to identify and fix
+ops having this problem, and then test head downstream of every op.
+
+What does bash do?

@@ -526,16 +526,6 @@ does not work, because ls is a marcel op, and marcel doesn't support
 
 ----------------------------------------------------------------------
 
-205. File objects for filenames with spaces are a problem for bash commands
-
-There is a file named "ab c".
-
-    M 0.17.1 jao@cheese /tmp$ cat (File('ab c'))
-    Error: ['cat: ab: No such file or directory']
-    Error: ['cat: c: No such file or directory']
-
-----------------------------------------------------------------------
-
 207. fork op handling cluster names incorrectly
 
 @ works for an unknown cluster, fork does not. Treats the string as an

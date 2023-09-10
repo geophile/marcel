@@ -1829,17 +1829,17 @@ def test_bug_206():
                  expected_out=testdir)
         TEST.run(test=lambda: run(bash('mkdir "a b" x1 x2')),
                  verification=lambda: run(ls(file=True, dir=True) | sort() | map(lambda d: str(d))),
-                 expected_out=['.', 'a b', 'x1', 'x2'])
+                 expected_out=['.', "'a b'", 'x1', 'x2'])
         # Wildcard
         TEST.run(test=lambda: run(cd('a*')),
                  verification=lambda: run(pwd() | map(lambda d: str(d))),
-                 expected_out=f'{testdir}/a b')
+                 expected_out=f"'{testdir}/a b'")
         TEST.run(test=lambda: run(cd('..')),
                  verification=lambda: run(pwd() | map(lambda d: str(d))),
                  expected_out=testdir)
         TEST.run(test=lambda: run(pushd('*b')),
                  verification=lambda: run(pwd() | map(lambda d: str(d))),
-                 expected_out=f'{testdir}/a b')
+                 expected_out=f"'{testdir}/a b'")
         TEST.run(test=lambda: run(popd()),
                  verification=lambda: run(pwd() | map(lambda d: str(d))),
                  expected_out=testdir)

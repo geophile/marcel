@@ -3994,6 +3994,18 @@ then a bunch of marcel prompts are printed. They shouldn't be.
 
 FIXED
 
+205. File objects for filenames with spaces are a problem for bash commands
+
+There is a file named "ab c".
+
+    M 0.17.1 jao@cheese /tmp$ cat (File('ab c'))
+    Error: ['cat: ab: No such file or directory']
+    Error: ['cat: c: No such file or directory']
+
+----------------------------------------------------------------------
+
+FIXED
+
 206. cd foobar* is broken
 
 M 0.17.1 jao@cheese /tmp$ cd ~/Desktop/photos/Relo*

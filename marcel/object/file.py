@@ -112,7 +112,7 @@ class File(marcel.object.renderable.Renderable):
     # Renderable
 
     def render_compact(self):
-        return str(self._compact_path())
+        return marcel.util.quote_files(str(self._compact_path()))
 
     def render_full(self, color_scheme):
         line = self._formatted_metadata()

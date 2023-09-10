@@ -94,14 +94,12 @@ def unwrap_op_output(x):
 
 # Generate a list of filenames, suitable for use on a bash command line, (i.e., quoted to handle tricky cases
 # such as file names containing whitespace).
-def quote_files(files):
+def quote_files(*files):
     def quote_file(file):
         if isinstance(file, pathlib.Path) or is_file(file):
             file = file.as_posix()
         return shlex.quote(file)
-    return (' '.join([quote_file(file) for file in files])
-            if type(files) in (tuple, list) else
-            quote_file(files))
+    return ' '.join((quote_file(file) for file in files))
 
 
 def normalize_path(x):
