@@ -84,7 +84,7 @@ class TabCompleter:
         for topic in TabCompleter.HELP_TOPICS:
             if topic.startswith(text):
                 candidates.append(topic)
-        debug('complete_help candidates for <{}>: {}'.format(text, candidates))
+        debug(f'complete_help candidates for <{text}>: {candidates}')
         return candidates
 
     @staticmethod
@@ -93,13 +93,13 @@ class TabCompleter:
         for f in flags:
             if f.startswith(text):
                 candidates.append(f)
-        debug('complete_flag candidates for <{}>: {}'.format(text, candidates))
+        debug(f'complete_flag candidates for <{text}>: {candidates}')
         if len(candidates) == 1:
             candidates = [candidates[0] + ' ']
         return candidates
 
     def complete_filename(self, text):
-        debug('complete_filenames, text = <{}>'.format(text))
+        debug(f'complete_filenames, text = <{text}>')
         current_dir = self.main.env.dir_state().pwd()
         if text:
             if text == '~/':
@@ -134,7 +134,7 @@ class TabCompleter:
         if len(filenames) == 1:
             if not filenames[0].endswith('/'):
                 filenames = [filenames[0] + ' ']
-        debug('complete_filename candidates for {}: {}'.format(text, filenames))
+        debug(f'complete_filename candidates for {text}: {filenames}')
         return filenames
 
     def candidates(self, line, text):
