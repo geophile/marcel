@@ -144,7 +144,8 @@ class Job:
         def run_command_in_child(command, writer):
             debug(f'running: {command.source}')
             try:
-                child_namespace_changes = command.execute(self.env)
+                child_namespace_changes = command.execute(self.env, True)
+                debug('execution complete')
                 if child_namespace_changes is not None:
                     debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
                     writer.send(dill.dumps(child_namespace_changes))

@@ -551,6 +551,10 @@ M 0.17.3 jao@cheese ~$ fork asdf (| gen 3 |)
 
 209: Farcel crashes if ~/.config/marcel doesn't exist
 
+----------------------------------------------------------------------
+
+213: Variable storing stream not found in env
+
 24261: Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/.config/marcel'
 Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/.config/marcel'
   File "/usr/local/bin/farcel.py", line 184, in main
@@ -565,3 +569,7 @@ Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/
     self._accessor.mkdir(self, mode)
 24261: Exiting
        
+
+M 0.18.3 jao@loon ~/git/marcel$ gen 10 >$ v
+M 0.18.3 jao@loon ~/git/marcel$ (v)
+Error: Running map(lambda: v): name 'v' is not defined

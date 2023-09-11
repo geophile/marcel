@@ -254,7 +254,7 @@ class Command:
     def __repr__(self):
         return str(self.pipeline)
 
-    def execute(self, env, api=False):
+    def execute(self, env, remote=False):
         depth = env.vars().n_scopes()
         env.clear_changes()
         self.pipeline.setup(env)
@@ -263,10 +263,10 @@ class Command:
         self.pipeline.cleanup()
         # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.
         assert env.vars().n_scopes() == depth, env.vars().n_scopes()
-        # An interactive Command is executed by a multiprocessing.Process.
+        # An interactive Command is executed by a multiprocessing.Process (i.e., remotely).
         # Need to transmit the Environment's vars relating to the directory, to the parent
         # process, because they may have changed. This doesn't apply to API usage.
-        return env.changes() if api else None
+        return env.changes() if remote else None
 
 
 # Used to represent a function yielding a Node tree (which then yields a Pipeline).
