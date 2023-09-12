@@ -14,7 +14,6 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import os.path
 import pathlib
 import readline
 
@@ -28,7 +27,7 @@ import marcel.util
 Parser = marcel.parser.Parser
 
 
-DEBUG = True
+DEBUG = False
 
 
 def debug(message):
@@ -120,7 +119,8 @@ class TabCompleter:
                 filenames = []
                 for username in self.homedirs.keys():
                     if username.startswith(find_user):
-                        filenames.append('~' + username + ' ')
+                        filenames.append('~' + username)
+                print(f'filenames: {filenames}')
             elif text.startswith('/'):
                 base = '/'
                 pattern_prefix = text[1:]
@@ -133,7 +133,7 @@ class TabCompleter:
                              for p in pathlib.Path(base).glob(pattern_prefix + '*')]
         else:
             filenames = [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
-        filenames = [f + '/' if os.path.isdir(f) else f for f in filenames]
+        filenames = [f + '/' if pathlib.Path(f).expanduser().is_dir() else f for f in filenames]
         if len(filenames) == 1:
             if not filenames[0].endswith('/'):
                 filenames = [filenames[0] + ' ']
