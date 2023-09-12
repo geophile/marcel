@@ -120,7 +120,6 @@ class TabCompleter:
                 for username in self.homedirs.keys():
                     if username.startswith(find_user):
                         filenames.append('~' + username)
-                print(f'filenames: {filenames}')
             elif text.startswith('/'):
                 base = '/'
                 pattern_prefix = text[1:]
