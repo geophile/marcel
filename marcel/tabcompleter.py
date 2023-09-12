@@ -28,7 +28,7 @@ import marcel.util
 Parser = marcel.parser.Parser
 
 
-DEBUG = False
+DEBUG = True
 
 
 def debug(message):
@@ -107,10 +107,13 @@ class TabCompleter:
                 filenames = os.listdir(home.as_posix())
             elif text.startswith('~/'):
                 base = pathlib.Path('~/').expanduser()
+                debug(f'base: {base}')
                 base_length = len(base.as_posix())
+                debug(f'base length: {base_length}')
                 pattern = text[2:] + '*'
-                filenames = ['~' + f[base_length:] + ' '
+                filenames = ['~' + f[base_length:]
                              for f in [p.as_posix() for p in base.glob(pattern)]]
+                debug(f'filenames: {filenames}')
             elif text.startswith('~'):
                 find_user = text[1:]
                 self.ensure_homedirs()

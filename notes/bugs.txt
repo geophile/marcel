@@ -553,7 +553,7 @@ M 0.17.3 jao@cheese ~$ fork asdf (| gen 3 |)
 
 ----------------------------------------------------------------------
 
-213: Variable storing stream not found in env
+213: Variable storing stream not found i~env
 
 24261: Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/.config/marcel'
 Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/.config/marcel'
