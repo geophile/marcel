@@ -23,6 +23,16 @@ import marcel.exception
 import marcel.helpformatter
 import marcel.util
 
+HELP = '''
+{L}help [TOPIC]
+
+{L,indent=4:28}{r:TOPIC}             A marcel operator or concept.
+
+Prints information on some aspect of marcel. If {r:TOPIC} is not provided, then a top-level introduction
+is printed, along with suggestions for further exploration. {r:TOPIC} may be a marcel operator, or a concept
+mentioned in some other help message. 
+'''
+
 
 def help():
     return Help()

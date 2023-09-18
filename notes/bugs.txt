@@ -97,10 +97,6 @@ AttributeError: 'tuple' object has no attribute '__globals__'
 
 ----------------------------------------------------------------------
 
-79. less doesn't work
-
-----------------------------------------------------------------------
-
 85. Any env var can be deleted
 
 Even important ones, like PROMPT. Some of them need to be protected.
@@ -553,23 +549,46 @@ M 0.17.3 jao@cheese ~$ fork asdf (| gen 3 |)
 
 ----------------------------------------------------------------------
 
-213: Variable storing stream not found i~env
+214: Tab completion broken for files starting with ~
 
-24261: Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/.config/marcel'
-Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/.config/marcel'
-  File "/usr/local/bin/farcel.py", line 184, in main
-    namespace = marcel.nestednamespace.NestedNamespace(read_config())
-  File "/usr/local/bin/farcel.py", line 160, in read_config
-    config_path = locations.config_path()
-  File "/usr/local/lib/python3.10/dist-packages/marcel/locations.py", line 28, in config_path
-    return self._dir('XDG_CONFIG_HOME', '.config') / 'startup.py'
-  File "/usr/local/lib/python3.10/dist-packages/marcel/locations.py", line 49, in _dir
-    dir.mkdir(exist_ok=False)
-  File "/usr/lib/python3.10/pathlib.py", line 1175, in mkdir
-    self._accessor.mkdir(self, mode)
-24261: Exiting
-       
+Can complete the username, but nothing after it, e.g.
 
-M 0.18.3 jao@loon ~/git/marcel$ gen 10 >$ v
-M 0.18.3 jao@loon ~/git/marcel$ (v)
-Error: Running map(lambda: v): name 'v' is not defined
+    ~jao/t
+
+----------------------------------------------------------------------
+
+215. help needs a help message
+
+"help help" should print something other than "None", which it does now.
+
+----------------------------------------------------------------------
+
+216. Tab completion includes spaces in filenames without quoting
+
+----------------------------------------------------------------------
+
+217. Native executables vs. filenames with spaces
+
+Tried creating a link. This 
+
+    M 0.18.3 jao@loon ~/Desktop$ ln -s "~/tufts/cs131/text/Stuart Russell, Peter Norvig - Artificial Intelligence_ A Modern Approach (4th Edition) (Pearson Series in Artifical Intelligence)-Language_ English (2020).pdf" AI.pdf
+
+creates a broken link because the link target is not quoted.
+
+
+More failures:
+
+    M 0.18.3 jao@loon ~/Desktop$ ln -s ~/tufts/cs131/text/Stuart\ Russell,\ Peter\ Norvig\ -\ Artificial\ Intelligence_\ A\ Modern\ Approach\ (4th\ Edition)\ (Pearson\ Series\ in\ Artifical\ Intelligence)-Language_\ English\ (2020).pdf AI.pdf
+
+Invalid function syntax: f'''~/tufts/cs131/text/Stuart Russell, Peter Norvig - Artificial Intelligence_ A Modern Approach {4th\ Edition} {Pearson\ Series\ in\ Artifical\ Intelligence}-Language_ English {2020}.pdf'''
+
+    M 0.18.3 jao@loon ~/Desktop$ ln -s ~/tufts/cs131/text/Stuart\ Russell,\ Peter\ Norvig\ -\ Artificial\ Intelligence_\ A\ Modern\ Approach\ \(4th\ Edition\)\ \(Pearson\ Series\ in\ Artifical\ Intelligence\)-Language_\ English\ (2020).pdf AI.pdf
+
+    Error: ["/bin/bash: -c: line 1: syntax error near unexpected token `('"]
+    Error: ["/bin/bash: -c: line 1: `ln -s ~/tufts/cs131/text/Stuart Russell, Peter Norvig - Artificial Intelligence_ A Modern Approach (4th Edition) (Pearson Series in Artifical Intelligence)-Language_ English 2020.pdf AI.pdf'"]
+
+This works:
+
+    ln -s ~/tufts/cs131/text/Stuart\ Russell,\ Peter\ Norvig\ -\ Artificial\ Intelligence_\ A\ Modern\ Approach\ \(4th\ Edition\)\ \(Pearson\ Series\ in\ Artifical\ Intelligence\)-Language_\ English\ \(2020\).pdf AI.pdf
+
+and in bash the target is single quoted. In marcel, the single quotes are not visible.

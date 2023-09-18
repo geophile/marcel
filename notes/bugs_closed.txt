@@ -1477,6 +1477,12 @@ FIXED
 
 ----------------------------------------------------------------------
 
+NOT A BUG
+
+79. less doesn't work
+
+----------------------------------------------------------------------
+
 FIXED
 
 80. ls -fr > /tmp/x 
@@ -4377,4 +4383,30 @@ Traceback (most recent call last):
     rv = reduce(self.proto)
 TypeError: cannot pickle '_json.Scanner' object
 M 0.17.3 jao@loon ~/git/marcel/test$ 
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+213: Variable storing stream not found i~env
+
+24261: Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/.config/marcel'
+Caught <class 'FileNotFoundError'>: [Errno 2] No such file or directory: '/root/.config/marcel'
+  File "/usr/local/bin/farcel.py", line 184, in main
+    namespace = marcel.nestednamespace.NestedNamespace(read_config())
+  File "/usr/local/bin/farcel.py", line 160, in read_config
+    config_path = locations.config_path()
+  File "/usr/local/lib/python3.10/dist-packages/marcel/locations.py", line 28, in config_path
+    return self._dir('XDG_CONFIG_HOME', '.config') / 'startup.py'
+  File "/usr/local/lib/python3.10/dist-packages/marcel/locations.py", line 49, in _dir
+    dir.mkdir(exist_ok=False)
+  File "/usr/lib/python3.10/pathlib.py", line 1175, in mkdir
+    self._accessor.mkdir(self, mode)
+24261: Exiting
+       
+
+M 0.18.3 jao@loon ~/git/marcel$ gen 10 >$ v
+M 0.18.3 jao@loon ~/git/marcel$ (v)
+Error: Running map(lambda: v): name 'v' is not defined
 

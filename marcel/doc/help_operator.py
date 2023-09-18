@@ -14,31 +14,32 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 HELP = ''' 
-Marcel {i:operators} are built in commands, able to pass Python objects
-to one another via pipes.
+Marcel {i:operators} take streams of Python values as input and generate streams of
+Python values as output. Operators are thus combined via pipes, as in more conventional shells (which are limited
+to passing textual data).
 
 {b:Command-line arguments:}
 
 In general, an operator has a number of command-line arguments,
-comprising optional and positional arguments.
+comprising flags, flags followed by values, and anonymous values (i.e., not preceded by a flag). Flags
+have long and short forms.
 
-For example, the {n:timer} command has two optional arguments:
+For example, the {n:gen} command has three arguments:
 
-{p,indent=4}1) {r:-c} or equivalently {r:--components}, for controlling the behavior
-of the operator.
+{L,wrap=F}gen [-p|--pad PAD] [COUNT [START]]
 
-{p,indent=4}2) {r:-h} or equivalently {r:--help} for obtaining documentation on the
-operator. (All operators have these flags.)
+{L,indent=4:28}{r:-p,} {r:--pad}               Specifies the width of the padded output.
 
-{n:timer} also has one positional argument, {r:interval}. You can see
-these described by running {n:timer -h}.
+{L,indent=4:28}{r:COUNT}                   The number of integers to be written to output. 
+
+{L,indent=4:28}{r:START}                   The first integer to be written to output. 
 
 {b:Input and output streams:}
 
 An operator may receive input from a preceding command through a pipe, and
-send output to a succeeding operator through a pipe. The {n:timer} command
+send output to a succeeding operator through a pipe. The {n:gen} command
 does not require an input stream, but it does generate output. For example,
-{n:timer 1} generates a timestamp (seconds since the epoch), once every second.
+{n:gen 5} generates the stream 0, 1, 2, 3, 4.
 
 Streams always carry tuples between commands. Often, these are
 1-tuples.  For example, the {n:ls} operator generates a stream
@@ -54,8 +55,8 @@ filename and file size values:
 
 {b:Obtaining output}
 
-The only marcel operator that writes output is {n:out}. Every command sequence
-has an {n:out} at the end, implicitly if necessary. By default, {n:out} simply uses
+The only marcel operator that writes output is {n:write}. Every command sequence
+has an {n:write} at the end, implicitly if necessary. By default, {n:ouwritet} simply uses
 the Python {n:str} method to generate its output. For example, the above command 
 sequence generates output that looks like this (for {n:/etc/sysctl.d}):
 
@@ -73,7 +74,7 @@ sequence generates output that looks like this (for {n:/etc/sysctl.d}):
 ('README.sysctl', 792)
 ('protect-links.conf', 324)
 
-The {n:out} command can be made explicit to add formatting and redirection options.
+The {n:write} command can be made explicit to add formatting and redirection options.
 For example, to format the above output differently:
 
 {p,wrap=F,indent=4}
@@ -103,7 +104,7 @@ In a major departure from other shells, marcel does not support the
 concept of {n:stdout} and {n:stderr}. Instead, errors are written to the
 operator's output stream as an object of type
 {n:marcel.object.Error}. {n:Error}s are not passed through operators. Instead
-they are forwarded from one stream to the next, until an {n:out} operator is encountered.
+they are forwarded from one stream to the next, until a {n:write} operator is encountered.
 At that point, the {n:Error} is printed and then not passed further downstream.
 
 For example, suppose directory {n:/tmp/d} contains three directories:

@@ -21,7 +21,7 @@ A single marcel command may span multiple lines, as long as a \\\\ is typed at t
 end of each non-terminal line.
 Marcel operators and host OS executables are distinguished as follows:
 
-{L,indent=4:4}{i:Marcel operator:} A command that is built into marcel. In its most 
+{L,indent=4:4}{i:Marcel operator:} An operator that is built into marcel. In its most 
 general form, an operator receives an input stream containing Python tuples,
 and writes an output stream containing Python tuples. Every marcel operator
 provides documentation via the {r:help}

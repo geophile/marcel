@@ -598,3 +598,13 @@ Hmm. This will get very complicated. Would need to identify and fix
 ops having this problem, and then test head downstream of every op.
 
 What does bash do?
+
+----------------------------------------------------------------------
+
+Typing:
+
+https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html
+
+----------------------------------------------------------------------
+
+Fix imports to use . notation

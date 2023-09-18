@@ -15,7 +15,7 @@
 
 HELP = '''
 A {i:pipeline} is a sequence of commands connected by pipes.
-Every marcel command amounts to the execution of a pipeline.
+A marcel command is executed by executing a pipeline.
 
 {b:A pipeline can be an argument to an operator}
 
