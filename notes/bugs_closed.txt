@@ -4410,3 +4410,11 @@ M 0.18.3 jao@loon ~/git/marcel$ gen 10 >$ v
 M 0.18.3 jao@loon ~/git/marcel$ (v)
 Error: Running map(lambda: v): name 'v' is not defined
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+215. help needs a help message
+
+"help help" should print something other than "None", which it does now.

@@ -557,12 +557,6 @@ Can complete the username, but nothing after it, e.g.
 
 ----------------------------------------------------------------------
 
-215. help needs a help message
-
-"help help" should print something other than "None", which it does now.
-
-----------------------------------------------------------------------
-
 216. Tab completion includes spaces in filenames without quoting
 
 ----------------------------------------------------------------------
