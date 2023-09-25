@@ -608,3 +608,10 @@ https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html
 ----------------------------------------------------------------------
 
 Fix imports to use . notation
+
+----------------------------------------------------------------------
+
+su doesn't work:
+
+M 0.18.3 jao@loon /media/backup$ su
+Error: ['Password: su: Authentication failure']

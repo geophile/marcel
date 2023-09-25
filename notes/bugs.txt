@@ -586,3 +586,12 @@ This works:
     ln -s ~/tufts/cs131/text/Stuart\ Russell,\ Peter\ Norvig\ -\ Artificial\ Intelligence_\ A\ Modern\ Approach\ \(4th\ Edition\)\ \(Pearson\ Series\ in\ Artifical\ Intelligence\)-Language_\ English\ \(2020\).pdf AI.pdf
 
 and in bash the target is single quoted. In marcel, the single quotes are not visible.
+
+----------------------------------------------------------------------
+
+218. cd done by sudo doesn't work. Should it?
+
+M 0.18.3 jao@loon /media/backup$ sudo (| cd daily |)
+M 0.18.3 jao@loon /media/backup$ pwd
+drwxr-xr-x   root   root       4096   2019 May 12 10:55:54   /media/backup
+
