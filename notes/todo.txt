@@ -597,7 +597,28 @@ Idea:
 Hmm. This will get very complicated. Would need to identify and fix
 ops having this problem, and then test head downstream of every op.
 
-What does bash do?
+......................................................................
+
+Idea:
+
+- Unify pipeline execution, so that it always goes through a PipelineWrapper.
+
+- Execute via PipelineWrapper.
+
+- In PW, catch PipelineTerminatingException (thrown by head)
+
+- PTE should leave the pipeline able to continue executing on further
+  input. E.g.
+
+      ... ifthen (...) (| ... | head 2 |)
+
+  The nested pipeline receives input, throws PTE from head 2. Next
+  input reruns the pipeline.
+
+SEMANTICS ARE UNCLEAR!
+
+What does the head 2 mean there? Is the counting on one execution of
+the pipeline? Or across all of them.
 
 ----------------------------------------------------------------------
 

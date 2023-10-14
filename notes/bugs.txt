@@ -595,3 +595,51 @@ M 0.18.3 jao@loon /media/backup$ sudo (| cd daily |)
 M 0.18.3 jao@loon /media/backup$ pwd
 drwxr-xr-x   root   root       4096   2019 May 12 10:55:54   /media/backup
 
+
+----------------------------------------------------------------------
+
+219. Killing command that spawns a python process doesn't kill the process
+
+Run a python http server:
+
+    M 0.18.3 jao@loon ~$ bash python3 -m http.server 8000
+    Error: ['127.0.0.1 - - [10/Oct/2023 11:31:41] "GET / HTTP/1.1" 200 -']
+    Error: ['127.0.0.1 - - [10/Oct/2023 11:31:47] "GET /cats.txt HTTP/1.1" 200 -']
+    ...
+
+Kill the command:
+
+    ^C
+
+The process is still there (pid 22110)
+
+    M 0.18.3 jao@loon ~$ ps -c python
+       972       1  root      sleeping    /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+       990       1  root      sleeping    /usr/bin/python3 /usr/lib/system76-driver/system76-daemon
+      1156     965  root      sleeping    /usr/bin/python3 /usr/sbin/execsnoop-bpfcc
+      2874    2646  jao       sleeping    /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-daemon
+      2934    2646  jao       sleeping    /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-notification
+      2947    2646  jao       sleeping    /usr/bin/python3 /usr/lib/system76-driver/system76-user-daemon
+      3087       1  root      sleeping    /usr/bin/python3 /usr/lib/pop-transition/service.py
+     21883    2377  jao       sleeping    /usr/bin/python3 /usr/bin/gnome-terminal --wait
+     21923   21922  jao       sleeping    python3 -m marcel.main
+     22110    2377  jao       sleeping    python3 -m http.server 8000
+     22180   21923  jao       running     python3 -m marcel.main
+
+Explicitly kill the process:
+
+    M 0.18.3 jao@loon ~$ ps -p 22110 | (p: p.signal(9))
+    None
+    M 0.18.3 jao@loon ~$ ps -c python
+       972       1  root      sleeping    /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+       990       1  root      sleeping    /usr/bin/python3 /usr/lib/system76-driver/system76-daemon
+      1156     965  root      sleeping    /usr/bin/python3 /usr/sbin/execsnoop-bpfcc
+      2874    2646  jao       sleeping    /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-daemon
+      2934    2646  jao       sleeping    /usr/bin/python3 /usr/lib/hidpi-daemon/hidpi-notification
+      2947    2646  jao       sleeping    /usr/bin/python3 /usr/lib/system76-driver/system76-user-daemon
+      3087       1  root      sleeping    /usr/bin/python3 /usr/lib/pop-transition/service.py
+     21883    2377  jao       sleeping    /usr/bin/python3 /usr/bin/gnome-terminal --wait
+     21923   21922  jao       sleeping    python3 -m marcel.main
+     22184   21923  jao       running     python3 -m marcel.main
+    M 0.18.3 jao@loon ~$ 
+
