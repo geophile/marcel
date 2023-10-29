@@ -1,0 +1,93 @@
+Pipeline Execution
+
+From todo.txt (regarding early termination of head op).
+
+    Idea:
+    
+    - Unify pipeline execution, so that it always goes through a PipelineWrapper.
+    
+    - Execute via PipelineWrapper.
+    
+    - In PW, catch PipelineTerminatingException (thrown by head)
+    
+    - PTE should leave the pipeline able to continue executing on further
+      input. E.g.
+    
+          ... ifthen (...) (| ... | head 2 |)
+    
+      The nested pipeline receives input, throws PTE from head 2. Next
+      input reruns the pipeline.
+
+But cleaning up pipeline execution is a good idea in any case. There
+was Pipeline, the Pipelineable (to support API), then PipelineWrapper.
+
+----------------------------------------------------------------------
+
+Callers of Pipeline.run():
+
+- farcel PipelineRunner
+
+- Command.execute
+
+        self.pipeline.setup(env)
+        self.pipeline.run(env)
+        self.pipeline.flush(env)
+        self.pipeline.cleanup()
+
+- Pipeline.receive (when input is None)
+
+- RunPipeline.run
+
+......................................................................
+
+PipelineWrapper API
+
+    create(error_handler, pipeline_arg, customize_pipeline)
+
+    setup(self, env)
+
+    n_params(self)
+
+    run_pipeline(self, env, args)
+
+    receive(self, env, x)
+
+    flush(self, env)
+
+    cleanup(self)
+
+*** Subtypes BOTH have prepare_to_receive, should be in API?
+
+PipelineInteractive (subclass):
+
+- setup evaluates pipeline arg, copies it, sets error handler,
+  customizes.
+
+- run_pipeline pushes and pops scope, delegates to Command.execute
+
+......................................................................
+
+PipelineFunction
+
+- For turning API pipeline function into a Pipeline, via tree of
+  Nodes.
+
+----------------------------------------------------------------------
+
+From RunPipeline:
+
+        # Why copy: A pipeline can be used twice in a command, e.g.
+        #    x = (| a: ... |)
+        #    x (1) | join (| x (2) |)
+        # Without copying the identical ops comprising x would be used twice in the same
+        # command. This potentially breaks the use of Op state during execution, and also
+        # breaks the structure of the pipeline, e.g. Op.receiver.
+
+Similar example:
+
+  p = (| x: gen (int(x)) | (x: (x, -x)) |)
+  p 4 | join -k (| p 3 |)
+
+  This works. If self.pipeline = self.pipeline.copy() in
+  RunPipeline.setup is deleted, there is no output. Why?
+

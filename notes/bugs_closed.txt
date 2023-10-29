@@ -4418,3 +4418,21 @@ FIXED
 215. help needs a help message
 
 "help help" should print something other than "None", which it does now.
+
+----------------------------------------------------------------------
+
+FIXED
+
+222. Stale docs: marcel.py
+
+https://github.com/geophile/marcel/issues/21
+
+----------------------------------------------------------------------
+
+FIXED
+
+223. Stale docs: Pipeline notation
+
+https://github.com/geophile/marcel/issues/17
+
+----------------------------------------------------------------------

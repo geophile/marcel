@@ -636,3 +636,70 @@ su doesn't work:
 
 M 0.18.3 jao@loon /media/backup$ su
 Error: ['Password: su: Authentication failure']
+
+----------------------------------------------------------------------
+
+Assign pipeline result to a variable. E.g. a way to run a pipeline
+inside a function, something like
+
+    x = (RUNPIPELINE(ls -fr | (f: f.size) | red +))
+
+What about this:
+
+    x = ls -fr | ...
+
+This runs the pipeline and:
+
+- converts a stream to a list
+- unwraps the list if it has a single element
+- if we now have a tuple, unwrap if length is 1
+
+
+x = ... syntax doesn't print anything currently. Could print the value
+assigned.
+
+
+Parsing might be difficult. We see "x = ls". What next? It could mean
+"x = ls", e.g., ls is a variable with an assigned value. Or there
+could be more symbols as in "x = ls -fr | ..." 
+
+----------------------------------------------------------------------
+
+Keep track of multiple histories. 
+
+What happens when there are multiple sessions. Does one exiting
+overwrite history from another?
+
+Merge them all into one history?
+
+If multiple histories are tracked, how to select one on startup?
+
+Bash:
+
+- history read at startup
+
+- Changes tracked and written on exit. (Or maybe the whole history
+  including changes from this console). But there isn't an
+  overwrite. So on exit, the history must be read again, and local
+  changes appended?
+
+Generalizing this: Keep track of sessions:
+
+- A session has its own history.
+
+- Vars are scoped to the session, and restarting a session brings back
+  those vars and their values.
+
+- Disallow multiple concurrent uses of a session?
+
+- Support session upload and download.
+
+- I guess sessions need names, or some way to refer to
+  them. E.g. start marcel with session foobar. If no session
+  specified, then:
+
+  - vars not preserved?
+  - what happens to history on exit?
+
+- Stream-valued vars can be large (on disk). Provide a way to manage
+  them.
