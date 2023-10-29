@@ -703,3 +703,20 @@ Generalizing this: Keep track of sessions:
 
 - Stream-valued vars can be large (on disk). Provide a way to manage
   them.
+
+From https://github.com/geophile/marcel/issues/6:
+
+    - Ability to hibernate (save context, close, and open it back again)
+
+Exactly, that's a session.
+    
+    - Ability to store multiple result buffers (aka output of previous commands).
+
+    - Ability to access the stored buffers and run processing functions on
+      them (e.g. I take a snapshot of counters and after a while another
+      snapshot - can I see the diff?)
+
+Idea: Store results of previous commands automatically, (results would
+be BEFORE an implicit write). Be able to recall these, based on this
+history mechanism.
+    
