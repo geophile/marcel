@@ -46,6 +46,6 @@ class Locations(object):
             if not dir.is_dir():
                 raise marcel.exception.KillShellException(f'Not a directory: {dir}')
         else:
-            dir.mkdir(exist_ok=False)
+            dir.mkdir(exist_ok=False, parents=True)
         return dir
 
