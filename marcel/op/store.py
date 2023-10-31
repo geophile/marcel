@@ -91,8 +91,7 @@ class Store(marcel.core.Op):
             # API
             self.picklefile = self.var
         elif type(self.var) is str:
-            # API: string is a filename.
-            # Interactive: string is a filename or environment variable name.
+            # Interactive
             if self.var.isidentifier():
                 self.picklefile = env.getvar(self.var)
                 if self.picklefile is None:

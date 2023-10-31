@@ -1887,6 +1887,14 @@ def test_bug_212():
              expected_out=[(0, 0), (1, -1), (2, -2)])
 
 
+@timeit
+def test_bug_229():
+    g = reservoir('g')
+    gn = lambda n: gen(int(n)) | store(g)
+    TEST.run(test=lambda: run(gn(3)))
+    TEST.run(test=lambda: run(load(g)),
+             expected_out=[0, 1, 2])
+
 
 # For bugs that aren't specific to a single op.
 @timeit
@@ -1898,6 +1906,7 @@ def test_bugs():
     test_bug_200()
     test_bug_206()
     test_bug_212()
+    test_bug_229()
 
 
 def main_slow_tests():
@@ -1957,7 +1966,7 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    # main_dev()
+    main_dev()
     main_stable()
     main_slow_tests()
     print(f'Test failures: {TEST.failures}')
