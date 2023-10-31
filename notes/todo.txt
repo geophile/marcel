@@ -665,58 +665,16 @@ could be more symbols as in "x = ls -fr | ..."
 
 ----------------------------------------------------------------------
 
-Keep track of multiple histories. 
+Store should pass on its input. This enables capture of state with
+continuation of processing. See ~/hacks/condprob.m.
 
-What happens when there are multiple sessions. Does one exiting
-overwrite history from another?
+----------------------------------------------------------------------
 
-Merge them all into one history?
+condprob.m also would benefit from cross product operator. The
+prepending of 0s to make join work like a cross product is a hack.
 
-If multiple histories are tracked, how to select one on startup?
+----------------------------------------------------------------------
 
-Bash:
-
-- history read at startup
-
-- Changes tracked and written on exit. (Or maybe the whole history
-  including changes from this console). But there isn't an
-  overwrite. So on exit, the history must be read again, and local
-  changes appended?
-
-Generalizing this: Keep track of sessions:
-
-- A session has its own history.
-
-- Vars are scoped to the session, and restarting a session brings back
-  those vars and their values.
-
-- Disallow multiple concurrent uses of a session?
-
-- Support session upload and download.
-
-- I guess sessions need names, or some way to refer to
-  them. E.g. start marcel with session foobar. If no session
-  specified, then:
-
-  - vars not preserved?
-  - what happens to history on exit?
-
-- Stream-valued vars can be large (on disk). Provide a way to manage
-  them.
-
-From https://github.com/geophile/marcel/issues/6:
-
-    - Ability to hibernate (save context, close, and open it back again)
-
-Exactly, that's a session.
-    
-    - Ability to store multiple result buffers (aka output of previous commands).
-
-    - Ability to access the stored buffers and run processing functions on
-      them (e.g. I take a snapshot of counters and after a while another
-      snapshot - can I see the diff?)
-
-Idea: Store results of previous commands automatically, (results would
-be BEFORE an implicit write). Be able to recall these, based on this
-history mechanism.
-    
+tee is stupid. The pipelines are dead ends, so can only do anything
+useful by side effect. Need a way to operate on the two
+streams. Nested? Merge? Join?

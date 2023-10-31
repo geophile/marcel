@@ -741,3 +741,12 @@ Traceback (most recent call last):
     self._accessor.mkdir(self, mode)
 FileNotFoundError: [Errno 2] No such file or directory: '/home/issue22/.config/marcel'
 (venv) issue22@loon:~$ 
+
+----------------------------------------------------------------------
+
+228. marcel exit can lose history
+
+If there are concurrent sessions, the LAST one to exit overwrites
+changes from the others.  bash gets it right.
+
+On exit, should reread history on disk and then append to it.
