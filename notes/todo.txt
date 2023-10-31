@@ -678,3 +678,22 @@ prepending of 0s to make join work like a cross product is a hack.
 tee is stupid. The pipelines are dead ends, so can only do anything
 useful by side effect. Need a way to operate on the two
 streams. Nested? Merge? Join?
+
+----------------------------------------------------------------------
+
+Debug mode: Collect stream after each op. Or selected ops. 
+
+Minimal implementation:
+
+- Have store copy input to output
+- Add store ops to pipeline
+
+Debug info is in the stored vars.
+
+----------------------------------------------------------------------
+
+Inline comments don't work
+
+- FIx parser?
+
+- Or have # be syntactic sugar for noop op which just copies input to output.
