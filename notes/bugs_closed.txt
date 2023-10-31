@@ -4436,3 +4436,31 @@ FIXED
 https://github.com/geophile/marcel/issues/17
 
 ----------------------------------------------------------------------
+
+FIXED
+
+229. var assigned in saved pipeline can't be read
+
+    M 0.18.4 jao@loon ~$ gn = (| n: gen (int(n)) >$ g |)
+    M 0.18.4 jao@loon ~$ gn 3
+    M 0.18.4 jao@loon ~$ g <$
+    Process Process-2:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+        child_namespace_changes = command.execute(self.env, True)
+      File "/home/jao/git/marcel/marcel/core.py", line 260, in execute
+        self.pipeline.setup(env)
+      File "/home/jao/git/marcel/marcel/core.py", line 415, in setup
+        op.setup(env)
+      File "/home/jao/git/marcel/marcel/op/load.py", line 99, in setup
+        self.reader = iter(self.picklefile)
+      File "/home/jao/git/marcel/marcel/picklefile.py", line 38, in __iter__
+        return self.reader()
+      File "/home/jao/git/marcel/marcel/picklefile.py", line 48, in reader
+        assert len(self.writers) == 0, self
+    AssertionError: Reservoir(/tmp/tmp_10yzt3q: readers = 0, writers = 1)
+
