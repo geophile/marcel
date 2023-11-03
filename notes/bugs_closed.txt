@@ -4464,3 +4464,12 @@ FIXED
         assert len(self.writers) == 0, self
     AssertionError: Reservoir(/tmp/tmp_10yzt3q: readers = 0, writers = 1)
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+230. Problem with bash ls -i ( -l option is OK, -i option fails)
+
+See https://github.com/geophile/marcel/issues/23
+

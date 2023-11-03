@@ -770,9 +770,3 @@ M 0.18.4 jao@loon ~$ bash ls -l *.txt
 -rw-rw-r-- 1 jao jao  6779 Nov  2 10:50 todo.txt
 M 0.18.4 jao@loon ~$ bash ls -i *.txt
 Operator bash: Flags must all appear before the first anonymous arg
-
-----------------------------------------------------------------------
-
-230. Problem with bash ls -i ( -l option is OK, -i option fails)
-
-See https://github.com/geophile/marcel/issues/23

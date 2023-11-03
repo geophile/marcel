@@ -1896,6 +1896,17 @@ def test_bug_229():
              expected_out=[0, 1, 2])
 
 
+@timeit
+def test_bug_230():
+    with TestDir() as testdir:
+        TEST.cd(testdir)
+        os.system('touch a1 a2')
+        TEST.run(test=lambda: run(bash('ls -l a?') | map (lambda x: x[-2:])),
+                 expected_out=['a1', 'a2'])
+        TEST.run(test=lambda: run(bash('ls -i ??') | map (lambda x: x[-2:])),
+                 expected_out=['a1', 'a2'])
+
+
 # For bugs that aren't specific to a single op.
 @timeit
 def test_bugs():
@@ -1907,6 +1918,7 @@ def test_bugs():
     test_bug_206()
     test_bug_212()
     test_bug_229()
+    test_bug_230()
 
 
 def main_slow_tests():

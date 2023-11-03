@@ -2323,8 +2323,13 @@ def test_bug_229():
 
 @timeit
 def test_bug_230():
-    # TEST.run('bash ls -l')
-    TEST.run('bash ls -i')
+    with TestDir() as testdir:
+        TEST.cd(testdir)
+        os.system('touch a1 a2')
+        TEST.run('bash ls -l a? | (x: (x[-2:]))',
+                 expected_out=['a1', 'a2'])
+        TEST.run('bash ls -i ?? | (x: (x[-2:]))',
+                 expected_out=['a1', 'a2'])
 
 
 # Generalization of bug 195
@@ -2453,14 +2458,14 @@ def main_stable():
 
 
 def main_dev():
-    test_bug_230()
+    pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # main_slow_tests()
+    main_stable()
+    main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

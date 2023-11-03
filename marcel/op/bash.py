@@ -51,9 +51,18 @@ class BashArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('bash', env)
-        self.add_flag_no_value('interactive', '-i', '--interactive')
+        # self.add_flag_no_value('interactive', '-i', '--interactive')
         self.add_anon_list('args', convert=self.check_str, target='args_arg')
         self.validate()
+
+    # Bash arg parsing is special. In general, the args just get passed to bash. However, bash itself
+    # has a -i|--interactive flag. So look for that specially, and just accept the others as is, let bash
+    # handle it.
+    def parse(self, args, op):
+        if args[0] in ('-i', '--interactive'):
+            op.interactive = True
+            args = args[1:]
+        op.args_arg = args
 
 
 class Bash(marcel.core.Op):
@@ -64,6 +73,7 @@ class Bash(marcel.core.Op):
         self.args = None
         self.escape = None
         self.input = None
+        self.interactive = None
 
     def __repr__(self):
         return f'bash(args={self.args_arg})'
@@ -73,8 +83,9 @@ class Bash(marcel.core.Op):
     def setup(self, env):
         self.args = self.eval_function(env, 'args_arg')
         self.input = []
+        interactive = self.interactive or env.is_interactive_executable(self.args[0])
         self.escape = (BashShell(self) if len(self.args) == 0 else
-                       Interactive(self) if env.is_interactive_executable(self.args[0]) else
+                       Interactive(self) if interactive else
                        NonInteractive(self))
 
     def run(self, env):
