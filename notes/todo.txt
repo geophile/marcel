@@ -697,3 +697,26 @@ Inline comments don't work
 - FIx parser?
 
 - Or have # be syntactic sugar for noop op which just copies input to output.
+
+----------------------------------------------------------------------
+
+Switch to LGPL
+
+----------------------------------------------------------------------
+
+pwd is a command. I think it means print working directory. So PWD as
+a var name doesn't make sense, it should be WD. But bash has a PWD
+also.
+
+Does the marcel cd command change the enclosing process wd? It
+probably shouldn't.
+
+----------------------------------------------------------------------
+
+History implementation creates a HistoryRecord for each command in
+history, and then throws away probably nearly all of them if n is
+set. Don't be so dumb.
+
+----------------------------------------------------------------------
+
+Need an exit command, which is run by Ctrl-D.

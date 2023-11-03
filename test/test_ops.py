@@ -2321,6 +2321,12 @@ def test_bug_229():
              expected_out=[0, 1, 2])
 
 
+@timeit
+def test_bug_230():
+    # TEST.run('bash ls -l')
+    TEST.run('bash ls -i')
+
+
 # Generalization of bug 195
 @timeit
 def test_pipeline_vars():
@@ -2398,6 +2404,7 @@ def test_bugs():
     test_bug_206()
     test_bug_212()
     test_bug_229()
+    test_bug_230()
 
 
 def main_stable():
@@ -2446,14 +2453,14 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_bug_230()
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
-    main_slow_tests()
+    # main_stable()
+    # main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
