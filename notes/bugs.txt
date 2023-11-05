@@ -770,3 +770,57 @@ M 0.18.4 jao@loon ~$ bash ls -l *.txt
 -rw-rw-r-- 1 jao jao  6779 Nov  2 10:50 todo.txt
 M 0.18.4 jao@loon ~$ bash ls -i *.txt
 Operator bash: Flags must all appear before the first anonymous arg
+
+----------------------------------------------------------------------
+
+231. Crash due to tuple/list confusion by red . cat
+
+M 0.18.5 jao@loon ~/tufts/cs131/assignments/a4$ read -c all.csv \
+| (p, h, t, c, *_: (p, h.strip(), int(c.strip()))) \
+| (p, h, c: (p, (h, c))) \
+| red . concat \
+| (p, hc: sorted(hc, key=lambda hc: -hc[1])) \
+| expand 1
+Process Process-12:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env, True)
+  File "/home/jao/git/marcel/marcel/core.py", line 262, in execute
+    self.pipeline.flush(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 430, in flush
+    self.ops[0].flush(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 133, in flush
+    self.propagate_flush(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 93, in propagate_flush
+    self.receiver.flush(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 133, in flush
+    self.propagate_flush(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 93, in propagate_flush
+    self.receiver.flush(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 133, in flush
+    self.propagate_flush(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 93, in propagate_flush
+    self.receiver.flush(env)
+  File "/home/jao/git/marcel/marcel/op/red.py", line 168, in flush
+    self.reducer.flush(env)
+  File "/home/jao/git/marcel/marcel/op/red.py", line 243, in flush
+    op.send(env, tuple(data))
+  File "/home/jao/git/marcel/marcel/core.py", line 84, in send
+    receiver.receive_input(env, x)
+  File "/home/jao/git/marcel/marcel/core.py", line 115, in receive_input
+    self.receive(env, x if type(x) in (tuple, list) else (x,))
+  File "/home/jao/git/marcel/marcel/op/map.py", line 67, in receive
+    self.send(env, self.call(env, self.function, *x))
+  File "/home/jao/git/marcel/marcel/core.py", line 84, in send
+    receiver.receive_input(env, x)
+  File "/home/jao/git/marcel/marcel/core.py", line 115, in receive_input
+    self.receive(env, x if type(x) in (tuple, list) else (x,))
+  File "/home/jao/git/marcel/marcel/op/expand.py", line 102, in receive
+    self.expander.receive(env, x)
+  File "/home/jao/git/marcel/marcel/op/expand.py", line 154, in receive
+    send(env, pre + (x,) + post)
+TypeError: can only concatenate list (not "tuple") to list

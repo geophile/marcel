@@ -59,7 +59,7 @@ class BashArgsParser(marcel.argsparser.ArgsParser):
     # has a -i|--interactive flag. So look for that specially, and just accept the others as is, let bash
     # handle it.
     def parse(self, args, op):
-        if args[0] in ('-i', '--interactive'):
+        if len(args) > 0 and args[0] in ('-i', '--interactive'):
             op.interactive = True
             args = args[1:]
         op.args_arg = args
@@ -83,7 +83,7 @@ class Bash(marcel.core.Op):
     def setup(self, env):
         self.args = self.eval_function(env, 'args_arg')
         self.input = []
-        interactive = self.interactive or env.is_interactive_executable(self.args[0])
+        interactive = self.interactive or len(self.args) > 0 and env.is_interactive_executable(self.args[0])
         self.escape = (BashShell(self) if len(self.args) == 0 else
                        Interactive(self) if interactive else
                        NonInteractive(self))
