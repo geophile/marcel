@@ -557,16 +557,25 @@ def test_window():
 
 @timeit
 def test_bash():
-    # Two space between hello and world not preserved.
-    TEST.run(lambda: run(bash('echo', 'hello', 'world')),
-             expected_out=['hello world'])
-    # Quoted, so they are preserved.
-    TEST.run(lambda: run(bash('echo', '"hello  world"')),
-             expected_out=['hello  world'])
-    # Function-valued args
-    HELLO = 'hello'
-    TEST.run(lambda: run(bash('echo', f"'{HELLO}  world'")),
-             expected_out=['hello  world'])
+    with TestDir() as testdir:
+        os.system(f'touch {testdir}/x1')
+        os.system(f'touch {testdir}/x2')
+        os.system(f'touch {testdir}/y1')
+        os.system(f'touch {testdir}/y2')
+        who = 'world'
+        # Test command string
+        TEST.run(lambda: run(cd(testdir)))
+        TEST.run(lambda: run(bash('ls x*')),
+                 expected_out=['x1', 'x2'])
+        TEST.run(lambda: run(bash('ls -l *1') | map(lambda x: x.split()[-1])),
+                 expected_out=['x1', 'y1'])
+        TEST.run(lambda: run(bash('echo "hello  world"')), # --- two spaces in string to be printed
+                 expected_out='hello  world')
+        # Test args
+        TEST.run(lambda: run(bash('echo', f'hello {who}')),
+                 expected_out='hello world')
+        TEST.run(lambda: run(bash('echo', 'hello', 'world')),
+                 expected_out=['hello world'])
 
 
 @timeit

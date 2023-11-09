@@ -24,16 +24,39 @@ import marcel.object.error
 import marcel.util
 
 HELP = '''
-{L,wrap=F}bash [-i|--interactive] ARG ...
+{L,wrap=F}bash [-i|--interactive] [COMMAND | EXECUTABLE ARG ...]
 
 {L,indent=4:28}{r:-i}, {r:--interactive}       Specifies that the executable to be run 
-is interactive. stdin, stdout, and stderr are not handled by marcel. 
+is interactive. stdin, stdout, and stderr are not handled by marcel.
 
-Runs the executable specified by the first {r:ARG}, (as opposed to a marcel command).
-Remaining {r:ARG}s are arguments to the executable. 
+{L,indent=4:28}COMMAND                 The command to be passed to bash. 
 
-It is usually possible to run an executable directly, without using the bash command.
-Use this command if the {r:--interactive} flag is needed.
+{L,indent=4:28}EXECUTABLE              Host OS executable to be run.
+ 
+{L,indent=4:28}ARG                     Argument to EXECUTABLE
+
+Runs a bash command, which may be given as a single string ({r:COMMAND}), or as a sequence of strings
+({r:EXECUTABLE} {r:ARG} ...).
+
+The bash command to be executed can receive stdin from a marcel pipeline, e.g.
+
+{p,indent=4}gen 20 | map (x: (x, x)) | bash "grep 2"
+
+yields:
+
+{p,indent=4,wrap=F}(2, 2)
+(12, 12)
+
+{r:gen ... | map ...} yields a stream of tuples {n:(0, 0), ..., (19, 19)}. Piping to 
+bash converts these to strings which the bash command can act upon.
+
+Similarly, stdout from the bash command can be piped as strings into marcel operators. For example:
+
+{p,indent=4}bash "cat /etc/passwd" | map (line: line.split(':')[-1]) | unique
+
+The lines of {r:/etc/passwd} are read by the host executable {r:cat}, and the strings are piped into
+{r:map ... | unique}. These marcel operators extract the last field of each line, 
+(a user's default shell), and removes duplicates. 
 '''
 
 
@@ -41,50 +64,44 @@ Use this command if the {r:--interactive} flag is needed.
 # See https://pymotw.com/2/subprocess/#process-groups-sessions for more information.
 
 
-def bash(*args, interactive=False):
-    op_args = ['--interactive'] if interactive else []
-    op_args.extend(args)
-    return Bash(), op_args
+def bash(*bash_args, interactive=False):
+    args = ['--interactive'] if interactive else []
+    args.extend(bash_args)
+    return Bash(), args
 
 
 class BashArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('bash', env)
-        # self.add_flag_no_value('interactive', '-i', '--interactive')
+        self.add_flag_no_value('interactive', '-i', '--interactive')
         self.add_anon_list('args', convert=self.check_str, target='args_arg')
         self.validate()
-
-    # Bash arg parsing is special. In general, the args just get passed to bash. However, bash itself
-    # has a -i|--interactive flag. So look for that specially, and just accept the others as is, let bash
-    # handle it.
-    def parse(self, args, op):
-        if len(args) > 0 and args[0] in ('-i', '--interactive'):
-            op.interactive = True
-            args = args[1:]
-        op.args_arg = args
 
 
 class Bash(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.args_arg = None
         self.args = None
         self.escape = None
-        self.input = None
         self.interactive = None
+        self.command = None
 
     def __repr__(self):
-        return f'bash(args={self.args_arg})'
+        return f'bash({self.command})'
 
     # AbstractOp
 
     def setup(self, env):
+        def executable(command):
+            return ''if command is None or len(command) == 0 else command.split()[0]
+
         self.args = self.eval_function(env, 'args_arg')
-        self.input = []
-        interactive = self.interactive or len(self.args) > 0 and env.is_interactive_executable(self.args[0])
-        self.escape = (BashShell(self) if len(self.args) == 0 else
+        self.command = ' '.join([str(x).strip() for x in self.args])
+        # Try to extract the executable to see if it is interactive.
+        interactive = self.interactive or env.is_interactive_executable(executable(self.command))
+        self.escape = (BashShell(self) if len(self.command) == 0 else
                        Interactive(self) if interactive else
                        NonInteractive(self))
 
@@ -120,7 +137,7 @@ class Escape:
         pass
 
     def command(self):
-        return ' '.join([str(arg) for arg in self.op.args])
+        return self.op.command
 
 
 class NonInteractive(Escape):

@@ -1171,14 +1171,8 @@ class Parser(object):
                 op.expected_args = (1 if op_token.value() == '!' else
                                     0 if op_token.value() == '!!' else None)
             args = []
-            if op_name == 'bash':
-                for x in arg_tokens:
-                    args.append(x.raw() if isinstance(x, String) else
-                                x.value() if isinstance(x, Token) else
-                                x)
-            else:
-                for x in arg_tokens:
-                    args.append(x.value() if isinstance(x, Token) else x)
+            for x in arg_tokens:
+                args.append(x.value() if isinstance(x, Token) else x)
             op_module.args_parser().parse(args, op)
         return op
 

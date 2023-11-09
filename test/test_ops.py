@@ -577,24 +577,27 @@ def test_window():
 
 @timeit
 def test_bash():
-    # Two space between hello and world not preserved.
-    TEST.run('bash echo hello  world',
-             expected_out=['hello world'])
-    # Quoted, so they are preserved.
-    TEST.run('bash echo "hello  world"',
-             expected_out=['hello  world'])
-    # Function-valued args
-    TEST.run('HELLO = hello')
-    TEST.run('''bash echo (f"'{HELLO}  world'")''',
-             expected_out=['hello  world'])
-    # without 'bash'
-    TEST.run('echo hello  world',
-             expected_out=['hello world'])
-    TEST.run('echo "hello  world"',
-             expected_out=['hello  world'])
-    TEST.run('HELLO = hello')
-    TEST.run('''echo (f"'{HELLO}  world'")''',
-             expected_out=['hello  world'])
+    with TestDir() as testdir:
+        os.system(f'touch {testdir}/x1')
+        os.system(f'touch {testdir}/x2')
+        os.system(f'touch {testdir}/y1')
+        os.system(f'touch {testdir}/y2')
+        TEST.run('who = world')
+        # Test command string
+        TEST.run(f'cd {testdir}')
+        TEST.run('bash "ls x*"',
+                 expected_out=['x1', 'x2'])
+        TEST.run('bash "ls -l *1" | (x: x.split()[-1])',
+                 expected_out=['x1', 'y1'])
+        TEST.run('''bash 'echo "hello  world"''', # Two spaces in string to be printed
+                 expected_out='hello  world')
+        TEST.run('''echo (f"hello {who}")''',
+                 expected_out='hello world')
+        # Test args
+        TEST.run('echo hello  world',          # Two spaces between args should not be reproduced
+                 expected_out=['hello world'])
+        TEST.run('echo hello (who)',
+                 expected_out=['hello world'])
 
 
 @timeit
@@ -2328,7 +2331,7 @@ def test_bug_230():
         os.system('touch a1 a2')
         TEST.run('bash ls -l a? | (x: (x[-2:]))',
                  expected_out=['a1', 'a2'])
-        TEST.run('bash ls -i ?? | (x: (x[-2:]))',
+        TEST.run('bash "ls -i ??" | (x: (x[-2:]))',
                  expected_out=['a1', 'a2'])
 
 
