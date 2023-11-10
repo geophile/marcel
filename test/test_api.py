@@ -1345,6 +1345,33 @@ def test_difference():
              expected_err='not hashable')
     TEST.run(lambda: run(gen(3) | map(lambda x: (x, (x, x))) | difference(gen(2) | map(lambda x: (x, [x, x])))),
              expected_err='not hashable')
+    # --filter --------------------------------------------
+    # Empty inputs
+    empty = reservoir('empty')
+    TEST.run(test=lambda: run(gen(1) | select(lambda *x: False) | store(empty)))
+    TEST.run(test=lambda: run(load(empty) | difference(load(empty), filter=True)),
+             expected_out=[])
+    TEST.run(test=lambda: run(gen(3) | difference(load(empty), filter=True) | sort()),
+             expected_out=[0, 1, 2])
+    TEST.run(test=lambda: run(load(empty) | difference(gen(3), filter=True)),
+             expected_out=[])
+    # Non-empty inputs
+    TEST.run(test=lambda: run(gen(6) | difference(gen(6, 100), filter=True) | sort()),
+             expected_out=[0, 1, 2, 3, 4, 5])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | difference(gen(6, 100), filter=True) | sort()),
+             expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5])
+    TEST.run(test=lambda: run(gen(6) | difference(gen(6), filter=True) | sort()),
+             expected_out=[])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | difference(gen(6), filter=True) | sort()),
+             expected_out=[])
+    TEST.run(test=lambda: run(gen(6) | difference(gen(6, 3), filter=True) | sort()),
+             expected_out=[0, 1, 2])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | difference(gen(6, 3), filter=True) | sort()),
+             expected_out=[0, 0, 1, 1, 2, 2])
+    TEST.run(test=lambda: run(gen(5) | map(lambda x: [x] * x) | expand() | difference(gen(5), filter=True) | sort()),
+             expected_out=[])
+    TEST.run(test=lambda: run(gen(20) | map(lambda x: x % 7) | difference(gen(3), filter=True) | sort()),
+             expected_out=[3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6])
 
 
 @timeit
