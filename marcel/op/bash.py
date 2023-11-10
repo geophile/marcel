@@ -249,10 +249,6 @@ class ProcessOutputHandler(threading.Thread):
         if x[-1] == '\n':
             x = x[:-1]
         return x
-        # x = x.split('\n')
-        # if len(x[-1]) == 0:
-        #     x = x[:-1]
-        # return x
 
 
 class ProcessStdoutHandler(ProcessOutputHandler):
