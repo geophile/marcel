@@ -1,0 +1,86 @@
+Hi, my name is Jack Orenstein. I discovered your book, Data Science at the Command Line, on Hacker News, which took me to your book's website, https://jeroenjanssens.com/dsatcl.
+
+I am not a data scientist, but I like the ideas you are describing. I like those ideas so much that I wrote a shell, marcel, to support them: https://marceltheshell.org. I thought that I would write to you about marcel as it seems very much in line with the ideas you describe in your book.
+
+I started down this path in 2004, while working for a startup building a distributed archival system. The idea was that each node of our cluster was responsible for a subset of the files, and for a subset of the metadata, and that storage capacity could increase by horizontal scaling. We built our product, and the company was acquired by Hitachi Data Systems. The software is still being deployed by HDS.  I was building the metadata part of the system, comprising a Postgres database on each node, and a Java layer to integrate things, and implement redundancy and failover.
+
+I quickly found that I needed tools to support working in a distributed system with a database on each node. I didn't like the tools that I could find, so I built Object Shell (osh) (http://geophile.com/osh). This tool was based on the Unix philosophy of connecting commands by pipes. I built the tool in Python, and osh supports the piping of Python values, instead of strings, between commands. Osh also allows the processing of data on the command line through the use of Python lambda expressions as arguments to commands, e.g. sort an incomfing stream of 3-element tuples by lambda x, y, z: y+z.
+
+Because I was working on a distributed system, osh supported running commands on all nodes of the cluster, bringing back streams of tuples, each labelled with the host of origin. And because I was working with databases, I also integrated database access.  Database query results, of course, look a lot like a stream of Python tuples.  So I could use osh to run a SQL query on each node of the system and bring it all back as a stream of tuples, combining results from across the cluster.
+
+To process these streams, I added functional data processing operations: mapping, filtering, aggregation. Osh was incredibly useful in my work. I also found it useful for the sort of things you describe, one-off data analysis and ETL from the command line. Not always one-off, as I would sometimes put these commands into scripts.
+
+Then, as a pandemic project, I revisited osh, and decided to rewrite it, switching from Python 2 to Python 3, and expanding it to a real shell, marcel. Marcel has all of the features of osh, with lots of additions:
+
+- Built-in support for CSV data.
+
+- Built-in support for JSON data.
+
+- Abstraction mechanisms: Building pipelines, naming them, and then using them to build other pipelines.
+
+- Relational algebraic operations (union, intersection, difference, join).
+
+- Saving and loading of streams.
+
+- Integration with bash, (pipelines can mix marcel and host OS commands).
+
+What I like about this Python-based approach is that the data structures are very rich, and there are no sublanguages to learn. All detailed logic is expressed in Python. I think that marcel's approach is appealing for people who, like me, are more familiar with Python than with the obscure corners and sublanguages of Linux commands.
+
+I've included below a marcel example, implementing one of the examples in your book. For more information, there is a pretty extensive tutorial at https://marceltheshell.org. The code is under the GPL license, hosted on github: https://github.com/geophile/marcel.
+
+Jack Orenstein
+
+Here is the example in chapter 4.2 done in marcel (it gets the same answer):
+
+import re  # Because marcel does not import re by default
+
+curl -sL "https://www.gutenberg.org/files/11/11-0.txt" \
+| map (line: re.sub(r'[^a-z]', ' ', line.lower()).split()) \
+| select (*words: len(words) > 0) \
+| expand \
+| select (word: len(word) > 1) \
+| map (word: (word, 1)) \
+| red . + \
+| sort (word, count: -count) \
+| head 10
+
+Everything inside top-level parens is a Python function (marcel allows you to omit the lambda keyword). So, for example, that first "map" function gets rid of everything that isn't a letter, applied to the lower-cased line, and then split at whitespace to yield a list of strings. The first "select" function discards blank lines.
+
+Modified to filter out stopwords:
+
+curl -sL "https://www.gutenberg.org/files/11/11-0.txt" \
+| map (line: re.sub(r'[^a-z]', ' ', line.lower()).split()) \
+| select (*words: len(words) > 0) \
+| expand \
+| select (word: len(word) > 1) \
+| difference --filter (| curl -sL "https://raw.githubusercontent.com/stopwords-iso/stopwords-en/master/stopwords-en.txt" |) \
+| map (word: (word, 1)) \
+| red . + \
+| sort (word, count: -count) \
+| head 10
+
+This adds a difference operator that receives, through a pipe, the words from the text, reads the stopwords, and uses them to remove matching words from the text.
+
+I could also have proceeded as in your example, putting the stopwords into a file (or environment variable), but it's actually easier not to.
+
+This all works, but could be made more readable.  First, put the source URLs in variables.
+
+text_source = "https://www.gutenberg.org/files/11/11-0.txt"
+stopwords_source = "https://raw.githubusercontent.com/stopwords-iso/stopwords-en/master/stopwords-en.txt"
+
+Second, move the text cleanup code into a pipeline-valued variable. (This pipeline could also be used to clean up the stopwrds list.)
+
+cleanup = (| map (line: re.sub(r'[^a-z]', ' ', line.lower()).split()) \
+           | select (*words: len(words) > 0) \
+           | expand \
+           | select (word: len(word) > 1) \
+           |)
+
+Putting it all together:
+
+curl -sL (text_source) | cleanup \
+| difference --filter (| curl -sL (stopwords_source) | cleanup |) \
+| map (word: (word, 1)) \
+| red . + \
+| sort (word, count: -count) \
+| head 10

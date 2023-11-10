@@ -749,3 +749,14 @@ Error: ['\t--version']
 Error: ['Shell options:']
 Error: ['\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)']
 Error: ['\t-abefhkmnptuvxBCHP or -o option']
+
+----------------------------------------------------------------------
+
+Instead of difference --filter, and intersect --filter, should there
+be a filter command?
+
+Could be more general, e.g.
+
+- Use a function to extract comparison fields of incoming stream.
+
+Or add that function as the value of --filter?
