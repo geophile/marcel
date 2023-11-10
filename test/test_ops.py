@@ -1722,32 +1722,6 @@ def test_difference():
              expected_err='not hashable')
     TEST.run('gen 3 | (x: (x, (x, x))) | difference (|gen 2 | (x: (x, [x, x]))|)',
              expected_err='not hashable')
-    # --filter --------------------------------------------
-    # Empty inputs
-    TEST.run('gen 1 | select (*x: False) >$ empty')
-    TEST.run('empty <$ difference --filter (|empty <$|)',
-             expected_out=[])
-    TEST.run('gen 3 | difference -f (|empty <$|) | sort',
-             expected_out=[0, 1, 2])
-    TEST.run('empty <$ difference -f (|gen 3|)',
-             expected_out=[])
-    # Non-empty inputs
-    TEST.run('gen 6 | difference -f (|gen 6 100|) | sort',
-             expected_out=[0, 1, 2, 3, 4, 5])
-    TEST.run('gen 6 | (x: (x, x)) | expand | difference -f (|gen 6 100|) | sort',
-             expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5])
-    TEST.run('gen 6 | difference -f (|gen 6|) | sort',
-             expected_out=[])
-    TEST.run('gen 6 | (x: (x, x)) | expand | difference -f (|gen 6|) | sort',
-             expected_out=[])
-    TEST.run('gen 6 | difference -f (|gen 6 3|) | sort',
-             expected_out=[0, 1, 2])
-    TEST.run('gen 6 | (x: (x, x)) | expand | difference -f (|gen 6 3|) | sort',
-             expected_out=[0, 0, 1, 1, 2, 2])
-    TEST.run('gen 5 | map (x: [x] * x) | expand | difference (| gen 5 |) | sort',
-             expected_out=[])
-    TEST.run('gen 20 | (x: x % 7) | difference -f (| gen 3 |) | sort',
-             expected_out=[3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6])
 
 
 @timeit
@@ -2072,6 +2046,28 @@ def test_download():
                  expected_out=[f'{node1}/a', f'{node1}/a b',
                                f'{node2}/a', f'{node2}/a b'])
         os.system(f'rm -rf {testdir}/dest/*')
+
+
+@timeit
+def test_filter():
+    TEST.run('gen 6 | (x: (x, x)) | expand | filter (| gen 3|)',
+             expected_out=[0, 0, 1, 1, 2, 2])
+    TEST.run('gen 6 | (x: (x, x)) | expand | filter -k (| gen 3|)',
+             expected_out=[0, 0, 1, 1, 2, 2])
+    TEST.run('gen 6 | (x: (x, x)) | expand | filter --keep (| gen 3|)',
+             expected_out=[0, 0, 1, 1, 2, 2])
+    TEST.run('gen 6 | (x: (x, x)) | expand | filter -d (| gen 3|)',
+             expected_out=[3, 3, 4, 4, 5, 5])
+    TEST.run('gen 6 | (x: (x, x)) | expand | filter --discard (| gen 3|)',
+             expected_out=[3, 3, 4, 4, 5, 5])
+    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) (| gen 3 |)',
+             expected_out=[(0, 0), (1, 1), (2, 2)])
+    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) -k (| gen 3 |)',
+             expected_out=[(0, 0), (1, 1), (2, 2)])
+    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) -d (| gen 3 |)',
+             expected_out=[(3, 3), (4, 4), (5, 5)])
+    TEST.run('gen 6 | filter -d -k (| gen 3 |)',
+             expected_err='Cannot specify more than one')
 
 
 @timeit
@@ -2483,6 +2479,7 @@ def main_stable():
     test_pos()
     test_tee()
     test_json()
+    test_filter()
     test_bugs()
 
 
