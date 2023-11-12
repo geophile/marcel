@@ -79,7 +79,7 @@ cleanup = (| map (line: re.sub(r'[^a-z]', ' ', line.lower()).split()) \
 Putting it all together:
 
 curl -sL (text_source) | cleanup \
-| difference --filter (| curl -sL (stopwords_source) | cleanup |) \
+| filter --discard (| curl -sL (stopwords_source) | cleanup |) \
 | map (word: (word, 1)) \
 | red . + \
 | sort (word, count: -count) \

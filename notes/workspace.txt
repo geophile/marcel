@@ -249,7 +249,7 @@ instance.
 
 ----------------------------------------------------------------------
 
-Workspace is the wrong word! I think common usage restricts it to a
+Session is the wrong word! I think common usage restricts it to a
 continuous block of time.
 
 ======================================================================
@@ -258,13 +258,13 @@ Workspaces spec
 
 Concepts:
 
-A marcel *session* is marcel running in a process. Typically, once the marcel
-session *exits*, the process terminates, and that session no longer
-exists.
+A marcel *session* is marcel running in a process. Typically, once the
+marcel session *exits*, the process terminates, and that session no
+longer exists.
 
-A *workspace* is the context in which marcel commands executes.  An
-session is always associated with exactly one workspace. At
-all times, a workspace may be used by at most one session.
+A *workspace* is the context in which marcel commands executes. A
+session is always associated with exactly one workspace. 
+A workspace may be used by at most one session at a time.
 
 A workspace comprises the following:
 

@@ -54,8 +54,7 @@ the right input stream, then write the left tuple to the output
 stream.
 
 In other words, {r:--keep} is similar to set intersection, while {r:--discard}
-is similar to set difference.
-
+is similar to set difference. These flags are mutually exclusive. 
 If neither {r:--keep} nor {r:--discard} are specified, then {r:--keep} is assumed.
 '''
 
