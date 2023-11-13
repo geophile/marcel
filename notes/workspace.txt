@@ -1,260 +1,228 @@
-Keep track of multiple histories
+
+API startup:
+
+_MAIN = _main.Main(_os.getenv('MARCEL_CONFIG', default=None),
+                   same_process=True,
+                   old_namespace=None)
 
 
-What happens when there are concurrent workspaces. Does one exiting
-overwrite history from another?
+CLI startup:
 
-Merge them all into one history?
+        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
+        ...
+                MAIN.run(print_prompt)
+                
+                - Loop for command line
 
-If multiple histories are tracked, how to select one on startup?
+                - Run commands
 
-Bash:
+Script startup:
 
-- history read at startup
+        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
+        ...
+                    MAIN.run_script(script_file.read())
 
-- Changes tracked and written on exit. (Or maybe the whole history
-  including changes from this console). But there isn't an
-  overwrite. So on exit, the history must be read again, and local
-  changes appended?
+                    - Loop over lines of script
 
-Generalizing this: Keep track of workspaces:
+                    - Run commands
 
-- A workspace has its own history.
-
-- Vars are scoped to the workspace, and restarting a workspace brings back
-  those vars and their values.
-
-- Disallow multiple concurrent uses of a workspace?
-
-- Support workspace distribution. E.g., tar czvf and write to
-  specified location; import the package to create a workspace
-  locally.
-
-- I guess workspaces need names, or some way to refer to
-  them. E.g. start marcel with workspace foobar. If no workspace
-  specified, then:
-
-  - vars not preserved?
-  - what happens to history on exit?
-
-- Workspace name should NOT BE STORED inside the workspace. Otherwise
-  distribution gets messy. 
-
-- Stream-valued vars can be large (on disk). Provide a way to manage
-  them.
-
-From https://github.com/geophile/marcel/issues/6:
-
-    - Ability to hibernate (save context, close, and open it back again)
-
-Exactly, that's a workspace.
-    
-    - Ability to store multiple result buffers (aka output of previous commands).
-
-    - Ability to access the stored buffers and run processing functions on
-      them (e.g. I take a snapshot of counters and after a while another
-      snapshot - can I see the diff?)
-
-Idea: Store results of previous commands automatically, (results would
-be BEFORE an implicit write). Be able to recall these, based on this
-history mechanism.
+- Should that be same_process=True? Doesn't actually matter,
+  run_script assumes same process.
 
 
-----------------------------------------------------------------------
+Main.__init__:
 
-Wait a minute. Why is automatically storing every command output a
-good idea? It's already easy enough to store wanted results in a
-variable, and then, with workspaces, persist those variables.
+- Set main_pid
 
-With everything stored, there's a lot to wade through, and cleaning
-up, being selective about what's kept is labor intensive. Too easy to
-accidentally delete something, too easy to be cautious and keep
-everything, and then it's difficult to find what you want. Also
-EVERYTHING is kept. Common shell usage is to refine commands until
-they work properly. Just save the final, correct version.
+- (*1) Set same_process
 
-Infinite output problem iss avoided. It should be pretty obvious that
-"timer 1 ... > var" is a bad idea.
+- Env.new: Allows for setup from old_namespace. This is for reload of
+  startup script.
 
-----------------------------------------------------------------------
-    
+- (*2) set tab_completer
 
-Possible rules on workspace usage:
+- (*2) initialize_reader()
 
-- A workspace can be used by at most one marcel instance at a time.
+- (*2) Start job control thread (needed for interactive only)
 
-- Starting an anonymous workspace (no workspace selected) creates a new
-  one. Resuming a workspace blocks anyone else from resuming the same
-  workspace, (attempt results in error message and exit).
+- (*2) Set config time (for knowing when config file changes)
 
-- Exiting anonymous workspace:
+- atexit.register()
 
-  - Present option to name it (don't allow duplicate names).
+*1: same_process should be false for interactive, true otherwise.
 
-  - If declined, then save anyway with some identifying information?
-    Or just delete it? Could save it with some descriptive information
-    (e.g. start/end timestamps) to allow it to be located later.
-
-- Exiting named workspace: No user input required.
-
-- Allow for workspace rename
+*2: Needed for interactive only
 
 
+Env.new:
 
-How is a named workspace deleted? Need workspace commands. Can only delete
-one workspace while it is not in use, and from some other workspace.
+- (*1) Get initial_namespace, either copying old_namespace, or copying os.environ().
+
+- Set a bunch of vars: 
+
+    USER
+    HOME
+    HOST
+    MARCEL_VERSION
+    PWD
+    (*2) DIRS
+    (*2) PROMPT
+    (*2) PROMPT_CONTINUATION
+    (*2) BOLD
+    (*2) ITALIC
+    (*2) COLOR_SCHEME
+    (*2) Color
+    pos
+    (*2) EDITOR
+
+- Add in public marcel.builtins
+
+- (*3) Create NestedNamespace
 
 
+*1: This looks wrong. Shouldn't os.environ be included in any case?
+ Also should os.environ BE included at all?
 
-Workspace management:
+*2: Only needed for interactive usage.
 
-- List workspaces: name, size
-
-- Delete workspace
-
-- Duplicate workspace, giving duplicate a new name
-
-- Start marcel with a named workspace. Problem: If you can't remember
-  the name, you would need to start marcel to find out the name.
-
-- Switch workspaces? That solves the forgotten name problem: Start anon,
-  select a workspace. Switching to it ends the anon workspace. But then do
-  we need all the end-of-anon workspace stuff?
-
-- Prune workspace, deleting some subset of saved results. By time? By
-  size? User-selected? Or have the user identify what to keep?
-
-- Workspace state:
-
-  - In /var/lib/marcel, owned by root? Maybe, but it's per-user
-    state. Could also go to .local/share/marcel. But it's potentially
-    a lot of space. Allow for user control.
-
-  - Need to enforce a max, in case of commands that never end, e.g. "timer 1 | ..."
-
+*3: Not needed for API?
 
 ----------------------------------------------------------------------
 
-On disk:
+workspace op:
 
-Each workspace has its own startup?
-
-.config/marcel/
-    startup.py  # For anon workspaces, and template for named workspaces
-    WORKSPACE_NAME/
-        startup.py
-
-.config/marcel/
-    WORKSPACE_NAME/
-        workspace.p  # Workspace properties (pickled) Or maybe JSON?
-        env.p: Pickled environment
-        history
-
-Should workspace.p omit workspace name? If it's included, then that
-creates an opportunity for a discrepancy, in case of a manual rename
-of the WORKSPACE_NAME directory. And a workspace rename command gets more
-complicated.
+list      -l --list
+create    -n --new
+open      -o --open
+close     -c --close
+delete    -d --delete
+rename    -r --rename
+copy      -2 --dup
+export    -e --export
+import    -i --import
 
 ----------------------------------------------------------------------
 
-workspace 
 
-- use NAME
+Tasks
 
-  - use workspace with given NAME.
+Open ws
 
-  - close existing workspace
+- Revisit and cleanup marcel startup
 
-- close
 
-  - close current workspace
+Close ws
 
-  - If anonymous: save with a new name? discard?
+- Saving default ws command history
 
-- list
+- Saving named wd command history
 
-  - list all workspaces
-    - name
-    - create timestamp
-    - last saved timestamp
-    - size on disk
 
-- properties:
+Main & Environment
 
-  - name
-  - startup file
-  - create timestamp
-  - last save timestamp
-  - max size on disk
-  - max size on disk for a single command output
+- Cleanup:
+
+  - Decide on use of Env from API. Is there one? Or are there just
+    python vars?
+
+  - Use Env for interactive usage only. Not for scripts, not for API.
+
+  - Separate uses: interactive, API, script.
+
+    - Some ops are only useful interactive: job control, edit, dir stack, help.
+
+- Track symbols from startup script
+
+- Prevent interactive update
+
+- Prevent interactive deletion
+
+- Handle symbol deleted from startup script (it should not appear on
+  reload of startup)
+
+- When a reservoir is created, the env must be saved first. Otherwise,
+  there could be a reservoir not referenced by the environment.
+
+- Env var for workspace name
+
+- Add workspace name to default prompt.
+
+- It should be possible to get rid of MARCEL_CONFIG
+
+- old_namespace is only needed for default namespace. Otherwise, can
+  be read from disk. Any way to get rid of old_namespace?
+
+
+Directory structure for workspaces
+
+- Modify Locations
+
+
+Workspace locking
+
+
+Workspace op
+
+  - list      -l --list
+  - create    -n --new
+  - open      -o --open
+  - close     -c --close
+  - delete    -d --delete
+  - rename    -r --rename
+  - copy      -2 --dup
+  - export    -e --export
+  - import    -i --import
+
+
+HistoryRecord
+
+- Add timestamp
 
 ----------------------------------------------------------------------
 
-What is the role of a startup script? Does it get run once at the
-beginning of the workspace? Or on each instantiation?
+Workspaces implementation
 
-The imports are needed each time a process starts. The only (?) other
-thing the startup script does is to populate the environment. The
-imports can be viewed as adding to the namespace some values that
-should not or cannot be persisted, e.g. modules.
+There must be a standard way to lock things in Linux. Alternative:
+When using a workspace, create a .IN_USE file. Other processes check it.
+Problem: there are ways for the process to end suddently, leaving the
+.IN_USE file in place erroneously.
 
-Harmless to run obsolete definitions from startup.py, as long as that
-precedes loading the environment. The environment will have the most
-current version, and probably overwrite much of what is done in
-startup without resulting in any change. E.g. the COLOR_SCHEMA
-probably doesn't change.
+The .IN_USE file could store a pid. If that process is not running,
+then it is a sign that the workspace is not actually in use and can be
+deleted.
 
-Alternatively: The workspace DOES NOT have a startup script, just an
-environment. But getting imported modules and functions right looks
-difficult and delicate.
+Locking is broken in Linux! http://0pointer.de/blog/projects/locking.html
 
-Could do the imports in RUN_ON_STARTUP. The import op could then
-record what's been imported, and duplicate that in each
-instance. Maybe block reassignment of imported symbols.
+- File F used to store "lock", which is a PID
 
-But having a startup script is convenient. I *can* replace a prompt
-interactively, but it's kind of a pain. It would be nice to have a
-startup script that does that. But then, you want the startup script
-overriding the environment! E.g. if I want a new prompt: the env
-already has one. I edit the startup script to get a new one. If env
-overwrites startup script, then I don't get the new prompt.
+- Lock protocol:
 
-So how about this:
+  - read F, check empty
 
-- Startup loads environment
+      - If not empty and pid stored does not exist, steal the lock
 
-- Then runs startup script
+      - If not empty and pid does exist, the file is locked
 
-This gets imports and a new prompt. But it also could "revert" and env
-change. 
+  - append pid to F, flush
 
-How about this: a symbol that comes in from the startup script cannot
-be changed interactively, (i.e., assigned), it has to be done by
-editing the startup script. (Changes already take effect immediately.)
+  - read F
+
+      - My pid: I have the lock
+      - my pid is not there: shouldn't happen
+      - my pid is there as well as someone else's:
+          - first pid gets the lock
+
+
+It's not that much of a race condition. We're talking about actual
+console sessions by the SAME USER. Not even script execution. Two
+different logins to the same username could still create a problem, I
+guess.
+
+......................................................................
+
+Be clearer about role of Env in API usage. Is it there or not?
 
 ----------------------------------------------------------------------
-
-Workspace creation
-
-I originally thought that you would use an anonymous marcel workspace,
-decide to create a workspace, and that the instance's history (just the
-commands in that instance) and environment would then be saved to
-initialize the workspace. But that is messy. Those commands, and that
-environment are part of the anonymous workspace, and could be persisted
-at any time.
-
-Creating a workspace on first reference to a new workspace name seems
-dangerous. E.g. "switch to workspace abc" could succeed, creating a
-workspace because that name is not in use. But what if it was a typo,
-and the user meant abd. In that case, we have stuff in abc that should
-have been in abd, and there doesn't seem to be a good way to rerun
-those commands against abd. The results might have been completely
-different.
-
-So workspace creation should be explicit, on startup or during an
-instance.
-
-======================================================================
 
 Workspaces spec
 
@@ -367,181 +335,258 @@ EXPORT_MWS NEW_NAME".
 
 ----------------------------------------------------------------------
 
-Workspaces implementation
+What is the role of a startup script? Does it get run once at the
+beginning of the workspace? Or on each instantiation?
 
-There must be a standard way to lock things in Linux. Alternative:
-When using a workspace, create a .IN_USE file. Other processes check it.
-Problem: there are ways for the process to end suddently, leaving the
-.IN_USE file in place erroneously.
+The imports are needed each time a process starts. The only (?) other
+thing the startup script does is to populate the environment. The
+imports can be viewed as adding to the namespace some values that
+should not or cannot be persisted, e.g. modules.
 
-The .IN_USE file could store a pid. If that process is not running,
-then it is a sign that the workspace is not actually in use and can be
-deleted.
+Harmless to run obsolete definitions from startup.py, as long as that
+precedes loading the environment. The environment will have the most
+current version, and probably overwrite much of what is done in
+startup without resulting in any change. E.g. the COLOR_SCHEMA
+probably doesn't change.
 
-Locking is broken in Linux! http://0pointer.de/blog/projects/locking.html
+Alternatively: The workspace DOES NOT have a startup script, just an
+environment. But getting imported modules and functions right looks
+difficult and delicate.
 
-- File F used to store "lock", which is a PID
+Could do the imports in RUN_ON_STARTUP. The import op could then
+record what's been imported, and duplicate that in each
+instance. Maybe block reassignment of imported symbols.
 
-- Lock protocol:
+But having a startup script is convenient. I *can* replace a prompt
+interactively, but it's kind of a pain. It would be nice to have a
+startup script that does that. But then, you want the startup script
+overriding the environment! E.g. if I want a new prompt: the env
+already has one. I edit the startup script to get a new one. If env
+overwrites startup script, then I don't get the new prompt.
 
-  - read F, check empty
+So how about this:
 
-      - If not empty and pid stored does not exist, steal the lock
+- Startup loads environment
 
-      - If not empty and pid does exist, the file is locked
+- Then runs startup script
 
-  - append pid to F, flush
+This gets imports and a new prompt. But it also could "revert" and env
+change. 
 
-  - read F
-
-      - My pid: I have the lock
-      - my pid is not there: shouldn't happen
-      - my pid is there as well as someone else's:
-          - first pid gets the lock
-
-
-It's not that much of a race condition. We're talking about actual
-console sessions by the SAME USER. Not even script execution. Two
-different logins to the same username could still create a problem, I
-guess.
-
-......................................................................
-
-Be clearer about role of Env in API usage. Is it there or not?
-
-----------------------------------------------------------------------
-
-workspace op:
-
-list      -l --list
-create    -n --new
-open      -o --open
-close     -c --close
-delete    -d --delete
-rename    -r --rename
-copy      -2 --dup
-export    -e --export
-import    -i --import
+How about this: a symbol that comes in from the startup script cannot
+be changed interactively, (i.e., assigned), it has to be done by
+editing the startup script. (Changes already take effect immediately.)
 
 ----------------------------------------------------------------------
 
+Workspace creation
 
+I originally thought that you would use an anonymous marcel workspace,
+decide to create a workspace, and that the instance's history (just the
+commands in that instance) and environment would then be saved to
+initialize the workspace. But that is messy. Those commands, and that
+environment are part of the anonymous workspace, and could be persisted
+at any time.
 
-Open ws
+Creating a workspace on first reference to a new workspace name seems
+dangerous. E.g. "switch to workspace abc" could succeed, creating a
+workspace because that name is not in use. But what if it was a typo,
+and the user meant abd. In that case, we have stuff in abc that should
+have been in abd, and there doesn't seem to be a good way to rerun
+those commands against abd. The results might have been completely
+different.
 
-- Revisit and cleanup marcel startup
-
-
-Close ws
-
-- Saving default ws command history
-
-- Saving named wd command history
-
-
-Environment
-
-- Cleanup:
-
-  - Decide on use of Env from API. Is there one? Or are there just
-    python vars?
-
-  - Use Env for interactive usage only. Not for scripts, not for API.
-
-  - Separate uses: interactive, API, script.
-
-    - Some ops are only useful interactive: job control, edit, dir stack, help.
-
-- Track symbols from startup script
-
-- Prevent interactive update
-
-- Prevent interactive deletion
-
-- Handle symbol deleted from startup script (it should not appear on
-  reload of startup)
-
-- When a reservoir is created, the env must be saved first. Otherwise,
-  there could be a reservoir not referenced by the environment.
-
-- Env var for workspace name
-
-- Add workspace name to default prompt.
-
-
-Directory structure for workspaces
-
-- Modify Locations
-
-
-Workspace locking
-
-
-Workspace op
-
-  - list      -l --list
-  - create    -n --new
-  - open      -o --open
-  - close     -c --close
-  - delete    -d --delete
-  - rename    -r --rename
-  - copy      -2 --dup
-  - export    -e --export
-  - import    -i --import
-
-
-HistoryRecord
-
-- Add timestamp
+So workspace creation should be explicit, on startup or during an
+instance.
 
 ----------------------------------------------------------------------
 
-API startup:
+workspace 
 
-_MAIN = _main.Main(_os.getenv('MARCEL_CONFIG', default=None),
-                   same_process=True,
-                   old_namespace=None)
+- use NAME
 
-- It should be possible to get rid of MARCEL_CONFIG
+  - use workspace with given NAME.
 
-CLI startup:
+  - close existing workspace
 
-        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
-        ...
-                MAIN.run(print_prompt)
+- close
 
-Script startup:
+  - close current workspace
 
-        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
-        ...
-                    MAIN.run_script(script_file.read())
+  - If anonymous: save with a new name? discard?
 
-- Should that be same_process=True? Doesn't actually matter,
-  run_script assumes same process.
+- list
+
+  - list all workspaces
+    - name
+    - create timestamp
+    - last saved timestamp
+    - size on disk
+
+- properties:
+
+  - name
+  - startup file
+  - create timestamp
+  - last save timestamp
+  - max size on disk
+  - max size on disk for a single command output
+
+----------------------------------------------------------------------
+
+On disk:
+
+Each workspace has its own startup?
+
+.config/marcel/
+    startup.py  # For anon workspaces, and template for named workspaces
+    WORKSPACE_NAME/
+        startup.py
+
+.config/marcel/
+    WORKSPACE_NAME/
+        workspace.p  # Workspace properties (pickled) Or maybe JSON?
+        env.p: Pickled environment
+        history
+
+Should workspace.p omit workspace name? If it's included, then that
+creates an opportunity for a discrepancy, in case of a manual rename
+of the WORKSPACE_NAME directory. And a workspace rename command gets more
+complicated.
+
+----------------------------------------------------------------------
+
+Possible rules on workspace usage:
+
+- A workspace can be used by at most one marcel instance at a time.
+
+- Starting an anonymous workspace (no workspace selected) creates a new
+  one. Resuming a workspace blocks anyone else from resuming the same
+  workspace, (attempt results in error message and exit).
+
+- Exiting anonymous workspace:
+
+  - Present option to name it (don't allow duplicate names).
+
+  - If declined, then save anyway with some identifying information?
+    Or just delete it? Could save it with some descriptive information
+    (e.g. start/end timestamps) to allow it to be located later.
+
+- Exiting named workspace: No user input required.
+
+- Allow for workspace rename
 
 
-Main.__init__:
 
-- Set main_pid
-
-- (*1) Set same_process
-
-- Env.new: Allows for setup from old_namespace. This is for reload of
-  startup script.
-
-- (*2) set tab_completer
-
-- (*2) initialize_reader()
-
-- (*2) Start job control thread (needed for interactive only)
-
-- (*2) Set config time (for knowing when config file changes)
-
-- atexit.register()
-
-*1: same_process should be false for interactive, true otherwise.
-
-*2: Needed for interactive only
+How is a named workspace deleted? Need workspace commands. Can only delete
+one workspace while it is not in use, and from some other workspace.
 
 
-Env.new:
+
+Workspace management:
+
+- List workspaces: name, size
+
+- Delete workspace
+
+- Duplicate workspace, giving duplicate a new name
+
+- Start marcel with a named workspace. Problem: If you can't remember
+  the name, you would need to start marcel to find out the name.
+
+- Switch workspaces? That solves the forgotten name problem: Start anon,
+  select a workspace. Switching to it ends the anon workspace. But then do
+  we need all the end-of-anon workspace stuff?
+
+- Prune workspace, deleting some subset of saved results. By time? By
+  size? User-selected? Or have the user identify what to keep?
+
+- Workspace state:
+
+  - In /var/lib/marcel, owned by root? Maybe, but it's per-user
+    state. Could also go to .local/share/marcel. But it's potentially
+    a lot of space. Allow for user control.
+
+  - Need to enforce a max, in case of commands that never end, e.g. "timer 1 | ..."
+
+
+----------------------------------------------------------------------
+
+Wait a minute. Why is automatically storing every command output a
+good idea? It's already easy enough to store wanted results in a
+variable, and then, with workspaces, persist those variables.
+
+With everything stored, there's a lot to wade through, and cleaning
+up, being selective about what's kept is labor intensive. Too easy to
+accidentally delete something, too easy to be cautious and keep
+everything, and then it's difficult to find what you want. Also
+EVERYTHING is kept. Common shell usage is to refine commands until
+they work properly. Just save the final, correct version.
+
+Infinite output problem iss avoided. It should be pretty obvious that
+"timer 1 ... > var" is a bad idea.
+
+----------------------------------------------------------------------
+    
+Keep track of multiple histories
+
+
+What happens when there are concurrent workspaces. Does one exiting
+overwrite history from another?
+
+Merge them all into one history?
+
+If multiple histories are tracked, how to select one on startup?
+
+Bash:
+
+- history read at startup
+
+- Changes tracked and written on exit. (Or maybe the whole history
+  including changes from this console). But there isn't an
+  overwrite. So on exit, the history must be read again, and local
+  changes appended?
+
+Generalizing this: Keep track of workspaces:
+
+- A workspace has its own history.
+
+- Vars are scoped to the workspace, and restarting a workspace brings back
+  those vars and their values.
+
+- Disallow multiple concurrent uses of a workspace?
+
+- Support workspace distribution. E.g., tar czvf and write to
+  specified location; import the package to create a workspace
+  locally.
+
+- I guess workspaces need names, or some way to refer to
+  them. E.g. start marcel with workspace foobar. If no workspace
+  specified, then:
+
+  - vars not preserved?
+  - what happens to history on exit?
+
+- Workspace name should NOT BE STORED inside the workspace. Otherwise
+  distribution gets messy. 
+
+- Stream-valued vars can be large (on disk). Provide a way to manage
+  them.
+
+From https://github.com/geophile/marcel/issues/6:
+
+    - Ability to hibernate (save context, close, and open it back again)
+
+Exactly, that's a workspace.
+    
+    - Ability to store multiple result buffers (aka output of previous commands).
+
+    - Ability to access the stored buffers and run processing functions on
+      them (e.g. I take a snapshot of counters and after a while another
+      snapshot - can I see the diff?)
+
+Idea: Store results of previous commands automatically, (results would
+be BEFORE an implicit write). Be able to recall these, based on this
+history mechanism.
+
+

@@ -69,57 +69,142 @@ from marcel.op.write import write as _write, Write as _Write
 from marcel.builtin import *
 from marcel.reduction import *
 
-_MAIN = _main.Main(_os.getenv('MARCEL_CONFIG', default=None),
-                   same_process=True,
-                   old_namespace=None)
+_MAIN = _main.MainInteractive(_os.getenv('MARCEL_CONFIG', default=None),
+                              old_namespace=None)
 # No colors for API
 _MAIN.env.set_color_scheme(None)
 _reservoir_counter = 0
 
 
 def args(*args, **kwargs): return _generate_op(_args, *args, **kwargs)
+
+
 def assign(*args, **kwargs): return _generate_op(_assign, *args, **kwargs)
+
+
 def bash(*args, **kwargs): return _generate_op(_bash, *args, **kwargs)
+
+
 def cd(*args, **kwargs): return _generate_op(_cd, *args, **kwargs)
+
+
 def difference(*args, **kwargs): return _generate_op(_difference, *args, **kwargs)
+
+
 def dirs(*args, **kwargs): return _generate_op(_dirs, *args, **kwargs)
+
+
 def download(*args, **kwargs): return _generate_op(_download, *args, **kwargs)
+
+
 def env(*args, **kwargs): return _generate_op(_env, *args, **kwargs)
+
+
 def expand(*args, **kwargs): return _generate_op(_expand, *args, **kwargs)
+
+
 def filt(*args, **kwargs): return _generate_op(_filt, *args, **kwargs)
+
+
 def fork(*args, **kwargs): return _generate_op(_fork, *args, **kwargs)
+
+
 def gen(*args, **kwargs): return _generate_op(_gen, *args, **kwargs)
+
+
 def head(*args, **kwargs): return _generate_op(_head, *args, **kwargs)
+
+
 def ifelse(*args, **kwargs): return _generate_op(_ifelse, *args, **kwargs)
+
+
 def ifthen(*args, **kwargs): return _generate_op(_ifthen, *args, **kwargs)
+
+
 def intersect(*args, **kwargs): return _generate_op(_intersect, *args, **kwargs)
+
+
 def join(*args, **kwargs): return _generate_op(_join, *args, **kwargs)
+
+
 def load(*args, **kwargs): return _generate_op(_load, *args, **kwargs)
+
+
 def loop(*args, **kwargs): return _generate_op(_loop, *args, **kwargs)
+
+
 def ls(*args, **kwargs): return _generate_op(_ls, *args, **kwargs)
+
+
 def map(*args, **kwargs): return _generate_op(_map, *args, **kwargs)
+
+
 def write(*args, **kwargs): return _generate_op(_write, *args, **kwargs)
+
+
 def popd(*args, **kwargs): return _generate_op(_popd, *args, **kwargs)
+
+
 def ps(*args, **kwargs): return _generate_op(_ps, *args, **kwargs)
+
+
 def pushd(*args, **kwargs): return _generate_op(_pushd, *args, **kwargs)
+
+
 def pwd(*args, **kwargs): return _generate_op(_pwd, *args, **kwargs)
+
+
 def read(*args, **kwargs): return _generate_op(_read, *args, **kwargs)
+
+
 def red(*args, **kwargs): return _generate_op(_red, *args, **kwargs)
+
+
 def remote(*args, **kwargs): return _generate_op(_remote, *args, **kwargs)
+
+
 def reverse(*args, **kwargs): return _generate_op(_reverse, *args, **kwargs)
+
+
 def select(*args, **kwargs): return _generate_op(_select, *args, **kwargs)
+
+
 def sort(*args, **kwargs): return _generate_op(_sort, *args, **kwargs)
+
+
 def sql(*args, **kwargs): return _generate_op(_sql, *args, **kwargs)
+
+
 def store(*args, **kwargs): return _generate_op(_store, *args, **kwargs)
+
+
 def squish(*args, **kwargs): return _generate_op(_squish, *args, **kwargs)
+
+
 def sudo(*args, **kwargs): return _generate_op(_sudo, *args, **kwargs)
+
+
 def tail(*args, **kwargs): return _generate_op(_tail, *args, **kwargs)
+
+
 def tee(*args, **kwargs): return _generate_op(_tee, *args, **kwargs)
+
+
 def timer(*args, **kwargs): return _generate_op(_timer, *args, **kwargs)
+
+
 def unique(*args, **kwargs): return _generate_op(_unique, *args, **kwargs)
+
+
 def union(*args, **kwargs): return _generate_op(_union, *args, **kwargs)
+
+
 def upload(*args, **kwargs): return _generate_op(_upload, *args, **kwargs)
+
+
 def version(*args, **kwargs): return _generate_op(_version, *args, **kwargs)
+
+
 def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 
 

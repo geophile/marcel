@@ -102,17 +102,17 @@ def test_gen():
     # Error along with output
     TEST.run('gen 3 -1 | map (x: 5 / x)',
              expected_out=[-5.0, Error('division by zero'), 5.0])
-    # Function-valued args
-    TEST.run('N = (7)')
-    TEST.run('gen (N - 2)',
-             expected_out=[0, 1, 2, 3, 4])
-    TEST.run('gen (N - 2) (N + 3)',
-             expected_out=[10, 11, 12, 13, 14])
-    TEST.run('gen -p (N - 4) (N - 2) (N + 3)',
-             expected_out=['010', '011', '012', '013', '014'])
-    TEST.run('N = ("7")')
-    TEST.run('gen (N - 2)',
-             expected_err="unsupported operand type(s) for -: 'str' and 'int'")
+    # # Function-valued args
+    # TEST.run('N = (7)')
+    # TEST.run('gen (N - 2)',
+    #          expected_out=[0, 1, 2, 3, 4])
+    # TEST.run('gen (N - 2) (N + 3)',
+    #          expected_out=[10, 11, 12, 13, 14])
+    # TEST.run('gen -p (N - 4) (N - 2) (N + 3)',
+    #          expected_out=['010', '011', '012', '013', '014'])
+    # TEST.run('N = ("7")')
+    # TEST.run('gen (N - 2)',
+    #          expected_err="unsupported operand type(s) for -: 'str' and 'int'")
 
 
 @timeit

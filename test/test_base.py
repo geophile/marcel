@@ -43,7 +43,7 @@ class TestBase:
 
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
         if self.main is None or new_main:
-            self.main = marcel.main.Main(config_file, same_process=True, old_namespace=None)
+            self.main = marcel.main.MainInteractive(config_file, old_namespace=None)
         self.env = self.main.env
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')
@@ -304,7 +304,7 @@ class TestTabCompletion(TestBase):
         super().__init__(config_file)
 
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
-        self.main = marcel.main.Main(config_file, same_process=True, old_namespace=None)
+        self.main = marcel.main.MainInteractive(config_file, old_namespace=None)
 
     def run(self, line, text=None, expected=None):
         if text is None:

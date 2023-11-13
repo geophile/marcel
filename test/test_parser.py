@@ -16,7 +16,7 @@
 import marcel.main
 import marcel.parser
 
-MAIN = marcel.main.Main(None, same_process=True, old_namespace=None)
+MAIN = marcel.main.MainInteractive(None, old_namespace=None)
 
 
 def test(text):

@@ -28,10 +28,6 @@ from marcel.util import username, groupname, quote_files
 from marcel.jsonutil import JSONUtil as _JSONUtil
 _JSON_UTIL = _JSONUtil()
 
-_COMMANDS = '''
-#    read = [map (f: f.readlines()) | expand]
-'''
-
 
 def minutes(n):
     return 60 * n

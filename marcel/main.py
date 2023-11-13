@@ -74,23 +74,72 @@ class SameProcessMode:
 
     def __init__(self, main, same_process):
         self.main = main
-        self.original_same_process = main.same_process
+        self.original_same_process = True  # main.same_process
         self.new_same_process = same_process
 
     def __enter__(self):
-        self.main.same_process = self.new_same_process
+        # self.main.same_process = self.new_same_process
+        pass
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.main.same_process = self.original_same_process
+        # self.main.same_process = self.original_same_process
+        pass
 
 
-class Main:
+class Main(object):
 
-    def __init__(self, config_file, same_process, old_namespace):
-        # sys.argv sets config_path, dill
+    def __init__(self, config_file, old_namespace):
         self.main_pid = os.getpid()
-        #
-        self.same_process = same_process
+        self.config_time = time.time()
+        try:
+            self.env = marcel.env.Environment.new(config_file, old_namespace)
+        except marcel.exception.KillCommandException as e:
+            print(f'Cannot start marcel: {e}', file=sys.stderr)
+            sys.exit(1)
+        except marcel.exception.KillShellException as e:
+            print(f'Cannot start marcel: {e}', file=sys.stderr)
+            sys.exit(1)
+        self.config_time = time.time()
+        self.run_startup()
+        atexit.register(self.shutdown)
+
+    def run_startup(self):
+        run_on_startup = self.env.getvar('RUN_ON_STARTUP')
+        if run_on_startup:
+            if type(run_on_startup) is str:
+                self.run_script(run_on_startup)
+            else:
+                fail(f'RUN_ON_STARTUP must be a string')
+
+    def run_script(self, script):
+        with SameProcessMode(self, True):
+            command = ''
+            for line in script.split('\n'):
+                if len(line.strip()) > 0:
+                    if line.endswith('\\'):
+                        command += line[:-1]
+                    else:
+                        command += line
+                        self.run_command(command)
+                        command = ''
+            if len(command) > 0:
+                self.run_command(command)
+
+    def run_command(self, command):
+        assert False
+
+    def shutdown(self):
+        assert False
+
+    def run_immediate(self, pipeline):
+        return True
+
+
+class MainInteractive(Main):
+
+    def __init__(self, config_file, old_namespace):
+        super().__init__(config_file, old_namespace)
+        self.main_pid = os.getpid()
         try:
             self.env = marcel.env.Environment.new(config_file, old_namespace)
         except marcel.exception.KillCommandException as e:
@@ -107,7 +156,6 @@ class Main:
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
         self.config_time = time.time()
         self.run_startup()
-        self.run_script(marcel.builtin._COMMANDS)
         atexit.register(self.shutdown)
 
     def __getstate__(self):
@@ -138,7 +186,7 @@ class Main:
             try:
                 parser = marcel.parser.Parser(line, self)
                 pipeline = parser.parse()
-                pipeline.set_error_handler(Main.default_error_handler)
+                pipeline.set_error_handler(MainInteractive.default_error_handler)
                 # self.run_immediate(pipeline) depends on whether the pipeline has a single op.
                 # So check this before tacking on the out op.
                 run_immediate = self.run_immediate(pipeline)
@@ -197,28 +245,6 @@ class Main:
             pass
         self.env.namespace.update(child_namespace_changes)
 
-    def run_startup(self):
-        run_on_startup = self.env.getvar('RUN_ON_STARTUP')
-        if run_on_startup:
-            if type(run_on_startup) is str:
-                self.run_script(run_on_startup)
-            else:
-                fail(f'RUN_ON_STARTUP must be a string')
-
-    def run_script(self, script):
-        with SameProcessMode(self, True):
-            command = ''
-            for line in script.split('\n'):
-                if len(line.strip()) > 0:
-                    if line.endswith('\\'):
-                        command += line[:-1]
-                    else:
-                        command += line
-                        self.run_command(command)
-                        command = ''
-            if len(command) > 0:
-                self.run_command(command)
-
     def check_for_config_update(self):
         config_path = self.env.config_path
         config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
@@ -230,13 +256,13 @@ class Main:
         print(error.render_full(env.color_scheme()), flush=True)
 
     def run_immediate(self, pipeline):
-        return (
-                # For the execution of tests and scripts
-                self.same_process or
-                pipeline.first_op().run_in_main_process() or
-                # This takes care of # side effects we want to keep,
-                # e.g. (INTERACTIVE_EXECUTABLES.append(...))
-                pipeline.first_op().op_name() == 'map')
+        return True
+        # return (  # For the execution of tests and scripts
+        #         self.same_process or
+        #         pipeline.first_op().run_in_main_process() or
+        #         # This takes care of # side effects we want to keep,
+        #         # e.g. (INTERACTIVE_EXECUTABLES.append(...))
+        #         pipeline.first_op().op_name() == 'map')
 
 
 def fail(message):
@@ -255,9 +281,11 @@ def usage():
 
 
 # --mpstart: fork/spawn/forkserver. Use fork if not specified
+# --config: startup script
 def args():
-    flags = ('--mpstart',)
+    flags = ('--mpstart', '--config')
     mpstart = 'fork'
+    config = None
     script = None
     flag = None
     for arg in sys.argv[1:]:
@@ -276,34 +304,36 @@ def args():
                         mpstart = arg
                     else:
                         usage()
+                elif flag == '--config':
+                    config = arg
                 flag = None
-    return mpstart, script
+    return mpstart, config, script
 
 
 def main():
-    mpstart, script = args()
+    mpstart, config, script = args()
     old_namespace = None
     input = None
     if mpstart is not None:
         multiprocessing.set_start_method(mpstart)
     while True:
-        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
-        MAIN.input = input
+        main = MainInteractive(None, old_namespace=old_namespace)
+        main.input = input
         print_prompt = sys.stdin.isatty()
         if script is None:
             # Interactive
             try:
-                MAIN.run(print_prompt)
+                main.run(print_prompt)
                 break
             except ReloadConfigException:
-                input = MAIN.input
-                old_namespace = MAIN.shutdown(restart=True)
+                input = main.input
+                old_namespace = main.shutdown(restart=True)
                 pass
         else:
             # Script
             try:
                 with open(script, 'r') as script_file:
-                    MAIN.run_script(script_file.read())
+                    main.run_script(script_file.read())
             except FileNotFoundError:
                 fail(f'File not found: {script}')
             break
