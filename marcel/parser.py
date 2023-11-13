@@ -933,7 +933,7 @@ class Parser(object):
     def __init__(self, text, main):
         self.text = text
         self.env = main.env
-        self.op_modules = main.op_modules
+        self.op_modules = main.env.op_modules
         self.tokens = Tokens(self, text)
         self.token = None  # The current token
         self.shell_op = False

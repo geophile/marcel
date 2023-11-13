@@ -448,6 +448,10 @@ Environment
 
   - Use Env for interactive usage only. Not for scripts, not for API.
 
+  - Separate uses: interactive, API, script.
+
+    - Some ops are only useful interactive: job control, edit, dir stack, help.
+
 - Track symbols from startup script
 
 - Prevent interactive update
@@ -489,3 +493,55 @@ Workspace op
 HistoryRecord
 
 - Add timestamp
+
+----------------------------------------------------------------------
+
+API startup:
+
+_MAIN = _main.Main(_os.getenv('MARCEL_CONFIG', default=None),
+                   same_process=True,
+                   old_namespace=None)
+
+- It should be possible to get rid of MARCEL_CONFIG
+
+CLI startup:
+
+        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
+        ...
+                MAIN.run(print_prompt)
+
+Script startup:
+
+        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
+        ...
+                    MAIN.run_script(script_file.read())
+
+- Should that be same_process=True? Doesn't actually matter,
+  run_script assumes same process.
+
+
+Main.__init__:
+
+- Set main_pid
+
+- (*1) Set same_process
+
+- Env.new: Allows for setup from old_namespace. This is for reload of
+  startup script.
+
+- (*2) set tab_completer
+
+- (*2) initialize_reader()
+
+- (*2) Start job control thread (needed for interactive only)
+
+- (*2) Set config time (for knowing when config file changes)
+
+- atexit.register()
+
+*1: same_process should be false for interactive, true otherwise.
+
+*2: Needed for interactive only
+
+
+Env.new:

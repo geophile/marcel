@@ -127,7 +127,7 @@ def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 
 def _generate_op(f, *args, **kwargs):
     op, arglist = f(*args, **kwargs)
-    _MAIN.op_modules[op.op_name()].args_parser().parse(arglist, op)
+    _MAIN.env.op_modules[op.op_name()].args_parser().parse(arglist, op)
     op.env = _MAIN.env
     return op
 

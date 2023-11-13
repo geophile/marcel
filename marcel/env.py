@@ -216,6 +216,7 @@ class Environment:
         env.op_modules = None
         env.reader = None
         env.modified_vars = set()
+        env.op_modules = marcel.opmodule.import_op_modules(env)  # op name -> OpModule
         return env
 
     def __init__(self):

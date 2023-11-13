@@ -88,7 +88,6 @@ class Main:
 
     def __init__(self, config_file, same_process, old_namespace):
         # sys.argv sets config_path, dill
-        self.dill = True
         self.main_pid = os.getpid()
         #
         self.same_process = same_process
@@ -101,8 +100,6 @@ class Main:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
-        self.op_modules = marcel.opmodule.import_op_modules(self.env)  # op name -> OpModule
-        self.env.op_modules = self.op_modules
         self.reader = None
         self.initialize_reader()  # Sets self.reader
         self.input = None
