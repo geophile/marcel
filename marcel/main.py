@@ -133,49 +133,11 @@ class Main(object):
         return True
 
 
-class MainAPI(Main):
-
-    def run_command(self, line):
-        assert line is not None
-        try:
-            parser = marcel.parser.Parser(line, self)
-            pipeline = parser.parse()
-            pipeline.set_error_handler(MainAPI.default_error_handler)
-            # Append an out op at the end of pipeline, if there is no output op there already.
-            if not pipeline.last_op().op_name() == 'write':
-                pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
-            command = marcel.core.Command(line, pipeline)
-            command.execute(self.env)
-        except marcel.parser.EmptyCommand:
-            pass
-        except marcel.exception.KillCommandException as e:
-            marcel.util.print_to_stderr(e, self.env)
-        except marcel.exception.KillAndResumeException:
-            # Error handler printed the error
-            pass
-
-    def shutdown(self, restart=False):
-        namespace = self.env.namespace
-        if not restart:
-            marcel.reservoir.shutdown(self.main_pid)
-        return namespace
-
-    def run_pipeline(self, pipeline):
-        command = marcel.core.Command(None, pipeline)
-        try:
-            command.execute(self.env)
-        except marcel.exception.KillCommandException as e:
-            marcel.util.print_to_stderr(e, self.env)
-
-    @staticmethod
-    def default_error_handler(env, error):
-        print(error.render_full(None), flush=True)
-
-
 class MainInteractive(Main):
 
-    def __init__(self, config_file, old_namespace):
+    def __init__(self, config_file, old_namespace, testing=False):
         super().__init__(config_file, old_namespace)
+        self.testing = testing
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
         self.reader = None
         self.initialize_reader()  # Sets self.reader
@@ -208,14 +170,10 @@ class MainInteractive(Main):
                 parser = marcel.parser.Parser(line, self)
                 pipeline = parser.parse()
                 pipeline.set_error_handler(MainInteractive.default_error_handler)
-                # self.run_immediate(pipeline) depends on whether the pipeline has a single op.
-                # So check this before tacking on the out op.
-                run_immediate = self.run_immediate(pipeline)
-                # Append an out op at the end of pipeline, if there is no output op there already.
                 if not pipeline.last_op().op_name() == 'write':
                     pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
                 command = marcel.core.Command(line, pipeline)
-                if run_immediate:
+                if self.run_immediate(pipeline):
                     command.execute(self.env)
                 else:
                     self.job_control.create_job(command)
@@ -266,7 +224,7 @@ class MainInteractive(Main):
             raise ReloadConfigException()
 
     def run_immediate(self, pipeline):
-        return pipeline.first_op().run_in_main_process()
+        return self.testing or pipeline.first_op().run_in_main_process()
 
     @staticmethod
     def default_error_handler(env, error):
@@ -322,6 +280,45 @@ class MainScript(Main):
         config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
         if config_mtime > self.config_time:
             raise ReloadConfigException()
+
+    @staticmethod
+    def default_error_handler(env, error):
+        print(error.render_full(None), flush=True)
+
+
+class MainAPI(Main):
+
+    def run_command(self, line):
+        assert line is not None
+        try:
+            parser = marcel.parser.Parser(line, self)
+            pipeline = parser.parse()
+            pipeline.set_error_handler(MainAPI.default_error_handler)
+            # Append an out op at the end of pipeline, if there is no output op there already.
+            if not pipeline.last_op().op_name() == 'write':
+                pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
+            command = marcel.core.Command(line, pipeline)
+            command.execute(self.env)
+        except marcel.parser.EmptyCommand:
+            pass
+        except marcel.exception.KillCommandException as e:
+            marcel.util.print_to_stderr(e, self.env)
+        except marcel.exception.KillAndResumeException:
+            # Error handler printed the error
+            pass
+
+    def shutdown(self, restart=False):
+        namespace = self.env.namespace
+        if not restart:
+            marcel.reservoir.shutdown(self.main_pid)
+        return namespace
+
+    def run_pipeline(self, pipeline):
+        command = marcel.core.Command(None, pipeline)
+        try:
+            command.execute(self.env)
+        except marcel.exception.KillCommandException as e:
+            marcel.util.print_to_stderr(e, self.env)
 
     @staticmethod
     def default_error_handler(env, error):
