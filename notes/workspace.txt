@@ -416,7 +416,7 @@ there could be a reservoir not referenced by the environment.
 
 ......................................................................
 
-Dill usage is hardwired. Get rid of the flag.
+Be clearer about role of Env in API usage. Is it there or not?
 
 ----------------------------------------------------------------------
 

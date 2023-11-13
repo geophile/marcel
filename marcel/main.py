@@ -247,6 +247,16 @@ def fail(message):
     exit(1)
 
 
+def usage():
+    usage = '''marcel [--mpstart fork|spawn|forksever] [SCRIPT]
+    
+    Run marcel, interactively if a SCRIPT is not specified. Otherwise, run the SCRIPT.
+    It should not be necessary to specify --mpstart. fork is the default.
+'''
+    print(usage, file=sys.stderr)
+    sys.exit(1)
+
+
 # --mpstart: fork/spawn/forkserver. Use fork if not specified
 def args():
     flags = ('--mpstart',)
@@ -257,7 +267,7 @@ def args():
         if arg in flags:
             flag = arg
         elif arg.startswith('-'):
-            fail(f'Unrecognized flag {arg}')
+            usage()
         else:
             if flag is None:
                 # arg must be a script name
@@ -268,7 +278,7 @@ def args():
                     if arg in ('fork', 'spawn', 'forkserver'):
                         mpstart = arg
                     else:
-                        fail(f'Set --mpstart to fork (default), forkserver, or spawn')
+                        usage()
                 flag = None
     return mpstart, script
 
