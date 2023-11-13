@@ -128,41 +128,62 @@ class Main(object):
     def run_command(self, command):
         assert False
 
-    def shutdown(self):
+    def shutdown(self, restart=False):
         assert False
 
     def run_immediate(self, pipeline):
         return True
 
 
+class MainAPI(Main):
+
+    def run_command(self, line):
+        assert line is not None
+        try:
+            parser = marcel.parser.Parser(line, self)
+            pipeline = parser.parse()
+            pipeline.set_error_handler(MainAPI.default_error_handler)
+            # Append an out op at the end of pipeline, if there is no output op there already.
+            if not pipeline.last_op().op_name() == 'write':
+                pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
+            command = marcel.core.Command(line, pipeline)
+            command.execute(self.env)
+        except marcel.parser.EmptyCommand:
+            pass
+        except marcel.exception.KillCommandException as e:
+            marcel.util.print_to_stderr(e, self.env)
+        except marcel.exception.KillAndResumeException:
+            # Error handler printed the error
+            pass
+
+    def shutdown(self, restart=False):
+        namespace = self.env.namespace
+        if not restart:
+            marcel.reservoir.shutdown(self.main_pid)
+        return namespace
+
+    def run_pipeline(self, pipeline):
+        command = marcel.core.Command(None, pipeline)
+        try:
+            command.execute(self.env)
+        except marcel.exception.KillCommandException as e:
+            marcel.util.print_to_stderr(e, self.env)
+
+    @staticmethod
+    def default_error_handler(env, error):
+        print(error.render_full(None), flush=True)
+
+
 class MainInteractive(Main):
 
     def __init__(self, config_file, old_namespace):
         super().__init__(config_file, old_namespace)
-        self.main_pid = os.getpid()
-        try:
-            self.env = marcel.env.Environment.new(config_file, old_namespace)
-        except marcel.exception.KillCommandException as e:
-            print(f'Cannot start marcel: {e}', file=sys.stderr)
-            sys.exit(1)
-        except marcel.exception.KillShellException as e:
-            print(f'Cannot start marcel: {e}', file=sys.stderr)
-            sys.exit(1)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
         self.reader = None
         self.initialize_reader()  # Sets self.reader
         self.input = None
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
-        self.config_time = time.time()
-        self.run_startup()
-        atexit.register(self.shutdown)
-
-    def __getstate__(self):
-        assert False
-
-    def __setstate__(self, state):
-        assert False
 
     def run(self, print_prompt):
         try:
@@ -206,13 +227,6 @@ class MainInteractive(Main):
                 # Error handler printed the error
                 pass
 
-    def run_api(self, pipeline):
-        command = marcel.core.Command(None, pipeline)
-        try:
-            command.execute(self.env)
-        except marcel.exception.KillCommandException as e:
-            marcel.util.print_to_stderr(e, self.env)
-
     def initialize_reader(self):
         readline.set_history_length(HISTORY_LENGTH)
         readline.parse_and_bind('tab: complete')
@@ -251,10 +265,6 @@ class MainInteractive(Main):
         if config_mtime > self.config_time:
             raise ReloadConfigException()
 
-    @staticmethod
-    def default_error_handler(env, error):
-        print(error.render_full(env.color_scheme()), flush=True)
-
     def run_immediate(self, pipeline):
         return True
         # return (  # For the execution of tests and scripts
@@ -263,6 +273,10 @@ class MainInteractive(Main):
         #         # This takes care of # side effects we want to keep,
         #         # e.g. (INTERACTIVE_EXECUTABLES.append(...))
         #         pipeline.first_op().op_name() == 'map')
+
+    @staticmethod
+    def default_error_handler(env, error):
+        print(error.render_full(env.color_scheme()), flush=True)
 
 
 def fail(message):

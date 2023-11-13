@@ -25,6 +25,10 @@ import marcel.util
 Error = marcel.object.error.Error
 
 
+def _noop_error_handler(env, error):
+    pass
+
+
 def kill_command_on_file_open_error(path, mode, error):
     raise marcel.exception.KillCommandException(f'Unable to open {path} with mode {mode}: {str(error)}')
 
@@ -469,7 +473,7 @@ class PipelineIterator:
 
     def __init__(self, env, pipeline):
         # Errors go to output, so no other error handling is needed
-        pipeline.set_error_handler(PipelineIterator.noop_error_handler)
+        pipeline.set_error_handler(_noop_error_handler)
         output = []
         gather_op = env.op_modules['gather'].api_function()(output)
         pipeline.append(gather_op)
@@ -483,10 +487,6 @@ class PipelineIterator:
 
     def __next__(self):
         return next(self.iterator)
-
-    @staticmethod
-    def noop_error_handler(env, error):
-        pass
 
 
 # For the CLI, pipeline syntax is parsed and a Pipeline is created. For the API, a pipeline is a function whose

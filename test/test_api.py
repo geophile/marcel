@@ -8,6 +8,7 @@ import marcel.object.error
 import marcel.object.cluster
 import marcel.version
 from marcel.api import *
+from marcel.api import _MAIN
 
 import test_base
 
@@ -16,7 +17,7 @@ TestDir = test_base.TestDir
 
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
-TEST = test_base.TestAPI(main=marcel.api._MAIN)
+TEST = test_base.TestAPI(main=_MAIN)
 
 SQL = True
 

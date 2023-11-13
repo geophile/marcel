@@ -152,6 +152,8 @@ Main & Environment
 - old_namespace is only needed for default namespace. Otherwise, can
   be read from disk. Any way to get rid of old_namespace?
 
+- Real arg processing for marcel execution.
+
 
 Directory structure for workspaces
 

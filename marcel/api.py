@@ -69,8 +69,7 @@ from marcel.op.write import write as _write, Write as _Write
 from marcel.builtin import *
 from marcel.reduction import *
 
-_MAIN = _main.MainInteractive(_os.getenv('MARCEL_CONFIG', default=None),
-                              old_namespace=None)
+_MAIN = _main.MainAPI(_os.getenv('MARCEL_CONFIG', default=None), old_namespace=None)
 # No colors for API
 _MAIN.env.set_color_scheme(None)
 _reservoir_counter = 0
@@ -234,7 +233,7 @@ def run(x):
     if not isinstance(pipeline.last_op(), _Write):
         pipeline.append(write())
     pipeline.set_error_handler(_MAIN.default_error_handler)
-    _MAIN.run_api(pipeline)
+    _MAIN.run_pipeline(pipeline)
 
 
 def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
@@ -247,7 +246,7 @@ def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
                           error_handler=error_handler)
     pipeline.append(terminal_op)
     pipeline.set_error_handler(_noop_error_handler)
-    _MAIN.run_api(pipeline)
+    _MAIN.run_pipeline(pipeline)
     return output
 
 
@@ -262,7 +261,7 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     pipeline.append(terminal_op)
     pipeline.set_error_handler(_noop_error_handler)
     try:
-        _MAIN.run_api(pipeline)
+        _MAIN.run_pipeline(pipeline)
     except _exception.StopAfterFirst:
         pass
     first = None if len(output) == 0 else output[0]
