@@ -43,7 +43,7 @@ class TestBase:
 
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
         if self.main is None or new_main:
-            self.main = marcel.main.MainInteractive(config_file, old_namespace=None)
+            self.main = marcel.main.MainScript(config_file, old_namespace=None)
         self.env = self.main.env
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')

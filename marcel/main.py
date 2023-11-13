@@ -99,8 +99,6 @@ class Main(object):
         except marcel.exception.KillShellException as e:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)
-        self.config_time = time.time()
-        self.run_startup()
         atexit.register(self.shutdown)
 
     def run_startup(self):
@@ -184,6 +182,8 @@ class MainInteractive(Main):
         self.input = None
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
+        self.config_time = time.time()
+        self.run_startup()
 
     def run(self, print_prompt):
         try:
@@ -271,6 +271,61 @@ class MainInteractive(Main):
     @staticmethod
     def default_error_handler(env, error):
         print(error.render_full(env.color_scheme()), flush=True)
+
+
+class MainScript(Main):
+
+    def __init__(self, config_file, old_namespace):
+        super().__init__(config_file, old_namespace)
+        self.reader = None
+        self.input = None
+        self.config_time = time.time()
+        self.run_startup()
+
+    def run_command(self, line):
+        if line:
+            try:
+                parser = marcel.parser.Parser(line, self)
+                pipeline = parser.parse()
+                pipeline.set_error_handler(MainScript.default_error_handler)
+                # Append an out op at the end of pipeline, if there is no output op there already.
+                if not pipeline.last_op().op_name() == 'write':
+                    pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
+                command = marcel.core.Command(line, pipeline)
+                command.execute(self.env)
+            except marcel.parser.EmptyCommand:
+                pass
+            except marcel.exception.KillCommandException as e:
+                marcel.util.print_to_stderr(e, self.env)
+            except marcel.exception.KillAndResumeException:
+                # Error handler printed the error
+                pass
+
+    def shutdown(self, restart=False):
+        namespace = self.env.namespace
+        if not restart:
+            marcel.reservoir.shutdown(self.main_pid)
+        return namespace
+
+    def update_namespace(self, child_namespace_changes):
+        # pwd requires special handling
+        try:
+            pwd = child_namespace_changes['PWD']
+            self.env.dir_state().cd(pathlib.Path(pwd))
+        except KeyError:
+            # PWD wasn't changed
+            pass
+        self.env.namespace.update(child_namespace_changes)
+
+    def check_for_config_update(self):
+        config_path = self.env.config_path
+        config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
+        if config_mtime > self.config_time:
+            raise ReloadConfigException()
+
+    @staticmethod
+    def default_error_handler(env, error):
+        print(error.render_full(None), flush=True)
 
 
 def fail(message):
