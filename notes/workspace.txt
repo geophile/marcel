@@ -365,6 +365,10 @@ imported workspace will be unchanged. In case of a name collision, the
 import can be done with a new name, e.g. "workspace --import-rename
 EXPORT_MWS NEW_NAME".
 
+......................................................................
+
+Does script execution use a workspace? Probably not.
+
 ----------------------------------------------------------------------
 
 Workspaces implementation
@@ -377,6 +381,35 @@ Problem: there are ways for the process to end suddently, leaving the
 The .IN_USE file could store a pid. If that process is not running,
 then it is a sign that the workspace is not actually in use and can be
 deleted.
+
+Locking is broken in Linux! http://0pointer.de/blog/projects/locking.html
+
+- File F used to store "lock", which is a PID
+
+- Lock protocol:
+
+  - read F, check empty
+
+      - If not empty and pid stored does not exist, steal the lock
+
+      - If not empty and pid does exist, the file is locked
+
+  - append pid to F, flush
+
+  - read F
+
+      - My pid: I have the lock
+      - my pid is not there: shouldn't happen
+      - my pid is there as well as someone else's:
+          - first pid gets the lock
+
+
+It's not that much of a race condition. We're talking about actual
+console sessions by the SAME USER. Not even script execution. Two
+different logins to the same username could still create a problem, I
+guess.
+
+......................................................................
 
 
 When a reservoir is created, the env must be saved first. Otherwise,
