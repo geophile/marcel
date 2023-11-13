@@ -65,3 +65,6 @@ class Map(marcel.core.Op):
     
     def receive(self, env, x):
         self.send(env, self.call(env, self.function, *x))
+
+    def run_in_main_process(self):
+        return True

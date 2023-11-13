@@ -154,6 +154,15 @@ Main & Environment
 
 - Real arg processing for marcel execution.
 
+- Stuff in startup.py not needed by API:
+
+  - COLOR_SCHEME
+  - PROMPT, PROMPT_CONTINUATION
+  - INTERACTIVE_EXECUTABLES
+  - RUN_ON_STARTUP: Just put that code in your own python code.
+
+  Really not needed at all! 
+
 
 Directory structure for workspaces
 

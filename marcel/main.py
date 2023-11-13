@@ -266,10 +266,7 @@ class MainInteractive(Main):
             raise ReloadConfigException()
 
     def run_immediate(self, pipeline):
-        return (pipeline.first_op().run_in_main_process() or
-                # This takes care of # side effects we want to keep,
-                # e.g. (INTERACTIVE_EXECUTABLES.append(...))
-                pipeline.first_op().op_name() == 'map')
+        return pipeline.first_op().run_in_main_process()
 
     @staticmethod
     def default_error_handler(env, error):
