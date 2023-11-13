@@ -247,20 +247,15 @@ def fail(message):
     exit(1)
 
 
-# --dill: bool
 # --mpstart: fork/spawn/forkserver. Use fork if not specified
 def args():
-    flags = ('--dill', '--mpstart')
-    dill = True
+    flags = ('--mpstart',)
     mpstart = 'fork'
     script = None
     flag = None
     for arg in sys.argv[1:]:
         if arg in flags:
             flag = arg
-            # For a boolean flag, set to True. A different value may be specified by a later arg.
-            if flag == '--dill':
-                dill = True
         elif arg.startswith('-'):
             fail(f'Unrecognized flag {arg}')
         else:
@@ -269,19 +264,17 @@ def args():
                 script = arg
             else:
                 # arg is a flag value
-                if flag == '--dill':
-                    dill = arg.lower() in ('t', 'true')
-                elif flag == '--mpstart':
+                if flag == '--mpstart':
                     if arg in ('fork', 'spawn', 'forkserver'):
                         mpstart = arg
                     else:
                         fail(f'Set --mpstart to fork (default), forkserver, or spawn')
                 flag = None
-    return dill, mpstart, script
+    return mpstart, script
 
 
 def main():
-    dill, mpstart, script = args()
+    mpstart, script = args()
     old_namespace = None
     input = None
     if mpstart is not None:
@@ -289,7 +282,6 @@ def main():
     while True:
         MAIN = Main(None, same_process=False, old_namespace=old_namespace)
         MAIN.input = input
-        MAIN.dill = dill
         print_prompt = sys.stdin.isatty()
         if script is None:
             # Interactive

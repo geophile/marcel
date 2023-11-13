@@ -411,6 +411,23 @@ guess.
 
 ......................................................................
 
-
 When a reservoir is created, the env must be saved first. Otherwise,
 there could be a reservoir not referenced by the environment.
+
+......................................................................
+
+Dill usage is hardwired. Get rid of the flag.
+
+----------------------------------------------------------------------
+
+workspace op:
+
+list      -l --list
+create    -n --new
+open      -o --open
+close     -c --close
+delete    -d --delete
+rename    -r --rename
+copy      -2 --dup
+export    -e --export
+import    -i --import
