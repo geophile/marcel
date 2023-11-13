@@ -18,7 +18,7 @@ import marcel.util
 
 
 HELP = '''
-{L,wrap=F}ifthen PREDICATE [THEN_PIPELINE]
+{L,wrap=F}ifthen PREDICATE (| THEN_PIPELINE |)
 
 {L,indent=4:28}{r:PREDICATE}               Used to determine if an input tuple is passed
 to the {r:THEN_PIPELINE}

@@ -557,16 +557,25 @@ def test_window():
 
 @timeit
 def test_bash():
-    # Two space between hello and world not preserved.
-    TEST.run(lambda: run(bash('echo', 'hello', 'world')),
-             expected_out=['hello world'])
-    # Quoted, so they are preserved.
-    TEST.run(lambda: run(bash('echo', '"hello  world"')),
-             expected_out=['hello  world'])
-    # Function-valued args
-    HELLO = 'hello'
-    TEST.run(lambda: run(bash('echo', f"'{HELLO}  world'")),
-             expected_out=['hello  world'])
+    with TestDir() as testdir:
+        os.system(f'touch {testdir}/x1')
+        os.system(f'touch {testdir}/x2')
+        os.system(f'touch {testdir}/y1')
+        os.system(f'touch {testdir}/y2')
+        who = 'world'
+        # Test command string
+        TEST.run(lambda: run(cd(testdir)))
+        TEST.run(lambda: run(bash('ls x*')),
+                 expected_out=['x1', 'x2'])
+        TEST.run(lambda: run(bash('ls -l *1') | map(lambda x: x.split()[-1])),
+                 expected_out=['x1', 'y1'])
+        TEST.run(lambda: run(bash('echo "hello  world"')), # --- two spaces in string to be printed
+                 expected_out='hello  world')
+        # Test args
+        TEST.run(lambda: run(bash('echo', f'hello {who}')),
+                 expected_out='hello world')
+        TEST.run(lambda: run(bash('echo', 'hello', 'world')),
+                 expected_out=['hello world'])
 
 
 @timeit
@@ -1667,6 +1676,24 @@ def test_download():
 
 
 @timeit
+def test_filter():
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | filt(gen(3))),
+             expected_out=[0, 0, 1, 1, 2, 2])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | filt(gen(3), keep=True)),
+             expected_out=[0, 0, 1, 1, 2, 2])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | filt(gen(3), discard=True)),
+             expected_out=[3, 3, 4, 4, 5, 5])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | filt(gen(3), compare=lambda x, y: x)),
+             expected_out=[(0, 0), (1, 1), (2, 2)])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | filt(gen(3), keep=True, compare=lambda x, y: x)),
+             expected_out=[(0, 0), (1, 1), (2, 2)])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | filt(gen(3), discard=True, compare=lambda x, y: x)),
+             expected_out=[(3, 3), (4, 4), (5, 5)])
+    TEST.run(test=lambda: run(gen(6) | filt(gen(3), discard=True, keep=True)),
+             expected_err='Cannot specify more than one')
+
+
+@timeit
 def test_api_run():
     # Error-free output, just an op
     TEST.run(test=lambda: run(gen(3)),
@@ -1896,6 +1923,17 @@ def test_bug_229():
              expected_out=[0, 1, 2])
 
 
+@timeit
+def test_bug_230():
+    with TestDir() as testdir:
+        TEST.cd(testdir)
+        os.system('touch a1 a2')
+        TEST.run(test=lambda: run(bash('ls -l a?') | map (lambda x: x[-2:])),
+                 expected_out=['a1', 'a2'])
+        TEST.run(test=lambda: run(bash('ls -i ??') | map (lambda x: x[-2:])),
+                 expected_out=['a1', 'a2'])
+
+
 # For bugs that aren't specific to a single op.
 @timeit
 def test_bugs():
@@ -1907,6 +1945,7 @@ def test_bugs():
     test_bug_206()
     test_bug_212()
     test_bug_229()
+    test_bug_230()
 
 
 def main_slow_tests():

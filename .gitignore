@@ -3,5 +3,6 @@
 .idea/**
 build
 dist
+experiments
 marcel.egg-info
 venv*

@@ -6,12 +6,10 @@ TEST = test_base.TestTabCompletion()
 TestDir = test_base.TestDir
 
 ALL_OPS = ['args', 'assign', 'bash', 'bg', 'cd', 'difference', 'dirs', 'download', 'edit', 'env', 'expand',
-           'fg', 'fork', 'gen', 'head', 'help', 'history', 'ifelse', 'ifthen', 'import', 'intersect', 'jobs', 'join',
-           'load', 'ls', 'map', 'popd', 'ps', 'pushd', 'pwd', 'read', 'red', 'remote', 'reverse', 'run', 'select',
-           'sort', 'sql', 'squish', 'store', 'sudo', 'tail', 'tee', 'timer', 'union', 'unique', 'upload', 'version',
-           'window',
-           'write',
-           ]
+           'fg', 'filter', 'fork', 'gen', 'head', 'help', 'history', 'ifelse', 'ifthen', 'import', 'intersect', 'jobs',
+           'join', 'load', 'ls', 'map', 'popd', 'ps', 'pushd', 'pwd', 'read', 'red', 'remote', 'reverse', 'run',
+           'select', 'sort', 'sql', 'squish', 'store', 'sudo', 'tail', 'tee', 'timer', 'union', 'unique', 'upload',
+           'version', 'window', 'write']
 
 
 def test_op():

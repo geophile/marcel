@@ -913,3 +913,81 @@ Resolved as bug 202
 ----------------------------------------------------------------------
 
 Don't need both the delete op and env -d.
+
+----------------------------------------------------------------------
+
+Instead of difference --filter, and intersect --filter, should there
+be a filter command?
+
+Could be more general, e.g.
+
+- Use a function to extract comparison fields of incoming stream.
+
+Or add that function as the value of --filter?
+
+......................................................................
+
+filter op:
+
+filter [-k|--keep] [-d|--discard] [KEY] PIPELINE
+
+-k, --keep         Keep input tuples that match any tuple from the PIPELINE.
+
+-d, --discard      Keep input tuples that do not match any tuple from the PIPELINE.
+
+KEY                Computes the comparison key from a left tuple.
+
+PIPELINE           Source of right tuples.
+
+Filter the input stream based on the contents of the PIPELINE.
+
+The input stream will be referred to as the left input), and the
+stream from the PIPELINE will be referred to as the right input.
+
+Tuples from the left input are passed to the output stream or not,
+depending on a comparison between that tuple and the right input. For
+each left input tuple:
+
+- Compute the comparison key by applying the KEY function to the left
+  tuple. If KEY is not provided, then the key is the entire tuple.
+
+- If --keep is specified, and the key matches any tuple from the right
+  input stream, then write the left tuple to the output stream.
+
+- If --discard is specified, and the key does not match any tuple from
+  the right input stream, then write the left tuple to the output
+  stream.
+
+In other words, --keep is similar to set intersection, while --discard
+is similar to set difference.
+
+If neither --keep nor --discard are specified, then --keep is assumed.
+
+----------------------------------------------------------------------
+
+Clean up stderr output
+
+M 0.18.5 jao@loon ~$ bash -c "cat $(which marcel)"
+Error: ['/bin/bash: - : invalid option']
+Error: ['Usage:\t/bin/bash [GNU long option] [option] ...']
+Error: ['\t/bin/bash [GNU long option] [option] script-file ...']
+Error: ['GNU long options:']
+Error: ['\t--debug']
+Error: ['\t--debugger']
+Error: ['\t--dump-po-strings']
+Error: ['\t--dump-strings']
+Error: ['\t--help']
+Error: ['\t--init-file']
+Error: ['\t--login']
+Error: ['\t--noediting']
+Error: ['\t--noprofile']
+Error: ['\t--norc']
+Error: ['\t--posix']
+Error: ['\t--pretty-print']
+Error: ['\t--rcfile']
+Error: ['\t--restricted']
+Error: ['\t--verbose']
+Error: ['\t--version']
+Error: ['Shell options:']
+Error: ['\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)']
+Error: ['\t-abefhkmnptuvxBCHP or -o option']

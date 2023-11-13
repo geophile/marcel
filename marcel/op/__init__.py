@@ -26,6 +26,7 @@ public = [
     'env',
     'expand',
     'fg',
+    'filter',
     'fork',
     'gen',
     'head',

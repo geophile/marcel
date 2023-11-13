@@ -30,6 +30,7 @@ from marcel.op.dirs import dirs as _dirs
 from marcel.op.download import download as _download
 from marcel.op.env import env as _env
 from marcel.op.expand import expand as _expand
+from marcel.op.filter import filt as _filt
 from marcel.op.first import _first
 from marcel.op.fork import fork as _fork
 from marcel.op.gather import _gather
@@ -85,6 +86,7 @@ def dirs(*args, **kwargs): return _generate_op(_dirs, *args, **kwargs)
 def download(*args, **kwargs): return _generate_op(_download, *args, **kwargs)
 def env(*args, **kwargs): return _generate_op(_env, *args, **kwargs)
 def expand(*args, **kwargs): return _generate_op(_expand, *args, **kwargs)
+def filt(*args, **kwargs): return _generate_op(_filt, *args, **kwargs)
 def fork(*args, **kwargs): return _generate_op(_fork, *args, **kwargs)
 def gen(*args, **kwargs): return _generate_op(_gen, *args, **kwargs)
 def head(*args, **kwargs): return _generate_op(_head, *args, **kwargs)

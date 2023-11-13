@@ -1,0 +1,52 @@
+Issue 16 is about getting marcel packaged under NixOS.
+
+
+bin/bash references in marcel:
+
+- Edit op, for Popen to run editor
+
+- Bash op, for Popen to run given command
+
+- testall script
+
+- marcel script
+
+----------------------------------------------------------------------
+
+There are two kinds of references to /bin/bash in marcel:
+
+1) In two scripts: testall, and marcel. testall is a script that runs
+all unit tests. marcel is the top-level script starting marcel. Both
+of them start like this:
+
+    #!/bin/bash
+
+2) In two of marcel's operators, edit and bash. The edit operator runs
+your favorite editor (specified by the EDITOR environment variable) on
+some command in the command history. The bash operator runs a bash
+script. In both of these cases, the Python method subprocess.Popen is
+called to execute a command. Here is the invocation from edit.py:
+
+        process = subprocess.Popen(edit_command,
+                                   shell=True,
+                                   executable='/bin/bash',
+                                   universal_newlines=True)
+
+From the NixOS documentation you provided, it looks to me like fixing
+the scripts is as simple as replacing this:
+
+    #!/bin/bash
+
+with this:
+
+    #!/usr/bin/env bash
+
+As for the edit and bash operators, what would you recommend? If I ran
+"which bash" on marcel startup to determine the location of the OSs
+bash executable, and then passed that location to subprocess.Popen,
+would that work better with NixOS?
+
+I do all my work on one computer, a Pop OS laptop. I'm happy to try
+out NixOS, perhaps as an AWS instance. Can you point me in the right
+direction for getting started with NixOS quickly, so that I can play
+with marcel in a NixOS environment?

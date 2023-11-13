@@ -25,9 +25,13 @@ HELP = '''
 
 {L,indent=4:28}{r:PIPELINE}                The second input to the difference.
 
-The output stream represents the difference of the tuples in the input stream (to be referred
-to as the {i:left} input), and the tuples
-from the {r:PIPELINE} argument (to be referred to as the {i:right} input). 
+The output stream represents the difference of the tuples in the input stream and the tuples
+from the {r:PIPELINE} argument.
+
+The input stream will be referred
+to as the {i:left} input), and the stream from the {r:PIPELINE} will be
+referred to as the {i:right} input.
+ 
 A tuple is included in the output if it is present in the left input,
 and not present
 in the right input.
@@ -46,7 +50,8 @@ output is unspecified.
 
 def difference(pipeline):
     assert isinstance(pipeline, marcel.core.Pipelineable)
-    return Difference(), [pipeline.create_pipeline()]
+    args = [pipeline.create_pipeline()]
+    return Difference(), args
 
 
 class DifferenceArgsParser(marcel.argsparser.ArgsParser):
@@ -62,7 +67,7 @@ class Difference(marcel.core.Op):
     def __init__(self):
         super().__init__()
         self.pipeline_arg = None
-        self.right = None  # Right input, tuple -> count
+        self.right = None
 
     def __repr__(self):
         return f'difference({self.pipeline_arg})'
@@ -73,7 +78,7 @@ class Difference(marcel.core.Op):
         pipeline = marcel.core.PipelineWrapper.create(self.owner.error_handler,
                                                       self.pipeline_arg,
                                                       self.customize_pipeline)
-        pipeline.setup(env, )
+        pipeline.setup(env)
         pipeline.run_pipeline(env, None)
 
     def receive(self, env, x):
@@ -88,8 +93,6 @@ class Difference(marcel.core.Op):
                 self.send(env, x)
         except TypeError:
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
-
-    # Internal
 
     def customize_pipeline(self, env, pipeline):
         def load_right(*x):
