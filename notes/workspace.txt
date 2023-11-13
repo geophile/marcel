@@ -365,10 +365,6 @@ imported workspace will be unchanged. In case of a name collision, the
 import can be done with a new name, e.g. "workspace --import-rename
 EXPORT_MWS NEW_NAME".
 
-......................................................................
-
-Does script execution use a workspace? Probably not.
-
 ----------------------------------------------------------------------
 
 Workspaces implementation
@@ -411,11 +407,6 @@ guess.
 
 ......................................................................
 
-When a reservoir is created, the env must be saved first. Otherwise,
-there could be a reservoir not referenced by the environment.
-
-......................................................................
-
 Be clearer about role of Env in API usage. Is it there or not?
 
 ----------------------------------------------------------------------
@@ -431,3 +422,70 @@ rename    -r --rename
 copy      -2 --dup
 export    -e --export
 import    -i --import
+
+----------------------------------------------------------------------
+
+
+
+Open ws
+
+- Revisit and cleanup marcel startup
+
+
+Close ws
+
+- Saving default ws command history
+
+- Saving named wd command history
+
+
+Environment
+
+- Cleanup:
+
+  - Decide on use of Env from API. Is there one? Or are there just
+    python vars?
+
+  - Use Env for interactive usage only. Not for scripts, not for API.
+
+- Track symbols from startup script
+
+- Prevent interactive update
+
+- Prevent interactive deletion
+
+- Handle symbol deleted from startup script (it should not appear on
+  reload of startup)
+
+- When a reservoir is created, the env must be saved first. Otherwise,
+  there could be a reservoir not referenced by the environment.
+
+- Env var for workspace name
+
+- Add workspace name to default prompt.
+
+
+Directory structure for workspaces
+
+- Modify Locations
+
+
+Workspace locking
+
+
+Workspace op
+
+  - list      -l --list
+  - create    -n --new
+  - open      -o --open
+  - close     -c --close
+  - delete    -d --delete
+  - rename    -r --rename
+  - copy      -2 --dup
+  - export    -e --export
+  - import    -i --import
+
+
+HistoryRecord
+
+- Add timestamp
