@@ -26,7 +26,9 @@ Generalizing this: Keep track of workspaces:
 
 - Disallow multiple concurrent uses of a workspace?
 
-- Support workspace upload and download.
+- Support workspace distribution. E.g., tar czvf and write to
+  specified location; import the package to create a workspace
+  locally.
 
 - I guess workspaces need names, or some way to refer to
   them. E.g. start marcel with workspace foobar. If no workspace
@@ -34,6 +36,9 @@ Generalizing this: Keep track of workspaces:
 
   - vars not preserved?
   - what happens to history on exit?
+
+- Workspace name should NOT BE STORED inside the workspace. Otherwise
+  distribution gets messy. 
 
 - Stream-valued vars can be large (on disk). Provide a way to manage
   them.
@@ -134,11 +139,14 @@ On disk:
 
 Each workspace has its own startup?
 
-.local/share/marcel/
+.config/marcel/
     startup.py  # For anon workspaces, and template for named workspaces
     WORKSPACE_NAME/
         startup.py
-        workspace.p  # Workspace properties (pickled)
+
+.config/marcel/
+    WORKSPACE_NAME/
+        workspace.p  # Workspace properties (pickled) Or maybe JSON?
         env.p: Pickled environment
         history
 
@@ -246,129 +254,116 @@ different.
 So workspace creation should be explicit, on startup or during an
 instance.
 
-
-----------------------------------------------------------------------
-
-Workspace is the wrong word! I think common usage restricts it to a
-continuous block of time.
-
 ======================================================================
 
 Workspaces spec
 
 Concepts:
 
-A marcel *session* is marcel running in a process. Typically, once the marcel
-session *exits*, the process terminates, and that session no longer
-exists.
+Session: A marcel *session* is a process running marcel.  The session and
+process end at the same instant.
 
-A *workspace* is the context in which marcel commands executes.  An
-session is always associated with exactly one workspace. At
-all times, a workspace may be used by at most one session.
+Workspace: A *workspace* is the context in which marcel commands
+executes.  Unless a workspace is specifically selected and used,
+marcel runs using the *default workspace*. A *named workspace* must be
+explicitly created and selected for use.
 
-A workspace comprises the following:
+Workspace state comprises the following:
+
+- A startup script: This provides imports and definitions to be used
+  by the session.
 
 - A command history: As marcel executes commands, they are recorded in
   the workspace's command history.
 
-- A startup script: This provides some imports and definitions to be
-  used by the session.
-
 - An environment: This is a set of environment variables, established
   in part by the startup script.
 
-As marcel runs commands, the commands are recorded in the command
-history. The commands reference and may modify environment
-variables. All changes to the command history and environment persist
-from one session using a workspace, to the next one. The
-startup script can only be modified by editing it. If the current
-workspace's startup script is modified, then the effects take place
-starting with the next command issued in that workspace (even in the
-same session).
+The startup script is created upon workspace creation. Further changes
+must be made by the user. Marcel maintains the other parts of
+workspace state, the command history and environment.
 
-*** BUT IF THIS IS TRUE, THEN THERE CAN'T BE CONCURRENT MARCEL
-    SESSIONS USING THE DEFAULT WORKSPACE. ***
+Binding between sessions and workspaces: A session is always bound to
+exactly one workspace. If no workspace is specified, then the default
+workspace is used by a session.  A named workspace can be used by at
+most one session at a time. The default workspace can be used by
+multiple sessions at the same time.
 
 
-*** Interactive vs API: Command history is API only. Environment in
-    the API is fuzzy -- do env vars make sense, or are there just
-    python vars? Startup script exists. test_api relies on cluster
-    definitions, for example. Probably shouldn't do that, rely on
-    normal python code to set up the cluster. ***
 
+Workspace lifecycle
 
-A workspace has:
+Listing workspaces: Workspaces can be listed by marcel command,
+e.g. "workspace --list". The listing will provide information on each
+namespace, including name, creation date, and size on disk. 
 
-- A name
+Creating a workspace: A workspace is created by a marcel command,
+e.g. "workspace --create NAME". This causes the workspace to be opened.
 
-- A startup script
+Opening a workspace: A workspace is opened when it is created, or when
+it is explicitly opened, e.g. "workspace --open NAME". When a
+workspace is joined, the session's currently bound workspace is
+closed.
 
-- A command history
+Closing a workspace: A workspace is closed by a session when it is in
+use by a session, and the session joins a different workspace. Upon
+closing, the command history is saved, and for a named workspace, the
+environment is saved. When the default workspace is closed, the
+environment is lost. A workspace can also be closed by marcel command,
+e.g. "workspace --close". When a named workspace is closed, the
+default workspace is opened. Closing the default workspace can be
+done, but has no effect since the default workspace is immediately
+joined again. (However, the default namespace's command history on
+disk will be updated.)
 
-- An environment (set of name/value bindings).
+There is a subtle difference in command history persistence between
+the two kinds of workspaces. When a session bound to a named workspace
+ends normally, the commands issued for that workspace are simply
+appended to the command history on disk. Because simultaneous sessions
+using the same named workspace cannot occur, we know that the command
+history hasn't been changed since the workspace was opened by that
+session. issued in previous sessions that used the same workspace.
+But the default workspace can be used simultaneously by different
+sessions. Care must be taken to ensure that all the commands, in all
+the sessions, are stored. When a session using the default namespace
+exits, the command history on disk is read, the commands from the
+session are appended, and the modified history is then written back to
+disk. All this is done under a lock, to prevent contention for the
+history file between the read and the write. 
 
+If a session ends abnormally, e.g. a crash due to a bug in marcel, or
+due to the OOM killer, then for a named workspace, some recent changes
+to the command history and environment may be lost. For a default
+session, the command history of that session will definitely be lost
+(and the environment isn't saved in any case).
 
-*** ANONYMOUS WORKSPACE? DEFAULT WORKSPACE? ***
+Deleting a workspace: A workspace can be deleted if it is not in use
+by any session (including the current session). Deletion can be done
+by a marcel command, e.g. "workspace --delete NAME".  Deleting a
+workspace deletes the saved command history, environment, and any
+files and directories created by marcel on the workspace's behalf.
 
+Renaming a workspace: A workspace not in use by any session (including
+the current session) can be renamed by marcel command, e.g. "workspace
+--rename NAME NEW_NAME".
 
-Workspace operations:
+Duplicating a workspace: A workspace not in use by any session (including
+the current session) can be duplicated by marcel command, e.g. "workspace
+--copy NAME COPY_NAME".
 
-Workspace creation:
+Exporting a workspace: A workspace not in use by any session
+(including the current session) can be exported to a file by marcel
+command, e.g. "workspace --export NAME FILENAME". The filename will be
+given a .mws (marcel workspace) extension if the filename does not
+already have that suffix. This file can be used to recreate a
+workspace, e.g., for a different user.
 
-A workspace must be created before it can be used. Workspace creation
-should be possible when marcel starts (e.g. using a --create-workspace
-flag), or while marcel is running, through a command.
-
-*** DOES CREATING A WORKSPACE SWITCH TO IT?
-
-When a workspace is created, it gets a new environment (determined by
-the parent process's environment and the startup script), and a new
-command history. The workspace gets its own startup script which is
-initially a copy of the default startup script. 
-
-
-Workspace deletion:
-
-A workspace is deleted by command. Deletion is permitted only when there
-are no sessions bound to it.
-
-
-Workspace duplication:
-
-There needs to be a workspace command for duplicating a workspace, giving
-the copy its own name. Duplication is permitted only when there are no
-sessions bound to it.
-
-
-Workspace rename:
-
-There needs to be a workspace command for renaming a workspace, Renaming
-is permitted only when there are no sessions bound to it.
-
-
-Workspace selection:
-
-If marcel is started with a workspace name, then the session is
-associated with the named workspace. Otherwise, the session is
-associcated with the default workspace.
-
-An session can switch to a different workspace. If an session switches
-from workspace A to workspace B, any changes to workspace A are written to
-disk. (They may or may not have been partially written to disk before
-the switch.) In switching, workspace B's startup script is run, and the
-command history and environment are switched to those that were saved
-the last time that an session running workspace B exited. *** DEFINE
-EXITED ***
-
-
-Workspace listing:
-
-Listing workspaces can be done in two ways:
-
-1) marcel --list-workspaces
-
-2) Through a workspace command.
-
+Importing a workspace: A workspace can be imported, given a file
+containing an exported workspace. The import is done by a marcel
+command, e.g. "workspace --import EXPORT_MWS". The name of the
+imported workspace will be unchanged. In case of a name collision, the
+import can be done with a new name, e.g. "workspace --import-rename
+EXPORT_MWS NEW_NAME".
 
 ----------------------------------------------------------------------
 
@@ -382,3 +377,7 @@ Problem: there are ways for the process to end suddently, leaving the
 The .IN_USE file could store a pid. If that process is not running,
 then it is a sign that the workspace is not actually in use and can be
 deleted.
+
+
+When a reservoir is created, the env must be saved first. Otherwise,
+there could be a reservoir not referenced by the environment.

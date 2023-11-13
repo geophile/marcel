@@ -720,3 +720,7 @@ set. Don't be so dumb.
 ----------------------------------------------------------------------
 
 Need an exit command, which is run by Ctrl-D.
+
+----------------------------------------------------------------------
+
+History record should include time of execution.
