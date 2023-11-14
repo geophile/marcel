@@ -239,6 +239,8 @@ class Environment:
         self.modified_vars = None
         # Support for pos()
         self.current_op = None
+        # Where to find bash
+        self.bash = marcel.util.bash_executable()
 
     def __getstate__(self):
         return {'namespace': self.namespace,

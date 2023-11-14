@@ -145,18 +145,8 @@ def colorize(s, color, readline=False):
 
 
 def console_width():
-    process = subprocess.Popen('stty size',
-                               shell=True,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.DEVNULL,
-                               universal_newlines=True)
-    process.wait()
-    stdout, _ = process.communicate()
-    try:
-        console_columns = int(stdout.split()[1])
-    except Exception:
-        # Not running in a console.
-        console_columns = None
+    process = subprocess.run('stty size', shell=True, capture_output=True)
+    console_columns = int(process.stdout.split()[1])
     return console_columns
 
 
@@ -197,6 +187,13 @@ def open_file(path, mode, error_handler=None):
             error_handler(path, mode, e)
         else:
             raise
+
+
+def bash_executable():
+    process = subprocess.run('which bash', shell=True, capture_output=True)
+    bash = process.stdout.strip().decode('UTF-8')
+    return bash
+
 
 
 class Trace:
