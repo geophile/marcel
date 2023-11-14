@@ -93,7 +93,7 @@ class Main(object):
 # MainScript is the parent of MainInteractive, and provides much of its logic.
 class MainScript(Main):
 
-    def __init__(self, config_file, old_namespace, testing):
+    def __init__(self, config_file=None, old_namespace=None, testing=False):
         super().__init__(config_file, old_namespace)
         self.testing = testing
         self.config_time = time.time()
@@ -167,6 +167,10 @@ class MainInteractive(MainScript):
         self.initialize_reader()  # Sets self.reader
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
+        # input records the current line of input. If the startup file changes, a ReloadConfigException
+        # is thrown. The old Main's input field carries the input to the new Main, allowing the command to
+        # execute.
+        self.input = None
 
     # Main
 
@@ -188,14 +192,14 @@ class MainInteractive(MainScript):
     def run(self, print_prompt):
         try:
             while True:
-                input = None
                 try:
-                    if input is None:
+                    if self.input is None:
                         prompts = self.env.prompts() if print_prompt else (None, None)
-                        input = self.reader.input(*prompts)
-                    # else: Restarted main, and self.line was from the previous incarnation.
+                        self.input = self.reader.input(*prompts)
+                    # else: Restarted main, and self.input was from the previous incarnation.
                     self.check_for_config_update()
-                    self.parse_and_run_command(input)
+                    self.parse_and_run_command(self.input)
+                    self.input = None
                     self.job_control.wait_for_idle_foreground()
                 except KeyboardInterrupt:  # ctrl-C
                     print()
@@ -312,31 +316,29 @@ def args():
 
 def main():
     mpstart, config, script = args()
-    old_namespace = None
-    input = None
-    if mpstart is not None:
-        multiprocessing.set_start_method(mpstart)
-    while True:
-        main = MainInteractive(None, old_namespace=old_namespace)
-        main.input = input
-        print_prompt = sys.stdin.isatty()
-        if script is None:
-            # Interactive
+    multiprocessing.set_start_method(mpstart)
+    if script is None:
+        # Interactive
+        old_namespace = None
+        input = None
+        while True:
+            main = MainInteractive(None, old_namespace=old_namespace)
+            main.input = input
+            print_prompt = sys.stdin.isatty()
             try:
                 main.run(print_prompt)
                 break
             except ReloadConfigException:
                 input = main.input
                 old_namespace = main.shutdown(restart=True)
-                pass
-        else:
-            # Script
-            try:
-                with open(script, 'r') as script_file:
-                    main.run_script(script_file.read())
-            except FileNotFoundError:
-                fail(f'File not found: {script}')
-            break
+    else:
+        # Script
+        main = MainScript()
+        try:
+            with open(script, 'r') as script_file:
+                main.run_script(script_file.read())
+        except FileNotFoundError:
+            fail(f'File not found: {script}')
 
 
 if __name__ == '__main__':

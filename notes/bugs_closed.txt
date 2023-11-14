@@ -4473,3 +4473,25 @@ FIXED
 
 See https://github.com/geophile/marcel/issues/23
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+232. Config changes don't take place on the next command
+
+Has to wait until the one after.
+
+The variable asdf doesn't exist:
+
+    M 0.19.0 jao@loon ~/git/marcel/test$ (asdf)
+    Error: Running map(lambda: asdf): name 'asdf' is not defined
+
+Add "asdf = 1" in startup.
+
+    M 0.19.0 jao@loon ~/git/marcel/test$ (asdf)
+
+It seems to know it's there, but doesn't have the value?! Try again:
+
+    M 0.19.0 jao@loon ~/git/marcel/test$ (asdf)
+    1
