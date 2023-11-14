@@ -97,31 +97,6 @@ class Main(object):
     def shutdown(self, restart=False):
         assert False
 
-    # Internal
-
-    # TODO: Should not be done for API
-    def run_startup(self):
-        run_on_startup = self.env.getvar('RUN_ON_STARTUP')
-        if run_on_startup:
-            if type(run_on_startup) is str:
-                self.run_script(run_on_startup)
-            else:
-                fail(f'RUN_ON_STARTUP must be a string')
-
-    # TODO: Should not be done for API
-    def run_script(self, script):
-        command = ''
-        for line in script.split('\n'):
-            if len(line.strip()) > 0:
-                if line.endswith('\\'):
-                    command += line[:-1]
-                else:
-                    command += line
-                    self.parse_and_run_command(command)
-                    command = ''
-        if len(command) > 0:
-            self.parse_and_run_command(command)
-
 
 class MainScript(Main):
 
@@ -164,6 +139,27 @@ class MainScript(Main):
 
     def execute_command(self, command, run_immediately=False):
         command.execute(self.env)
+
+    def run_startup(self):
+        run_on_startup = self.env.getvar('RUN_ON_STARTUP')
+        if run_on_startup:
+            if type(run_on_startup) is str:
+                self.run_script(run_on_startup)
+            else:
+                fail(f'RUN_ON_STARTUP must be a string')
+
+    def run_script(self, script):
+        command = ''
+        for line in script.split('\n'):
+            if len(line.strip()) > 0:
+                if line.endswith('\\'):
+                    command += line[:-1]
+                else:
+                    command += line
+                    self.parse_and_run_command(command)
+                    command = ''
+        if len(command) > 0:
+            self.parse_and_run_command(command)
 
     # Internal
 
