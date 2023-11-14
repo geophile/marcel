@@ -2008,7 +2008,7 @@ def main():
     TEST.reset_environment()
     main_dev()
     main_stable()
-    # main_slow_tests()
+    main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

@@ -87,17 +87,11 @@ class Main(object):
 
     # Main
 
-    # TODO: This should not be here. Doesn't apply to MainAPI
-    def parse_and_run_command(self, command):
-        assert False
-
-    def run_immediate(self, pipeline):
-        return True
-
     def shutdown(self, restart=False):
         assert False
 
 
+# MainScript is the parent of MainInteractive, and provides much of its logic.
 class MainScript(Main):
 
     def __init__(self, config_file, old_namespace, testing):
@@ -117,7 +111,7 @@ class MainScript(Main):
                 if not pipeline.last_op().op_name() == 'write':
                     pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
                 command = marcel.core.Command(text, pipeline)
-                self.execute_command(command, self.run_immediate(pipeline))
+                self.execute_command(command, pipeline)
             except marcel.parser.EmptyCommand:
                 pass
             except marcel.exception.KillCommandException as e:
@@ -134,10 +128,7 @@ class MainScript(Main):
 
     # MainScript
 
-    def run_immediate(self, pipeline):
-        return False
-
-    def execute_command(self, command, run_immediately=False):
+    def execute_command(self, command, pipeline):
         command.execute(self.env)
 
     def run_startup(self):
@@ -187,11 +178,8 @@ class MainInteractive(MainScript):
 
     # MainScript
 
-    def run_immediate(self, pipeline):
-        return self.testing or pipeline.first_op().run_in_main_process()
-
-    def execute_command(self, command, run_immediately=False):
-        if run_immediately:
+    def execute_command(self, command, pipeline):
+        if self.testing or pipeline.first_op().run_in_main_process():
             command.execute(self.env)
         else:
             self.job_control.create_job(command)
