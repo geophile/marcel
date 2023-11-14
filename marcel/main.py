@@ -74,7 +74,6 @@ class Main(object):
 
     def __init__(self, config_file, old_namespace):
         self.main_pid = os.getpid()
-        self.config_time = time.time()
         try:
             self.env = marcel.env.Environment.new(config_file, old_namespace)
         except marcel.exception.KillCommandException as e:
