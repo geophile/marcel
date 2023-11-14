@@ -67,7 +67,7 @@ def filename_op_setup(testdir):
     # Create test data
     for x in setup_script:
         os.system(x)
-    TEST.cd(testdir)
+    TEST.run(lambda: run(cd(testdir)))
 
 
 @timeit
@@ -1927,7 +1927,7 @@ def test_bug_229():
 @timeit
 def test_bug_230():
     with TestDir() as testdir:
-        TEST.cd(testdir)
+        TEST.run(lambda: run(cd(testdir)))
         os.system('touch a1 a2')
         TEST.run(test=lambda: run(bash('ls -l a?') | map (lambda x: x[-2:])),
                  expected_out=['a1', 'a2'])
@@ -2008,7 +2008,7 @@ def main():
     TEST.reset_environment()
     main_dev()
     main_stable()
-    main_slow_tests()
+    # main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

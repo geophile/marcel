@@ -70,22 +70,6 @@ class ReloadConfigException(BaseException):
         super().__init__()
 
 
-class SameProcessMode:
-
-    def __init__(self, main, same_process):
-        self.main = main
-        self.original_same_process = True  # main.same_process
-        self.new_same_process = same_process
-
-    def __enter__(self):
-        # self.main.same_process = self.new_same_process
-        pass
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # self.main.same_process = self.original_same_process
-        pass
-
-
 class Main(object):
 
     def __init__(self, config_file, old_namespace):
@@ -101,6 +85,21 @@ class Main(object):
             sys.exit(1)
         atexit.register(self.shutdown)
 
+    # Main
+
+    # TODO: This should not be here. Doesn't apply to MainAPI
+    def parse_and_run_command(self, command):
+        assert False
+
+    def run_immediate(self, pipeline):
+        return True
+
+    def shutdown(self, restart=False):
+        assert False
+
+    # Internal
+
+    # TODO: Should not be done for API
     def run_startup(self):
         run_on_startup = self.env.getvar('RUN_ON_STARTUP')
         if run_on_startup:
@@ -109,74 +108,41 @@ class Main(object):
             else:
                 fail(f'RUN_ON_STARTUP must be a string')
 
+    # TODO: Should not be done for API
     def run_script(self, script):
-        with SameProcessMode(self, True):
-            command = ''
-            for line in script.split('\n'):
-                if len(line.strip()) > 0:
-                    if line.endswith('\\'):
-                        command += line[:-1]
-                    else:
-                        command += line
-                        self.run_command(command)
-                        command = ''
-            if len(command) > 0:
-                self.run_command(command)
-
-    def run_command(self, command):
-        assert False
-
-    def shutdown(self, restart=False):
-        assert False
-
-    def run_immediate(self, pipeline):
-        return True
+        command = ''
+        for line in script.split('\n'):
+            if len(line.strip()) > 0:
+                if line.endswith('\\'):
+                    command += line[:-1]
+                else:
+                    command += line
+                    self.parse_and_run_command(command)
+                    command = ''
+        if len(command) > 0:
+            self.parse_and_run_command(command)
 
 
-class MainInteractive(Main):
+class MainScript(Main):
 
-    def __init__(self, config_file, old_namespace, testing=False):
+    def __init__(self, config_file, old_namespace, testing):
         super().__init__(config_file, old_namespace)
         self.testing = testing
-        self.tab_completer = marcel.tabcompleter.TabCompleter(self)
-        self.reader = None
-        self.initialize_reader()  # Sets self.reader
-        self.input = None
-        self.env.reader = self.reader
-        self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
         self.config_time = time.time()
         self.run_startup()
 
-    def run(self, print_prompt):
-        try:
-            while True:
-                try:
-                    if self.input is None:
-                        prompts = self.env.prompts() if print_prompt else (None, None)
-                        self.input = self.reader.input(*prompts)
-                    # else: Restarted main, and self.line was from the previous incarnation.
-                    self.check_for_config_update()
-                    self.run_command(self.input)
-                    self.input = None
-                    self.job_control.wait_for_idle_foreground()
-                except KeyboardInterrupt:  # ctrl-C
-                    print()
-        except EOFError:  # ctrl-D
-            print()
+    # Main
 
-    def run_command(self, line):
-        if line:
+    def parse_and_run_command(self, text):
+        if text:
             try:
-                parser = marcel.parser.Parser(line, self)
+                parser = marcel.parser.Parser(text, self)
                 pipeline = parser.parse()
-                pipeline.set_error_handler(MainInteractive.default_error_handler)
+                pipeline.set_error_handler(MainScript.default_error_handler)
                 if not pipeline.last_op().op_name() == 'write':
                     pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
-                command = marcel.core.Command(line, pipeline)
-                if self.run_immediate(pipeline):
-                    command.execute(self.env)
-                else:
-                    self.job_control.create_job(command)
+                command = marcel.core.Command(text, pipeline)
+                self.execute_command(command, self.run_immediate(pipeline))
             except marcel.parser.EmptyCommand:
                 pass
             except marcel.exception.KillCommandException as e:
@@ -185,6 +151,76 @@ class MainInteractive(Main):
                 # Error handler printed the error
                 pass
 
+    def shutdown(self, restart=False):
+        namespace = self.env.namespace
+        if not restart:
+            marcel.reservoir.shutdown(self.main_pid)
+        return namespace
+
+    # MainScript
+
+    def run_immediate(self, pipeline):
+        return False
+
+    def execute_command(self, command, run_immediately=False):
+        command.execute(self.env)
+
+    # Internal
+
+    @staticmethod
+    def default_error_handler(env, error):
+        print(error.render_full(None), flush=True)
+
+
+class MainInteractive(MainScript):
+
+    def __init__(self, config_file, old_namespace, testing=False):
+        super().__init__(config_file, old_namespace, testing)
+        self.tab_completer = marcel.tabcompleter.TabCompleter(self)
+        self.reader = None
+        self.initialize_reader()  # Sets self.reader
+        self.env.reader = self.reader
+        self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
+
+    # Main
+
+    def shutdown(self, restart=False):
+        self.job_control.shutdown()
+        self.reader.close()
+        return super().shutdown(restart)
+
+    # MainScript
+
+    def run_immediate(self, pipeline):
+        return self.testing or pipeline.first_op().run_in_main_process()
+
+    def execute_command(self, command, run_immediately=False):
+        if run_immediately:
+            command.execute(self.env)
+        else:
+            self.job_control.create_job(command)
+
+    # MainInteractive
+
+    def run(self, print_prompt):
+        try:
+            while True:
+                input = None
+                try:
+                    if input is None:
+                        prompts = self.env.prompts() if print_prompt else (None, None)
+                        input = self.reader.input(*prompts)
+                    # else: Restarted main, and self.line was from the previous incarnation.
+                    self.check_for_config_update()
+                    self.parse_and_run_command(input)
+                    self.job_control.wait_for_idle_foreground()
+                except KeyboardInterrupt:  # ctrl-C
+                    print()
+        except EOFError:  # ctrl-D
+            print()
+
+    # Internal
+
     def initialize_reader(self):
         readline.set_history_length(HISTORY_LENGTH)
         readline.parse_and_bind('tab: complete')
@@ -192,14 +228,6 @@ class MainInteractive(Main):
         readline.parse_and_bind('set completion-query-items 50')
         readline.set_pre_input_hook(self.insert_edited_command)
         self.reader = Reader(self.env, self.env.locations.history_path())
-
-    def shutdown(self, restart=False):
-        namespace = self.env.namespace
-        self.job_control.shutdown()
-        self.reader.close()
-        if not restart:
-            marcel.reservoir.shutdown(self.main_pid)
-        return namespace
 
     def insert_edited_command(self):
         command = self.reader.take_edited_command()
@@ -223,95 +251,22 @@ class MainInteractive(Main):
         if config_mtime > self.config_time:
             raise ReloadConfigException()
 
-    def run_immediate(self, pipeline):
-        return self.testing or pipeline.first_op().run_in_main_process()
-
     @staticmethod
     def default_error_handler(env, error):
         print(error.render_full(env.color_scheme()), flush=True)
 
 
-class MainScript(Main):
-
-    def __init__(self, config_file, old_namespace):
-        super().__init__(config_file, old_namespace)
-        self.reader = None
-        self.input = None
-        self.config_time = time.time()
-        self.run_startup()
-
-    def run_command(self, line):
-        if line:
-            try:
-                parser = marcel.parser.Parser(line, self)
-                pipeline = parser.parse()
-                pipeline.set_error_handler(MainScript.default_error_handler)
-                # Append an out op at the end of pipeline, if there is no output op there already.
-                if not pipeline.last_op().op_name() == 'write':
-                    pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
-                command = marcel.core.Command(line, pipeline)
-                command.execute(self.env)
-            except marcel.parser.EmptyCommand:
-                pass
-            except marcel.exception.KillCommandException as e:
-                marcel.util.print_to_stderr(e, self.env)
-            except marcel.exception.KillAndResumeException:
-                # Error handler printed the error
-                pass
-
-    def shutdown(self, restart=False):
-        namespace = self.env.namespace
-        if not restart:
-            marcel.reservoir.shutdown(self.main_pid)
-        return namespace
-
-    def update_namespace(self, child_namespace_changes):
-        # pwd requires special handling
-        try:
-            pwd = child_namespace_changes['PWD']
-            self.env.dir_state().cd(pathlib.Path(pwd))
-        except KeyError:
-            # PWD wasn't changed
-            pass
-        self.env.namespace.update(child_namespace_changes)
-
-    def check_for_config_update(self):
-        config_path = self.env.config_path
-        config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
-        if config_mtime > self.config_time:
-            raise ReloadConfigException()
-
-    @staticmethod
-    def default_error_handler(env, error):
-        print(error.render_full(None), flush=True)
-
-
 class MainAPI(Main):
 
-    def run_command(self, line):
-        assert line is not None
-        try:
-            parser = marcel.parser.Parser(line, self)
-            pipeline = parser.parse()
-            pipeline.set_error_handler(MainAPI.default_error_handler)
-            # Append an out op at the end of pipeline, if there is no output op there already.
-            if not pipeline.last_op().op_name() == 'write':
-                pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
-            command = marcel.core.Command(line, pipeline)
-            command.execute(self.env)
-        except marcel.parser.EmptyCommand:
-            pass
-        except marcel.exception.KillCommandException as e:
-            marcel.util.print_to_stderr(e, self.env)
-        except marcel.exception.KillAndResumeException:
-            # Error handler printed the error
-            pass
+    # Main
 
     def shutdown(self, restart=False):
         namespace = self.env.namespace
         if not restart:
             marcel.reservoir.shutdown(self.main_pid)
         return namespace
+
+    # MainAPI
 
     def run_pipeline(self, pipeline):
         command = marcel.core.Command(None, pipeline)
@@ -319,6 +274,8 @@ class MainAPI(Main):
             command.execute(self.env)
         except marcel.exception.KillCommandException as e:
             marcel.util.print_to_stderr(e, self.env)
+
+    # Internal
 
     @staticmethod
     def default_error_handler(env, error):

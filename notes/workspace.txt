@@ -163,6 +163,8 @@ Main & Environment
 
   Really not needed at all! 
 
+- Why do Main and Environment both nead reader?
+
 
 Directory structure for workspaces
 

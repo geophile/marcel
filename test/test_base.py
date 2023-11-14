@@ -43,7 +43,7 @@ class TestBase:
 
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
         if self.main is None or new_main:
-            self.main = marcel.main.MainScript(config_file, old_namespace=None)
+            self.main = marcel.main.MainScript(config_file, old_namespace=None, testing=True)
         self.env = self.main.env
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')
@@ -86,9 +86,6 @@ class TestBase:
         if len(lines[-1]) == 0:
             del lines[-1]
         return lines
-
-    def cd(self, path):
-        self.main.run_command(f'cd {path}')
 
     def tab_complete(self, line, text):
         return self.main.tab_completer.candidates(line, text)
@@ -148,7 +145,7 @@ class TestConsole(TestBase):
         # test is the thing being tested. Usually it will produce output that can be used for verification.
         # For operations with side effects (e.g. rm), a separate verification command is needed.
         if verification is None and expected_out is None and expected_err is None and file is None:
-            self.main.run_command(test)
+            self.main.parse_and_run_command(test)
         else:
             print(f'TESTING: {self.description(test)}')
             try:
@@ -172,11 +169,14 @@ class TestConsole(TestBase):
             except marcel.exception.KillCommandException as e:
                 print(f'{self.description(test)}: Terminated by KillCommandException: {e}', file=sys.__stderr__)
 
+    def cd(self, path):
+        self.main.parse_and_run_command(f'cd {path}')
+
     def run_and_capture_output(self, command):
         self.test_stdout = open(TEST_STDOUT, 'w')
         self.test_stderr = open(TEST_STDERR, 'w')
         with contextlib.redirect_stdout(self.test_stdout), contextlib.redirect_stderr(self.test_stderr):
-            self.main.run_command(command)
+            self.main.parse_and_run_command(command)
         self.test_stdout = open(TEST_STDOUT, 'r')
         self.test_stderr = open(TEST_STDERR, 'r')
         test_stdout_contents = ''.join(self.test_stdout.readlines())
@@ -308,7 +308,7 @@ class TestTabCompletion(TestBase):
 
     def run(self, line, text=None, expected=None):
         if text is None:
-            self.main.run_command(line)
+            self.main.parse_and_run_command(line)
         else:
             print(f'TESTING: line="{line}", text="{text}"')
             actual = self.main.tab_completer.candidates(line, text)
