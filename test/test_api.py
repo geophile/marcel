@@ -2001,7 +2001,7 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    TEST.run(lambda: run(gen(3)))
 
 
 def main():

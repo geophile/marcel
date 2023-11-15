@@ -192,7 +192,7 @@ def main():
         env.directory_state = marcel.env.DirectoryState(env)
         env.modified_vars = set()
         env.main_pid = os.getpid()
-        marcel.opmodule.import_op_modules(env)
+        env.op_modules = marcel.opmodule.import_op_modules()
         # Use sys.stdin.buffer because we want binary data, not the text version
         input = dill.Unpickler(sys.stdin.buffer)
         # Python version from client

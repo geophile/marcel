@@ -42,14 +42,22 @@ API has some dependencies on env for ops that are actually used by API
     - squish
     - window
 
+  Is set_globals needed for API? The function is an ordinary Python function and should already
+  have its globals.
+
+  Interactive: Map's function is SourceFunction
+  API: NativeFunction
+
 - self.picklefile = env.getvar(self.var):
 
     - load
     - store
 
+  These ops already special-case API and Interactive
+
 - env.getvar('DB_DEFAULT'): sql
 
-- Runpipeline: A few places, but is this needed by API?
+  Require db to be specified for API
 
 
 ......................................................................
@@ -98,6 +106,7 @@ read                x             x             x
 remote              x             x             x
 reverse             x             x             x
 run                 x
+runpipeline*        x             x
 select              x             x             x
 sort                x             x             x
 squish              x             x             x
@@ -113,6 +122,8 @@ upload              x             x             x
 version             x             x             x
 window              x             x             x
 write               x             x             x
+
+* Not a public op
 
 ----------------------------------------------------------------------
 

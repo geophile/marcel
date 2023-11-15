@@ -69,6 +69,7 @@ from marcel.op.write import write as _write, Write as _Write
 from marcel.builtin import *
 from marcel.reduction import *
 
+# TODO: This is work in progress. Main is there only to get env for now. Should be gone eventually.
 _MAIN = _main.MainAPI(_os.getenv('MARCEL_CONFIG', default=None), old_namespace=None)
 # No colors for API
 _MAIN.env.set_color_scheme(None)
@@ -127,9 +128,6 @@ def join(*args, **kwargs): return _generate_op(_join, *args, **kwargs)
 
 
 def load(*args, **kwargs): return _generate_op(_load, *args, **kwargs)
-
-
-def loop(*args, **kwargs): return _generate_op(_loop, *args, **kwargs)
 
 
 def ls(*args, **kwargs): return _generate_op(_ls, *args, **kwargs)
@@ -211,7 +209,7 @@ def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 
 def _generate_op(f, *args, **kwargs):
     op, arglist = f(*args, **kwargs)
-    _MAIN.env.op_modules[op.op_name()].args_parser().parse(arglist, op)
+    _MAIN.env.op_modules[op.op_name()].args_parser(_MAIN.env).parse(arglist, op)
     op.env = _MAIN.env
     return op
 

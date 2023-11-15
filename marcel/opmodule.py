@@ -23,9 +23,8 @@ import marcel.op
 
 class OpModule:
 
-    def __init__(self, op_name, env, public_op):
+    def __init__(self, op_name, public_op):
         self._op_name = op_name
-        self._env = env
         self._public_op = public_op
         self._api = None  # For creating op instances from the api
         self._op_constructor = None
@@ -58,9 +57,6 @@ class OpModule:
         # assert self._op_constructor is not None, op_name
         # args validator not always present, e.g. for gather
 
-    def env(self):
-        return self._env
-
     def public_op(self):
         return self._public_op
 
@@ -73,10 +69,10 @@ class OpModule:
     def create_op(self):
         return self._op_constructor()
 
-    def args_parser(self):
+    def args_parser(self, env):
         if self._args_parser is None:
             assert self._args_parser_constructor is not None
-            self._args_parser = self._args_parser_constructor(self._env)
+            self._args_parser = self._args_parser_constructor(env)
         return self._args_parser
 
     def help(self):
@@ -86,16 +82,15 @@ class OpModule:
         return self._bashy_args
 
 
-def import_op_modules(env):
+def import_op_modules():
     op_modules = {}
     for op_name in marcel.op.all:
-        op_modules[op_name] = OpModule(op_name, env, public_op=(op_name in marcel.op.public))
-    env.op_modules = op_modules
+        op_modules[op_name] = OpModule(op_name, public_op=(op_name in marcel.op.public))
     return op_modules
 
 
 def create_op(env, op_name, *op_args):
     op_module = env.op_modules[op_name]
     op, args = op_module.api_function()(*op_args)
-    op_module.args_parser().parse(args, op)
+    op_module.args_parser(env).parse(args, op)
     return op

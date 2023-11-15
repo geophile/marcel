@@ -1173,7 +1173,7 @@ class Parser(object):
             args = []
             for x in arg_tokens:
                 args.append(x.value() if isinstance(x, Token) else x)
-            op_module.args_parser().parse(args, op)
+            op_module.args_parser(self.env).parse(args, op)
         return op
 
     def create_op_variable(self, op_token, arg_tokens, undefined_var_ok=False):
@@ -1250,7 +1250,7 @@ class Parser(object):
         flags = []
         pipeline = self.current_pipeline()
         if pipeline and pipeline.op_token:
-            flag_args = self.op_modules[pipeline.op_token.value()].args_parser().flag_args
+            flag_args = self.op_modules[pipeline.op_token.value()].args_parser(self.env).flag_args
             for flag in flag_args:
                 if flag.short:
                     flags.append(flag.short)
