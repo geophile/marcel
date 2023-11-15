@@ -190,10 +190,7 @@ def open_file(path, mode, error_handler=None):
 
 
 def bash_executable():
-    process = subprocess.run('which bash', shell=True, capture_output=True)
-    bash = process.stdout.strip().decode('UTF-8')
-    return bash
-
+    return shutil.which('bash')
 
 
 class Trace:

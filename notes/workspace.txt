@@ -1,58 +1,120 @@
+It should be possible to use marcel.api without a Main or Environment, I think.
 
-API startup:
+From marcel.api:
 
-_MAIN = _main.Main(_os.getenv('MARCEL_CONFIG', default=None),
-                   same_process=True,
-                   old_namespace=None)
+- MAIN.op_modules
+
+- Get rid of loop
+
+- ops need env! WHAT FOR?
+  - getvar()
+  - vars()
+  - setvar()
+  - color_scheme()
+  - bash
+  - is_interactive_executable
+  - dir_state
+  - reader
+  - set edited_command
+  - delvar
+  - op_modules
+  - mark_possible_changed
+  - python_version()
+
+- MAIN.run_pipeline: 
+  - Doesn't have to be on Main.
+  - Just needs env
+
+- MAIN.default_error_handler:
+  - Static
+  - Doesn't have to be on Main.
+
+- env.current_op.pos()
+
+API has some dependencies on env for ops that are actually used by API
+(as opposed to non-API ops):
+
+- self.function.set_globals(env.vars()):
+    - map
+    - red
+    - select
+    - sort
+    - squish
+    - window
+
+- self.picklefile = env.getvar(self.var):
+
+    - load
+    - store
+
+- env.getvar('DB_DEFAULT'): sql
+
+- Runpipeline: A few places, but is this needed by API?
 
 
-CLI startup:
+......................................................................
 
-        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
-        ...
-                MAIN.run(print_prompt)
-                
-                - Loop for command line
+There's actually no problem having an Env for the API, but its
+namespace must be marcel.api.globals()
 
-                - Run commands
+----------------------------------------------------------------------
 
-Script startup:
+Op usage
 
-        MAIN = Main(None, same_process=False, old_namespace=old_namespace)
-        ...
-                    MAIN.run_script(script_file.read())
+                Interactive     Script         API
+args                x             x             x
+assign              x             x
+bash                x             x             x
+bg                  x
+cd                  x
+difference          x             x             x
+dirs                x
+download            x             x             x
+edit                x
+env                 x             x
+expand              x             x             x
+fg                  x
+filter              x             x             x
+fork                x             x             x
+gen                 x             x             x
+head                x             x             x
+help                x
+history             x             x             x
+ifelse              x             x             x
+ifthen              x             x             x
+import              x             x
+intersect           x             x             x
+jobs                x
+join                x             x             x
+load                x             x             x
+ls                  x             x             x
+map                 x             x             x
+popd                x
+ps                  x             x             x
+pushd               x
+pwd                 x
+red                 x             x             x
+read                x             x             x
+remote              x             x             x
+reverse             x             x             x
+run                 x
+select              x             x             x
+sort                x             x             x
+squish              x             x             x
+sql                 x             x             x
+store               x             x             x
+sudo                x             x             x
+tail                x             x             x
+tee                 x             x             x
+timer               x             x             x
+unique              x             x             x
+union               x             x             x
+upload              x             x             x
+version             x             x             x
+window              x             x             x
+write               x             x             x
 
-                    - Loop over lines of script
-
-                    - Run commands
-
-- Should that be same_process=True? Doesn't actually matter,
-  run_script assumes same process.
-
-
-Main.__init__:
-
-- Set main_pid
-
-- (*1) Set same_process
-
-- Env.new: Allows for setup from old_namespace. This is for reload of
-  startup script.
-
-- (*2) set tab_completer
-
-- (*2) initialize_reader()
-
-- (*2) Start job control thread (needed for interactive only)
-
-- (*2) Set config time (for knowing when config file changes)
-
-- atexit.register()
-
-*1: same_process should be false for interactive, true otherwise.
-
-*2: Needed for interactive only
-
+----------------------------------------------------------------------
 
 Env.new:
 
