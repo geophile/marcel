@@ -19,7 +19,9 @@ import marcel.core as _core
 import marcel.exception as _exception
 import marcel.main as _main
 import marcel.object.error as _error
+import marcel.opmodule
 import marcel.reservoir as _reservoir
+import marcel.util
 
 from marcel.op.args import args as _args
 from marcel.op.assign import assign as _assign
@@ -71,8 +73,12 @@ from marcel.reduction import *
 
 # TODO: This is work in progress. Main is there only to get env for now. Should be gone eventually.
 _MAIN = _main.MainAPI(_os.getenv('MARCEL_CONFIG', default=None), old_namespace=None)
+_ENV = _MAIN.env
+_OP_MODULES = marcel.opmodule.import_op_modules()
+
+
 # No colors for API
-_MAIN.env.set_color_scheme(None)
+_ENV.set_color_scheme(None)
 _reservoir_counter = 0
 
 
@@ -209,9 +215,21 @@ def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 
 def _generate_op(f, *args, **kwargs):
     op, arglist = f(*args, **kwargs)
-    _MAIN.env.op_modules[op.op_name()].args_parser(_MAIN.env).parse(arglist, op)
-    op.env = _MAIN.env
+    _OP_MODULES[op.op_name()].args_parser(_ENV).parse(arglist, op)
+    op.env = _ENV
     return op
+
+
+def _run_pipeline(pipeline):
+    command = marcel.core.Command(None, pipeline)
+    try:
+        command.execute(_ENV)
+    except marcel.exception.KillCommandException as e:
+        marcel.util.print_to_stderr(e, _ENV)
+
+
+def _default_error_handler(env, error):
+    print(error.render_full(None), flush=True)
 
 
 def _noop_error_handler(env, error):
@@ -230,8 +248,8 @@ def run(x):
     pipeline = _prepare_pipeline(x)
     if not isinstance(pipeline.last_op(), _Write):
         pipeline.append(write())
-    pipeline.set_error_handler(_MAIN.default_error_handler)
-    _MAIN.run_pipeline(pipeline)
+    pipeline.set_error_handler(_default_error_handler)
+    _run_pipeline(pipeline)
 
 
 def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
@@ -244,7 +262,7 @@ def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
                           error_handler=error_handler)
     pipeline.append(terminal_op)
     pipeline.set_error_handler(_noop_error_handler)
-    _MAIN.run_pipeline(pipeline)
+    _run_pipeline(pipeline)
     return output
 
 
@@ -259,7 +277,7 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     pipeline.append(terminal_op)
     pipeline.set_error_handler(_noop_error_handler)
     try:
-        _MAIN.run_pipeline(pipeline)
+        _run_pipeline(pipeline)
     except _exception.StopAfterFirst:
         pass
     first = None if len(output) == 0 else output[0]
@@ -277,4 +295,4 @@ def reservoir(name=None):
 
 
 def pos():
-    return _MAIN.env.current_op.pos()
+    return _ENV.current_op.pos()

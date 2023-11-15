@@ -253,15 +253,6 @@ class MainAPI(Main):
             marcel.reservoir.shutdown(self.main_pid)
         return namespace
 
-    # MainAPI
-
-    def run_pipeline(self, pipeline):
-        command = marcel.core.Command(None, pipeline)
-        try:
-            command.execute(self.env)
-        except marcel.exception.KillCommandException as e:
-            marcel.util.print_to_stderr(e, self.env)
-
     # Internal
 
     @staticmethod
