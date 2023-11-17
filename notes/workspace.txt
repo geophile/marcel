@@ -1,10 +1,68 @@
+
+env handling:
+
+API _generate_op assigns Op.env. Usually, pipeline construction clears
+these, see run(), gather(), etc., and Node.__init__.
+
+But if a command has a pipeline arg, the ops in that pipeline aren't
+touched by this process. And for remote(..., pipeline), it's fatal,
+because the pipeline is serialized, and the Env has something in it
+causing trouble:
+
+    Pickling an AuthenticationString object is disallowed for security reasons
+
+Not yet sure what exactly causes this.
+
+*** Can create_pipeline do the cleanup? In general, whenever the
+    native function is evaluated, and we get a real Pipeline, it
+    should be possible to remove the envs.
+
+......................................................................
+
+API & env handling:
+
+
+Immediate execution:
+
+E.g. run(ls())
+
+- Ops have env assigned on creation, by marcel.api._generate_op.
+
+- Op | Op -> Node, pipeline is represented by a tree of Nodes. 
+
+- When a Node is constructed from others, env propagates up, so that
+  the root always has an env and no descendents do.
+
+- api._prepare_pipeline calls Node.create_pipeline(), which traverses 
+
+- api._run_pipeline which uses Command.execute.
+
+
+Pipeline function
+
+E.g. 
+
+x = reservoir('x')
+run(gen(6)
+    | ifthen(lambda x: x % 2 == 1, store(x))
+    | select(lambda x: False))
+run(load(x))
+
+- ifthen's 2nd arg is a pipeline. It's a Node tree. Root has env,
+  descendents do not.
+
+- ifthen() calls Node.create_pipeline
+
+*** Ifbase.setup gets created pipeline (type Pipeline), with store's
+  env set. Calls PipelineWrapper.create, and because it's a Pipeline,
+  and not a PipelineFunction, PW.create does the wrong thing! Creates
+  a PipelineInteractive, not a PipelineAPI.
+
+----------------------------------------------------------------------
+
 It should be possible to use marcel.api without a Main or Environment, I think.
 
 From marcel.api:
-
-- MAIN.op_modules
-
-- Get rid of loop
 
 - ops need env! WHAT FOR?
   - getvar()
@@ -20,14 +78,6 @@ From marcel.api:
   - op_modules
   - mark_possible_changed
   - python_version()
-
-- MAIN.run_pipeline: 
-  - Doesn't have to be on Main.
-  - Just needs env
-
-- MAIN.default_error_handler:
-  - Static
-  - Doesn't have to be on Main.
 
 - env.current_op.pos()
 
@@ -62,8 +112,14 @@ API has some dependencies on env for ops that are actually used by API
 
 ......................................................................
 
-There's actually no problem having an Env for the API, but its
-namespace must be marcel.api.globals()
+Farcel read_config is a copy of some Env code. 
+
+- Clean up along with Environment.
+
+- Not needed for API, but farcel doesn't know client-side usage
+  (interactive, script, API)
+
+- Filenames init no longer needs env arg.
 
 ----------------------------------------------------------------------
 

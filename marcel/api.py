@@ -247,7 +247,10 @@ def run(x):
     x.env = None  # See comment on Op.env
     pipeline = _prepare_pipeline(x)
     if not isinstance(pipeline.last_op(), _Write):
-        pipeline.append(write())
+        w = write()
+        w.env = None
+        pipeline.append(w)
+    print(f'run: {pipeline}')
     pipeline.set_error_handler(_default_error_handler)
     _run_pipeline(pipeline)
 

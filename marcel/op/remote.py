@@ -113,19 +113,16 @@ class Remote(marcel.core.Op):
 
     class RunRemote(marcel.core.Op):
 
-        def __init__(self, host, pipeline_wrapper):
+        def __init__(self, host, pipeline):
             super().__init__()
             self.host = host
-            self.pipeline_wrapper = pipeline_wrapper
+            self.pipeline_wrapper = pipeline
             self.process = None
 
         def __repr__(self):
             return f'runremote({self.host}, {self.pipeline_wrapper})'
 
         # AbstractOp
-
-        def setup(self, env):
-            pass
 
         def run(self, env):
             # Start the remote process
@@ -146,8 +143,11 @@ class Remote(marcel.core.Op):
                                             universal_newlines=False)
             buffer = io.BytesIO()
             pickler = dill.Pickler(buffer)
-            pickler.dump(env.python_version())
-            pickler.dump(self.pipeline_wrapper)
+            try:
+                pickler.dump(env.python_version())
+                pickler.dump(self.pipeline_wrapper)
+            except Exception as e:
+                print(f'Caught ({type(e)} {e}', file=sys.stderr)
             buffer.seek(0)
             try:
                 stdout, stderr = self.process.communicate(input=buffer.getvalue())

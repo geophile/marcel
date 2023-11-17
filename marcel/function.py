@@ -64,7 +64,7 @@ class NativeFunction(Function):
         return self.__dict__
 
     def set_globals(self, globals):
-        self.function.__globals__.update(globals)
+        pass
 
     def is_grouping(self):
         # red op with grouping, via the API, represents grouping by the native function r_group.

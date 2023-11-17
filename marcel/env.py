@@ -169,13 +169,17 @@ class DirectoryState:
             raise marcel.exception.KillCommandException('\n'.join(buffer))
 
 
-class Environment:
+class Environment(object):
+    pass
+
+
+class EnvironmentInteractive(Environment):
     DEFAULT_PROMPT = f'M-{marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
 
     @staticmethod
     def new(config_file, old_namespace):
-        env = Environment()
+        env = EnvironmentInteractive()
         user = getpass.getuser()
         homedir = pathlib.Path.home().resolve()
         host = socket.gethostname()
@@ -194,8 +198,8 @@ class Environment:
             'MARCEL_VERSION': marcel.version.VERSION,
             'PWD': current_dir.as_posix(),
             'DIRS': [current_dir.as_posix()],
-            'PROMPT': [Environment.DEFAULT_PROMPT],
-            'PROMPT_CONTINUATION': [Environment.DEFAULT_PROMPT_CONTINUATION],
+            'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
+            'PROMPT_CONTINUATION': [EnvironmentInteractive.DEFAULT_PROMPT_CONTINUATION],
             'BOLD': marcel.object.color.Color.BOLD,
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
@@ -241,14 +245,6 @@ class Environment:
         self.current_op = None
         # Where to find bash
         self.bash = marcel.util.bash_executable()
-
-    def __getstate__(self):
-        return {'namespace': self.namespace,
-                'directory_state': self.directory_state,
-                'modified_vars': self.modified_vars}
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
 
     def hasvar(self, var):
         return var in self.namespace
@@ -366,10 +362,10 @@ class Environment:
             return ''.join(buffer)
         except Exception as e:
             print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)
-            return Environment.DEFAULT_PROMPT
+            return EnvironmentInteractive.DEFAULT_PROMPT
 
     def note_var_access(self, var, value):
-        if not Environment.immutable(value):
+        if not EnvironmentInteractive.immutable(value):
             self.modified_vars.add(var)
 
     def shallow_copy(self):

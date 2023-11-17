@@ -147,30 +147,31 @@ def kill_descendents(signal_id):
 
 # Adapted from Environment.read_config
 def read_config():
-    current_dir = pathlib.Path.cwd().resolve()
-    namespace = {
-        'USER': getpass.getuser(),
-        'HOME': pathlib.Path.home().resolve().as_posix(),
-        'HOST': socket.gethostname(),
-        'MARCEL_VERSION': marcel.version.VERSION,
-        'PWD': current_dir.as_posix(),
-        'DIRS': [current_dir.as_posix()],
-        'BOLD': marcel.object.color.Color.BOLD,
-        'ITALIC': marcel.object.color.Color.ITALIC,
-        'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-        'Color': marcel.object.color.Color,
-    }
-    locations = marcel.locations.Locations(marcel.env.Environment())  # Pass in env from caller
-    config_path = locations.config_path()
-    if config_path.exists():
-        with open(config_path.as_posix()) as config_file:
-            config_source = config_file.read()
-        locals = {}
-        # Execute the config file. Imported and newly-defined symbols go into locals, which
-        # will then be added to self.namespace, for use in the execution of op functions.
-        exec(config_source, namespace, locals)
-        namespace.update(locals)
-    return namespace
+    return {}
+    # current_dir = pathlib.Path.cwd().resolve()
+    # namespace = {
+    #     'USER': getpass.getuser(),
+    #     'HOME': pathlib.Path.home().resolve().as_posix(),
+    #     'HOST': socket.gethostname(),
+    #     'MARCEL_VERSION': marcel.version.VERSION,
+    #     'PWD': current_dir.as_posix(),
+    #     'DIRS': [current_dir.as_posix()],
+    #     'BOLD': marcel.object.color.Color.BOLD,
+    #     'ITALIC': marcel.object.color.Color.ITALIC,
+    #     'COLOR_SCHEME': marcel.object.color.ColorScheme(),
+    #     'Color': marcel.object.color.Color,
+    # }
+    # locations = marcel.locations.Locations(marcel.env.Environment())  # Pass in env from caller
+    # config_path = locations.config_path()
+    # if config_path.exists():
+    #     with open(config_path.as_posix()) as config_file:
+    #         config_source = config_file.read()
+    #     locals = {}
+    #     # Execute the config file. Imported and newly-defined symbols go into locals, which
+    #     # will then be added to self.namespace, for use in the execution of op functions.
+    #     exec(config_source, namespace, locals)
+    #     namespace.update(locals)
+    # return namespace
 
 
 def shutdown():
@@ -187,7 +188,7 @@ def main():
         TRACE.write(getpass.getuser())
         TRACE.write(f'{datetime.datetime.now()}')
         # env
-        env = marcel.env.Environment()
+        env = marcel.env.EnvironmentInteractive()
         env.namespace = marcel.nestednamespace.NestedNamespace(read_config())
         env.directory_state = marcel.env.DirectoryState(env)
         env.modified_vars = set()

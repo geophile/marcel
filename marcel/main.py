@@ -75,7 +75,7 @@ class Main(object):
     def __init__(self, config_file, old_namespace):
         self.main_pid = os.getpid()
         try:
-            self.env = marcel.env.Environment.new(config_file, old_namespace)
+            self.env = marcel.env.EnvironmentInteractive.new(config_file, old_namespace)
         except marcel.exception.KillCommandException as e:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)

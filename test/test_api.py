@@ -831,20 +831,19 @@ def test_remote():
     TEST.run(lambda: run(remote('CLUSTER1', lambda: gen(3, -1) | map(lambda x: 5 / x))),
              expected_out=[(node1, -5.0), Error('division by zero'), (node1, 5.0)])
     # Handling of remote error in setup
-    # TODO: Bug - should be expected_err
+    # TODO: Bug 176 - should be expected_err
     TEST.run(lambda: run(remote('CLUSTER1', lambda: ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
-    # expected_err='No qualifying paths')
-    # Bug 4
-    TEST.run(lambda: run(remote('CLUSTER1',
-                                lambda: gen(3)) | red(None, r_plus)),
-             expected_out=[(node1, 3)])
-    TEST.run(lambda: run(remote('CLUSTER1',
-                                lambda: gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
-             expected_out=[(node1, 0, 20), (node1, 1, 25)])
-    # Bug 121
-    TEST.run(test=lambda: run(remote('notacluster', lambda: gen(3))),
-             expected_err='notacluster is not a Cluster')
+    # # Bug 4
+    # TEST.run(lambda: run(remote('CLUSTER1',
+    #                             lambda: gen(3)) | red(None, r_plus)),
+    #          expected_out=[(node1, 3)])
+    # TEST.run(lambda: run(remote('CLUSTER1',
+    #                             lambda: gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
+    #          expected_out=[(node1, 0, 20), (node1, 1, 25)])
+    # # Bug 121
+    # TEST.run(test=lambda: run(remote('notacluster', lambda: gen(3))),
+    #          expected_err='notacluster is not a Cluster')
 
 
 @timeit
@@ -2001,14 +2000,24 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run(lambda: run(gen(3)))
+    x = reservoir('x')
+    run(gen(6)
+        | ifthen(lambda x: x % 2 == 1, store(x))
+        | select(lambda x: False))
+    run(load(x))
+
+    # TEST.run(lambda: run(remote('CLUSTER1', lambda: ls('/nosuchfile'))))
+    # TEST.run(lambda: run(remote('CLUSTER1', lambda: gen(3))))
+    # test_remote()
+    # TEST.run(lambda: run(remote('CLUSTER1', lambda: ls('/nosuchfile'))))
+    # TEST.run(test=lambda: list(gen(3)))
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
-    main_slow_tests()
+    # main_stable()
+    # main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

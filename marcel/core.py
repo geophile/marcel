@@ -78,7 +78,14 @@ class Op(AbstractOp):
         assert args is None
         pipeline = Pipeline()
         pipeline.append(self)
+        e = self.env
+        print(f'Op.create_pipeline {self}, env: {len(e.namespace) if e else None}')
         return pipeline
+
+    # AbstractOp
+
+    def setup(self, env):
+        self.env = None
 
     # Op
 
@@ -95,6 +102,8 @@ class Op(AbstractOp):
     def propagate_flush(self, env):
         if self.receiver:
             self.receiver.flush(env)
+
+    # For use by subclasses
 
     def call(self, env, function, *args, **kwargs):
         try:
@@ -292,7 +301,10 @@ class PipelineFunction(Pipelineable):
         if not (type(pipelineable) is Node or isinstance(pipelineable, Op)):
             raise marcel.exception.KillCommandException(
                 f'Function that should evaluate to a Pipeline evalutes instead to {type(pipelineable)}.')
-        return pipelineable.create_pipeline()
+        p = pipelineable.create_pipeline()
+        e = p.ops[0].env
+        print(f'create_pipeline {p} env: {len(e.namespace) if e is not None else None}')
+        return p
 
 
 class Node(Pipelineable):
@@ -325,7 +337,7 @@ class Node(Pipelineable):
                 ops = [op]
             elif type(op) is Pipeline:
                 # op will usually be an Op. But the op could represent a Pipeline, e.g.
-                #     recent = [select (f: now() - f.mtime < days(1))]
+                #     recent = (| select (f: now() - f.mtime < days(1)) |)
                 #     ls | recent
                 # In this case, through the CLI, the Pipeline would be wrapped in a runpipeline op. But
                 # through the API, op could actually be a Pipeline.
@@ -339,11 +351,13 @@ class Node(Pipelineable):
                 # # for error handling. If the owner isn't set prior to the copy, then the copy won't have its
                 # # FunctionWrapper's op's owner set.
                 # op.set_owner(pipeline)
+                print(f'Append {op}')
                 pipeline.append(op)
 
         assert args is None
         pipeline = Pipeline()
         self.traverse(visit)
+        print('Done create_pipeline')
         return pipeline
 
     # Node
@@ -407,8 +421,6 @@ class Pipeline(AbstractOp):
         prev_op = None
         for op in self.ops:
             if isinstance(op, Op) and op is not self.ops[0] and op.must_be_first_in_pipeline():
-                print(f'op: {op}')
-                print(f'first op in pipeline: {self.ops[0]}')
                 raise marcel.exception.KillCommandException(
                     f'{op.op_name()} cannot receive input from a pipe')
             op.owner = self
