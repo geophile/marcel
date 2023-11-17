@@ -110,9 +110,9 @@ class Filter(marcel.core.Op):
         self.keep = not self.discard
         if self.compare is None:
             self.compare = lambda *x: x
-        pipeline = marcel.core.PipelineWrapper.create(self.owner.error_handler,
-                                                      self.pipeline_arg,
-                                                      self.customize_pipeline)
+        pipeline = marcel.core.Pipeline.create(self.owner.error_handler,
+                                               self.pipeline_arg,
+                                               self.customize_pipeline)
         pipeline.setup(env)
         pipeline.run_pipeline(env, None)
 

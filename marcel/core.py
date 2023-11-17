@@ -492,7 +492,7 @@ class PipelineIterator:
 # For the CLI, pipeline syntax is parsed and a Pipeline is created. For the API, a pipeline is a function whose
 # body is a marcel expression. PipelineWrapper provides a uniform interface for dealing with pipelines, regardless
 # of which interface created is in use.
-class PipelineWrapper(object):
+class Pipeline(object):
 
     # customize_pipeline takes pipeline as an argument, returns None
     def __init__(self, error_handler, pipeline_arg, customize_pipeline):
@@ -502,7 +502,7 @@ class PipelineWrapper(object):
         self.pipeline = None
 
     def __repr__(self):
-        return f'PipelineWrapper({self.pipeline_arg})'
+        return f'Pipeline({self.pipeline_arg})'
 
     def setup(self, env):
         assert False
@@ -529,7 +529,7 @@ class PipelineWrapper(object):
                 else PipelineInteractive(error_handler, pipeline_arg, customize_pipeline))
 
 
-class PipelineInteractive(PipelineWrapper):
+class PipelineInteractive(Pipeline):
 
     def __init__(self, error_handler, pipeline_arg, customize_pipeline):
         super().__init__(error_handler, pipeline_arg, customize_pipeline)
@@ -564,7 +564,7 @@ class PipelineInteractive(PipelineWrapper):
         self.pipeline.setup(env)
 
 
-class PipelineAPI(PipelineWrapper):
+class PipelineAPI(Pipeline):
 
     def __init__(self, error_handler, pipeline_arg, customize_pipeline):
         super().__init__(error_handler, pipeline_arg, customize_pipeline)

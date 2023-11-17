@@ -43,9 +43,9 @@ class IfBase(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.then = marcel.core.PipelineWrapper.create(self.owner.error_handler,
-                                                       self.then_arg,
-                                                       lambda env, pipeline: pipeline)
+        self.then = marcel.core.Pipeline.create(self.owner.error_handler,
+                                                self.then_arg,
+                                                lambda env, pipeline: pipeline)
         self.then.setup(env)
         self.then.prepare_to_receive(env)
 

@@ -57,9 +57,9 @@ class Tee(marcel.core.Op):
             raise marcel.exception.KillCommandException('No pipelines given.')
         self.pipelines = []
         for pipeline in self.pipelines_arg:
-            pipeline = marcel.core.PipelineWrapper.create(self.owner.error_handler,
-                                                          pipeline,
-                                                          lambda env, pipeline: pipeline)
+            pipeline = marcel.core.Pipeline.create(self.owner.error_handler,
+                                                   pipeline,
+                                                   lambda env, pipeline: pipeline)
             pipeline.setup(env)
             pipeline.prepare_to_receive(env)
             self.pipelines.append(pipeline)

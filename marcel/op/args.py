@@ -77,9 +77,9 @@ class Args(marcel.core.Op):
     def setup(self, env):
         pipeline_arg = self.pipeline_arg
         assert isinstance(pipeline_arg, marcel.core.Pipelineable)
-        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(self.owner.error_handler,
-                                                                   pipeline_arg,
-                                                                   self.customize_pipeline)
+        self.pipeline_wrapper = marcel.core.Pipeline.create(self.owner.error_handler,
+                                                            pipeline_arg,
+                                                            self.customize_pipeline)
         self.n_params = pipeline_arg.n_params()
         self.check_args()
         self.args = []

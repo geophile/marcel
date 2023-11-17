@@ -66,9 +66,9 @@ class Union(marcel.core.Op):
     def setup(self, env):
         self.pipelines = []
         for pipeline_arg in self.pipelines_arg:
-            pipeline = marcel.core.PipelineWrapper.create(self.owner.error_handler,
-                                                          pipeline_arg,
-                                                          self.customize_pipeline)
+            pipeline = marcel.core.Pipeline.create(self.owner.error_handler,
+                                                   pipeline_arg,
+                                                   self.customize_pipeline)
             pipeline.setup(env)
             self.pipelines.append(pipeline)
 
