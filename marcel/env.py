@@ -379,7 +379,7 @@ class Environment:
 
     @staticmethod
     def immutable(x):
-        return callable(x) or type(x) in (int, float, str, bool, tuple, marcel.core.Pipeline)
+        return callable(x) or type(x) in (int, float, str, bool, tuple, marcel.core.PipelineExecutable)
 
     @staticmethod
     def python_version():

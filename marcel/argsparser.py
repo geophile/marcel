@@ -202,7 +202,7 @@ class ArgsParser:
         raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
 
     def check_str_or_pipeline(self, arg, x):
-        if type(x) in (str, marcel.core.Pipeline, marcel.core.PipelineFunction):
+        if type(x) in (str, marcel.core.PipelineExecutable, marcel.core.PipelineFunction):
             return x
         raise marcel.argsparser.ArgsError(self.op_name,
                                           f'{arg.name} argument must be a Pipeline: {x}')

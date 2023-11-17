@@ -60,7 +60,7 @@ class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def check_str_and_pipeline(self, arg, x):
         # This isn't really accurate. The last arg must be a pipeline. The preceding ones must be str.
-        if type(x) not in (str, marcel.core.Pipeline):
+        if type(x) not in (str, marcel.core.PipelineExecutable):
             raise marcel.argsparser.ArgsError(self.op_name,
                                               f'Arguments must be strings (flags to sudo) followed by a pipeline: {x}')
         return x
@@ -84,7 +84,7 @@ class Sudo(marcel.core.Op):
         self.pipeline = self.args.pop()
         if type(self.pipeline) is str:
             self.pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
-        if not isinstance(self.pipeline, marcel.core.Pipeline):
+        if not isinstance(self.pipeline, marcel.core.PipelineExecutable):
             raise marcel.exception.KillCommandException('Last argument to sudo must be a pipeline')
 
     # Op

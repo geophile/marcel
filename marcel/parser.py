@@ -961,7 +961,7 @@ class Parser(object):
         arg = self.arg()
         if isinstance(arg, Token):
             value = arg.value()
-        elif type(arg) is marcel.core.Pipeline:
+        elif type(arg) is marcel.core.PipelineExecutable:
             value = arg
         elif arg is None:
             raise SyntaxError(self.token, 'Unexpected token type.')
@@ -1018,7 +1018,7 @@ class Parser(object):
             # else:  op_sequence is OK as is
             return op_sequence
 
-        pipeline = marcel.core.Pipeline()
+        pipeline = marcel.core.PipelineExecutable()
         with Parser.PipelineSourceTracker(self, pipeline):
             # If the next tokens are var comma, or var colon, then we have
             # pipeline variables being declared.
@@ -1185,7 +1185,7 @@ class Parser(object):
                 pipeline_args = []
                 for token in arg_tokens:
                     pipeline_args.append(token
-                                         if type(token) is marcel.core.Pipeline else
+                                         if type(token) is marcel.core.PipelineExecutable else
                                          token.value())
                 args, kwargs = marcel.argsparser.PipelineArgsParser(var).parse_pipeline_args(pipeline_args)
                 op.set_pipeline_args(args, kwargs)
@@ -1212,13 +1212,13 @@ class Parser(object):
         op.var = var
         if callable(value):
             op.function = value
-        elif type(value) is marcel.core.Pipeline:
+        elif type(value) is marcel.core.PipelineExecutable:
             op.pipeline = value
         elif type(value) is str:
             op.string = value
         else:
             assert False, value
-        pipeline = marcel.core.Pipeline()
+        pipeline = marcel.core.PipelineExecutable()
         pipeline.append(op)
         return pipeline
 

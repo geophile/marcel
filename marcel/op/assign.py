@@ -59,7 +59,7 @@ class Assign(marcel.core.Op):
             self.value = self.string
             count += 1
         if self.pipeline is not None:
-            assert type(self.pipeline) is marcel.core.Pipeline, type(self.pipeline)
+            assert type(self.pipeline) is marcel.core.PipelineExecutable, type(self.pipeline)
             self.value = self.pipeline
             count += 1
         if self.function is not None:

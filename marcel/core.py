@@ -37,7 +37,7 @@ def kill_and_resume_on_file_open_error(path, mode, error):
     raise marcel.exception.KillAndResumeException(f'Unable to open {path} with mode {mode}: {str(error)}')
 
 
-class Pipelineable:
+class Pipelineable(object):
 
     def n_params(self):
         assert False
@@ -76,7 +76,7 @@ class Op(AbstractOp):
 
     def create_pipeline(self, args=None):
         assert args is None
-        pipeline = Pipeline()
+        pipeline = PipelineExecutable()
         pipeline.append(self)
         return pipeline
 
@@ -181,13 +181,13 @@ class Op(AbstractOp):
     # and come up with the pipeline itself.
     @staticmethod
     def pipeline_arg_value(env, arg):
-        if type(arg) is marcel.core.Pipeline:
+        if type(arg) is marcel.core.PipelineExecutable:
             pipeline = arg
         elif isinstance(arg, marcel.core.Pipelineable):
             pipeline = arg.create_pipeline()
         elif type(arg) is str:  # Presumably a var
             pipeline = env.getvar(arg)
-            if type(pipeline) is not marcel.core.Pipeline:
+            if type(pipeline) is not marcel.core.PipelineExecutable:
                 raise marcel.exception.KillCommandException(
                     f'The variable {arg} is not bound to a pipeline')
         else:
@@ -307,7 +307,7 @@ class Node(Pipelineable):
         self.right = right
 
     def __or__(self, other):
-        assert isinstance(other, Op) or type(other) is Pipeline, type(other)
+        assert isinstance(other, Op) or type(other) is PipelineExecutable, type(other)
         return Node(self, other)
 
     def __iter__(self):
@@ -323,7 +323,7 @@ class Node(Pipelineable):
         def visit(op):
             if isinstance(op, Op):
                 ops = [op]
-            elif type(op) is Pipeline:
+            elif type(op) is PipelineExecutable:
                 # op will usually be an Op. But the op could represent a Pipeline, e.g.
                 #     recent = [select (f: now() - f.mtime < days(1))]
                 #     ls | recent
@@ -342,7 +342,7 @@ class Node(Pipelineable):
                 pipeline.append(op)
 
         assert args is None
-        pipeline = Pipeline()
+        pipeline = PipelineExecutable()
         self.traverse(visit)
         return pipeline
 
@@ -359,7 +359,7 @@ class Node(Pipelineable):
             visit(self.right)
 
 
-class Pipeline(AbstractOp):
+class PipelineExecutable(AbstractOp):
 
     def __init__(self):
         super().__init__()
@@ -449,7 +449,7 @@ class Pipeline(AbstractOp):
         # A pipeline copy contains shallow copies of the ops. This allows an op to make a copy of the pipeline
         # and be sure that the copy doesn't share state or structure (i.e. Op.receiver) with other uses of the
         # "same" pipeline within the same command.
-        copy = Pipeline()
+        copy = PipelineExecutable()
         copy.error_handler = self.error_handler
         for op in self.ops:
             copy.append(op.copy())
