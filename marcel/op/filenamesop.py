@@ -43,7 +43,7 @@ class FilenamesOp(marcel.core.Op):
         super().__init__()
         # A method's type would be MethodType. We don't want a method of this class, e.g. self.foobar. self
         # would be bound to the current instance, and that might not be the instance that gets executed later,
-        # due to possible pipeline copying. The action should not be a method, e.g. it could be a staticmethod,
+        # due to possible pipelines copying. The action should not be a method, e.g. it could be a staticmethod,
         # whose type is FunctionType.
         assert(isinstance(action, types.FunctionType))
         self.action = action

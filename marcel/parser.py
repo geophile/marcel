@@ -805,12 +805,12 @@ class Tokens(object):
 #
 #     command:
 #             assignment
-#             pipeline
+#             pipelines
 #    
 #     assignment:
 #             str = arg
 #    
-#     pipeline:
+#     pipelines:
 #             op_sequence [gt str]
 #             str lt gt str
 #             str lt [op_sequence [gt str]]
@@ -848,7 +848,7 @@ class Tokens(object):
 #     arg:
 #             expr
 #             str
-#             begin [vars :] pipeline end
+#             begin [vars :] pipelines end
 #
 #     vars:
 #             vars, str
@@ -1021,7 +1021,7 @@ class Parser(object):
         pipeline = marcel.core.PipelineExecutable()
         with Parser.PipelineSourceTracker(self, pipeline):
             # If the next tokens are var comma, or var colon, then we have
-            # pipeline variables being declared.
+            # pipelines variables being declared.
             if self.next_token(String, Comma) or self.next_token(String, Colon):
                 parameters = self.vars()
             else:
@@ -1131,7 +1131,7 @@ class Parser(object):
         self.token = self.tokens.next_token()
         return True
 
-    # Does token t+n indicate the end of a pipeline?
+    # Does token t+n indicate the end of a pipelines?
     def pipeline_end(self, n=0):
         tokens = self.tokens.peek(n + 1)
         return tokens is None or tokens[-1].is_end()
@@ -1209,15 +1209,7 @@ class Parser(object):
         assign_module = self.op_modules['assign']
         assert assign_module is not None
         op = assign_module.create_op()
-        op.var = var
-        if callable(value):
-            op.function = value
-        elif type(value) is marcel.core.PipelineExecutable:
-            op.pipeline = value
-        elif type(value) is str:
-            op.string = value
-        else:
-            assert False, value
+        op.set_var_and_value(var, value)
         pipeline = marcel.core.PipelineExecutable()
         pipeline.append(op)
         return pipeline

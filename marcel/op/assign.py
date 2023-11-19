@@ -48,25 +48,15 @@ class Assign(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        assert self.var is not None
-        count = 0
-        if self.value is not None:
-            # Only self.value is set via API. Check first because CLI will should have string, pipeline or function
-            # field set, and the non-None one of those will be assigned to value.
-            count += 1
         if self.string is not None:
             assert type(self.string) is str, type(self.string)
             self.value = self.string
-            count += 1
         if self.pipeline is not None:
             assert type(self.pipeline) is marcel.core.PipelineExecutable, type(self.pipeline)
             self.value = self.pipeline
-            count += 1
         if self.function is not None:
             assert isinstance(self.function, marcel.function.Function), type(self.function)
             self.value = self.call(env, self.function)
-            count += 1
-        assert count == 1, count
         if isinstance(self.value, marcel.function.Function):
             self.value.set_globals(env.vars())
 
@@ -80,3 +70,18 @@ class Assign(marcel.core.Op):
 
     def run_in_main_process(self):
         return True
+
+    # Assign
+    
+    def set_var_and_value(self, var, value):
+        assert var is not None
+        assert value is not None
+        self.var = var
+        if callable(value):
+            self.function = value
+        elif type(value) is marcel.core.PipelineExecutable:
+            self.pipeline = value
+        elif type(value) is str:
+            self.string = value
+        else:
+            assert False, value

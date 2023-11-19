@@ -63,7 +63,7 @@ Op usage
 
                 Interactive     Script         API
 args                x             x             x
-assign              x             x
+assign (1)          x             x
 bash                x             x             x
 bg                  x
 cd                  x
@@ -113,6 +113,9 @@ upload              x             x             x
 version             x             x             x
 window              x             x             x
 write               x             x             x
+
+1: Assign *is* in the api currently. It operates on the env just like
+CLI.
 
 ----------------------------------------------------------------------
 

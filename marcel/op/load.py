@@ -37,15 +37,15 @@ is equivalent to:
 
 {L,wrap=F}foobar <$ map (x, y: (y, x))
 
-{r:foobar <$} is valid at the beginning of a pipeline since it produces a stream of tuples, just like
-any other pipeline. So, for example the command line {r:foobar <$} prints the contents of foobar,
-(since the {r:write} operator is applied at the end of a top-level pipeline if not explicitly provided).
+{r:foobar <$} is valid at the beginning of a pipelines since it produces a stream of tuples, just like
+any other pipelines. So, for example the command line {r:foobar <$} prints the contents of foobar,
+(since the {r:write} operator is applied at the end of a top-level pipelines if not explicitly provided).
 
-This syntax can be used in any pipeline, e.g.
+This syntax can be used in any pipelines, e.g.
 
 {L,wrap=F}abc <$ join [def <$]
 
-This loads {r:abc} into the pipeline carrying data to the {r:join} operator. The other
+This loads {r:abc} into the pipelines carrying data to the {r:join} operator. The other
 input to {r:join} comes from loading {r:def}.
 '''
 

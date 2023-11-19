@@ -39,15 +39,15 @@ output is unspecified.
 
 
 def intersect(pipeline):
-    assert isinstance(pipeline, marcel.core.Pipelineable)
-    return Intersect(), [pipeline.create_pipeline()]
+    assert isinstance(pipeline, marcel.core.OpList), pipeline
+    return Intersect(), [pipeline]
 
 
 class IntersectArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('intersect', env)
-        self.add_anon_list('pipelines', convert=self.check_str_or_pipeline, target='pipelines_arg')
+        self.add_anon_list('pipelines', convert=self.check_pipeline, target='pipelines_arg')
         self.validate()
 
 
@@ -59,7 +59,7 @@ class Intersect(marcel.core.Op):
         super().__init__()
         self.pipelines_arg = None
         self.common = None  # item -> count: Accumulated intersection
-        self.input = None   # item -> count: From one of the pipeline args
+        self.input = None   # item -> count: From one of the pipelines args
 
     def __repr__(self):
         return f'intersect({self.pipelines_arg})'
@@ -69,7 +69,7 @@ class Intersect(marcel.core.Op):
             pipeline = marcel.core.Pipeline.create(self.owner.error_handler,
                                                    pipeline_arg,
                                                    self.customize_pipeline)
-            # pipeline.setup() will store item counts in self.input.
+            # pipelines.setup() will store item counts in self.input.
             self.input = {}
             pipeline.setup(env)
             pipeline.run_pipeline(env, None)

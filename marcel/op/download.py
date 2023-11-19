@@ -97,7 +97,7 @@ class Download(marcel.core.Op):
         for filename in self.filenames:
             if not filename.startswith('/'):
                 raise marcel.exception.KillCommandException(f'Remote filenames must be absolute: {filename}')
-        # Empty pipeline will be filled in by customize_pipeline
+        # Empty pipelines will be filled in by customize_pipeline
         pipeline_template = marcel.core.PipelineExecutable()
         pipeline_template.set_error_handler(self.owner.error_handler)
         self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,

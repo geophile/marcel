@@ -27,15 +27,19 @@ Tuples arriving in the input stream are passed to each {r:PIPELINE} and to the o
 '''
 
 
-def tee(*pipeline):
-    return Tee(), [p.create_pipeline() for p in pipeline]
+def tee(*pipelines):
+    args = []
+    for pipeline in pipelines:
+        assert isinstance(pipeline, marcel.core.OpList), pipeline
+        args.append(pipeline)
+    return Tee(), args
 
 
 class TeeArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('tee', env)
-        self.add_anon_list('pipelines', convert=self.check_str_or_pipeline, target='pipelines_arg')
+        self.add_anon_list('pipelines', convert=self.check_pipeline, target='pipelines_arg')
         self.validate()
 
 

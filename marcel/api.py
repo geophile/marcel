@@ -212,26 +212,24 @@ def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 def _generate_op(f, *args, **kwargs):
     op, arglist = f(*args, **kwargs)
     _MAIN.env.op_modules[op.op_name()].args_parser().parse(arglist, op)
-    op.env = _MAIN.env
-    return op
+    return _core.OpList(_MAIN.env, op)
 
 
 def _noop_error_handler(env, error):
     pass
 
 
-# Create a pipeline, by copying if necessary. The caller is going to append an op, and we
+# Create a pipelines, by copying if necessary. The caller is going to append an op, and we
 # don't want to modify the original.
 def _prepare_pipeline(x):
-    assert isinstance(x, _core.Pipelineable)
+    assert isinstance(x, _core.OpList)
     return x.create_pipeline()
 
 
 def run(x):
-    x.env = None  # See comment on Op.env
     pipeline = _prepare_pipeline(x)
     if not isinstance(pipeline.last_op(), _Write):
-        pipeline.append(write())
+        pipeline.append(write().op)
     pipeline.set_error_handler(_MAIN.default_error_handler)
     _MAIN.run_pipeline(pipeline)
 

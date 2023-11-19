@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import marcel.core
 import marcel.op.ifbase
 import marcel.util
 
@@ -23,7 +24,7 @@ HELP = '''
 {L,indent=4:28}{r:PREDICATE}               Used to determine if an input tuple is passed
 to the {r:THEN_PIPELINE}
 
-{L,indent=4:28}{r:THEN_PIPELINE}           This pipeline receives tuples for which 
+{L,indent=4:28}{r:THEN_PIPELINE}           This pipelines receives tuples for which 
 {r:PREDICATE} evaluates to True.
 
 {r:PREDICATE} is applied to each input tuple. If the {r:PREDICATE} evaluates to
@@ -36,14 +37,15 @@ the tuple is passed downstream.
 
 {r:gen 100} generates a stream of integers, 0, ..., 99.
 The predicate is True for even integers. These integers are
-passed to the {r:[store even]} pipeline, which stores the numbers in the variable {r:even}.
+passed to the {r:[store even]} pipelines, which stores the numbers in the variable {r:even}.
 Odd integers only are passed downstream, to {r:store odd} which stores numbers in the {r:odd}
 variable. 
 '''
 
 
 def ifelse(predicate, then):
-    return Ifelse(), [predicate, then.create_pipeline()]
+    assert isinstance(then, marcel.core.OpList), then
+    return Ifelse(), [predicate, then]
 
 
 class IfelseArgsParser(marcel.op.ifbase.IfBaseArgsParser):

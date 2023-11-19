@@ -16,7 +16,7 @@
 HELP = '''
 A marcel {i:command} is what you type following the prompt. A command may 
 be a single marcel operator, or host OS executable, or it can combine several
-of these via piping, (run {n:help pipeline} for more information on this topic). 
+of these via piping, (run {n:help pipelines} for more information on this topic). 
 A single marcel command may span multiple lines, as long as a \\\\ is typed at the
 end of each non-terminal line.
 Marcel operators and host OS executables are distinguished as follows:
@@ -36,7 +36,7 @@ be carried by marcel pipes.
 A marcel operator does one well-defined thing. For example, the {n:map} operator
 applies a function to each tuple arriving on its input stream, and writes the result
 to the output stream. {n:map} does not concern itself with printing these results -- that 
-would be done by using the {n:out} operator later in the pipeline.
+would be done by using the {n:out} operator later in the pipelines.
 
 Many host OS commands have large collections of flags and options controlling the selection
 and printing of relevant information. Marcel aims for simpler operators, and relies on
@@ -104,8 +104,8 @@ Run {n:help function} for more information on functions.
 {b:Executables}
 
 Executables can be run from marcel, just as in any other shell. stdout
-and stderr from an executable can flow into a marcel pipeline, and will show up 
-as a stream of strings, each terminated by \\\\n. Similarly, a marcel pipeline can
+and stderr from an executable can flow into a marcel pipelines, and will show up 
+as a stream of strings, each terminated by \\\\n. Similarly, a marcel pipelines can
 deliver data to an executable via stdin.
 
 {b:Combining operators and executables}

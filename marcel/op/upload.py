@@ -96,7 +96,7 @@ class Upload(marcel.core.Op):
         if len(self.filenames) == 0:
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
-        # Empty pipeline will be filled in by customize_pipeline
+        # Empty pipelines will be filled in by customize_pipeline
         pipeline_template = marcel.core.PipelineExecutable()
         pipeline_template.set_error_handler(self.owner.error_handler)
         self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,

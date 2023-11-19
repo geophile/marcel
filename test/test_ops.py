@@ -878,7 +878,7 @@ def test_fork():
                            (1, 100), (1, 101), (1, 102),
                            (2, 100), (2, 101), (2, 102)])
     TEST.run('fork 3 (|t, u: gen 3 100 | (x: (t, x))|) | sort',
-             expected_err='Too many pipeline args')
+             expected_err='Too many pipelines args')
     # iterable forkgen
     TEST.run('fork "abc" (|gen 3 100|) | sort',
              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
@@ -887,14 +887,14 @@ def test_fork():
                            ('b', 100), ('b', 101), ('b', 102),
                            ('c', 100), ('c', 101), ('c', 102)])
     TEST.run('fork "abc" (|t, u: gen 3 100 | (x: (t, x))|) | sort',
-             expected_err='Too many pipeline args')
+             expected_err='Too many pipelines args')
     # Cluster forkgen
     TEST.run('fork CLUSTER1 (|gen 3 100|)',
              expected_out=[100, 101, 102])
     TEST.run('fork CLUSTER1 (|t: gen 3 100 | (x: (str(t), x))|)',
              expected_out=[('127.0.0.1', 100), ('127.0.0.1', 101), ('127.0.0.1', 102)])
     TEST.run('fork CLUSTER1 (|t, u: gen 3 100 | (x: (str(t), x))|)',
-             expected_err='Too many pipeline args')
+             expected_err='Too many pipelines args')
 
 
 @timeit
@@ -976,7 +976,7 @@ def test_join():
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
     TEST.run(test='gen 4 | map (x: (x, -x)) | join (|x100|)',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
-    # Join with pipeline var taking arg
+    # Join with pipelines var taking arg
     TEST.run('xn = (|n: gen 3 | map (x: (x, x * n))|)')
     TEST.run(test='gen 4 | map (x: (x, -x)) | join (|xn (100)|)',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
@@ -1128,7 +1128,7 @@ def test_store_load():
 @timeit
 def test_redirect_file():
     with TestDir() as testdir:
-        # ------------------------ Test all the paths through Parser.pipeline() for files
+        # ------------------------ Test all the paths through Parser.pipelines() for files
         # file <
         TEST.run(test=f'gen 3 | write {testdir}/p1',
                  verification=f'{testdir}/p1 <',
@@ -1206,15 +1206,15 @@ def test_redirect_file():
                  verification=f'{testdir}/o2 < map (v: f"v{version}")',
                  expected_out=[f"v{version}", f"v{version}"])
         # ---------------------------------------------------------------------
-        # Store at end of top-level pipeline
+        # Store at end of top-level pipelines
         TEST.run(test=f'gen 5 > {testdir}/g5',
                  verification=f'read {testdir}/g5',
                  expected_out=[0, 1, 2, 3, 4])
-        # Store at end of pipeline arg
+        # Store at end of pipelines arg
         TEST.run(test=f'gen 10 | ifthen (x: x % 2 == 0) (|map (x: x * 10) > {testdir}/e10x10|)',
                  verification=f'read {testdir}/e10x10',
                  expected_out=[0, 20, 40, 60, 80])
-        # Store as the entire pipeline arg
+        # Store as the entire pipelines arg
         TEST.run(test=f'gen 10 | ifthen (x: x % 2 == 0) (|> {testdir}/e10|)',
                  verification=f'read {testdir}/e10',
                  expected_out=[0, 2, 4, 6, 8])
@@ -1225,11 +1225,11 @@ def test_redirect_file():
         TEST.run(test=f'gen 5 5 >> {testdir}/g10',
                  verification=f'read {testdir}/g10',
                  expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-        # Load at beginning of top-level pipeline
+        # Load at beginning of top-level pipelines
         TEST.run(test=f'gen 4 > {testdir}/g4',
                  verification=f'{testdir}/g4 < map (x: -int(x))',
                  expected_out=[0, -1, -2, -3])
-        # Load in pipeline arg
+        # Load in pipelines arg
         TEST.run(f'gen 4 | map (x: (x, x * 10)) > {testdir}/x10')
         TEST.run(f'gen 4 | map (x: (x, x * 100)) > {testdir}/x100')
         TEST.run(f'{testdir}/x10 < map (x: eval(x)) | join (|{testdir}/x100 < map (x: eval(x))|)',
@@ -1258,7 +1258,7 @@ def test_redirect_file():
 
 @timeit
 def test_redirect_var():
-    # ------------------------ Test all the paths through Parser.pipeline() for vars
+    # ------------------------ Test all the paths through Parser.pipelines() for vars
     # var <$
     TEST.run(test='gen 3 | store p1',
              verification='p1 <$',
@@ -1335,15 +1335,15 @@ def test_redirect_var():
              verification='o2 <$ map (v: f"v{v}")',
              expected_out=[f"v{version}", f"v{version}"])
     # ---------------------------------------------------------------------
-    # Store at end of top-level pipeline
+    # Store at end of top-level pipelines
     TEST.run(test='gen 5 >$ g5',
              verification='load g5',
              expected_out=[0, 1, 2, 3, 4])
-    # Store at end of pipeline arg
+    # Store at end of pipelines arg
     TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) (|map (x: x * 10) >$ e10x10|)',
              verification='load e10x10',
              expected_out=[0, 20, 40, 60, 80])
-    # Store as the entire pipeline arg
+    # Store as the entire pipelines arg
     TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) (|>$ e10|)',
              verification='load e10',
              expected_out=[0, 2, 4, 6, 8])
@@ -1354,11 +1354,11 @@ def test_redirect_var():
     TEST.run(test='gen 5 5 >>$ g10',
              verification='load g10',
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-    # Load at beginning of top-level pipeline
+    # Load at beginning of top-level pipelines
     TEST.run(test='gen 4 >$ g4',
              verification='g4 <$ map (x: -x)',
              expected_out=[0, -1, -2, -3])
-    # Load in pipeline arg
+    # Load in pipelines arg
     TEST.run('gen 4 | map (x: (x, x * 10)) >$ x10')
     TEST.run('gen 4 | map (x: (x, x * 100)) >$ x100')
     TEST.run('x10 <$ join (|x100 <$|)',
@@ -1687,6 +1687,28 @@ def test_union():
 
 
 @timeit
+def test_filter():
+    TEST.run('gen 6 | (x: (x, x)) | expand | filter (| gen 3|)',
+             expected_out=[0, 0, 1, 1, 2, 2])
+    TEST.run('gen 6 | (x: (x, x)) | expand | filter -k (| gen 3|)',
+             expected_out=[0, 0, 1, 1, 2, 2])
+    TEST.run('gen 6 | (x: (x, x)) | expand | filter --keep (| gen 3|)',
+             expected_out=[0, 0, 1, 1, 2, 2])
+    TEST.run('gen 6 | (x: (x, x)) | expand | filter -d (| gen 3|)',
+             expected_out=[3, 3, 4, 4, 5, 5])
+    TEST.run('gen 6 | (x: (x, x)) | expand | filter --discard (| gen 3|)',
+             expected_out=[3, 3, 4, 4, 5, 5])
+    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) (| gen 3 |)',
+             expected_out=[(0, 0), (1, 1), (2, 2)])
+    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) -k (| gen 3 |)',
+             expected_out=[(0, 0), (1, 1), (2, 2)])
+    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) -d (| gen 3 |)',
+             expected_out=[(3, 3), (4, 4), (5, 5)])
+    TEST.run('gen 6 | filter -d -k (| gen 3 |)',
+             expected_err='Cannot specify more than one')
+
+
+@timeit
 def test_difference():
     TEST.reset_environment()
     # Empty inputs
@@ -1793,11 +1815,11 @@ def test_args():
              expected_out=[])
     # negative testing
     TEST.run('gen 3 | args --all (|x, y: (123) |)',
-             expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
+             expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
     TEST.run('gen 3 | args --all (| (123) |)',
-             expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
+             expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
     TEST.run('gen 3 | args (| (123) |)',
-             expected_err="The args pipeline must be parameterized")
+             expected_err="The args pipelines must be parameterized")
     # Bug 94
     TEST.run('gen 4 1 | args (|n: gen (n)|) | window (x: x == 0)',
              expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
@@ -2046,28 +2068,6 @@ def test_download():
                  expected_out=[f'{node1}/a', f'{node1}/a b',
                                f'{node2}/a', f'{node2}/a b'])
         os.system(f'rm -rf {testdir}/dest/*')
-
-
-@timeit
-def test_filter():
-    TEST.run('gen 6 | (x: (x, x)) | expand | filter (| gen 3|)',
-             expected_out=[0, 0, 1, 1, 2, 2])
-    TEST.run('gen 6 | (x: (x, x)) | expand | filter -k (| gen 3|)',
-             expected_out=[0, 0, 1, 1, 2, 2])
-    TEST.run('gen 6 | (x: (x, x)) | expand | filter --keep (| gen 3|)',
-             expected_out=[0, 0, 1, 1, 2, 2])
-    TEST.run('gen 6 | (x: (x, x)) | expand | filter -d (| gen 3|)',
-             expected_out=[3, 3, 4, 4, 5, 5])
-    TEST.run('gen 6 | (x: (x, x)) | expand | filter --discard (| gen 3|)',
-             expected_out=[3, 3, 4, 4, 5, 5])
-    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) (| gen 3 |)',
-             expected_out=[(0, 0), (1, 1), (2, 2)])
-    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) -k (| gen 3 |)',
-             expected_out=[(0, 0), (1, 1), (2, 2)])
-    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) -d (| gen 3 |)',
-             expected_out=[(3, 3), (4, 4), (5, 5)])
-    TEST.run('gen 6 | filter -d -k (| gen 3 |)',
-             expected_err='Cannot specify more than one')
 
 
 @timeit
@@ -2474,12 +2474,12 @@ def main_stable():
     test_intersect()
     test_union()
     test_difference()
+    test_filter()
     test_args()
     test_env()
     test_pos()
     test_tee()
     test_json()
-    test_filter()
     test_bugs()
 
 

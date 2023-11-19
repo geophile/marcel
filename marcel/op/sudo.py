@@ -41,16 +41,17 @@ Running the command via {r:sudo} would work:
 
 
 def sudo(pipeline, *args):
+    assert isinstance(pipeline, marcel.core.OpList), pipeline
     args = list(args)
-    args.append(pipeline.create_pipeline())
+    args.append(pipeline)
     return Sudo(), args
 
 
-# The sudo command has 0 or more flags and arguments for the native sudo command, followed by a pipeline.
+# The sudo command has 0 or more flags and arguments for the native sudo command, followed by a pipelines.
 # There are a lot of flags, and it might not be a great idea to model them all. How much do those flags
 # differ across distros? And since the flags aren't being modeled by the arg parser, we can't say that the
-# last arg is, specifically, a pipeline. So just get all the args, and assume the last one is a pipeline.
-# This means that setup has to convert the pipeline ref to a pipeline.
+# last arg is, specifically, a pipelines. So just get all the args, and assume the last one is a pipelines.
+# This means that setup has to convert the pipelines ref to a pipelines.
 class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
@@ -59,10 +60,10 @@ class SudoArgsParser(marcel.argsparser.ArgsParser):
         self.validate()
 
     def check_str_and_pipeline(self, arg, x):
-        # This isn't really accurate. The last arg must be a pipeline. The preceding ones must be str.
-        if type(x) not in (str, marcel.core.PipelineExecutable):
+        # This isn't really accurate. The last arg must be a pipelines. The preceding ones must be str.
+        if type(x) not in (str, marcel.core.PipelineExecutable, marcel.core.OpList):
             raise marcel.argsparser.ArgsError(self.op_name,
-                                              f'Arguments must be strings (flags to sudo) followed by a pipeline: {x}')
+                                              f'Arguments must be strings (flags to sudo) followed by a pipelines: {x}')
         return x
 
 
@@ -80,12 +81,15 @@ class Sudo(marcel.core.Op):
 
     def setup(self, env):
         if len(self.args) == 0:
-            raise marcel.exception.KillCommandException('Missing pipeline')
-        self.pipeline = self.args.pop()
-        if type(self.pipeline) is str:
-            self.pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline).copy()
-        if not isinstance(self.pipeline, marcel.core.PipelineExecutable):
-            raise marcel.exception.KillCommandException('Last argument to sudo must be a pipeline')
+            raise marcel.exception.KillCommandException('Missing pipelines')
+        last_arg = self.args.pop()
+        if type(last_arg) is str:
+            self.pipeline = env.getvar(last_arg)
+            if type(self.pipeline) is not marcel.core.PipelineExecutable:
+                raise marcel.exception.KillCommandException(
+                    f'The variable {last_arg} is not bound to a pipeline')
+        else:
+            self.pipeline = marcel.core.Pipeline.create(self.owner.error_handler, last_arg).executable(env)
 
     # Op
 
@@ -98,8 +102,8 @@ class Sudo(marcel.core.Op):
                                         stderr=subprocess.PIPE,
                                         shell=True,
                                         universal_newlines=False)
-        # The pipeline's environment will be set remotely.
-        # Send the python version, environment and pipeline, (as in Remote)
+        # The pipelines's environment will be set remotely.
+        # Send the python version, environment and pipelines, (as in Remote)
         buffer = io.BytesIO()
         pickler = dill.Pickler(buffer)
         pickler.dump(env.python_version())

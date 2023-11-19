@@ -61,7 +61,7 @@ If neither {r:--keep} nor {r:--discard} are specified, then {r:--keep} is assume
 
 # 'filter' is a builtin Python function
 def filt(pipeline, compare=None, keep=False, discard=False):
-    assert isinstance(pipeline, marcel.core.Pipelineable)
+    assert isinstance(pipeline, marcel.core.OpList), pipeline
     args = []
     if keep:
         args.append('--keep')
@@ -69,7 +69,7 @@ def filt(pipeline, compare=None, keep=False, discard=False):
         args.append('--discard')
     if compare:
         args.extend(['--compare', compare])
-    args.append(pipeline.create_pipeline())
+    args.append(pipeline)
     return Filter(), args
 
 
@@ -80,7 +80,7 @@ class FilterArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_no_value('keep', '-k', '--keep')
         self.add_flag_no_value('discard', '-d', '--discard')
         self.add_flag_one_value('compare', '-c', '--compare')
-        self.add_anon('pipeline', convert=self.check_str_or_pipeline, target='pipeline_arg')
+        self.add_anon('pipelines', convert=self.check_pipeline, target='pipeline_arg')
         self.at_most_one('keep', 'discard')
         self.validate()
 

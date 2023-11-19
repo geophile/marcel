@@ -37,16 +37,7 @@ def kill_and_resume_on_file_open_error(path, mode, error):
     raise marcel.exception.KillAndResumeException(f'Unable to open {path} with mode {mode}: {str(error)}')
 
 
-class Pipelineable(object):
-
-    def n_params(self):
-        assert False
-
-    def create_pipeline(self, args=None):
-        assert False
-
-
-class AbstractOp(Pipelineable):
+class AbstractOp(object):
 
     def setup(self, env):
         pass
@@ -56,11 +47,11 @@ class Op(AbstractOp):
 
     def __init__(self):
         super().__init__()
-        # The following fields are set and have defined values only during the execution of a pipeline
+        # The following fields are set and have defined values only during the execution of a pipelines
         # containing this op.
         # The op receiving this op's output
         self.receiver = None
-        # The pipeline to which this op belongs
+        # The pipelines to which this op belongs
         self.owner = None
         self._count = -1
         # Used temporarily by API, to convey env to PipelineIterator. For the API, a Pipeline is built from
@@ -165,36 +156,6 @@ class Op(AbstractOp):
     def op_name(cls):
         return cls.__name__.lower()
 
-    # API
-
-    def __or__(self, other):
-        return Node(self, other)
-
-    def __iter__(self):
-        env = self.env
-        self.env = None
-        assert env is not None
-        return PipelineIterator(env, self.create_pipeline())
-
-
-    # arg is a Pipeline, Pipelineable, or a var bound to a pipeline. Deal with all of these possibilities
-    # and come up with the pipeline itself.
-    @staticmethod
-    def pipeline_arg_value(env, arg):
-        if type(arg) is marcel.core.PipelineExecutable:
-            pipeline = arg
-        elif isinstance(arg, marcel.core.Pipelineable):
-            pipeline = arg.create_pipeline()
-        elif type(arg) is str:  # Presumably a var
-            pipeline = env.getvar(arg)
-            if type(pipeline) is not marcel.core.PipelineExecutable:
-                raise marcel.exception.KillCommandException(
-                    f'The variable {arg} is not bound to a pipeline')
-        else:
-            raise marcel.exception.KillCommandException(
-                f'Not a pipeline: {arg}')
-        return pipeline
-
     # Examine the named field, which is a single- or list-valued attr of self.
     # Evaluate any functions found, and then check that the resulting type is
     # one of the given types.
@@ -273,8 +234,8 @@ class Command:
         return env.changes() if remote else None
 
 
-# Used to represent a function yielding a Node tree (which then yields a Pipeline).
-class PipelineFunction(Pipelineable):
+# Used to represent a function yielding an OpList (which then yields a Pipeline).
+class PipelineFunction(object):
 
     def __init__(self, function):
         if not callable(function):
@@ -288,75 +249,51 @@ class PipelineFunction(Pipelineable):
     def create_pipeline(self, args=None):
         if args is None:
             args = []
-        pipelineable = self.function(*args)
-        if not (type(pipelineable) is Node or isinstance(pipelineable, Op)):
-            raise marcel.exception.KillCommandException(
-                f'Function that should evaluate to a Pipeline evalutes instead to {type(pipelineable)}.')
-        return pipelineable.create_pipeline()
+        op_list = self.function(*args)
+        assert type(op_list) is OpList, op_list
+        return op_list.create_pipeline()
 
 
-class Node(Pipelineable):
+# For use by API
+class OpList(object):
 
-    # See comment on Op.env for discussion of env handling
-
-    def __init__(self, left, right):
-        self.env = left.env
-        left.env = None
-        right.env = None
-        self.left = left
-        self.right = right
+    def __init__(self, env, op):
+        # The API constructs a pipelines by or-ing together the objects returned by marcel.api._generate_op.
+        # This class is written to work as both the object returned for each op, and the accumulator. E.g.
+        # map() | select() | red()
+        # 1. map() returns an OpList with op = map()
+        # 2. select() returns an OpList with op = select()
+        # 3. These OpLists are or-ed, returning an OpList placing map() and select() into ops.
+        # 4. Then red() yields an OpList with op set to red(), and that is or-ed appending to OpList.ops from step 3.
+        self.env = env
+        self.op = op
+        self.ops = None
 
     def __or__(self, other):
-        assert isinstance(other, Op) or type(other) is PipelineExecutable, type(other)
-        return Node(self, other)
+        if self.ops is None:
+            # self must be the first op of a pipelines
+            self.ops = [self.op]
+            self.op = None
+        # Append ops from other. There could be one or more than one
+        assert (other.op is None) != (other.ops is None)
+        if other.op:
+            self.ops.append(other.op)
+        else:
+            self.ops.extend(other.ops)
+        return self
 
     def __iter__(self):
-        env = self.env
-        self.env = None
-        assert env is not None
-        pipeline = self.create_pipeline()
-        return PipelineIterator(env, pipeline)
-
-    # Pipelineable
+        return PipelineIterator(self.env, self.create_pipeline())
 
     def create_pipeline(self, args=None):
-        def visit(op):
-            if isinstance(op, Op):
-                ops = [op]
-            elif type(op) is PipelineExecutable:
-                # op will usually be an Op. But the op could represent a Pipeline, e.g.
-                #     recent = [select (f: now() - f.mtime < days(1))]
-                #     ls | recent
-                # In this case, through the CLI, the Pipeline would be wrapped in a runpipeline op. But
-                # through the API, op could actually be a Pipeline.
-                ops = list(op.ops)
-            else:
-                assert False, op
-            for op in ops:
-                # # TODO: Obsolete?
-                # # The need to set the owner on the source of the copy is a bit subtle. op might be something that owns
-                # # a FunctionWrapper. A FunctionWrapper points to it's op, and error handling requires the op's owner
-                # # for error handling. If the owner isn't set prior to the copy, then the copy won't have its
-                # # FunctionWrapper's op's owner set.
-                # op.set_owner(pipeline)
-                pipeline.append(op)
-
         assert args is None
         pipeline = PipelineExecutable()
-        self.traverse(visit)
+        if self.ops is None:
+            pipeline.append(self.op)
+        else:
+            for op in self.ops:
+                pipeline.append(op)
         return pipeline
-
-    # Node
-
-    def traverse(self, visit):
-        if type(self.left) is Node:
-            self.left.traverse(visit)
-        else:
-            visit(self.left)
-        if type(self.right) is Node:
-            self.right.traverse(visit)
-        else:
-            visit(self.right)
 
 
 class PipelineExecutable(AbstractOp):
@@ -365,7 +302,7 @@ class PipelineExecutable(AbstractOp):
         super().__init__()
         self.error_handler = None
         self.ops = []
-        # Parameters declared for a pipeline
+        # Parameters declared for a pipelines
         self.params = None
         self.source = None
 
@@ -446,9 +383,9 @@ class PipelineExecutable(AbstractOp):
         return self.params
 
     def copy(self):
-        # A pipeline copy contains shallow copies of the ops. This allows an op to make a copy of the pipeline
+        # A pipelines copy contains shallow copies of the ops. This allows an op to make a copy of the pipelines
         # and be sure that the copy doesn't share state or structure (i.e. Op.receiver) with other uses of the
-        # "same" pipeline within the same command.
+        # "same" pipelines within the same command.
         copy = PipelineExecutable()
         copy.error_handler = self.error_handler
         for op in self.ops:
@@ -489,12 +426,15 @@ class PipelineIterator:
         return next(self.iterator)
 
 
-# For the CLI, pipeline syntax is parsed and a Pipeline is created. For the API, a pipeline is a function whose
-# body is a marcel expression. PipelineWrapper provides a uniform interface for dealing with pipelines, regardless
-# of which interface created is in use.
+# There are a few kinds of pipelines:
+# - PipelineExecutable: Created directly by Parser, and used for execution of pipelines.
+# - OpList: Constructed by marcel.api, can be used to generate PipelineExecutable.
+# - function evaluated to OpList: Also constructed by marcel.api, for parameterized pipelines.
+# - PipelineFunction: Wrapper around function that evaluates to OpList
+# Pipeline provides a uniform interface to all of these.
 class Pipeline(object):
 
-    # customize_pipeline takes pipeline as an argument, returns None
+    # customize_pipeline takes pipelines as an argument, returns None
     def __init__(self, error_handler, pipeline_arg, customize_pipeline):
         self.error_handler = error_handler
         self.pipeline_arg = pipeline_arg
@@ -513,6 +453,9 @@ class Pipeline(object):
     def run_pipeline(self, env, args):
         assert False
 
+    def executable(self, env):
+        assert False
+
     def receive(self, env, x):
         self.pipeline.receive(env, x)
 
@@ -523,13 +466,24 @@ class Pipeline(object):
         self.pipeline.cleanup()
 
     @staticmethod
-    def create(error_handler, pipeline_arg, customize_pipeline):
-        return (PipelineAPI(error_handler, pipeline_arg, customize_pipeline)
-                if type(pipeline_arg) is PipelineFunction
-                else PipelineInteractive(error_handler, pipeline_arg, customize_pipeline))
+    def create(error_handler,
+               pipeline,
+               customize_pipeline=lambda env, pipeline: pipeline):
+        if type(pipeline) in (str, PipelineExecutable):
+            # str: Presumably the name of a variable bound to a PipelineExecutable
+            return PipelineMarcel(error_handler,
+                                  pipeline,
+                                  customize_pipeline)
+        if callable(pipeline) or type(pipeline) is OpList:
+            return PipelinePython(error_handler,
+                                  pipeline,
+                                  customize_pipeline)
+        assert False, pipeline
 
 
-class PipelineInteractive(Pipeline):
+# A pipeline constructed through the marcel parser, via command line or script. Pipeline args are managed
+# by the Environment's NestedNamspace, and are pushed/popped around pipeline execution.
+class PipelineMarcel(Pipeline):
 
     def __init__(self, error_handler, pipeline_arg, customize_pipeline):
         super().__init__(error_handler, pipeline_arg, customize_pipeline)
@@ -537,9 +491,17 @@ class PipelineInteractive(Pipeline):
         self.scope = None
 
     def setup(self, env):
-        self.pipeline = marcel.core.Op.pipeline_arg_value(env, self.pipeline_arg).copy()
-        self.pipeline.set_error_handler(self.error_handler)
-        self.pipeline = self.customize_pipeline(env, self.pipeline)
+        if type(self.pipeline_arg) is str:
+            executable = env.getvar(self.pipeline_arg)
+            if type(executable) is not marcel.core.PipelineExecutable:
+                raise marcel.exception.KillCommandException(
+                    f'The variable {self.pipeline_arg} is not bound to a pipeline')
+        else:
+            executable = self.pipeline_arg
+        # Make a copy, in case the pipeline needs an instance per fork.
+        executable = executable.copy()
+        executable.set_error_handler(self.error_handler)
+        self.pipeline = self.customize_pipeline(env, executable)
         assert self.pipeline is not None
         self.scope = {}
         self.params = self.pipeline.parameters()
@@ -563,10 +525,31 @@ class PipelineInteractive(Pipeline):
     def prepare_to_receive(self, env):
         self.pipeline.setup(env)
 
+    def executable(self, env):
+        if type(self.pipeline_arg) is str:
+            # Presumably a var
+            pipeline = env.getvar(self.pipeline_arg)
+            if type(pipeline) is not marcel.core.PipelineExecutable:
+                raise marcel.exception.KillCommandException(
+                    f'The variable {self.pipeline_arg} is not bound to a pipeline')
+        elif type(self.pipeline_arg) is PipelineExecutable:
+            pipeline = self.pipeline_arg
+        else:
+            assert False, self.pipeline_arg
+        return pipeline
 
-class PipelineAPI(Pipeline):
+
+# A pipeline created by Python, by using marcel.api. Pipeline variables are ordinary Python variables,
+# and scoping is taken care of by Python.
+class PipelinePython(Pipeline):
 
     def __init__(self, error_handler, pipeline_arg, customize_pipeline):
+        if callable(pipeline_arg):
+            pipeline_arg = marcel.core.PipelineFunction(pipeline_arg)
+        elif type(pipeline_arg) is OpList:
+            pipeline_arg = pipeline_arg.create_pipeline()
+        else:
+            assert False, pipeline_arg
         super().__init__(error_handler, pipeline_arg, customize_pipeline)
         self.pipeline = None
 
@@ -577,10 +560,6 @@ class PipelineAPI(Pipeline):
         return self.pipeline_arg.n_params()
 
     def run_pipeline(self, env, args):
-        # Through the API, a pipeline is expressed as a Python function which, when evaluated,
-        # yields a pipeline composed of op.core.Nodes. This function is the value of the op's
-        # pipeline_arg field. So op.pipeline_arg(*args) evaluates the function (using the current
-        # value of the args), and yields the pipeline to execute.
         pipeline = (self.pipeline_arg.create_pipeline(args)
                     if self.n_params() > 0 else
                     self.pipeline_arg.create_pipeline())
@@ -590,7 +569,10 @@ class PipelineAPI(Pipeline):
 
     def prepare_to_receive(self, env):
         assert self.n_params() == 0
-        pipeline = self.pipeline_arg.create_pipeline()
+        pipeline = self.executable(env)
         pipeline.set_error_handler(self.error_handler)
         self.pipeline = self.customize_pipeline(env, pipeline)
         self.pipeline.setup(env)
+
+    def executable(self, env):
+        return self.pipeline_arg.create_pipeline()
