@@ -44,7 +44,7 @@ from marcel.api import *
 # stdin carries the following from the client process:
 #   - The client's python version (checked to match server's, see bug 169.)
 #   - The client's environment
-#   - The pipeline to be executed
+#   - The pipelines to be executed
 #   - Possibly a kill signal
 # The kill signal may be delayed and may never arrive. Pipeline execution takes place
 # on a thread so that stdin can be monitored for the kill signal and then acted upon.
@@ -198,7 +198,7 @@ def main():
         input = dill.Unpickler(sys.stdin.buffer)
         # Python version from client
         client_python_version = input.load()
-        # pipeline from client
+        # pipelines from client
         pipeline = input.load()
         version = env.getvar('MARCEL_VERSION')
         TRACE.write(f'Marcel version {version}')

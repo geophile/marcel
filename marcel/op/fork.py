@@ -102,10 +102,8 @@ using the {n:upload} or {n:download} operators, or remote execution syntax, e.g.
 
 
 def fork(forkgen, pipeline):
-    # callable: Through API.
-    # not callable: Interactive.
-    pipeline_arg = marcel.core.PipelineFunction(pipeline) if callable(pipeline) else pipeline
-    return Fork(), [forkgen, pipeline_arg]
+    assert isinstance(pipeline, marcel.core.OpList) or callable(pipeline), pipeline
+    return Fork(), [forkgen, pipeline]
 
 
 # For API
@@ -114,7 +112,7 @@ class ForkArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('fork', env)
         self.add_anon('forkgen', convert=self.fork_gen)
-        self.add_anon('pipeline', convert=self.check_str_or_pipeline, target='pipeline_arg')
+        self.add_anon('pipeline', convert=self.check_pipeline, target='pipeline_arg')
         self.validate()
 
 
@@ -134,8 +132,6 @@ class Fork(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        pipeline_arg = self.pipeline_arg
-        assert isinstance(pipeline_arg, marcel.core.Pipelineable)
         forkgen = self.eval_function(env, 'forkgen') if callable(self.forkgen) else self.forkgen
         if type(forkgen) is int:
             if forkgen > 0:
@@ -148,9 +144,11 @@ class Fork(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'Iterable fork generator must not be empty.')
         else:
             raise marcel.exception.KillCommandException(f'Invalid fork generator.')
+        # For API, the pipeline can have no args, e.g. gen(3), or one arg, e.g. lambda t: gen(t).
+        pipeline = self.pipeline_arg
         self.manager = marcel.op.forkmanager.ForkManager(op=self,
                                                          thread_ids=self.thread_ids,
-                                                         pipeline_arg=pipeline_arg,
+                                                         pipeline_arg=pipeline,
                                                          max_pipeline_args=1)
         self.manager.setup(env)
 

@@ -23,6 +23,6 @@ topics = [
     'object',
     'operator',
     'overview',
-    'pipeline',
+    'pipelines',
     'prompt'
 ]

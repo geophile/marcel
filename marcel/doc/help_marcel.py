@@ -27,7 +27,7 @@ on these introductory topics:
 {L,indent=4:12}- {n:interaction}: Interacting with marcel.
 {L,indent=4:12}- {n:command}: Marcel operators, host OS executables.
 {L,indent=4:12}- {n:function}: The use of functions in marcel commands.
-{L,indent=4:12}- {n:pipeline}: The main structuring mechanism of marcel, relying on pipes 
+{L,indent=4:12}- {n:pipelines}: The main structuring mechanism of marcel, relying on pipes 
 as in other shells.
 {L,indent=4:12}- {n:object}: The data operated on by commands, and carried by pipes.
 

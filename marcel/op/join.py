@@ -31,7 +31,7 @@ tuple from the right input.
 Computes a database-style join between the input stream, 
 and a second stream from the given {r:PIPELINE}.
 
-The input pipeline provides one input to the join, named {i:left}.
+The input pipelines provides one input to the join, named {i:left}.
 The {r:PIPELINE} argument provides the second input, named {i:right}.
 Left and right tuples are matched by comparing their first elements. For matching
 pairs, an output tuple consists of the left tuple followed by the right tuple with the
@@ -70,9 +70,9 @@ If the {r:--keep} flag were included, the output would have two additional rows:
 
 
 def join(pipeline, keep=False):
-    assert isinstance(pipeline, marcel.core.Pipelineable)
+    assert isinstance(pipeline, marcel.core.OpList)
     args = ['--keep'] if keep else []
-    args.append(pipeline.create_pipeline())
+    args.append(pipeline)
     return Join(), args
 
 
@@ -82,7 +82,7 @@ class JoinArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('join', env)
         self.add_flag_no_value('keep', '-k', '--keep')
         # str: To accommodate var names
-        self.add_anon('pipeline', convert=self.check_str_or_pipeline, target='pipeline_arg')
+        self.add_anon('pipelines', convert=self.check_pipeline, target='pipeline_arg')
         self.validate()
 
 
@@ -92,7 +92,7 @@ class Join(marcel.core.Op):
         super().__init__()
         self.pipeline_arg = None
         self.keep = None
-        self.inner = None  # Map containing contents of pipeline, keyed by join value
+        self.inner = None  # Map containing contents of pipelines, keyed by join value
 
     def __repr__(self):
         return f'join(keep, {self.pipeline_arg})' if self.keep else f'join({self.pipeline_arg})'
@@ -100,9 +100,9 @@ class Join(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        pipeline = marcel.core.PipelineWrapper.create(self.owner.error_handler,
-                                                      self.pipeline_arg,
-                                                      self.customize_pipeline)
+        pipeline = marcel.core.Pipeline.create(self.owner.error_handler,
+                                               self.pipeline_arg,
+                                               self.customize_pipeline)
         pipeline.setup(env)
         pipeline.run_pipeline(env, None)
 

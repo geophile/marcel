@@ -1,0 +1,193 @@
+Pipeline Overhaul
+
+Pipelines are still a mess. In the beginning, there was Pipeline, a
+list of Ops. That worked for interactive marcel. 
+
+Then to support the API, there were Nodes and PipelineFunction. Op
+defined __or__ so that "op | op" would create a Node, and then Node |
+Op created another Node. A tree of Nodes could be converted to a
+Pipeline. And to support parameterized pipelines in the API,
+PipelineFunction was created. The function, when evaluated, creates a
+Node tree which then yields a Pipeline.
+
+PipelineWrapper was created to unify the handling of API and
+interactive pipelines, but it's still kind of a mess.
+
+So this note will explain how it should all work, regardless of the
+code right now, and then I'll go and make the code match.
+
+----------------------------------------------------------------------
+
+Env handling:
+
+It has been very difficult to get env handling correct. At various
+times, it's been associated with pipelines, ops, and neither. Having
+an env associated with an op or a pipeline is a problem because the
+env can be large, and have unpickleable things, which is a problem
+when pickling is required. 
+
+The current *intent* is for an env not to be referenced from pipelines
+and ops at execution time, which pickling might be required. But this
+is tricky because of PipelineIterators. We want this to work:
+
+   for file in ls() | select(...):
+       ...
+
+ls | select creates a Node tree. Node.__iter__ yields a
+PipelineIterator which allows the for loop to work. But
+PipelineIterator initiates execution of the pipeline, which requires
+an env. How does the env get there?
+
+There is some trickiness involving referencing an env from *every* op
+created by marcel.api, grabbing the env in PipelineIterator, and
+clearing out the reference before it is used. But I don't think the
+env is cleared out on the PipelineIterator code path, and it looks
+like other code paths leave the env in place, (based on some crashes
+I've seen).
+
+Possible alternative to temporary Op.env reference: 
+
+- Don't even have the Op.env field.
+
+- Make sure that we never have an op by itself in a pipeline, it's
+  always wrapped by a Node. E.g. p = ls() creates an Ls op right now,
+  with an env. Instead, have it be a Node referencing Ls, and put the
+  env on the Node. Nodes create a linked list instead of a tree:
+
+  Node
+  - op: Op
+  - next: Node
+
+- PipelineIterator always gets a Node which always has an env.
+
+*** Remove Pipelineable as parent of Op, once Ops don't need to work
+    like Nodes.
+
+----------------------------------------------------------------------
+
+Classes:
+
+Pipelineable
+    - n_params()
+    - create_pipeline()
+
+    AbstractOp
+        - setup()
+
+        Pipeline
+
+    PipelineFunction
+
+    Node
+
+PipelineWrapper
+
+    - setup():
+      - Get a Pipeline
+      - Set error_handler
+      - Customize
+      - Interactive only: set up params
+
+    - n_params()
+
+    - run_pipeline(): Execute the pipeline (no input stream)
+
+    - receive()
+
+    - flush()
+
+    - cleanup()
+
+      setup/run or setup/prepare_to_receive prepare and run the
+      pipeline. Division of labor is different for API and Interactive.
+
+    PipelineInteractive
+
+    PipelineAPI
+
+----------------------------------------------------------------------
+
+PipelineWrapper has the right idea. It should be the single interface
+to pipelines, creating a wrapper ASAP, e.g. in the API functions like
+select(), and in args parsing for interactive/scripts. Modify and
+extend PW as necessary to make this work.
+
+This has the benefit of reducing uncertainty about what kind of
+pipeline we have at any point in the code. All the handling of cases
+is within PW.
+
+PW needs to abstract parameterized pipelines, which means it has to be
+able to wrap PipelineFunction. But PFs have two uses. 1) The user
+calls the function to generate a pipeline. 2) Args uses it, binding
+stream content to the PFs parameters. So when creating a PW, there
+needs to be a flag indicating whether PF is OK.
+
+
+Renaming would be good:
+
+old                     new
+
+Pipeline                PipelineExecutable
+PipelineWrapper         Pipeline
+Pipelineable            AbstractPipeline
+
+----------------------------------------------------------------------
+
+Bugs:
+
+This works:
+
+    run(remote('jao', lambda: ls('/tmp/*.txt')))
+
+But this does not:
+
+    run(remote('jao', ls('/tmp/*.txt')))
+
+This is the OPPOSITE of union:
+
+    run(gen(3) | union(pn(5)))  # OK
+    run(gen(3) | union(lambda: p))  # ERROR
+
+
+I think both should be allowed. The second one is a convenient
+shorthand for unparameterized pipelines.
+
+......................................................................
+
+This works:
+
+    M 0.20.0 jao@loon ~/git/marcel$ p = (| n: (x: [x] * n) |)
+    M 0.20.0 jao@loon ~/git/marcel$ gen (3) | p (3)
+    [0, 0, 0]
+    [1, 1, 1]
+    [2, 2, 2]
+
+But this doesn't:
+
+    M 0.20.0 jao@loon ~/git/marcel$ gen (3) | (| n: (x: [x] * n |) 3
+    Parsing error at position 8 of "gen (3) | (| n: (x: [x] * n |) 3...": Premature end of input
+
+The syntax is weird, but maybe it should be allowed?
+
+----------------------------------------------------------------------
+
+API ops using pipelines:
+
+* args
+* assign
+* difference
+* download
+* filter
+* fork
+* ifbase
+* intersect
+* join
+* remote
+* sudo
+* tee
+* union
+* upload
+
+* Fixed
+
+Op.pipeline_arg_value is a mess, does too much. Used only by Sudo.setup, PipelineInteractive.setup

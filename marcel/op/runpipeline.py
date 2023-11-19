@@ -41,7 +41,7 @@ class RunPipeline(marcel.core.Op):
         if self.pipeline is None:
             raise marcel.exception.KillCommandException(
                 f'{self.var} is not executable.')
-        if not isinstance(self.pipeline, marcel.core.Pipeline):
+        if not isinstance(self.pipeline, marcel.core.PipelineExecutable):
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is not bound to anything executable.')
         n_params = 0 if self.pipeline.parameters() is None else len(self.pipeline.parameters())
@@ -49,12 +49,12 @@ class RunPipeline(marcel.core.Op):
                         (0 if self.kwargs is None else len(self.kwargs))):
             raise marcel.exception.KillCommandException(
                 f'Wrong number of arguments for pipeline {self.var} = {self.pipeline}')
-        # Why copy: A pipeline can be used twice in a command, e.g.
+        # Why copy: A pipelines can be used twice in a command, e.g.
         #    x = (| a: ... |)
         #    x (1) | join (| x (2) |)
         # Without copying the identical ops comprising x would be used twice in the same
         # command. This potentially breaks the use of Op state during execution, and also
-        # breaks the structure of the pipeline, e.g. Op.receiver.
+        # breaks the structure of the pipelines, e.g. Op.receiver.
         self.pipeline = self.pipeline.copy()
         self.pipeline.set_error_handler(self.owner.error_handler)
         self.pipeline.last_op().receiver = self.receiver

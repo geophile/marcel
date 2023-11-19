@@ -26,9 +26,9 @@ HELP = '''
 {L,wrap=F}args [-a|--all] PIPELINE
 
 {L,indent=4:28}{r:-a}, {r:--all}               Accumulate the entire input stream into a list, and bind it to a single
-pipeline parameter. 
+pipelines parameter. 
 
-{L,indent=4:28}{r:PIPELINE}                A parameterized pipeline, to be executed with arguments coming 
+{L,indent=4:28}{r:PIPELINE}                A parameterized pipelines, to be executed with arguments coming 
 from the input stream.
 
 Items in the input stream to {r:args} will be bound to the {r:PIPELINE}s parameters. 
@@ -44,8 +44,9 @@ accumulated into a list and bound to that parameter.
 
 
 def args(pipeline_function, all=False):
+    assert callable(pipeline_function), pipeline_function
     op_args = ['--all'] if all else []
-    op_args.append(marcel.core.PipelineFunction(pipeline_function))
+    op_args.append(pipeline_function)
     return (Args()), op_args
 
 
@@ -54,7 +55,7 @@ class ArgsArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('args', env)
         self.add_flag_no_value('all', '-a', '--all')
-        self.add_anon('pipeline', convert=self.check_str_or_pipeline, target='pipeline_arg')
+        self.add_anon('pipelines', convert=self.check_pipeline, target='pipeline_arg')
         self.validate()
 
 
@@ -66,7 +67,7 @@ class Args(marcel.core.Op):
         self.pipeline_arg = None
         self.n_params = None
         self.args = None
-        self.pipeline_wrapper = None
+        self.pipeline = None
 
     def __repr__(self):
         flags = 'all, ' if self.all else ''
@@ -76,19 +77,22 @@ class Args(marcel.core.Op):
 
     def setup(self, env):
         pipeline_arg = self.pipeline_arg
-        assert isinstance(pipeline_arg, marcel.core.Pipelineable)
-        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(self.owner.error_handler,
-                                                                   pipeline_arg,
-                                                                   self.customize_pipeline)
-        self.n_params = pipeline_arg.n_params()
+        # API: callable
+        # CLI: PipelineExecutable
+        assert (callable(pipeline_arg) or
+                isinstance(pipeline_arg, marcel.core.PipelineExecutable))
+        self.pipeline = marcel.core.Pipeline.create(self.owner.error_handler,
+                                                    pipeline_arg,
+                                                    self.customize_pipeline)
+        self.pipeline.setup(env)
+        self.n_params = self.pipeline.n_params()
         self.check_args()
         self.args = []
-        self.pipeline_wrapper.setup(env)
 
     def receive(self, env, x):
         self.args.append(unwrap_op_output(x))
         if not self.all and len(self.args) == self.n_params:
-            self.pipeline_wrapper.run_pipeline(env, self.args)
+            self.pipeline.run_pipeline(env, self.args)
             self.args.clear()
 
     def flush(self, env):
@@ -98,21 +102,21 @@ class Args(marcel.core.Op):
             else:
                 while len(self.args) < self.n_params:
                     self.args.append(None)
-            self.pipeline_wrapper.run_pipeline(env, self.args)
+            self.pipeline.run_pipeline(env, self.args)
             self.args.clear()
         self.propagate_flush(env)
 
     def check_args(self):
         error = None
         if self.all and self.n_params != 1:
-            error = 'With -a|--all option, the pipeline must have exactly one parameter.'
+            error = 'With -a|--all option, the pipelines must have exactly one parameter.'
         elif self.n_params == 0:
-            error = 'The args pipeline must be parameterized.'
+            error = 'The args pipelines must be parameterized.'
         if error:
             raise marcel.exception.KillCommandException(error)
 
     def customize_pipeline(self, env, pipeline):
-        # By appending this map invocation to the pipeline, we relay pipeline output
+        # By appending this map invocation to the pipelines, we relay pipelines output
         # to arg's downstream operator. But flush is a dead end, it doesn't propagate
         # to arg's downstream, which was the issue in bug 136.
         pipeline.append(marcel.opmodule.create_op(env, 'map', lambda *x: self.send(env, x)))

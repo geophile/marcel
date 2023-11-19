@@ -127,7 +127,7 @@ Op usage
 
                 Interactive     Script         API
 args                x             x             x
-assign              x             x
+assign (1)          x             x
 bash                x             x             x
 bg                  x
 cd                  x
@@ -162,7 +162,7 @@ read                x             x             x
 remote              x             x             x
 reverse             x             x             x
 run                 x
-runpipeline*        x             x
+runpipeline (2)     x             x
 select              x             x             x
 sort                x             x             x
 squish              x             x             x
@@ -179,7 +179,10 @@ version             x             x             x
 window              x             x             x
 write               x             x             x
 
-* Not a public op
+1: Assign *is* in the api currently. It operates on the env just like
+CLI.
+
+2: Not a public op
 
 ----------------------------------------------------------------------
 

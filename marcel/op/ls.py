@@ -90,13 +90,8 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
         super().__init__(Ls.send_path)
 
     def __repr__(self):
-        buffer = []
-        depth = ('0' if self.d0 else
-                 '1' if self.d1 else
-                 'r' if self.dr else
-                 None)
-        if depth is not None:
-            buffer.append(depth)
+        depth = '0' if self.d0 else '1' if self.d1 else 'recursive' if self.dr else None
+        buffer = [f'depth={depth}'] if depth is not None else []
         include = ''
         if self.file:
             include += 'f'

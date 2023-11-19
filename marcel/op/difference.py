@@ -49,16 +49,15 @@ output is unspecified.
 
 
 def difference(pipeline):
-    assert isinstance(pipeline, marcel.core.Pipelineable)
-    args = [pipeline.create_pipeline()]
-    return Difference(), args
+    assert isinstance(pipeline, marcel.core.OpList), pipeline
+    return Difference(), [pipeline]
 
 
 class DifferenceArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('difference', env)
-        self.add_anon('pipeline', convert=self.check_str_or_pipeline, target='pipeline_arg')
+        self.add_anon('pipelines', convert=self.check_pipeline, target='pipeline_arg')
         self.validate()
 
 
@@ -75,9 +74,9 @@ class Difference(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        pipeline = marcel.core.PipelineWrapper.create(self.owner.error_handler,
-                                                      self.pipeline_arg,
-                                                      self.customize_pipeline)
+        pipeline = marcel.core.Pipeline.create(self.owner.error_handler,
+                                               self.pipeline_arg,
+                                               self.customize_pipeline)
         pipeline.setup(env)
         pipeline.run_pipeline(env, None)
 

@@ -5,10 +5,10 @@ import test_base
 #
 # command:
 #         assignment
-#         pipeline
+#         pipelines
 #
 # assignment:
-#         var = [ pipeline ]
+#         var = [ pipelines ]
 #         var = expr
 #         var = str
 #

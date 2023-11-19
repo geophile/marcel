@@ -80,17 +80,17 @@ class ForkWorker(object):
         # duplex=False: child writes to parent when function completes execution.
         # No need to communicate in the other direction
         self.reader, self.writer = mp.Pipe(duplex=False)
-        self.pipeline_wrapper = marcel.core.PipelineWrapper.create(op.owner.error_handler,
-                                                                   fork_manager.pipeline_arg,
-                                                                   self.customize_pipeline)
-        self.pipeline_wrapper.setup(env)
-        if self.pipeline_wrapper.n_params() > fork_manager.max_pipeline_args:
-            raise marcel.exception.KillCommandException('Too many pipeline args.')
+        self.pipeline = marcel.core.Pipeline.create(op.owner.error_handler,
+                                                    fork_manager.pipeline_arg,
+                                                    self.customize_pipeline)
+        self.pipeline.setup(env)
+        if self.pipeline.n_params() > fork_manager.max_pipeline_args:
+            raise marcel.exception.KillCommandException('Too many pipelines args.')
 
     def start_process(self):
         def run_pipeline_in_child():
             try:
-                self.pipeline_wrapper.run_pipeline(self.env, [self.thread_id])
+                self.pipeline.run_pipeline(self.env, [self.thread_id])
             except BaseException as e:
                 self.writer.send(dill.dumps(e))
             self.writer.close()

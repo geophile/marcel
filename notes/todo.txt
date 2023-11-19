@@ -724,3 +724,7 @@ Need an exit command, which is run by Ctrl-D.
 ----------------------------------------------------------------------
 
 History record should include time of execution.
+
+----------------------------------------------------------------------
+
+Move op tests into ops themselves? Is this feasible for API testing?

@@ -805,12 +805,12 @@ class Tokens(object):
 #
 #     command:
 #             assignment
-#             pipeline
+#             pipelines
 #    
 #     assignment:
 #             str = arg
 #    
-#     pipeline:
+#     pipelines:
 #             op_sequence [gt str]
 #             str lt gt str
 #             str lt [op_sequence [gt str]]
@@ -848,7 +848,7 @@ class Tokens(object):
 #     arg:
 #             expr
 #             str
-#             begin [vars :] pipeline end
+#             begin [vars :] pipelines end
 #
 #     vars:
 #             vars, str
@@ -961,7 +961,7 @@ class Parser(object):
         arg = self.arg()
         if isinstance(arg, Token):
             value = arg.value()
-        elif type(arg) is marcel.core.Pipeline:
+        elif type(arg) is marcel.core.PipelineExecutable:
             value = arg
         elif arg is None:
             raise SyntaxError(self.token, 'Unexpected token type.')
@@ -1018,10 +1018,10 @@ class Parser(object):
             # else:  op_sequence is OK as is
             return op_sequence
 
-        pipeline = marcel.core.Pipeline()
+        pipeline = marcel.core.PipelineExecutable()
         with Parser.PipelineSourceTracker(self, pipeline):
             # If the next tokens are var comma, or var colon, then we have
-            # pipeline variables being declared.
+            # pipelines variables being declared.
             if self.next_token(String, Comma) or self.next_token(String, Colon):
                 parameters = self.vars()
             else:
@@ -1131,7 +1131,7 @@ class Parser(object):
         self.token = self.tokens.next_token()
         return True
 
-    # Does token t+n indicate the end of a pipeline?
+    # Does token t+n indicate the end of a pipelines?
     def pipeline_end(self, n=0):
         tokens = self.tokens.peek(n + 1)
         return tokens is None or tokens[-1].is_end()
@@ -1185,7 +1185,7 @@ class Parser(object):
                 pipeline_args = []
                 for token in arg_tokens:
                     pipeline_args.append(token
-                                         if type(token) is marcel.core.Pipeline else
+                                         if type(token) is marcel.core.PipelineExecutable else
                                          token.value())
                 args, kwargs = marcel.argsparser.PipelineArgsParser(var).parse_pipeline_args(pipeline_args)
                 op.set_pipeline_args(args, kwargs)
@@ -1209,16 +1209,8 @@ class Parser(object):
         assign_module = self.op_modules['assign']
         assert assign_module is not None
         op = assign_module.create_op()
-        op.var = var
-        if callable(value):
-            op.function = value
-        elif type(value) is marcel.core.Pipeline:
-            op.pipeline = value
-        elif type(value) is str:
-            op.string = value
-        else:
-            assert False, value
-        pipeline = marcel.core.Pipeline()
+        op.set_var_and_value(var, value)
+        pipeline = marcel.core.PipelineExecutable()
         pipeline.append(op)
         return pipeline
 

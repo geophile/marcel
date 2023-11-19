@@ -23,7 +23,7 @@ HELP = '''
 {L,indent=4:28}{r:PREDICATE}               Used to determine if an input tuple is passed
 to the {r:THEN_PIPELINE}
 
-{L,indent=4:28}{r:THEN_PIPELINE}           This pipeline receives tuples for which 
+{L,indent=4:28}{r:THEN_PIPELINE}           This pipelines receives tuples for which 
 {r:PREDICATE} evaluates to True.
 
 Tuples arriving in the input stream are passed to the output stream. In addition, 
@@ -35,14 +35,15 @@ any tuples for which {r:PREDICATE} evaluates to True are passed to the {r:THEN_P
 
 {r:gen 100} generates a stream of integers, 0, ..., 99.
 The predicate is True for integers divisible by 7. These integers are
-passed to the {r:[store div7]} pipeline, which stores the numbers in the variable {r:div7}.
+passed to the {r:[store div7]} pipelines, which stores the numbers in the variable {r:div7}.
 All 100 integers are passed downstream to the {r:store all100} operator, which stores
 the numbers in the variable {r:all100}.
 '''
 
 
 def ifthen(predicate, then):
-    return Ifthen(), [predicate, then.create_pipeline()]
+    assert isinstance(then, marcel.core.OpList), then
+    return Ifthen(), [predicate, then]
 
 
 class IfthenArgsParser(marcel.op.ifbase.IfBaseArgsParser):

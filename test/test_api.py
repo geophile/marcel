@@ -825,38 +825,39 @@ def test_dir_stack():
 @timeit
 def test_remote():
     node1 = marcel.object.cluster.Host(TEST.env.getvar('NODE1'), None)
-    TEST.run(lambda: run(remote('CLUSTER1', lambda: gen(3))),
+    TEST.run(lambda: run(remote('CLUSTER1', gen(3))),
              expected_out=[(node1, 0), (node1, 1), (node1, 2)])
     # Handling of remote error in execution
-    TEST.run(lambda: run(remote('CLUSTER1', lambda: gen(3, -1) | map(lambda x: 5 / x))),
+    TEST.run(lambda: run(remote('CLUSTER1', gen(3, -1) | map(lambda x: 5 / x))),
              expected_out=[(node1, -5.0), Error('division by zero'), (node1, 5.0)])
     # Handling of remote error in setup
-    # TODO: Bug 176 - should be expected_err
-    TEST.run(lambda: run(remote('CLUSTER1', lambda: ls('/nosuchfile'))),
+    # TODO: Bug - should be expected_err
+    TEST.run(lambda: run(remote('CLUSTER1', ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
-    # # Bug 4
-    # TEST.run(lambda: run(remote('CLUSTER1',
-    #                             lambda: gen(3)) | red(None, r_plus)),
-    #          expected_out=[(node1, 3)])
-    # TEST.run(lambda: run(remote('CLUSTER1',
-    #                             lambda: gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
-    #          expected_out=[(node1, 0, 20), (node1, 1, 25)])
-    # # Bug 121
-    # TEST.run(test=lambda: run(remote('notacluster', lambda: gen(3))),
-    #          expected_err='notacluster is not a Cluster')
+    # expected_err='No qualifying paths')
+    # Bug 4
+    TEST.run(lambda: run(remote('CLUSTER1',
+                                gen(3)) | red(None, r_plus)),
+             expected_out=[(node1, 3)])
+    TEST.run(lambda: run(remote('CLUSTER1',
+                                gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
+             expected_out=[(node1, 0, 20), (node1, 1, 25)])
+    # Bug 121
+    TEST.run(test=lambda: run(remote('notacluster', gen(3))),
+             expected_err='notacluster is not a Cluster')
 
 
 @timeit
 def test_fork():
     # int forkgen
-    TEST.run(lambda: run(fork(3, lambda: gen(3, 100)) | sort()),
+    TEST.run(lambda: run(fork(3, gen(3, 100)) | sort()),
              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
     TEST.run(lambda: run(fork(3, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
              expected_out=[(0, 100), (0, 101), (0, 102),
                            (1, 100), (1, 101), (1, 102),
                            (2, 100), (2, 101), (2, 102)])
     TEST.run(lambda: run(fork(3, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-             expected_err='Too many pipeline args')
+             expected_err='Too many pipelines args')
     # iterable forkgen
     TEST.run(lambda: run(fork('abc', lambda: gen(3, 100)) | sort()),
              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
@@ -865,7 +866,7 @@ def test_fork():
                            ('b', 100), ('b', 101), ('b', 102),
                            ('c', 100), ('c', 101), ('c', 102)])
     TEST.run(lambda: run(fork('abc', lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-             expected_err='Too many pipeline args')
+             expected_err='Too many pipelines args')
     # Cluster forkgen
     jao = TEST.main.env.cluster('CLUSTER1')
     localhost = marcel.object.cluster.Host('127.0.0.1', None)
@@ -874,7 +875,7 @@ def test_fork():
     TEST.run(lambda: run(fork(jao, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
              expected_out=[(localhost, 100), (localhost, 101), (localhost, 102)])
     TEST.run(lambda: run(fork(jao, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-             expected_err='Too many pipeline args')
+             expected_err='Too many pipelines args')
 
 
 @timeit
@@ -910,7 +911,7 @@ def test_assign():
     TEST.run(test=lambda: run(assign('a', [419])),
              verification=lambda: run(env(var='a')),
              expected_out=[('a', [419])])
-    # test_ops assigns a pipeline to env var a and then uses the pipeline: gen 3 | a
+    # test_ops assigns a pipelines to env var a and then uses the pipelines: gen 3 | a
     # But in the API, env vars can't be referred to an a marcel command, so we have to use
     # a program variable instead.
     a = map(lambda x: (x, -x))
@@ -1348,6 +1349,24 @@ def test_difference():
 
 
 @timeit
+def test_filter():
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | filt(gen(3))),
+             expected_out=[0, 0, 1, 1, 2, 2])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | filt(gen(3), keep=True)),
+             expected_out=[0, 0, 1, 1, 2, 2])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | filt(gen(3), discard=True)),
+             expected_out=[3, 3, 4, 4, 5, 5])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | filt(gen(3), compare=lambda x, y: x)),
+             expected_out=[(0, 0), (1, 1), (2, 2)])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | filt(gen(3), keep=True, compare=lambda x, y: x)),
+             expected_out=[(0, 0), (1, 1), (2, 2)])
+    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | filt(gen(3), discard=True, compare=lambda x, y: x)),
+             expected_out=[(3, 3), (4, 4), (5, 5)])
+    TEST.run(test=lambda: run(gen(6) | filt(gen(3), discard=True, keep=True)),
+             expected_err='Cannot specify more than one')
+
+
+@timeit
 def test_args():
     # gen
     TEST.run(test=lambda: run(gen(5, 1) | args(lambda n: gen(n)) | map(lambda x: -x)),
@@ -1362,8 +1381,8 @@ def test_args():
         os.system(f'touch {testdir}/d1/f1')
         os.system(f'touch {testdir}/d2/f2')
         os.system(f'touch {testdir}/d3/f3')
-        # TEST.run(test=lambda: run(ls(f'{testdir}/*', dir=True) | args(lambda d: ls(d, file=True)) | map(lambda f: f.name)),
-        #          expected_out=['f1', 'f2', 'f3'])
+        TEST.run(test=lambda: run(ls(f'{testdir}/*', dir=True) | args(lambda d: ls(d, file=True)) | map(lambda f: f.name)),
+                 expected_out=['f1', 'f2', 'f3'])
         os.system(f'touch {testdir}/a_file')
         os.system(f'touch {testdir}/"a file"')
         os.system(f'touch {testdir}/"a file with a \' mark"')
@@ -1407,14 +1426,14 @@ def test_args():
                            1102, 1103, 1104, 1103, 1104, 1105, 1104, 1105, 1106])
     # negative testing
     TEST.run(test=lambda: run(gen(3) | args(lambda x, y: 123, all=True)),
-             expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
+             expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
     TEST.run(test=lambda: run(gen(3) | args(lambda: 123, all=True)),
-             expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
+             expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
     TEST.run(test=lambda: run(gen(3) | args(lambda: 123)),
-             expected_err="The args pipeline must be parameterized")
+             expected_err="The args pipelines must be parameterized")
 
     TEST.run(test=lambda: run(gen(3) | args(lambda: gen(3))),
-             expected_err='The args pipeline must be parameterized')
+             expected_err='The args pipelines must be parameterized')
     # Bug 94
     TEST.run(test=lambda: run(gen(4, 1) | args(lambda n: gen(n)) | window(lambda x: x == 0)),
              expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
@@ -1676,29 +1695,11 @@ def test_download():
 
 
 @timeit
-def test_filter():
-    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | filt(gen(3))),
-             expected_out=[0, 0, 1, 1, 2, 2])
-    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | filt(gen(3), keep=True)),
-             expected_out=[0, 0, 1, 1, 2, 2])
-    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | filt(gen(3), discard=True)),
-             expected_out=[3, 3, 4, 4, 5, 5])
-    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | filt(gen(3), compare=lambda x, y: x)),
-             expected_out=[(0, 0), (1, 1), (2, 2)])
-    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | filt(gen(3), keep=True, compare=lambda x, y: x)),
-             expected_out=[(0, 0), (1, 1), (2, 2)])
-    TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | filt(gen(3), discard=True, compare=lambda x, y: x)),
-             expected_out=[(3, 3), (4, 4), (5, 5)])
-    TEST.run(test=lambda: run(gen(6) | filt(gen(3), discard=True, keep=True)),
-             expected_err='Cannot specify more than one')
-
-
-@timeit
 def test_api_run():
     # Error-free output, just an op
     TEST.run(test=lambda: run(gen(3)),
              expected_out=[0, 1, 2])
-    # Error-free output, pipeline
+    # Error-free output, pipelines
     TEST.run(test=lambda: run(gen(3) | map(lambda x: -x)),
              expected_out=[0, -1, -2])
     # With errors
@@ -1987,6 +1988,7 @@ def main_stable():
     test_intersect()
     test_union()
     test_difference()
+    test_filter()
     test_args()
     test_env()
     test_pos()
@@ -2000,24 +2002,14 @@ def main_stable():
 
 
 def main_dev():
-    x = reservoir('x')
-    run(gen(6)
-        | ifthen(lambda x: x % 2 == 1, store(x))
-        | select(lambda x: False))
-    run(load(x))
-
-    # TEST.run(lambda: run(remote('CLUSTER1', lambda: ls('/nosuchfile'))))
-    # TEST.run(lambda: run(remote('CLUSTER1', lambda: gen(3))))
-    # test_remote()
-    # TEST.run(lambda: run(remote('CLUSTER1', lambda: ls('/nosuchfile'))))
-    # TEST.run(test=lambda: list(gen(3)))
+    pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # main_slow_tests()
+    main_stable()
+    main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

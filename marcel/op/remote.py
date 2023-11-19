@@ -32,7 +32,7 @@ HELP = '''
 
 {L,indent=4:28}{r:CLUSTER}                The name of a cluster.
    
-{L,indent=4:28}{r:PIPELINE}                A pipeline whose instances are to be executed on nodes
+{L,indent=4:28}{r:PIPELINE}                A pipelines whose instances are to be executed on nodes
 of the cluster.
 
 The pipeline is executed on each node of the named cluster. Output comprises 
@@ -61,8 +61,7 @@ the output might look like this:
 
 
 def remote(cluster, pipeline):
-    # callable: Through API.
-    # not callable: Interactive.
+    assert isinstance(pipeline, marcel.core.OpList), pipeline
     pipeline_arg = marcel.core.PipelineFunction(pipeline) if callable(pipeline) else pipeline
     return Remote(), [cluster, pipeline_arg]
 
@@ -73,7 +72,7 @@ class RemoteArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('remote', env)
         self.add_anon('cluster', convert=self.cluster)
-        self.add_anon('pipeline', convert=self.check_str_or_pipeline, target='pipeline_arg')
+        self.add_anon('pipeline', convert=self.check_pipeline, target='pipeline_arg')
         self.validate()
 
 
@@ -210,9 +209,9 @@ class Remote(marcel.core.Op):
         remote = Remote.RunRemote(host, pipeline)
         label_thread = Remote.LabelThread(host)
         label_thread.receiver = self.receiver
-        wrapped_pipeline = marcel.core.Pipeline()
-        wrapped_pipeline.set_error_handler(pipeline.error_handler)
-        wrapped_pipeline.params = pipeline.params
-        wrapped_pipeline.append(remote)
-        wrapped_pipeline.append(label_thread)
-        return wrapped_pipeline
+        customized_pipeline = marcel.core.PipelineExecutable()
+        customized_pipeline.set_error_handler(pipeline.error_handler)
+        customized_pipeline.params = pipeline.params
+        customized_pipeline.append(remote)
+        customized_pipeline.append(label_thread)
+        return customized_pipeline
