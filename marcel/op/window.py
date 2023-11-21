@@ -162,7 +162,7 @@ class Window(marcel.core.Op):
             self.window_generator = DisjointWindow(self)
             self.n = self.disjoint
         if self.predicate:
-            self.predicate.set_globals(env.vars())
+            env.set_function_globals(self.predicate)
 
     # Op
 

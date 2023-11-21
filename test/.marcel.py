@@ -1,6 +1,6 @@
 from marcel.builtin import *
 
-# Convenient to have NODE1 precede NODE2 lexicographically
+# Convenient for testing to have NODE1 precede NODE2 lexicographically
 NODE1 = '127.0.0.1'
 NODE2 = 'localhost'
 

@@ -66,7 +66,7 @@ class Squish(marcel.core.Op):
     def setup(self, env):
         if self.function is None:
             self.function = marcel.function.SymbolFunction('+')
-        self.function.set_globals(env.vars())
+        env.set_function_globals(self.function)
 
     # Op
 

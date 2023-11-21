@@ -17,6 +17,7 @@ import getpass
 import os
 import os.path
 import pathlib
+import shutil
 import socket
 import sys
 
@@ -93,16 +94,26 @@ INTERACTIVE_EXECUTABLES = [
 
 
 class DirectoryState:
-    VARS = ('DIRS', 'PWD')
 
     def __init__(self, env):
         self.env = env
+        try:
+            homedir = pathlib.Path.home().resolve()
+        except FileNotFoundError:
+            raise marcel.exception.KillShellException(
+                'Home directory does not exist!')
+        try:
+            current_dir = pathlib.Path.cwd().resolve()
+        except FileNotFoundError:
+            raise marcel.exception.KillShellException(
+                'Current directory does not exist! cd somewhere else and try again.')
+        # TODO: Are these vars actually needed? Why not fields in this class instead?
+        env.setvar('HOME', homedir)
+        env.setvar('PWD', current_dir)
+        env.setvar('DIRS', [current_dir])
 
     def __repr__(self):
-        buffer = []
-        for name in DirectoryState.VARS:
-            buffer.append(f'{name}: {self.env.getvar(name)}')
-        return f'DirectoryState({", ".join(buffer)})'
+        return f'DirectoryState({self._dir_stack()})'
 
     def pwd(self):
         return pathlib.Path(self.env.getvar('PWD'))
@@ -113,14 +124,14 @@ class DirectoryState:
         new_dir = new_dir.as_posix()
         # So that executables have the same view of the current directory.
         os.chdir(new_dir)
-        self.dir_stack()[-1] = new_dir
+        self._dir_stack()[-1] = new_dir
         self.env.setvar('PWD', new_dir)
 
     def pushd(self, directory):
-        self.clean_dir_stack()
+        self._clean_dir_stack()
         # Operate on a copy of the directory stack. Don't want to change the
         # actual stack until the cd succeeds (bug 133).
-        dir_stack = list(self.dir_stack())
+        dir_stack = list(self._dir_stack())
         if directory is None:
             if len(dir_stack) > 1:
                 dir_stack[-2:] = [dir_stack[-1], dir_stack[-2]]
@@ -131,31 +142,31 @@ class DirectoryState:
         self.env.setvar('DIRS', dir_stack)
 
     def popd(self):
-        self.clean_dir_stack()
-        dir_stack = self.dir_stack()
+        self._clean_dir_stack()
+        dir_stack = self._dir_stack()
         if len(dir_stack) > 1:
             self.cd(pathlib.Path(dir_stack[-2]))
             dir_stack.pop()
 
     def reset_dir_stack(self):
-        dir_stack = self.dir_stack()
+        dir_stack = self._dir_stack()
         dir_stack.clear()
         dir_stack.append(self.pwd())
 
     def dirs(self):
-        self.clean_dir_stack()
-        dirs = list(self.dir_stack())
+        self._clean_dir_stack()
+        dirs = list(self._dir_stack())
         dirs.reverse()
         return dirs
 
-    def dir_stack(self):
+    def _dir_stack(self):
         return self.env.getvar('DIRS')
 
     # Remove entries that are not files, and not accessible, (presumably due to changes since they entered the stack).
-    def clean_dir_stack(self):
+    def _clean_dir_stack(self):
         clean = []
         removed = []
-        dirs = self.dir_stack()
+        dirs = self._dir_stack()
         for dir in dirs:
             if os.path.exists(dir) and os.access(dir, mode=os.X_OK, follow_symlinks=True):
                 clean.append(dir)
@@ -170,36 +181,119 @@ class DirectoryState:
 
 
 class Environment(object):
-    pass
+
+    def __init__(self, namespace, op_modules):
+        # Where environment variables live.
+        self.namespace = namespace
+        # Directory stack, including current directory. Initializes PWD, DIRS, HOME.
+        self.directory_state = DirectoryState(self)
+        # Source of ops and arg parsers.
+        self.op_modules = op_modules
+        # Where to find bash.
+        self.bash = shutil.which('bash')
+
+    def hasvar(self, var):
+        return var in self.namespace
+
+    def getvar(self, var):
+        assert var is not None
+        try:
+            value = self.namespace[var]
+        except KeyError:
+            value = None
+        return value
+
+    def setvar(self, var, value):
+        assert var is not None
+        current_value = self.namespace.get(var, None)
+        if type(current_value) is marcel.reservoir.Reservoir:
+            current_value.ensure_deleted()
+        self.namespace[var] = value
+
+    def delvar(self, var):
+        assert var is not None
+        return self.namespace.pop(var)
+
+    def vars(self):
+        return self.namespace
+
+    def dir_state(self):
+        return self.directory_state
+
+    def cluster(self, name):
+        cluster = None
+        if type(name) is str:
+            x = self.getvar(name)
+            if type(x) is marcel.object.cluster.Cluster:
+                cluster = x
+        return cluster
+
+    def set_function_globals(self, function):
+        pass
+
+    def color_scheme(self):
+        return None
+
+    def is_interactive_executable(self, x):
+        return False
 
 
-class EnvironmentInteractive(Environment):
+class EnvironmentAPI(Environment):
+
+    class CheckNestingNoop(object):
+
+        def __enter__(self):
+            pass
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            pass
+
+    def changes(self):
+        return None
+
+    def clear_changes(self):
+        pass
+
+    def check_nesting(self):
+        return EnvironmentAPI.CheckNestingNoop()
+
+
+class EnvironmentScript(Environment):
     DEFAULT_PROMPT = f'M-{marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
 
+    class CheckNesting(object):
+
+        def __init__(self, env):
+            self.env = env
+            self.depth = None
+
+        def __enter__(self):
+            self.depth = self.env.vars().n_scopes()
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.
+            assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
+            self.depth = None
+
+    def check_nesting(self):
+        return EnvironmentScript.CheckNesting(self)
+
+    def set_function_globals(self, function):
+        function.set_globals(self.vars())
+
     @staticmethod
     def new(config_file, old_namespace):
-        env = EnvironmentInteractive()
         user = getpass.getuser()
-        homedir = pathlib.Path.home().resolve()
         host = socket.gethostname()
         editor = os.getenv('EDITOR')
-        try:
-            current_dir = pathlib.Path.cwd().resolve()
-        except FileNotFoundError:
-            raise marcel.exception.KillShellException(
-                'Current directory does not exist! cd somewhere else and try again.')
-        env.current_op = None
         initial_namespace = os.environ.copy() if old_namespace is None else old_namespace
         initial_namespace.update({
             'USER': user,
-            'HOME': homedir.as_posix(),
             'HOST': host,
             'MARCEL_VERSION': marcel.version.VERSION,
-            'PWD': current_dir.as_posix(),
-            'DIRS': [current_dir.as_posix()],
-            'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
-            'PROMPT_CONTINUATION': [EnvironmentInteractive.DEFAULT_PROMPT_CONTINUATION],
+            'PROMPT': [EnvironmentScript.DEFAULT_PROMPT],
+            'PROMPT_CONTINUATION': [EnvironmentScript.DEFAULT_PROMPT_CONTINUATION],
             'BOLD': marcel.object.color.Color.BOLD,
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
@@ -211,40 +305,32 @@ class EnvironmentInteractive(Environment):
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 initial_namespace[key] = value
-        env.namespace = marcel.nestednamespace.NestedNamespace(initial_namespace)
+        env = EnvironmentScript(marcel.nestednamespace.NestedNamespace(initial_namespace),
+                                marcel.opmodule.import_op_modules())
+        env.current_op = None
         env.locations = marcel.locations.Locations(env)
         env.config_path = env.read_config(config_file)
         env.directory_state = DirectoryState(env)
         # TODO: This is a hack. Clean it up once the env handles command history
         env.edited_command = None
-        env.op_modules = None
         env.reader = None
         env.modified_vars = set()
-        env.op_modules = marcel.opmodule.import_op_modules()  # op name -> OpModule
         return env
 
-    def __init__(self):
-        # The marcel namespace is split between namespace and modules. These are separated to avoid
-        # serializing and deserializing modules, but logically they are one namespace.
-        self.namespace = {}
+    def __init__(self, namespace, op_modules):
+        super().__init__(namespace, op_modules)
         # Standard locations of files important to marcel: config, history
         self.locations = None
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
-        # Directory stack, including current directory
-        self.directory_state = None
         # Used during readline editing
         self.edited_command = None
-        # Source of ops and arg parsers
-        self.op_modules = None
         # readline wrapper
         self.reader = None
         # For tracking env var changes made by job
         self.modified_vars = None
         # Support for pos()
         self.current_op = None
-        # Where to find bash
-        self.bash = marcel.util.bash_executable()
 
     def hasvar(self, var):
         return var in self.namespace
@@ -290,23 +376,12 @@ class EnvironmentInteractive(Environment):
         return (self.prompt_string(self.getvar('PROMPT')),
                 self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
 
-    def cluster(self, name):
-        cluster = None
-        if type(name) is str:
-            x = self.getvar(name)
-            if type(x) is marcel.object.cluster.Cluster:
-                cluster = x
-        return cluster
-
     def db(self, name):
         db = None
         x = self.getvar(name)
         if type(x) is marcel.object.db.Database:
             db = x
         return db
-
-    def dir_state(self):
-        return self.directory_state
 
     def color_scheme(self):
         return self.getvar('COLOR_SCHEME')
@@ -362,10 +437,10 @@ class EnvironmentInteractive(Environment):
             return ''.join(buffer)
         except Exception as e:
             print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)
-            return EnvironmentInteractive.DEFAULT_PROMPT
+            return EnvironmentScript.DEFAULT_PROMPT
 
     def note_var_access(self, var, value):
-        if not EnvironmentInteractive.immutable(value):
+        if not EnvironmentScript.immutable(value):
             self.modified_vars.add(var)
 
     def shallow_copy(self):
@@ -377,6 +452,3 @@ class EnvironmentInteractive(Environment):
     def immutable(x):
         return callable(x) or type(x) in (int, float, str, bool, tuple, marcel.core.PipelineExecutable)
 
-    @staticmethod
-    def python_version():
-        return sys.version_info.major, sys.version_info.minor

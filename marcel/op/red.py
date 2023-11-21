@@ -157,7 +157,7 @@ class Red(marcel.core.Op):
             self.reducer = GroupingReducer(self, grouping_positions, data_positions)
         for function in self.functions:
             if isinstance(function, marcel.function.Function):
-                function.set_globals(env.vars())
+                env.set_function_globals(function)
 
     # Op
 

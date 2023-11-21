@@ -55,7 +55,7 @@ class Select(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.function.set_globals(env.vars())
+        env.set_function_globals(self.function)
 
     # Op
 

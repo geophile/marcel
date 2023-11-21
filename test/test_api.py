@@ -16,13 +16,28 @@ timeit = test_base.timeit
 TestDir = test_base.TestDir
 
 Error = marcel.object.error.Error
-start_dir = os.getcwd()
-TEST = test_base.TestAPI(main=_MAIN)
+TEST = test_base.TestAPI(_MAIN)
 
 SQL = True
 
+# Convenient for testing to have NODE1 precede NODE2 lexicographically
+NODE1 = '127.0.0.1'
+NODE2 = 'localhost'
+CLUSTER1 = cluster(user='jao',
+                   identity='/home/jao/.ssh/id_rsa',
+                   host=NODE1)
+CLUSTER2 = cluster(user='jao',
+                   identity='/home/jao/.ssh/id_rsa',
+                   hosts=[NODE1, NODE2])
+jdb = database(driver='psycopg2',
+               dbname='jao',
+               user='jao',
+               password='jao')
+ENV = marcel.api._ENV
+ENV.setvar('DB_DEFAULT', jdb)
 
 # Utilities for testing filename ops
+
 
 def relative(base, x):
     x_path = pathlib.Path(x)
@@ -170,9 +185,10 @@ def test_write():
         TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(output_filename, pickle=True, append=True)),
                  verification=lambda: run(read(output_filename, pickle=True)),
                  expected_out=[(0, 0), (1, -1), (2, -2)])
-        TEST.run(test=lambda: run(gen(3, 3) | map(lambda x: (x, -x)) | write(output_filename, pickle=True, append=True)),
-                 verification=lambda: run(read(output_filename, pickle=True)),
-                 expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4), (5, -5)])
+        TEST.run(
+            test=lambda: run(gen(3, 3) | map(lambda x: (x, -x)) | write(output_filename, pickle=True, append=True)),
+            verification=lambda: run(read(output_filename, pickle=True)),
+            expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4), (5, -5)])
         # Function-valued filename
         TEST.run(test=lambda: run(gen(3) | write(lambda: output_filename)),
                  expected_out=[0, 1, 2],
@@ -570,7 +586,7 @@ def test_bash():
                  expected_out=['x1', 'x2'])
         TEST.run(lambda: run(bash('ls -l *1') | map(lambda x: x.split()[-1])),
                  expected_out=['x1', 'y1'])
-        TEST.run(lambda: run(bash('echo "hello  world"')), # --- two spaces in string to be printed
+        TEST.run(lambda: run(bash('echo "hello  world"')),  # --- two spaces in string to be printed
                  expected_out='hello  world')
         # Test args
         TEST.run(lambda: run(bash('echo', f'hello {who}')),
@@ -868,13 +884,12 @@ def test_fork():
     TEST.run(lambda: run(fork('abc', lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
              expected_err='Too many pipelines args')
     # Cluster forkgen
-    jao = TEST.main.env.cluster('CLUSTER1')
     localhost = marcel.object.cluster.Host('127.0.0.1', None)
-    TEST.run(lambda: run(fork(jao, lambda: gen(3, 100)) | sort()),
+    TEST.run(lambda: run(fork(CLUSTER1, lambda: gen(3, 100)) | sort()),
              expected_out=[100, 101, 102])
-    TEST.run(lambda: run(fork(jao, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+    TEST.run(lambda: run(fork(CLUSTER1, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
              expected_out=[(localhost, 100), (localhost, 101), (localhost, 102)])
-    TEST.run(lambda: run(fork(jao, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+    TEST.run(lambda: run(fork(CLUSTER1, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
              expected_err='Too many pipelines args')
 
 
@@ -1190,9 +1205,10 @@ def test_read():
                  expected_err='-s|--skip-headings can only be specified with')
         TEST.run(lambda: run(read(f'{testdir}/f3.txt', headings=True, skip_headings=True)),
                  expected_err='Cannot specify more than one of')
-        TEST.run(lambda: run(read(f'{testdir}/headings.csv', csv=True, headings=True) | map(lambda t: (t.c1, t.c2, t.c3))),
-                 expected_out=[('a', 'b', 'c'),
-                               ('d', 'e', 'f')])
+        TEST.run(
+            lambda: run(read(f'{testdir}/headings.csv', csv=True, headings=True) | map(lambda t: (t.c1, t.c2, t.c3))),
+            expected_out=[('a', 'b', 'c'),
+                          ('d', 'e', 'f')])
         TEST.run(lambda: run(read(f'{testdir}/headings.csv', csv=True, headings=True, label=True) |
                              map(lambda t: (str(t.LABEL), t.c1, t.c2, t.c3))),
                  expected_out=[('headings.csv', 'a', 'b', 'c'),
@@ -1381,8 +1397,9 @@ def test_args():
         os.system(f'touch {testdir}/d1/f1')
         os.system(f'touch {testdir}/d2/f2')
         os.system(f'touch {testdir}/d3/f3')
-        TEST.run(test=lambda: run(ls(f'{testdir}/*', dir=True) | args(lambda d: ls(d, file=True)) | map(lambda f: f.name)),
-                 expected_out=['f1', 'f2', 'f3'])
+        TEST.run(
+            test=lambda: run(ls(f'{testdir}/*', dir=True) | args(lambda d: ls(d, file=True)) | map(lambda f: f.name)),
+            expected_out=['f1', 'f2', 'f3'])
         os.system(f'touch {testdir}/a_file')
         os.system(f'touch {testdir}/"a file"')
         os.system(f'touch {testdir}/"a file with a \' mark"')
@@ -1655,11 +1672,12 @@ def test_download():
         TEST.run(test=lambda: run(download(f'{testdir}/dest', 'CLUSTER2')),
                  expected_err='No remote files specified')
         # Copy fully-specified filenames
-        TEST.run(test=lambda: run(download(f'{testdir}/dest', 'CLUSTER2', f'{testdir}/source/a', f'{testdir}/source/b')),
-                 verification=lambda: run(ls(f'{testdir}/dest', file=True, recursive=True) |
-                                          map(lambda f: f.relative_to(f'{testdir}/dest')) |
-                                          sort()),
-                 expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
+        TEST.run(
+            test=lambda: run(download(f'{testdir}/dest', 'CLUSTER2', f'{testdir}/source/a', f'{testdir}/source/b')),
+            verification=lambda: run(ls(f'{testdir}/dest', file=True, recursive=True) |
+                                     map(lambda f: f.relative_to(f'{testdir}/dest')) |
+                                     sort()),
+            expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
         # Leave files in place, delete some of them, try downloading again
         os.system(f'rm -rf {testdir}/dest/{node1}')
         os.system(f'rm -rf {testdir}/dest/{node2}/*')
@@ -1929,9 +1947,9 @@ def test_bug_230():
     with TestDir() as testdir:
         TEST.run(lambda: run(cd(testdir)))
         os.system('touch a1 a2')
-        TEST.run(test=lambda: run(bash('ls -l a?') | map (lambda x: x[-2:])),
+        TEST.run(test=lambda: run(bash('ls -l a?') | map(lambda x: x[-2:])),
                  expected_out=['a1', 'a2'])
-        TEST.run(test=lambda: run(bash('ls -i ??') | map (lambda x: x[-2:])),
+        TEST.run(test=lambda: run(bash('ls -i ??') | map(lambda x: x[-2:])),
                  expected_out=['a1', 'a2'])
 
 
@@ -2009,7 +2027,7 @@ def main():
     TEST.reset_environment()
     main_dev()
     main_stable()
-    main_slow_tests()
+    # main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

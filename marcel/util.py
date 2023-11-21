@@ -28,6 +28,10 @@ import traceback
 import dill
 
 
+def python_version():
+    return sys.version_info.major, sys.version_info.minor
+
+
 def username(uid):
     try:
         return pwd.getpwuid(uid).pw_name

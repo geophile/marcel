@@ -168,26 +168,3 @@ But this doesn't:
     Parsing error at position 8 of "gen (3) | (| n: (x: [x] * n |) 3...": Premature end of input
 
 The syntax is weird, but maybe it should be allowed?
-
-----------------------------------------------------------------------
-
-API ops using pipelines:
-
-* args
-* assign
-* difference
-* download
-* filter
-* fork
-* ifbase
-* intersect
-* join
-* remote
-* sudo
-* tee
-* union
-* upload
-
-* Fixed
-
-Op.pipeline_arg_value is a mess, does too much. Used only by Sudo.setup, PipelineInteractive.setup

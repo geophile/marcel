@@ -74,14 +74,7 @@ class Main(object):
 
     def __init__(self, config_file, old_namespace):
         self.main_pid = os.getpid()
-        try:
-            self.env = marcel.env.EnvironmentInteractive.new(config_file, old_namespace)
-        except marcel.exception.KillCommandException as e:
-            print(f'Cannot start marcel: {e}', file=sys.stderr)
-            sys.exit(1)
-        except marcel.exception.KillShellException as e:
-            print(f'Cannot start marcel: {e}', file=sys.stderr)
-            sys.exit(1)
+        self.env = None
         atexit.register(self.shutdown)
 
     # Main
@@ -95,6 +88,14 @@ class MainScript(Main):
 
     def __init__(self, config_file=None, old_namespace=None, testing=False):
         super().__init__(config_file, old_namespace)
+        try:
+            self.env = marcel.env.EnvironmentScript.new(config_file, old_namespace)
+        except marcel.exception.KillCommandException as e:
+            print(f'Cannot start marcel: {e}', file=sys.stderr)
+            sys.exit(1)
+        except marcel.exception.KillShellException as e:
+            print(f'Cannot start marcel: {e}', file=sys.stderr)
+            sys.exit(1)
         self.testing = testing
         self.config_time = time.time()
         self.run_startup()
@@ -244,6 +245,9 @@ class MainInteractive(MainScript):
 
 
 class MainAPI(Main):
+
+    def __init__(self, env):
+        self.env = env
 
     # Main
 

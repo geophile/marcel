@@ -16,6 +16,7 @@
 import os as _os
 
 import marcel.core as _core
+import marcel.env as _env_  # _env would create a name conflict with import of marcel.op.env below
 import marcel.exception as _exception
 import marcel.main as _main
 import marcel.object.error as _error
@@ -72,13 +73,15 @@ from marcel.builtin import *
 from marcel.reduction import *
 
 # TODO: This is work in progress. Main is there only to get env for now. Should be gone eventually.
-_MAIN = _main.MainAPI(_os.getenv('MARCEL_CONFIG', default=None), old_namespace=None)
-_ENV = _MAIN.env
+PWD = None
+DIRS = []
+DB_DEFAULT = None
 _OP_MODULES = marcel.opmodule.import_op_modules()
+_ENV = _env_.EnvironmentAPI(globals(), _OP_MODULES)
+_MAIN = _main.MainAPI(_ENV)
 
 
 # No colors for API
-_ENV.set_color_scheme(None)
 _reservoir_counter = 0
 
 
@@ -251,7 +254,6 @@ def run(x):
 
 
 def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
-    x.env = None  # See comment on Op.env
     pipeline = _prepare_pipeline(x)
     output = []
     terminal_op = _gather(output=output,
@@ -265,7 +267,6 @@ def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
 
 
 def first(x, unwrap_singleton=True, errors=None, error_handler=None):
-    x.env = None  # See comment on Op.env
     pipeline = _prepare_pipeline(x)
     output = []
     terminal_op = _first(output=output,

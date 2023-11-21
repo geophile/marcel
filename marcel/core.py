@@ -54,11 +54,6 @@ class Op(AbstractOp):
         # The pipelines to which this op belongs
         self.owner = None
         self._count = -1
-        # Used temporarily by API, to convey env to PipelineIterator. For the API, a Pipeline is built from
-        # a single Op, or from Nodes containing two or more ops. Node construction takes the env, and clears
-        # it in its inputs. So by the time an Op or tree of Nodes is turned into a Pipeline, only the root of
-        # the tree has an env.
-        self.env = None
 
     def __repr__(self):
         assert False, self.op_name()
@@ -69,14 +64,12 @@ class Op(AbstractOp):
         assert args is None
         pipeline = PipelineExecutable()
         pipeline.append(self)
-        e = self.env
-        print(f'Op.create_pipeline {self}, env: {len(e.namespace) if e else None}')
         return pipeline
 
     # AbstractOp
 
     def setup(self, env):
-        self.env = None
+        pass
 
     # Op
 
@@ -229,14 +222,12 @@ class Command:
         return str(self.pipeline)
 
     def execute(self, env, remote=False):
-        depth = env.vars().n_scopes()
-        env.clear_changes()
-        self.pipeline.setup(env)
-        self.pipeline.run(env)
-        self.pipeline.flush(env)
-        self.pipeline.cleanup()
-        # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.
-        assert env.vars().n_scopes() == depth, env.vars().n_scopes()
+        with env.check_nesting():
+            env.clear_changes()
+            self.pipeline.setup(env)
+            self.pipeline.run(env)
+            self.pipeline.flush(env)
+            self.pipeline.cleanup()
         # An interactive Command is executed by a multiprocessing.Process (i.e., remotely).
         # Need to transmit the Environment's vars relating to the directory, to the parent
         # process, because they may have changed. This doesn't apply to API usage.

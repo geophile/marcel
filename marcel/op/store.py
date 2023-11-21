@@ -79,7 +79,6 @@ class Store(marcel.core.Op):
         self.append = None
         self.picklefile = None
         self.writer = None
-        self.nesting = None
 
     def __repr__(self):
         return f'store({self.var}, append)' if self.append else f'store({self.var})'
@@ -113,8 +112,7 @@ class Store(marcel.core.Op):
         else:
             raise marcel.exception.KillCommandException(
                 f'{self.var} is not usable as a reservoir, it stores a value of type {type(self.picklefile)}.')
-        self.writer = self.picklefile.writer(self.append)
-        self.nesting = env.vars().n_scopes()
+        self.writer = self.picklefile.writer(append=self.append)
 
     def receive(self, env, x):
         try:

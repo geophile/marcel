@@ -195,8 +195,8 @@ class TestConsole(TestBase):
 
 class TestAPI(TestBase):
 
-    def __init__(self, config_file='./.marcel.py', main=None):
-        super().__init__(config_file=config_file, main=main)
+    def __init__(self, main):
+        super().__init__(config_file=None, main=main)
 
     def run(self,
             test,

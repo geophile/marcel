@@ -22,6 +22,7 @@ import dill
 import marcel.argsparser
 import marcel.core
 import marcel.exception
+import marcel.util
 
 
 HELP = '''
@@ -106,7 +107,7 @@ class Sudo(marcel.core.Op):
         # Send the python version, environment and pipelines, (as in Remote)
         buffer = io.BytesIO()
         pickler = dill.Pickler(buffer)
-        pickler.dump(env.python_version())
+        pickler.dump(marcel.util.python_version())
         pickler.dump(self.pipeline)
         buffer.seek(0)
         stdout, stderr = self.process.communicate(input=buffer.getvalue())

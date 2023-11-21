@@ -58,7 +58,7 @@ class Map(marcel.core.Op):
     # Op
 
     def setup(self, env):
-        self.function.set_globals(env.vars())
+        env.set_function_globals(self.function)
 
     def run(self, env):
         self.send(env, self.call(env, self.function))

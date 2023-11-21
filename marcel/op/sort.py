@@ -60,7 +60,7 @@ class Sort(marcel.core.Op):
     def setup(self, env):
         self.contents = []
         if self.key:
-            self.key.set_globals(env.vars())
+            env.set_function_globals(self.key)
 
     # Op
 

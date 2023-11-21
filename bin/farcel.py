@@ -188,12 +188,11 @@ def main():
         TRACE.write(getpass.getuser())
         TRACE.write(f'{datetime.datetime.now()}')
         # env
-        env = marcel.env.EnvironmentInteractive()
-        env.namespace = marcel.nestednamespace.NestedNamespace(read_config())
+        env = marcel.env.EnvironmentScript(marcel.nestednamespace.NestedNamespace(read_config()),
+                                           marcel.opmodule.import_op_modules())
         env.directory_state = marcel.env.DirectoryState(env)
         env.modified_vars = set()
         env.main_pid = os.getpid()
-        env.op_modules = marcel.opmodule.import_op_modules()
         # Use sys.stdin.buffer because we want binary data, not the text version
         input = dill.Unpickler(sys.stdin.buffer)
         # Python version from client
