@@ -46,15 +46,15 @@ Env variable kinds
 
 NestedNamespace is currently var name -> value. Replace value with:
 
-    EnvironmentVariable
+    Variable
     - name
 
-        EnvironmentVariableMarcel
+        VariableMarcel
         - value
 
-            EnvironmentVariableImmutable (from source)
+            VariableImmutable (from source)
 
-            EnvironmentVariableMutable (assigned)
+            VariableMutable (assigned)
 
         EnvironmentVariableHost
           These are generated on lookup and not held on to
@@ -69,7 +69,7 @@ Env cleanup
 
 - Farcel needs to create an env matching caller.
 
-- Change state to set of EnvironmentVariable:
+- Change state to set of Variable:
 
   - source: startup or interaction
   - name

@@ -167,43 +167,6 @@ class DirectoryState:
             raise marcel.exception.KillCommandException('\n'.join(buffer))
 
 
-class EnvironmentVariable(object):
-
-    def __init__(self, name):
-        self.name = name
-
-    def get(self):
-        assert False
-
-    def set(self, value):
-        assert False
-
-
-class EnvironmentVariableMarcel(EnvironmentVariable):
-
-    def __init__(self, name):
-        super().__init__(name)
-        self.value = None
-
-    def get(self):
-        return self.value
-
-
-class EnvironmentVariableImmutable(EnvironmentVariableMarcel):
-
-    def set(self, value):
-        raise marcel.exception.KillCommandException(
-            f'{self.name} is defined in the startup script, and cannot be modified programmatically. '
-            f'Modify the startup script instead.'
-        )
-
-
-class EnvironmentVariableMutable(EnvironmentVariableMarcel):
-
-    def set(self, value):
-        self.value = value
-
-
 class Environment(object):
 
     def __init__(self, namespace):
@@ -317,6 +280,9 @@ class EnvironmentScript(Environment):
         self.modified_vars = set()
         # Support for pos()
         self.current_op = None
+        # Variables defined in startup script are immutable
+        self.immutable = set()
+        #
         self.initialize_namespace()
 
     def check_nesting(self):
@@ -332,8 +298,13 @@ class EnvironmentScript(Environment):
         return value
 
     def setvar(self, var, value):
+        self.check_mutable(var)
         super().setvar(var, value)
-        self.modified_vars.add(var)
+        return self.modified_vars.add(var)
+
+    def delvar(self, var):
+        self.check_mutable(var)
+        return super().delvar(var)
 
     def clear_changes(self):
         self.modified_vars = set()
@@ -396,6 +367,26 @@ class EnvironmentScript(Environment):
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 self.namespace[key] = value
+        self.immutable.update([
+            'HOME',
+            'PWD',
+            'DIRS',
+            'USER',
+            'HOST',
+            'MARCEL_VERSION',
+            'PROMPT',
+            'PROMPT_CONTINUATION',
+            'BOLD',
+            'ITALIC',
+            'COLOR_SCHEME',
+            'Color'])
+
+    def check_mutable(self, var):
+        if var in self.immutable:
+            raise marcel.exception.KillCommandException(
+                f'{var} was defined by marcel, or in your startup script, '
+                f'so it cannot be modified or deleted programmatically. '
+                f'Edit the startup script instead.')
 
     def is_interactive_executable(self, x):
         interactive_executables = self.getvar('INTERACTIVE_EXECUTABLES')
@@ -418,6 +409,7 @@ class EnvironmentScript(Environment):
         # will then be added to self.namespace, for use in the execution of op functions.
         exec(config_source, self.namespace, locals)
         self.namespace.update(locals)
+        self.immutable.update(locals)
         self.config_path = config_path
 
     def prompt_string(self, prompt_pieces):
@@ -450,10 +442,20 @@ class EnvironmentScript(Environment):
         if not EnvironmentScript.immutable(value):
             self.modified_vars.add(var)
 
-    def shallow_copy(self):
-        copy = Environment()
-        copy.__dict__.update(self.__dict__)
-        return copy
+    def no_mutability_check(self):
+        class NoMutabilityCheck(object):
+
+            def __init__(self, env):
+                self.env = env
+                self.immutable = env.immutable
+
+            def __enter__(self):
+                self.env.immutable = set()
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                self.env.immutable = self.immutable
+
+        return NoMutabilityCheck(self)
 
     @staticmethod
     def immutable(x):

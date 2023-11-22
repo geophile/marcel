@@ -131,12 +131,14 @@ class MainScript(Main):
         command.execute(self.env)
 
     def run_startup(self):
-        run_on_startup = self.env.getvar('RUN_ON_STARTUP')
-        if run_on_startup:
-            if type(run_on_startup) is str:
-                self.run_script(run_on_startup)
-            else:
-                fail(f'RUN_ON_STARTUP must be a string')
+        # Inside the startup script, variables that are otherwise immutabe, aren't.
+        with self.env.no_mutability_check():
+            run_on_startup = self.env.getvar('RUN_ON_STARTUP')
+            if run_on_startup:
+                if type(run_on_startup) is str:
+                    self.run_script(run_on_startup)
+                else:
+                    fail(f'RUN_ON_STARTUP must be a string')
 
     def run_script(self, script):
         command = ''
