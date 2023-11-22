@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import os as _os
+import pathlib as _pathlib
 
 import marcel.core as _core
 import marcel.env as _env_  # _env would create a name conflict with import of marcel.op.env below
@@ -74,10 +75,9 @@ from marcel.reduction import *
 
 # TODO: This is work in progress. Main is there only to get env for now. Should be gone eventually.
 PWD = None
-DIRS = []
+DIRS = [_pathlib.Path(_os.getcwd())]
 DB_DEFAULT = None
-_OP_MODULES = marcel.opmodule.import_op_modules()
-_ENV = _env_.EnvironmentAPI(globals(), _OP_MODULES)
+_ENV = _env_.EnvironmentAPI(globals())
 _MAIN = _main.MainAPI(_ENV)
 
 
@@ -218,7 +218,7 @@ def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 
 def _generate_op(f, *args, **kwargs):
     op, arglist = f(*args, **kwargs)
-    _OP_MODULES[op.op_name()].args_parser(_ENV).parse(arglist, op)
+    _ENV.op_modules[op.op_name()].args_parser(_ENV).parse(arglist, op)
     return _core.OpList(_MAIN.env, op)
 
 

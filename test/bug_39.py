@@ -4,7 +4,7 @@ import marcel.object.host
 import marcel.util
 import test_base
 
-MAIN = marcel.main.MainInteractive(None, old_namespace=None)
+MAIN = marcel.main.MainInteractive(None)
 
 TEXT = '''
 If this sequence is piped to this invocation of {red}:

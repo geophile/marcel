@@ -2,10 +2,10 @@ import os
 
 import marcel.main
 import marcel.op
-import marcel.object.host
+import marcel.object.cluster
 import test_base
 
-MAIN = marcel.main.MainInteractive(None, old_namespace=None)
+MAIN = marcel.main.MainInteractive(None)
 
 
 class Bug33(test_base.Test):

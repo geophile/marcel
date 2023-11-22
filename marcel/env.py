@@ -97,26 +97,13 @@ class DirectoryState:
 
     def __init__(self, env):
         self.env = env
-        try:
-            homedir = pathlib.Path.home().resolve()
-        except FileNotFoundError:
-            raise marcel.exception.KillShellException(
-                'Home directory does not exist!')
-        try:
-            current_dir = pathlib.Path.cwd().resolve()
-        except FileNotFoundError:
-            raise marcel.exception.KillShellException(
-                'Current directory does not exist! cd somewhere else and try again.')
-        # TODO: Are these vars actually needed? Why not fields in this class instead?
-        env.setvar('HOME', homedir)
-        env.setvar('PWD', current_dir)
-        env.setvar('DIRS', [current_dir])
 
     def __repr__(self):
         return f'DirectoryState({self._dir_stack()})'
 
     def pwd(self):
-        return pathlib.Path(self.env.getvar('PWD'))
+        # return pathlib.Path(self.env.getvar('PWD'))
+        return pathlib.Path(os.getcwd())
 
     def cd(self, directory):
         assert isinstance(directory, pathlib.Path), directory
@@ -180,15 +167,52 @@ class DirectoryState:
             raise marcel.exception.KillCommandException('\n'.join(buffer))
 
 
+class EnvironmentVariable(object):
+
+    def __init__(self, name):
+        self.name = name
+
+    def get(self):
+        assert False
+
+    def set(self, value):
+        assert False
+
+
+class EnvironmentVariableMarcel(EnvironmentVariable):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.value = None
+
+    def get(self):
+        return self.value
+
+
+class EnvironmentVariableImmutable(EnvironmentVariableMarcel):
+
+    def set(self, value):
+        raise marcel.exception.KillCommandException(
+            f'{self.name} is defined in the startup script, and cannot be modified programmatically. '
+            f'Modify the startup script instead.'
+        )
+
+
+class EnvironmentVariableMutable(EnvironmentVariableMarcel):
+
+    def set(self, value):
+        self.value = value
+
+
 class Environment(object):
 
-    def __init__(self, namespace, op_modules):
+    def __init__(self, namespace):
         # Where environment variables live.
         self.namespace = namespace
-        # Directory stack, including current directory. Initializes PWD, DIRS, HOME.
+        # Directory stack, including current directory.
         self.directory_state = DirectoryState(self)
         # Source of ops and arg parsers.
-        self.op_modules = op_modules
+        self.op_modules = marcel.opmodule.import_op_modules()
         # Where to find bash.
         self.bash = shutil.which('bash')
 
@@ -248,6 +272,10 @@ class EnvironmentAPI(Environment):
         def __exit__(self, exc_type, exc_val, exc_tb):
             pass
 
+    # globals: From the module in which marcel.api is imported.
+    def __init__(self, globals):
+        super().__init__(globals)
+
     def changes(self):
         return None
 
@@ -259,7 +287,7 @@ class EnvironmentAPI(Environment):
 
 
 class EnvironmentScript(Environment):
-    DEFAULT_PROMPT = f'M-{marcel.version.VERSION} $ '
+    DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
 
     class CheckNesting(object):
@@ -272,55 +300,13 @@ class EnvironmentScript(Environment):
             self.depth = self.env.vars().n_scopes()
 
         def __exit__(self, exc_type, exc_val, exc_tb):
-            # TODO: Deal with exceptions. Pop scopes until depth is reached and reraise.
             assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
             self.depth = None
 
-    def check_nesting(self):
-        return EnvironmentScript.CheckNesting(self)
-
-    def set_function_globals(self, function):
-        function.set_globals(self.vars())
-
-    @staticmethod
-    def new(config_file, old_namespace):
-        user = getpass.getuser()
-        host = socket.gethostname()
-        editor = os.getenv('EDITOR')
-        initial_namespace = os.environ.copy() if old_namespace is None else old_namespace
-        initial_namespace.update({
-            'USER': user,
-            'HOST': host,
-            'MARCEL_VERSION': marcel.version.VERSION,
-            'PROMPT': [EnvironmentScript.DEFAULT_PROMPT],
-            'PROMPT_CONTINUATION': [EnvironmentScript.DEFAULT_PROMPT_CONTINUATION],
-            'BOLD': marcel.object.color.Color.BOLD,
-            'ITALIC': marcel.object.color.Color.ITALIC,
-            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-            'Color': marcel.object.color.Color,
-            'pos': lambda: env.current_op.pos()
-        })
-        if editor:
-            initial_namespace['EDITOR'] = editor
-        for key, value in marcel.builtin.__dict__.items():
-            if not key.startswith('_'):
-                initial_namespace[key] = value
-        env = EnvironmentScript(marcel.nestednamespace.NestedNamespace(initial_namespace),
-                                marcel.opmodule.import_op_modules())
-        env.current_op = None
-        env.locations = marcel.locations.Locations(env)
-        env.config_path = env.read_config(config_file)
-        env.directory_state = DirectoryState(env)
-        # TODO: This is a hack. Clean it up once the env handles command history
-        env.edited_command = None
-        env.reader = None
-        env.modified_vars = set()
-        return env
-
-    def __init__(self, namespace, op_modules):
-        super().__init__(namespace, op_modules)
+    def __init__(self):
+        super().__init__(marcel.nestednamespace.NestedNamespace())
         # Standard locations of files important to marcel: config, history
-        self.locations = None
+        self.locations = marcel.locations.Locations(self)
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
         # Used during readline editing
@@ -328,36 +314,26 @@ class EnvironmentScript(Environment):
         # readline wrapper
         self.reader = None
         # For tracking env var changes made by job
-        self.modified_vars = None
+        self.modified_vars = set()
         # Support for pos()
         self.current_op = None
+        self.initialize_namespace()
 
-    def hasvar(self, var):
-        return var in self.namespace
+    def check_nesting(self):
+        return EnvironmentScript.CheckNesting(self)
+
+    def set_function_globals(self, function):
+        function.set_globals(self.vars())
 
     def getvar(self, var):
-        assert var is not None
-        try:
-            value = self.namespace[var]
+        value = super().getvar(var)
+        if var in self.namespace:
             self.note_var_access(var, value)
-        except KeyError:
-            value = None
         return value
 
     def setvar(self, var, value):
-        assert var is not None
-        current_value = self.namespace.get(var, None)
-        if type(current_value) is marcel.reservoir.Reservoir:
-            current_value.ensure_deleted()
-        self.namespace[var] = value
+        super().setvar(var, value)
         self.modified_vars.add(var)
-
-    def delvar(self, var):
-        assert var is not None
-        return self.namespace.pop(var)
-
-    def vars(self):
-        return self.namespace
 
     def clear_changes(self):
         self.modified_vars = set()
@@ -389,6 +365,38 @@ class EnvironmentScript(Environment):
     def set_color_scheme(self, color_scheme):
         self.setvar('COLOR_SCHEME', color_scheme)
 
+    def initialize_namespace(self):
+        try:
+            homedir = pathlib.Path.home().resolve().as_posix()
+        except FileNotFoundError:
+            raise marcel.exception.KillShellException(
+                'Home directory does not exist!')
+        try:
+            current_dir = pathlib.Path.cwd().resolve().as_posix()
+        except FileNotFoundError:
+            raise marcel.exception.KillShellException(
+                'Current directory does not exist! cd somewhere else and try again.')
+        self.namespace.update({
+            'HOME': homedir,
+            'PWD': current_dir,
+            'DIRS': [current_dir],
+            'USER': getpass.getuser(),
+            'HOST': socket.gethostname(),
+            'MARCEL_VERSION': marcel.version.VERSION,
+            'PROMPT': [EnvironmentScript.DEFAULT_PROMPT],
+            'PROMPT_CONTINUATION': [EnvironmentScript.DEFAULT_PROMPT_CONTINUATION],
+            'BOLD': marcel.object.color.Color.BOLD,
+            'ITALIC': marcel.object.color.Color.ITALIC,
+            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
+            'Color': marcel.object.color.Color,
+        })
+        editor = os.getenv('EDITOR')
+        if editor:
+            self.namespace['EDITOR'] = editor
+        for key, value in marcel.builtin.__dict__.items():
+            if not key.startswith('_'):
+                self.namespace[key] = value
+
     def is_interactive_executable(self, x):
         interactive_executables = self.getvar('INTERACTIVE_EXECUTABLES')
         return (interactive_executables is not None and
@@ -396,22 +404,21 @@ class EnvironmentScript(Environment):
                 x in interactive_executables)
 
     def read_config(self, config_path=None):
-        if config_path is None:
-            config_path = self.locations.config_path()
-        else:
-            config_path = pathlib.Path(config_path)
+        config_path = (self.locations.config_path()
+                       if config_path is None else
+                       pathlib.Path(config_path))
         if not config_path.exists():
-            with open(config_path.as_posix(), 'w') as config_file:
+            with open(config_path, 'w') as config_file:
                 config_file.write(DEFAULT_CONFIG)
             config_path.chmod(0o600)
-        with open(config_path.as_posix()) as config_file:
+        with open(config_path) as config_file:
             config_source = config_file.read()
         locals = {}
         # Execute the config file. Imported and newly-defined symbols go into locals, which
         # will then be added to self.namespace, for use in the execution of op functions.
         exec(config_source, self.namespace, locals)
         self.namespace.update(locals)
-        return config_path
+        self.config_path = config_path
 
     def prompt_string(self, prompt_pieces):
         try:

@@ -72,7 +72,7 @@ class ReloadConfigException(BaseException):
 
 class Main(object):
 
-    def __init__(self, config_file, old_namespace):
+    def __init__(self):
         self.main_pid = os.getpid()
         self.env = None
         atexit.register(self.shutdown)
@@ -86,10 +86,10 @@ class Main(object):
 # MainScript is the parent of MainInteractive, and provides much of its logic.
 class MainScript(Main):
 
-    def __init__(self, config_file=None, old_namespace=None, testing=False):
-        super().__init__(config_file, old_namespace)
+    def __init__(self, config_file, testing=False):
+        super().__init__()
         try:
-            self.env = marcel.env.EnvironmentScript.new(config_file, old_namespace)
+            self.env = marcel.env.EnvironmentScript()
         except marcel.exception.KillCommandException as e:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)
@@ -98,6 +98,7 @@ class MainScript(Main):
             sys.exit(1)
         self.testing = testing
         self.config_time = time.time()
+        self.env.read_config(config_file)
         self.run_startup()
 
     # Main
@@ -121,10 +122,8 @@ class MainScript(Main):
                 pass
 
     def shutdown(self, restart=False):
-        namespace = self.env.namespace
         if not restart:
             marcel.reservoir.shutdown(self.main_pid)
-        return namespace
 
     # MainScript
 
@@ -161,8 +160,8 @@ class MainScript(Main):
 
 class MainInteractive(MainScript):
 
-    def __init__(self, config_file, old_namespace, testing=False):
-        super().__init__(config_file, old_namespace, testing)
+    def __init__(self, config_file, testing=False):
+        super().__init__(config_file, testing)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
         self.reader = None
         self.initialize_reader()  # Sets self.reader
@@ -314,10 +313,9 @@ def main():
     multiprocessing.set_start_method(mpstart)
     if script is None:
         # Interactive
-        old_namespace = None
         input = None
         while True:
-            main = MainInteractive(None, old_namespace=old_namespace)
+            main = MainInteractive(None)
             main.input = input
             print_prompt = sys.stdin.isatty()
             try:
@@ -325,10 +323,10 @@ def main():
                 break
             except ReloadConfigException:
                 input = main.input
-                old_namespace = main.shutdown(restart=True)
+                main.shutdown(restart=True)
     else:
         # Script
-        main = MainScript()
+        main = MainScript(config)
         try:
             with open(script, 'r') as script_file:
                 main.run_script(script_file.read())

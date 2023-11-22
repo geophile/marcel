@@ -1,13 +1,73 @@
+Things disabled that need to be re-enabled or re-implemented
+
+- old_namespace mechanism for maintaining env across startup script
+  changes. Most likely reimplementation. Alternative: Save to disk
+  temporarily and restore from that as for named workspace?
+
+----------------------------------------------------------------------
+
+Env
+ creation:
+
+EnvironmentScript.new(config_file, old_namespace):
+
+- If old_namespace is None, start a new namespace from
+  os.environ.copy(). Otherwise, start with old_namespace.
+
+- Add some vars: USER, HOST, MARCEL_VERSION, etc.
+
+- Add marcel.builtin contents
+
+- Create a new Environment (i.e., using __init__)
+
+- Set env.locations
+
+- Read config
+
+
+Once workspaces are working:
+
+- For named namespace, old_namespace doesn't have to be preserved. Reconstruct:
+
+  - Startup
+  - builtins
+  - Additional vars
+  - Saved env
+
+----------------------------------------------------------------------
+
+Env variable kinds
+
+- From startup
+
+- From commands (assign, store)
+
+- From host
+
+NestedNamespace is currently var name -> value. Replace value with:
+
+    EnvironmentVariable
+    - name
+
+        EnvironmentVariableMarcel
+        - value
+
+            EnvironmentVariableImmutable (from source)
+
+            EnvironmentVariableMutable (assigned)
+
+        EnvironmentVariableHost
+          These are generated on lookup and not held on to
+          by the env.
+
+
+----------------------------------------------------------------------
 
 env.set_function_globals(self.vars())
 
 Env cleanup
 
-- Split like Main
-
-  - EnvironmentInteractive
-  - EnvironmentScript
-  - EnvironmentAPI
+- Farcel needs to create an env matching caller.
 
 - Change state to set of EnvironmentVariable:
 

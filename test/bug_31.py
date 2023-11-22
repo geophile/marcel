@@ -5,7 +5,7 @@ import marcel.op
 import marcel.object.host
 import test_base
 
-MAIN = marcel.main.MainInteractive(None, old_namespace=None)
+MAIN = marcel.main.MainInteractive(None)
 
 
 class Bug31(test_base.Test):

@@ -151,7 +151,6 @@ def read_config():
     # current_dir = pathlib.Path.cwd().resolve()
     # namespace = {
     #     'USER': getpass.getuser(),
-    #     'HOME': pathlib.Path.home().resolve().as_posix(),
     #     'HOST': socket.gethostname(),
     #     'MARCEL_VERSION': marcel.version.VERSION,
     #     'PWD': current_dir.as_posix(),
@@ -188,8 +187,7 @@ def main():
         TRACE.write(getpass.getuser())
         TRACE.write(f'{datetime.datetime.now()}')
         # env
-        env = marcel.env.EnvironmentScript(marcel.nestednamespace.NestedNamespace(read_config()),
-                                           marcel.opmodule.import_op_modules())
+        env = marcel.env.EnvironmentScript()
         env.directory_state = marcel.env.DirectoryState(env)
         env.modified_vars = set()
         env.main_pid = os.getpid()
