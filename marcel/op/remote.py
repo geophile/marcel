@@ -144,6 +144,7 @@ class Remote(marcel.core.Op):
             pickler = dill.Pickler(buffer)
             try:
                 pickler.dump(marcel.util.python_version())
+                pickler.dump(env.marcel_usage())
                 pickler.dump(self.pipeline_wrapper)
             except Exception as e:
                 print(f'Caught ({type(e)} {e}', file=sys.stderr)

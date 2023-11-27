@@ -4,136 +4,9 @@ Things disabled that need to be re-enabled or re-implemented
   changes. Most likely reimplementation. Alternative: Save to disk
   temporarily and restore from that as for named workspace?
 
-----------------------------------------------------------------------
-
-Env
- creation:
-
-EnvironmentScript.new(config_file, old_namespace):
-
-- If old_namespace is None, start a new namespace from
-  os.environ.copy(). Otherwise, start with old_namespace.
-
-- Add some vars: USER, HOST, MARCEL_VERSION, etc.
-
-- Add marcel.builtin contents
-
-- Create a new Environment (i.e., using __init__)
-
-- Set env.locations
-
-- Read config
-
-
-Once workspaces are working:
-
-- For named namespace, old_namespace doesn't have to be preserved. Reconstruct:
-
-  - Startup
-  - builtins
-  - Additional vars
-  - Saved env
+- env testing, including immutable vars
 
 ----------------------------------------------------------------------
-
-Env variable kinds
-
-- From startup
-
-- From commands (assign, store)
-
-- From host
-
-NestedNamespace is currently var name -> value. Replace value with:
-
-    Variable
-    - name
-
-        VariableMarcel
-        - value
-
-            VariableImmutable (from source)
-
-            VariableMutable (assigned)
-
-        EnvironmentVariableHost
-          These are generated on lookup and not held on to
-          by the env.
-
-
-----------------------------------------------------------------------
-
-env.set_function_globals(self.vars())
-
-Env cleanup
-
-- Farcel needs to create an env matching caller.
-
-- Change state to set of Variable:
-
-  - source: startup or interaction
-  - name
-  - value
-
-- Disallow mod/delete for startup vars
-
-- Get rid of os.environ.copy(). When lookup fails, try
-  os.environ.get() Add -h|--host option to have -d|--delete and
-  -p|--pattern operate on host vars.
-
-----------------------------------------------------------------------
-
-It should be possible to use marcel.api without a Main or Environment, I think.
-
-From marcel.api:
-
-- ops need env! WHAT FOR?
-  - getvar()
-  - vars()
-  - setvar()
-  - color_scheme()
-  - bash
-  - is_interactive_executable
-  - dir_state
-  - reader
-  - set edited_command
-  - delvar
-  - op_modules
-  - mark_possible_changed
-  - python_version()
-
-- env.current_op.pos()
-
-API has some dependencies on env for ops that are actually used by API
-(as opposed to non-API ops):
-
-- self.function.set_globals(env.vars()):
-    - map
-    - red
-    - select
-    - sort
-    - squish
-    - window
-
-  Is set_globals needed for API? The function is an ordinary Python function and should already
-  have its globals.
-
-  Interactive: Map's function is SourceFunction
-  API: NativeFunction
-
-- self.picklefile = env.getvar(self.var):
-
-    - load
-    - store
-
-  These ops already special-case API and Interactive
-
-- env.getvar('DB_DEFAULT'): sql
-
-  Require db to be specified for API
-
-
-......................................................................
 
 Farcel read_config is a copy of some Env code. 
 
@@ -153,9 +26,9 @@ args                x             x             x
 assign (1)          x             x
 bash                x             x             x
 bg                  x
-cd                  x
+cd                  x             x             x
 difference          x             x             x
-dirs                x
+dirs                x             x             x
 download            x             x             x
 edit                x
 env                 x             x
@@ -176,10 +49,10 @@ join                x             x             x
 load                x             x             x
 ls                  x             x             x
 map                 x             x             x
-popd                x
+popd                x             x             x
 ps                  x             x             x
-pushd               x
-pwd                 x
+pushd               x             x             x
+pwd                 x             x             x
 red                 x             x             x
 read                x             x             x
 remote              x             x             x

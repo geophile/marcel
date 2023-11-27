@@ -22,14 +22,17 @@ import marcel.util
 
 
 HELP = '''
-{L,wrap=F}window [-o|--overlap N] [-d|--disjoint N] [PREDICATE]
+{L,wrap=F}window [-o|--overlap N] [-d|--disjoint N] [-t|--truncate] [PREDICATE]
 
 {L,indent=4:28}{r:-o}, {r:--overlap}           Generate overlapping windows of size N.
 
 {L,indent=4:28}{r:-d}, {r:--disjoint}          Generate disjoint windows of size N.
 
 {L,indent=4:28}{r:PREDICATE}               Start a new window on inputs for which the predicate
-evaluates to True.
+evaluates to {n:True}.
+
+{L,indent=4:28}{r:-t}, {r:--truncate}          Truncate output by discarding 
+tuples containing {n:None}. 
 
 Groups of consecutive input tuples are combined into a single tuple, which is written to
 the output stream. 
@@ -96,12 +99,14 @@ tuples:
 '''
 
 
-def window(predicate=None, overlap=None, disjoint=None):
+def window(predicate=None, overlap=None, disjoint=None, truncate=False):
     args = []
     if overlap is not None:
         args.extend(['--overlap', overlap])
     if disjoint is not None:
         args.extend(['--disjoint', disjoint])
+    if truncate:
+        args.append('--truncate')
     if predicate:
         args.append(predicate)
     return Window(), args
@@ -113,6 +118,7 @@ class WindowArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('window', env)
         self.add_flag_one_value('overlap', '-o', '--overlap', convert=self.str_to_int, target='overlap_arg')
         self.add_flag_one_value('disjoint', '-d', '--disjoint', convert=self.str_to_int, target='disjoint_arg')
+        self.add_flag_no_value('truncate', '-t', '--truncate')
         self.add_anon('predicate', convert=self.function, default=None)
         self.exactly_one('overlap', 'disjoint', 'predicate')
         self.validate()
@@ -128,21 +134,20 @@ class Window(marcel.core.Op):
         self.disjoint_arg = None
         self.disjoint = None
         self.window_generator = None
+        self.truncate = None
         self.n = None
 
     def __repr__(self):
-        buffer = ['window(']
+        options = []
         if self.overlap:
-            buffer.append('overlap=')
-            buffer.append(str(self.overlap))
+            options.append(f'overlap={self.overlap}')
         if self.disjoint:
-            buffer.append('disjoint=')
-            buffer.append(str(self.disjoint))
+            options.append(f'disjoint={self.disjoint}')
+        if self.truncate:
+            options.append('truncate')
         if self.predicate:
-            buffer.append('predicate=')
-            buffer.append(self.predicate.source())
-        buffer.append(')')
-        return ''.join(buffer)
+            options.append(f'predicate={self.predicate.source()}')
+        return f'window({", ".join(options)})'
 
     # AbstractOp
 
@@ -186,9 +191,14 @@ class WindowBase:
     def flush(self, env):
         assert False
 
+    def send_window(self, env):
+        t = tuple(self.window)
+        if not self.op.truncate or None not in t:
+            self.op.send(env, t)
+
     def flush_window(self, env):
         if len(self.window) > 0:
-            self.op.send(env, tuple(self.window))
+            self.send_window(env)
             self.window = []
 
 
@@ -217,7 +227,7 @@ class OverlapWindow(WindowBase):
             self.window = self.window[1:]
         self.window.append(marcel.util.unwrap_op_output(x))
         if len(self.window) == self.op.n:
-            self.op.send(env, tuple(self.window))
+            self.send_window(env)
 
     def flush(self, env):
         if len(self.window) > 0:
@@ -225,11 +235,11 @@ class OverlapWindow(WindowBase):
             if len(self.window) < self.op.n:
                 while len(self.window) < self.op.n:
                     self.window.append(padding)
-                self.op.send(env, tuple(self.window))
+                self.send_window(env)
             for i in range(self.op.n - 1):
                 self.window = self.window[1:]
                 self.window.append(padding)
-                self.op.send(env, tuple(self.window))
+                self.send_window(env)
             self.op.propagate_flush(env)
 
 

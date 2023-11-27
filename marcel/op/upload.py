@@ -97,8 +97,7 @@ class Upload(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
         # Empty pipelines will be filled in by customize_pipeline
-        pipeline_template = marcel.core.PipelineExecutable()
-        pipeline_template.set_error_handler(self.owner.error_handler)
+        pipeline_template = marcel.core.Pipeline.create_empty_pipeline(env)
         self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,
                                                               thread_ids=self.cluster.hosts,
                                                               pipeline_arg=pipeline_template,
@@ -119,7 +118,6 @@ class Upload(marcel.core.Op):
                                          dest=dest)
 
     def customize_pipeline(self, env, pipeline, host):
-        host_pipeline = pipeline.copy()
         scp_command = Upload.scp_command(host.identity, self.filenames, host.user, host.name, self.dir)
-        host_pipeline.append(marcel.opmodule.create_op(env, 'bash', scp_command))
-        return host_pipeline
+        pipeline.append(marcel.opmodule.create_op(env, 'bash', scp_command))
+        return pipeline

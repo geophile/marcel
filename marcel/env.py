@@ -112,7 +112,7 @@ class DirectoryState:
         # So that executables have the same view of the current directory.
         os.chdir(new_dir)
         self._dir_stack()[-1] = new_dir
-        self.env.setvar('PWD', new_dir)
+        self.env.namespace['PWD'] = new_dir
 
     def pushd(self, directory):
         self._clean_dir_stack()
@@ -126,7 +126,7 @@ class DirectoryState:
             assert isinstance(directory, pathlib.Path)
             dir_stack.append(directory.resolve().as_posix())
         self.cd(pathlib.Path(dir_stack[-1]))
-        self.env.setvar('DIRS', dir_stack)
+        self.env.namespace['DIRS'] = dir_stack
 
     def popd(self):
         self._clean_dir_stack()
@@ -160,7 +160,7 @@ class DirectoryState:
             else:
                 removed.append(dir)
         if len(clean) < len(dirs):
-            self.env.setvar('DIRS', clean)
+            self.env.namespace['DIRS'] = clean
             buffer = ['The following directories have been removed from the directory stack because',
                       'they are no longer accessible:']
             buffer.extend(removed)
@@ -168,6 +168,14 @@ class DirectoryState:
 
 
 class Environment(object):
+
+    class CheckNestingNoop(object):
+
+        def __enter__(self):
+            pass
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            pass
 
     def __init__(self, namespace):
         # Where environment variables live.
@@ -178,6 +186,9 @@ class Environment(object):
         self.op_modules = marcel.opmodule.import_op_modules()
         # Where to find bash.
         self.bash = shutil.which('bash')
+
+    def initialize_namespace(self):
+        self.namespace['MARCEL_VERSION'] = marcel.version.VERSION
 
     def hasvar(self, var):
         return var in self.namespace
@@ -215,8 +226,14 @@ class Environment(object):
                 cluster = x
         return cluster
 
-    def set_function_globals(self, function):
+    def check_nesting(self):
+        return Environment.CheckNestingNoop()
+
+    def clear_changes(self):
         pass
+
+    def set_function_globals(self, function):
+        function.set_globals(self.namespace)
 
     def color_scheme(self):
         return None
@@ -224,16 +241,18 @@ class Environment(object):
     def is_interactive_executable(self, x):
         return False
 
+    # 'script' or 'api'
+    def marcel_usage(self):
+        assert False
+
+    @staticmethod
+    def create():
+        env = Environment(dict())
+        env.initialize_namespace()
+        return env
+
 
 class EnvironmentAPI(Environment):
-
-    class CheckNestingNoop(object):
-
-        def __enter__(self):
-            pass
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            pass
 
     # globals: From the module in which marcel.api is imported.
     def __init__(self, globals):
@@ -245,11 +264,19 @@ class EnvironmentAPI(Environment):
     def clear_changes(self):
         pass
 
-    def check_nesting(self):
-        return EnvironmentAPI.CheckNestingNoop()
+    def marcel_usage(self):
+        return 'api'
+
+    @staticmethod
+    def create(globals):
+        env = EnvironmentAPI(globals)
+        env.initialize_namespace()
+        return env
+
 
 
 class EnvironmentScript(Environment):
+
     DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
 
@@ -265,6 +292,18 @@ class EnvironmentScript(Environment):
         def __exit__(self, exc_type, exc_val, exc_tb):
             assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
             self.depth = None
+
+    class NoMutabilityCheck(object):
+
+        def __init__(self, env):
+            self.env = env
+            self.immutable = env.immutable
+
+        def __enter__(self):
+            self.env.immutable = set()
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            self.env.immutable = self.immutable
 
     def __init__(self):
         super().__init__(marcel.nestednamespace.NestedNamespace())
@@ -284,6 +323,53 @@ class EnvironmentScript(Environment):
         self.immutable = set()
         #
         self.initialize_namespace()
+
+    def initialize_namespace(self):
+        super().initialize_namespace()
+        try:
+            homedir = pathlib.Path.home().resolve().as_posix()
+        except FileNotFoundError:
+            raise marcel.exception.KillShellException(
+                'Home directory does not exist!')
+        try:
+            current_dir = pathlib.Path.cwd().resolve().as_posix()
+        except FileNotFoundError:
+            raise marcel.exception.KillShellException(
+                'Current directory does not exist! cd somewhere else and try again.')
+        self.namespace.update({
+            'HOME': homedir,
+            'PWD': current_dir,
+            'DIRS': [current_dir],
+            'USER': getpass.getuser(),
+            'HOST': socket.gethostname(),
+            'PROMPT': [EnvironmentScript.DEFAULT_PROMPT],
+            'PROMPT_CONTINUATION': [EnvironmentScript.DEFAULT_PROMPT_CONTINUATION],
+            'BOLD': marcel.object.color.Color.BOLD,
+            'ITALIC': marcel.object.color.Color.ITALIC,
+            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
+            'Color': marcel.object.color.Color,
+            'pos': lambda: self.current_op.pos()
+        })
+        editor = os.getenv('EDITOR')
+        if editor:
+            self.namespace['EDITOR'] = editor
+        for key, value in marcel.builtin.__dict__.items():
+            if not key.startswith('_'):
+                self.namespace[key] = value
+        self.immutable.update([
+            'HOME',
+            'PWD',
+            'DIRS',
+            'USER',
+            'HOST',
+            'MARCEL_VERSION',
+            'PROMPT',
+            'PROMPT_CONTINUATION',
+            'BOLD',
+            'ITALIC',
+            'COLOR_SCHEME',
+            'Color',
+            'pos'])
 
     def check_nesting(self):
         return EnvironmentScript.CheckNesting(self)
@@ -315,6 +401,9 @@ class EnvironmentScript(Environment):
             changes[var] = self.namespace[var]
         return changes
 
+    def marcel_usage(self):
+        return 'script'
+
     def mark_possibly_changed(self, var):
         if self.modified_vars is not None and var is not None:
             self.modified_vars.add(var)
@@ -335,51 +424,6 @@ class EnvironmentScript(Environment):
 
     def set_color_scheme(self, color_scheme):
         self.setvar('COLOR_SCHEME', color_scheme)
-
-    def initialize_namespace(self):
-        try:
-            homedir = pathlib.Path.home().resolve().as_posix()
-        except FileNotFoundError:
-            raise marcel.exception.KillShellException(
-                'Home directory does not exist!')
-        try:
-            current_dir = pathlib.Path.cwd().resolve().as_posix()
-        except FileNotFoundError:
-            raise marcel.exception.KillShellException(
-                'Current directory does not exist! cd somewhere else and try again.')
-        self.namespace.update({
-            'HOME': homedir,
-            'PWD': current_dir,
-            'DIRS': [current_dir],
-            'USER': getpass.getuser(),
-            'HOST': socket.gethostname(),
-            'MARCEL_VERSION': marcel.version.VERSION,
-            'PROMPT': [EnvironmentScript.DEFAULT_PROMPT],
-            'PROMPT_CONTINUATION': [EnvironmentScript.DEFAULT_PROMPT_CONTINUATION],
-            'BOLD': marcel.object.color.Color.BOLD,
-            'ITALIC': marcel.object.color.Color.ITALIC,
-            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-            'Color': marcel.object.color.Color,
-        })
-        editor = os.getenv('EDITOR')
-        if editor:
-            self.namespace['EDITOR'] = editor
-        for key, value in marcel.builtin.__dict__.items():
-            if not key.startswith('_'):
-                self.namespace[key] = value
-        self.immutable.update([
-            'HOME',
-            'PWD',
-            'DIRS',
-            'USER',
-            'HOST',
-            'MARCEL_VERSION',
-            'PROMPT',
-            'PROMPT_CONTINUATION',
-            'BOLD',
-            'ITALIC',
-            'COLOR_SCHEME',
-            'Color'])
 
     def check_mutable(self, var):
         if var in self.immutable:
@@ -409,7 +453,7 @@ class EnvironmentScript(Environment):
         # will then be added to self.namespace, for use in the execution of op functions.
         exec(config_source, self.namespace, locals)
         self.namespace.update(locals)
-        self.immutable.update(locals)
+        self.immutable.update(locals.keys())
         self.config_path = config_path
 
     def prompt_string(self, prompt_pieces):
@@ -443,21 +487,14 @@ class EnvironmentScript(Environment):
             self.modified_vars.add(var)
 
     def no_mutability_check(self):
-        class NoMutabilityCheck(object):
+        return EnvironmentScript.NoMutabilityCheck(self)
 
-            def __init__(self, env):
-                self.env = env
-                self.immutable = env.immutable
-
-            def __enter__(self):
-                self.env.immutable = set()
-
-            def __exit__(self, exc_type, exc_val, exc_tb):
-                self.env.immutable = self.immutable
-
-        return NoMutabilityCheck(self)
+    @staticmethod
+    def create():
+        env = EnvironmentScript()
+        env.initialize_namespace()
+        return env
 
     @staticmethod
     def immutable(x):
         return callable(x) or type(x) in (int, float, str, bool, tuple, marcel.core.PipelineExecutable)
-

@@ -77,7 +77,7 @@ from marcel.reduction import *
 PWD = None
 DIRS = [_pathlib.Path(_os.getcwd())]
 DB_DEFAULT = None
-_ENV = _env_.EnvironmentAPI(globals())
+_ENV = _env_.EnvironmentAPI.create(globals())
 _MAIN = _main.MainAPI(_ENV)
 
 

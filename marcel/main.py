@@ -89,7 +89,7 @@ class MainScript(Main):
     def __init__(self, config_file, testing=False):
         super().__init__()
         try:
-            self.env = marcel.env.EnvironmentScript()
+            self.env = marcel.env.EnvironmentScript.create()
         except marcel.exception.KillCommandException as e:
             print(f'Cannot start marcel: {e}', file=sys.stderr)
             sys.exit(1)

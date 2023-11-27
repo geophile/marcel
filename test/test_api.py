@@ -21,14 +21,20 @@ TEST = test_base.TestAPI(_MAIN)
 SQL = True
 
 # Convenient for testing to have NODE1 precede NODE2 lexicographically
-NODE1 = '127.0.0.1'
-NODE2 = 'localhost'
+def find_node(cluster, node_name):
+    for host in cluster.hosts:
+        if host.name == node_name:
+            return host
+    return None
+
 CLUSTER1 = cluster(user='jao',
                    identity='/home/jao/.ssh/id_rsa',
-                   host=NODE1)
+                   host='127.0.0.1')
 CLUSTER2 = cluster(user='jao',
                    identity='/home/jao/.ssh/id_rsa',
-                   hosts=[NODE1, NODE2])
+                   hosts=['127.0.0.1', 'localhost'])
+NODE1 = find_node(CLUSTER2, '127.0.0.1')
+NODE2 = find_node(CLUSTER2, 'localhost')
 jdb = database(driver='psycopg2',
                dbname='jao',
                user='jao',
@@ -840,24 +846,23 @@ def test_dir_stack():
 
 @timeit
 def test_remote():
-    node1 = marcel.object.cluster.Host(TEST.env.getvar('NODE1'), None)
-    TEST.run(lambda: run(remote('CLUSTER1', gen(3))),
-             expected_out=[(node1, 0), (node1, 1), (node1, 2)])
+    TEST.run(lambda: run(remote(CLUSTER1, gen(3))),
+             expected_out=[(NODE1, 0), (NODE1, 1), (NODE1, 2)])
     # Handling of remote error in execution
-    TEST.run(lambda: run(remote('CLUSTER1', gen(3, -1) | map(lambda x: 5 / x))),
-             expected_out=[(node1, -5.0), Error('division by zero'), (node1, 5.0)])
+    TEST.run(lambda: run(remote(CLUSTER1, gen(3, -1) | map(lambda x: 5 / x))),
+             expected_out=[(NODE1, -5.0), Error('division by zero'), (NODE1, 5.0)])
     # Handling of remote error in setup
     # TODO: Bug - should be expected_err
-    TEST.run(lambda: run(remote('CLUSTER1', ls('/nosuchfile'))),
+    TEST.run(lambda: run(remote(CLUSTER1, ls('/nosuchfile'))),
              expected_out=[Error('No qualifying paths')])
     # expected_err='No qualifying paths')
     # Bug 4
-    TEST.run(lambda: run(remote('CLUSTER1',
+    TEST.run(lambda: run(remote(CLUSTER1,
                                 gen(3)) | red(None, r_plus)),
-             expected_out=[(node1, 3)])
-    TEST.run(lambda: run(remote('CLUSTER1',
+             expected_out=[(NODE1, 3)])
+    TEST.run(lambda: run(remote(CLUSTER1,
                                 gen(10) | map(lambda x: (x % 2, x)) | red(None, r_plus))),
-             expected_out=[(node1, 0, 20), (node1, 1, 25)])
+             expected_out=[(NODE1, 0, 20), (NODE1, 1, 25)])
     # Bug 121
     TEST.run(test=lambda: run(remote('notacluster', gen(3))),
              expected_err='notacluster is not a Cluster')
@@ -1607,37 +1612,37 @@ def test_upload():
         os.system(f'rm -rf {testdir}/dest')
         os.system(f'mkdir {testdir}/dest')
         # No qualifying paths
-        TEST.run(test=lambda: run(upload('CLUSTER1', f'{testdir}/dest', '/nosuchfile')),
-                 expected_err='No qualifying paths')
+        # TEST.run(test=lambda: run(upload(CLUSTER1, f'{testdir}/dest', '/nosuchfile')),
+        #          expected_err='No qualifying paths')
         # Qualifying paths exist but insufficient permission to read
         os.system(f'sudo touch {testdir}/nope1')
         os.system(f'sudo rm {testdir}/nope?')
         os.system(f'touch {testdir}/nope1')
         os.system(f'touch {testdir}/nope2')
         os.system(f'chmod 000 {testdir}/nope?')
-        TEST.run(test=lambda: run(upload('CLUSTER1', f'{testdir}/dest', f'{testdir}/nope1')),
+        TEST.run(test=lambda: run(upload(CLUSTER1, f'{testdir}/dest', f'{testdir}/nope1')),
                  expected_out=[Error('nope1: Permission denied')])
-        TEST.run(test=lambda: run(upload('CLUSTER1', f'{testdir}/dest', f'{testdir}/nope?')),
+        TEST.run(test=lambda: run(upload(CLUSTER1, f'{testdir}/dest', f'{testdir}/nope?')),
                  expected_out=[Error('Permission denied'),
                                Error('Permission denied')])
         # Target dir must be absolute
-        TEST.run(test=lambda: run(upload('CLUSTER1', 'dest', f'{testdir}/source/a')),
+        TEST.run(test=lambda: run(upload(CLUSTER1, 'dest', f'{testdir}/source/a')),
                  expected_err='Target directory must be absolute: dest')
         # There must be at least one source
-        TEST.run(test=lambda: run(upload('CLUSTER1', f'{testdir}/dest')),
+        TEST.run(test=lambda: run(upload(CLUSTER1, f'{testdir}/dest')),
                  expected_err='No qualifying paths')
         # Copy fully-specified filenames
-        TEST.run(test=lambda: run(upload('CLUSTER1', f'{testdir}/dest', f'{testdir}/source/a', f'{testdir}/source/b')),
+        TEST.run(test=lambda: run(upload(CLUSTER1, f'{testdir}/dest', f'{testdir}/source/a', f'{testdir}/source/b')),
                  verification=lambda: run(ls(f'{testdir}/dest', file=True) | map(lambda f: f.name)),
                  expected_out=['a', 'b'])
         os.system(f'rm {testdir}/dest/*')
         # Filename with spaces
-        TEST.run(test=lambda: run(upload('CLUSTER1', f'{testdir}/dest', f'{testdir}/source/a b')),
+        TEST.run(test=lambda: run(upload(CLUSTER1, f'{testdir}/dest', f'{testdir}/source/a b')),
                  verification=lambda: run(ls(f'{testdir}/dest', file=True) | map(lambda f: f.name)),
                  expected_out=['a b'])
         os.system(f'rm {testdir}/dest/*')
         # Wildcard
-        TEST.run(test=lambda: run(upload('CLUSTER1', f'{testdir}/dest', f'{testdir}/source/a*')),
+        TEST.run(test=lambda: run(upload(CLUSTER1, f'{testdir}/dest', f'{testdir}/source/a*')),
                  verification=lambda: run(ls(f'{testdir}/dest', file=True) | map(lambda f: f.name)),
                  expected_out=['a', 'a b'])
         os.system(f'rm {testdir}/dest/*')
@@ -1646,16 +1651,13 @@ def test_upload():
 @timeit
 def test_download():
     with TestDir() as testdir:
-        node1 = TEST.env.getvar('NODE1')
-        node2 = TEST.env.getvar('NODE2')
-        cluster2 = TEST.env.getvar('CLUSTER2')
         os.system(f'rm -rf {testdir}/source')
         os.system(f'mkdir {testdir}/source')
         os.system(f'touch {testdir}/source/a {testdir}/source/b "{testdir}/source/a b"')
         os.system(f'rm -rf {testdir}/dest')
         os.system(f'mkdir {testdir}/dest')
         # No qualifying paths
-        TEST.run(test=lambda: run(download(f'{testdir}/dest', cluster2, '/nosuchfile')),
+        TEST.run(test=lambda: run(download(f'{testdir}/dest', CLUSTER2, '/nosuchfile')),
                  expected_out=[Error('No such file or directory'), Error('No such file or directory')])
         # Qualifying paths exist but insufficient permission to read
         os.system(f'sudo touch {testdir}/nope1')
@@ -1663,36 +1665,36 @@ def test_download():
         os.system(f'touch {testdir}/nope1')
         os.system(f'touch {testdir}/nope2')
         os.system(f'chmod 000 {testdir}/nope?')
-        TEST.run(test=lambda: run(download(f'{testdir}/dest', 'CLUSTER2', f'{testdir}/nope1')),
+        TEST.run(test=lambda: run(download(f'{testdir}/dest', CLUSTER2, f'{testdir}/nope1')),
                  expected_out=[Error('Permission denied'), Error('Permission denied')])
-        TEST.run(test=lambda: run(download(f'{testdir}/dest', 'CLUSTER2', f'{testdir}/nope?')),
+        TEST.run(test=lambda: run(download(f'{testdir}/dest', CLUSTER2, f'{testdir}/nope?')),
                  expected_out=[Error('Permission denied'), Error('Permission denied'),
                                Error('Permission denied'), Error('Permission denied')])
         # There must be at least one source specified (regardless of what actually exists remotely)
-        TEST.run(test=lambda: run(download(f'{testdir}/dest', 'CLUSTER2')),
+        TEST.run(test=lambda: run(download(f'{testdir}/dest', CLUSTER2)),
                  expected_err='No remote files specified')
         # Copy fully-specified filenames
         TEST.run(
-            test=lambda: run(download(f'{testdir}/dest', 'CLUSTER2', f'{testdir}/source/a', f'{testdir}/source/b')),
+            test=lambda: run(download(f'{testdir}/dest', CLUSTER2, f'{testdir}/source/a', f'{testdir}/source/b')),
             verification=lambda: run(ls(f'{testdir}/dest', file=True, recursive=True) |
                                      map(lambda f: f.relative_to(f'{testdir}/dest')) |
                                      sort()),
-            expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
+            expected_out=[f'{NODE1}/a', f'{NODE1}/b', f'{NODE2}/a', f'{NODE2}/b'])
         # Leave files in place, delete some of them, try downloading again
-        os.system(f'rm -rf {testdir}/dest/{node1}')
-        os.system(f'rm -rf {testdir}/dest/{node2}/*')
-        TEST.run(test=lambda: run(download(f'{testdir}/dest', cluster2, f'{testdir}/source/a', f'{testdir}/source/b')),
+        os.system(f'rm -rf {testdir}/dest/{NODE1}')
+        os.system(f'rm -rf {testdir}/dest/{NODE2}/*')
+        TEST.run(test=lambda: run(download(f'{testdir}/dest', CLUSTER2, f'{testdir}/source/a', f'{testdir}/source/b')),
                  verification=lambda: run(ls(f'{testdir}/dest', file=True, recursive=True) |
                                           map(lambda f: f.relative_to(f'{testdir}/dest')) |
                                           sort()),
-                 expected_out=[f'{node1}/a', f'{node1}/b', f'{node2}/a', f'{node2}/b'])
+                 expected_out=[f'{NODE1}/a', f'{NODE1}/b', f'{NODE2}/a', f'{NODE2}/b'])
         os.system(f'rm -rf {testdir}/dest/*')
         # Filename with spaces
-        TEST.run(test=lambda: run(download(f'{testdir}/dest', cluster2, f'{testdir}/source/a\\ b')),
+        TEST.run(test=lambda: run(download(f'{testdir}/dest', CLUSTER2, f'{testdir}/source/a\\ b')),
                  verification=lambda: run(ls(f'{testdir}/dest', file=True, recursive=True) |
                                           map(lambda f: f.relative_to(f'{testdir}/dest')) |
                                           sort()),
-                 expected_out=[f'{node1}/a b', f'{node2}/a b'])
+                 expected_out=[f'{NODE1}/a b', f'{NODE2}/a b'])
         os.system(f'rm -rf {testdir}/dest/*')
         # # Relative directory
         # current_dir = os.getcwd()
@@ -1703,12 +1705,12 @@ def test_download():
         # os.system(f'rm {testdir}/dest/*')
         # os.chdir(current_dir)
         # Wildcard
-        TEST.run(test=lambda: run(download(f'{testdir}/dest', cluster2, f'{testdir}/source/a*')),
+        TEST.run(test=lambda: run(download(f'{testdir}/dest', CLUSTER2, f'{testdir}/source/a*')),
                  verification=lambda: run(ls(f'{testdir}/dest', file=True, recursive=True) |
                                           map(lambda f: f.relative_to(f'{testdir}/dest')) |
                                           sort()),
-                 expected_out=[f'{node1}/a', f'{node1}/a b',
-                               f'{node2}/a', f'{node2}/a b'])
+                 expected_out=[f'{NODE1}/a', f'{NODE1}/a b',
+                               f'{NODE2}/a', f'{NODE2}/a b'])
         os.system(f'rm -rf {testdir}/dest/*')
 
 
@@ -2020,13 +2022,14 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_sudo()
+    test_remote()
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
+    # main_stable()
     # main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)

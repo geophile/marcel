@@ -186,17 +186,19 @@ def main():
         TRACE.write('-' * 80)
         TRACE.write(getpass.getuser())
         TRACE.write(f'{datetime.datetime.now()}')
-        # env
-        env = marcel.env.EnvironmentScript()
-        env.directory_state = marcel.env.DirectoryState(env)
-        env.modified_vars = set()
-        env.main_pid = os.getpid()
         # Use sys.stdin.buffer because we want binary data, not the text version
         input = dill.Unpickler(sys.stdin.buffer)
         # Python version from client
         client_python_version = input.load()
+        marcel_usage = input.load()
         # pipelines from client
         pipeline = input.load()
+        if marcel_usage == 'api':
+            env = marcel.env.EnvironmentAPI.create(dict())
+        elif marcel_usage == 'script':
+            env = marcel.env.EnvironmentScript.create()
+        else:
+            assert False
         version = env.getvar('MARCEL_VERSION')
         TRACE.write(f'Marcel version {version}')
         TRACE.write(f'pipeline: {pipeline}')

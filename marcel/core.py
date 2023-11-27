@@ -15,6 +15,7 @@
 
 import sys
 
+import marcel.env
 import marcel.exception
 import marcel.function
 import marcel.helpformatter
@@ -287,10 +288,12 @@ class OpList(object):
 
     def create_pipeline(self, args=None):
         assert args is None
+        assert not (self.op is not None and self.ops is not None)
+        # self.op and ops could both be None. E.g., this happens with upload, which starts with an empty pipeline.
         pipeline = PipelineExecutable()
-        if self.ops is None:
+        if self.op is not None:
             pipeline.append(self.op)
-        else:
+        elif self.ops is not None:
             for op in self.ops:
                 pipeline.append(op)
         return pipeline
@@ -477,6 +480,12 @@ class Pipeline(object):
                                   pipeline,
                                   customize_pipeline)
         assert False, pipeline
+
+    @staticmethod
+    def create_empty_pipeline(env):
+        return (marcel.core.OpList(env, None)
+                if type(env) is marcel.env.EnvironmentAPI
+                else marcel.core.PipelineExecutable())
 
 
 # A pipeline constructed through the marcel parser, via command line or script. Pipeline args are managed

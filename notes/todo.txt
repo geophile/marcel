@@ -728,3 +728,7 @@ History record should include time of execution.
 ----------------------------------------------------------------------
 
 Move op tests into ops themselves? Is this feasible for API testing?
+
+----------------------------------------------------------------------
+
+window -t testing
