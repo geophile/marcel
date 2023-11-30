@@ -269,15 +269,12 @@ Workspaces spec
 
 Concepts:
 
-Session: A marcel *session* is a process running marcel.  The session and
-process end at the same instant.
+Session: A marcel *session* is a process running marcel.  The session
+and process end at the same instant.
 
-Workspace: A *workspace* is the context in which marcel commands
-executes.  Unless a workspace is specifically selected and used,
-marcel runs using the *default workspace*. A *named workspace* must be
-explicitly created and selected for use.
-
-Workspace state comprises the following:
+Workspace: A *workspace* comprises the context in which marcel
+commands executes. This context -- the workspace state -- comprises
+the following:
 
 - A startup script: This provides imports and definitions to be used
   by the session.
@@ -285,8 +282,8 @@ Workspace state comprises the following:
 - A command history: As marcel executes commands, they are recorded in
   the workspace's command history.
 
-- An environment: This is a set of environment variables, established
-  in part by the startup script.
+- An environment: This is a set of environment variables, initialized
+  by marcel and the startup script, and also operated on by the user.
 
 The startup script is created upon workspace creation. Further changes
 must be made by the user. Marcel maintains the other parts of
@@ -297,6 +294,10 @@ exactly one workspace. If no workspace is specified, then the default
 workspace is used by a session.  A named workspace can be used by at
 most one session at a time. The default workspace can be used by
 multiple sessions at the same time.
+
+Unless a workspace is specifically selected and
+used, marcel runs using the *default workspace*. A *named workspace*
+must be explicitly created and selected for use.
 
 
 

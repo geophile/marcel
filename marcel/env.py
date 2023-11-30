@@ -184,11 +184,38 @@ class Environment(object):
         self.directory_state = DirectoryState(self)
         # Source of ops and arg parsers.
         self.op_modules = marcel.opmodule.import_op_modules()
+        # Variables defined in startup script are immutable. Also, vars representing state of host OS.
+        self.immutable = set()
         # Where to find bash.
         self.bash = shutil.which('bash')
 
     def initialize_namespace(self):
-        self.namespace['MARCEL_VERSION'] = marcel.version.VERSION
+        try:
+            homedir = pathlib.Path.home().resolve().as_posix()
+        except FileNotFoundError:
+            raise marcel.exception.KillShellException(
+                'Home directory does not exist!')
+        try:
+            current_dir = pathlib.Path.cwd().resolve().as_posix()
+        except FileNotFoundError:
+            raise marcel.exception.KillShellException(
+                'Current directory does not exist! cd somewhere else and try again.')
+        self.namespace.update({
+            'MARCEL_VERSION': marcel.version.VERSION,
+            'HOME': homedir,
+            'PWD': current_dir,
+            'DIRS': [current_dir],
+            'USER': getpass.getuser(),
+            'HOST': socket.gethostname()
+        })
+        self.immutable.update([
+            'HOME',
+            'PWD',
+            'DIRS',
+            'USER',
+            'HOST',
+            'MARCEL_VERSION'
+        ])
 
     def hasvar(self, var):
         return var in self.namespace
@@ -203,6 +230,7 @@ class Environment(object):
 
     def setvar(self, var, value):
         assert var is not None
+        self.check_mutable(var)
         current_value = self.namespace.get(var, None)
         if type(current_value) is marcel.reservoir.Reservoir:
             current_value.ensure_deleted()
@@ -210,6 +238,7 @@ class Environment(object):
 
     def delvar(self, var):
         assert var is not None
+        self.check_mutable(var)
         return self.namespace.pop(var)
 
     def vars(self):
@@ -237,6 +266,13 @@ class Environment(object):
 
     def color_scheme(self):
         return None
+
+    def check_mutable(self, var):
+        if var in self.immutable:
+            raise marcel.exception.KillCommandException(
+                f'{var} was defined by marcel, or in your startup script, '
+                f'so it cannot be modified or deleted programmatically. '
+                f'Edit the startup script instead.')
 
     def is_interactive_executable(self, x):
         return False
@@ -274,7 +310,6 @@ class EnvironmentAPI(Environment):
         return env
 
 
-
 class EnvironmentScript(Environment):
 
     DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
@@ -297,13 +332,13 @@ class EnvironmentScript(Environment):
 
         def __init__(self, env):
             self.env = env
-            self.immutable = env.immutable
+            self.immutable = env.is_immutable
 
         def __enter__(self):
-            self.env.immutable = set()
+            self.env.is_immutable = set()
 
         def __exit__(self, exc_type, exc_val, exc_tb):
-            self.env.immutable = self.immutable
+            self.env.is_immutable = self.immutable
 
     def __init__(self):
         super().__init__(marcel.nestednamespace.NestedNamespace())
@@ -319,29 +354,12 @@ class EnvironmentScript(Environment):
         self.modified_vars = set()
         # Support for pos()
         self.current_op = None
-        # Variables defined in startup script are immutable
-        self.immutable = set()
         #
         self.initialize_namespace()
 
     def initialize_namespace(self):
         super().initialize_namespace()
-        try:
-            homedir = pathlib.Path.home().resolve().as_posix()
-        except FileNotFoundError:
-            raise marcel.exception.KillShellException(
-                'Home directory does not exist!')
-        try:
-            current_dir = pathlib.Path.cwd().resolve().as_posix()
-        except FileNotFoundError:
-            raise marcel.exception.KillShellException(
-                'Current directory does not exist! cd somewhere else and try again.')
         self.namespace.update({
-            'HOME': homedir,
-            'PWD': current_dir,
-            'DIRS': [current_dir],
-            'USER': getpass.getuser(),
-            'HOST': socket.gethostname(),
             'PROMPT': [EnvironmentScript.DEFAULT_PROMPT],
             'PROMPT_CONTINUATION': [EnvironmentScript.DEFAULT_PROMPT_CONTINUATION],
             'BOLD': marcel.object.color.Color.BOLD,
@@ -357,12 +375,6 @@ class EnvironmentScript(Environment):
             if not key.startswith('_'):
                 self.namespace[key] = value
         self.immutable.update([
-            'HOME',
-            'PWD',
-            'DIRS',
-            'USER',
-            'HOST',
-            'MARCEL_VERSION',
             'PROMPT',
             'PROMPT_CONTINUATION',
             'BOLD',
@@ -384,13 +396,8 @@ class EnvironmentScript(Environment):
         return value
 
     def setvar(self, var, value):
-        self.check_mutable(var)
         super().setvar(var, value)
         return self.modified_vars.add(var)
-
-    def delvar(self, var):
-        self.check_mutable(var)
-        return super().delvar(var)
 
     def clear_changes(self):
         self.modified_vars = set()
@@ -424,13 +431,6 @@ class EnvironmentScript(Environment):
 
     def set_color_scheme(self, color_scheme):
         self.setvar('COLOR_SCHEME', color_scheme)
-
-    def check_mutable(self, var):
-        if var in self.immutable:
-            raise marcel.exception.KillCommandException(
-                f'{var} was defined by marcel, or in your startup script, '
-                f'so it cannot be modified or deleted programmatically. '
-                f'Edit the startup script instead.')
 
     def is_interactive_executable(self, x):
         interactive_executables = self.getvar('INTERACTIVE_EXECUTABLES')
@@ -483,7 +483,7 @@ class EnvironmentScript(Environment):
             return EnvironmentScript.DEFAULT_PROMPT
 
     def note_var_access(self, var, value):
-        if not EnvironmentScript.immutable(value):
+        if not EnvironmentScript.is_immutable(value):
             self.modified_vars.add(var)
 
     def no_mutability_check(self):
@@ -496,5 +496,5 @@ class EnvironmentScript(Environment):
         return env
 
     @staticmethod
-    def immutable(x):
+    def is_immutable(x):
         return callable(x) or type(x) in (int, float, str, bool, tuple, marcel.core.PipelineExecutable)

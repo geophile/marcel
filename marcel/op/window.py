@@ -22,7 +22,7 @@ import marcel.util
 
 
 HELP = '''
-{L,wrap=F}window [-o|--overlap N] [-d|--disjoint N] [-t|--truncate] [PREDICATE]
+{L,wrap=F}window [-o|--overlap N] [-d|--disjoint N] [PREDICATE]
 
 {L,indent=4:28}{r:-o}, {r:--overlap}           Generate overlapping windows of size N.
 
@@ -30,9 +30,6 @@ HELP = '''
 
 {L,indent=4:28}{r:PREDICATE}               Start a new window on inputs for which the predicate
 evaluates to {n:True}.
-
-{L,indent=4:28}{r:-t}, {r:--truncate}          Truncate output by discarding 
-tuples containing {n:None}. 
 
 Groups of consecutive input tuples are combined into a single tuple, which is written to
 the output stream. 
@@ -99,14 +96,12 @@ tuples:
 '''
 
 
-def window(predicate=None, overlap=None, disjoint=None, truncate=False):
+def window(predicate=None, overlap=None, disjoint=None):
     args = []
     if overlap is not None:
         args.extend(['--overlap', overlap])
     if disjoint is not None:
         args.extend(['--disjoint', disjoint])
-    if truncate:
-        args.append('--truncate')
     if predicate:
         args.append(predicate)
     return Window(), args
@@ -118,7 +113,6 @@ class WindowArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('window', env)
         self.add_flag_one_value('overlap', '-o', '--overlap', convert=self.str_to_int, target='overlap_arg')
         self.add_flag_one_value('disjoint', '-d', '--disjoint', convert=self.str_to_int, target='disjoint_arg')
-        self.add_flag_no_value('truncate', '-t', '--truncate')
         self.add_anon('predicate', convert=self.function, default=None)
         self.exactly_one('overlap', 'disjoint', 'predicate')
         self.validate()
@@ -134,7 +128,6 @@ class Window(marcel.core.Op):
         self.disjoint_arg = None
         self.disjoint = None
         self.window_generator = None
-        self.truncate = None
         self.n = None
 
     def __repr__(self):
@@ -143,8 +136,6 @@ class Window(marcel.core.Op):
             options.append(f'overlap={self.overlap}')
         if self.disjoint:
             options.append(f'disjoint={self.disjoint}')
-        if self.truncate:
-            options.append('truncate')
         if self.predicate:
             options.append(f'predicate={self.predicate.source()}')
         return f'window({", ".join(options)})'
@@ -192,9 +183,7 @@ class WindowBase:
         assert False
 
     def send_window(self, env):
-        t = tuple(self.window)
-        if not self.op.truncate or None not in t:
-            self.op.send(env, t)
+        self.op.send(env, tuple(self.window))
 
     def flush_window(self, env):
         if len(self.window) > 0:

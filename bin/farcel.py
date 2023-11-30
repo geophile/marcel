@@ -190,6 +190,7 @@ def main():
         input = dill.Unpickler(sys.stdin.buffer)
         # Python version from client
         client_python_version = input.load()
+        # Client-side marcel usage, api or script.
         marcel_usage = input.load()
         # pipelines from client
         pipeline = input.load()
@@ -198,7 +199,7 @@ def main():
         elif marcel_usage == 'script':
             env = marcel.env.EnvironmentScript.create()
         else:
-            assert False
+            assert False, marcel_usage
         version = env.getvar('MARCEL_VERSION')
         TRACE.write(f'Marcel version {version}')
         TRACE.write(f'pipeline: {pipeline}')

@@ -1,3 +1,4 @@
+import getpass
 import math
 import os
 import pathlib
@@ -1837,31 +1838,46 @@ def test_args():
 @timeit
 def test_env():
     TEST.reset_environment()
-    # Get all env vars, and check for things that should definitely be there.
-    # PATH, PWD are inherited from the process.
-    # NODE1, NODE2 come from the test config file, ./.marcel.py
-    TEST.run(test='env | (var, value: var) | select (var: var in ("NODE1", "NODE2", "PATH", "PWD"))',
-             expected_out=["NODE1", "NODE2", "PATH", "PWD"])
-    # Test some vars
-    TEST.run(test='env -p NODE | (var, value: var) | select (var: var in ("NODE1", "NODE2"))',
-             expected_out=["NODE1", "NODE2"])
-    # One var
-    TEST.run(test='env PATH | (var, value: var)',
-             expected_out=["PATH"])
-    # Missing var
-    TEST.run(test='env NOSUCHVAR | (var, value: var)',
-             expected_out=[Error('undefined')])
-    # Delete var
-    TEST.run('GARBAGE = asdf')
-    TEST.run(test='env GARBAGE',
-             expected_out=[('GARBAGE', 'asdf')])
-    TEST.run(test='env -d GARBAGE',
-             expected_out=[('GARBAGE', 'asdf')])
-    TEST.run(test='env GARBAGE',
-             expected_out=[Error('undefined')])
-    # Delete missing var
-    TEST.run(test='env -d GARBAGE',
+    # Env vars defined by user
+    TEST.run(test='env v1',
+             expected_err='v1 is undefined')
+    TEST.run(test='v2 = asdf',
+             verification='env v2',
+             expected_out=[('v2', 'asdf')])
+    TEST.run(test='env -d v2',
+             expected_out=[('v2', 'asdf')])
+    TEST.run(test='env -d v2',
              expected_out=[])
+    TEST.run(test='v3xyz = 1')
+    TEST.run(test='v3xyzw = 2')
+    TEST.run(test='v3xzw = 3')
+    TEST.run(test='env -p xyz | sort',
+             expected_out=[('v3xyz', '1'),
+                           ('v3xyzw', '2')])
+    # Env defined by startup
+    TEST.run(test='env NODE1',
+             expected_out=[('NODE1', '127.0.0.1')])
+    TEST.run(test='env --delete NODE1',
+             expected_err='cannot be modified or deleted')
+    TEST.run(test='NODE1 = asdf',
+             expected_err='cannot be modified or deleted')
+    # Env defined by marcel
+    TEST.run(test='env USER',
+             expected_out=[('USER', getpass.getuser())])
+    TEST.run(test='USER = asdf',
+             expected_err='cannot be modified or deleted')
+    TEST.run(test='env -d USER',
+             expected_err='cannot be modified or deleted')
+    # Env inherited from host
+    TEST.run(test='env -o asdfasdf',
+             expected_err='is undefined')
+    TEST.run(test='env -o SHELL',
+             expected_out=[('SHELL', os.getenv('SHELL'))])
+    TEST.run(test='env -o -p SHELL | select (k, v: k == "SHELL")',
+             expected_out=[('SHELL', os.getenv('SHELL'))])
+    TEST.run(test='env -o -d SHELL',
+             expected_err='Cannot specify more than one of')
+
 
 
 @timeit

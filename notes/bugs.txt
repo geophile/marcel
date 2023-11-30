@@ -824,3 +824,24 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/op/expand.py", line 154, in receive
     send(env, pre + (x,) + post)
 TypeError: can only concatenate list (not "tuple") to list
+
+----------------------------------------------------------------------
+
+232. Bug in redirect at both ends of a pipeline
+
+This doesn't load al:
+
+a <$ args -a (| L: (L) |) >$ al
+
+----------------------------------------------------------------------
+
+233. args -a producing wrapped lists?
+
+M 0.20.0 jao@loon ~/tufts/cs131/assignments/a5$ gen 5 | (x: [x] * 4) | args -a (| t: (list(zip(t))) |) | expand | write -c
+"[0, 0, 0, 0]"
+"[1, 1, 1, 1]"
+"[2, 2, 2, 2]"
+"[3, 3, 3, 3]"
+"[4, 4, 4, 4]"
+
+The problem is that write gets 1-tuples containing lists, not lists.

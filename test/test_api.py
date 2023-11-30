@@ -1,3 +1,4 @@
+import getpass
 import os
 import pathlib
 import shutil
@@ -1468,37 +1469,39 @@ def test_args():
 @timeit
 def test_env():
     TEST.reset_environment()
-    # Get all env vars, and check for things that should definitely be there.
-    # PATH, PWD are inherited from the process.
-    # NODE1, NODE2 come from the test config file, ./.marcel.py
-    TEST.run(test=lambda: run(env() |
-                              map(lambda var, value: var) |
-                              select(lambda var: var in ("NODE1", "NODE2", "PATH", "PWD"))),
-             expected_out=["NODE1", "NODE2", "PATH", "PWD"])
-    # Test some vars
-    TEST.run(test=lambda: run(env(pattern='NODE') |
-                              map(lambda var, value: var) |
-                              select(lambda var: var in ("NODE1", "NODE2"))),
-             expected_out=["NODE1", "NODE2"])
-    # One var
-    TEST.run(test=lambda: run(env(var='PATH') |
-                              map(lambda var, value: var)),
-             expected_out=["PATH"])
-    # Missing var
-    TEST.run(test=lambda: run(env(var='NOSUCHVAR') |
-                              map(lambda var, value: var)),
-             expected_out=[Error('undefined')])
-    # Delete var
-    TEST.run(lambda: run(assign('GARBAGE', 'asdf')))
-    TEST.run(test=lambda: run(env(var='GARBAGE')),
-             expected_out=[('GARBAGE', 'asdf')])
-    TEST.run(test=lambda: run(env(delete='GARBAGE')),
-             expected_out=[('GARBAGE', 'asdf')])
-    TEST.run(test=lambda: run(env(var='GARBAGE')),
-             expected_out=[Error('undefined')])
-    # Delete missing var
-    TEST.run(test=lambda: run(env(delete='GARBAGE')),
+    # Env vars defined by user
+    TEST.run(test=lambda: run(env('v1')),
+             expected_err='v1 is undefined')
+    TEST.run(test=lambda: run(assign('v2', 'asdf')),
+             verification=lambda: run(env('v2')),
+             expected_out=[('v2', 'asdf')])
+    TEST.run(test=lambda: run(env(delete='v2')),
+             expected_out=[('v2', 'asdf')])
+    TEST.run(test=lambda: run(env(delete='v2')),
              expected_out=[])
+    TEST.run(test=lambda: run(assign('v3xyz', 1)))
+    TEST.run(test=lambda: run(assign('v3xyzw', 2)))
+    TEST.run(test=lambda: run(assign('v3xzw', 3)))
+    TEST.run(test=lambda: run(env(pattern='xyz') | sort()),
+             expected_out=[('v3xyz', 1),
+                           ('v3xyzw', 2)])
+    # Env defined by marcel
+    TEST.run(test=lambda: run(env(var='USER')),
+             expected_out=[('USER', getpass.getuser())])
+    TEST.run(test=lambda: run(assign('USER', 'asdf')),
+             expected_err='cannot be modified or deleted')
+    TEST.run(test=lambda: run(env(delete='USER')),
+             expected_err='cannot be modified or deleted')
+    # Env inherited from host
+    TEST.run(test=lambda: run(env('asdfasdf', os=True)),
+             expected_err='is undefined')
+    TEST.run(test=lambda: run(env('SHELL', os=True)),
+             expected_out=[('SHELL', os.getenv('SHELL'))])
+    TEST.run(test=lambda: run(env(pattern='SHELL', os=True) | select (lambda k, v: k == "SHELL")),
+             expected_out=[('SHELL', os.getenv('SHELL'))])
+    TEST.run(test=lambda: run(env(delete='SHELL', os=True)),
+             expected_err='Cannot specify more than one of')
+
 
 
 @timeit
@@ -2022,15 +2025,14 @@ def main_stable():
 
 
 def main_dev():
-    test_sudo()
-    test_remote()
+    pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # main_slow_tests()
+    main_stable()
+    main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
