@@ -60,7 +60,7 @@ class Cd(marcel.core.Op):
                                                   'directory_arg',
                                                   str,
                                                   pathlib.Path, pathlib.PosixPath, marcel.object.file.File))
-        dirs = marcel.op.filenames.Filenames(env, [dir_arg]).normalize()
+        dirs = marcel.op.filenames.Filenames([dir_arg]).normalize()
         if len(dirs) == 0:
             raise marcel.exception.KillCommandException('No qualifying path')
         elif len(dirs) > 1:

@@ -8,17 +8,6 @@ Things disabled that need to be re-enabled or re-implemented
 
 ----------------------------------------------------------------------
 
-Farcel read_config is a copy of some Env code. 
-
-- Clean up along with Environment.
-
-- Not needed for API, but farcel doesn't know client-side usage
-  (interactive, script, API)
-
-- Filenames init no longer needs env arg.
-
-----------------------------------------------------------------------
-
 Op usage
 
                 Interactive     Script         API

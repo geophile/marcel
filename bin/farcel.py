@@ -16,12 +16,9 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import atexit
-import datetime
 import getpass
 import os
-import pathlib
 import signal
-import socket
 import sys
 import threading
 
@@ -143,34 +140,6 @@ def kill_descendents(signal_id):
         TRACE.write(f'Caught {type(e)} in kill_self_and_descendents: {e}')
         with TRACE.open() as file:
             marcel.util.print_stack_of_current_exception(file)
-
-
-# Adapted from Environment.read_config
-def read_config():
-    return {}
-    # current_dir = pathlib.Path.cwd().resolve()
-    # namespace = {
-    #     'USER': getpass.getuser(),
-    #     'HOST': socket.gethostname(),
-    #     'MARCEL_VERSION': marcel.version.VERSION,
-    #     'PWD': current_dir.as_posix(),
-    #     'DIRS': [current_dir.as_posix()],
-    #     'BOLD': marcel.object.color.Color.BOLD,
-    #     'ITALIC': marcel.object.color.Color.ITALIC,
-    #     'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-    #     'Color': marcel.object.color.Color,
-    # }
-    # locations = marcel.locations.Locations(marcel.env.Environment())  # Pass in env from caller
-    # config_path = locations.config_path()
-    # if config_path.exists():
-    #     with open(config_path.as_posix()) as config_file:
-    #         config_source = config_file.read()
-    #     locals = {}
-    #     # Execute the config file. Imported and newly-defined symbols go into locals, which
-    #     # will then be added to self.namespace, for use in the execution of op functions.
-    #     exec(config_source, namespace, locals)
-    #     namespace.update(locals)
-    # return namespace
 
 
 def shutdown():

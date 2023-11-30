@@ -34,7 +34,7 @@ File = marcel.object.file.File
 
 class Filenames(object):
 
-    def __init__(self, env, filenames):
+    def __init__(self, filenames):
         self.filenames = filenames
         # Marcel and host path should be in sync. Use os.getcwd() instead of DirState to minimize dependence
         # on Environment. This works better for API and farcel usage.

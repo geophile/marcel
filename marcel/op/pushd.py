@@ -68,7 +68,7 @@ class Pushd(marcel.core.Op):
         if dir_arg is None:
             self.directory = None
         else:
-            dirs = marcel.op.filenames.Filenames(env, [pathlib.Path(dir_arg)]).normalize()
+            dirs = marcel.op.filenames.Filenames([pathlib.Path(dir_arg)]).normalize()
             if len(dirs) == 0:
                 raise marcel.exception.KillCommandException('No qualifying path')
             elif len(dirs) > 1:
