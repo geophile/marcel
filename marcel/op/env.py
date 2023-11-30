@@ -23,8 +23,8 @@ import marcel.object.error
 HELP = '''
 {L,wrap=F}env [-o|--os]
 {L,wrap=F}env [-o|--os] VAR
+{L,wrap=F}env [-o|--os] -p|--pattern PATTERN
 {L,wrap=F}env -d|--delete VAR
-{L,wrap=F}env -p|--pattern [-o|--os] PATTERN
 
 {L,indent=4:28}{r:VAR}                     The name of an environment variable.
 

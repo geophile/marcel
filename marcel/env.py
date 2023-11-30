@@ -332,13 +332,13 @@ class EnvironmentScript(Environment):
 
         def __init__(self, env):
             self.env = env
-            self.immutable = env.is_immutable
+            self.immutable = env.immutable
 
         def __enter__(self):
-            self.env.is_immutable = set()
+            self.env.immutable = set()
 
         def __exit__(self, exc_type, exc_val, exc_tb):
-            self.env.is_immutable = self.immutable
+            self.env.immutable = self.immutable
 
     def __init__(self):
         super().__init__(marcel.nestednamespace.NestedNamespace())
