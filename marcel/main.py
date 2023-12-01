@@ -72,9 +72,9 @@ class ReloadConfigException(BaseException):
 
 class Main(object):
 
-    def __init__(self):
+    def __init__(self, env):
         self.main_pid = os.getpid()
-        self.env = None
+        self.env = env
         atexit.register(self.shutdown)
 
     # Main
@@ -83,19 +83,10 @@ class Main(object):
         assert False
 
 
-# MainScript is the parent of MainInteractive, and provides much of its logic.
 class MainScript(Main):
 
-    def __init__(self, config_file, testing=False):
-        super().__init__()
-        try:
-            self.env = marcel.env.EnvironmentScript.create()
-        except marcel.exception.KillCommandException as e:
-            print(f'Cannot start marcel: {e}', file=sys.stderr)
-            sys.exit(1)
-        except marcel.exception.KillShellException as e:
-            print(f'Cannot start marcel: {e}', file=sys.stderr)
-            sys.exit(1)
+    def __init__(self, config_file, testing=False, env=None):
+        super().__init__(env if env else marcel.env.EnvironmentScript.create())
         self.testing = testing
         self.config_time = time.time()
         self.env.read_config(config_file)
@@ -163,7 +154,7 @@ class MainScript(Main):
 class MainInteractive(MainScript):
 
     def __init__(self, config_file, testing=False):
-        super().__init__(config_file, testing)
+        super().__init__(config_file, testing, marcel.env.EnvironmentInteractive.create())
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
         self.reader = None
         self.initialize_reader()  # Sets self.reader
@@ -249,6 +240,7 @@ class MainInteractive(MainScript):
 class MainAPI(Main):
 
     def __init__(self, env):
+        super().__init__(env)
         self.env = env
 
     # Main

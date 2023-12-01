@@ -1,8 +1,38 @@
+Splitting EnvironmentScript -> EnvironmentInteractive
+
+Interactive only:
+
+Fields:
+- Prompts
+- edited_command
+- reader
+- editor
+
+namespace:
+- EDITOR -- remove completely, get from host?
+- PROMPT
+- PROMPT_CONTINUATION
+- BOLD
+- ITALIC
+- COLOR_SCHEME
+- Color
+
+functions:
+- prompts
+- color_scheme
+- set_color_scheme
+- prompt_string
+
+
+----------------------------------------------------------------------
+
 Things disabled that need to be re-enabled or re-implemented
 
 - old_namespace mechanism for maintaining env across startup script
   changes. Most likely reimplementation. Alternative: Save to disk
   temporarily and restore from that as for named workspace?
+
+  Get rid of env.config_path, part of the old_namespacee mechanism.
 
 - env testing, including immutable vars
 
@@ -197,9 +227,6 @@ Main & Environment
 - Why do Main and Environment both nead reader?
 
 
-Directory structure for workspaces
-
-- Modify Locations
 
 
 Workspace locking
@@ -490,6 +517,7 @@ Each workspace has its own startup?
 .config/marcel/
     startup.py  # For anon workspaces, and template for named workspaces
     WORKSPACE_NAME/
+        .WORKSPACE  # Empty file marking this directory as a workspace
         startup.py
 
 .local/share/marcel/

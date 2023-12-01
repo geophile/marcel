@@ -312,9 +312,6 @@ class EnvironmentAPI(Environment):
 
 class EnvironmentScript(Environment):
 
-    DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
-    DEFAULT_PROMPT_CONTINUATION = '+$    '
-
     class CheckNesting(object):
 
         def __init__(self, env):
@@ -346,10 +343,6 @@ class EnvironmentScript(Environment):
         self.locations = marcel.locations.Locations(self)
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
-        # Used during readline editing
-        self.edited_command = None
-        # readline wrapper
-        self.reader = None
         # For tracking env var changes made by job
         self.modified_vars = set()
         # Support for pos()
@@ -361,42 +354,40 @@ class EnvironmentScript(Environment):
 
     def __getstate__(self):
         state = self.__dict__.copy()
-        del state['reader']
         del state['op_modules']
         del state['immutable']
         del state['bash']
         del state['locations']
         del state['config_path']
-        del state['edited_command']
         del state['modified_vars']
         del state['current_op']
         return state
 
     def initialize_namespace(self):
         super().initialize_namespace()
-        self.namespace.update({
-            'PROMPT': [EnvironmentScript.DEFAULT_PROMPT],
-            'PROMPT_CONTINUATION': [EnvironmentScript.DEFAULT_PROMPT_CONTINUATION],
-            'BOLD': marcel.object.color.Color.BOLD,
-            'ITALIC': marcel.object.color.Color.ITALIC,
-            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-            'Color': marcel.object.color.Color,
-            'pos': lambda: self.current_op.pos()
-        })
-        editor = os.getenv('EDITOR')
-        if editor:
-            self.namespace['EDITOR'] = editor
+        self.namespace.update({'pos': lambda: self.current_op.pos()})
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 self.namespace[key] = value
-        self.immutable.update([
-            'PROMPT',
-            'PROMPT_CONTINUATION',
-            'BOLD',
-            'ITALIC',
-            'COLOR_SCHEME',
-            'Color',
-            'pos'])
+        self.immutable.update(['pos'])
+
+    def read_config(self, config_path=None):
+        config_path = (self.locations.config_file_path()
+                       if config_path is None else
+                       pathlib.Path(config_path))
+        if not config_path.exists():
+            with open(config_path, 'w') as config_file:
+                config_file.write(DEFAULT_CONFIG)
+            config_path.chmod(0o600)
+        with open(config_path) as config_file:
+            config_source = config_file.read()
+        locals = {}
+        # Execute the config file. Imported and newly-defined symbols go into locals, which
+        # will then be added to self.namespace, for use in the execution of op functions.
+        exec(config_source, self.namespace, locals)
+        self.namespace.update(locals)
+        self.immutable.update(locals.keys())
+        self.config_path = config_path
 
     def check_nesting(self):
         return EnvironmentScript.CheckNesting(self)
@@ -430,10 +421,6 @@ class EnvironmentScript(Environment):
         if self.modified_vars is not None and var is not None:
             self.modified_vars.add(var)
 
-    def prompts(self):
-        return (self.prompt_string(self.getvar('PROMPT')),
-                self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
-
     def db(self, name):
         db = None
         x = self.getvar(name)
@@ -453,23 +440,78 @@ class EnvironmentScript(Environment):
                 type(interactive_executables) in (tuple, list) and
                 x in interactive_executables)
 
-    def read_config(self, config_path=None):
-        config_path = (self.locations.config_file_path()
-                       if config_path is None else
-                       pathlib.Path(config_path))
-        if not config_path.exists():
-            with open(config_path, 'w') as config_file:
-                config_file.write(DEFAULT_CONFIG)
-            config_path.chmod(0o600)
-        with open(config_path) as config_file:
-            config_source = config_file.read()
-        locals = {}
-        # Execute the config file. Imported and newly-defined symbols go into locals, which
-        # will then be added to self.namespace, for use in the execution of op functions.
-        exec(config_source, self.namespace, locals)
-        self.namespace.update(locals)
-        self.immutable.update(locals.keys())
-        self.config_path = config_path
+    def note_var_access(self, var, value):
+        if not EnvironmentScript.is_immutable(value):
+            self.modified_vars.add(var)
+
+    def no_mutability_check(self):
+        return EnvironmentScript.NoMutabilityCheck(self)
+
+    @staticmethod
+    def create():
+        env = EnvironmentScript()
+        env.initialize_namespace()
+        return env
+
+    @staticmethod
+    def is_immutable(x):
+        return callable(x) or type(x) in (int, float, str, bool, tuple, marcel.core.PipelineExecutable)
+
+
+class EnvironmentInteractive(EnvironmentScript):
+
+    DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
+    DEFAULT_PROMPT_CONTINUATION = '+$    '
+
+    def __init__(self):
+        super().__init__()
+        # Actual config path. Needed to reread config file in case of modification.
+        self.config_path = None
+        # Used during readline editing
+        self.edited_command = None
+        # readline wrapper
+        self.reader = None
+        #
+        self.initialize_namespace()
+    # Don't pickle everything
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['reader']
+        del state['op_modules']
+        del state['immutable']
+        del state['bash']
+        del state['locations']
+        del state['config_path']
+        del state['edited_command']
+        del state['modified_vars']
+        del state['current_op']
+        return state
+
+    def initialize_namespace(self):
+        super().initialize_namespace()
+        self.namespace.update({
+            'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
+            'PROMPT_CONTINUATION': [EnvironmentInteractive.DEFAULT_PROMPT_CONTINUATION],
+            'BOLD': marcel.object.color.Color.BOLD,
+            'ITALIC': marcel.object.color.Color.ITALIC,
+            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
+            'Color': marcel.object.color.Color
+        })
+        editor = os.getenv('EDITOR')
+        if editor:
+            self.namespace['EDITOR'] = editor
+        self.immutable.update([
+            'PROMPT',
+            'PROMPT_CONTINUATION',
+            'BOLD',
+            'ITALIC',
+            'COLOR_SCHEME',
+            'Color'])
+
+    def prompts(self):
+        return (self.prompt_string(self.getvar('PROMPT')),
+                self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
 
     def prompt_string(self, prompt_pieces):
         try:
@@ -497,19 +539,8 @@ class EnvironmentScript(Environment):
             print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)
             return EnvironmentScript.DEFAULT_PROMPT
 
-    def note_var_access(self, var, value):
-        if not EnvironmentScript.is_immutable(value):
-            self.modified_vars.add(var)
-
-    def no_mutability_check(self):
-        return EnvironmentScript.NoMutabilityCheck(self)
-
     @staticmethod
     def create():
-        env = EnvironmentScript()
+        env = EnvironmentInteractive()
         env.initialize_namespace()
         return env
-
-    @staticmethod
-    def is_immutable(x):
-        return callable(x) or type(x) in (int, float, str, bool, tuple, marcel.core.PipelineExecutable)
