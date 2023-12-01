@@ -46,10 +46,10 @@ class MultiLineReader:
             self._fix_history()
 
     def __getstate__(self):
-        assert False
+        assert False, "Don't pickle multilinereader"
 
     def __setstate__(self, state):
-        assert False
+        assert False, "Don't pickle multilinereader"
 
     def input(self, prompt, continuation_prompt):
         """Get input from the user, similar to the Python input() function. The prompt is printed

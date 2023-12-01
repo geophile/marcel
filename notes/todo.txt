@@ -731,4 +731,4 @@ Move op tests into ops themselves? Is this feasible for API testing?
 
 ----------------------------------------------------------------------
 
-window -t testing
+Clusters and Hosts should be renderable. What else is missing that?

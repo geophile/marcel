@@ -9,7 +9,7 @@ ALL_OPS = ['args', 'assign', 'bash', 'bg', 'cd', 'difference', 'dirs', 'download
            'fg', 'filter', 'fork', 'gen', 'head', 'help', 'history', 'ifelse', 'ifthen', 'import', 'intersect', 'jobs',
            'join', 'load', 'ls', 'map', 'popd', 'ps', 'pushd', 'pwd', 'read', 'red', 'remote', 'reverse', 'run',
            'select', 'sort', 'sql', 'squish', 'store', 'sudo', 'tail', 'tee', 'timer', 'union', 'unique', 'upload',
-           'version', 'window', 'write']
+           'version', 'window', 'write', 'ws']
 
 
 def test_op():

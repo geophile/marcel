@@ -357,6 +357,21 @@ class EnvironmentScript(Environment):
         #
         self.initialize_namespace()
 
+    # Don't pickle everything
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['reader']
+        del state['op_modules']
+        del state['immutable']
+        del state['bash']
+        del state['locations']
+        del state['config_path']
+        del state['edited_command']
+        del state['modified_vars']
+        del state['current_op']
+        return state
+
     def initialize_namespace(self):
         super().initialize_namespace()
         self.namespace.update({
@@ -439,7 +454,7 @@ class EnvironmentScript(Environment):
                 x in interactive_executables)
 
     def read_config(self, config_path=None):
-        config_path = (self.locations.config_path()
+        config_path = (self.locations.config_file_path()
                        if config_path is None else
                        pathlib.Path(config_path))
         if not config_path.exists():

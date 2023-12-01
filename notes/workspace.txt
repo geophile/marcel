@@ -6,6 +6,20 @@ Things disabled that need to be re-enabled or re-implemented
 
 - env testing, including immutable vars
 
+
+- Deleted from env on pickling. Should be reconstituted on going to
+  new ws, or change to config file.
+
+        reader
+        op_modules
+        immutable
+        bash
+        locations
+        config_path
+        edited_command
+        modified_vars
+        current_op
+
 ----------------------------------------------------------------------
 
 Op usage
@@ -282,11 +296,12 @@ Binding between sessions and workspaces: A session is always bound to
 exactly one workspace. If no workspace is specified, then the default
 workspace is used by a session.  A named workspace can be used by at
 most one session at a time. The default workspace can be used by
-multiple sessions at the same time.
+multiple sessions at the same time. A workspace name must be a valid
+filename on the host operating system.
 
-Unless a workspace is specifically selected and
-used, marcel runs using the *default workspace*. A *named workspace*
-must be explicitly created and selected for use.
+Unless a workspace is specifically selected and used, marcel runs
+using the *default workspace*. A *named workspace* must be explicitly
+created and selected for use.
 
 
 
@@ -297,7 +312,8 @@ e.g. "workspace --list". The listing will provide information on each
 namespace, including name, creation date, and size on disk. 
 
 Creating a workspace: A workspace is created by a marcel command,
-e.g. "workspace --create NAME". This causes the workspace to be opened.
+e.g. "workspace --create NAME". This causes the workspace to be
+opened.
 
 Opening a workspace: A workspace is opened when it is created, or when
 it is explicitly opened, e.g. "workspace --open NAME". When a
@@ -456,16 +472,18 @@ workspace
 
 - properties:
 
-  - name
-  - startup file
   - create timestamp
+  - last open timestamp
   - last save timestamp
-  - max size on disk
-  - max size on disk for a single command output
+
+workspace.p should omit workspace name. If it's included, then that
+creates an opportunity for a discrepancy, in case of a manual rename
+of the WORKSPACE_NAME directory. And a workspace rename command gets
+more complicated.
 
 ----------------------------------------------------------------------
 
-On disk:
+Structure on disk:
 
 Each workspace has its own startup?
 
@@ -474,16 +492,11 @@ Each workspace has its own startup?
     WORKSPACE_NAME/
         startup.py
 
-.config/marcel/
+.local/share/marcel/
     WORKSPACE_NAME/
         workspace.p  # Workspace properties (pickled) Or maybe JSON?
         env.p: Pickled environment
         history
-
-Should workspace.p omit workspace name? If it's included, then that
-creates an opportunity for a discrepancy, in case of a manual rename
-of the WORKSPACE_NAME directory. And a workspace rename command gets more
-complicated.
 
 ----------------------------------------------------------------------
 

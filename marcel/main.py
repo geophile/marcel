@@ -199,7 +199,8 @@ class MainInteractive(MainScript):
                         prompts = self.env.prompts() if print_prompt else (None, None)
                         self.input = self.reader.input(*prompts)
                     # else: Restarted main, and self.input was from the previous incarnation.
-                    self.check_for_config_update()
+                    # TODO: config update and reread is broken while workspaces are being built
+                    # self.check_for_config_update()
                     self.parse_and_run_command(self.input)
                     self.input = None
                     self.job_control.wait_for_idle_foreground()
@@ -216,7 +217,7 @@ class MainInteractive(MainScript):
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
         readline.set_pre_input_hook(self.insert_edited_command)
-        self.reader = Reader(self.env, self.env.locations.history_path())
+        self.reader = Reader(self.env, self.env.locations.history_file_path())
 
     def insert_edited_command(self):
         command = self.reader.take_edited_command()
@@ -235,7 +236,7 @@ class MainInteractive(MainScript):
         self.env.namespace.update(child_namespace_changes)
 
     def check_for_config_update(self):
-        config_path = self.env.config_path
+        config_path = self.env.config_file_path
         config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
         if config_mtime > self.config_time:
             raise ReloadConfigException()

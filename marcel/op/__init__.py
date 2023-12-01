@@ -64,7 +64,8 @@ public = [
     'upload',
     'version',
     'window',
-    'write'
+    'write',
+    'ws'
 ]
 
 all = public + [
