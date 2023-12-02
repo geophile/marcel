@@ -51,6 +51,15 @@ class StopAfterFirst(BaseException):
     pass
 
 
+# Used in case of a config file change, or switch to a different workspace.
+class ReconfigureException(BaseException):
+
+    def __init__(self, workspace):
+        assert workspace is not None
+        super().__init__()
+        self.workspace = workspace
+
+
 # Exception thrown to indicate that an op cannot complete for the current input,
 # but command execution should continue.
 class KillAndResumeException(BaseException):

@@ -44,11 +44,14 @@ HELP = '''
 
 {L,indent=4:28}{r:-r}, {r:--rename}            Change the name of the workspace_properties named OLD_NAME to NEW_NAME.
 
-{L,indent=4:28}{r:-2}, {r:--copy}              Create a copy of the workspace_properties named NAME, under the name COPY_NAME.
+{L,indent=4:28}{r:-2}, {r:--copy}              Create a copy of the workspace_properties named NAME, 
+under the name COPY_NAME.
 
-{L,indent=4:28}{r:-e}, {r:--export}            Export the workspace_properties with the given NAME to the file MWS_FILENAME.
+{L,indent=4:28}{r:-e}, {r:--export}            Export the workspace_properties with the given NAME 
+to the file MWS_FILENAME.
 
-{L,indent=4:28}{r:-i}, {r:--import}            Import file MWS_FILENAME to create a workspace_properties with the given NAME.
+{L,indent=4:28}{r:-i}, {r:--import}            Import file MWS_FILENAME to create a workspace_properties 
+with the given NAME.
 
 TBD
 '''
@@ -219,7 +222,7 @@ class WsOpen(WsImpl):
         self.check_anon_arg_present('NAME')
 
     def run(self, env):
-        pass
+        raise marcel.exception.ReconfigureException(Workspace(self.op.open))
 
 
 class WsClose(WsImpl):

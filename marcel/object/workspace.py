@@ -48,6 +48,9 @@ class Workspace(marcel.object.renderable.Renderable):
         self.name = name
         self.properties = None
 
+    def __repr__(self):
+        return f'Workspace({self.name})'
+
     # ws op support
 
     def new(self):

@@ -471,6 +471,8 @@ class EnvironmentInteractive(EnvironmentScript):
         self.edited_command = None
         # readline wrapper
         self.reader = None
+        # Workspace
+        self.workspace = None
         #
         self.initialize_namespace()
     # Don't pickle everything

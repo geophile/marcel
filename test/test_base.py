@@ -188,8 +188,8 @@ class TestConsole(TestBase):
     def expect_config_change_exception(self):
         try:
             self.run('pwd | select (*x: False)')
-            self.fail('pwd', 'Should have triggered ReloadConfigException')
-        except marcel.main.ReloadConfigException:
+            self.fail('pwd', 'Should have triggered ReconfigureException')
+        except marcel.exception.ReconfigureException:
             self.reset_environment(self.config_file)
 
 

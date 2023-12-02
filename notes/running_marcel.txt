@@ -27,7 +27,7 @@ from stdin:
             try:
                 MAIN.run()
                 break
-            except ReloadConfigException:
+            except ReconfigureException:
                 input = MAIN.input
                 old_namespace = MAIN.shutdown(restart=True)
                 pass

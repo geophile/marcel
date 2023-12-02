@@ -1,28 +1,33 @@
-Splitting EnvironmentScript -> EnvironmentInteractive
+Environment initialization:
 
-Interactive only:
+Sources:
 
-Fields:
-- Prompts
-- edited_command
-- reader
-- editor
+    - Startup script
+    - Set in marcel/env.py
+    - Stored environment
 
-namespace:
-- EDITOR -- remove completely, get from host?
-- PROMPT
-- PROMPT_CONTINUATION
-- BOLD
-- ITALIC
-- COLOR_SCHEME
-- Color
+- Vars from startup and script are immutable. If they differ from
+  stored env, then one of the following has happened:
 
-functions:
-- prompts
-- color_scheme
-- set_color_scheme
-- prompt_string
+  - User modified startup script
 
+  - New release of marcel, changing env.py. This could include
+    adding/removing vars.
+
+- Be careful about startup script modifying settings from env.py, that
+  should be disallowed.
+
+The stored env should be used only for user-specified vars. Simplest
+to just stored such vars. I.e., don't store the entire env, we'll just
+want to ignore things from startup and env.py anyway, including the
+changes mentioned above.
+
+One tricky issue: What if stored env has a var xyz, and then startup
+modified to add xyz?
+
+- Conflict in startup script: Kill shell, notify user
+
+- Conflict in env.py: rename stored var, notify user
 
 ----------------------------------------------------------------------
 
@@ -53,6 +58,8 @@ Things disabled that need to be re-enabled or re-implemented
 ----------------------------------------------------------------------
 
 Op usage
+
+Need to enforce this
 
                 Interactive     Script         API
 args                x             x             x
@@ -107,6 +114,7 @@ upload              x             x             x
 version             x             x             x
 window              x             x             x
 write               x             x             x
+ws                  x
 
 1: Assign *is* in the api currently. It operates on the env just like
 CLI.

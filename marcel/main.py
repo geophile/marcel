@@ -64,12 +64,6 @@ class Reader(marcel.multilinereader.MultiLineReader):
         return edited_command
 
 
-class ReloadConfigException(BaseException):
-
-    def __init__(self):
-        super().__init__()
-
-
 class Main(object):
 
     def __init__(self, env):
@@ -81,6 +75,27 @@ class Main(object):
 
     def shutdown(self, restart=False):
         assert False
+
+
+class MainAPI(Main):
+
+    def __init__(self, env):
+        super().__init__(env)
+        self.env = env
+
+    # Main
+
+    def shutdown(self, restart=False):
+        namespace = self.env.namespace
+        if not restart:
+            marcel.reservoir.shutdown(self.main_pid)
+        return namespace
+
+    # Internal
+
+    @staticmethod
+    def default_error_handler(env, error):
+        print(error.render_full(None), flush=True)
 
 
 class MainScript(Main):
@@ -160,10 +175,10 @@ class MainInteractive(MainScript):
         self.initialize_reader()  # Sets self.reader
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
-        # input records the current line of input. If the startup file changes, a ReloadConfigException
-        # is thrown. The old Main's input field carries the input to the new Main, allowing the command to
-        # execute.
-        self.input = None
+        self.workspace = None
+        # input records the current line of input. If a ReconfigureException is thrown, the old Main's input field
+        # carries the input to the new Main, allowing the command to execute.
+        self.input = input
 
     # Main
 
@@ -190,8 +205,7 @@ class MainInteractive(MainScript):
                         prompts = self.env.prompts() if print_prompt else (None, None)
                         self.input = self.reader.input(*prompts)
                     # else: Restarted main, and self.input was from the previous incarnation.
-                    # TODO: config update and reread is broken while workspaces are being built
-                    # self.check_for_config_update()
+                    self.check_for_config_update()
                     self.parse_and_run_command(self.input)
                     self.input = None
                     self.job_control.wait_for_idle_foreground()
@@ -230,32 +244,11 @@ class MainInteractive(MainScript):
         config_path = self.env.config_file_path
         config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
         if config_mtime > self.config_time:
-            raise ReloadConfigException()
+            raise marcel.exception.ReconfigureException(self.env.workspace)
 
     @staticmethod
     def default_error_handler(env, error):
         print(error.render_full(env.color_scheme()), flush=True)
-
-
-class MainAPI(Main):
-
-    def __init__(self, env):
-        super().__init__(env)
-        self.env = env
-
-    # Main
-
-    def shutdown(self, restart=False):
-        namespace = self.env.namespace
-        if not restart:
-            marcel.reservoir.shutdown(self.main_pid)
-        return namespace
-
-    # Internal
-
-    @staticmethod
-    def default_error_handler(env, error):
-        print(error.render_full(None), flush=True)
 
 
 def fail(message):
@@ -308,16 +301,18 @@ def main():
     multiprocessing.set_start_method(mpstart)
     if script is None:
         # Interactive
+        workspace = None  # DEFAULT WORKSPACE
         input = None
         while True:
-            main = MainInteractive(None)
+            main = MainInteractive(config)
             main.input = input
             print_prompt = sys.stdin.isatty()
             try:
                 main.run(print_prompt)
                 break
-            except ReloadConfigException:
+            except marcel.exception.ReconfigureException as e:
                 input = main.input
+                workspace = e.workspace
                 main.shutdown(restart=True)
     else:
         # Script
