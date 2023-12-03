@@ -81,7 +81,6 @@ class MainAPI(Main):
 
     def __init__(self, env):
         super().__init__(env)
-        self.env = env
 
     # Main
 
@@ -101,11 +100,17 @@ class MainAPI(Main):
 class MainScript(Main):
 
     def __init__(self, config_file, testing=False, env=None):
-        super().__init__(env if env else marcel.env.EnvironmentScript.create())
+        if env is None:
+            env = marcel.env.EnvironmentScript.create()
+        super().__init__(env)
         self.testing = testing
         self.config_time = time.time()
+        keys_before = set(env.namespace.keys())
         self.env.read_config(config_file)
         self.run_startup()
+        keys_after = set(env.namespace.keys())
+        startup_vars = keys_after - keys_before
+        self.env.enforce_var_immutability(startup_vars)
 
     # Main
 
@@ -137,14 +142,12 @@ class MainScript(Main):
         command.execute(self.env)
 
     def run_startup(self):
-        # Inside the startup script, variables that are otherwise immutabe, aren't.
-        with self.env.no_mutability_check():
-            run_on_startup = self.env.getvar('RUN_ON_STARTUP')
-            if run_on_startup:
-                if type(run_on_startup) is str:
-                    self.run_script(run_on_startup)
-                else:
-                    fail(f'RUN_ON_STARTUP must be a string')
+        run_on_startup = self.env.getvar('RUN_ON_STARTUP')
+        if run_on_startup:
+            if type(run_on_startup) is str:
+                self.run_script(run_on_startup)
+            else:
+                fail(f'RUN_ON_STARTUP must be a string')
 
     def run_script(self, script):
         command = ''

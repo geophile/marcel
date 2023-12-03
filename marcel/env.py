@@ -165,6 +165,59 @@ class DirectoryState:
                       'they are no longer accessible:']
             buffer.extend(removed)
             raise marcel.exception.KillCommandException('\n'.join(buffer))
+        
+
+class VarHandlerPlain(object):
+    
+    def __init__(self, env):
+        self.env = env
+
+    def hasvar(self, var):
+        return var in self.env.namespace
+
+    def getvar(self, var):
+        assert var is not None
+        try:
+            value = self.env.namespace[var]
+        except KeyError:
+            value = None
+        return value
+
+    def setvar(self, var, value):
+        assert var is not None
+        current_value = self.env.namespace.get(var, None)
+        if type(current_value) is marcel.reservoir.Reservoir:
+            current_value.ensure_deleted()
+        self.env.namespace[var] = value
+
+    def delvar(self, var):
+        assert var is not None
+        return self.env.namespace.pop(var)
+
+    def vars(self):
+        return self.env.namespace
+
+
+class VarHandlerCheckMutability(VarHandlerPlain):
+    
+    def __init__(self, env):
+        super().__init__(env)
+        self.immutable = env.immutable_vars()
+
+    def setvar(self, var, value):
+        self.check_mutability(var)
+        super().setvar(var, value)
+
+    def delvar(self, var):
+        self.check_mutability(var)
+        return super().delvar(var)
+
+    def check_mutability(self, var):
+        if var in self.immutable:
+            raise marcel.exception.KillCommandException(
+                f'{var} was defined by marcel, or in your startup script, '
+                f'so it cannot be modified or deleted programmatically. '
+                f'Edit the startup script instead.')
 
 
 class Environment(object):
@@ -184,8 +237,8 @@ class Environment(object):
         self.directory_state = DirectoryState(self)
         # Source of ops and arg parsers.
         self.op_modules = marcel.opmodule.import_op_modules()
-        # Variables defined in startup script are immutable. Also, vars representing state of host OS.
-        self.immutable = set()
+        # Lax var handling for now. Check immutability after startup is complete.
+        self.var_handler = VarHandlerPlain(self)
         # Where to find bash.
         self.bash = shutil.which('bash')
 
@@ -208,41 +261,27 @@ class Environment(object):
             'USER': getpass.getuser(),
             'HOST': socket.gethostname()
         })
-        self.immutable.update([
-            'HOME',
-            'PWD',
-            'DIRS',
-            'USER',
-            'HOST',
-            'MARCEL_VERSION'
-        ])
+
+    def immutable_vars(self):
+        return {'HOME', 'PWD', 'DIRS', 'USER', 'HOST', 'MARCEL_VERSION'}
+
+    def enforce_var_immutability(self, _=None):
+        self.var_handler = VarHandlerCheckMutability(self)
 
     def hasvar(self, var):
-        return var in self.namespace
+        return self.var_handler.hasvar(self)
 
     def getvar(self, var):
-        assert var is not None
-        try:
-            value = self.namespace[var]
-        except KeyError:
-            value = None
-        return value
+        return self.var_handler.getvar(var)
 
     def setvar(self, var, value):
-        assert var is not None
-        self.check_mutable(var)
-        current_value = self.namespace.get(var, None)
-        if type(current_value) is marcel.reservoir.Reservoir:
-            current_value.ensure_deleted()
-        self.namespace[var] = value
+        self.var_handler.setvar(var, value)
 
     def delvar(self, var):
-        assert var is not None
-        self.check_mutable(var)
-        return self.namespace.pop(var)
+        return self.var_handler.delvar(var)
 
     def vars(self):
-        return self.namespace
+        return self.var_handler.vars()
 
     def dir_state(self):
         return self.directory_state
@@ -266,13 +305,6 @@ class Environment(object):
 
     def color_scheme(self):
         return None
-
-    def check_mutable(self, var):
-        if var in self.immutable:
-            raise marcel.exception.KillCommandException(
-                f'{var} was defined by marcel, or in your startup script, '
-                f'so it cannot be modified or deleted programmatically. '
-                f'Edit the startup script instead.')
 
     def is_interactive_executable(self, x):
         return False
@@ -307,6 +339,7 @@ class EnvironmentAPI(Environment):
     def create(globals):
         env = EnvironmentAPI(globals)
         env.initialize_namespace()
+        env.enforce_var_immutability()
         return env
 
 
@@ -325,18 +358,6 @@ class EnvironmentScript(Environment):
             assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
             self.depth = None
 
-    class NoMutabilityCheck(object):
-
-        def __init__(self, env):
-            self.env = env
-            self.immutable = env.immutable
-
-        def __enter__(self):
-            self.env.immutable = set()
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            self.env.immutable = self.immutable
-
     def __init__(self):
         super().__init__(marcel.nestednamespace.NestedNamespace())
         # Standard locations of files important to marcel: config, history
@@ -347,8 +368,8 @@ class EnvironmentScript(Environment):
         self.modified_vars = set()
         # Support for pos()
         self.current_op = None
-        #
-        self.initialize_namespace()
+        # Vars defined during startup
+        self.startup_vars = None
 
     # Don't pickle everything
 
@@ -369,7 +390,18 @@ class EnvironmentScript(Environment):
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 self.namespace[key] = value
-        self.immutable.update(['pos'])
+
+    def immutable_vars(self):
+        immutable = {'pos'}
+        immutable.update(self.startup_vars)
+        immutable.update(super().immutable_vars())
+        return immutable
+
+    def enforce_var_immutability(self, startup_vars=None):
+        assert startup_vars is not None
+        # enforce_var_immutability needs to see startup_vars, so set startup_vars first.
+        self.startup_vars = startup_vars
+        super().enforce_var_immutability()
 
     def read_config(self, config_path=None):
         config_path = (self.locations.config_file_path()
@@ -381,12 +413,11 @@ class EnvironmentScript(Environment):
             config_path.chmod(0o600)
         with open(config_path) as config_file:
             config_source = config_file.read()
-        locals = {}
         # Execute the config file. Imported and newly-defined symbols go into locals, which
         # will then be added to self.namespace, for use in the execution of op functions.
+        locals = dict()
         exec(config_source, self.namespace, locals)
         self.namespace.update(locals)
-        self.immutable.update(locals.keys())
         self.config_path = config_path
 
     def check_nesting(self):
@@ -444,9 +475,6 @@ class EnvironmentScript(Environment):
         if not EnvironmentScript.is_immutable(value):
             self.modified_vars.add(var)
 
-    def no_mutability_check(self):
-        return EnvironmentScript.NoMutabilityCheck(self)
-
     @staticmethod
     def create():
         env = EnvironmentScript()
@@ -503,13 +531,11 @@ class EnvironmentInteractive(EnvironmentScript):
         editor = os.getenv('EDITOR')
         if editor:
             self.namespace['EDITOR'] = editor
-        self.immutable.update([
-            'PROMPT',
-            'PROMPT_CONTINUATION',
-            'BOLD',
-            'ITALIC',
-            'COLOR_SCHEME',
-            'Color'])
+
+    def immutable_vars(self):
+        immutable = {'PROMPT', 'PROMPT_CONTINUATION', 'BOLD', 'ITALIC', 'COLOR_SCHEME', 'Color'}
+        immutable.update(super().immutable_vars())
+        return immutable
 
     def prompts(self):
         return (self.prompt_string(self.getvar('PROMPT')),
@@ -539,7 +565,7 @@ class EnvironmentInteractive(EnvironmentScript):
             return ''.join(buffer)
         except Exception as e:
             print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)
-            return EnvironmentScript.DEFAULT_PROMPT
+            return EnvironmentInteractive.DEFAULT_PROMPT
 
     @staticmethod
     def create():
