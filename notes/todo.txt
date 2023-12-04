@@ -732,3 +732,7 @@ Move op tests into ops themselves? Is this feasible for API testing?
 ----------------------------------------------------------------------
 
 Clusters and Hosts should be renderable. What else is missing that?
+
+----------------------------------------------------------------------
+
+Revisit checking of python and marcel version in farcel

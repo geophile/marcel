@@ -167,7 +167,7 @@ class DirectoryState:
             raise marcel.exception.KillCommandException('\n'.join(buffer))
         
 
-class VarHandlerPlain(object):
+class VarHandlerStartup(object):
     
     def __init__(self, env):
         self.env = env
@@ -198,7 +198,7 @@ class VarHandlerPlain(object):
         return self.env.namespace
 
 
-class VarHandlerCheckMutability(VarHandlerPlain):
+class VarHandler(VarHandlerStartup):
     
     def __init__(self, env):
         super().__init__(env)
@@ -238,9 +238,7 @@ class Environment(object):
         # Source of ops and arg parsers.
         self.op_modules = marcel.opmodule.import_op_modules()
         # Lax var handling for now. Check immutability after startup is complete.
-        self.var_handler = VarHandlerPlain(self)
-        # Where to find bash.
-        self.bash = shutil.which('bash')
+        self.var_handler = VarHandlerStartup(self)
 
     def initialize_namespace(self):
         try:
@@ -254,7 +252,6 @@ class Environment(object):
             raise marcel.exception.KillShellException(
                 'Current directory does not exist! cd somewhere else and try again.')
         self.namespace.update({
-            'MARCEL_VERSION': marcel.version.VERSION,
             'HOME': homedir,
             'PWD': current_dir,
             'DIRS': [current_dir],
@@ -263,10 +260,10 @@ class Environment(object):
         })
 
     def immutable_vars(self):
-        return {'HOME', 'PWD', 'DIRS', 'USER', 'HOST', 'MARCEL_VERSION'}
+        return {'HOME', 'PWD', 'DIRS', 'USER', 'HOST'}
 
     def enforce_var_immutability(self, _=None):
-        self.var_handler = VarHandlerCheckMutability(self)
+        self.var_handler = VarHandler(self)
 
     def hasvar(self, var):
         return self.var_handler.hasvar(self)
@@ -376,8 +373,6 @@ class EnvironmentScript(Environment):
     def __getstate__(self):
         state = self.__dict__.copy()
         del state['op_modules']
-        del state['immutable']
-        del state['bash']
         del state['locations']
         del state['config_path']
         del state['modified_vars']
@@ -499,8 +494,6 @@ class EnvironmentInteractive(EnvironmentScript):
         self.edited_command = None
         # readline wrapper
         self.reader = None
-        # Workspace
-        self.workspace = None
         #
         self.initialize_namespace()
     # Don't pickle everything
@@ -509,8 +502,6 @@ class EnvironmentInteractive(EnvironmentScript):
         state = self.__dict__.copy()
         del state['reader']
         del state['op_modules']
-        del state['immutable']
-        del state['bash']
         del state['locations']
         del state['config_path']
         del state['edited_command']

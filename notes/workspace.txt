@@ -1,3 +1,43 @@
+
+Env persistence:
+
+What should be saved? 
+
+- Don't save vars coming from startup script. That will be reread.
+
+- What about vars defined in env initialization?
+
+  - Environment:
+    - MARCEL_VERSION: Don't save, goes stale with new releases.
+    - HOME: Recompute
+    - PWD: Save. If doesn't exist on restart, go to homedir
+    - DIRS: Save. Clean on restart. If empty, go to homedir
+    - USER: Recompute
+    - HOST: Recompute
+
+  - EnvironmentScript:
+    - pos: Don't save
+
+  - EnvironmentInteractive:
+    - PROMPT: Get from startup or set to default
+    - PROMPT_CONTINUATION: Get from startup or set to default
+    - BOLD: Get from startup or set 
+    - ITALIC: Get from startup or set 
+    - COLOR_SCHEME: Get from startup or set 
+    - Color: Get from startup or set 
+    - EDITOR: Not needed at all, get from host env
+
+
+......................................................................
+
+Move all the var tracking to VarHandler? Things to track:
+
+- Immutable
+- Defined in startup
+- Defined by user (these get saved on disk)
+
+----------------------------------------------------------------------
+
 Environment initialization:
 
 Sources:
@@ -18,7 +58,7 @@ Sources:
   should be disallowed.
 
 The stored env should be used only for user-specified vars. Simplest
-to just stored such vars. I.e., don't store the entire env, we'll just
+to just store such vars. I.e., don't store the entire env, we'll just
 want to ignore things from startup and env.py anyway, including the
 changes mentioned above.
 
@@ -303,7 +343,7 @@ Be clearer about role of Env in API usage. Is it there or not?
 
 ----------------------------------------------------------------------
 
-Workspaces spec
+Workspaces specification
 
 Concepts:
 

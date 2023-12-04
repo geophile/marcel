@@ -55,9 +55,8 @@ class StopAfterFirst(BaseException):
 class ReconfigureException(BaseException):
 
     def __init__(self, workspace):
-        assert workspace is not None
         super().__init__()
-        self.workspace = workspace
+        self.workspace_to_open = workspace
 
 
 # Exception thrown to indicate that an op cannot complete for the current input,

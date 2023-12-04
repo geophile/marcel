@@ -304,7 +304,7 @@ class TestTabCompletion(TestBase):
         super().__init__(config_file)
 
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
-        self.main = marcel.main.MainInteractive(config_file, testing=True)
+        self.main = marcel.main.MainInteractive(None, config_file, testing=True)
 
     def run(self, line, text=None, expected=None):
         if text is None:

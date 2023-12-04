@@ -24,22 +24,22 @@ class Locations(object):
         self.env = env
         self.home = pathlib.Path.home().expanduser()
 
-    def config_dir_path(self, ws_name=None):
+    def config_dir_path(self, ws_name):
         path = self._dir('XDG_CONFIG_HOME', '.config')
         if ws_name is not None:
             path = path / ws_name
         return path
 
-    def data_dir_path(self, ws_name=None):
+    def data_dir_path(self, ws_name):
         path = self._dir('XDG_DATA_HOME', '.local', 'share')
         if ws_name is not None:
             path = path / ws_name
         return path
 
-    def config_file_path(self, ws_name=None):
+    def config_file_path(self, ws_name):
         return self.config_dir_path(ws_name) / 'startup.py'
 
-    def history_file_path(self, ws_name=None):
+    def history_file_path(self, ws_name):
         return self.data_dir_path(ws_name) / 'history'
 
     def workspace_properties_file_path(self, ws_name):

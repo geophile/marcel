@@ -101,9 +101,9 @@ class Bash(marcel.core.Op):
         self.command = ' '.join([str(x).strip() for x in self.args])
         # Try to extract the executable to see if it is interactive.
         interactive = self.interactive or env.is_interactive_executable(executable(self.command))
-        self.escape = (BashShell(self, env) if len(self.command) == 0 else
-                       Interactive(self, env) if interactive else
-                       NonInteractive(self, env))
+        self.escape = (BashShell(self) if len(self.command) == 0 else
+                       Interactive(self) if interactive else
+                       NonInteractive(self))
 
     def run(self, env):
         self.receive(env, None)
@@ -121,9 +121,9 @@ class Bash(marcel.core.Op):
 
 class Escape:
 
-    def __init__(self, op, env):
+    def __init__(self, op):
         self.op = op
-        self.bash = env.bash
+        self.bash = marcel.util.bash_executable()
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.op})'
@@ -143,8 +143,8 @@ class Escape:
 
 class NonInteractive(Escape):
 
-    def __init__(self, op, env):
-        super().__init__(op, env)
+    def __init__(self, op):
+        super().__init__(op)
         self.process = None
         self.out_handler = None
         self.err_handler = None
@@ -197,8 +197,8 @@ class NonInteractive(Escape):
 
 class Interactive(Escape):
 
-    def __init__(self, op, env):
-        super().__init__(op, env)
+    def __init__(self, op):
+        super().__init__(op)
         self.process = subprocess.Popen(self.command(),
                                         shell=True,
                                         executable=self.bash,
@@ -213,8 +213,8 @@ class Interactive(Escape):
 
 class BashShell(Escape):
 
-    def __init__(self, op, env):
-        super().__init__(op, env)
+    def __init__(self, op):
+        super().__init__(op)
         self.process = subprocess.Popen('bash',
                                         shell=True,
                                         executable=self.bash,

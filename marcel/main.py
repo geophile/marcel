@@ -43,6 +43,7 @@ import marcel.exception
 import marcel.job
 import marcel.locations
 import marcel.multilinereader
+import marcel.object.workspace
 import marcel.opmodule
 import marcel.parser
 import marcel.reservoir
@@ -171,21 +172,25 @@ class MainScript(Main):
 
 class MainInteractive(MainScript):
 
-    def __init__(self, config_file, testing=False):
+    def __init__(self, old_main, config_file, testing=False):
         super().__init__(config_file, testing, marcel.env.EnvironmentInteractive.create())
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
         self.reader = None
+        self.workspace = marcel.object.workspace.Workspace(self.env)
         self.initialize_reader()  # Sets self.reader
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
-        self.workspace = None
-        # input records the current line of input. If a ReconfigureException is thrown, the old Main's input field
-        # carries the input to the new Main, allowing the command to execute.
-        self.input = input
+        self.input = None
+        if old_main:
+            # input records the current line of input. If a ReconfigureException is thrown, the old Main's input field
+            # carries the input to the new Main, allowing the command to execute.
+            self.input = old_main.input
 
     # Main
 
     def shutdown(self, restart=False):
+        if self.workspace:  # TODO: There will always be a workspace, even if just default
+            self.workspace.close()
         self.job_control.shutdown()
         self.reader.close()
         return super().shutdown(restart)
@@ -200,7 +205,8 @@ class MainInteractive(MainScript):
 
     # MainInteractive
 
-    def run(self, print_prompt):
+    def run(self):
+        print_prompt = sys.stdin.isatty()
         try:
             while True:
                 try:
@@ -225,7 +231,8 @@ class MainInteractive(MainScript):
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
         readline.set_pre_input_hook(self.insert_edited_command)
-        self.reader = Reader(self.env, self.env.locations.history_file_path())
+        ws_name = self.workspace.name if self.workspace else None  # TODO: self.workspace will always be set
+        self.reader = Reader(self.env, self.env.locations.history_file_path(ws_name))
 
     def insert_edited_command(self):
         command = self.reader.take_edited_command()
@@ -244,10 +251,10 @@ class MainInteractive(MainScript):
         self.env.namespace.update(child_namespace_changes)
 
     def check_for_config_update(self):
-        config_path = self.env.config_file_path
+        config_path = self.env.config_path
         config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
         if config_mtime > self.config_time:
-            raise marcel.exception.ReconfigureException(self.env.workspace)
+            raise marcel.exception.ReconfigureException(None)  # self.env.workspace)
 
     @staticmethod
     def default_error_handler(env, error):
@@ -304,18 +311,13 @@ def main():
     multiprocessing.set_start_method(mpstart)
     if script is None:
         # Interactive
-        workspace = None  # DEFAULT WORKSPACE
-        input = None
+        main = None
         while True:
-            main = MainInteractive(config)
-            main.input = input
-            print_prompt = sys.stdin.isatty()
+            main = MainInteractive(main, config)
             try:
-                main.run(print_prompt)
+                main.run()
                 break
             except marcel.exception.ReconfigureException as e:
-                input = main.input
-                workspace = e.workspace
                 main.shutdown(restart=True)
     else:
         # Script
