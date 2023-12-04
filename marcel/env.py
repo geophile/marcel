@@ -180,6 +180,9 @@ class VarHandlerStartup(object):
         else:
             self.immutable_vars = set()
             self.startup_vars = None
+        self.vars_read = set()
+        self.vars_written = set()
+        self.vars_deleted = set()
 
     def hasvar(self, var):
         return var in self.env.namespace
@@ -188,6 +191,7 @@ class VarHandlerStartup(object):
         assert var is not None
         try:
             value = self.env.namespace[var]
+            self.vars_read.add(var)
         except KeyError:
             value = None
         return value
@@ -195,12 +199,14 @@ class VarHandlerStartup(object):
     def setvar(self, var, value):
         assert var is not None
         current_value = self.env.namespace.get(var, None)
+        self.vars_written.add(var)
         if type(current_value) is marcel.reservoir.Reservoir:
             current_value.ensure_deleted()
         self.env.namespace[var] = value
 
     def delvar(self, var):
         assert var is not None
+        self.vars_deleted.add(var)
         return self.env.namespace.pop(var)
 
     def vars(self):
@@ -212,6 +218,17 @@ class VarHandlerStartup(object):
     def add_startup_vars(self, *vars):
         self.immutable_vars.update(vars)
         self.startup_vars = vars
+
+    def changes(self):
+        changes = {}
+        for var in self.vars_written:
+            changes[var] = self.env.namespace[var]
+        return changes
+
+    def clear_changes(self):
+        self.vars_read.clear()
+        self.vars_written.clear()
+        self.vars_deleted.clear()
 
 
 class VarHandler(VarHandlerStartup):
@@ -226,6 +243,9 @@ class VarHandler(VarHandlerStartup):
     def delvar(self, var):
         self.check_mutability(var)
         return super().delvar(var)
+
+    def add_written(self, var):
+        self.vars_written.add(var)
 
     def check_mutability(self, var):
         if var in self.immutable_vars:
@@ -279,7 +299,7 @@ class Environment(object):
         self.var_handler = VarHandler(self.var_handler)
 
     def hasvar(self, var):
-        return self.var_handler.hasvar(self)
+        return self.var_handler.hasvar(var)
 
     def getvar(self, var):
         return self.var_handler.getvar(var)
@@ -307,8 +327,11 @@ class Environment(object):
     def check_nesting(self):
         return Environment.CheckNestingNoop()
 
+    def changes(self):
+        return self.var_handler.changes()
+
     def clear_changes(self):
-        pass
+        self.var_handler.clear_changes()
 
     def set_function_globals(self, function):
         function.set_globals(self.namespace)
@@ -336,11 +359,8 @@ class EnvironmentAPI(Environment):
     def __init__(self, globals):
         super().__init__(globals)
 
-    def changes(self):
-        return None
-
     def clear_changes(self):
-        pass
+        self.var_handler.clear_changes()
 
     def marcel_usage(self):
         return 'api'
@@ -374,8 +394,6 @@ class EnvironmentScript(Environment):
         self.locations = marcel.locations.Locations(self)
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
-        # For tracking env var changes made by job
-        self.modified_vars = set()
         # Support for pos()
         self.current_op = None
         # Vars defined during startup
@@ -393,7 +411,6 @@ class EnvironmentScript(Environment):
         del state['op_modules']
         del state['locations']
         del state['config_path']
-        del state['modified_vars']
         del state['current_op']
         return state
 
@@ -432,31 +449,12 @@ class EnvironmentScript(Environment):
     def set_function_globals(self, function):
         function.set_globals(self.vars())
 
-    def getvar(self, var):
-        value = super().getvar(var)
-        if var in self.namespace:
-            self.note_var_access(var, value)
-        return value
-
-    def setvar(self, var, value):
-        super().setvar(var, value)
-        return self.modified_vars.add(var)
-
-    def clear_changes(self):
-        self.modified_vars = set()
-
-    def changes(self):
-        changes = {}
-        for var in self.modified_vars:
-            changes[var] = self.namespace[var]
-        return changes
-
     def marcel_usage(self):
         return 'script'
 
     def mark_possibly_changed(self, var):
-        if self.modified_vars is not None and var is not None:
-            self.modified_vars.add(var)
+        if var is not None:
+            self.var_handler.add_written(var)
 
     def db(self, name):
         db = None
@@ -476,10 +474,6 @@ class EnvironmentScript(Environment):
         return (interactive_executables is not None and
                 type(interactive_executables) in (tuple, list) and
                 x in interactive_executables)
-
-    def note_var_access(self, var, value):
-        if not EnvironmentScript.is_immutable(var):
-            self.modified_vars.add(var)
 
     @staticmethod
     def create():
@@ -522,7 +516,6 @@ class EnvironmentInteractive(EnvironmentScript):
         del state['locations']
         del state['config_path']
         del state['edited_command']
-        del state['modified_vars']
         del state['current_op']
         return state
 
