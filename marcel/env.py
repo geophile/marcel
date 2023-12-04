@@ -17,7 +17,6 @@ import getpass
 import os
 import os.path
 import pathlib
-import shutil
 import socket
 import sys
 
@@ -36,6 +35,7 @@ import marcel.opmodule
 import marcel.reservoir
 import marcel.util
 import marcel.version
+import marcel.object.workspace
 
 DEFAULT_CONFIG = '''from marcel.builtin import *
 
@@ -169,8 +169,11 @@ class DirectoryState:
 
 class VarHandlerStartup(object):
     
-    def __init__(self, env):
+    def __init__(self, env, immutable_vars=None):
         self.env = env
+        # Immutability isn't enforced by this var hander. But the set is populated during startup,
+        # before VarHandler, which enforces immutability, is in place.
+        self.immutable_vars = set() if immutable_vars is None else immutable_vars
 
     def hasvar(self, var):
         return var in self.env.namespace
@@ -197,12 +200,14 @@ class VarHandlerStartup(object):
     def vars(self):
         return self.env.namespace
 
+    def add_immutable_vars(self, *vars):
+        self.immutable_vars.update(vars)
+
 
 class VarHandler(VarHandlerStartup):
     
-    def __init__(self, env):
-        super().__init__(env)
-        self.immutable = env.immutable_vars()
+    def __init__(self, startup_var_handler):
+        super().__init__(startup_var_handler.env, startup_var_handler.immutable_vars)
 
     def setvar(self, var, value):
         self.check_mutability(var)
@@ -213,7 +218,7 @@ class VarHandler(VarHandlerStartup):
         return super().delvar(var)
 
     def check_mutability(self, var):
-        if var in self.immutable:
+        if var in self.immutable_vars:
             raise marcel.exception.KillCommandException(
                 f'{var} was defined by marcel, or in your startup script, '
                 f'so it cannot be modified or deleted programmatically. '
@@ -239,6 +244,7 @@ class Environment(object):
         self.op_modules = marcel.opmodule.import_op_modules()
         # Lax var handling for now. Check immutability after startup is complete.
         self.var_handler = VarHandlerStartup(self)
+        self.var_handler.add_immutable_vars('HOME', 'PWD', 'DIRS', 'USER', 'HOST')
 
     def initialize_namespace(self):
         try:
@@ -259,11 +265,8 @@ class Environment(object):
             'HOST': socket.gethostname()
         })
 
-    def immutable_vars(self):
-        return {'HOME', 'PWD', 'DIRS', 'USER', 'HOST'}
-
-    def enforce_var_immutability(self, _=None):
-        self.var_handler = VarHandler(self)
+    def enforce_var_immutability(self, startup_vars=None):
+        self.var_handler = VarHandler(self.var_handler)
 
     def hasvar(self, var):
         return self.var_handler.hasvar(self)
@@ -355,7 +358,7 @@ class EnvironmentScript(Environment):
             assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
             self.depth = None
 
-    def __init__(self):
+    def __init__(self, workspace=marcel.object.workspace.Workspace.default()):
         super().__init__(marcel.nestednamespace.NestedNamespace())
         # Standard locations of files important to marcel: config, history
         self.locations = marcel.locations.Locations(self)
@@ -367,6 +370,11 @@ class EnvironmentScript(Environment):
         self.current_op = None
         # Vars defined during startup
         self.startup_vars = None
+        # Immutable vars
+        self.var_handler.add_immutable_vars('pos')
+        # Marcel used with a script does not manipulate workspaces, but it is convenient to
+        # have workspace defined, for use with Locations.
+        self.workspace = workspace
 
     # Don't pickle everything
 
@@ -386,20 +394,13 @@ class EnvironmentScript(Environment):
             if not key.startswith('_'):
                 self.namespace[key] = value
 
-    def immutable_vars(self):
-        immutable = {'pos'}
-        immutable.update(self.startup_vars)
-        immutable.update(super().immutable_vars())
-        return immutable
-
     def enforce_var_immutability(self, startup_vars=None):
-        assert startup_vars is not None
-        # enforce_var_immutability needs to see startup_vars, so set startup_vars first.
-        self.startup_vars = startup_vars
-        super().enforce_var_immutability()
+        assert startup_vars is not None  # Allowed to be None only in parent
+        self.var_handler.add_immutable_vars(*startup_vars)
+        self.var_handler = VarHandler(self.var_handler)
 
     def read_config(self, config_path=None):
-        config_path = (self.locations.config_file_path()
+        config_path = (self.locations.config_file_path(self.workspace.name)
                        if config_path is None else
                        pathlib.Path(config_path))
         if not config_path.exists():
@@ -467,7 +468,7 @@ class EnvironmentScript(Environment):
                 x in interactive_executables)
 
     def note_var_access(self, var, value):
-        if not EnvironmentScript.is_immutable(value):
+        if not EnvironmentScript.is_immutable(var):
             self.modified_vars.add(var)
 
     @staticmethod
@@ -486,8 +487,8 @@ class EnvironmentInteractive(EnvironmentScript):
     DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, workspace):
+        super().__init__(workspace)
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
         # Used during readline editing
@@ -496,8 +497,14 @@ class EnvironmentInteractive(EnvironmentScript):
         self.reader = None
         #
         self.initialize_namespace()
-    # Don't pickle everything
+        self.var_handler.add_immutable_vars('PROMPT',
+                                            'PROMPT_CONTINUATION',
+                                            'BOLD',
+                                            'ITALIC',
+                                            'COLOR_SCHEME',
+                                            'Color')
 
+    # Don't pickle everything
     def __getstate__(self):
         state = self.__dict__.copy()
         del state['reader']
@@ -522,11 +529,6 @@ class EnvironmentInteractive(EnvironmentScript):
         editor = os.getenv('EDITOR')
         if editor:
             self.namespace['EDITOR'] = editor
-
-    def immutable_vars(self):
-        immutable = {'PROMPT', 'PROMPT_CONTINUATION', 'BOLD', 'ITALIC', 'COLOR_SCHEME', 'Color'}
-        immutable.update(super().immutable_vars())
-        return immutable
 
     def prompts(self):
         return (self.prompt_string(self.getvar('PROMPT')),
@@ -560,6 +562,6 @@ class EnvironmentInteractive(EnvironmentScript):
 
     @staticmethod
     def create():
-        env = EnvironmentInteractive()
+        env = EnvironmentInteractive(marcel.object.workspace.Workspace.default())
         env.initialize_namespace()
         return env

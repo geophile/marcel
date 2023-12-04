@@ -88,6 +88,10 @@ class Workspace(marcel.object.renderable.Renderable):
             self.properties.update_save_time()
         self.save_workspace()
 
+    @staticmethod
+    def default():
+        return Workspace(None)
+
     # Renderable
 
     def render_compact(self):
