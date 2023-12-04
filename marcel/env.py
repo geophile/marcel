@@ -169,11 +169,17 @@ class DirectoryState:
 
 class VarHandlerStartup(object):
     
-    def __init__(self, env, immutable_vars=None):
+    def __init__(self, env, startup_var_handler=None):
         self.env = env
         # Immutability isn't enforced by this var hander. But the set is populated during startup,
-        # before VarHandler, which enforces immutability, is in place.
-        self.immutable_vars = set() if immutable_vars is None else immutable_vars
+        # before VarHandler, which enforces immutability, is in place. Similarly, startup vars are discovered
+        # during startup (duh!) and then transferred to VarHandler for use during post-startup operation.
+        if startup_var_handler:
+            self.immutable_vars = startup_var_handler.immutable_vars
+            self.startup_vars = startup_var_handler.startup_vars
+        else:
+            self.immutable_vars = set()
+            self.startup_vars = None
 
     def hasvar(self, var):
         return var in self.env.namespace
@@ -203,11 +209,15 @@ class VarHandlerStartup(object):
     def add_immutable_vars(self, *vars):
         self.immutable_vars.update(vars)
 
+    def add_startup_vars(self, *vars):
+        self.immutable_vars.update(vars)
+        self.startup_vars = vars
+
 
 class VarHandler(VarHandlerStartup):
     
     def __init__(self, startup_var_handler):
-        super().__init__(startup_var_handler.env, startup_var_handler.immutable_vars)
+        super().__init__(startup_var_handler.env, startup_var_handler)
 
     def setvar(self, var, value):
         self.check_mutability(var)
@@ -396,7 +406,7 @@ class EnvironmentScript(Environment):
 
     def enforce_var_immutability(self, startup_vars=None):
         assert startup_vars is not None  # Allowed to be None only in parent
-        self.var_handler.add_immutable_vars(*startup_vars)
+        self.var_handler.add_startup_vars(*startup_vars)
         self.var_handler = VarHandler(self.var_handler)
 
     def read_config(self, config_path=None):

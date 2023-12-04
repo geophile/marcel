@@ -21,6 +21,7 @@ TEST = test_base.TestAPI(_MAIN)
 
 SQL = True
 
+
 # Convenient for testing to have NODE1 precede NODE2 lexicographically
 def find_node(cluster, node_name):
     for host in cluster.hosts:
