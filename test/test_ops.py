@@ -2501,6 +2501,10 @@ def main_stable():
 
 def main_dev():
     pass
+    # test_import()
+    # os.system('rm -rf /home/jao/.config/marcel/hello')
+    # os.system('rm -rf /home/jao/.local/share/marcel/hello')
+    # TEST.run('ws hello')
 
 
 def main():

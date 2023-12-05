@@ -88,6 +88,14 @@ class Workspace(marcel.object.renderable.Renderable):
             self.properties.update_save_time()
         self.save_workspace()
 
+    def print(self):
+        self.read_workspace()
+        print(f'{self}')
+        print(f'properties: {self.properties}')
+        print(f'env:')
+        for var, value in self.env.namespace:
+            print(f'    {var}: {value}')
+
     @staticmethod
     def default():
         return Workspace(None)
@@ -117,16 +125,31 @@ class Workspace(marcel.object.renderable.Renderable):
             raise marcel.exception.KillCommandException(
                 f'Workspace name must be usable as a legal filename: {self.name}')
 
-    def save_workspace(self):
+    def read_workspace(self):
         locations = self.env.locations
         if self.name is not None:
             # Properties
-            with open(locations.workspace_properties_file_path(self.name), 'wb') as properties_file:
-                pickler = dill.Pickler(properties_file)
-                pickler.dump(self.properties)
+            with open(locations.workspace_properties_file_path(self.name), 'rb') as properties_file:
+                unpickler = dill.Unpickler(properties_file)
+                self.properties = unpickler.load()
         # else: Default workspace, properties not needed
         # Environment
-        with open(locations.workspace_environment_file_path(self.name), 'wb') as environment_file:
-            pickler = dill.Pickler(environment_file)
-            pickler.dump(self.env)
+        with open(locations.workspace_environment_file_path(self.name), 'rb') as environment_file:
+            unpickler = dill.Unpickler(environment_file)
+            self.env = unpickler.load()
         # History saved by main.reader.
+
+    def save_workspace(self):
+        return
+        # locations = self.env.locations
+        # if self.name is not None:
+        #     # Properties
+        #     with open(locations.workspace_properties_file_path(self.name), 'wb') as properties_file:
+        #         pickler = dill.Pickler(properties_file)
+        #         pickler.dump(self.properties)
+        # # else: Default workspace, properties not needed
+        # # Environment
+        # with open(locations.workspace_environment_file_path(self.name), 'wb') as environment_file:
+        #     pickler = dill.Pickler(environment_file)
+        #     pickler.dump(self.env.__getstate__())
+        # # History saved by main.reader.

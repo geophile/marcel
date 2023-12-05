@@ -180,6 +180,7 @@ class VarHandlerStartup(object):
         else:
             self.immutable_vars = set()
             self.startup_vars = None
+        self.save_vars = set()
         self.vars_read = set()
         self.vars_written = set()
         self.vars_deleted = set()
@@ -202,11 +203,13 @@ class VarHandlerStartup(object):
         self.vars_written.add(var)
         if type(current_value) is marcel.reservoir.Reservoir:
             current_value.ensure_deleted()
+        self.save_vars.add(var)
         self.env.namespace[var] = value
 
     def delvar(self, var):
         assert var is not None
         self.vars_deleted.add(var)
+        self.save_vars.remove(var)
         return self.env.namespace.pop(var)
 
     def vars(self):
@@ -218,6 +221,9 @@ class VarHandlerStartup(object):
     def add_startup_vars(self, *vars):
         self.immutable_vars.update(vars)
         self.startup_vars = vars
+
+    def add_save_vars(self, *vars):
+        self.save_vars.update(vars)
 
     def changes(self):
         changes = {}
@@ -274,7 +280,8 @@ class Environment(object):
         self.op_modules = marcel.opmodule.import_op_modules()
         # Lax var handling for now. Check immutability after startup is complete.
         self.var_handler = VarHandlerStartup(self)
-        self.var_handler.add_immutable_vars('HOME', 'PWD', 'DIRS', 'USER', 'HOST')
+        self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
+        self.var_handler.add_save_vars('PWD', 'DIRS')
 
     def initialize_namespace(self):
         try:
@@ -288,6 +295,7 @@ class Environment(object):
             raise marcel.exception.KillShellException(
                 'Current directory does not exist! cd somewhere else and try again.')
         self.namespace.update({
+            'MARCEL_VERSION': marcel.version.VERSION,
             'HOME': homedir,
             'PWD': current_dir,
             'DIRS': [current_dir],
@@ -407,12 +415,15 @@ class EnvironmentScript(Environment):
     # Don't pickle everything
 
     def __getstate__(self):
-        state = self.__dict__.copy()
-        del state['op_modules']
-        del state['locations']
-        del state['config_path']
-        del state['current_op']
-        return state
+        # Keep save vars only
+        save = dict()
+        save_vars = self.var_handler.save_vars
+        print(f'__getstate__ save_vars: {save_vars}')
+        for var, value in self.namespace.items():
+            if var in save_vars:
+                save[var] = value
+        print(f'__getstate__ return: {save}')
+        return {'namespace': save}
 
     def initialize_namespace(self):
         super().initialize_namespace()
@@ -507,17 +518,6 @@ class EnvironmentInteractive(EnvironmentScript):
                                             'ITALIC',
                                             'COLOR_SCHEME',
                                             'Color')
-
-    # Don't pickle everything
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        del state['reader']
-        del state['op_modules']
-        del state['locations']
-        del state['config_path']
-        del state['edited_command']
-        del state['current_op']
-        return state
 
     def initialize_namespace(self):
         super().initialize_namespace()

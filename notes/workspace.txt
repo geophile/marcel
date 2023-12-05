@@ -1,4 +1,16 @@
 
+import is a problem. It brings in to the env a lot of stuff, including
+things that don't serialize, breaking the saving of environments. Fix:
+
+- import.run uses setvar, which then tracks the var in
+  save_vars. DON'T put these symbols in save_vars.
+
+- Instead, track modules imported, and record their NAMES in the
+  environment. When opening an environment, import those modules
+  again.
+
+----------------------------------------------------------------------
+
 Env persistence:
 
 What should be saved? 
@@ -26,15 +38,6 @@ What should be saved?
     - COLOR_SCHEME: Get from startup or set 
     - Color: Get from startup or set 
     - EDITOR: Not needed at all, get from host env
-
-
-......................................................................
-
-Move all the var tracking to VarHandler? Things to track:
-
-- Immutable
-- Defined in startup
-- Defined by user (these get saved on disk)
 
 ----------------------------------------------------------------------
 

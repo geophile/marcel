@@ -107,6 +107,7 @@ class MainScript(Main):
         self.testing = testing
         self.config_time = time.time()
         keys_before = set(env.namespace.keys())
+        self.config_file = config_file  # Needed for testing of workspaces
         self.env.read_config(config_file)
         self.run_startup()
         keys_after = set(env.namespace.keys())
@@ -132,6 +133,12 @@ class MainScript(Main):
             except marcel.exception.KillAndResumeException:
                 # Error handler printed the error
                 pass
+            except marcel.exception.ReconfigureException as e:
+                if self.testing:
+                    self.shutdown(restart=True)
+                    MainScript(self.config_file, testing=True).parse_and_run_command(text)
+                else:
+                    raise
 
     def shutdown(self, restart=False):
         if not restart:
@@ -172,11 +179,11 @@ class MainScript(Main):
 
 class MainInteractive(MainScript):
 
-    def __init__(self, old_main, config_file, testing=False):
+    def __init__(self, old_main, config_file, ws_name=None, testing=False):
         super().__init__(config_file, testing, marcel.env.EnvironmentInteractive.create())
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
         self.reader = None
-        self.workspace = marcel.object.workspace.Workspace(self.env)
+        self.workspace = marcel.object.workspace.Workspace(self.env, ws_name)
         self.initialize_reader()  # Sets self.reader
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
@@ -187,6 +194,15 @@ class MainInteractive(MainScript):
             self.input = old_main.input
 
     # Main
+
+    # Only used in testing
+    def parse_and_run_command(self, text):
+        assert self.testing
+        try:
+            super().parse_and_run_command(text)
+        except marcel.exception.ReconfigureException as e:
+            self.shutdown(restart=True)
+            MainInteractive(self, self.config_file, e.workspace_to_open, testing=True).parse_and_run_command(text)
 
     def shutdown(self, restart=False):
         if self.workspace:  # TODO: There will always be a workspace, even if just default

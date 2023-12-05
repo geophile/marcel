@@ -736,3 +736,25 @@ Clusters and Hosts should be renderable. What else is missing that?
 ----------------------------------------------------------------------
 
 Revisit checking of python and marcel version in farcel
+
+----------------------------------------------------------------------
+
+python zip is useful. Add an operator. Optional padding of shorter lists.
+
+E.g.
+
+input stream:
+
+(1, 2, 3)
+(4, 5, 6)
+
+output:
+
+(1, 4)
+(2, 5)
+(3, 6)
+
+----------------------------------------------------------------------
+
+write -f: It would be nice if the format could be an expression
+referring to vars.

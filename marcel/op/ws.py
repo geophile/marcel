@@ -31,6 +31,7 @@ HELP = '''
 {L,wrap=F}ws [-2|--copy] NAME COPY_NAME
 {L,wrap=F}ws [-e|--export] NAME MWS_FILENAME
 {L,wrap=F}ws [-i|--import] MWS_FILENAME NAME
+{L,wrap=F}ws [-p|--print] NAME
 
 {L,indent=4:28}{r:-l}, {r:--list}              List workspaces.
 
@@ -52,6 +53,8 @@ to the file MWS_FILENAME.
 
 {L,indent=4:28}{r:-i}, {r:--import}            Import file MWS_FILENAME to create a workspace_properties 
 with the given NAME.
+
+{L,indent=4:28}{r:-p}, {r:--print}             Print the workspace with the given NAME to stdout. 
 
 TBD
 '''
@@ -104,6 +107,7 @@ class WsArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_one_value('copy', '-2', '--copy')
         self.add_flag_one_value('export', '-e', '--export', target='exp')
         self.add_flag_one_value('import', '-i', '--import', target='imp')
+        self.add_flag_one_value('print', '-p', '--print', target='imp')
         self.add_anon('name', default=None)
         self.validate()
 
@@ -122,6 +126,7 @@ class Ws(marcel.core.Op):
         self.exp = None
         self.imp = None
         self.name = None
+        self.print = None
         self.impl = None
 
     def __repr__(self):
@@ -148,7 +153,10 @@ class Ws(marcel.core.Op):
             self.impl = WsExp(self)
         elif self.imp is not None:
             self.impl = WsImp(self)
+        elif self.print is not None:
+            self.print = WsPrint(self)
         elif self.name is not None:
+            self.open = self.name
             self.impl = WsOpen(self)
         else:
             raise marcel.argsparser.ArgsError('ws', 'No arguments given.')
@@ -184,8 +192,8 @@ class WsImpl(object):
             raise marcel.exception.KillCommandException(f'Anonymous argument not allowed.')
 
     def check_anon_arg_present(self, arg_name):
-        if self.op.name is not None:
-            raise marcel.exception.KillCommandException(f'Anonymous argument not allowed.')
+        if self.op.name is None:
+            raise marcel.exception.KillCommandException(f'Anonymous argument required.')
 
 
 class WsList(WsImpl):
@@ -222,7 +230,8 @@ class WsOpen(WsImpl):
         self.check_anon_arg_present('NAME')
 
     def run(self, env):
-        raise marcel.exception.ReconfigureException(Workspace(self.op.open))
+        if env.workspace.name != self.op.open:
+            raise marcel.exception.ReconfigureException(Workspace(self.op.open))
 
 
 class WsClose(WsImpl):
@@ -295,3 +304,15 @@ class WsImp(WsImpl):
 
     def run(self, env):
         pass
+
+
+class WsPrint(WsImpl):
+
+    def __repr__(self):
+        return f'ws(print {self.op.print})'
+
+    def setup(self, env):
+        self.check_anon_arg_present('NAME')
+
+    def run(self, env):
+        Workspace(self.op.print).print()
