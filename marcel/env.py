@@ -561,12 +561,6 @@ class EnvironmentInteractive(EnvironmentScript):
                                             'COLOR_SCHEME',
                                             'Color')
 
-    def initialize_namespace(self):
-        super().initialize_namespace()
-        editor = os.getenv('EDITOR')
-        if editor:
-            self.namespace['EDITOR'] = editor
-
     def prompts(self):
         return (self.prompt_string(self.getvar('PROMPT')),
                 self.prompt_string(self.getvar('PROMPT_CONTINUATION')))

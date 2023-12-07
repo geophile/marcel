@@ -22,6 +22,7 @@ import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.main
+import marcel.util
 
 
 HELP = '''
@@ -63,10 +64,7 @@ class Edit(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.editor = env.getvar('EDITOR')
-        if self.editor is None:
-            raise marcel.exception.KillCommandException(
-                'Specify editor in the EDITOR environment variable')
+        self.editor = Edit.find_editor(env)
         _, self.tmp_file = tempfile.mkstemp(text=True)
 
     def run(self, env):
@@ -81,7 +79,7 @@ class Edit(marcel.core.Op):
         edit_command = f'{self.editor} {self.tmp_file}'
         process = subprocess.Popen(edit_command,
                                    shell=True,
-                                   executable=env.bash,
+                                   executable=marcel.util.bash_executable(),
                                    universal_newlines=True)
         process.wait()
         with open(self.tmp_file, 'r') as input:
@@ -105,3 +103,15 @@ class Edit(marcel.core.Op):
 
     def run_in_main_process(self):
         return True
+
+    # Internal
+
+    @staticmethod
+    def find_editor(env):
+        editor = env.getvar('EDITOR')
+        if editor is None:
+            editor = os.getenv('EDITOR')
+            if editor is None:
+                raise marcel.exception.KillCommandException(
+                    "Neither the host OS environment, nor marcel's defines EDITOR")
+        return editor

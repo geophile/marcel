@@ -64,7 +64,8 @@ M jao@cheese:~$ history
 {b:Editing commands}
 
 You can edit previous command using your editor of choice, configured using the
-{n:EDITOR} environment variable.
+{n:EDITOR} environment variable (defined in either marcel's environment,
+or inherited from parent process).
 
 To edit the previous command run the {n:edit} command.
 To edit a different command run the {n:edit} command, and provide the command number
