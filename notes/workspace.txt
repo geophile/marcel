@@ -1,67 +1,4 @@
 
-Env persistence:
-
-What should be saved? 
-
-- Don't save vars coming from startup script. That will be reread.
-
-- What about vars defined in env initialization?
-
-  - Environment:
-    - MARCEL_VERSION: Don't save, goes stale with new releases.
-    - HOME: Recompute
-    - PWD: Save. If doesn't exist on restart, go to homedir
-    - DIRS: Save. Clean on restart. If empty, go to homedir
-    - USER: Recompute
-    - HOST: Recompute
-
-  - EnvironmentScript:
-    - pos: Don't save
-
-  - EnvironmentInteractive:
-    - PROMPT: Get from startup or set to default
-    - PROMPT_CONTINUATION: Get from startup or set to default
-    - BOLD: Get from startup or set 
-    - ITALIC: Get from startup or set 
-    - COLOR_SCHEME: Get from startup or set 
-    - Color: Get from startup or set 
-    - EDITOR: Not needed at all, get from host env
-
-----------------------------------------------------------------------
-
-Environment initialization:
-
-Sources:
-
-    - Startup script
-    - Set in marcel/env.py
-    - Stored environment
-
-- Vars from startup and script are immutable. If they differ from
-  stored env, then one of the following has happened:
-
-  - User modified startup script
-
-  - New release of marcel, changing env.py. This could include
-    adding/removing vars.
-
-- Be careful about startup script modifying settings from env.py, that
-  should be disallowed.
-
-The stored env should be used only for user-specified vars. Simplest
-to just store such vars. I.e., don't store the entire env, we'll just
-want to ignore things from startup and env.py anyway, including the
-changes mentioned above.
-
-One tricky issue: What if stored env has a var xyz, and then startup
-modified to add xyz?
-
-- Conflict in startup script: Kill shell, notify user
-
-- Conflict in env.py: rename stored var, notify user
-
-----------------------------------------------------------------------
-
 Things disabled that need to be re-enabled or re-implemented
 
 - old_namespace mechanism for maintaining env across startup script
@@ -701,3 +638,13 @@ be BEFORE an implicit write). Be able to recall these, based on this
 history mechanism.
 
 
+----------------------------------------------------------------------
+
+TODO:
+
+One tricky issue: What if stored env has a var xyz, and then startup
+modified to add xyz?
+
+- Conflict in startup script: Kill shell, notify user
+
+- Conflict in env.py: rename stored var, notify user

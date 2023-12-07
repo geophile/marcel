@@ -305,6 +305,10 @@ class Environment(object):
             'HOST': socket.gethostname()
         })
 
+    # Vars that are not mutable even during startup. I.e., startup script can't modify them.
+    def never_mutable(self):
+        return {'MARCEL_VERSION', 'HOME', 'USER', 'HOST'}
+
     def enforce_var_immutability(self, startup_vars=None):
         if startup_vars:
             self.var_handler.add_startup_vars(*startup_vars)
@@ -464,6 +468,11 @@ class EnvironmentScript(Environment):
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 self.namespace[key] = value
+
+    def never_mutable(self):
+        vars = set(super().never_mutable())
+        vars.update({'MARCEL_VERSION', 'HOME', 'USER', 'HOST'})
+        return vars
 
     def read_config(self, config_path=None):
         config_path = (self.locations.config_file_path(self.workspace.name)
