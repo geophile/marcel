@@ -199,9 +199,7 @@ class MainInteractive(MainScript):
     def __init__(self, old_main, env, workspace, config_file, testing=False):
         super().__init__(env, workspace, config_file, testing)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
-        self.reader = None
-        self.initialize_reader()  # Sets self.reader
-        self.env.reader = self.reader
+        self.reader = self.initialize_reader()
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
         self.input = None
         if old_main:
@@ -254,7 +252,8 @@ class MainInteractive(MainScript):
         readline.parse_and_bind('set completion-query-items 50')
         readline.set_pre_input_hook(self.insert_edited_command)
         ws_name = self.workspace.name
-        self.reader = Reader(self.env, self.env.locations.history_file_path(ws_name))
+        self.env.reader = Reader(self.env, self.env.locations.history_file_path(ws_name))
+        return self.env.reader
 
     def insert_edited_command(self):
         command = self.reader.take_edited_command()

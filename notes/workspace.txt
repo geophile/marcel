@@ -1,4 +1,90 @@
 
+Tasks
+
+Open ws
+
+- Revisit and cleanup marcel startup
+
+
+Close ws
+
+- Saving default ws command history
+
+- Saving named wd command history
+
+
+Main & Environment
+
+- Cleanup:
+
+  - Decide on use of Env from API. Is there one? Or are there just
+    python vars?
+
+  - Use Env for interactive usage only. Not for scripts, not for API.
+
+  - Separate uses: interactive, API, script.
+
+    - Some ops are only useful interactive: job control, edit, dir stack, help.
+
+- Track symbols from startup script
+
+- Prevent interactive update
+
+- Prevent interactive deletion
+
+- Handle symbol deleted from startup script (it should not appear on
+  reload of startup)
+
+- When a reservoir is created, the env must be saved first. Otherwise,
+  there could be a reservoir not referenced by the environment.
+
+- Env var for workspace name
+
+- Add workspace name to default prompt.
+
+- It should be possible to get rid of MARCEL_CONFIG
+
+- old_namespace is only needed for default namespace. Otherwise, can
+  be read from disk. Any way to get rid of old_namespace?
+
+- Real arg processing for marcel execution.
+
+- Stuff in startup.py not needed by API:
+
+  - COLOR_SCHEME
+  - PROMPT, PROMPT_CONTINUATION
+  - INTERACTIVE_EXECUTABLES
+  - RUN_ON_STARTUP: Just put that code in your own python code.
+
+  Really not needed at all! 
+
+- Why do Main and Environment both nead reader?
+
+
+
+
+Workspace locking
+
+
+Workspace op
+
+  - list      -l --list
+  - create    -n --new
+  - open      -o --open
+  - close     -c --close
+  - delete    -d --delete
+  - rename    -r --rename
+  - copy      -2 --dup
+  - export    -e --export
+  - import    -i --import
+
+
+HistoryRecord
+
+- Add timestamp
+
+----------------------------------------------------------------------
+
 Things disabled that need to be re-enabled or re-implemented
 
 - old_namespace mechanism for maintaining env across startup script
@@ -88,142 +174,6 @@ ws                  x
 CLI.
 
 2: Not a public op
-
-----------------------------------------------------------------------
-
-Env.new:
-
-- (*1) Get initial_namespace, either copying old_namespace, or copying os.environ().
-
-- Set a bunch of vars: 
-
-    USER
-    HOME
-    HOST
-    MARCEL_VERSION
-    PWD
-    (*2) DIRS
-    (*2) PROMPT
-    (*2) PROMPT_CONTINUATION
-    (*2) BOLD
-    (*2) ITALIC
-    (*2) COLOR_SCHEME
-    (*2) Color
-    pos
-    (*2) EDITOR
-
-- Add in public marcel.builtins
-
-- (*3) Create NestedNamespace
-
-
-*1: This looks wrong. Shouldn't os.environ be included in any case?
- Also should os.environ BE included at all?
-
-*2: Only needed for interactive usage.
-
-*3: Not needed for API?
-
-----------------------------------------------------------------------
-
-workspace op:
-
-list      -l --list
-create    -n --new
-open      -o --open
-close     -c --close
-delete    -d --delete
-rename    -r --rename
-copy      -2 --dup
-export    -e --export
-import    -i --import
-
-----------------------------------------------------------------------
-
-
-Tasks
-
-Open ws
-
-- Revisit and cleanup marcel startup
-
-
-Close ws
-
-- Saving default ws command history
-
-- Saving named wd command history
-
-
-Main & Environment
-
-- Cleanup:
-
-  - Decide on use of Env from API. Is there one? Or are there just
-    python vars?
-
-  - Use Env for interactive usage only. Not for scripts, not for API.
-
-  - Separate uses: interactive, API, script.
-
-    - Some ops are only useful interactive: job control, edit, dir stack, help.
-
-- Track symbols from startup script
-
-- Prevent interactive update
-
-- Prevent interactive deletion
-
-- Handle symbol deleted from startup script (it should not appear on
-  reload of startup)
-
-- When a reservoir is created, the env must be saved first. Otherwise,
-  there could be a reservoir not referenced by the environment.
-
-- Env var for workspace name
-
-- Add workspace name to default prompt.
-
-- It should be possible to get rid of MARCEL_CONFIG
-
-- old_namespace is only needed for default namespace. Otherwise, can
-  be read from disk. Any way to get rid of old_namespace?
-
-- Real arg processing for marcel execution.
-
-- Stuff in startup.py not needed by API:
-
-  - COLOR_SCHEME
-  - PROMPT, PROMPT_CONTINUATION
-  - INTERACTIVE_EXECUTABLES
-  - RUN_ON_STARTUP: Just put that code in your own python code.
-
-  Really not needed at all! 
-
-- Why do Main and Environment both nead reader?
-
-
-
-
-Workspace locking
-
-
-Workspace op
-
-  - list      -l --list
-  - create    -n --new
-  - open      -o --open
-  - close     -c --close
-  - delete    -d --delete
-  - rename    -r --rename
-  - copy      -2 --dup
-  - export    -e --export
-  - import    -i --import
-
-
-HistoryRecord
-
-- Add timestamp
 
 ----------------------------------------------------------------------
 
