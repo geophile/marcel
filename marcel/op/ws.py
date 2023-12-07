@@ -21,6 +21,7 @@ import marcel.object.workspace
 Workspace = marcel.object.workspace.Workspace
 
 HELP = '''
+{L,wrap=F}ws
 {L,wrap=F}ws NAME
 {L,wrap=F}ws [-l|--list]
 {L,wrap=F}ws [-n|--new] NAME
@@ -159,7 +160,8 @@ class Ws(marcel.core.Op):
             self.open = self.name
             self.impl = WsOpen(self)
         else:
-            raise marcel.argsparser.ArgsError('ws', 'No arguments given.')
+            # No args
+            self.impl = WsIdentify(self)
         self.impl.setup(env)  # Check that name is given when required
 
     def run(self, env):
@@ -176,8 +178,9 @@ class Ws(marcel.core.Op):
 
 class WsImpl(object):
 
-    def __init__(self, op):
+    def __init__(self, op, anon_arg=None):
         self.op = op
+        self.anon_arg = anon_arg
 
     def setup(self, env):
         assert False
@@ -192,12 +195,25 @@ class WsImpl(object):
             raise marcel.exception.KillCommandException(f'Anonymous argument not allowed.')
 
     def check_anon_arg_present(self, arg_name):
-        if self.op.name is None:
-            raise marcel.exception.KillCommandException(f'Anonymous argument required.')
+        if self.anon_arg is None:
+            raise marcel.exception.KillCommandException(f'Anonymous argument {arg_name} required.')
+
+
+class WsIdentify(WsImpl):
+    
+    def __repr__(self):
+        return f'ws(identify)'
+
+    def setup(self, env):
+        self.check_anon_arg_absent()
+
+    def run(self, env):
+        for wp in Workspace.list():
+            self.op.send(env, wp)
 
 
 class WsList(WsImpl):
-    
+
     def __repr__(self):
         return f'ws(list)'
 
@@ -205,11 +221,14 @@ class WsList(WsImpl):
         self.check_anon_arg_absent()
 
     def run(self, env):
-        for wp in Workspace(env).list():
+        for wp in Workspace.list(env):
             self.op.send(env, wp)
 
 
 class WsNew(WsImpl):
+
+    def __init__(self, op):
+        super().__init__(op, op.new)
     
     def __repr__(self):
         return f'ws(new {self.op.new})'
@@ -222,7 +241,10 @@ class WsNew(WsImpl):
 
 
 class WsOpen(WsImpl):
-    
+
+    def __init__(self, op):
+        super().__init__(op, op.open)
+
     def __repr__(self):
         return f'ws(open {self.op.open})'
 
@@ -231,7 +253,7 @@ class WsOpen(WsImpl):
 
     def run(self, env):
         if env.workspace.name != self.op.open:
-            raise marcel.exception.ReconfigureException(Workspace(self.op.open))
+            raise marcel.exception.ReconfigureException(self.op.open)
 
 
 class WsClose(WsImpl):
@@ -247,7 +269,10 @@ class WsClose(WsImpl):
 
 
 class WsDelete(WsImpl):
-    
+
+    def __init__(self, op):
+        super().__init__(op, op.delete)
+
     def __repr__(self):
         return f'ws(delete {self.op.delete})'
 
@@ -259,7 +284,10 @@ class WsDelete(WsImpl):
 
 
 class WsRename(WsImpl):
-    
+
+    def __init__(self, op):
+        super().__init__(op, op.name)
+
     def __repr__(self):
         return f'ws(rename {self.op.rename} {self.op.name})'
 
@@ -271,7 +299,10 @@ class WsRename(WsImpl):
 
 
 class WsCopy(WsImpl):
-    
+
+    def __init__(self, op):
+        super().__init__(op, op.name)
+
     def __repr__(self):
         return f'ws(copy {self.op.copy} {self.op.name})'
 
@@ -284,6 +315,9 @@ class WsCopy(WsImpl):
 
 class WsExp(WsImpl):
     
+    def __init__(self, op):
+        super().__init__(op, op.name)
+
     def __repr__(self):
         return f'ws(export {self.op.exp} {self.op.name})'
 
@@ -296,6 +330,9 @@ class WsExp(WsImpl):
 
 class WsImp(WsImpl):
     
+    def __init__(self, op):
+        super().__init__(op, op.name)
+
     def __repr__(self):
         return f'ws(import {self.op.imp} {self.op.name})'
 
@@ -307,6 +344,9 @@ class WsImp(WsImpl):
 
 
 class WsPrint(WsImpl):
+
+    def __init__(self, op):
+        super().__init__(op, op.print)
 
     def __repr__(self):
         return f'ws(print {self.op.print})'

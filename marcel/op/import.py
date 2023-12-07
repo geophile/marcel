@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import importlib
-
 import marcel.argsparser
 import marcel.core
 import marcel.exception
@@ -86,23 +84,15 @@ class Import(marcel.core.Op):
 
     def run(self, env):
         try:
-            module = importlib.import_module(self.module)
+            if self.symbol is None:
+                env.import_module(self.module)
+            else:
+                try:
+                    env.import_module(self.module, self.symbol, self.name)
+                except KeyError:
+                    self.non_fatal_error(message=f'{self.symbol} is not defined in {self.module}')
         except ModuleNotFoundError:
             self.fatal_error(None, f'Module {self.module} not found.')
-            assert False
-        if self.symbol is None:
-            env.setvar(self.module, module)
-        elif self.symbol == '*':
-            for key, value in module.__dict__.items():
-                if not key.startswith('_'):
-                    env.setvar(key, value)
-        else:
-            try:
-                value = module.__dict__[self.symbol]
-                name = self.name if self.name else self.symbol
-                env.setvar(name, value)
-            except KeyError:
-                self.non_fatal_error(message=f'{self.symbol} is not defined in {self.module}')
 
     def must_be_first_in_pipeline(self):
         return True

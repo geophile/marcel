@@ -43,10 +43,10 @@ class Locations(object):
         return self.data_dir_path(ws_name) / 'history'
 
     def workspace_properties_file_path(self, ws_name):
-        return self.data_dir_path(ws_name) / 'properties.p'
+        return self.data_dir_path(ws_name) / 'properties.pickle'
 
     def workspace_environment_file_path(self, ws_name):
-        return self.data_dir_path(ws_name) / 'env.p'
+        return self.data_dir_path(ws_name) / 'env.pickle'
 
     def workspace_marker_file_path(self, ws_name):
         return self.config_dir_path(ws_name) / '.WORKSPACE'

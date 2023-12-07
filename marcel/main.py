@@ -70,7 +70,6 @@ class Main(object):
     def __init__(self, env):
         self.main_pid = os.getpid()
         self.env = env
-        atexit.register(self.shutdown)
 
     # Main
 
@@ -82,6 +81,8 @@ class MainAPI(Main):
 
     def __init__(self, env):
         super().__init__(env)
+        self.env.enforce_var_immutability()
+        atexit.register(self.shutdown)
 
     # Main
 
@@ -100,10 +101,9 @@ class MainAPI(Main):
 
 class MainScript(Main):
 
-    def __init__(self, config_file, testing=False, env=None):
-        if env is None:
-            env = marcel.env.EnvironmentScript.create()
+    def __init__(self, env, workspace, config_file, testing=False):
         super().__init__(env)
+        self.workspace = workspace
         self.testing = testing
         self.config_time = time.time()
         keys_before = set(env.namespace.keys())
@@ -113,6 +113,7 @@ class MainScript(Main):
         keys_after = set(env.namespace.keys())
         startup_vars = keys_after - keys_before
         self.env.enforce_var_immutability(startup_vars)
+        atexit.register(self.shutdown)
 
     # Main
 
@@ -134,11 +135,8 @@ class MainScript(Main):
                 # Error handler printed the error
                 pass
             except marcel.exception.ReconfigureException as e:
-                if self.testing:
-                    self.shutdown(restart=True)
-                    MainScript(self.config_file, testing=True).parse_and_run_command(text)
-                else:
-                    raise
+                self.shutdown(restart=True)
+                MainInteractive(self, self.config_file, e.workspace_to_open, testing=True).parse_and_run_command(text)
 
     def shutdown(self, restart=False):
         if not restart:
@@ -179,11 +177,10 @@ class MainScript(Main):
 
 class MainInteractive(MainScript):
 
-    def __init__(self, old_main, config_file, ws_name=None, testing=False):
-        super().__init__(config_file, testing, marcel.env.EnvironmentInteractive.create())
+    def __init__(self, old_main, env, workspace, config_file, testing=False):
+        super().__init__(env, workspace, config_file, testing)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
         self.reader = None
-        self.workspace = marcel.object.workspace.Workspace(self.env, ws_name)
         self.initialize_reader()  # Sets self.reader
         self.env.reader = self.reader
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
@@ -195,18 +192,8 @@ class MainInteractive(MainScript):
 
     # Main
 
-    # Only used in testing
-    def parse_and_run_command(self, text):
-        assert self.testing
-        try:
-            super().parse_and_run_command(text)
-        except marcel.exception.ReconfigureException as e:
-            self.shutdown(restart=True)
-            MainInteractive(self, self.config_file, e.workspace_to_open, testing=True).parse_and_run_command(text)
-
     def shutdown(self, restart=False):
-        if self.workspace:  # TODO: There will always be a workspace, even if just default
-            self.workspace.close()
+        self.workspace.close(self.env)
         self.job_control.shutdown()
         self.reader.close()
         return super().shutdown(restart)
@@ -247,7 +234,7 @@ class MainInteractive(MainScript):
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
         readline.set_pre_input_hook(self.insert_edited_command)
-        ws_name = self.workspace.name if self.workspace else None  # TODO: self.workspace will always be set
+        ws_name = self.workspace.name
         self.reader = Reader(self.env, self.env.locations.history_file_path(ws_name))
 
     def insert_edited_command(self):
@@ -322,27 +309,39 @@ def args():
     return mpstart, config, script
 
 
+def main_interactive_run(config):
+    main = None
+    workspace = marcel.object.workspace.Workspace.default()
+    while True:
+        env = marcel.env.EnvironmentInteractive.create(workspace)
+        main = MainInteractive(main, env, workspace, config)
+        try:
+            main.run()
+            break
+        except marcel.exception.ReconfigureException as e:
+            main.shutdown(restart=True)
+            workspace = (main.workspace if e.workspace_to_open is None else
+                         marcel.object.workspace.Workspace(e.workspace_to_open))
+
+
+def main_script_run(config, script):
+    workspace = marcel.object.workspace.Workspace.default()
+    env = marcel.env.EnvironmentScript.create(workspace)
+    main = MainScript(env, workspace, config)
+    try:
+        with open(script, 'r') as script_file:
+            main.run_script(script_file.read())
+    except FileNotFoundError:
+        fail(f'File not found: {script}')
+
+
 def main():
     mpstart, config, script = args()
     multiprocessing.set_start_method(mpstart)
     if script is None:
-        # Interactive
-        main = None
-        while True:
-            main = MainInteractive(main, config)
-            try:
-                main.run()
-                break
-            except marcel.exception.ReconfigureException as e:
-                main.shutdown(restart=True)
+        main_interactive_run(config)
     else:
-        # Script
-        main = MainScript(config)
-        try:
-            with open(script, 'r') as script_file:
-                main.run_script(script_file.read())
-        except FileNotFoundError:
-            fail(f'File not found: {script}')
+        main_script_run(config, script)
 
 
 if __name__ == '__main__':

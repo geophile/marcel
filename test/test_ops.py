@@ -1090,6 +1090,7 @@ def test_import():
     TEST.run('(os.popen)', expected_out=[os.popen])
     # Delete version var so that it does not mask the version op.
     TEST.run('env -d version | select (*_: False)')
+    TEST.reset_environment()
 
 
 @timeit
@@ -2501,10 +2502,9 @@ def main_stable():
 
 def main_dev():
     pass
-    # test_import()
     # os.system('rm -rf /home/jao/.config/marcel/hello')
     # os.system('rm -rf /home/jao/.local/share/marcel/hello')
-    # TEST.run('ws hello')
+    # TEST.run('ws -n hello')
 
 
 def main():

@@ -758,3 +758,11 @@ output:
 
 write -f: It would be nice if the format could be an expression
 referring to vars.
+
+----------------------------------------------------------------------
+
+Ideas about startup: 
+
+- Replace USER, BOLD, MARCEL_VERSION etc. by functions.
+
+- Replace RUN_ON_STARTUP by run(...)

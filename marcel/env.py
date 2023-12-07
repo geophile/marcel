@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import getpass
+import importlib
 import os
 import os.path
 import pathlib
@@ -197,13 +198,14 @@ class VarHandlerStartup(object):
             value = None
         return value
 
-    def setvar(self, var, value):
+    def setvar(self, var, value, save=True):
         assert var is not None
         current_value = self.env.namespace.get(var, None)
         self.vars_written.add(var)
         if type(current_value) is marcel.reservoir.Reservoir:
             current_value.ensure_deleted()
-        self.save_vars.add(var)
+        if save:
+            self.save_vars.add(var)
         self.env.namespace[var] = value
 
     def delvar(self, var):
@@ -242,9 +244,9 @@ class VarHandler(VarHandlerStartup):
     def __init__(self, startup_var_handler):
         super().__init__(startup_var_handler.env, startup_var_handler)
 
-    def setvar(self, var, value):
+    def setvar(self, var, value, save=True):
         self.check_mutability(var)
-        super().setvar(var, value)
+        super().setvar(var, value, save)
 
     def delvar(self, var):
         self.check_mutability(var)
@@ -304,6 +306,8 @@ class Environment(object):
         })
 
     def enforce_var_immutability(self, startup_vars=None):
+        if startup_vars:
+            self.var_handler.add_startup_vars(*startup_vars)
         self.var_handler = VarHandler(self.var_handler)
 
     def hasvar(self, var):
@@ -354,12 +358,6 @@ class Environment(object):
     def marcel_usage(self):
         assert False
 
-    @staticmethod
-    def create():
-        env = Environment(dict())
-        env.initialize_namespace()
-        return env
-
 
 class EnvironmentAPI(Environment):
 
@@ -377,7 +375,6 @@ class EnvironmentAPI(Environment):
     def create(globals):
         env = EnvironmentAPI(globals)
         env.initialize_namespace()
-        env.enforce_var_immutability()
         return env
 
 
@@ -396,7 +393,27 @@ class EnvironmentScript(Environment):
             assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
             self.depth = None
 
-    def __init__(self, workspace=marcel.object.workspace.Workspace.default()):
+    # Script and interactive usage rely on the import op to do imports. We don't want to dump these symbols
+    # in the environment because there is no point in persisting them with a workspace, and the contents of
+    # modules are sometimes not serializable. So the env will store Import objects which can be persisted,
+    # and handle reimportation.
+    class Import(object):
+
+        def __init__(self, module_name, symbol=None, rename=None):
+            self.module_name = module_name
+            self.symbol = symbol
+            self.rename = rename
+
+        def __repr__(self):
+            buffer = [f'import({self.module_name}']
+            if self.symbol is not None:
+                buffer.append(f' {self.symbol}')
+            if self.rename is not None:
+                buffer.append(f' as {self.rename}')
+            buffer.append(')')
+            return ''.join(buffer)
+
+    def __init__(self, workspace):
         super().__init__(marcel.nestednamespace.NestedNamespace())
         # Standard locations of files important to marcel: config, history
         self.locations = marcel.locations.Locations(self)
@@ -411,31 +428,42 @@ class EnvironmentScript(Environment):
         # Marcel used with a script does not manipulate workspaces, but it is convenient to
         # have workspace defined, for use with Locations.
         self.workspace = workspace
+        # Symbols imported need special handling
+        self.imports = []
 
     # Don't pickle everything
 
-    def __getstate__(self):
-        # Keep save vars only
+    def persistent_state(self):
+        # Things to persist:
+        # - vars mentioned in save_vars
+        # - imports
         save = dict()
         save_vars = self.var_handler.save_vars
-        print(f'__getstate__ save_vars: {save_vars}')
         for var, value in self.namespace.items():
             if var in save_vars:
                 save[var] = value
-        print(f'__getstate__ return: {save}')
-        return {'namespace': save}
+        return {'namespace': save,
+                'imports': self.imports}
+
+    def restore_persistent_state(self, persisted):
+        self.namespace = persisted['namespace']
+        self.imports = persisted['imports']
+        for i in self.imports():
+            self.import_module(i.name, i.symbol, i.rename)
 
     def initialize_namespace(self):
         super().initialize_namespace()
-        self.namespace.update({'pos': lambda: self.current_op.pos()})
+        self.namespace.update({
+            'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
+            'PROMPT_CONTINUATION': [EnvironmentInteractive.DEFAULT_PROMPT_CONTINUATION],
+            'BOLD': marcel.object.color.Color.BOLD,
+            'ITALIC': marcel.object.color.Color.ITALIC,
+            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
+            'Color': marcel.object.color.Color,
+            'pos': lambda: self.current_op.pos()})
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 self.namespace[key] = value
-
-    def enforce_var_immutability(self, startup_vars=None):
-        assert startup_vars is not None  # Allowed to be None only in parent
-        self.var_handler.add_startup_vars(*startup_vars)
-        self.var_handler = VarHandler(self.var_handler)
 
     def read_config(self, config_path=None):
         config_path = (self.locations.config_file_path(self.workspace.name)
@@ -467,6 +495,21 @@ class EnvironmentScript(Environment):
         if var is not None:
             self.var_handler.add_written(var)
 
+    def import_module(self, module_name, symbol=None, rename=None):
+        self.imports.append(EnvironmentScript.Import(module_name, symbol, rename))
+        # Exceptions handle by import op
+        module = importlib.import_module(module_name)
+        if symbol is None:
+            self.var_handler.setvar(module_name, module, save=False)
+        elif symbol == '*':
+            for name, value in module.__dict__.items():
+                if not name.startswith('_'):
+                    self.var_handler.setvar(name, value, save=False)
+        else:
+            value = module.__dict__[symbol]
+            name = rename if rename is not None else symbol
+            self.var_handler.setvar(name, value, save=False)
+
     def db(self, name):
         db = None
         x = self.getvar(name)
@@ -487,8 +530,8 @@ class EnvironmentScript(Environment):
                 x in interactive_executables)
 
     @staticmethod
-    def create():
-        env = EnvironmentScript()
+    def create(workspace):
+        env = EnvironmentScript(workspace)
         env.initialize_namespace()
         return env
 
@@ -511,7 +554,6 @@ class EnvironmentInteractive(EnvironmentScript):
         # readline wrapper
         self.reader = None
         #
-        self.initialize_namespace()
         self.var_handler.add_immutable_vars('PROMPT',
                                             'PROMPT_CONTINUATION',
                                             'BOLD',
@@ -521,14 +563,6 @@ class EnvironmentInteractive(EnvironmentScript):
 
     def initialize_namespace(self):
         super().initialize_namespace()
-        self.namespace.update({
-            'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
-            'PROMPT_CONTINUATION': [EnvironmentInteractive.DEFAULT_PROMPT_CONTINUATION],
-            'BOLD': marcel.object.color.Color.BOLD,
-            'ITALIC': marcel.object.color.Color.ITALIC,
-            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-            'Color': marcel.object.color.Color
-        })
         editor = os.getenv('EDITOR')
         if editor:
             self.namespace['EDITOR'] = editor
@@ -564,7 +598,7 @@ class EnvironmentInteractive(EnvironmentScript):
             return EnvironmentInteractive.DEFAULT_PROMPT
 
     @staticmethod
-    def create():
-        env = EnvironmentInteractive(marcel.object.workspace.Workspace.default())
+    def create(workspace):
+        env = EnvironmentInteractive(workspace)
         env.initialize_namespace()
         return env

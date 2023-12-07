@@ -8,9 +8,11 @@ import time
 
 import dill.source
 
+import marcel.env
 import marcel.exception
 import marcel.main
 import marcel.object.error
+import marcel.object.workspace
 import marcel.util
 
 
@@ -41,16 +43,19 @@ class TestBase:
         self.test_stdout = None
         self.test_stderr = None
 
-    def reset_environment(self, config_file='./.marcel.py', new_main=False):
-        if self.main is None or new_main:
-            self.main = marcel.main.MainInteractive(old_main=None,
-                                                    config_file=config_file,
-                                                    ws_name=None,
-                                                    testing=True)
-        self.env = self.main.env
+    def reset_environment(self, config_file='./.marcel.py', new_main=True):  # False):
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')
         os.chdir(TestConsole.start_dir)
+        if self.main is None or new_main:
+            workspace = marcel.object.workspace.Workspace.default()
+            env = marcel.env.EnvironmentInteractive.create(workspace)
+            self.main = marcel.main.MainInteractive(old_main=None,
+                                                    env=env,
+                                                    workspace=workspace,
+                                                    config_file=config_file,
+                                                    testing=True)
+        self.env = self.main.env
 
     def new_file(self, filename):
         path = pathlib.Path(filename)
@@ -307,7 +312,13 @@ class TestTabCompletion(TestBase):
         super().__init__(config_file)
 
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
-        self.main = marcel.main.MainInteractive(None, config_file, testing=True)
+        workspace = marcel.object.workspace.Workspace.default()
+        env = marcel.env.EnvironmentInteractive.create(workspace)
+        self.main = marcel.main.MainInteractive(old_main=None,
+                                                env=env,
+                                                workspace=workspace,
+                                                config_file=config_file,
+                                                testing=True)
 
     def run(self, line, text=None, expected=None):
         if text is None:

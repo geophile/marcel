@@ -1,4 +1,16 @@
 
+Startup is a mess. Overhaul it.
+
+Main.setupInteractive/Script/API
+
+- Create workspace
+- Create env (include read config)
+- Create main
+
+Then main.run*()
+
+----------------------------------------------------------------------
+
 import is a problem. It brings in to the env a lot of stuff, including
 things that don't serialize, breaking the saving of environments. Fix:
 

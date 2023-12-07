@@ -29,8 +29,8 @@ import marcel.core
 import marcel.env
 import marcel.exception
 import marcel.locations
-import marcel.object.color
 import marcel.object.error
+import marcel.object.workspace
 import marcel.opmodule
 import marcel.nestednamespace
 import marcel.util
@@ -166,7 +166,7 @@ def main():
         if marcel_usage == 'api':
             env = marcel.env.EnvironmentAPI.create(dict())
         elif marcel_usage == 'script':
-            env = marcel.env.EnvironmentScript.create()
+            env = marcel.env.EnvironmentScript.create(marcel.object.workspace.Workspace.default())
         else:
             assert False, marcel_usage
         version = env.getvar('MARCEL_VERSION')
