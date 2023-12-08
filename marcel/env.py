@@ -419,6 +419,7 @@ class EnvironmentScript(Environment):
 
     def __init__(self, workspace):
         super().__init__(marcel.nestednamespace.NestedNamespace())
+        assert workspace is not None
         # Standard locations of files important to marcel: config, history
         self.locations = marcel.locations.Locations(self)
         # Actual config path. Needed to reread config file in case of modification.
@@ -437,6 +438,22 @@ class EnvironmentScript(Environment):
 
     # Don't pickle everything
 
+    def initialize_namespace(self):
+        super().initialize_namespace()
+        self.namespace.update({
+            'WORKSPACE': self.workspace.name,
+            'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
+            'PROMPT_CONTINUATION': [EnvironmentInteractive.DEFAULT_PROMPT_CONTINUATION],
+            'BOLD': marcel.object.color.Color.BOLD,
+            'ITALIC': marcel.object.color.Color.ITALIC,
+            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
+            'Color': marcel.object.color.Color,
+            'pos': lambda: self.current_op.pos()})
+        for key, value in marcel.builtin.__dict__.items():
+            if not key.startswith('_'):
+                self.namespace[key] = value
+        self.restore_persistent_state()
+
     def persistent_state(self):
         # Things to persist:
         # - vars mentioned in save_vars
@@ -449,29 +466,18 @@ class EnvironmentScript(Environment):
         return {'namespace': save,
                 'imports': self.imports}
 
-    def restore_persistent_state(self, persisted):
-        self.namespace = persisted['namespace']
-        self.imports = persisted['imports']
-        for i in self.imports():
-            self.import_module(i.name, i.symbol, i.rename)
-
-    def initialize_namespace(self):
-        super().initialize_namespace()
-        self.namespace.update({
-            'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
-            'PROMPT_CONTINUATION': [EnvironmentInteractive.DEFAULT_PROMPT_CONTINUATION],
-            'BOLD': marcel.object.color.Color.BOLD,
-            'ITALIC': marcel.object.color.Color.ITALIC,
-            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-            'Color': marcel.object.color.Color,
-            'pos': lambda: self.current_op.pos()})
-        for key, value in marcel.builtin.__dict__.items():
-            if not key.startswith('_'):
-                self.namespace[key] = value
+    def restore_persistent_state(self):
+        self.workspace.open(self)
+        if not self.workspace.is_default():
+            saved_env = self.workspace.saved_env
+            self.namespace.update(saved_env['namespace'])
+            imports = saved_env['imports']
+            for i in imports:
+                self.import_module(i.module_name, i.symbol, i.rename)
 
     def never_mutable(self):
         vars = set(super().never_mutable())
-        vars.update({'MARCEL_VERSION', 'HOME', 'USER', 'HOST'})
+        vars.update({'MARCEL_VERSION', 'HOME', 'USER', 'HOST', 'WORKSPACE'})
         return vars
 
     def read_config(self, config_path=None):

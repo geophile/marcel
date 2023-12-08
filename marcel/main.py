@@ -153,13 +153,14 @@ class MainScript(Main):
             except marcel.exception.KillAndResumeException:
                 # Error handler printed the error
                 pass
-            except marcel.exception.ReconfigureException as e:
-                self.shutdown(restart=True)
-                MainInteractive(self, self.config_file, e.workspace_to_open, testing=True).parse_and_run_command(text)
 
     def shutdown(self, restart=False):
         if not restart:
             marcel.reservoir.shutdown(self.main_pid)
+        # The current main is about to be obsolete, but it still exists, and is registered with atexit,
+        # keeping it alive, I think. So it's shutdown handler gets run on shutdown. atexit.unregister
+        # prevents this, and only the current Main's shutdown will run, on shutdown.
+        atexit.unregister(self.shutdown)
 
     # MainScript
 
@@ -210,9 +211,9 @@ class MainInteractive(MainScript):
     # Main
 
     def shutdown(self, restart=False):
+        self.reader.close()
         self.workspace.close(self.env)
         self.job_control.shutdown()
-        self.reader.close()
         return super().shutdown(restart)
 
     # MainScript
@@ -251,8 +252,7 @@ class MainInteractive(MainScript):
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
         readline.set_pre_input_hook(self.insert_edited_command)
-        ws_name = self.workspace.name
-        self.env.reader = Reader(self.env, self.env.locations.history_file_path(ws_name))
+        self.env.reader = Reader(self.env, self.env.locations.history_file_path(self.workspace.name))
         return self.env.reader
 
     def insert_edited_command(self):
@@ -329,7 +329,7 @@ def args():
 
 def main_interactive_run(config):
     main = None
-    workspace = marcel.object.workspace.Workspace.default()
+    workspace = marcel.object.workspace.Workspace.DEFAULT
     while True:
         env = marcel.env.EnvironmentInteractive.create(workspace)
         main = MainInteractive(main, env, workspace, config)
@@ -338,8 +338,14 @@ def main_interactive_run(config):
             break
         except marcel.exception.ReconfigureException as e:
             main.shutdown(restart=True)
-            workspace = (main.workspace if e.workspace_to_open is None else
-                         marcel.object.workspace.Workspace(e.workspace_to_open))
+            if e.workspace_to_open is None:
+                # Reconfiguration is due to modified startup script. Same workspace, keep main.input so it is rerun.
+                workspace = main.workspace
+            else:
+                # Reconfiguration is due to change of workspace. main.input was the workspace command
+                # that caused the reconfiguration, so don't rerun it.
+                workspace = e.workspace_to_open
+                main.input = None
 
 
 def main_script_run(config, script):

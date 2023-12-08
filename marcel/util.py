@@ -16,6 +16,7 @@
 
 import collections.abc
 import grp
+import inspect
 import os
 import pathlib
 import pwd
@@ -130,6 +131,12 @@ def print_stack_of_current_exception(file=None):
     print(f'Caught {exception_type}: {exception}', file=file)
     traceback.print_tb(trace, file=file)
     file.flush()
+
+
+def print_stack(file=None):
+    if file is None:
+        file = sys.__stderr__
+    print(inspect.stack(), file=file)
 
 
 def colorize(s, color, readline=False):

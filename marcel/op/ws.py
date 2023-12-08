@@ -36,23 +36,23 @@ HELP = '''
 
 {L,indent=4:28}{r:-l}, {r:--list}              List workspaces.
 
-{L,indent=4:28}{r:-n}, {r:--new}               Create a new workspace_properties with the given NAME.
+{L,indent=4:28}{r:-n}, {r:--new}               Create a new workspace with the given NAME.
 
-{L,indent=4:28}{r:-o}, {r:--open}              Open the workspace_properties with the given NAME.
+{L,indent=4:28}{r:-o}, {r:--open}              Open the workspace with the given NAME.
 
-{L,indent=4:28}{r:-c}, {r:--close}             Close the current workspace_properties.
+{L,indent=4:28}{r:-c}, {r:--close}             Close the current workspace.
 
-{L,indent=4:28}{r:-d}, {r:--delete}            Delete the workspace_properties with the given NAME.
+{L,indent=4:28}{r:-d}, {r:--delete}            Delete the workspace with the given NAME.
 
-{L,indent=4:28}{r:-r}, {r:--rename}            Change the name of the workspace_properties named OLD_NAME to NEW_NAME.
+{L,indent=4:28}{r:-r}, {r:--rename}            Change the name of the workspace named OLD_NAME to NEW_NAME.
 
-{L,indent=4:28}{r:-2}, {r:--copy}              Create a copy of the workspace_properties named NAME, 
+{L,indent=4:28}{r:-2}, {r:--copy}              Create a copy of the workspace named NAME, 
 under the name COPY_NAME.
 
-{L,indent=4:28}{r:-e}, {r:--export}            Export the workspace_properties with the given NAME 
+{L,indent=4:28}{r:-e}, {r:--export}            Export the workspace with the given NAME 
 to the file MWS_FILENAME.
 
-{L,indent=4:28}{r:-i}, {r:--import}            Import file MWS_FILENAME to create a workspace_properties 
+{L,indent=4:28}{r:-i}, {r:--import}            Import file MWS_FILENAME to create a workspace 
 with the given NAME.
 
 {L,indent=4:28}{r:-p}, {r:--print}             Print the workspace with the given NAME to stdout. 
@@ -108,8 +108,9 @@ class WsArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_one_value('copy', '-2', '--copy')
         self.add_flag_one_value('export', '-e', '--export', target='exp')
         self.add_flag_one_value('import', '-i', '--import', target='imp')
-        self.add_flag_one_value('print', '-p', '--print', target='imp')
+        self.add_flag_one_value('print', '-p', '--print', target='print')
         self.add_anon('name', default=None)
+        self.at_most_one('list', 'new', 'open', 'close', 'delete', 'rename', 'copy', 'export', 'import', 'print')
         self.validate()
 
 
@@ -136,13 +137,13 @@ class Ws(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        if self.list is not None:
+        if self.list:
             self.impl = WsList(self)
         elif self.new is not None:
             self.impl = WsNew(self)
         elif self.open is not None:
             self.impl = WsOpen(self)
-        elif self.close is not None:
+        elif self.close:
             self.impl = WsClose(self)
         elif self.delete is not None:
             self.impl = WsDelete(self)
@@ -154,7 +155,7 @@ class Ws(marcel.core.Op):
             self.impl = WsExp(self)
         elif self.imp is not None:
             self.impl = WsImp(self)
-        elif self.print is not None:
+        elif self.print is True:
             self.print = WsPrint(self)
         elif self.name is not None:
             self.open = self.name
@@ -190,6 +191,9 @@ class WsImpl(object):
 
     # For use by subclasses
 
+    def reconfigure(self, workspace):
+        raise marcel.exception.ReconfigureException(workspace)
+
     def check_anon_arg_absent(self):
         if self.op.name is not None:
             raise marcel.exception.KillCommandException(f'Anonymous argument not allowed.')
@@ -208,8 +212,7 @@ class WsIdentify(WsImpl):
         self.check_anon_arg_absent()
 
     def run(self, env):
-        for wp in Workspace.list():
-            self.op.send(env, wp)
+        self.op.send(env, env.workspace)
 
 
 class WsList(WsImpl):
@@ -237,7 +240,14 @@ class WsNew(WsImpl):
         self.check_anon_arg_present('NAME')
 
     def run(self, env):
-        Workspace(env, self.op.new).new()
+        name = self.op.new
+        workspace = Workspace(name)
+        if workspace.exists(env):
+            raise marcel.exception.KillCommandException(f'Workspace {name} already exists.')
+        else:
+            workspace.create(env)
+            self.op.send(env, workspace)
+            self.reconfigure(workspace)
 
 
 class WsOpen(WsImpl):
@@ -252,8 +262,15 @@ class WsOpen(WsImpl):
         self.check_anon_arg_present('NAME')
 
     def run(self, env):
-        if env.workspace.name != self.op.open:
-            raise marcel.exception.ReconfigureException(self.op.open)
+        name = self.op.open
+        workspace = Workspace(name)
+        if workspace.exists(env):
+            if env.workspace.name != name:
+                workspace.open(env)
+                self.op.send(env, workspace)
+                self.reconfigure(workspace)
+        else:
+            raise marcel.exception.KillCommandException(f'There is no workspace named {name}.')
 
 
 class WsClose(WsImpl):
@@ -265,7 +282,13 @@ class WsClose(WsImpl):
         self.check_anon_arg_absent()
 
     def run(self, env):
-        pass
+        workspace = env.workspace
+        workspace.close(env)
+        if not workspace.is_default():
+            workspace = Workspace.DEFAULT
+            workspace.open(env)
+            self.op.send(env, workspace)
+            self.reconfigure(workspace)
 
 
 class WsDelete(WsImpl):

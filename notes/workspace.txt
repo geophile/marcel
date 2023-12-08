@@ -1,39 +1,12 @@
 
 Tasks
 
-Open ws
-
-- Revisit and cleanup marcel startup
-
 
 Close ws
 
 - Saving default ws command history
 
-- Saving named wd command history
-
-
-Main & Environment
-
-- Cleanup:
-
-  - Decide on use of Env from API. Is there one? Or are there just
-    python vars?
-
-  - Use Env for interactive usage only. Not for scripts, not for API.
-
-  - Separate uses: interactive, API, script.
-
-    - Some ops are only useful interactive: job control, edit, dir stack, help.
-
-- Track symbols from startup script
-
-- Prevent interactive update
-
-- Prevent interactive deletion
-
-- Handle symbol deleted from startup script (it should not appear on
-  reload of startup)
+- Saving named ws command history
 
 - When a reservoir is created, the env must be saved first. Otherwise,
   there could be a reservoir not referenced by the environment.
@@ -42,46 +15,7 @@ Main & Environment
 
 - Add workspace name to default prompt.
 
-- It should be possible to get rid of MARCEL_CONFIG
-
-- old_namespace is only needed for default namespace. Otherwise, can
-  be read from disk. Any way to get rid of old_namespace?
-
 - Real arg processing for marcel execution.
-
-- Stuff in startup.py not needed by API:
-
-  - COLOR_SCHEME
-  - PROMPT, PROMPT_CONTINUATION
-  - INTERACTIVE_EXECUTABLES
-  - RUN_ON_STARTUP: Just put that code in your own python code.
-
-  Really not needed at all! 
-
-- Why do Main and Environment both nead reader?
-
-
-
-
-Workspace locking
-
-
-Workspace op
-
-  - list      -l --list
-  - create    -n --new
-  - open      -o --open
-  - close     -c --close
-  - delete    -d --delete
-  - rename    -r --rename
-  - copy      -2 --dup
-  - export    -e --export
-  - import    -i --import
-
-
-HistoryRecord
-
-- Add timestamp
 
 ----------------------------------------------------------------------
 
@@ -598,3 +532,9 @@ modified to add xyz?
 - Conflict in startup script: Kill shell, notify user
 
 - Conflict in env.py: rename stored var, notify user
+
+
+
+HistoryRecord
+
+- Add timestamp

@@ -31,6 +31,7 @@ An C{error_handler} is a function with these arguments:
 
 import sys
 
+import marcel.object.workspace
 import marcel.util
 
 
@@ -55,6 +56,7 @@ class StopAfterFirst(BaseException):
 class ReconfigureException(BaseException):
 
     def __init__(self, workspace):
+        assert isinstance(workspace, marcel.object.workspace.WorkspaceDefault), (type(workspace), workspace)
         super().__init__()
         self.workspace_to_open = workspace
 

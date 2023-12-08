@@ -48,7 +48,7 @@ class TestBase:
         os.system('sudo rm /tmp/farcel.log')
         os.chdir(TestConsole.start_dir)
         if self.main is None or new_main:
-            workspace = marcel.object.workspace.Workspace.default()
+            workspace = marcel.object.workspace.Workspace.DEFAULT
             env = marcel.env.EnvironmentInteractive.create(workspace)
             self.main = marcel.main.MainInteractive(old_main=None,
                                                     env=env,
@@ -153,7 +153,17 @@ class TestConsole(TestBase):
         # test is the thing being tested. Usually it will produce output that can be used for verification.
         # For operations with side effects (e.g. rm), a separate verification command is needed.
         if verification is None and expected_out is None and expected_err is None and file is None:
-            self.main.parse_and_run_command(test)
+            try:
+                self.main.parse_and_run_command(test)
+            except marcel.exception.ReconfigureException as e:
+                # For workspace testing
+                self.main.shutdown(restart=True)
+                env = marcel.env.EnvironmentInteractive.create(e.workspace_to_open)
+                self.main = marcel.main.MainInteractive(self.main,
+                                                        env,
+                                                        e.workspace_to_open,
+                                                        self.main.config_file,
+                                                        testing=True)
         else:
             print(f'TESTING: {self.description(test)}')
             try:
@@ -312,7 +322,7 @@ class TestTabCompletion(TestBase):
         super().__init__(config_file)
 
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
-        workspace = marcel.object.workspace.Workspace.default()
+        workspace = marcel.object.workspace.Workspace.DEFAULT
         env = marcel.env.EnvironmentInteractive.create(workspace)
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
