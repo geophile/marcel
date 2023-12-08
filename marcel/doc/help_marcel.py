@@ -52,5 +52,5 @@ as in other shells.
     - {n:select}      - {n:sort}        - {n:sql}         - {n:squish}
     - {n:store}       - {n:sudo}        - {n:tail}        - {n:tee}
     - {n:timer}       - {n:unique}      - {n:union}       - {n:version}
-    - {n:window}      - {n:write}
+    - {n:window}      - {n:write}       - {n:ws}
 '''
