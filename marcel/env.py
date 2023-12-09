@@ -227,6 +227,9 @@ class VarHandlerStartup(object):
     def add_save_vars(self, *vars):
         self.save_vars.update(vars)
 
+    def add_changed_var(self, var):
+        self.vars_written.add(var)
+
     def changes(self):
         changes = {}
         for var in self.vars_written:
@@ -507,8 +510,7 @@ class EnvironmentScript(Environment):
         return 'script'
 
     def mark_possibly_changed(self, var):
-        if var is not None:
-            self.var_handler.add_written(var)
+        self.var_handler.add_changed_var(var)
 
     def import_module(self, module_name, symbol=None, rename=None):
         self.imports.append(EnvironmentScript.Import(module_name, symbol, rename))

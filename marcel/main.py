@@ -101,12 +101,13 @@ class MainAPI(Main):
 
 class MainScript(Main):
 
-    def __init__(self, env, workspace, config_file, testing=False):
+    # If a test is being run, testing is set to a directory pretending to be the user's home.
+    def __init__(self, env, workspace, config_file, testing=None):
         super().__init__(env)
         self.workspace = workspace
         self.testing = testing
         self.config_time = time.time()
-        self.config_file = config_file  # Needed for testing of workspaces
+        self.config_file = config_file
         startup_vars = self.read_config()
         self.env.enforce_var_immutability(startup_vars)
         atexit.register(self.shutdown)
@@ -197,7 +198,7 @@ class MainScript(Main):
 
 class MainInteractive(MainScript):
 
-    def __init__(self, old_main, env, workspace, config_file, testing=False):
+    def __init__(self, old_main, env, workspace, config_file, testing=None):
         super().__init__(env, workspace, config_file, testing)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
         self.reader = self.initialize_reader()

@@ -33,6 +33,7 @@ def timeit(f):
 
 class TestBase:
     start_dir = os.getcwd()
+    test_home = '/tmp/test_home'
 
     def __init__(self, config_file='./.marcel.py', main=None):
         self.config_file = config_file
@@ -44,9 +45,14 @@ class TestBase:
         self.test_stderr = None
 
     def reset_environment(self, config_file='./.marcel.py'):
+        os.system(f'rm -rf {TestBase.test_home}')
+        os.system(f'mkdir {TestBase.test_home}')
+        os.system(f'mkdir {TestBase.test_home}/config')
+        os.system(f'mkdir {TestBase.test_home}/local')
+        os.system(f'mkdir {TestBase.test_home}/local/share')
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')
-        os.chdir(TestConsole.start_dir)
+        os.chdir(TestBase.start_dir)
         workspace = marcel.object.workspace.Workspace.DEFAULT
         env = marcel.env.EnvironmentInteractive.create(workspace)
         self.main = marcel.main.MainInteractive(old_main=None,
@@ -323,6 +329,9 @@ class TestTabCompletion(TestBase):
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
         workspace = marcel.object.workspace.Workspace.DEFAULT
         env = marcel.env.EnvironmentInteractive.create(workspace)
+        env.locations.setup(TestBase.test_home,
+                            f'{TestBase.test_home}/config',
+                            f'{TestBase.test_home}/local/share')
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
                                                 workspace=workspace,
