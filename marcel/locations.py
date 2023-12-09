@@ -21,30 +21,30 @@ import marcel.exception
 
 class Locations(object):
 
-    def __init__(self, home=None, xdg_config_home=None, xdg_data_home=None):
+    def __init__(self, home=None, config_base=None, data_base=None):
         self.home = Locations.normalize_dir(
             'home directory',
             home,
             pathlib.Path.home())
-        self.xdg_config_home = Locations.normalize_dir(
+        self.config_base = Locations.normalize_dir(
             'application configuration directory (e.g. XDG_CONFIG_HOME)',
-            xdg_config_home,
+            config_base,
             os.getenv('XDG_CONFIG_HOME'),
             self.home / '.config')
-        self.xdg_data_home = Locations.normalize_dir(
+        self.data_base = Locations.normalize_dir(
             'application data directory (e.g. XDG_DATA_HOME)',
-            xdg_data_home,
+            data_base,
             os.getenv('XDG_DATA_HOME'),
             self.home / '.local' / 'share')
 
     def config_dir_path(self, ws_name):
-        path = Locations.marcel_dir(self.xdg_config_home)
+        path = Locations.marcel_dir(self.config_base)
         if ws_name is not None:
             path = path / ws_name
         return path
 
     def data_dir_path(self, ws_name):
-        path = Locations.marcel_dir(self.xdg_data_home)
+        path = Locations.marcel_dir(self.data_base)
         if ws_name is not None:
             path = path / ws_name
         return path
