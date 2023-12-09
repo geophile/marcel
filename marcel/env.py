@@ -421,7 +421,7 @@ class EnvironmentScript(Environment):
         super().__init__(marcel.nestednamespace.NestedNamespace())
         assert workspace is not None
         # Standard locations of files important to marcel: config, history
-        self.locations = marcel.locations.Locations(self)
+        self.locations = marcel.locations.Locations()
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
         # Support for pos()

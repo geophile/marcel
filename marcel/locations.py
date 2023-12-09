@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import pathlib
 
 import marcel.exception
@@ -20,7 +21,7 @@ import marcel.exception
 
 class Locations(object):
 
-    def __init__(self, env, home=None, xdg_config_home=None, xdg_data_home=None):
+    def __init__(self, home=None, xdg_config_home=None, xdg_data_home=None):
         self.home = Locations.normalize_dir(
             'home directory',
             home,
@@ -28,10 +29,12 @@ class Locations(object):
         self.xdg_config_home = Locations.normalize_dir(
             'application configuration directory (e.g. XDG_CONFIG_HOME)',
             xdg_config_home,
+            os.getenv('XDG_CONFIG_HOME'),
             self.home / '.config')
         self.xdg_data_home = Locations.normalize_dir(
             'application data directory (e.g. XDG_DATA_HOME)',
             xdg_data_home,
+            os.getenv('XDG_DATA_HOME'),
             self.home / '.local' / 'share')
 
     def config_dir_path(self, ws_name):
@@ -81,7 +84,11 @@ class Locations(object):
         if dir is None:
             raise marcel.exception.KillShellException(
                 f'Unable to start because value of {description} cannot be determined.')
-        if not isinstance(dir, pathlib.Path):
-            dir = pathlib.Path(dir)
-        dir = dir.expanduser()
+        try:
+            if not isinstance(dir, pathlib.Path):
+                dir = pathlib.Path(dir)
+            dir = dir.expanduser()
+        except Exception as e:
+            raise marcel.exception.KillShellException(
+                f'Unable to start because value of {description} cannot be determined: {e}')
         return dir
