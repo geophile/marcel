@@ -2377,7 +2377,7 @@ def test_bug_230():
 # Generalization of bug 195
 @timeit
 def test_pipeline_vars():
-    TEST.reset_environment(new_main=True)
+    TEST.reset_environment()
     # union
     TEST.run('genn = (| n: gen (int(n)) |)')
     TEST.run('g_3_100 = (| gen 3 100 |)')

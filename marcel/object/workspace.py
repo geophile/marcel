@@ -32,20 +32,20 @@ class WorkspaceProperties(object):
 
     def __init__(self):
         self.create_time = time.time()
-        self.last_open_time = self.create_time
-        self.last_save_time = self.create_time
+        self.open_time = self.create_time
+        self.save_time = self.create_time
 
     def __repr__(self):
         return (f'WorkspaceProperties('
                 f'create = {format_time(self.create_time)}, '
-                f'open = {format_time(self.last_open_time)}, '
-                f'save = {format_time(self.last_save_time)})')
+                f'open = {format_time(self.open_time)}, '
+                f'save = {format_time(self.save_time)})')
 
     def update_open_time(self):
-        self.last_open_time = time.time()
+        self.open_time = time.time()
 
     def update_save_time(self):
-        self.last_save_time = time.time()
+        self.save_time = time.time()
 
 
 class WorkspaceDefault(marcel.object.renderable.Renderable):
@@ -54,7 +54,29 @@ class WorkspaceDefault(marcel.object.renderable.Renderable):
         self.name = None
 
     def __repr__(self):
-        return 'Workspace(DEFAULT)'
+        return self.render_compact()
+
+    # Renderable
+
+    def render_compact(self):
+        return f'Workspace(DEFAULT)'
+
+    def render_full(self, color_scheme):
+        return self.render_compact()
+
+    # WorkspaceDefault
+
+    @property
+    def create_time(self):
+        return None
+
+    @property
+    def open_time(self):
+        return None
+
+    @property
+    def save_time(self):
+        return None
 
     def is_default(self):
         return True
@@ -85,6 +107,32 @@ class Workspace(WorkspaceDefault):
 
     def __repr__(self):
         return f'Workspace({self.name})'
+
+    # Renderable
+
+    def render_compact(self):
+        return f'Workspace({self.name})'
+
+    def render_full(self, color_scheme):
+        wp = self.properties
+        return (f'Workspace({self.name}, '
+                f'create_time = {format_time(wp.create_time)}, '
+                f'open_time = {format_time(wp.open_time)}, '
+                f'save_time = {format_time(wp.save_time)})')
+
+    # WorkspaceDefault
+
+    @property
+    def create_time(self):
+        return self.properties.create_time
+
+    @property
+    def open_time(self):
+        return self.properties.open_time
+
+    @property
+    def save_time(self):
+        return self.properties.save_time
 
     def is_default(self):
         return False
@@ -141,20 +189,7 @@ class Workspace(WorkspaceDefault):
                     workspace.properties = pickler.load()
                     yield workspace
 
-    # Renderable
-
-    def render_compact(self):
-        return f'Workspace({self.name})'
-
-    def render_full(self, color_scheme):
-        wp = self.properties
-        return ('Workspace(DEFAULT)' if wp is None else
-                f'Workspace({self.name}  '
-                f'created {format_time(wp.create_time)}  '
-                f'last open {format_time(wp.last_open_time)}  '
-                f'last save {format_time(wp.last_save_time)})')
-
-        # Internal
+    # Internal
 
     def create_dir(self, dir):
         try:

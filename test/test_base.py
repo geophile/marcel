@@ -43,18 +43,17 @@ class TestBase:
         self.test_stdout = None
         self.test_stderr = None
 
-    def reset_environment(self, config_file='./.marcel.py', new_main=True):  # False):
+    def reset_environment(self, config_file='./.marcel.py'):
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')
         os.chdir(TestConsole.start_dir)
-        if self.main is None or new_main:
-            workspace = marcel.object.workspace.Workspace.DEFAULT
-            env = marcel.env.EnvironmentInteractive.create(workspace)
-            self.main = marcel.main.MainInteractive(old_main=None,
-                                                    env=env,
-                                                    workspace=workspace,
-                                                    config_file=config_file,
-                                                    testing=True)
+        workspace = marcel.object.workspace.Workspace.DEFAULT
+        env = marcel.env.EnvironmentInteractive.create(workspace)
+        self.main = marcel.main.MainInteractive(old_main=None,
+                                                env=env,
+                                                workspace=workspace,
+                                                config_file=config_file,
+                                                testing=True)
         self.env = self.main.env
 
     def new_file(self, filename):

@@ -149,10 +149,6 @@ console sessions by the SAME USER. Not even script execution. Two
 different logins to the same username could still create a problem, I
 guess.
 
-......................................................................
-
-Be clearer about role of Env in API usage. Is it there or not?
-
 ----------------------------------------------------------------------
 
 Workspaces specification

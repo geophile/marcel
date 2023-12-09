@@ -20,18 +20,28 @@ import marcel.exception
 
 class Locations(object):
 
-    def __init__(self, env):
-        self.env = env
-        self.home = pathlib.Path.home().expanduser()
+    def __init__(self, env, home=None, xdg_config_home=None, xdg_data_home=None):
+        self.home = Locations.normalize_dir(
+            'home directory',
+            home,
+            pathlib.Path.home())
+        self.xdg_config_home = Locations.normalize_dir(
+            'application configuration directory (e.g. XDG_CONFIG_HOME)',
+            xdg_config_home,
+            self.home / '.config')
+        self.xdg_data_home = Locations.normalize_dir(
+            'application data directory (e.g. XDG_DATA_HOME)',
+            xdg_data_home,
+            self.home / '.local' / 'share')
 
     def config_dir_path(self, ws_name):
-        path = self._dir('XDG_CONFIG_HOME', '.config')
+        path = Locations.marcel_dir(self.xdg_config_home)
         if ws_name is not None:
             path = path / ws_name
         return path
 
     def data_dir_path(self, ws_name):
-        path = self._dir('XDG_DATA_HOME', '.local', 'share')
+        path = Locations.marcel_dir(self.xdg_data_home)
         if ws_name is not None:
             path = path / ws_name
         return path
@@ -51,17 +61,8 @@ class Locations(object):
     def workspace_marker_file_path(self, ws_name):
         return self.config_dir_path(ws_name) / '.WORKSPACE'
 
-    def _dir(self, xdg_var, *path_from_base):
-        base = self.env.getvar(xdg_var)
-        if base is None:
-            base = self.home
-            for dir in path_from_base:
-                base = base / dir
-        else:
-            if type(base) is not str:
-                raise marcel.exception.KillShellException(
-                    f'Type of {xdg_var} is {type(base)}. If defined, it must be a string.')
-            base = pathlib.Path(base).expanduser()
+    @staticmethod
+    def marcel_dir(base):
         dir = base / 'marcel'
         if dir.exists():
             if not dir.is_dir():
@@ -70,3 +71,17 @@ class Locations(object):
             dir.mkdir(exist_ok=False, parents=True)
         return dir
 
+    @staticmethod
+    def normalize_dir(description, provided, *defaults):
+        dir = provided
+        d = 0
+        while dir is None and d < len(defaults):
+            dir = defaults[d]
+            d += 1
+        if dir is None:
+            raise marcel.exception.KillShellException(
+                f'Unable to start because value of {description} cannot be determined.')
+        if not isinstance(dir, pathlib.Path):
+            dir = pathlib.Path(dir)
+        dir = dir.expanduser()
+        return dir
