@@ -2501,17 +2501,14 @@ def main_stable():
 
 
 def main_dev():
-    pass
-    # TEST.run('ws')
-    # os.system('rm -rf /home/jao/.config/marcel/hello')
-    # os.system('rm -rf /home/jao/.local/share/marcel/hello')
-    # TEST.run('ws -n hello')
-    # TEST.run('ws -n hello')
+    TEST.run('ws')
+    TEST.run('ws -n hello')
+    TEST.run('ws -n hello')
 
 
 def main():
     TEST.reset_environment()
-    main_dev()
+    # main_dev()
     main_stable()
     main_slow_tests()
     print(f'Test failures: {TEST.failures}')
