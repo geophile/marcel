@@ -873,18 +873,3 @@ allgraphs = (| f: \
 Exited marcel, restarted, open the ws. Running readdata:
 
 'NoneType' object is not callable
-
-----------------------------------------------------------------------
-
-235: Nested pipelines with args getting confused about pipeline vars?
-
-Using this:
-
-graph = (| a, b: \
-    map (*t: (t[int(a)+1], t[int(b)+1], t[0])) \
-    | args -a (| x: (list(zip(*x))) |) \
-    | map (*z: scatter(int(a), int(b), *z)) \
-|)
-
-Results in complaints about a being unknown in the last line (inside
-the scatter call).
