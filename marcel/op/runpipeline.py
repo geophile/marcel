@@ -81,8 +81,12 @@ class RunPipeline(marcel.core.Op):
             env.vars().pop_scope()
 
     def flush(self, env):
-        self.pipeline.flush(env)
-        self.propagate_flush(env)
+        env.vars().push_scope(self.pipeline_args())
+        try:
+            self.pipeline.flush(env)
+            self.propagate_flush(env)
+        finally:
+            env.vars().pop_scope()
 
     def cleanup(self):
         self.pipeline.cleanup()
