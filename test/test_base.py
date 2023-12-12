@@ -45,16 +45,23 @@ class TestBase:
         self.test_stderr = None
 
     def reset_environment(self, config_file='./.marcel.py'):
-        os.system(f'rm -rf {TestBase.test_home}')
-        os.system(f'mkdir {TestBase.test_home}')
-        os.system(f'mkdir {TestBase.test_home}/config')
-        os.system(f'mkdir {TestBase.test_home}/local')
-        os.system(f'mkdir {TestBase.test_home}/local/share')
+        if config_file:
+            os.system(f'rm -rf {TestBase.test_home}')
+            os.system(f'mkdir {TestBase.test_home}')
+            os.system(f'mkdir {TestBase.test_home}/config')
+            os.system(f'mkdir {TestBase.test_home}/config/marcel')
+            os.system(f'mkdir {TestBase.test_home}/local')
+            os.system(f'mkdir {TestBase.test_home}/local/share')
+            os.system(f'mkdir {TestBase.test_home}/local/share/marcel')
+            os.system(f'cp {config_file} {TestBase.test_home}/config/marcel/startup.py')
         os.system('sudo touch /tmp/farcel.log')
         os.system('sudo rm /tmp/farcel.log')
         os.chdir(TestBase.start_dir)
         workspace = marcel.object.workspace.Workspace.DEFAULT
         env = marcel.env.EnvironmentInteractive.create(workspace)
+        env.locations.setup(TestBase.test_home,
+                            f'{TestBase.test_home}/config',
+                            f'{TestBase.test_home}/local/share')
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
                                                 workspace=workspace,
@@ -164,6 +171,9 @@ class TestConsole(TestBase):
                 # For workspace testing
                 self.main.shutdown(restart=True)
                 env = marcel.env.EnvironmentInteractive.create(e.workspace_to_open)
+                env.locations.setup(TestBase.test_home,
+                                    f'{TestBase.test_home}/config',
+                                    f'{TestBase.test_home}/local/share')
                 self.main = marcel.main.MainInteractive(self.main,
                                                         env,
                                                         e.workspace_to_open,
