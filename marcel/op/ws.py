@@ -246,6 +246,7 @@ class WsNew(WsImpl):
             raise marcel.exception.KillCommandException(f'Workspace {name} already exists.')
         else:
             workspace.create(env)
+            workspace.open(env)
             self.op.send(env, workspace)
             self.reconfigure(workspace)
 

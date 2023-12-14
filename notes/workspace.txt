@@ -375,6 +375,7 @@ Each workspace has its own startup?
     startup.py  # For anon workspaces, and template for named workspaces
     WORKSPACE_NAME/
         .WORKSPACE  # Empty file marking this directory as a workspace
+        .OWNER
         startup.py
 
 .local/share/marcel/
@@ -382,6 +383,8 @@ Each workspace has its own startup?
         workspace.p  # Workspace properties (pickled) Or maybe JSON?
         env.p: Pickled environment
         history
+
+When a workspace is open, .OWNER contains the pid of the owning process.
 
 ----------------------------------------------------------------------
 

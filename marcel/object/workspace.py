@@ -81,6 +81,9 @@ class WorkspaceDefault(marcel.object.renderable.Renderable):
     def is_default(self):
         return True
 
+    def is_open(self):
+        return True
+
     def exists(self, env):
         return True
 
@@ -134,6 +137,9 @@ class Workspace(WorkspaceDefault):
     def is_default(self):
         return False
 
+    def is_open(self):
+        return self.properties is not None
+
     def exists(self, env):
         return env.locations.workspace_marker_file_path(self.name).exists()
 
@@ -149,29 +155,46 @@ class Workspace(WorkspaceDefault):
         self.create_dir(history_dir)
         locations.history_file_path(self.name).touch(mode=0o600, exist_ok=False)
         self.properties = WorkspaceProperties()
-        self.close(env)
+        self.close(env)  # Saves properties and environment
 
     def open(self, env):
-        locations = env.locations
-        # Properties
-        with open(locations.workspace_properties_file_path(self.name), 'rb') as properties_file:
-            unpickler = dill.Unpickler(properties_file)
-            self.properties = unpickler.load()
-        # Environment
-        with open(locations.workspace_environment_file_path(self.name), 'rb') as environment_file:
-            unpickler = dill.Unpickler(environment_file)
-            self.persistent_state = unpickler.load()
-        self.properties.update_open_time()
+        if not self.is_open():
+            locations = env.locations
+            # Properties
+            with open(locations.workspace_properties_file_path(self.name), 'rb') as properties_file:
+                unpickler = dill.Unpickler(properties_file)
+                self.properties = unpickler.load()
+            # Environment
+            with open(locations.workspace_environment_file_path(self.name), 'rb') as environment_file:
+                unpickler = dill.Unpickler(environment_file)
+                self.persistent_state = unpickler.load()
+            self.properties.update_open_time()
+            # Owner
+            with open(locations.workspace_owner_file_path(self.name), 'w') as owner_file:
+                print(str(os.getpid()), file=owner_file)
 
     def close(self, env):
-        self.properties.update_save_time()
-        locations = env.locations
-        with open(locations.workspace_properties_file_path(self.name), 'wb') as properties_file:
-            pickler = dill.Pickler(properties_file)
-            pickler.dump(self.properties)
-        with open(locations.workspace_environment_file_path(self.name), 'wb') as environment_file:
-            pickler = dill.Pickler(environment_file)
-            pickler.dump(env.persistent_state())
+        if self.is_open():
+            self.properties.update_save_time()
+            locations = env.locations
+            # Properties
+            with open(locations.workspace_properties_file_path(self.name), 'wb') as properties_file:
+                pickler = dill.Pickler(properties_file)
+                pickler.dump(self.properties)
+            # Environment
+            with open(locations.workspace_environment_file_path(self.name), 'wb') as environment_file:
+                pickler = dill.Pickler(environment_file)
+                pickler.dump(env.persistent_state())
+            # Owner
+            owner_file_path = locations.workspace_owner_file_path(self.name)
+            if owner_file_path.exists():
+                with open(owner_file_path, 'r') as owner_file:
+                    line = owner_file.read().strip()
+                    owner_pid = int(line)
+                    assert owner_pid == os.getpid()
+                owner_file_path.unlink()
+            # else: This close() call is presumably on behalf of a new workspace.
+            self.properties = None
 
     @staticmethod
     def list(env):
