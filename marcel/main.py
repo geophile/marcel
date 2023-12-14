@@ -275,7 +275,7 @@ class MainInteractive(MainScript):
     def check_for_config_update(self):
         config_path = self.env.config_path
         config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
-        if config_mtime > self.config_time:
+        if self.config_time and config_mtime > self.config_time:
             raise marcel.exception.ReconfigureException(None)  # self.env.workspace)
 
     @staticmethod

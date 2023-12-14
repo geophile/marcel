@@ -943,3 +943,39 @@ Traceback (most recent call last):
 FileNotFoundError: [Errno 2] No such file or directory
 jao@loon:/tmp/test_home$ 
 
+
+----------------------------------------------------------------------
+
+237. Typo leads to crash
+
+args -a was followed by function, not pipeline
+
+ 0.20.0 jao@loon ~/git/marcel/test$ transpose = (| args -a (x: (list(zip(*x)))) |)
+M 0.20.0 jao@loon ~/git/marcel/test$ gen 3 | (x: ([x] * 3))
+[0, 0, 0]
+[1, 1, 1]
+[2, 2, 2]
+M 0.20.0 jao@loon ~/git/marcel/test$ gen 3 | (x: ([x] * 3)) | transpose
+Process Process-8:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env, True)
+  File "/home/jao/git/marcel/marcel/core.py", line 228, in execute
+    self.pipeline.setup(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 357, in setup
+    op.setup(env)
+  File "/home/jao/git/marcel/marcel/op/runpipeline.py", line 63, in setup
+    self.pipeline.setup(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 357, in setup
+    op.setup(env)
+  File "/home/jao/git/marcel/marcel/op/args.py", line 88, in setup
+    self.n_params = self.pipeline.n_params()
+  File "/home/jao/git/marcel/marcel/core.py", line 567, in n_params
+    return self.pipeline_arg.n_params()
+  File "/home/jao/git/marcel/marcel/core.py", line 248, in n_params
+    return len(self.function.__code__.co_varnames)
+AttributeError: 'SourceFunction' object has no attribute '__code__'
