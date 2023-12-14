@@ -873,3 +873,73 @@ allgraphs = (| f: \
 Exited marcel, restarted, open the ws. Running readdata:
 
 'NoneType' object is not callable
+
+----------------------------------------------------------------------
+
+236. cd-ing out of nonexistent directory crashes marcel
+
+I was in .../hello, deleted it. Tried to cd out, but that caused a crash.
+
+M 0.20.0 jao@loon /tmp/test_home/local/marcel/hello$ 
+M 0.20.0 jao@loon /tmp/test_home/local/marcel/hello$ cd /tmp/test_home/local/marcel/hello
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 373, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 367, in main
+    main_interactive_run(config)
+  File "/home/jao/git/marcel/marcel/main.py", line 338, in main_interactive_run
+    main.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 240, in run
+    self.parse_and_run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 149, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 224, in execute_command
+    command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 228, in execute
+    self.pipeline.setup(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 357, in setup
+    op.setup(env)
+  File "/home/jao/git/marcel/marcel/op/cd.py", line 63, in setup
+    dirs = marcel.op.filenames.Filenames([dir_arg]).normalize()
+  File "/home/jao/git/marcel/marcel/op/filenames.py", line 41, in __init__
+    self.current_dir = pathlib.Path(os.getcwd())
+FileNotFoundError: [Errno 2] No such file or directory
+Error in sys.excepthook:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 76, in apport_excepthook
+    binary = os.path.realpath(os.path.join(os.getcwd(), sys.argv[0]))
+FileNotFoundError: [Errno 2] No such file or directory
+
+Original exception was:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 373, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 367, in main
+    main_interactive_run(config)
+  File "/home/jao/git/marcel/marcel/main.py", line 338, in main_interactive_run
+    main.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 240, in run
+    self.parse_and_run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 149, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 224, in execute_command
+    command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 228, in execute
+    self.pipeline.setup(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 357, in setup
+    op.setup(env)
+  File "/home/jao/git/marcel/marcel/op/cd.py", line 63, in setup
+    dirs = marcel.op.filenames.Filenames([dir_arg]).normalize()
+  File "/home/jao/git/marcel/marcel/op/filenames.py", line 41, in __init__
+    self.current_dir = pathlib.Path(os.getcwd())
+FileNotFoundError: [Errno 2] No such file or directory
+jao@loon:/tmp/test_home$ 
+

@@ -1989,6 +1989,90 @@ def test_json():
 
 
 @timeit
+def test_workspaces():
+    # Starting state: There is only a default workspace, and it is the current workspace.
+    TEST.run('ws | (w: w.is_default())',
+             expected_out=[True])
+    TEST.run('ws -l',
+             expected_out=['Workspace()'])
+    # Create a new workspace
+    TEST.run(test='ws -n hello',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace(hello)'])
+    TEST.run('ws | (w: str(w))',
+             expected_out=['Workspace(hello)'])
+    TEST.run('ws -l | (w: str(w)) | sort',
+             expected_out=['Workspace()', 'Workspace(hello)'])
+    # Creating it again should fail
+    TEST.run(test='ws -n hello',
+             expected_err='hello already exists')
+    # Close the workspace. We should be back in default.
+    TEST.run(test='ws -c',
+             verification='ws | (w: w.is_default())',
+             expected_out=[True])
+    TEST.run('ws -l | (w: str(w)) | sort',
+             expected_out=['Workspace()', 'Workspace(hello)'])
+    # Closing the default workspace is a noop
+    TEST.run(test='ws -c',
+             verification='ws | (w: w.is_default())',
+             expected_out=[True])
+    TEST.run('ws -l | (w: str(w)) | sort',
+             expected_out=['Workspace()', 'Workspace(hello)'])
+    # Switch to the new workspace
+    TEST.run(test='ws hello',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace(hello)'])
+    # A variable in the workspace shouldn't be present in a different one
+    TEST.run('ws | (w: str(w))',
+             expected_out=['Workspace(hello)'])
+    TEST.run('hellovar = world')
+    TEST.run('env hellovar',
+             expected_out=[('hellovar', 'world')])
+    TEST.run(test='ws -c',
+             verification='env hellovar',
+             expected_err='hellovar is undefined')
+    TEST.run(test='ws hello',
+             verification='env hellovar',
+             expected_out=[('hellovar', 'world')])
+    # A module imported into the workspace shouldn't be present in a different one.
+    TEST.run(test='ws | (w: str(w))',
+             expected_out=['Workspace(hello)'])
+    TEST.run(test='import os',
+             verification='(os.__name__)',
+             expected_out=['os'])
+    TEST.run(test='ws -c',
+             verification='(os.__name__)',
+             expected_out=[Error('not defined')])
+    TEST.run(test='ws hello',
+             verification='(os.__name__)',
+             expected_out=['os'])
+    # Close and reopen, to make sure that workspace contents (vars, imports) reach disk if they came from disk in
+    # the first place.
+    TEST.run(test='ws -c',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace()'])
+    TEST.run(test='ws hello',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace(hello)'])
+    TEST.run(test='env hellovar',
+             expected_out=[('hellovar', 'world')])
+    TEST.run(test='(os.__name__)',
+             expected_out=['os'])
+    # Reopening the current workspace is a noop
+    TEST.run(test='ws | (w: str(w))',
+             expected_out=['Workspace(hello)'])
+    TEST.run(test='env hellovar',
+             expected_out=[('hellovar', 'world')])
+    TEST.run(test='ws hello',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace(hello)'])
+    TEST.run(test='ws | (w: str(w))',
+             expected_out=['Workspace(hello)'])
+    TEST.run(test='env hellovar',
+             expected_out=[('hellovar', 'world')])
+
+
+@timeit
 def test_upload():
     with TestDir() as testdir:
         os.system(f'mkdir {testdir}/source')
@@ -2497,18 +2581,17 @@ def main_stable():
     test_pos()
     test_tee()
     test_json()
+    test_workspaces()
     test_bugs()
 
 
 def main_dev():
-    TEST.run('ws')
-    TEST.run('ws -n hello')
-    TEST.run('ws -n hello')
+    pass
 
 
 def main():
     TEST.reset_environment()
-    # main_dev()
+    main_dev()
     main_stable()
     main_slow_tests()
     print(f'Test failures: {TEST.failures}')

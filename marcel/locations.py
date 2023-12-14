@@ -21,14 +21,8 @@ import marcel.exception
 
 class Locations(object):
 
-    def __init__(self):
-        self.home = None
-        self.config_base = None
-        self.data_base = None
-        self.setup(None, None, None)
-
-    # Exposed for workspace testing
-    def setup(self, home, config_base, data_base):
+    # home, config_base, data_base should be specified only during testing
+    def __init__(self, home=None, config_base=None, data_base=None):
         self.home = Locations.normalize_dir(
             'home directory',
             home,

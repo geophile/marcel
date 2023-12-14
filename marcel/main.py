@@ -332,7 +332,7 @@ def main_interactive_run(config):
     main = None
     workspace = marcel.object.workspace.Workspace.DEFAULT
     while True:
-        env = marcel.env.EnvironmentInteractive.create(workspace)
+        env = marcel.env.EnvironmentInteractive.create(marcel.locations.Locations(), workspace)
         main = MainInteractive(main, env, workspace, config)
         try:
             main.run()
@@ -351,7 +351,7 @@ def main_interactive_run(config):
 
 def main_script_run(config, script):
     workspace = marcel.object.workspace.Workspace.default()
-    env = marcel.env.EnvironmentScript.create(workspace)
+    env = marcel.env.EnvironmentScript.create(marcel.locations.Locations(), workspace)
     main = MainScript(env, workspace, config)
     try:
         with open(script, 'r') as script_file:
@@ -370,4 +370,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except marcel.exception.KillShellException as e:
+        print(str(e), file=sys.stderr)

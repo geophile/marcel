@@ -180,7 +180,8 @@ exactly one workspace. If no workspace is specified, then the default
 workspace is used by a session.  A named workspace can be used by at
 most one session at a time. The default workspace can be used by
 multiple sessions at the same time. A workspace name must be a valid
-filename on the host operating system.
+filename on the host operating system. The default workspace name is
+the empty string, which is an invalid name for a named workspace.
 
 Unless a workspace is specifically selected and used, marcel runs
 using the *default workspace*. A *named workspace* must be explicitly

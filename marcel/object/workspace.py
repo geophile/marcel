@@ -51,7 +51,7 @@ class WorkspaceProperties(object):
 class WorkspaceDefault(marcel.object.renderable.Renderable):
 
     def __init__(self):
-        self.name = None
+        self.name = ''
 
     def __repr__(self):
         return self.render_compact()
@@ -59,7 +59,7 @@ class WorkspaceDefault(marcel.object.renderable.Renderable):
     # Renderable
 
     def render_compact(self):
-        return f'Workspace(DEFAULT)'
+        return f'Workspace({self.name})'
 
     def render_full(self, color_scheme):
         return self.render_compact()
@@ -103,10 +103,7 @@ class Workspace(WorkspaceDefault):
         assert name is not None
         self.name = name
         self.properties = None
-        self.saved_env = None
-
-    def __repr__(self):
-        return f'Workspace({self.name})'
+        self.persistent_state = None
 
     # Renderable
 
@@ -163,7 +160,7 @@ class Workspace(WorkspaceDefault):
         # Environment
         with open(locations.workspace_environment_file_path(self.name), 'rb') as environment_file:
             unpickler = dill.Unpickler(environment_file)
-            self.saved_env = unpickler.load()
+            self.persistent_state = unpickler.load()
         self.properties.update_open_time()
 
     def close(self, env):

@@ -178,10 +178,11 @@ class VarHandlerStartup(object):
         if startup_var_handler:
             self.immutable_vars = startup_var_handler.immutable_vars
             self.startup_vars = startup_var_handler.startup_vars
+            self.save_vars = startup_var_handler.save_vars
         else:
             self.immutable_vars = set()
             self.startup_vars = None
-        self.save_vars = set()
+            self.save_vars = set()
         self.vars_read = set()
         self.vars_written = set()
         self.vars_deleted = set()
@@ -420,11 +421,11 @@ class EnvironmentScript(Environment):
             buffer.append(')')
             return ''.join(buffer)
 
-    def __init__(self, workspace):
+    def __init__(self, locations, workspace):
         super().__init__(marcel.nestednamespace.NestedNamespace())
         assert workspace is not None
         # Standard locations of files important to marcel: config, history
-        self.locations = marcel.locations.Locations()
+        self.locations = locations
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
         # Support for pos()
@@ -455,7 +456,7 @@ class EnvironmentScript(Environment):
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 self.namespace[key] = value
-        self.restore_persistent_state()
+        self.restore_persistent_state_from_workspace()
 
     def persistent_state(self):
         # Things to persist:
@@ -469,12 +470,14 @@ class EnvironmentScript(Environment):
         return {'namespace': save,
                 'imports': self.imports}
 
-    def restore_persistent_state(self):
+    def restore_persistent_state_from_workspace(self):
         self.workspace.open(self)
         if not self.workspace.is_default():
-            saved_env = self.workspace.saved_env
-            self.namespace.update(saved_env['namespace'])
-            imports = saved_env['imports']
+            persistent_state = self.workspace.persistent_state
+            saved_vars = persistent_state['namespace']
+            self.namespace.update(saved_vars)
+            self.var_handler.add_save_vars(*saved_vars)
+            imports = persistent_state['imports']
             for i in imports:
                 self.import_module(i.module_name, i.symbol, i.rename)
 
@@ -547,8 +550,8 @@ class EnvironmentScript(Environment):
                 x in interactive_executables)
 
     @staticmethod
-    def create(workspace):
-        env = EnvironmentScript(workspace)
+    def create(locations, workspace):
+        env = EnvironmentScript(locations, workspace)
         env.initialize_namespace()
         return env
 
@@ -562,8 +565,8 @@ class EnvironmentInteractive(EnvironmentScript):
     DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
 
-    def __init__(self, workspace):
-        super().__init__(workspace)
+    def __init__(self, locations, workspace):
+        super().__init__(locations, workspace)
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
         # Used during readline editing
@@ -609,7 +612,7 @@ class EnvironmentInteractive(EnvironmentScript):
             return EnvironmentInteractive.DEFAULT_PROMPT
 
     @staticmethod
-    def create(workspace):
-        env = EnvironmentInteractive(workspace)
+    def create(locations, workspace):
+        env = EnvironmentInteractive(locations, workspace)
         env.initialize_namespace()
         return env

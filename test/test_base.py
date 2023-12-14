@@ -10,6 +10,7 @@ import dill.source
 
 import marcel.env
 import marcel.exception
+import marcel.locations
 import marcel.main
 import marcel.object.error
 import marcel.object.workspace
@@ -34,6 +35,8 @@ def timeit(f):
 class TestBase:
     start_dir = os.getcwd()
     test_home = '/tmp/test_home'
+    config_base = f'{test_home}/config'
+    data_base = f'{test_home}/local/share'
 
     def __init__(self, config_file='./.marcel.py', main=None):
         self.config_file = config_file
@@ -45,29 +48,7 @@ class TestBase:
         self.test_stderr = None
 
     def reset_environment(self, config_file='./.marcel.py'):
-        if config_file:
-            os.system(f'rm -rf {TestBase.test_home}')
-            os.system(f'mkdir {TestBase.test_home}')
-            os.system(f'mkdir {TestBase.test_home}/config')
-            os.system(f'mkdir {TestBase.test_home}/config/marcel')
-            os.system(f'mkdir {TestBase.test_home}/local')
-            os.system(f'mkdir {TestBase.test_home}/local/share')
-            os.system(f'mkdir {TestBase.test_home}/local/share/marcel')
-            os.system(f'cp {config_file} {TestBase.test_home}/config/marcel/startup.py')
-        os.system('sudo touch /tmp/farcel.log')
-        os.system('sudo rm /tmp/farcel.log')
-        os.chdir(TestBase.start_dir)
-        workspace = marcel.object.workspace.Workspace.DEFAULT
-        env = marcel.env.EnvironmentInteractive.create(workspace)
-        env.locations.setup(TestBase.test_home,
-                            f'{TestBase.test_home}/config',
-                            f'{TestBase.test_home}/local/share')
-        self.main = marcel.main.MainInteractive(old_main=None,
-                                                env=env,
-                                                workspace=workspace,
-                                                config_file=config_file,
-                                                testing=True)
-        self.env = self.main.env
+        assert False
 
     def new_file(self, filename):
         path = pathlib.Path(filename)
@@ -156,6 +137,30 @@ class TestConsole(TestBase):
     def __init__(self, config_file='./.marcel.py'):
         super().__init__(config_file)
 
+    def reset_environment(self, config_file='./.marcel.py'):
+        if self.main is not None:
+            self.main.shutdown()
+        os.system(f'rm -rf {TestBase.test_home}')
+        os.system(f'mkdir {TestBase.test_home}')
+        os.system(f'mkdir -p {TestBase.config_base}/marcel')
+        os.system(f'mkdir -p {TestBase.data_base}/share/marcel')
+        os.system(f'cp {config_file} {TestBase.config_base}/marcel/startup.py')
+        os.system('sudo touch /tmp/farcel.log')
+        os.system('sudo rm /tmp/farcel.log')
+        os.chdir(TestBase.start_dir)
+        workspace = marcel.object.workspace.Workspace.DEFAULT
+        locations = marcel.locations.Locations(home=TestBase.test_home,
+                                               config_base=TestBase.config_base,
+                                               data_base=TestBase.data_base)
+        env = marcel.env.EnvironmentInteractive.create(locations, workspace)
+        self.main = marcel.main.MainInteractive(old_main=None,
+                                                env=env,
+                                                workspace=workspace,
+                                                config_file=config_file,
+                                                testing=True)
+        self.env = env
+
+
     def run(self,
             test,
             verification=None,
@@ -165,27 +170,14 @@ class TestConsole(TestBase):
         # test is the thing being tested. Usually it will produce output that can be used for verification.
         # For operations with side effects (e.g. rm), a separate verification command is needed.
         if verification is None and expected_out is None and expected_err is None and file is None:
-            try:
-                self.main.parse_and_run_command(test)
-            except marcel.exception.ReconfigureException as e:
-                # For workspace testing
-                self.main.shutdown(restart=True)
-                env = marcel.env.EnvironmentInteractive.create(e.workspace_to_open)
-                env.locations.setup(TestBase.test_home,
-                                    f'{TestBase.test_home}/config',
-                                    f'{TestBase.test_home}/local/share')
-                self.main = marcel.main.MainInteractive(self.main,
-                                                        env,
-                                                        e.workspace_to_open,
-                                                        self.main.config_file,
-                                                        testing=True)
+            self.handle_reconfigure_exception(lambda: self.main.parse_and_run_command(test))
         else:
             print(f'TESTING: {self.description(test)}')
             try:
                 if verification is None:
                     actual_out, actual_err = self.run_and_capture_output(test)
                 else:
-                    self.run_and_capture_output(test)
+                    self.handle_reconfigure_exception(lambda: self.run_and_capture_output(test))
                     actual_out, actual_err = self.run_and_capture_output(verification)
                 if file:
                     actual_out = self.file_contents(file)
@@ -218,18 +210,33 @@ class TestConsole(TestBase):
         self.test_stderr.close()
         return test_stdout_contents, test_stderr_contents
 
-    def expect_config_change_exception(self):
+    # For workspace testing
+    def handle_reconfigure_exception(self, action):
         try:
-            self.run('pwd | select (*x: False)')
-            self.fail('pwd', 'Should have triggered ReconfigureException')
-        except marcel.exception.ReconfigureException:
-            self.reset_environment(self.config_file)
+            return action()
+        except marcel.exception.ReconfigureException as e:
+            self.main.shutdown(restart=True)
+            self.env = marcel.env.EnvironmentInteractive.create(self.main.env.locations, e.workspace_to_open)
+            self.main = marcel.main.MainInteractive(self.main,
+                                                    self.env,
+                                                    e.workspace_to_open,
+                                                    self.main.config_file,
+                                                    testing=True)
+            return None, None
 
 
 class TestAPI(TestBase):
 
     def __init__(self, main):
         super().__init__(config_file=None, main=main)
+
+    def reset_environment(self, config_file='./.marcel.py'):
+        if self.main is not None:
+            self.main.shutdown()
+        os.chdir(TestBase.start_dir)
+        env = marcel.env.EnvironmentAPI.create(dict())
+        self.main = marcel.main.MainAPI(env)
+        self.env = env
 
     def run(self,
             test,
@@ -338,10 +345,10 @@ class TestTabCompletion(TestBase):
 
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
         workspace = marcel.object.workspace.Workspace.DEFAULT
-        env = marcel.env.EnvironmentInteractive.create(workspace)
-        env.locations.setup(TestBase.test_home,
-                            f'{TestBase.test_home}/config',
-                            f'{TestBase.test_home}/local/share')
+        locations = marcel.locations.Locations(TestBase.test_home,
+                                               TestBase.config_base,
+                                               TestBase.data_base)
+        env = marcel.env.EnvironmentInteractive.create(locations, workspace)
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
                                                 workspace=workspace,

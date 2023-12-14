@@ -264,11 +264,12 @@ class WsOpen(WsImpl):
     def run(self, env):
         name = self.op.open
         workspace = Workspace(name)
+        workspace.open(env)
         if workspace.exists(env):
             if env.workspace.name != name:
-                workspace.open(env)
                 self.op.send(env, workspace)
                 self.reconfigure(workspace)
+                # The workspace will be opened in the handling of the ReconfigurationException
         else:
             raise marcel.exception.KillCommandException(f'There is no workspace named {name}.')
 
