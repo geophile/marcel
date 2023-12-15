@@ -184,6 +184,14 @@ class VarHandler(VarHandlerStartup):
     def add_written(self, var):
         self.vars_written.add(var)
 
+    def reservoirs(self):
+        reservoirs = []
+        for var in self.save_vars:
+            value = self.getvar(var)
+            if type(value) is marcel.reservoir.Reservoir:
+                reservoirs.append(value)
+        return reservoirs
+
     def check_mutability(self, var):
         if var in self.immutable_vars:
             raise marcel.exception.KillCommandException(
