@@ -350,7 +350,7 @@ def main_interactive_run(config):
 
 
 def main_script_run(config, script):
-    workspace = marcel.object.workspace.Workspace.default()
+    workspace = marcel.object.workspace.Workspace.DEFAULT
     env = marcel.env.EnvironmentScript.create(marcel.locations.Locations(), workspace)
     main = MainScript(env, workspace, config)
     try:

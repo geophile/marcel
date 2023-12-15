@@ -265,9 +265,9 @@ class WsOpen(WsImpl):
     def run(self, env):
         name = self.op.open
         workspace = Workspace(name)
-        workspace.open(env)
         if workspace.exists(env):
             if env.workspace.name != name:
+                workspace.open(env)
                 self.op.send(env, workspace)
                 self.reconfigure(workspace)
                 # The workspace will be opened in the handling of the ReconfigurationException
@@ -305,7 +305,11 @@ class WsDelete(WsImpl):
         self.check_anon_arg_present('NAME')
 
     def run(self, env):
-        pass
+        name = self.op.delete
+        if name == env.workspace.name:
+            raise marcel.exception.KillCommandException(
+                f'You are using workspace {name}. It cannot be deleted while it is in use.')
+        Workspace(name).delete(env)
 
 
 class WsRename(WsImpl):

@@ -2070,6 +2070,25 @@ def test_workspaces():
              expected_out=['Workspace(hello)'])
     TEST.run(test='env hellovar',
              expected_out=[('hellovar', 'world')])
+    # Deletion
+    TEST.run(test='ws hello',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace(hello)'])
+    TEST.run(test='ws -d hello',
+             expected_err='cannot be deleted')
+    TEST.run(test='ws -l | (w: str(w)) | sort',
+             expected_out=['Workspace()', 'Workspace(hello)'])
+    TEST.run(test='ws -d hello',
+             expected_err='cannot be deleted')
+    TEST.run(test='ws -c',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace()'])
+    TEST.run(test='ws -d hello',
+             expected_out=[])
+    TEST.run(test='ws -l | (w: str(w))',
+             expected_out=['Workspace()'])
+    TEST.run(test='ws hello',
+             expected_err='no workspace named hello')
 
 
 @timeit
@@ -2586,7 +2605,7 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_workspaces()
 
 
 def main():

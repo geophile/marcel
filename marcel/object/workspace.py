@@ -163,6 +163,21 @@ class Workspace(WorkspaceDefault):
         self.properties = WorkspaceProperties()
         self.close(env)  # Saves properties and environment
 
+    def delete(self, env):
+        assert not self.open(env)  # Caller should have guaranteed this
+        locations = env.locations
+        self.lock_workspace(locations)
+        # Use missing_ok = True to enable deletion of damaged workspaces, missing files.
+        # config directory
+        locations.workspace_marker_file_path(self.name).unlink(missing_ok=True)
+        locations.config_file_path(self.name).unlink(missing_ok=True)
+        locations.config_dir_path(self.name).rmdir()
+        # data directory
+        locations.history_file_path(self.name).unlink(missing_ok=True)
+        locations.workspace_properties_file_path(self.name).unlink(missing_ok=True)
+        locations.workspace_environment_file_path(self.name).unlink(missing_ok=True)
+        locations.data_dir_path(self.name).rmdir()
+
     def open(self, env):
         if not self.is_open():
             locations = env.locations
