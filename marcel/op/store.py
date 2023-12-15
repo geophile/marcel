@@ -19,6 +19,8 @@ import marcel.exception
 import marcel.picklefile
 import marcel.reservoir
 
+Reservoir = marcel.reservoir.Reservoir
+
 HELP = '''
 {L,wrap=F}store [-a|--append] VAR
 {L,wrap=F}>$ VAR
@@ -55,7 +57,7 @@ def store(var, append=False):
     args = []
     if append:
         args.append('--append')
-    if type(var) in (str, marcel.reservoir.Reservoir):
+    if type(var) in (str, Reservoir):
         args.append(var)
     else:
         raise marcel.exception.KillCommandException(f'{var} is not a Reservoir: {type(var)}')
@@ -77,7 +79,7 @@ class Store(marcel.core.Op):
         super().__init__()
         self.var = None
         self.append = None
-        self.picklefile = None
+        self.reservoir = None
         self.writer = None
 
     def __repr__(self):
@@ -86,24 +88,21 @@ class Store(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        if type(self.var) is marcel.reservoir.Reservoir:
+        if type(self.var) is Reservoir:
             # API
-            self.picklefile = self.var
+            self.reservoir = self.var
         elif type(self.var) is str:
             # Interactive
             if self.var.isidentifier():
-                self.picklefile = env.getvar(self.var)
-                if self.picklefile is None:
-                    self.picklefile = marcel.reservoir.Reservoir(self.var)
-                    env.setvar(self.var, self.picklefile)
-                if type(self.picklefile) is not marcel.reservoir.Reservoir:
-                    if self.append:
-                        raise marcel.exception.KillCommandException(
-                            f'{self.var} is not usable as a reservoir, '
-                            f'it stores a value of type {type(self.picklefile)}.')
-                    else:
-                        self.picklefile = marcel.reservoir.Reservoir(self.var)
-                        env.setvar(self.var, self.picklefile)
+                value = env.getvar(self.var)
+                if value is not None and type(value) is not Reservoir and self.append:
+                    raise marcel.exception.KillCommandException(
+                        f'A stream cannot be appended to {self.var} '
+                        f'because it stores a value of type {type(value)}.')
+                if type(value) is not Reservoir:
+                    value = Reservoir(self.var)
+                self.reservoir = value
+                env.setvar(self.var, value)
                 env.mark_possibly_changed(self.var)
             else:
                 raise marcel.exception.KillCommandException(f'{self.var} is not a Python identifier.')
@@ -111,8 +110,8 @@ class Store(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'Reservoir is undefined.')
         else:
             raise marcel.exception.KillCommandException(
-                f'{self.var} is not usable as a reservoir, it stores a value of type {type(self.picklefile)}.')
-        self.writer = self.picklefile.writer(append=self.append)
+                f'{self.var} is not usable as a reservoir, it stores a value of type {type(self.reservoir)}.')
+        self.writer = self.reservoir.writer(append=self.append)
 
     def receive(self, env, x):
         try:

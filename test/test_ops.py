@@ -1121,7 +1121,7 @@ def test_store_load():
              expected_out=[0, 1, 2])
     TEST.run('x = 1')
     TEST.run(test='gen 3 | store -a x',
-             expected_err='not usable as a reservoir')
+             expected_err='A stream cannot be appended')
     # Bad variable name
     TEST.run('gen 3 | store /tmp/storeload.test',
              expected_err='is not a Python identifier')
@@ -2605,7 +2605,7 @@ def main_stable():
 
 
 def main_dev():
-    test_workspaces()
+    pass
 
 
 def main():

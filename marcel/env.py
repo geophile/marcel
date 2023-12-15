@@ -128,7 +128,7 @@ class VarHandlerStartup(object):
         assert var is not None
         current_value = self.env.namespace.get(var, None)
         self.vars_written.add(var)
-        if type(current_value) is marcel.reservoir.Reservoir:
+        if type(current_value) is marcel.reservoir.Reservoir and value != current_value:
             current_value.ensure_deleted()
         if save:
             self.save_vars.add(var)
