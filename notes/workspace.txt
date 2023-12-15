@@ -111,46 +111,6 @@ CLI.
 
 ----------------------------------------------------------------------
 
-Workspaces implementation
-
-There must be a standard way to lock things in Linux. Alternative:
-When using a workspace, create a .IN_USE file. Other processes check it.
-Problem: there are ways for the process to end suddently, leaving the
-.IN_USE file in place erroneously.
-
-The .IN_USE file could store a pid. If that process is not running,
-then it is a sign that the workspace is not actually in use and can be
-deleted.
-
-Locking is broken in Linux! http://0pointer.de/blog/projects/locking.html
-
-- File F used to store "lock", which is a PID
-
-- Lock protocol:
-
-  - read F, check empty
-
-      - If not empty and pid stored does not exist, steal the lock
-
-      - If not empty and pid does exist, the file is locked
-
-  - append pid to F, flush
-
-  - read F
-
-      - My pid: I have the lock
-      - my pid is not there: shouldn't happen
-      - my pid is there as well as someone else's:
-          - first pid gets the lock
-
-
-It's not that much of a race condition. We're talking about actual
-console sessions by the SAME USER. Not even script execution. Two
-different logins to the same username could still create a problem, I
-guess.
-
-----------------------------------------------------------------------
-
 Workspaces specification
 
 Concepts:
@@ -375,7 +335,6 @@ Each workspace has its own startup?
     startup.py  # For anon workspaces, and template for named workspaces
     WORKSPACE_NAME/
         .WORKSPACE  # Empty file marking this directory as a workspace
-        .OWNER
         startup.py
 
 .local/share/marcel/
@@ -384,7 +343,12 @@ Each workspace has its own startup?
         env.p: Pickled environment
         history
 
-When a workspace is open, .OWNER contains the pid of the owning process.
+When a workspace is open, .WORKSPACE is renamed to .WORKSPACE.<PID>
+where <PID> is the pid of the owning process. Rename is as atomic as
+things get in Linux, so even simultaneous renames should be safe,
+giving the workspace unambiguously to one of the processes. After
+claiming the file, the name should be checked by the renaming process,
+to be sure that the rename went its way.
 
 ----------------------------------------------------------------------
 

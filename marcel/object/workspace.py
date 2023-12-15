@@ -100,6 +100,7 @@ class WorkspaceDefault(marcel.object.renderable.Renderable):
 class Workspace(WorkspaceDefault):
 
     DEFAULT = WorkspaceDefault()
+    MARKER = '.WORKSPACE'
 
     def __init__(self, name):
         super().__init__()
@@ -141,14 +142,19 @@ class Workspace(WorkspaceDefault):
         return self.properties is not None
 
     def exists(self, env):
-        return env.locations.workspace_marker_file_path(self.name).exists()
+        locations = env.locations
+        if locations.config_dir_path(self.name).exists():
+            marker_path = locations.workspace_marker_file_path(self.name)
+            return marker_path is not None and marker_path.exists()
+        else:
+            return False
 
     def create(self, env):
         locations = env.locations
         # config
         config_dir = locations.config_dir_path(self.name)
         self.create_dir(config_dir)
-        shutil.copyfile(locations.config_file_path(None), locations.config_file_path(self.name))
+        shutil.copyfile(locations.config_file_path(Workspace.DEFAULT.name), locations.config_file_path(self.name))
         locations.workspace_marker_file_path(self.name).touch(mode=0o000, exist_ok=False)
         # history
         history_dir = locations.data_dir_path(self.name)
@@ -160,6 +166,7 @@ class Workspace(WorkspaceDefault):
     def open(self, env):
         if not self.is_open():
             locations = env.locations
+            self.lock_workspace(locations)
             # Properties
             with open(locations.workspace_properties_file_path(self.name), 'rb') as properties_file:
                 unpickler = dill.Unpickler(properties_file)
@@ -169,9 +176,6 @@ class Workspace(WorkspaceDefault):
                 unpickler = dill.Unpickler(environment_file)
                 self.persistent_state = unpickler.load()
             self.properties.update_open_time()
-            # Owner
-            with open(locations.workspace_owner_file_path(self.name), 'w') as owner_file:
-                print(str(os.getpid()), file=owner_file)
 
     def close(self, env):
         if self.is_open():
@@ -185,24 +189,18 @@ class Workspace(WorkspaceDefault):
             with open(locations.workspace_environment_file_path(self.name), 'wb') as environment_file:
                 pickler = dill.Pickler(environment_file)
                 pickler.dump(env.persistent_state())
-            # Owner
-            owner_file_path = locations.workspace_owner_file_path(self.name)
-            if owner_file_path.exists():
-                with open(owner_file_path, 'r') as owner_file:
-                    line = owner_file.read().strip()
-                    owner_pid = int(line)
-                    assert owner_pid == os.getpid()
-                owner_file_path.unlink()
-            # else: This close() call is presumably on behalf of a new workspace.
+            # Unlock
+            self.unlock_workspace(locations)
+            # Mark this workspace object as closed
             self.properties = None
 
     @staticmethod
     def list(env):
         yield Workspace.DEFAULT
         locations = env.locations
-        for dir in locations.config_dir_path(None).iterdir():
-            if dir.is_dir() and locations.workspace_marker_file_path(dir).exists():
-                name = dir.name
+        for dir in locations.config_dir_path(Workspace.DEFAULT.name).iterdir():
+            name = dir.name
+            if dir.is_dir() and locations.workspace_marker_file_path(name).exists():
                 workspace = Workspace(name)
                 with open(locations.workspace_properties_file_path(name), 'rb') as properties_file:
                     pickler = dill.Unpickler(properties_file)
@@ -221,3 +219,50 @@ class Workspace(WorkspaceDefault):
         except FileNotFoundError:
             raise marcel.exception.KillCommandException(
                 f'Workspace name must be usable as a legal filename: {self.name}')
+
+    def lock_workspace(self, locations):
+        marker_path = locations.workspace_marker_file_path(self.name)
+        owner = Workspace.owner(marker_path)
+        if owner is None:
+            # Lock the file by renaming it. Check for success, to guard against another process trying to
+            # lock the same workspace.
+            locked_marker_path = marker_path.parent / f'{Workspace.MARKER}.{os.getpid()}'
+            marker_path.rename(locked_marker_path)
+            if not locked_marker_path.exists():
+                self.cannot_lock_workspace()
+        elif owner == os.getpid():
+            # Already locked
+            pass
+        else:
+            # It's locked by another process
+            self.cannot_lock_workspace()
+
+    def unlock_workspace(self, locations):
+        marker_path = locations.workspace_marker_file_path(self.name)
+        owner = Workspace.owner(marker_path)
+        if owner is None:
+            # Someone is unlocking an unlocked workspace? I'll allow it.
+            pass
+        elif owner == os.getpid():
+            # Unlock
+            unlocked_marker_path = marker_path.parent / Workspace.MARKER
+            marker_path.rename(unlocked_marker_path)
+            if not unlocked_marker_path.exists():
+                assert False, marker_path
+        else:
+            # Owned by someone else?!
+            assert False, marker_path
+
+    def cannot_lock_workspace(self):
+        raise marcel.exception.KillCommandException(
+            f'Unable to open workspace {self.name} because it is in use by another process.')
+
+    @staticmethod
+    def owner(marker_file_path):
+        if marker_file_path.name == Workspace.MARKER:
+            return None
+        else:
+            assert marker_file_path.name[len(Workspace.MARKER)] == '.'
+            owner_pid = marker_file_path.name[len(Workspace.MARKER) + 1:]
+            return int(owner_pid)
+

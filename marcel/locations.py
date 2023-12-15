@@ -19,6 +19,10 @@ import pathlib
 import marcel.exception
 
 
+# ws_name is the empty string for default workspaces. Default workspaces have a config dir and file,
+# and a data dir and history file. But they don't have a workspace properties file, environment file, or
+# a marker file. This explains the different handling of ws_name. ws_name is asserted not to be an empty
+# string for obtaining the names of files that don't exist for default workspaces.
 class Locations(object):
 
     # home, config_base, data_base should be specified only during testing
@@ -40,13 +44,13 @@ class Locations(object):
 
     def config_dir_path(self, ws_name):
         path = Locations.marcel_dir(self.config_base)
-        if ws_name is not None:
+        if len(ws_name) > 0:
             path = path / ws_name
         return path
 
     def data_dir_path(self, ws_name):
         path = Locations.marcel_dir(self.data_base)
-        if ws_name is not None:
+        if len(ws_name) > 0:
             path = path / ws_name
         return path
 
@@ -57,16 +61,21 @@ class Locations(object):
         return self.data_dir_path(ws_name) / 'history'
 
     def workspace_properties_file_path(self, ws_name):
+        assert len(ws_name) > 0
         return self.data_dir_path(ws_name) / 'properties.pickle'
 
     def workspace_environment_file_path(self, ws_name):
+        assert len(ws_name) > 0
         return self.data_dir_path(ws_name) / 'env.pickle'
 
     def workspace_marker_file_path(self, ws_name):
+        assert len(ws_name) > 0
+        for file_path in self.config_dir_path(ws_name).iterdir():
+            if file_path.name.startswith('.WORKSPACE'):
+                return file_path
+        # If the config directory doesn't have a .WORKSPACE file, it should. Presumably we are in the process
+        # of creating a new workspace.
         return self.config_dir_path(ws_name) / '.WORKSPACE'
-
-    def workspace_owner_file_path(self, ws_name):
-        return self.config_dir_path(ws_name) / '.OWNER'
 
     @staticmethod
     def marcel_dir(base):
