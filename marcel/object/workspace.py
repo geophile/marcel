@@ -189,10 +189,10 @@ class Workspace(WorkspaceDefault):
             with open(locations.workspace_environment_file_path(self.name), 'wb') as environment_file:
                 pickler = dill.Pickler(environment_file)
                 pickler.dump(env.persistent_state())
-            # Unlock
-            self.unlock_workspace(locations)
             # Mark this workspace object as closed
             self.properties = None
+            # Unlock
+            self.unlock_workspace(locations)
 
     @staticmethod
     def list(env):
@@ -254,8 +254,7 @@ class Workspace(WorkspaceDefault):
             assert False, marker_path
 
     def cannot_lock_workspace(self):
-        raise marcel.exception.KillCommandException(
-            f'Unable to open workspace {self.name} because it is in use by another process.')
+        raise marcel.exception.KillCommandException(f'Workspace {self.name} is in use by another process.')
 
     @staticmethod
     def owner(marker_file_path):

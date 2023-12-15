@@ -149,7 +149,7 @@ def test_write():
     TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(csv=True, tsv=True)),
              expected_err='Cannot specify more than one of')
     # Write to file
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         output_filename = f'{testdir}/out.txt'
         TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write(filename=output_filename)),
                  expected_out=[(0, 0), (1, -1), (2, -2)],
@@ -582,7 +582,7 @@ def test_window():
 
 @timeit
 def test_bash():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         os.system(f'touch {testdir}/x1')
         os.system(f'touch {testdir}/x2')
         os.system(f'touch {testdir}/y1')
@@ -634,7 +634,7 @@ def test_namespace():
 
 @timeit
 def test_source_filenames():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         filename_op_setup(testdir)
         # # Relative path
         # TEST.run('ls . | map (f: f.render_compact())',
@@ -672,7 +672,7 @@ def test_source_filenames():
 
 @timeit
 def test_ls():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         filename_op_setup(testdir)
         # 0/1/r flags with no files specified.
         TEST.run(test=lambda: run(ls(depth=0) | map(lambda f: f.render_compact())),
@@ -729,7 +729,7 @@ def test_ls():
         TEST.run(test=lambda: run(ls(f'{testdir}', f'{testdir}/d', depth=1) | map(lambda f: f.render_compact())),
                  expected_out=expected)
     # ls should continue past permission error
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         os.system(f'mkdir {testdir}/d1')
         os.system(f'mkdir {testdir}/d2')
         os.system(f'mkdir {testdir}/d3')
@@ -777,7 +777,7 @@ def test_ls():
 # pushd, popd, dirs, cd
 @timeit
 def test_dir_stack():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         filename_op_setup(testdir)
         os.system('mkdir a b c')
         os.system('touch f')
@@ -902,7 +902,7 @@ def test_fork():
 
 @timeit
 def test_sudo():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         TEST.run(test=lambda: run(sudo(gen(3))),
                  expected_out=[0, 1, 2])
         os.system(f'sudo mkdir {testdir}/sudotest')
@@ -1094,7 +1094,7 @@ def test_if():
 
 @timeit
 def test_read():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         file = open(f'{testdir}/f1.csv', 'w')
         file.writelines(['1,2.3,ab\n',
                          '2,3.4,xy\n',
@@ -1241,7 +1241,7 @@ def test_read():
                                ('a', 'b', 'c'),
                                ('d', 'e', 'f')])
     # Resume after error
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         TEST.run(test=lambda: run(cd(testdir)))
         TEST.run(test=lambda: run(bash('echo aaa > a')))
         TEST.run(test=lambda: run(bash('echo aaa > aa')))
@@ -1397,7 +1397,7 @@ def test_args():
     TEST.run(test=lambda: run(gen(6, 1) | args(lambda count, start: gen(count, start))),
              expected_out=[2, 4, 5, 6, 6, 7, 8, 9, 10])
     # ls
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         os.system(f'mkdir {testdir}/d1')
         os.system(f'mkdir {testdir}/d2')
         os.system(f'mkdir {testdir}/d3')
@@ -1610,7 +1610,7 @@ def test_json():
 
 @timeit
 def test_upload():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         os.system(f'mkdir {testdir}/source')
         os.system(f'touch {testdir}/source/a {testdir}/source/b "{testdir}/source/a b"')
         os.system(f'rm -rf {testdir}/dest')
@@ -1654,7 +1654,7 @@ def test_upload():
 
 @timeit
 def test_download():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         os.system(f'rm -rf {testdir}/source')
         os.system(f'mkdir {testdir}/source')
         os.system(f'touch {testdir}/source/a {testdir}/source/b "{testdir}/source/a b"')
@@ -1826,7 +1826,7 @@ def test_bug_136():
 
 @timeit
 def test_bug_198():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         # IsADirectoryError
         TEST.run(test=lambda: run(gen(3) | write(f'{testdir}')),
                  expected_err='Is a directory')
@@ -1840,7 +1840,7 @@ def test_bug_198():
 
 @timeit
 def test_bug_200():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         source = f'{testdir}/source.csv'
         target = f'{testdir}/target.csv'
         target2 = f'{testdir}/target2.csv'
@@ -1874,7 +1874,7 @@ def test_bug_200():
 
 @timeit
 def test_bug_206():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         home = pathlib.Path('~').expanduser().absolute()
         TEST.run(test=lambda: run(cd(testdir)),
                  verification=lambda: run(pwd() | map(lambda d: str(d))),
@@ -1950,7 +1950,7 @@ def test_bug_229():
 
 @timeit
 def test_bug_230():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         TEST.run(lambda: run(cd(testdir)))
         os.system('touch a1 a2')
         TEST.run(test=lambda: run(bash('ls -l a?') | map(lambda x: x[-2:])),

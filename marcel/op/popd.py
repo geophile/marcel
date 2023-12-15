@@ -49,7 +49,7 @@ class Popd(marcel.core.Op):
 
     def run(self, env):
         try:
-            env.dir_state().popd()
+            env.dir_state().pop_dir()
         except PermissionError as e:
             raise marcel.exception.KillCommandException(e)
         except FileNotFoundError as e:

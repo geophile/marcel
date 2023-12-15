@@ -84,7 +84,7 @@ class Download(marcel.core.Op):
                                       str,
                                       pathlib.Path, pathlib.PosixPath, File)
         self.dir = pathlib.Path(self.dir)
-        self.dir = marcel.op.filenames.Filenames([self.dir]).normalize()
+        self.dir = marcel.op.filenames.Filenames(env, [self.dir]).normalize()
         if len(self.dir) == 0:
             raise marcel.exception.KillCommandException(f'Target directory does not exist: {self.dir_arg}')
         else:

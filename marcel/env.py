@@ -15,14 +15,13 @@
 
 import getpass
 import importlib
-import os
-import os.path
 import pathlib
 import socket
 import sys
 
 import marcel.builtin
 import marcel.core
+import marcel.directorystate
 import marcel.exception
 import marcel.function
 import marcel.locations
@@ -93,80 +92,6 @@ INTERACTIVE_EXECUTABLES = [
 ]
 '''
 
-
-class DirectoryState:
-
-    def __init__(self, env):
-        self.env = env
-
-    def __repr__(self):
-        return f'DirectoryState({self._dir_stack()})'
-
-    def pwd(self):
-        # return pathlib.Path(self.env.getvar('PWD'))
-        return pathlib.Path(os.getcwd())
-
-    def cd(self, directory):
-        assert isinstance(directory, pathlib.Path), directory
-        new_dir = (self.pwd() / directory.expanduser()).resolve(False)  # False: due to bug 27
-        new_dir = new_dir.as_posix()
-        # So that executables have the same view of the current directory.
-        os.chdir(new_dir)
-        self._dir_stack()[-1] = new_dir
-        self.env.namespace['PWD'] = new_dir
-
-    def pushd(self, directory):
-        self._clean_dir_stack()
-        # Operate on a copy of the directory stack. Don't want to change the
-        # actual stack until the cd succeeds (bug 133).
-        dir_stack = list(self._dir_stack())
-        if directory is None:
-            if len(dir_stack) > 1:
-                dir_stack[-2:] = [dir_stack[-1], dir_stack[-2]]
-        else:
-            assert isinstance(directory, pathlib.Path)
-            dir_stack.append(directory.resolve().as_posix())
-        self.cd(pathlib.Path(dir_stack[-1]))
-        self.env.namespace['DIRS'] = dir_stack
-
-    def popd(self):
-        self._clean_dir_stack()
-        dir_stack = self._dir_stack()
-        if len(dir_stack) > 1:
-            self.cd(pathlib.Path(dir_stack[-2]))
-            dir_stack.pop()
-
-    def reset_dir_stack(self):
-        dir_stack = self._dir_stack()
-        dir_stack.clear()
-        dir_stack.append(self.pwd())
-
-    def dirs(self):
-        self._clean_dir_stack()
-        dirs = list(self._dir_stack())
-        dirs.reverse()
-        return dirs
-
-    def _dir_stack(self):
-        return self.env.getvar('DIRS')
-
-    # Remove entries that are not files, and not accessible, (presumably due to changes since they entered the stack).
-    def _clean_dir_stack(self):
-        clean = []
-        removed = []
-        dirs = self._dir_stack()
-        for dir in dirs:
-            if os.path.exists(dir) and os.access(dir, mode=os.X_OK, follow_symlinks=True):
-                clean.append(dir)
-            else:
-                removed.append(dir)
-        if len(clean) < len(dirs):
-            self.env.namespace['DIRS'] = clean
-            buffer = ['The following directories have been removed from the directory stack because',
-                      'they are no longer accessible:']
-            buffer.extend(removed)
-            raise marcel.exception.KillCommandException('\n'.join(buffer))
-        
 
 class VarHandlerStartup(object):
     
@@ -281,7 +206,7 @@ class Environment(object):
         # Where environment variables live.
         self.namespace = namespace
         # Directory stack, including current directory.
-        self.directory_state = DirectoryState(self)
+        self.directory_state = None
         # Source of ops and arg parsers.
         self.op_modules = marcel.opmodule.import_op_modules()
         # Lax var handling for now. Check immutability after startup is complete.
@@ -308,6 +233,10 @@ class Environment(object):
             'USER': getpass.getuser(),
             'HOST': socket.gethostname()
         })
+        self.dir_state().change_current_dir(self.getvar('PWD'))
+
+    def dir_state(self):
+        return self.directory_state
 
     # Vars that are not mutable even during startup. I.e., startup script can't modify them.
     def never_mutable(self):
@@ -332,9 +261,6 @@ class Environment(object):
 
     def vars(self):
         return self.var_handler.vars()
-
-    def dir_state(self):
-        return self.directory_state
 
     def cluster(self, name):
         cluster = None
@@ -372,6 +298,7 @@ class EnvironmentAPI(Environment):
     # globals: From the module in which marcel.api is imported.
     def __init__(self, globals):
         super().__init__(globals)
+        self.directory_state = marcel.directorystate.DirectoryState(self)
 
     def clear_changes(self):
         self.var_handler.clear_changes()
@@ -439,6 +366,7 @@ class EnvironmentScript(Environment):
         self.workspace = workspace
         # Symbols imported need special handling
         self.imports = []
+        self.directory_state = marcel.directorystate.DirectoryState(self)
 
     # Don't pickle everything
 
@@ -457,6 +385,7 @@ class EnvironmentScript(Environment):
             if not key.startswith('_'):
                 self.namespace[key] = value
         self.restore_persistent_state_from_workspace()
+        self.dir_state().change_current_dir(self.getvar('PWD'))
 
     def persistent_state(self):
         # Things to persist:

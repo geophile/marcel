@@ -266,7 +266,7 @@ class MainInteractive(MainScript):
         # pwd requires special handling
         try:
             pwd = child_namespace_changes['PWD']
-            self.env.dir_state().cd(pathlib.Path(pwd))
+            self.env.dir_state().change_current_dir(pathlib.Path(pwd))
         except KeyError:
             # PWD wasn't changed
             pass

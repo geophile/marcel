@@ -163,11 +163,11 @@ def console_width():
 
 
 # Utility to print to stderr, flushing stdout first, to minimize weird ordering due to buffering.
-def print_to_stderr(s, env):
+def print_to_stderr(message, env):
     sys.stdout.flush()
     if env.color_scheme() is not None:
-        s = colorize(s, env.color_scheme().error)
-    print(s, file=sys.stderr, flush=True)
+        message = colorize(message, env.color_scheme().error)
+    print(message, file=sys.stderr, flush=True)
 
 
 def namespace_description(namespace):

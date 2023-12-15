@@ -231,12 +231,14 @@ class TestAPI(TestBase):
         super().__init__(config_file=None, main=main)
 
     def reset_environment(self, config_file='./.marcel.py'):
-        if self.main is not None:
-            self.main.shutdown()
-        os.chdir(TestBase.start_dir)
-        env = marcel.env.EnvironmentAPI.create(dict())
-        self.main = marcel.main.MainAPI(env)
-        self.env = env
+        self.env = marcel.api._ENV
+        self.env.dir_state().change_current_dir(TestBase.start_dir)
+        # if self.main is not None:
+        #     self.main.shutdown()
+        # os.chdir(TestBase.start_dir)
+        # env = marcel.env.EnvironmentAPI.create(dict())
+        # self.main = marcel.main.MainAPI(env)
+        # self.env = env
 
     def run(self,
             test,
@@ -354,6 +356,7 @@ class TestTabCompletion(TestBase):
                                                 workspace=workspace,
                                                 config_file=config_file,
                                                 testing=True)
+        self.env = env
 
     def run(self, line, text=None, expected=None):
         if text is None:
@@ -371,13 +374,15 @@ class TestTabCompletion(TestBase):
 
 class TestDir(object):
 
-    def __init__(self):
-        self.original_dir = os.getcwd()
+    def __init__(self, env):
+        self.env = env
         self.test_dir = pathlib.Path(tempfile.mkdtemp())
 
     def __enter__(self):
         return self.test_dir
 
     def __exit__(self, *_):
-        os.chdir(self.original_dir)
+        # Remove references to the directory about to be nuked
+        self.env.dir_state().reset_dir_stack()
+        self.env.dir_state().change_current_dir('/tmp')
         os.system(f'rm -rf {self.test_dir.absolute()}')

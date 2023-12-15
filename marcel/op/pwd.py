@@ -47,7 +47,7 @@ class Pwd(marcel.core.Op):
     # AbstractOp
 
     def run(self, env):
-        self.send(env, marcel.object.file.File(env.dir_state().pwd()))
+        self.send(env, marcel.object.file.File(env.dir_state().current_dir()))
 
     # Op
 

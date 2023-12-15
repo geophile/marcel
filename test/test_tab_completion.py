@@ -53,7 +53,7 @@ def test_flags():
 
 
 def test_filenames():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         os.mkdir(f'{testdir}/abcx')
         os.mkdir(f'{testdir}/abcy')
         os.system(f'touch {testdir}/abcz')
@@ -65,7 +65,7 @@ def test_filenames():
         TEST.run(line=f'echo {testdir}/a', text=f'{testdir}/a',
                  expected=[f'{testdir}/abcx/', f'{testdir}/abcy/', f'{testdir}/abcz'])
     # Bug 147
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         os.system(f'touch {testdir}/x')
         TEST.run(line=f'ls {testdir}', text=f'{testdir}',
                  expected=[f'{testdir}/'])
@@ -73,14 +73,14 @@ def test_filenames():
 
 # Inspired by bug 189
 def test_filenames_with_whitespace():
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         os.system(f'touch "{testdir}/space xx"')
         os.system(f'touch "{testdir}/tab\txx"')
 
 
 def test_pipeline_args():
     # Try (almost) every prefix of: ls --recursive -d | args (| d: ls -fs (d) |)
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         all_files = ['a', 'b', 'c']
         TEST.run(f'touch {testdir}/a')
         TEST.run(f'touch {testdir}/b')

@@ -24,14 +24,14 @@ def absolute(base, x):
 
 def test_mv():
     # Move file
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         TEST.run(f'cd {testdir}')
         os.system('echo asdf > f')
         TEST.run(test='mv f g',
                  verification='ls -f | map (f: (f.name, f.size))',
                  expected_out=[('g', 5)])
     # Move into dir
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         TEST.run(f'cd {testdir}')
         os.system('echo asdf > f')
         os.system('echo asdfasdf > g')
@@ -40,7 +40,7 @@ def test_mv():
                  verification='ls -f d | map (f: (f.name, f.size))',
                  expected_out=[('f', 5), ('g', 9)])
     # Funny names
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         TEST.run(f'cd {testdir}')
         os.system('echo asdf > "a b"')
         os.system('echo asdfasdf > c\\ d')
@@ -52,14 +52,14 @@ def test_mv():
 
 def test_cp():
     # Copy file
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         TEST.run(f'cd {testdir}')
         os.system('echo asdf > f')
         TEST.run(test='cp f g',
                  verification='ls -f | map (f: (f.name, f.size))',
                  expected_out=[('f', 5), ('g', 5)])
     # Copy into dir
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         TEST.run(f'cd {testdir}')
         os.system('echo asdf > f')
         os.system('echo asdfasdf > g')
@@ -68,7 +68,7 @@ def test_cp():
                  verification='ls -f d | map (f: (f.name, f.size))',
                  expected_out=[('f', 5), ('g', 9)])
     # Funny names
-    with TestDir() as testdir:
+    with TestDir(TEST.env) as testdir:
         TEST.run(f'cd {testdir}')
         os.system('echo asdf > "a b"')
         os.system('echo asdfasdf > c\\ d')

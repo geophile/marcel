@@ -99,7 +99,7 @@ class TabCompleter:
 
     def complete_filename(self, text):
         debug(f'complete_filenames, text = <{text}>')
-        current_dir = self.main.env.dir_state().pwd()
+        current_dir = self.main.env.dir_state().current_dir()
         if text:
             if text == '~/':
                 home = pathlib.Path(text).expanduser()

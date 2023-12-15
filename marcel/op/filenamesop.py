@@ -72,10 +72,8 @@ class FilenamesOp(marcel.core.Op):
     def setup(self, env):
         self.filenames = self.eval_function(env, 'filenames_arg', str, pathlib.Path, pathlib.PosixPath, File)
         self.roots = []
-        # Marcel and host path should be in sync. Use os.getcwd() instead of DirState to minimize dependence
-        # on Environment. This works better for API and farcel usage.
-        self.current_dir = pathlib.Path(os.getcwd())
-        self.roots = marcel.op.filenames.Filenames(self.filenames).normalize()
+        self.current_dir = pathlib.Path(env.dir_state().current_dir())
+        self.roots = marcel.op.filenames.Filenames(env, self.filenames).normalize()
         if len(self.filenames) > 0 and len(self.roots) == 0:
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')

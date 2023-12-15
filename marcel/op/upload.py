@@ -92,7 +92,7 @@ class Upload(marcel.core.Op):
         self.filenames = self.eval_function(env,
                                             'filenames_arg',
                                             str, pathlib.Path, pathlib.PosixPath, File)
-        self.filenames = marcel.op.filenames.Filenames(self.filenames).normalize()
+        self.filenames = marcel.op.filenames.Filenames(env, self.filenames).normalize()
         if len(self.filenames) == 0:
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
