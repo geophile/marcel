@@ -17,8 +17,6 @@ import marcel.object.workspace
 import marcel.util
 
 
-TEST_STDOUT = '/tmp/test_stdout.txt'
-TEST_STDERR = '/tmp/test_stderr.txt'
 TEST_TIMING = False
 
 
@@ -35,12 +33,13 @@ def timeit(f):
 class TestBase:
     start_dir = os.getcwd()
     test_home = '/tmp/test_home'
-    config_base = f'{test_home}/config'
-    data_base = f'{test_home}/local/share'
+    test_stdout = f'{test_home}/test_stdout.txt'
+    test_stderr = f'{test_home}/test_stderr.txt'
 
     def __init__(self, config_file='./.marcel.py', main=None):
         self.config_file = config_file
         self.main = main
+        self.locations = None
         self.env = None
         self.failures = 0
         self.reset_environment(config_file)
@@ -48,7 +47,15 @@ class TestBase:
         self.test_stderr = None
 
     def reset_environment(self, config_file='./.marcel.py'):
-        assert False
+        if self.main is not None:
+            self.main.shutdown()
+        os.environ['HOME'] = TestBase.test_home
+        self.locations = marcel.locations.Locations()
+        workspace = marcel.object.workspace.Workspace.DEFAULT
+        os.system(f'rm -rf {TestBase.test_home}')
+        os.system(f'mkdir -p {self.locations.config_dir_path(workspace.name)}')
+        os.system(f'mkdir -p {self.locations.config_dir_path(workspace.name)}')
+        os.system('sudo rm -f /tmp/farcel*.log')
 
     def new_file(self, filename):
         path = pathlib.Path(filename)
@@ -138,27 +145,16 @@ class TestConsole(TestBase):
         super().__init__(config_file)
 
     def reset_environment(self, config_file='./.marcel.py'):
-        if self.main is not None:
-            self.main.shutdown()
-        os.system(f'rm -rf {TestBase.test_home}')
-        os.system(f'mkdir {TestBase.test_home}')
-        os.system(f'mkdir -p {TestBase.config_base}/marcel')
-        os.system(f'mkdir -p {TestBase.data_base}/share/marcel')
-        os.system(f'cp {config_file} {TestBase.config_base}/marcel/startup.py')
-        os.system('sudo touch /tmp/farcel.log')
-        os.system('sudo rm /tmp/farcel.log')
-        os.chdir(TestBase.start_dir)
+        super().reset_environment(config_file)
         workspace = marcel.object.workspace.Workspace.DEFAULT
-        locations = marcel.locations.Locations(home=TestBase.test_home,
-                                               config_base=TestBase.config_base,
-                                               data_base=TestBase.data_base)
-        env = marcel.env.EnvironmentInteractive.create(locations, workspace)
+        env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
+        os.system(f'cp {TestBase.start_dir}/{config_file} {self.locations.config_file_path(workspace.name)}')
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
                                                 workspace=workspace,
-                                                config_file=config_file,
                                                 testing=True)
         self.env = env
+        self.env.dir_state().change_current_dir(TestBase.start_dir)
 
 
     def run(self,
@@ -198,12 +194,12 @@ class TestConsole(TestBase):
         self.main.parse_and_run_command(f'cd {path}')
 
     def run_and_capture_output(self, command):
-        self.test_stdout = open(TEST_STDOUT, 'w')
-        self.test_stderr = open(TEST_STDERR, 'w')
+        self.test_stdout = open(TestBase.test_stdout, 'w')
+        self.test_stderr = open(TestBase.test_stderr, 'w')
         with contextlib.redirect_stdout(self.test_stdout), contextlib.redirect_stderr(self.test_stderr):
             self.main.parse_and_run_command(command)
-        self.test_stdout = open(TEST_STDOUT, 'r')
-        self.test_stderr = open(TEST_STDERR, 'r')
+        self.test_stdout = open(TestBase.test_stdout, 'r')
+        self.test_stderr = open(TestBase.test_stderr, 'r')
         test_stdout_contents = ''.join(self.test_stdout.readlines())
         test_stderr_contents = ''.join(self.test_stderr.readlines())
         self.test_stdout.close()
@@ -220,7 +216,6 @@ class TestConsole(TestBase):
             self.main = marcel.main.MainInteractive(self.main,
                                                     self.env,
                                                     e.workspace_to_open,
-                                                    self.main.config_file,
                                                     testing=True)
             return None, None
 
@@ -231,14 +226,9 @@ class TestAPI(TestBase):
         super().__init__(config_file=None, main=main)
 
     def reset_environment(self, config_file='./.marcel.py'):
+        super().reset_environment(config_file)
         self.env = marcel.api._ENV
         self.env.dir_state().change_current_dir(TestBase.start_dir)
-        # if self.main is not None:
-        #     self.main.shutdown()
-        # os.chdir(TestBase.start_dir)
-        # env = marcel.env.EnvironmentAPI.create(dict())
-        # self.main = marcel.main.MainAPI(env)
-        # self.env = env
 
     def run(self,
             test,
@@ -295,16 +285,16 @@ class TestAPI(TestBase):
                     self.failures += 1
 
     def run_and_capture_output(self, command):
-        self.test_stdout = open(TEST_STDOUT, 'w')
-        self.test_stderr = open(TEST_STDERR, 'w')
+        self.test_stdout = open(TestBase.test_stdout, 'w')
+        self.test_stderr = open(TestBase.test_stderr, 'w')
         with contextlib.redirect_stdout(self.test_stdout), contextlib.redirect_stderr(self.test_stderr):
             try:
                 actual_return = command()
             except marcel.exception.KillCommandException as e:
                 print(f'{self.description(command)}: Terminated by KillCommandException: {e}', file=sys.stderr)
                 actual_return = None
-        self.test_stdout = open(TEST_STDOUT, 'r')
-        self.test_stderr = open(TEST_STDERR, 'r')
+        self.test_stdout = open(TestBase.test_stdout, 'r')
+        self.test_stderr = open(TestBase.test_stderr, 'r')
         test_stdout_contents = ''.join(self.test_stdout.readlines())
         test_stderr_contents = ''.join(self.test_stderr.readlines())
         self.test_stdout.close()
@@ -346,17 +336,16 @@ class TestTabCompletion(TestBase):
         super().__init__(config_file)
 
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
+        super().reset_environment(config_file)
         workspace = marcel.object.workspace.Workspace.DEFAULT
-        locations = marcel.locations.Locations(TestBase.test_home,
-                                               TestBase.config_base,
-                                               TestBase.data_base)
-        env = marcel.env.EnvironmentInteractive.create(locations, workspace)
+        env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
                                                 workspace=workspace,
-                                                config_file=config_file,
                                                 testing=True)
         self.env = env
+        self.env.dir_state().change_current_dir(TestBase.start_dir)
+        os.system(f'cp {config_file} {self.locations.config_file_path(workspace.name)}')
 
     def run(self, line, text=None, expected=None):
         if text is None:

@@ -102,12 +102,11 @@ class MainAPI(Main):
 class MainScript(Main):
 
     # If a test is being run, testing is set to a directory pretending to be the user's home.
-    def __init__(self, env, workspace, config_file, testing=None):
+    def __init__(self, env, workspace, testing=None):
         super().__init__(env)
         self.workspace = workspace
         self.testing = testing
         self.config_time = time.time()
-        self.config_file = config_file
         startup_vars = self.read_config()
         self.env.enforce_var_immutability(startup_vars)
         atexit.register(self.shutdown)
@@ -120,7 +119,7 @@ class MainScript(Main):
         never_mutable_before = {var: value for (var, value) in self.env.vars().items()
                                 if var in never_mutable_vars}
         # Read the startup script, and then any marcel code contained in it.
-        self.env.read_config(self.config_file)
+        self.env.read_config()
         self.run_startup()
         # Find the vars defined during startup
         keys_after = set(self.env.namespace.keys())
@@ -198,8 +197,8 @@ class MainScript(Main):
 
 class MainInteractive(MainScript):
 
-    def __init__(self, old_main, env, workspace, config_file, testing=None):
-        super().__init__(env, workspace, config_file, testing)
+    def __init__(self, old_main, env, workspace, testing=None):
+        super().__init__(env, workspace, testing)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
         self.reader = self.initialize_reader()
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
@@ -299,11 +298,9 @@ def usage():
 
 
 # --mpstart: fork/spawn/forkserver. Use fork if not specified
-# --config: startup script
 def args():
-    flags = ('--mpstart', '--config')
+    flags = ('--mpstart',)
     mpstart = 'fork'
-    config = None
     script = None
     flag = None
     for arg in sys.argv[1:]:
@@ -322,18 +319,16 @@ def args():
                         mpstart = arg
                     else:
                         usage()
-                elif flag == '--config':
-                    config = arg
                 flag = None
-    return mpstart, config, script
+    return mpstart, script
 
 
-def main_interactive_run(config):
+def main_interactive_run():
     main = None
     workspace = marcel.object.workspace.Workspace.DEFAULT
     while True:
         env = marcel.env.EnvironmentInteractive.create(marcel.locations.Locations(), workspace)
-        main = MainInteractive(main, env, workspace, config)
+        main = MainInteractive(main, env, workspace)
         try:
             main.run()
             break
@@ -349,10 +344,10 @@ def main_interactive_run(config):
                 main.input = None
 
 
-def main_script_run(config, script):
+def main_script_run(script):
     workspace = marcel.object.workspace.Workspace.DEFAULT
     env = marcel.env.EnvironmentScript.create(marcel.locations.Locations(), workspace)
-    main = MainScript(env, workspace, config)
+    main = MainScript(env, workspace)
     try:
         with open(script, 'r') as script_file:
             main.run_script(script_file.read())
@@ -361,12 +356,12 @@ def main_script_run(config, script):
 
 
 def main():
-    mpstart, config, script = args()
+    mpstart, script = args()
     multiprocessing.set_start_method(mpstart)
     if script is None:
-        main_interactive_run(config)
+        main_interactive_run()
     else:
-        main_script_run(config, script)
+        main_script_run(script)
 
 
 if __name__ == '__main__':

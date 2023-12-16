@@ -603,32 +603,23 @@ def test_bash():
 
 @timeit
 def test_namespace():
-    original_dir = os.getcwd()
-    original_config_file = TEST.config_file
-    config_file = '/tmp/.marcel.py'
-    config_path = pathlib.Path(config_file)
-    # Default namespace has just __builtins__ and initial set of env vars.
-    config_path.touch()
-    config_path.unlink()
-    config_path.touch()
-    TEST.reset_environment(config_file)
+    TEST.run(test='ws -n namespace_test',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace(namespace_test)'])
     TEST.run('map (list(globals().keys())) | expand | select (x: x == "USER")',
              expected_out=['USER'])
     # Try to use an undefined symbol
     TEST.run('map (pi)',
              expected_out=[Error("name 'pi' is not defined")])
-    # Try a namespace importing symbols in the math module
-    config_path.unlink()
-    with open(config_file, 'w') as file:
-        file.writelines('from math import *')
-    TEST.main = None
-    TEST.reset_environment(config_file=config_file)
-    TEST.run('map (pi)',
+    TEST.run(test='import math *',
+             verification='map (pi)',
              expected_out=['3.141592653589793'])
-    # Reset environment
-    TEST.main = None
-    os.chdir(original_dir)
-    TEST.reset_environment(original_config_file)
+    TEST.run(test='ws -c',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace()'])
+    TEST.run('ws -d namespace_test')
+    TEST.run('map (pi)',
+             expected_out=[Error("name 'pi' is not defined")])
 
 
 @timeit
@@ -1839,22 +1830,22 @@ def test_args():
 @timeit
 def test_env():
     TEST.reset_environment()
-    # # Env vars defined by user
-    # TEST.run(test='env v1',
-    #          expected_err='v1 is undefined')
-    # TEST.run(test='v2 = asdf',
-    #          verification='env v2',
-    #          expected_out=[('v2', 'asdf')])
-    # TEST.run(test='env -d v2',
-    #          expected_out=[('v2', 'asdf')])
-    # TEST.run(test='env -d v2',
-    #          expected_out=[])
-    # TEST.run(test='v3xyz = 1')
-    # TEST.run(test='v3xyzw = 2')
-    # TEST.run(test='v3xzw = 3')
-    # TEST.run(test='env -p xyz | sort',
-    #          expected_out=[('v3xyz', '1'),
-    #                        ('v3xyzw', '2')])
+    # Env vars defined by user
+    TEST.run(test='env v1',
+             expected_err='v1 is undefined')
+    TEST.run(test='v2 = asdf',
+             verification='env v2',
+             expected_out=[('v2', 'asdf')])
+    TEST.run(test='env -d v2',
+             expected_out=[('v2', 'asdf')])
+    TEST.run(test='env -d v2',
+             expected_out=[])
+    TEST.run(test='v3xyz = 1')
+    TEST.run(test='v3xyzw = 2')
+    TEST.run(test='v3xzw = 3')
+    TEST.run(test='env -p xyz | sort',
+             expected_out=[('v3xyz', '1'),
+                           ('v3xyzw', '2')])
     # Env defined by startup
     TEST.run(test='env NODE1',
              expected_out=[('NODE1', '127.0.0.1')])
@@ -1878,7 +1869,6 @@ def test_env():
              expected_out=[('SHELL', os.getenv('SHELL'))])
     TEST.run(test='env -o -d SHELL',
              expected_err='Cannot specify more than one of')
-
 
 
 @timeit

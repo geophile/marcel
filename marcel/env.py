@@ -423,10 +423,8 @@ class EnvironmentScript(Environment):
         vars.update({'MARCEL_VERSION', 'HOME', 'USER', 'HOST', 'WORKSPACE'})
         return vars
 
-    def read_config(self, config_path=None):
-        config_path = (self.locations.config_file_path(self.workspace.name)
-                       if config_path is None else
-                       pathlib.Path(config_path))
+    def read_config(self):
+        config_path = self.locations.config_file_path(self.workspace.name)
         if not config_path.exists():
             with open(config_path, 'w') as config_file:
                 config_file.write(DEFAULT_CONFIG)

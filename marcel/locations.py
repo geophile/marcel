@@ -26,20 +26,18 @@ import marcel.exception
 class Locations(object):
 
     # home, config_base, data_base should be specified only during testing
-    def __init__(self, home=None, config_base=None, data_base=None):
+    def __init__(self):
         self.home = Locations.normalize_dir(
             'home directory',
-            home,
+            os.environ.get('HOME', None),
             pathlib.Path.home())
         self.config_base = Locations.normalize_dir(
             'application configuration directory (e.g. XDG_CONFIG_HOME)',
-            config_base,
-            os.getenv('XDG_CONFIG_HOME'),
+            os.environ.get('XDG_CONFIG_HOME', None),
             self.home / '.config')
         self.data_base = Locations.normalize_dir(
             'application data directory (e.g. XDG_DATA_HOME)',
-            data_base,
-            os.getenv('XDG_DATA_HOME'),
+            os.environ.get('XDG_DATA_HOME', None),
             self.home / '.local' / 'share')
 
     def config_dir_path(self, ws_name):
