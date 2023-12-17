@@ -1,4 +1,18 @@
 
+Rename:
+
+- Workspace -> WorkspaceNamed
+- WorkspaceDefault -> Workspace
+
+----------------------------------------------------------------------
+
+Make default and named workspaces as similar as possible:
+
+- Marker file for default, but skip labelling with PID.
+
+- history maintenance: Read at beginning. Reread and append saved
+  commands at end. Flush periodically to avoid bloat.
+
 Tasks
 
 
@@ -332,23 +346,31 @@ Structure on disk:
 Each workspace has its own startup?
 
 .config/marcel/
-    startup.py  # For anon workspaces, and template for named workspaces
+    startup.py  # For anon workspaces, and template for named
+    workspaces
+    .WORKSPACE  # Marker for default workspace
     WORKSPACE_NAME/
         .WORKSPACE  # Empty file marking this directory as a workspace
         startup.py
 
 .local/share/marcel/
+    history
+    reservoirs/  # FOR DEFAULT WORKSPACE 
+        <pid>/  # PID of process using default workspace
+            <varname>.pickle  # Deleted at end of session
     WORKSPACE_NAME/
-        workspace.p  # Workspace properties (pickled) Or maybe JSON?
+        workspace.p
         env.p: Pickled environment
         history
+        reservoirs/
+            <varname>.pickle
 
-When a workspace is open, .WORKSPACE is renamed to .WORKSPACE.<PID>
-where <PID> is the pid of the owning process. Rename is as atomic as
-things get in Linux, so even simultaneous renames should be safe,
-giving the workspace unambiguously to one of the processes. After
-claiming the file, the name should be checked by the renaming process,
-to be sure that the rename went its way.
+When a named workspace is open, .WORKSPACE is renamed to
+.WORKSPACE.<PID> where <PID> is the pid of the owning process. Rename
+is as atomic as things get in Linux, so even simultaneous renames
+should be safe, giving the workspace unambiguously to one of the
+processes. After claiming the file, the name should be checked by the
+renaming process, to be sure that the rename went its way.
 
 ----------------------------------------------------------------------
 

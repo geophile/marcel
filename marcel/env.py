@@ -361,8 +361,6 @@ class EnvironmentScript(Environment):
         assert workspace is not None
         # Standard locations of files important to marcel: config, history
         self.locations = locations
-        # Actual config path. Needed to reread config file in case of modification.
-        self.config_path = None
         # Support for pos()
         self.current_op = None
         # Vars defined during startup
@@ -394,6 +392,10 @@ class EnvironmentScript(Environment):
                 self.namespace[key] = value
         self.restore_persistent_state_from_workspace()
         self.dir_state().change_current_dir(self.getvar('PWD'))
+        # Need to make sure default workspace exists. Timing is delicate, this needs to be done before
+        # Main runs Environment.read_config(). We are now toward the end of Environment creation, for both
+        # Interactive and Script usage. (API doesn't use workspaces.)
+        marcel.object.workspace.Workspace.DEFAULT.create(self, DEFAULT_CONFIG)
 
     def persistent_state(self):
         # Things to persist:
@@ -425,10 +427,6 @@ class EnvironmentScript(Environment):
 
     def read_config(self):
         config_path = self.locations.config_file_path(self.workspace.name)
-        if not config_path.exists():
-            with open(config_path, 'w') as config_file:
-                config_file.write(DEFAULT_CONFIG)
-            config_path.chmod(0o600)
         with open(config_path) as config_file:
             config_source = config_file.read()
         # Execute the config file. Imported and newly-defined symbols go into locals, which
@@ -436,7 +434,6 @@ class EnvironmentScript(Environment):
         locals = dict()
         exec(config_source, self.namespace, locals)
         self.namespace.update(locals)
-        self.config_path = config_path
 
     def check_nesting(self):
         return EnvironmentScript.CheckNesting(self)

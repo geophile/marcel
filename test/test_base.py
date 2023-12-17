@@ -42,11 +42,11 @@ class TestBase:
         self.locations = None
         self.env = None
         self.failures = 0
-        self.reset_environment(config_file)
+        self.reset_environment()
         self.test_stdout = None
         self.test_stderr = None
 
-    def reset_environment(self, config_file='./.marcel.py'):
+    def reset_environment(self):
         if self.main is not None:
             self.main.shutdown()
         os.environ['HOME'] = TestBase.test_home
@@ -145,7 +145,7 @@ class TestConsole(TestBase):
         super().__init__(config_file)
 
     def reset_environment(self, config_file='./.marcel.py'):
-        super().reset_environment(config_file)
+        super().reset_environment()
         workspace = marcel.object.workspace.Workspace.DEFAULT
         env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
         os.system(f'cp {TestBase.start_dir}/{config_file} {self.locations.config_file_path(workspace.name)}')
@@ -155,7 +155,6 @@ class TestConsole(TestBase):
                                                 testing=True)
         self.env = env
         self.env.dir_state().change_current_dir(TestBase.start_dir)
-
 
     def run(self,
             test,
@@ -226,7 +225,7 @@ class TestAPI(TestBase):
         super().__init__(config_file=None, main=main)
 
     def reset_environment(self, config_file='./.marcel.py'):
-        super().reset_environment(config_file)
+        super().reset_environment()
         self.env = marcel.api._ENV
         self.env.dir_state().change_current_dir(TestBase.start_dir)
 
@@ -336,7 +335,7 @@ class TestTabCompletion(TestBase):
         super().__init__(config_file)
 
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
-        super().reset_environment(config_file)
+        super().reset_environment()
         workspace = marcel.object.workspace.Workspace.DEFAULT
         env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
         self.main = marcel.main.MainInteractive(old_main=None,

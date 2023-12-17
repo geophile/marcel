@@ -70,7 +70,6 @@ class Locations(object):
         return self.data_dir_path(ws_name) / 'env.pickle'
 
     def workspace_marker_file_path(self, ws_name):
-        assert len(ws_name) > 0
         for file_path in self.config_dir_path(ws_name).iterdir():
             if file_path.name.startswith('.WORKSPACE'):
                 return file_path

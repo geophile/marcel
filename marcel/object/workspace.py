@@ -85,16 +85,54 @@ class WorkspaceDefault(marcel.object.renderable.Renderable):
         return True
 
     def exists(self, env):
-        return True
+        locations = env.locations
+        if locations.config_dir_path(self.name).exists():
+            marker_path = locations.workspace_marker_file_path(self.name)
+            return marker_path is not None and marker_path.exists()
+        else:
+            return False
 
-    def create(self, env):
-        assert False
+    def create(self, env, initial_config_contents=None):
+        if not self.exists(env):
+            locations = env.locations
+            # initial_config_contents specified only for default workspace. For named workspaces, config
+            # is copied from default.
+            if initial_config_contents is None:
+                assert not self.is_default()
+                with open(locations.config_file_path(Workspace.DEFAULT.name), 'r') as config_file:
+                    initial_config_contents = config_file.read()
+            else:
+                assert self.is_default()
+            # config
+            config_dir = locations.config_dir_path(self.name)
+            self.create_dir(config_dir)
+            config_file_path = locations.config_file_path(self.name)
+            with open(config_file_path, 'w') as config_file:
+                config_file.write(initial_config_contents)
+            config_file_path.chmod(0o600)
+            locations.workspace_marker_file_path(self.name).touch(mode=0o000, exist_ok=False)
+            # data
+            data_dir = locations.data_dir_path(self.name)
+            self.create_dir(data_dir)
+            locations.history_file_path(self.name).touch(mode=0o600, exist_ok=False)
 
     def open(self, env):
         pass
 
     def close(self, env):
         pass
+
+    # Internal
+
+    def create_dir(self, dir):
+        try:
+            os.mkdir(dir)
+            assert dir.exists(), dir
+        except FileExistsError:
+            pass
+        except FileNotFoundError:
+            raise marcel.exception.KillCommandException(
+                f'Workspace name must be usable as a legal filename: {self.name}')
 
 
 class Workspace(WorkspaceDefault):
@@ -141,27 +179,10 @@ class Workspace(WorkspaceDefault):
     def is_open(self):
         return self.properties is not None
 
-    def exists(self, env):
-        locations = env.locations
-        if locations.config_dir_path(self.name).exists():
-            marker_path = locations.workspace_marker_file_path(self.name)
-            return marker_path is not None and marker_path.exists()
-        else:
-            return False
-
-    def create(self, env):
-        locations = env.locations
-        # config
-        config_dir = locations.config_dir_path(self.name)
-        self.create_dir(config_dir)
-        shutil.copyfile(locations.config_file_path(Workspace.DEFAULT.name), locations.config_file_path(self.name))
-        locations.workspace_marker_file_path(self.name).touch(mode=0o000, exist_ok=False)
-        # history
-        history_dir = locations.data_dir_path(self.name)
-        self.create_dir(history_dir)
-        locations.history_file_path(self.name).touch(mode=0o600, exist_ok=False)
+    def create(self, env, initial_config_contents=None):
+        super().create(env, initial_config_contents)
         self.properties = WorkspaceProperties()
-        self.close(env)  # Saves properties and environment
+        self.close(env)
 
     def delete(self, env):
         assert not self.open(env)  # Caller should have guaranteed this
@@ -223,17 +244,6 @@ class Workspace(WorkspaceDefault):
                     yield workspace
 
     # Internal
-
-    def create_dir(self, dir):
-        try:
-            os.mkdir(dir)
-            assert dir.exists(), dir
-        except FileExistsError:
-            raise marcel.exception.KillCommandException(
-                f'Workspace {self.name} already exists.')
-        except FileNotFoundError:
-            raise marcel.exception.KillCommandException(
-                f'Workspace name must be usable as a legal filename: {self.name}')
 
     def lock_workspace(self, locations):
         marker_path = locations.workspace_marker_file_path(self.name)
