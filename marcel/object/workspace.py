@@ -113,8 +113,8 @@ class Workspace(marcel.object.renderable.Renderable):
             config_file_path.chmod(0o600)
             locations.workspace_marker_file_path(self.name).touch(mode=0o000, exist_ok=False)
             # data
-            data_dir = locations.data_dir_path(self.name)
-            self.create_dir(data_dir)
+            self.create_dir(locations.data_dir_path(self.name))
+            self.create_dir(locations.reservoir_dir_path(self.name))
             locations.history_file_path(self.name).touch(mode=0o600, exist_ok=False)
 
     def open(self, env):
@@ -231,6 +231,10 @@ class WorkspaceNamed(Workspace):
         locations.history_file_path(self.name).unlink(missing_ok=True)
         locations.workspace_properties_file_path(self.name).unlink(missing_ok=True)
         locations.workspace_environment_file_path(self.name).unlink(missing_ok=True)
+        reservoir_dir = locations.reservoir_dir_path(self.name)
+        for reservoir_file in reservoir_dir.iterdir():
+            reservoir_file.unlink()
+        reservoir_dir.rmdir()
         locations.data_dir_path(self.name).rmdir()
 
     # Internal

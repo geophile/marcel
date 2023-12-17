@@ -427,13 +427,14 @@ class EnvironmentScript(Environment):
 
     def read_config(self):
         config_path = self.locations.config_file_path(self.workspace.name)
-        with open(config_path) as config_file:
-            config_source = config_file.read()
-        # Execute the config file. Imported and newly-defined symbols go into locals, which
-        # will then be added to self.namespace, for use in the execution of op functions.
-        locals = dict()
-        exec(config_source, self.namespace, locals)
-        self.namespace.update(locals)
+        if config_path.exists():
+            with open(config_path) as config_file:
+                config_source = config_file.read()
+            # Execute the config file. Imported and newly-defined symbols go into locals, which
+            # will then be added to self.namespace, for use in the execution of op functions.
+            locals = dict()
+            exec(config_source, self.namespace, locals)
+            self.namespace.update(locals)
 
     def check_nesting(self):
         return EnvironmentScript.CheckNesting(self)
