@@ -100,7 +100,7 @@ class Workspace(marcel.object.renderable.Renderable):
             # is copied from default.
             if initial_config_contents is None:
                 assert not self.is_default()
-                with open(locations.config_file_path(WorkspaceNamed.DEFAULT.name), 'r') as config_file:
+                with open(locations.config_file_path(Workspace.default().name), 'r') as config_file:
                     initial_config_contents = config_file.read()
             else:
                 assert self.is_default()
@@ -133,7 +133,7 @@ class Workspace(marcel.object.renderable.Renderable):
     def list(env):
         yield Workspace.default()
         locations = env.locations
-        for dir in locations.config_dir_path(WorkspaceNamed.DEFAULT.name).iterdir():
+        for dir in locations.config_dir_path(Workspace.default().name).iterdir():
             name = dir.name
             if dir.is_dir() and locations.workspace_marker_file_path(name).exists():
                 yield WorkspaceNamed(name)
@@ -153,7 +153,6 @@ class Workspace(marcel.object.renderable.Renderable):
 
 class WorkspaceNamed(Workspace):
 
-    DEFAULT = Workspace()
     MARKER = '.WORKSPACE'
 
     def __init__(self, name):

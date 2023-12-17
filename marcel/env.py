@@ -395,7 +395,7 @@ class EnvironmentScript(Environment):
         # Need to make sure default workspace exists. Timing is delicate, this needs to be done before
         # Main runs Environment.read_config(). We are now toward the end of Environment creation, for both
         # Interactive and Script usage. (API doesn't use workspaces.)
-        marcel.object.workspace.WorkspaceNamed.DEFAULT.create(self, DEFAULT_CONFIG)
+        marcel.object.workspace.Workspace.default().create(self, DEFAULT_CONFIG)
 
     def persistent_state(self):
         # Things to persist:

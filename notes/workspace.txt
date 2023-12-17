@@ -1,17 +1,10 @@
 
-Rename:
-
-- Workspace -> WorkspaceNamed
-- Workspace -> Workspace
-
-----------------------------------------------------------------------
-
 Make default and named workspaces as similar as possible:
-
-- Marker file for default, but skip labelling with PID.
 
 - history maintenance: Read at beginning. Reread and append saved
   commands at end. Flush periodically to avoid bloat.
+
+----------------------------------------------------------------------
 
 Tasks
 

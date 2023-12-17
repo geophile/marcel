@@ -167,7 +167,7 @@ def main():
             env = marcel.env.EnvironmentAPI.create(dict())
         elif marcel_usage == 'script':
             env = marcel.env.EnvironmentScript.create(marcel.locations.Locations(),
-                                                      marcel.object.workspace.WorkspaceNamed.DEFAULT)
+                                                      marcel.object.workspace.Workspace.default())
         else:
             assert False, marcel_usage
         version = env.getvar('MARCEL_VERSION')
