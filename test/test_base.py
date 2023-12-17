@@ -51,7 +51,7 @@ class TestBase:
             self.main.shutdown()
         os.environ['HOME'] = TestBase.test_home
         self.locations = marcel.locations.Locations()
-        workspace = marcel.object.workspace.Workspace.DEFAULT
+        workspace = marcel.object.workspace.WorkspaceNamed.DEFAULT
         os.system(f'rm -rf {TestBase.test_home}')
         os.system(f'mkdir -p {self.locations.config_dir_path(workspace.name)}')
         os.system(f'mkdir -p {self.locations.config_dir_path(workspace.name)}')
@@ -146,7 +146,7 @@ class TestConsole(TestBase):
 
     def reset_environment(self, config_file='./.marcel.py'):
         super().reset_environment()
-        workspace = marcel.object.workspace.Workspace.DEFAULT
+        workspace = marcel.object.workspace.WorkspaceNamed.DEFAULT
         env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
         os.system(f'cp {TestBase.start_dir}/{config_file} {self.locations.config_file_path(workspace.name)}')
         self.main = marcel.main.MainInteractive(old_main=None,
@@ -336,7 +336,7 @@ class TestTabCompletion(TestBase):
 
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
         super().reset_environment()
-        workspace = marcel.object.workspace.Workspace.DEFAULT
+        workspace = marcel.object.workspace.WorkspaceNamed.DEFAULT
         env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,

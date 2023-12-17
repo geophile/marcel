@@ -18,7 +18,7 @@ import marcel.core
 import marcel.exception
 import marcel.object.workspace
 
-Workspace = marcel.object.workspace.Workspace
+Workspace = marcel.object.workspace.WorkspaceNamed
 
 HELP = '''
 {L,wrap=F}ws
@@ -287,7 +287,7 @@ class WsClose(WsImpl):
         workspace = env.workspace
         workspace.close(env)
         if not workspace.is_default():
-            workspace = Workspace.DEFAULT
+            workspace = Workspace.default()
             workspace.open(env)
             self.op.send(env, workspace)
             self.reconfigure(workspace)

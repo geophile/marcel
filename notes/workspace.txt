@@ -2,7 +2,7 @@
 Rename:
 
 - Workspace -> WorkspaceNamed
-- WorkspaceDefault -> Workspace
+- Workspace -> Workspace
 
 ----------------------------------------------------------------------
 

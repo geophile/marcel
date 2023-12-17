@@ -325,7 +325,7 @@ def args():
 
 def main_interactive_run():
     main = None
-    workspace = marcel.object.workspace.Workspace.DEFAULT
+    workspace = marcel.object.workspace.WorkspaceNamed.DEFAULT
     while True:
         env = marcel.env.EnvironmentInteractive.create(marcel.locations.Locations(), workspace)
         main = MainInteractive(main, env, workspace)
@@ -345,7 +345,7 @@ def main_interactive_run():
 
 
 def main_script_run(script):
-    workspace = marcel.object.workspace.Workspace.DEFAULT
+    workspace = marcel.object.workspace.WorkspaceNamed.DEFAULT
     env = marcel.env.EnvironmentScript.create(marcel.locations.Locations(), workspace)
     main = MainScript(env, workspace)
     try:

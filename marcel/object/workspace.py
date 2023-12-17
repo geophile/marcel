@@ -15,7 +15,6 @@
 
 import dill
 import os
-import shutil
 import time
 
 import marcel.exception
@@ -48,7 +47,9 @@ class WorkspaceProperties(object):
         self.save_time = time.time()
 
 
-class WorkspaceDefault(marcel.object.renderable.Renderable):
+class Workspace(marcel.object.renderable.Renderable):
+
+    _DEFAULT = None
 
     def __init__(self):
         self.name = ''
@@ -64,7 +65,7 @@ class WorkspaceDefault(marcel.object.renderable.Renderable):
     def render_full(self, color_scheme):
         return self.render_compact()
 
-    # WorkspaceDefault
+    # Workspace
 
     @property
     def create_time(self):
@@ -99,7 +100,7 @@ class WorkspaceDefault(marcel.object.renderable.Renderable):
             # is copied from default.
             if initial_config_contents is None:
                 assert not self.is_default()
-                with open(locations.config_file_path(Workspace.DEFAULT.name), 'r') as config_file:
+                with open(locations.config_file_path(WorkspaceNamed.DEFAULT.name), 'r') as config_file:
                     initial_config_contents = config_file.read()
             else:
                 assert self.is_default()
@@ -122,6 +123,21 @@ class WorkspaceDefault(marcel.object.renderable.Renderable):
     def close(self, env):
         pass
 
+    @staticmethod
+    def default():
+        if Workspace._DEFAULT is None:
+            Workspace._DEFAULT = Workspace()
+        return Workspace._DEFAULT
+
+    @staticmethod
+    def list(env):
+        yield Workspace.default()
+        locations = env.locations
+        for dir in locations.config_dir_path(WorkspaceNamed.DEFAULT.name).iterdir():
+            name = dir.name
+            if dir.is_dir() and locations.workspace_marker_file_path(name).exists():
+                yield WorkspaceNamed(name)
+
     # Internal
 
     def create_dir(self, dir):
@@ -135,9 +151,9 @@ class WorkspaceDefault(marcel.object.renderable.Renderable):
                 f'Workspace name must be usable as a legal filename: {self.name}')
 
 
-class Workspace(WorkspaceDefault):
+class WorkspaceNamed(Workspace):
 
-    DEFAULT = WorkspaceDefault()
+    DEFAULT = Workspace()
     MARKER = '.WORKSPACE'
 
     def __init__(self, name):
@@ -147,19 +163,7 @@ class Workspace(WorkspaceDefault):
         self.properties = None
         self.persistent_state = None
 
-    # Renderable
-
-    def render_compact(self):
-        return f'Workspace({self.name})'
-
-    def render_full(self, color_scheme):
-        wp = self.properties
-        return (f'Workspace({self.name}, '
-                f'create_time = {format_time(wp.create_time)}, '
-                f'open_time = {format_time(wp.open_time)}, '
-                f'save_time = {format_time(wp.save_time)})')
-
-    # WorkspaceDefault
+    # Workspace
 
     @property
     def create_time(self):
@@ -183,21 +187,6 @@ class Workspace(WorkspaceDefault):
         super().create(env, initial_config_contents)
         self.properties = WorkspaceProperties()
         self.close(env)
-
-    def delete(self, env):
-        assert not self.open(env)  # Caller should have guaranteed this
-        locations = env.locations
-        self.lock_workspace(locations)
-        # Use missing_ok = True to enable deletion of damaged workspaces, missing files.
-        # config directory
-        locations.workspace_marker_file_path(self.name).unlink(missing_ok=True)
-        locations.config_file_path(self.name).unlink(missing_ok=True)
-        locations.config_dir_path(self.name).rmdir()
-        # data directory
-        locations.history_file_path(self.name).unlink(missing_ok=True)
-        locations.workspace_properties_file_path(self.name).unlink(missing_ok=True)
-        locations.workspace_environment_file_path(self.name).unlink(missing_ok=True)
-        locations.data_dir_path(self.name).rmdir()
 
     def open(self, env):
         if not self.is_open():
@@ -230,28 +219,30 @@ class Workspace(WorkspaceDefault):
             # Unlock
             self.unlock_workspace(locations)
 
-    @staticmethod
-    def list(env):
-        yield Workspace.DEFAULT
+    def delete(self, env):
+        assert not self.open(env)  # Caller should have guaranteed this
         locations = env.locations
-        for dir in locations.config_dir_path(Workspace.DEFAULT.name).iterdir():
-            name = dir.name
-            if dir.is_dir() and locations.workspace_marker_file_path(name).exists():
-                workspace = Workspace(name)
-                with open(locations.workspace_properties_file_path(name), 'rb') as properties_file:
-                    pickler = dill.Unpickler(properties_file)
-                    workspace.properties = pickler.load()
-                    yield workspace
+        self.lock_workspace(locations)
+        # Use missing_ok = True to enable deletion of damaged workspaces, missing files.
+        # config directory
+        locations.workspace_marker_file_path(self.name).unlink(missing_ok=True)
+        locations.config_file_path(self.name).unlink(missing_ok=True)
+        locations.config_dir_path(self.name).rmdir()
+        # data directory
+        locations.history_file_path(self.name).unlink(missing_ok=True)
+        locations.workspace_properties_file_path(self.name).unlink(missing_ok=True)
+        locations.workspace_environment_file_path(self.name).unlink(missing_ok=True)
+        locations.data_dir_path(self.name).rmdir()
 
     # Internal
 
     def lock_workspace(self, locations):
         marker_path = locations.workspace_marker_file_path(self.name)
-        owner = Workspace.owner(marker_path)
+        owner = WorkspaceNamed.owner(marker_path)
         if owner is None:
             # Lock the file by renaming it. Check for success, to guard against another process trying to
             # lock the same workspace.
-            locked_marker_path = marker_path.parent / f'{Workspace.MARKER}.{os.getpid()}'
+            locked_marker_path = marker_path.parent / f'{WorkspaceNamed.MARKER}.{os.getpid()}'
             marker_path.rename(locked_marker_path)
             if not locked_marker_path.exists():
                 self.cannot_lock_workspace()
@@ -264,13 +255,13 @@ class Workspace(WorkspaceDefault):
 
     def unlock_workspace(self, locations):
         marker_path = locations.workspace_marker_file_path(self.name)
-        owner = Workspace.owner(marker_path)
+        owner = WorkspaceNamed.owner(marker_path)
         if owner is None:
             # Someone is unlocking an unlocked workspace? I'll allow it.
             pass
         elif owner == os.getpid():
             # Unlock
-            unlocked_marker_path = marker_path.parent / Workspace.MARKER
+            unlocked_marker_path = marker_path.parent / WorkspaceNamed.MARKER
             marker_path.rename(unlocked_marker_path)
             if not unlocked_marker_path.exists():
                 assert False, marker_path
@@ -283,10 +274,10 @@ class Workspace(WorkspaceDefault):
 
     @staticmethod
     def owner(marker_file_path):
-        if marker_file_path.name == Workspace.MARKER:
+        if marker_file_path.name == WorkspaceNamed.MARKER:
             return None
         else:
-            assert marker_file_path.name[len(Workspace.MARKER)] == '.'
-            owner_pid = marker_file_path.name[len(Workspace.MARKER) + 1:]
+            assert marker_file_path.name[len(WorkspaceNamed.MARKER)] == '.'
+            owner_pid = marker_file_path.name[len(WorkspaceNamed.MARKER) + 1:]
             return int(owner_pid)
 
