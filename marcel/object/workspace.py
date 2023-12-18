@@ -88,8 +88,8 @@ class Workspace(marcel.object.renderable.Renderable):
 
     def exists(self, env):
         locations = env.locations
-        if locations.config_dir_path(self.name).exists():
-            marker_path = locations.workspace_marker_file_path(self.name)
+        if locations.config_dir_path(self).exists():
+            marker_path = locations.workspace_marker_file_path(self)
             return marker_path is not None and marker_path.exists()
         else:
             return False
@@ -101,22 +101,22 @@ class Workspace(marcel.object.renderable.Renderable):
             # is copied from default.
             if initial_config_contents is None:
                 assert not self.is_default()
-                with open(locations.config_file_path(Workspace.default().name), 'r') as config_file:
+                with open(locations.config_file_path(Workspace.default()), 'r') as config_file:
                     initial_config_contents = config_file.read()
             else:
                 assert self.is_default()
             # config
-            config_dir = locations.config_dir_path(self.name)
+            config_dir = locations.config_dir_path(self)
             self.create_dir(config_dir)
-            config_file_path = locations.config_file_path(self.name)
+            config_file_path = locations.config_file_path(self)
             with open(config_file_path, 'w') as config_file:
                 config_file.write(initial_config_contents)
             config_file_path.chmod(0o600)
-            locations.workspace_marker_file_path(self.name).touch(mode=0o000, exist_ok=False)
+            locations.workspace_marker_file_path(self).touch(mode=0o000, exist_ok=False)
             # data
-            self.create_dir(locations.data_dir_path(self.name))
-            self.create_dir(locations.reservoir_dir_path(self.name))
-            locations.history_file_path(self.name).touch(mode=0o600, exist_ok=False)
+            self.create_dir(locations.data_dir_path(self))
+            self.create_dir(locations.reservoir_dir_path(self))
+            locations.history_file_path(self).touch(mode=0o600, exist_ok=False)
 
     def open(self, env):
         pass
@@ -137,10 +137,11 @@ class Workspace(marcel.object.renderable.Renderable):
     def list(env):
         yield Workspace.default()
         locations = env.locations
-        for dir in locations.config_dir_path(Workspace.default().name).iterdir():
+        for dir in locations.config_dir_path(Workspace.default()).iterdir():
             name = dir.name
-            if dir.is_dir() and locations.workspace_marker_file_path(name).exists():
-                yield WorkspaceNamed(name)
+            workspace = WorkspaceNamed(name)
+            if dir.is_dir() and locations.workspace_marker_file_path(workspace).exists():
+                yield workspace
 
     # Internal
 
@@ -196,11 +197,11 @@ class WorkspaceNamed(Workspace):
             locations = env.locations
             self.lock_workspace(locations)
             # Properties
-            with open(locations.workspace_properties_file_path(self.name), 'rb') as properties_file:
+            with open(locations.workspace_properties_file_path(self), 'rb') as properties_file:
                 unpickler = dill.Unpickler(properties_file)
                 self.properties = unpickler.load()
             # Environment
-            with open(locations.workspace_environment_file_path(self.name), 'rb') as environment_file:
+            with open(locations.workspace_environment_file_path(self), 'rb') as environment_file:
                 unpickler = dill.Unpickler(environment_file)
                 self.persistent_state = unpickler.load()
             self.properties.update_open_time()
@@ -210,11 +211,11 @@ class WorkspaceNamed(Workspace):
             self.properties.update_save_time()
             locations = env.locations
             # Properties
-            with open(locations.workspace_properties_file_path(self.name), 'wb') as properties_file:
+            with open(locations.workspace_properties_file_path(self), 'wb') as properties_file:
                 pickler = dill.Pickler(properties_file)
                 pickler.dump(self.properties)
             # Environment
-            with open(locations.workspace_environment_file_path(self.name), 'wb') as environment_file:
+            with open(locations.workspace_environment_file_path(self), 'wb') as environment_file:
                 pickler = dill.Pickler(environment_file)
                 pickler.dump(env.persistent_state())
             # Reservoirs
@@ -227,28 +228,28 @@ class WorkspaceNamed(Workspace):
             self.unlock_workspace(locations)
 
     def delete(self, env):
-        assert not self.open(env)  # Caller should have guaranteed this
+        assert not self.is_open()  # Caller should have guaranteed this
         locations = env.locations
         self.lock_workspace(locations)
         # Use missing_ok = True to enable deletion of damaged workspaces, missing files.
         # config directory
-        locations.workspace_marker_file_path(self.name).unlink(missing_ok=True)
-        locations.config_file_path(self.name).unlink(missing_ok=True)
-        locations.config_dir_path(self.name).rmdir()
+        locations.workspace_marker_file_path(self).unlink(missing_ok=True)
+        locations.config_file_path(self).unlink(missing_ok=True)
+        locations.config_dir_path(self).rmdir()
         # data directory
-        locations.history_file_path(self.name).unlink(missing_ok=True)
-        locations.workspace_properties_file_path(self.name).unlink(missing_ok=True)
-        locations.workspace_environment_file_path(self.name).unlink(missing_ok=True)
-        reservoir_dir = locations.reservoir_dir_path(self.name)
+        locations.history_file_path(self).unlink(missing_ok=True)
+        locations.workspace_properties_file_path(self).unlink(missing_ok=True)
+        locations.workspace_environment_file_path(self).unlink(missing_ok=True)
+        reservoir_dir = locations.reservoir_dir_path(self)
         for reservoir_file in reservoir_dir.iterdir():
             reservoir_file.unlink()
         reservoir_dir.rmdir()
-        locations.data_dir_path(self.name).rmdir()
+        locations.data_dir_path(self).rmdir()
 
     # Internal
 
     def lock_workspace(self, locations):
-        marker_path = locations.workspace_marker_file_path(self.name)
+        marker_path = locations.workspace_marker_file_path(self)
         owner = WorkspaceNamed.owner(marker_path)
         if owner is None:
             # Lock the file by renaming it. Check for success, to guard against another process trying to
@@ -265,7 +266,7 @@ class WorkspaceNamed(Workspace):
             self.cannot_lock_workspace()
 
     def unlock_workspace(self, locations):
-        marker_path = locations.workspace_marker_file_path(self.name)
+        marker_path = locations.workspace_marker_file_path(self)
         owner = WorkspaceNamed.owner(marker_path)
         if owner is None:
             # Someone is unlocking an unlocked workspace? I'll allow it.

@@ -430,7 +430,7 @@ class EnvironmentScript(Environment):
         return vars
 
     def read_config(self):
-        config_path = self.locations.config_file_path(self.workspace.name)
+        config_path = self.locations.config_file_path(self.workspace)
         if config_path.exists():
             with open(config_path) as config_file:
                 config_source = config_file.read()

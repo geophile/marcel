@@ -40,42 +40,42 @@ class Locations(object):
             os.environ.get('XDG_DATA_HOME', None),
             self.home / '.local' / 'share')
 
-    def config_dir_path(self, ws_name):
+    def config_dir_path(self, workspace):
         path = Locations.marcel_dir(self.config_base)
-        if len(ws_name) > 0:
-            path = path / ws_name
+        if not workspace.is_default():
+            path = path / workspace.name
         return path
 
-    def data_dir_path(self, ws_name):
+    def data_dir_path(self, workspace):
         path = Locations.marcel_dir(self.data_base)
-        if len(ws_name) > 0:
-            path = path / ws_name
+        if not workspace.is_default():
+            path = path / workspace.name
         return path
 
-    def reservoir_dir_path(self, ws_name):
-        return self.data_dir_path(ws_name) / 'reservoirs'
+    def reservoir_dir_path(self, workspace):
+        return self.data_dir_path(workspace) / 'reservoirs'
 
-    def config_file_path(self, ws_name):
-        return self.config_dir_path(ws_name) / 'startup.py'
+    def config_file_path(self, workspace):
+        return self.config_dir_path(workspace) / 'startup.py'
 
-    def history_file_path(self, ws_name):
-        return self.data_dir_path(ws_name) / 'history'
+    def history_file_path(self, workspace):
+        return self.data_dir_path(workspace) / 'history'
 
-    def workspace_properties_file_path(self, ws_name):
-        assert len(ws_name) > 0
-        return self.data_dir_path(ws_name) / 'properties.pickle'
+    def workspace_properties_file_path(self, workspace):
+        assert not workspace.is_default()
+        return self.data_dir_path(workspace) / 'properties.pickle'
 
-    def workspace_environment_file_path(self, ws_name):
-        assert len(ws_name) > 0
-        return self.data_dir_path(ws_name) / 'env.pickle'
+    def workspace_environment_file_path(self, workspace):
+        assert not workspace.is_default()
+        return self.data_dir_path(workspace) / 'env.pickle'
 
-    def workspace_marker_file_path(self, ws_name):
-        for file_path in self.config_dir_path(ws_name).iterdir():
+    def workspace_marker_file_path(self, workspace):
+        for file_path in self.config_dir_path(workspace).iterdir():
             if file_path.name.startswith('.WORKSPACE'):
                 return file_path
         # If the config directory doesn't have a .WORKSPACE file, it should. Presumably we are in the process
         # of creating a new workspace.
-        return self.config_dir_path(ws_name) / '.WORKSPACE'
+        return self.config_dir_path(workspace) / '.WORKSPACE'
 
     @staticmethod
     def marcel_dir(base):

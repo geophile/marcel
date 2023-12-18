@@ -53,8 +53,8 @@ class TestBase:
         self.locations = marcel.locations.Locations()
         workspace = marcel.object.workspace.Workspace.default()
         os.system(f'rm -rf {TestBase.test_home}')
-        os.system(f'mkdir -p {self.locations.config_dir_path(workspace.name)}')
-        os.system(f'mkdir -p {self.locations.config_dir_path(workspace.name)}')
+        os.system(f'mkdir -p {self.locations.config_dir_path(workspace)}')
+        os.system(f'mkdir -p {self.locations.config_dir_path(workspace)}')
         os.system('sudo rm -f /tmp/farcel*.log')
 
     def new_file(self, filename):
@@ -148,7 +148,7 @@ class TestConsole(TestBase):
         super().reset_environment()
         workspace = marcel.object.workspace.Workspace.default()
         env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
-        os.system(f'cp {TestBase.start_dir}/{config_file} {self.locations.config_file_path(workspace.name)}')
+        os.system(f'cp {TestBase.start_dir}/{config_file} {self.locations.config_file_path(workspace)}')
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
                                                 workspace=workspace,
@@ -344,7 +344,7 @@ class TestTabCompletion(TestBase):
                                                 testing=True)
         self.env = env
         self.env.dir_state().change_current_dir(TestBase.start_dir)
-        os.system(f'cp {config_file} {self.locations.config_file_path(workspace.name)}')
+        os.system(f'cp {config_file} {self.locations.config_file_path(workspace)}')
 
     def run(self, line, text=None, expected=None):
         if text is None:
