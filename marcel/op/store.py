@@ -100,7 +100,7 @@ class Store(marcel.core.Op):
                         f'A stream cannot be appended to {self.var} '
                         f'because it stores a value of type {type(value)}.')
                 if type(value) is not Reservoir:
-                    value = Reservoir(self.var)
+                    value = Reservoir(self.var, env.locations.reservoir_file_path(env.workspace, self.var))
                 self.reservoir = value
                 env.setvar(self.var, value)
                 env.mark_possibly_changed(self.var)

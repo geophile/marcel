@@ -77,6 +77,10 @@ class Locations(object):
         # of creating a new workspace.
         return self.config_dir_path(workspace) / '.WORKSPACE'
 
+    def reservoir_file_path(self, workspace, name):
+        filename = f'{os.getpid()}.{name}.pickle' if workspace.is_default() else f'{name}.pickle'
+        return self.reservoir_dir_path(workspace) / filename
+
     @staticmethod
     def marcel_dir(base):
         dir = base / 'marcel'

@@ -13,8 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import atexit
 import os as _os
 import pathlib as _pathlib
+import tempfile
 
 import marcel.core as _core
 import marcel.env as _env_  # _env would create a name conflict with import of marcel.op.env below
@@ -73,6 +75,14 @@ from marcel.op.write import write as _write, Write as _Write
 from marcel.builtin import *
 from marcel.reduction import *
 
+
+_RESERVOIRS = []
+
+
+def shutdown():
+    for reservoir in _RESERVOIRS:
+        reservoir.ensure_deleted()
+
 # TODO: This is work in progress. Main is there only to get env for now. Should be gone eventually.
 PWD = None
 DIRS = [_pathlib.Path(_os.getcwd())]
@@ -80,9 +90,7 @@ DB_DEFAULT = None
 _ENV = _env_.EnvironmentAPI.create(globals())
 _MAIN = _main.MainAPI(_ENV)
 
-
-# No colors for API
-_reservoir_counter = 0
+atexit.register(shutdown)
 
 
 def args(*args, **kwargs): return _generate_op(_args, *args, **kwargs)
@@ -288,8 +296,9 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
 def reservoir(name):
     assert type(name) is str
     assert name.isidentifier()
-    global _reservoir_counter
-    return _reservoir.Reservoir(name)
+    reservoir = _reservoir.Reservoir(name, tempfile.mkstemp()[1])
+    _RESERVOIRS.append(reservoir)
+    return reservoir
 
 
 def pos():

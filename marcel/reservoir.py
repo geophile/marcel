@@ -20,6 +20,6 @@ import marcel.picklefile
 
 class Reservoir(marcel.picklefile.PickleFile):
 
-    def __init__(self, name, path=None):
-        super().__init__(tempfile.mkstemp()[1] if path is None else path)
+    def __init__(self, name, path):
+        super().__init__(path)
         self.name = name

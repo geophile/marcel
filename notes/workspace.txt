@@ -234,8 +234,7 @@ Each workspace has its own startup?
 .local/share/marcel/
     history
     reservoirs/  # FOR DEFAULT WORKSPACE 
-        <pid>/  # PID of process using default workspace
-            <varname>.pickle  # Deleted at end of session
+        <pid>.<varname>.pickle  # Deleted at end of session
     WORKSPACE_NAME/
         workspace.p
         env.p: Pickled environment

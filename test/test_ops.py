@@ -8,6 +8,7 @@ import marcel.main
 import marcel.version
 import marcel.object.cluster
 import marcel.object.error
+import marcel.object.workspace
 import marcel.version
 
 import test_base
@@ -2082,6 +2083,47 @@ def test_workspaces():
 
 
 @timeit
+def test_workspaces_and_reservoirs():
+    ws_default = marcel.object.workspace.Workspace.default()
+    ws_restest = marcel.object.workspace.WorkspaceNamed('restest')
+    # Default reservoir including its location
+    TEST.run(test='gen 3 >$ g3_default',
+             verification='g3_default <$',
+             expected_out=[0, 1, 2])
+    TEST.run(test=f'ls -f {TEST.locations.reservoir_file_path(ws_default, "g3_default")} | red count',
+             expected_out=[1])
+    # Leave the default workspace and check that the reservoir disappears
+    TEST.run(test='ws -n restest',
+             verification=f'ls -f {TEST.locations.reservoir_dir_path(ws_default)} | red count',
+             expected_out=[0])
+    # Create a reservoir in the restest workspace
+    TEST.run(test='gen 3 >$ g3_restest',
+             verification='g3_restest <$',
+             expected_out=[0, 1, 2])
+    TEST.run(test=f'ls {TEST.locations.reservoir_file_path(ws_restest, "g3_restest")} | (f: f.as_posix())',
+             expected_out=[f'{TEST.locations.reservoir_file_path(ws_restest, "g3_restest")}'])
+    # Go back to the default workspace and check the reservoirs
+    TEST.run(test='ws -c',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace()'])
+    TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_default)} | red count',
+             expected_out=[0])
+    TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_restest)} | red count',
+             expected_out=[1])
+    # Re-enter restest, check again
+    TEST.run(test='ws restest',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace(restest)'])
+    TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_default)} | red count',
+             expected_out=[0])
+    TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_restest)} | red count',
+             expected_out=[1])
+    # And contents
+    TEST.run(test='g3_restest <$',
+             expected_out=[0, 1, 2])
+
+
+@timeit
 def test_upload():
     with TestDir(TEST.env) as testdir:
         os.system(f'mkdir {testdir}/source')
@@ -2591,6 +2633,7 @@ def main_stable():
     test_tee()
     test_json()
     test_workspaces()
+    test_workspaces_and_reservoirs()
     test_bugs()
 
 
