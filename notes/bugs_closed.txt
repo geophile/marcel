@@ -4512,3 +4512,20 @@ graph = (| a, b: \
 
 Results in complaints about a being unknown in the last line (inside
 the scatter call).
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+238. Default workspace reservoirs don't go away when the session ends
+
+Seems to work in testing, not manually.
+
+The problem is that interactively, the command is run in a process
+with a different pid, while cleanup looks for the top-level process
+pid.
+
+Put top-level pid in Env? Or would a global in some module work,
+e.g. TOP_LEVEL_PID = os.getpid()? Job's multiprocessing forks the
+environment, including the global?

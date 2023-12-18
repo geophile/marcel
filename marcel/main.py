@@ -266,7 +266,8 @@ class MainInteractive(MainScript):
         except KeyError:
             # PWD wasn't changed
             pass
-        self.env.namespace.update(child_namespace_changes)
+        for var, value in child_namespace_changes.items():
+            self.env.setvar(var, value)
 
     def check_for_config_update(self):
         config_path = self.env.locations.config_file_path(self.workspace)
