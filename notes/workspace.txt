@@ -1,54 +1,40 @@
 
-Make default and named workspaces as similar as possible:
-
-- history maintenance: Read at beginning. Reread and append saved
-  commands at end. Flush periodically to avoid bloat.
-
-----------------------------------------------------------------------
-
 Tasks
 
+- Reservoirs
 
-Close ws
+    - Put in reservoirs directory.
 
-- Saving default ws command history
+    - For default workspace, delete on close
 
-- Saving named ws command history
+    - When a reservoir is created, the env must be saved first. Otherwise,
+      there could be a reservoir not referenced by the environment.
 
-- When a reservoir is created, the env must be saved first. Otherwise,
-  there could be a reservoir not referenced by the environment.
+- History
 
-- Env var for workspace name
+    - Read at beginning.
 
-- Add workspace name to default prompt.
+    - Reread and append saved commands at end. 
 
-- Real arg processing for marcel execution.
+    - Flush periodically to avoid bloat.
 
-----------------------------------------------------------------------
+    - Real arg processing for marcel execution.
 
-Things disabled that need to be re-enabled or re-implemented
+- Startup script change
 
-- old_namespace mechanism for maintaining env across startup script
-  changes. Most likely reimplementation. Alternative: Save to disk
-  temporarily and restore from that as for named workspace?
+    - Default workspace
 
-  Get rid of env.config_path, part of the old_namespacee mechanism.
+    - Named workspace
 
-- env testing, including immutable vars
+- HistoryRecord
 
+  - Add timestamp
 
-- Deleted from env on pickling. Should be reconstituted on going to
-  new ws, or change to config file.
+  - How do timestamps get saved? MultilineReader already edits the lines. 
+    
+    - Write lines with timestamp
 
-        reader
-        op_modules
-        immutable
-        bash
-        locations
-        config_path
-        edited_command
-        modified_vars
-        current_op
+    - Strip them off and keep them available on reading history.
 
 ----------------------------------------------------------------------
 
@@ -233,107 +219,6 @@ EXPORT_MWS NEW_NAME".
 
 ----------------------------------------------------------------------
 
-What is the role of a startup script? Does it get run once at the
-beginning of the workspace? Or on each instantiation?
-
-The imports are needed each time a process starts. The only (?) other
-thing the startup script does is to populate the environment. The
-imports can be viewed as adding to the namespace some values that
-should not or cannot be persisted, e.g. modules.
-
-Harmless to run obsolete definitions from startup.py, as long as that
-precedes loading the environment. The environment will have the most
-current version, and probably overwrite much of what is done in
-startup without resulting in any change. E.g. the COLOR_SCHEMA
-probably doesn't change.
-
-Alternatively: The workspace DOES NOT have a startup script, just an
-environment. But getting imported modules and functions right looks
-difficult and delicate.
-
-Could do the imports in RUN_ON_STARTUP. The import op could then
-record what's been imported, and duplicate that in each
-instance. Maybe block reassignment of imported symbols.
-
-But having a startup script is convenient. I *can* replace a prompt
-interactively, but it's kind of a pain. It would be nice to have a
-startup script that does that. But then, you want the startup script
-overriding the environment! E.g. if I want a new prompt: the env
-already has one. I edit the startup script to get a new one. If env
-overwrites startup script, then I don't get the new prompt.
-
-So how about this:
-
-- Startup loads environment
-
-- Then runs startup script
-
-This gets imports and a new prompt. But it also could "revert" and env
-change. 
-
-How about this: a symbol that comes in from the startup script cannot
-be changed interactively, (i.e., assigned), it has to be done by
-editing the startup script. (Changes already take effect immediately.)
-
-----------------------------------------------------------------------
-
-Workspace creation
-
-I originally thought that you would use an anonymous marcel workspace,
-decide to create a workspace, and that the instance's history (just the
-commands in that instance) and environment would then be saved to
-initialize the workspace. But that is messy. Those commands, and that
-environment are part of the anonymous workspace, and could be persisted
-at any time.
-
-Creating a workspace on first reference to a new workspace name seems
-dangerous. E.g. "switch to workspace abc" could succeed, creating a
-workspace because that name is not in use. But what if it was a typo,
-and the user meant abd. In that case, we have stuff in abc that should
-have been in abd, and there doesn't seem to be a good way to rerun
-those commands against abd. The results might have been completely
-different.
-
-So workspace creation should be explicit, on startup or during an
-instance.
-
-----------------------------------------------------------------------
-
-workspace 
-
-- use NAME
-
-  - use workspace with given NAME.
-
-  - close existing workspace
-
-- close
-
-  - close current workspace
-
-  - If anonymous: save with a new name? discard?
-
-- list
-
-  - list all workspaces
-    - name
-    - create timestamp
-    - last saved timestamp
-    - size on disk
-
-- properties:
-
-  - create timestamp
-  - last open timestamp
-  - last save timestamp
-
-workspace.p should omit workspace name. If it's included, then that
-creates an opportunity for a discrepancy, in case of a manual rename
-of the WORKSPACE_NAME directory. And a workspace rename command gets
-more complicated.
-
-----------------------------------------------------------------------
-
 Structure on disk:
 
 Each workspace has its own startup?
@@ -514,6 +399,3 @@ modified to add xyz?
 
 
 
-HistoryRecord
-
-- Add timestamp

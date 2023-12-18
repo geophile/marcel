@@ -52,14 +52,14 @@ class Locations(object):
             path = path / ws_name
         return path
 
+    def reservoir_dir_path(self, ws_name):
+        return self.data_dir_path(ws_name) / 'reservoirs'
+
     def config_file_path(self, ws_name):
         return self.config_dir_path(ws_name) / 'startup.py'
 
     def history_file_path(self, ws_name):
         return self.data_dir_path(ws_name) / 'history'
-
-    def reservoir_dir_path(self, ws_name):
-        return self.data_dir_path(ws_name) / 'reservoirs'
 
     def workspace_properties_file_path(self, ws_name):
         assert len(ws_name) > 0

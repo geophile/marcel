@@ -167,6 +167,15 @@ class VarHandlerStartup(object):
         self.vars_written.clear()
         self.vars_deleted.clear()
 
+    # Returns (var, value), where type(value) is Reservoir.
+    def reservoirs(self):
+        reservoirs = []
+        for var in self.save_vars:
+            value = self.getvar(var)
+            if type(value) is marcel.reservoir.Reservoir:
+                reservoirs.append((var, value))
+        return reservoirs
+
 
 class VarHandler(VarHandlerStartup):
     
@@ -183,14 +192,6 @@ class VarHandler(VarHandlerStartup):
 
     def add_written(self, var):
         self.vars_written.add(var)
-
-    def reservoirs(self):
-        reservoirs = []
-        for var in self.save_vars:
-            value = self.getvar(var)
-            if type(value) is marcel.reservoir.Reservoir:
-                reservoirs.append(value)
-        return reservoirs
 
     def check_mutability(self, var):
         if var in self.immutable_vars:
@@ -269,6 +270,9 @@ class Environment(object):
 
     def vars(self):
         return self.var_handler.vars()
+
+    def reservoirs(self):
+        return self.var_handler.reservoirs()
 
     def cluster(self, name):
         cluster = None

@@ -19,6 +19,7 @@ import time
 
 import marcel.exception
 import marcel.object.renderable
+import marcel.reservoir
 
 WORKSPACE_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
@@ -121,7 +122,10 @@ class Workspace(marcel.object.renderable.Renderable):
         pass
 
     def close(self, env):
-        pass
+        for var, reservoir in env.reservoirs():
+            assert type(reservoir) is marcel.reservoir.Reservoir
+            reservoir.close()
+            reservoir.ensure_deleted()
 
     @staticmethod
     def default():
@@ -213,6 +217,10 @@ class WorkspaceNamed(Workspace):
             with open(locations.workspace_environment_file_path(self.name), 'wb') as environment_file:
                 pickler = dill.Pickler(environment_file)
                 pickler.dump(env.persistent_state())
+            # Reservoirs
+            for var, reservoir in env.reservoirs():
+                assert type(reservoir) is marcel.reservoir.Reservoir
+                reservoir.close()
             # Mark this workspace object as closed
             self.properties = None
             # Unlock
@@ -266,8 +274,7 @@ class WorkspaceNamed(Workspace):
             # Unlock
             unlocked_marker_path = marker_path.parent / WorkspaceNamed.MARKER
             marker_path.rename(unlocked_marker_path)
-            if not unlocked_marker_path.exists():
-                assert False, marker_path
+            assert unlocked_marker_path.exists(), marker_path
         else:
             # Owned by someone else?!
             assert False, marker_path

@@ -285,11 +285,10 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
     return first
 
 
-def reservoir(name=None):
+def reservoir(name):
+    assert type(name) is str
+    assert name.isidentifier()
     global _reservoir_counter
-    if name is None:
-        name = f'r{_reservoir_counter}'
-        _reservoir_counter += 1
     return _reservoir.Reservoir(name)
 
 

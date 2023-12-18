@@ -13,30 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
 import tempfile
 
 import marcel.picklefile
 
 
-RESERVOIRS = set()
-
-
-def shutdown(main_pid):
-    if os.getpid() == main_pid:
-        for reservoir in RESERVOIRS:
-            reservoir.close()
-            reservoir.ensure_deleted()
-        RESERVOIRS.clear()
-
-
-# A Reservoir collects and feeds streams.
-
 class Reservoir(marcel.picklefile.PickleFile):
-
-    FLUSH_INTERVAL_SEC = 1
 
     def __init__(self, name, path=None):
         super().__init__(tempfile.mkstemp()[1] if path is None else path)
         self.name = name
-        RESERVOIRS.add(self)

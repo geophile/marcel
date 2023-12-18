@@ -88,8 +88,7 @@ class MainAPI(Main):
 
     def shutdown(self, restart=False):
         namespace = self.env.namespace
-        if not restart:
-            marcel.reservoir.shutdown(self.main_pid)
+        marcel.object.workspace.Workspace.default().close(self.env)
         return namespace
 
     # Internal
@@ -155,8 +154,7 @@ class MainScript(Main):
                 pass
 
     def shutdown(self, restart=False):
-        if not restart:
-            marcel.reservoir.shutdown(self.main_pid)
+        self.workspace.close(self.env)
         # The current main is about to be obsolete, but it still exists, and is registered with atexit,
         # keeping it alive, I think. So it's shutdown handler gets run on shutdown. atexit.unregister
         # prevents this, and only the current Main's shutdown will run, on shutdown.
@@ -212,7 +210,6 @@ class MainInteractive(MainScript):
 
     def shutdown(self, restart=False):
         self.reader.close()
-        self.workspace.close(self.env)
         self.job_control.shutdown()
         return super().shutdown(restart)
 
