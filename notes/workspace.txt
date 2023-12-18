@@ -3,10 +3,6 @@ Tasks
 
 - Reservoirs
 
-    - Put in reservoirs directory.
-
-    - For default workspace, delete on close
-
     - When a reservoir is created, the env must be saved first. Otherwise,
       there could be a reservoir not referenced by the environment.
 

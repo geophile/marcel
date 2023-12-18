@@ -26,7 +26,9 @@ import marcel.util
 
 
 HELP = '''
-{L,wrap=F}edit [COMMAND]
+{L,wrap=F}edit [-s|--startup] [COMMAND] 
+
+{L,indent=4:28}{r:-s}, {--startup}           Edit the marcel startup script.
 
 {L,indent=4:28}{r:COMMAND}                 The number of the command to be edited.
 
@@ -35,10 +37,17 @@ Open an editor to edit the command identified by {r:COMMAND} in the command hist
 executed command will be edited. The editor is selected by the {n:EDITOR}
 environment variable. On exiting the editor, the edited command
 will be on the command line. (Hit enter to run the command, as usual.)
+
+If {r:--startup} is specified, then the marcel startup script for the current workspace is edited.
 '''
 
 
-def edit(n=None):
+def edit(n=None, startup=False):
+    args = []
+    if n is not None:
+        args.append(n)
+    if startup:
+        args.append(startup)
     return Edit(), [] if n is None else [n]
 
 
@@ -46,6 +55,7 @@ class EditArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('edit', env)
+        self.add_flag_no_value('startup', '-s', '--startup')
         self.add_anon('n', convert=self.str_to_int, default=None)
         self.validate()
 
@@ -55,8 +65,9 @@ class Edit(marcel.core.Op):
     def __init__(self):
         super().__init__()
         self.n = None
+        self.startup = None
         self.editor = None
-        self.tmp_file = None
+        self.impl = None
 
     def __repr__(self):
         return 'edit()'
@@ -64,37 +75,11 @@ class Edit(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.editor = Edit.find_editor(env)
-        _, self.tmp_file = tempfile.mkstemp(text=True)
+        editor = Edit.find_editor(env)
+        self.impl = EditStartup(self, editor) if self.startup else EditCommand(self, editor)
 
     def run(self, env):
-        # Remove the edit command from history
-        readline.remove_history_item(readline.get_current_history_length() - 1)
-        if self.n is None:
-            self.n = readline.get_current_history_length() - 1
-        command = readline.get_history_item(self.n + 1)  # 1-based
-        assert command is not None
-        with open(self.tmp_file, 'w') as output:
-            output.write(command)
-        edit_command = f'{self.editor} {self.tmp_file}'
-        process = subprocess.Popen(edit_command,
-                                   shell=True,
-                                   executable=marcel.util.bash_executable(),
-                                   universal_newlines=True)
-        process.wait()
-        with open(self.tmp_file, 'r') as input:
-            command_lines = input.readlines()
-        # Make sure that each new line after the first is preceded by a continuation string.
-        continued_correctly = []
-        correct_termination = env.reader.continuation + '\n'
-        for line in command_lines[:-1]:
-            if not line.endswith(correct_termination):
-                assert line[-1] == '\n', line
-                line = line[:-1] + correct_termination
-            continued_correctly.append(line)
-        continued_correctly.append(command_lines[-1])
-        env.edited_command = ''.join(continued_correctly)
-        os.remove(self.tmp_file)
+        self.impl.run(env)
 
     # Op
 
@@ -115,3 +100,60 @@ class Edit(marcel.core.Op):
                 raise marcel.exception.KillCommandException(
                     "Neither the host OS environment, nor marcel's defines EDITOR")
         return editor
+
+
+class EditImpl(object):
+
+    def __init__(self, op, editor):
+        self.op = op
+        self.editor = editor
+
+    def run(self, env):
+        assert False
+
+    # For use by sumbclasses
+
+    def edit(self, file):
+        edit_command = f'{self.editor} {file}'
+        process = subprocess.Popen(edit_command,
+                                   shell=True,
+                                   executable=marcel.util.bash_executable(),
+                                   universal_newlines=True)
+        process.wait()
+
+
+class EditCommand(EditImpl):
+
+    def __init__(self, op, editor):
+        super().__init__(op, editor)
+        _, self.tmp_file = tempfile.mkstemp(text=True)
+
+    def run(self, env):
+        # Remove the edit command from history
+        readline.remove_history_item(readline.get_current_history_length() - 1)
+        if self.op.n is None:
+            self.op.n = readline.get_current_history_length() - 1
+        command = readline.get_history_item(self.op.n + 1)  # 1-based
+        assert command is not None
+        with open(self.tmp_file, 'w') as output:
+            output.write(command)
+        self.edit(self.tmp_file)
+        with open(self.tmp_file, 'r') as input:
+            command_lines = input.readlines()
+        # Make sure that each new line after the first is preceded by a continuation string.
+        continued_correctly = []
+        correct_termination = env.reader.continuation + '\n'
+        for line in command_lines[:-1]:
+            if not line.endswith(correct_termination):
+                assert line[-1] == '\n', line
+                line = line[:-1] + correct_termination
+            continued_correctly.append(line)
+        continued_correctly.append(command_lines[-1])
+        env.edited_command = ''.join(continued_correctly)
+        os.remove(self.tmp_file)
+
+
+class EditStartup(EditImpl):
+
+    def run(self, env):
+        self.edit(env.locations.config_file_path(env.workspace))

@@ -147,7 +147,7 @@ class Workspace(marcel.object.renderable.Renderable):
 
     def create_dir(self, dir):
         try:
-            os.mkdir(dir)
+            dir.mkdir(parents=True)
             assert dir.exists(), dir
         except FileExistsError:
             pass
