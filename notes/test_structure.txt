@@ -1,0 +1,18 @@
+Tests run in TestBase.test_home (e.g. /tmp/test_home). Structure
+inside that top-level directory:
+
+    .config/
+        startup.py  # Copy of test/.marcel.py
+    
+    .local/share/marcel/
+        history
+    
+    tests/  # For use by tests
+
+----------------------------------------------------------------------
+
+Change os.getenv() calls to os.environ[...]
+
+Testing can specify HOME, then everything else works.
+
+Locations: Rely on $HOME instead of pathlib.Path.home()

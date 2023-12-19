@@ -14,7 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import pickle
+import dill
 import time
 
 
@@ -94,7 +94,8 @@ class Reader(Access):
 
     def __init__(self, owner):
         super().__init__(owner)
-        self.file = open(owner.path, 'r+b')
+        self.file = open(owner.path, 'rb')
+        self.unpickler = dill.Unpickler(self.file)
 
     def __next__(self):
         try:
@@ -113,7 +114,7 @@ class Reader(Access):
         self.close()
 
     def read(self):
-        return pickle.load(self.file)
+        return self.unpickler.load()
 
 
 class Writer(Access):
@@ -123,13 +124,14 @@ class Writer(Access):
     def __init__(self, owner, append):
         super().__init__(owner)
         self.append = append
-        self.file = open(owner.path, 'a+b' if self.append else 'w+b')
+        self.file = open(owner.path, 'ab' if self.append else 'wb')
+        self.pickler = dill.Pickler(self.file)
         self.last_flush = time.time()
 
     def write(self, x):
         assert self.file is not None
         try:
-            pickle.dump(x, self.file)
+            self.pickler.dump(x)
             now = time.time()
             if now - self.last_flush > Writer.FLUSH_INTERVAL_SEC:
                 self.file.flush()
