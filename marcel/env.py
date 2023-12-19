@@ -340,7 +340,7 @@ class EnvironmentScript(Environment):
             assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
             self.depth = None
 
-    # Script and interactive usage rely on the import op to do imports. We don't want to dump these symbols
+    # Script and interactive usage rely on the import op to do imports. We don't want to pickle these symbols
     # in the environment because there is no point in persisting them with a workspace, and the contents of
     # modules are sometimes not serializable. So the env will store Import objects which can be persisted,
     # and handle reimportation.

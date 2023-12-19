@@ -138,7 +138,7 @@ class MainScript(Main):
     def parse_and_run_command(self, text):
         if text:
             try:
-                parser = marcel.parser.Parser(text, self)
+                parser = marcel.parser.Parser(text, self.env)
                 pipeline = parser.parse()
                 pipeline.set_error_handler(MainScript.default_error_handler)
                 if not pipeline.last_op().op_name() == 'write':

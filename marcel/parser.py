@@ -930,10 +930,10 @@ class Parser(object):
             # Lexer.mark() returns text, start, end
             return self.parser.tokens.lexer.mark()[2]
 
-    def __init__(self, text, main):
+    def __init__(self, text, env):
         self.text = text
-        self.env = main.env
-        self.op_modules = main.env.op_modules
+        self.env = env
+        self.op_modules = env.op_modules
         self.tokens = Tokens(self, text)
         self.token = None  # The current token
         self.shell_op = False

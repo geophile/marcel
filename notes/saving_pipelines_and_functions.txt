@@ -1,0 +1,28 @@
+Saving pipelines and functions
+
+This doesn't work very well. It's always a problem, most recently bug
+234.
+
+Only explicitly assigned vars are now persisted (in env.pickle), so
+the current iteration of the problem is due to assigned functions and
+pipelines, e.g. 
+
+    x = (lambda: lambda x: x + 1)
+
+    fn = (| n: gen (int(n)) |)
+
+(Vars are also assigned via import, store, and load, and these special
+cases already work.)
+
+So for vars assigned function (callable() yields True) and pipeline
+values (PipelineExecutable)
+
+- Value is 
+
+        class Compilable
+          - source
+          - compiled
+
+- env.getvar compiles if needed and caches the result in compiled.
+
+- When persisting env: Clear the caches
