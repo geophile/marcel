@@ -32,8 +32,50 @@ returns the current workspace.
 **M 0.20.0 jao@loon ~$** ws
 Workspace()
 ```
-
 `Workspace()` denotes the default workspace.
+
+If I import a module while in the workspace, it stays imported, even if I exit marcel,
+restart it, and join the workspace again:
+
+```shell script
+# import the math module into the a6 workspace
+M 0.20.0 (a6) jao@loon ~$ import math
+M 0.20.0 (a6) jao@loon ~$ (math.pi)
+3.141592653589793
+# Exit and then restart marcel, and go back to the a6 workspace
+M 0.20.0 (a6) jao@loon ~$ exit
+jao@loon:~$ marcel
+M 0.20.0 jao@loon ~$ ws a6
+Workspace(a6)
+# math is still imported
+M 0.20.0 (a6) jao@loon ~$ (math.pi)
+3.141592653589793
+```
+
+All symbols, not just imported ones are scoped to the workspace, and are persistent.
+For example, a persistent pipeline:
+
+```shell script
+# Define a pipeline to find all files under a directory, and compute the
+# sum of file sizes with a given extension.
+M 0.20.0 (a6) jao@loon ~$ extspace = (| dir, ext: \
+M +$    ls -fr (dir) \
+M +$    | select (f: f.suffix == ext) \
+M +$    | map (f: f.size) \
+M +$    | red + \
+M +$    |)
+# Try it out
+M 0.20.0 (a6) jao@loon ~$ extspace git/marcel .py
+43637344
+# Exit marcel, restart it, and go back to the workspace
+M 0.20.0 (a6) jao@loon ~$ exit 
+jao@loon:~$ marcel
+M 0.20.0 jao@loon ~$ ws a6
+Workspace(a6)
+# Try the pipeline previously defined.
+M 0.20.0 (a6) jao@loon ~$ extspace git/marcel .py
+43637344 
+```
 
 
 Marcel

@@ -24,6 +24,7 @@ public = [
     'download',
     'edit',
     'env',
+    'exit',
     'expand',
     'fg',
     'filter',

@@ -367,3 +367,5 @@ if __name__ == '__main__':
         main()
     except marcel.exception.KillShellException as e:
         print(str(e), file=sys.stderr)
+    except marcel.exception.ExitException:
+        sys.exit(0)

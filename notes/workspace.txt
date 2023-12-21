@@ -1,10 +1,6 @@
 
 Tasks
 
-- Workspace marker file: If it has a PID, don't assume it's
-  open. Check if the PID actually exists first. If it doesn't, remove
-  the PID from the name.
-
 - Reservoirs
 
     - When a reservoir is created, the env must be saved first. Otherwise,

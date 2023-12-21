@@ -13,4 +13,38 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-VERSION = '0.21.0'
+import marcel.argsparser
+import marcel.core
+import marcel.exception
+
+HELP = '''
+{L,wrap=F}exit
+
+Marcel exits.
+'''
+
+
+class ExitArgsParser(marcel.argsparser.ArgsParser):
+
+    def __init__(self, env):
+        super().__init__('exit', env)
+        self.validate()
+
+
+class Exit(marcel.core.Op):
+
+    def __repr__(self):
+        return 'exit'
+
+    # AbstractOp
+
+    def run(self, env):
+        raise marcel.exception.ExitException()
+
+    # Op
+
+    def must_be_first_in_pipeline(self):
+        return True
+
+    def run_in_main_process(self):
+        return True

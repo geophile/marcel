@@ -78,6 +78,10 @@ class KillShellException(BaseException):
         super().__init__(cause)
 
 
+class ExitException(BaseException):
+    pass
+
+
 def _format_input_for_reporting(command_input, buffer):
     if isinstance(command_input, list):
         buffer.append(str(tuple(command_input)))
