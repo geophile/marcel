@@ -1,6 +1,10 @@
 
 Tasks
 
+- Workspace marker file: If it has a PID, don't assume it's
+  open. Check if the PID actually exists first. If it doesn't, remove
+  the PID from the name.
+
 - Reservoirs
 
     - When a reservoir is created, the env must be saved first. Otherwise,
@@ -15,12 +19,6 @@ Tasks
     - Flush periodically to avoid bloat.
 
     - Real arg processing for marcel execution.
-
-- Startup script change
-
-    - Default workspace
-
-    - Named workspace
 
 - HistoryRecord
 

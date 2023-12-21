@@ -1,79 +1,39 @@
 What's New
 ----------
 
-Marcel now supports JSON input, output, and translation to and from Python
-data structures.
+This release contains a major new feature: workspaces. A *workspace*
+contains a startup script, a command history, and environment
+variables, separated from those of other workspaces. 
 
-To convert a JSON document into a Python structure, use the `json_parse()` function.
-Example:
+* **Startup script:** The startup script has always been a convenient
+place to import useful modules, define databases and remote access,
+and define useful functions and variables. By providing a startup
+script for each workspace, you don't have to put everything, for all
+projects, into one startup script.
 
-```shell
-convert 'IMG_7079.jpg' json: \
-| red + \
-| (j: json_parse(j))
+* **Command history:** Marcel has always had a persistent command
+history, so the only novelty is the separation by workspace. For
+example, you might have a workspace per project that you're working
+on, and each project would then have its own command history.
+
+* **Environment variables:** Environment variables in workspace
+persist. So any variables defined from the command line are saved, and
+when you next use marcel with the same workspace, your variables are
+still there.
+
+Example: 
+
+* Marcel starts in the default workspace, which has identical behavior
+to that of marcel in previous versions. All workspace operations can
+be accomplished using the `ws` operator. With no arguments `ws`
+returns the current workspace.
+
+```shell script
+**M 0.20.0 jao@loon ~$** ws
+Workspace()
 ```
 
-* `convert IMG_7079.jpg json:` uses ImageMagick's `convert` executable to extract the file's EXIF metadata and format it as a multi-line JSON document. 
-* `red +` concatenates the lines into a single string.
-* `(j: json_parse(j))` parses the JSON string, yielding a Python structure.
-
-`json_parse` uses the Python `json` module to convert the JSON string to a Python
-structure. Consult documentation on
-that module for details of the mapping, but the main points are that JSON objects are mapped to 
-Python dicts, and arrays are mapped to lists. Scalar values translate in the obvious ways. 
-
-Access to the Python rendering of a JSON document is similar to what is supported in 
-[jq](https://jqlang.github.io/jq/). In particular, an object can be accessed using dot notation,
-and arrays can be accessed with subscript and slice notation. 
-Continuing the previous example, the image's name and 
-properties can be extracted (only the last line is new):
-
-```shell
-convert 'IMG_7079.jpg' json: \
-| red + \
-| (x: json_parse(x)) \
-| (i: (i.image.name, i.image.properties))
-```
-
-Or, if only the modification date property is of interest:
-
-```shell
-convert 'IMG_7079.jpg' json: \
-| red + \
-| (x: json_parse(x)) \
-| (i: (i.image.name, i.image.properties['date:modify']))
-```
-
-Note that `date:modify` is not valid
-as a Python identifier, so dict lookup notation is used instead of dot notation. (EXIF metadata 
-converted to 
-JSON has no arrays, but array access can be done using subscript and slice notation as in jq.) 
-
-To make the example a bit more realistic, here is the marcel code to extract the name and 
-modification date metadata for all `jpg` files in the current directory:
-
-```shell
-ls *.jpg | args (| f: \
-    convert (f) json: \
-    | red + \
-    | (x: json_parse(x)) \
-    | (i: (i.image.name, i.image.properties['date:modify'])) |)
-```
-
-Conversion of Python structures to JSON is done by the `json_format()` function. To complete the running
-example, this code generates the extracted metadata as another JSON document:
-
-```shell
-ls *.jpg | args (| f: \
-    convert (f) json: \
-    | red + \
-    | (x: json_parse(x)) \
-    | (i: {'name': i.image.name, 'mod': i.image.properties['date:modify']}) |) \
-| args --all (| name_mod: (json_format(name_mod)) |)
-```
-
-The 2nd-last line generates dicts instead of tuples. The last line gathers up all the
-dicts and formats them into a single JSON document.
+`Workspace()` denotes the default workspace.
 
 
 Marcel

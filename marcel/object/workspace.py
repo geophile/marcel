@@ -20,6 +20,7 @@ import time
 import marcel.exception
 import marcel.object.renderable
 import marcel.reservoir
+import marcel.util
 
 WORKSPACE_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
@@ -122,7 +123,7 @@ class Workspace(marcel.object.renderable.Renderable):
         pass
 
     def close(self, env):
-        for var, reservoir in env.reservoirs():
+        for _, reservoir in env.reservoirs():
             assert type(reservoir) is marcel.reservoir.Reservoir
             reservoir.close()
             reservoir.ensure_deleted()
@@ -263,7 +264,14 @@ class WorkspaceNamed(Workspace):
             pass
         else:
             # It's locked by another process
-            self.cannot_lock_workspace()
+            if marcel.util.process_exists(owner):
+                self.cannot_lock_workspace()
+            else:
+                # Owner disappeared. Rename the file and try again.
+                unlocked_marker_path = marker_path.parent / WorkspaceNamed.MARKER
+                marker_path.rename(unlocked_marker_path)
+                assert unlocked_marker_path.exists(), unlocked_marker_path
+                self.lock_workspace(locations)
 
     def unlock_workspace(self, locations):
         marker_path = locations.workspace_marker_file_path(self)

@@ -205,6 +205,16 @@ def bash_executable():
     return shutil.which('bash')
 
 
+def process_exists(pid):
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except Exception as e:
+        assert False, e
+
+
 class Trace:
 
     def __init__(self, tracefile, replace=False):
