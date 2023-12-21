@@ -20,6 +20,7 @@ import socket
 import sys
 
 import marcel.builtin
+import marcel.compilable
 import marcel.core
 import marcel.directorystate
 import marcel.exception
@@ -36,6 +37,8 @@ import marcel.reservoir
 import marcel.util
 import marcel.version
 import marcel.object.workspace
+
+Compilable = marcel.compilable.Compilable
 
 DEFAULT_CONFIG = '''from marcel.builtin import *
 
@@ -120,6 +123,8 @@ class VarHandlerStartup(object):
         try:
             value = self.env.namespace[var]
             self.vars_read.add(var)
+            if isinstance(value, marcel.compilable.Compilable):
+                value = value.value()
         except KeyError:
             value = None
         return value
@@ -271,6 +276,15 @@ class Environment(object):
     def vars(self):
         return self.var_handler.vars()
 
+    # Should only call this from the assign op, when assigning something that is compilable,
+    # i.e., something with source.
+    def setvar_with_source(self, var, value, source):
+        if callable(value):
+            value = Compilable.for_function(self, f'({source})', value)
+        elif type(value) is marcel.core.PipelineExecutable:
+            value = Compilable.for_pipeline(self, source, value)
+        self.setvar(var, value)
+
     def reservoirs(self):
         return self.var_handler.reservoirs()
 
@@ -401,15 +415,25 @@ class EnvironmentScript(Environment):
         # Interactive and Script usage. (API doesn't use workspaces.)
         marcel.object.workspace.Workspace.default().create(self, DEFAULT_CONFIG)
 
+    # This is destructive. Should be called only as the current workspace is being closed, and this Environment
+    # is being saved.
     def persistent_state(self):
         # Things to persist:
         # - vars mentioned in save_vars
         # - imports
         save = dict()
         save_vars = self.var_handler.save_vars
+        compilable_vars = []
         for var, value in self.namespace.items():
             if var in save_vars:
                 save[var] = value
+                if isinstance(value, Compilable):
+                    compilable_vars.append(var)
+                    value.purge()
+        # Now that we know what to save, remove the compilables. Otherwise, shutdown, which examines the environment,
+        # and does getvars, will fail when getvar is applied to a Compilable.
+        for var in compilable_vars:
+            del self.namespace[var]
         return {'namespace': save,
                 'imports': self.imports}
 
@@ -419,6 +443,9 @@ class EnvironmentScript(Environment):
             persistent_state = self.workspace.persistent_state
             saved_vars = persistent_state['namespace']
             self.namespace.update(saved_vars)
+            for var, value in saved_vars.items():
+                if isinstance(value, Compilable):
+                    value.recompile(self)
             self.var_handler.add_save_vars(*saved_vars)
             imports = persistent_state['imports']
             for i in imports:

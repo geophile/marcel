@@ -769,4 +769,4 @@ Ideas about startup:
 
 ----------------------------------------------------------------------
 
-edit -s: edit startup file
+Assign has three cases: function, pipeline, other. Break out a sublcass for each.

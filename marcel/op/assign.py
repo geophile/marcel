@@ -14,9 +14,12 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import marcel.argsparser
+import marcel.compilable
 import marcel.core
 import marcel.exception
 import marcel.function
+
+Compilable = marcel.compilable.Compilable
 
 
 def assign(var, value):
@@ -41,6 +44,7 @@ class Assign(marcel.core.Op):
         self.pipeline = None
         self.function = None
         self.value = None
+        self.source = None
 
     def __repr__(self):
         return f'assign({self.var}, {self.value})'
@@ -61,7 +65,7 @@ class Assign(marcel.core.Op):
             self.value.set_globals(env.vars())
 
     def run(self, env):
-        env.setvar(self.var, self.value)
+        env.setvar_with_source(self.var, self.value, self.source)
 
     # Op
 
@@ -73,10 +77,11 @@ class Assign(marcel.core.Op):
 
     # Assign
     
-    def set_var_and_value(self, var, value):
+    def set_var_and_value(self, var, value, source):
         assert var is not None
         assert value is not None
         self.var = var
+        self.source = source
         if callable(value):
             self.function = value
         elif type(value) is marcel.core.PipelineExecutable:

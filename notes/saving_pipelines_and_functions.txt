@@ -26,3 +26,19 @@ values (PipelineExecutable)
 - env.getvar compiles if needed and caches the result in compiled.
 
 - When persisting env: Clear the caches
+
+
+The introduction of the Compilable can be done in
+assign.set_var_and_value(). The parser has the source, so pass that
+along as one more arg to set_var_and_value.
+
+ALTERNATIVE
+
+- pipeline already has its source, thanks to PipelineSourceTracker.
+
+- Function is parsed to Expression, which should know it's source too.
+
+
+Compilable needs Parser API for parsing -> function or
+pipeline. Top-level parse() yields a Command, which we don't
+want. pipeline() and arg() look like they should work.

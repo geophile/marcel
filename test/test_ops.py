@@ -1979,8 +1979,8 @@ def test_json():
     test_json_format()
 
 
-@timeit
-def test_workspaces():
+def test_workspace_lifecycle():
+    TEST.reset_environment()
     # Starting state: There is only a default workspace, and it is the current workspace.
     TEST.run('ws | (w: w.is_default())',
              expected_out=[True])
@@ -2082,8 +2082,8 @@ def test_workspaces():
              expected_err='no workspace named hello')
 
 
-@timeit
 def test_workspaces_and_reservoirs():
+    TEST.reset_environment()
     ws_default = marcel.object.workspace.Workspace.default()
     ws_restest = marcel.object.workspace.WorkspaceNamed('restest')
     # Default reservoir including its location
@@ -2121,6 +2121,52 @@ def test_workspaces_and_reservoirs():
     # And contents
     TEST.run(test='g3_restest <$',
              expected_out=[0, 1, 2])
+
+
+def test_workspaces_and_compilables():
+    # Pipelines and functions are Compilables, and require special handling, since they aren't persisted as is.
+    # Instead, their source is persisted, and they are recompiled when necessary, e.g. when switching to a workspace
+    # whose environment stores them.
+    TEST.reset_environment()
+    TEST.run(test='ws -n w',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace(w)'])
+    TEST.run(test='f = (lambda: lambda x: x + 1)',
+             verification='(f(4))',
+             expected_out=[5])
+    TEST.run(test='g3 = (| gen 3 |)',
+             verification='g3',
+             expected_out=[0, 1, 2])
+    TEST.run(test='gn = (| n: gen (int(n)) |)',
+             verification='gn 5',
+             expected_out=[0, 1, 2, 3, 4])
+    # Close the workspace, make sure the vars we've just defined aren't there
+    TEST.run(test='ws -c',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace()'])
+    TEST.run(test='(f(5))',
+             expected_out=[Error('not defined')])
+    TEST.run(test='g3',
+             expected_err='not executable')
+    TEST.run(test='gn 4',
+             expected_err='not executable')
+    # Re-open the workspace, check that everything works
+    TEST.run(test='ws w',
+             verification='ws | (w: str(w))',
+             expected_out=['Workspace(w)'])
+    TEST.run(test='(f(4))',
+             expected_out=[5])
+    TEST.run(test='g3',
+             expected_out=[0, 1, 2])
+    TEST.run(test='gn 5',
+             expected_out=[0, 1, 2, 3, 4])
+
+
+@timeit
+def test_workspaces():
+    test_workspace_lifecycle()
+    test_workspaces_and_reservoirs()
+    test_workspaces_and_compilables()
 
 
 @timeit
@@ -2633,7 +2679,6 @@ def main_stable():
     test_tee()
     test_json()
     test_workspaces()
-    test_workspaces_and_reservoirs()
     test_bugs()
 
 

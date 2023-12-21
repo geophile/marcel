@@ -4496,6 +4496,37 @@ It seems to know it's there, but doesn't have the value?! Try again:
     M 0.19.0 jao@loon ~/git/marcel/test$ (asdf)
     1
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+234. Saved pipelines not working
+
+For AI course A6, I created a workspace and defined these vars:
+
+readdata = (| f: \
+    read -c (f) \
+    | map (sl, sw, pl, pw, c: (c, float(sl), float(sw), float(pl), float(pw))) \
+|)
+
+graph = (| a, b: \
+    map (*t: (t[int(a)+1], t[int(b)+1], t[0])) \
+    | args -a (| x: (zip(*x)) |) \
+    | map (z: scatter(a, b, *list(z))) \
+|)
+
+
+allgraphs = (| f: \
+    gen 3 | args (| a: \
+        gen (3-a) (a+1) | args (| b: \
+            readdata (f) | graph (a) (b) |) |) \
+|)
+
+Exited marcel, restarted, open the ws. Running readdata:
+
+'NoneType' object is not callable
+
 ----------------------------------------------------------------------
 
 FIXED

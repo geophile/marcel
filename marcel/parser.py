@@ -947,6 +947,18 @@ class Parser(object):
             raise EmptyCommand()
         return self.command()
 
+    # Used by Compilable which contains function source and caches the compiled function.
+    def parse_function(self):
+        token = self.arg()
+        # assert type(token) is Expression, f'({type(token)}) {token} '
+        return token.value()
+
+    # Used by Compilable which contains pipeline source and caches the compiled pipeline.
+    def parse_pipeline(self):
+        pipeline = self.pipeline()
+        assert type(pipeline) is marcel.core.PipelineExecutable
+        return pipeline
+
     def command(self):
         if self.next_token(String, Assign):
             command = self.assignment(self.token.value())
@@ -959,15 +971,19 @@ class Parser(object):
     def assignment(self, var):
         self.next_token(Assign)
         arg = self.arg()
+        source = None
         if isinstance(arg, Token):
             value = arg.value()
+            if type(arg) is Expression:
+                source = arg.source()
         elif type(arg) is marcel.core.PipelineExecutable:
             value = arg
+            source = arg.source
         elif arg is None:
             raise SyntaxError(self.token, 'Unexpected token type.')
         else:
             assert False, arg
-        op = self.create_assignment(var, value)
+        op = self.create_assignment(var, value, source)
         return op
     
     def pipeline(self):
@@ -1205,11 +1221,11 @@ class Parser(object):
             op = marcel.opmodule.create_op(self.env, 'bash', *args)
         return op
 
-    def create_assignment(self, var, value):
+    def create_assignment(self, var, value, source):
         assign_module = self.op_modules['assign']
         assert assign_module is not None
         op = assign_module.create_op()
-        op.set_var_and_value(var, value)
+        op.set_var_and_value(var, value, source)
         pipeline = marcel.core.PipelineExecutable()
         pipeline.append(op)
         return pipeline

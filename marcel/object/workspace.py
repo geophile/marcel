@@ -214,14 +214,14 @@ class WorkspaceNamed(Workspace):
             with open(locations.workspace_properties_file_path(self), 'wb') as properties_file:
                 pickler = dill.Pickler(properties_file)
                 pickler.dump(self.properties)
-            # Environment
-            with open(locations.workspace_environment_file_path(self), 'wb') as environment_file:
-                pickler = dill.Pickler(environment_file)
-                pickler.dump(env.persistent_state())
             # Reservoirs
             for var, reservoir in env.reservoirs():
                 assert type(reservoir) is marcel.reservoir.Reservoir
                 reservoir.close()
+            # Environment (Do this last because env.persistent_state() is destructive.)
+            with open(locations.workspace_environment_file_path(self), 'wb') as environment_file:
+                pickler = dill.Pickler(environment_file)
+                pickler.dump(env.persistent_state())
             # Mark this workspace object as closed
             self.properties = None
             # Unlock
