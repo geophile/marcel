@@ -318,6 +318,9 @@ class Environment(object):
     def marcel_usage(self):
         assert False
 
+    def api_usage(self):
+        return self.marcel_usage() == 'api'
+
 
 class EnvironmentAPI(Environment):
 

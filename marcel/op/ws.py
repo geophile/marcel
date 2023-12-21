@@ -194,7 +194,7 @@ class WsImpl(object):
         assert False
 
     def run(self, env):
-        assert False
+        raise marcel.exception.KillCommandException('Not implemented yet')
 
     # For use by subclasses
 
@@ -330,9 +330,6 @@ class WsRename(WsImpl):
     def setup(self, env):
         self.check_anon_arg_present('NEW_NAME')
 
-    def run(self, env):
-        pass
-
 
 class WsCopy(WsImpl):
 
@@ -344,9 +341,6 @@ class WsCopy(WsImpl):
 
     def setup(self, env):
         self.check_anon_arg_present('COPY_NAME')
-
-    def run(self, env):
-        pass
 
 
 class WsExp(WsImpl):
@@ -360,9 +354,6 @@ class WsExp(WsImpl):
     def setup(self, env):
         self.check_anon_arg_present('MWS_FILENAME')
 
-    def run(self, env):
-        pass
-
 
 class WsImp(WsImpl):
     
@@ -374,6 +365,3 @@ class WsImp(WsImpl):
 
     def setup(self, env):
         self.check_anon_arg_present('MWS_FILENAME')
-
-    def run(self, env):
-        pass

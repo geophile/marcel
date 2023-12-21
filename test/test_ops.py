@@ -1826,6 +1826,9 @@ def test_args():
         os.system(f'rm -rf {testdir}/hello')
         os.system(f'echo hello > {testdir}/hello')
         os.system(f'echo hello >> {testdir}/hello')
+    # Bug 237
+    TEST.run('gen 3 | args -a (x: (x))',
+             expected_err='must be a Pipeline')
 
 
 @timeit

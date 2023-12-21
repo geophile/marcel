@@ -727,10 +727,6 @@ History record should include time of execution.
 
 ----------------------------------------------------------------------
 
-Move op tests into ops themselves? Is this feasible for API testing?
-
-----------------------------------------------------------------------
-
 Clusters and Hosts should be renderable. What else is missing that?
 
 ----------------------------------------------------------------------
@@ -766,7 +762,3 @@ Ideas about startup:
 - Replace USER, BOLD, MARCEL_VERSION etc. by functions.
 
 - Replace RUN_ON_STARTUP by run(...)
-
-----------------------------------------------------------------------
-
-Assign has three cases: function, pipeline, other. Break out a sublcass for each.

@@ -202,10 +202,12 @@ class ArgsParser:
         raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
 
     def check_pipeline(self, arg, x):
-        if callable(x):
+        if self.env.api_usage() and (callable(x) or type(x) is marcel.core.OpList):
             # There should be more checking later, regarding the number of args
             return x
-        if type(x) in (str, marcel.core.OpList, marcel.core.PipelineExecutable, marcel.core.PipelineFunction):
+        if not self.env.api_usage() and type(x) in (str,
+                                                    marcel.core.PipelineExecutable,
+                                                    marcel.core.PipelineFunction):
             # str: Presumably the name of a variable bound to a pipelines
             return x
         raise marcel.argsparser.ArgsError(self.op_name,
