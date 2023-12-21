@@ -29,7 +29,7 @@ be accomplished using the `ws` operator. With no arguments `ws`
 returns the current workspace.
 
 ```shell script
-**M 0.20.0 jao@loon ~$** ws
+M 0.20.0 jao@loon ~$ ws
 Workspace()
 ```
 `Workspace()` denotes the default workspace.
