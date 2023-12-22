@@ -25,9 +25,9 @@ HELP = '''
 
 {L,indent=4:28}-k, --keep              Keep input tuples that match any tuple from the PIPELINE.
 
-{L,indent=4:28}-d, --discard           Keep input tuples that do not match any tuple from the PIPELINE.
+{L,indent=4:28}-d, --discard           Discard input tuples that match any tuple from the PIPELINE.
 
-{L,indent=4:28}-c, --compare           The comparison key will be computed by appying the COMPAREW function
+{L,indent=4:28}-c, --compare           The comparison key will be computed by appying the COMPARE function
 to left tuples.
 
 {L,indent=4:28}COMPARE                 Function that computes the comparison key from a left tuple.

@@ -1,6 +1,6 @@
 Here is a function:
 
-    (lambda x: x + 1)
+    (lambda x: x + 1)g
 
 The lambda can be omitted, so this works:
 

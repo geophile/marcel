@@ -22,17 +22,22 @@ class PickleFile:
 
     def __init__(self, path):
         self.path = path
-        self.readers = {}  # id(PickleFile) -> Reader
+        self.readers = {}  # PickleFile -> Reader
         # There should never be more than one writer. A map is a convenient way to record the writer's id and
         # the writer object.
-        self.writers = {}  # id(PickleFile) -> Writer
+        self.writers = {}  # PickleFile -> Writer
 
     def __repr__(self):
-        nr = len(self.readers)
-        nw = len(self.writers)
-        return (f'{self.__class__.__name__}({self.path})'
-                if nr == 0 and nw == 0 else
-                f'{self.__class__.__name__}({self.path}: readers = {nr}, writers = {nw})')
+        return f'{self.__class__.__name__}({self.path})'
+
+    def __hash__(self):
+        return self.path.hash()
+
+    def __eq__(self, other):
+        return self is other or (type(self) is type(other) and self.path == other.path)
+
+    def __ne__(self, other):
+        return not (self == other)
 
     def __iter__(self):
         return self.reader()

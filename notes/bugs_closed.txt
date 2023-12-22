@@ -4600,3 +4600,51 @@ pid.
 Put top-level pid in Env? Or would a global in some module work,
 e.g. TOP_LEVEL_PID = os.getpid()? Job's multiprocessing forks the
 environment, including the global?
+
+----------------------------------------------------------------------
+
+FIXED
+
+239. Reservoirs in default workspaces are flaky
+
+Populate a stream var. I can look at it. But the file isn't there. And
+reading from it again crashes. But the variable is in the environment.
+
+M 0.21.2 jao@loon ~/git/marcel/test$ gen 3 >$ g
+M 0.21.2 jao@loon ~/git/marcel/test$ g <$
+0
+1
+2
+M 0.21.2 jao@loon ~/git/marcel/test$ cd ~/.local/share/marcel
+M 0.21.2 jao@loon ~/.local/share/marcel$ ls
+drwxrwxr-x   jao    jao        4096   2023 Dec 22 09:06:42   .
+-rw-------   jao    jao        3388   2023 Dec 22 12:44:53   history
+drwxrwxr-x   jao    jao        4096   2023 Dec 22 12:47:57   reservoirs
+M 0.21.2 jao@loon ~/.local/share/marcel$ cd reservoirs/
+M 0.21.2 jao@loon ~/.local/share/marcel/reservoirs$ ls
+drwxrwxr-x   jao    jao        4096   2023 Dec 22 12:47:57   .
+M 0.21.2 jao@loon ~/.local/share/marcel/reservoirs$ g <$
+Process Process-5:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env, True)
+  File "/home/jao/git/marcel/marcel/core.py", line 228, in execute
+    self.pipeline.setup(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 357, in setup
+    op.setup(env)
+  File "/home/jao/git/marcel/marcel/op/load.py", line 99, in setup
+    self.reader = iter(self.picklefile)
+  File "/home/jao/git/marcel/marcel/picklefile.py", line 38, in __iter__
+    return self.reader()
+  File "/home/jao/git/marcel/marcel/picklefile.py", line 49, in reader
+    reader = Reader(self)
+  File "/home/jao/git/marcel/marcel/picklefile.py", line 97, in __init__
+    self.file = open(owner.path, 'rb')
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jao/.local/share/marcel/reservoirs/713612.g.pickle'
+M 0.21.2 jao@loon ~/.local/share/marcel/reservoirs$ 
+M 0.21.2 jao@loon ~/.local/share/marcel/reservoirs$ (g)
+Reservoir(/home/jao/.local/share/marcel/reservoirs/713612.g.pickle)
