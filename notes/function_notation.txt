@@ -1,0 +1,47 @@
+Here is a function:
+
+    (lambda x: x + 1)
+
+The lambda can be omitted, so this works:
+
+    (x: x + 1)
+
+If there are no arguments:
+
+    (lambda: 5 + 6)
+
+or just:
+
+    (5 + 6)
+
+This is handy for examining vars, e.g.
+
+    (USER)
+
+The focus here is on assignment statements. These do the same thing:
+
+    ELEVEN = (lambda: 5 + 6)
+
+    ELEVEN = (5 + 6)
+
+In other words:
+
+- If no lambda is present, "lambda:" is assumed.
+
+- The resulting stuff between parens is evaluated as a function.
+
+But this gets clunky if we want to assign a function to a variable. E.g.
+
+    inc = (lambda x: x + 1)
+
+doesn't work. lambda is present, so the stuff between parens is left
+alone. Evaluating that, x is unbound so we get an error message.
+
+Fix:
+
+- Let (lambda x: ...) be understood as (lambda: lambda x: ...). I.e.,
+  a lambda with one or more args implies that a function is being
+  returned.
+
+- If you really want a function of zero args, it would have to be
+  (lambda: lambda: ...) But that should be pretty uncommon.

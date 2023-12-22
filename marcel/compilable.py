@@ -31,7 +31,6 @@ class Compilable(object):
     def recompile(self, env):
         self.env = env
         self.compiled = self.compile()
-        return
 
     def purge(self):
         self.env = None
@@ -61,12 +60,12 @@ class CompilableFunction(Compilable):
 
     def compile(self):
         assert self.env
-        f = marcel.parser.Parser(self.source, self.env).parse_function()
+        function = marcel.parser.Parser(self.source, self.env).parse_function()
         # The variable owning this Compilable was assigned using this marcel syntax: var = (...).
-        # The function in the parens is evaluated and assigned to the var. In this case, that value is
-        # itself a function. f is a function which needs to be evaluated, similar to what happened during the original
-        # assign op.
-        return f()
+        # The expression in the parens is evaluated and assigned to the var. For a CompilableFunction (this class),
+        # that value is itself a function. That return value of parse_function() needs to be evaluated, similar to
+        # what happened during the original assign op.
+        return function()
 
     # A function-valued env var can be called as a function. In that case, env.getvar is bypassed and the Compilable
     # is invoked directly.
