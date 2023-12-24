@@ -719,10 +719,6 @@ set. Don't be so dumb.
 
 ----------------------------------------------------------------------
 
-Need an exit command, which is run by Ctrl-D.
-
-----------------------------------------------------------------------
-
 History record should include time of execution.
 
 ----------------------------------------------------------------------
@@ -762,3 +758,9 @@ Ideas about startup:
 - Replace USER, BOLD, MARCEL_VERSION etc. by functions.
 
 - Replace RUN_ON_STARTUP by run(...)
+
+----------------------------------------------------------------------
+
+help_workspace.py
+
+Mention workspaces in top-level help

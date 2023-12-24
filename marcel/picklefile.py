@@ -22,10 +22,8 @@ class PickleFile:
 
     def __init__(self, path):
         self.path = path
-        self.readers = {}  # PickleFile -> Reader
-        # There should never be more than one writer. A map is a convenient way to record the writer's id and
-        # the writer object.
-        self.writers = {}  # PickleFile -> Writer
+        self._readers = {}  # PickleFile -> Reader
+        self._writer = None
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.path})'
@@ -50,19 +48,19 @@ class PickleFile:
         return self
 
     def reader(self):
-        assert len(self.writers) == 0, self
+        assert self._writer is None, self
         reader = Reader(self)
-        self.readers[id(self)] = reader
+        self._readers[id(self)] = reader
         return reader
 
     def writer(self, append):
-        assert len(self.readers) == 0 and len(self.writers) == 0, self
+        assert len(self._readers) == 0 and self._writer is None, self
         writer = Writer(self, append)
-        self.writers[id(self)] = writer
+        self._writer = writer
         return writer
 
     def ensure_deleted(self):
-        assert len(self.readers) == 0 and len(self.writers) == 0, self
+        assert len(self._readers) == 0 and self._writer is None, self
         try:
             os.unlink(self.path)
         except FileNotFoundError:
@@ -71,12 +69,10 @@ class PickleFile:
     def close(self):
         self_id = id(self)
         try:
-            access = self.readers.pop(self_id)
+            access = self._readers.pop(self_id)
         except KeyError:
-            try:
-                access = self.writers.pop(self_id)
-            except KeyError:
-                access = None
+            access = self._writer
+            self._writer = None
         if access is not None:
             access.close_file()
 

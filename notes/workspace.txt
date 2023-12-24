@@ -144,11 +144,10 @@ opened.
 
 Opening a workspace: A workspace is opened when it is created, or when
 it is explicitly opened, e.g. "workspace --open NAME". When a
-workspace is joined, the session's currently bound workspace is
-closed.
+workspace is opened, the session's currently open workspace is closed.
 
 Closing a workspace: A workspace is closed by a session when it is in
-use by a session, and the session joins a different workspace. Upon
+use by a session, and the session opens a different workspace. Upon
 closing, the command history is saved, and for a named workspace, the
 environment is saved. When the default workspace is closed, the
 environment is lost. A workspace can also be closed by marcel command,
@@ -210,8 +209,6 @@ EXPORT_MWS NEW_NAME".
 ----------------------------------------------------------------------
 
 Structure on disk:
-
-Each workspace has its own startup?
 
 .config/marcel/
     startup.py  # For anon workspaces, and template for named
@@ -309,7 +306,7 @@ EVERYTHING is kept. Common shell usage is to refine commands until
 they work properly. Just save the final, correct version.
 
 Infinite output problem iss avoided. It should be pretty obvious that
-"timer 1 ... > var" is a bad idea.
+"timer 1 ... >$ var" is a bad idea.
 
 ----------------------------------------------------------------------
     

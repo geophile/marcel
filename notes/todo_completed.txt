@@ -991,3 +991,7 @@ Error: ['\t--version']
 Error: ['Shell options:']
 Error: ['\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)']
 Error: ['\t-abefhkmnptuvxBCHP or -o option']
+
+----------------------------------------------------------------------
+
+Need an exit command, which is run by Ctrl-D.

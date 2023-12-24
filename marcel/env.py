@@ -558,8 +558,8 @@ class EnvironmentInteractive(EnvironmentScript):
             buffer = []
             color = None
             for x in prompt_pieces:
-                # In each iteration, we either have a color, or a prompt component. In the latter case,
-                # append it to the buffer, colorizing if color is defined.
+                # In each iteration, we have a color, a prompt component, or a function creating a prompt component.
+                # In the last two cases, append the prompt component to the buffer, colorizing if color is defined.
                 if isinstance(x, marcel.object.color.Color):
                     color = x
                     x = None
