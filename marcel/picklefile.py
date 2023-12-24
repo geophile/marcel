@@ -22,7 +22,7 @@ class PickleFile:
 
     def __init__(self, path):
         self.path = path
-        self._readers = {}  # PickleFile -> Reader
+        self._readers = {}  # path -> Reader
         self._writer = None
 
     def __repr__(self):
@@ -50,7 +50,7 @@ class PickleFile:
     def reader(self):
         assert self._writer is None, self
         reader = Reader(self)
-        self._readers[id(self)] = reader
+        self._readers[self.path] = reader
         return reader
 
     def writer(self, append):
@@ -67,9 +67,8 @@ class PickleFile:
             pass
 
     def close(self):
-        self_id = id(self)
         try:
-            access = self._readers.pop(self_id)
+            access = self._readers.pop(self.path)
         except KeyError:
             access = self._writer
             self._writer = None
