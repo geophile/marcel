@@ -42,8 +42,7 @@ class MultiLineReader:
         history_file.touch(0o666)
         self.continuation = continuation
         self.history_file = history_file
-        if history_file:
-            self._fix_history()
+        self._fix_history()
 
     def __getstate__(self):
         assert False, "Don't pickle multilinereader"

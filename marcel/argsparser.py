@@ -246,13 +246,20 @@ class ArgsParser:
     # Python expressions, (parser.Expression). x is function source for console usage,
     # a callable for API usage.
     def function(self, arg, x):
+        f = None
         if isinstance(x, marcel.function.Function):
             f = x
         elif callable(x):
             f = marcel.function.NativeFunction(function=x)
         elif type(x) is str:
-            f = marcel.function.SymbolFunction(x)
-        else:
+            try:
+                f = marcel.function.SymbolFunction(x)
+            except KeyError:
+                # Could be a function name, which should be in the environment
+                xval = self.env.getvar(x)
+                if callable(xval):
+                    f = marcel.function.NativeFunction(function=xval)
+        if f is None:
             raise ArgsError(arg.op_name, f'{arg.name} argument must be a function.')
         return f
 

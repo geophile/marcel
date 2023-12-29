@@ -4648,3 +4648,9 @@ FileNotFoundError: [Errno 2] No such file or directory: '/home/jao/.local/share/
 M 0.21.2 jao@loon ~/.local/share/marcel/reservoirs$ 
 M 0.21.2 jao@loon ~/.local/share/marcel/reservoirs$ (g)
 Reservoir(/home/jao/.local/share/marcel/reservoirs/713612.g.pickle)
+
+----------------------------------------------------------------------
+
+FIXED
+
+242. Function defined in startup.py can't be used in reduction? 

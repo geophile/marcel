@@ -332,6 +332,9 @@ def test_red():
              expected_out=[(0, 1), (1, 2), (2, 3)])
     TEST.run('gen 5 | (x: (x // 2, None)) | red . count | sort',
              expected_out=[(0, 2), (1, 2), (2, 1)])
+    # Bug 242
+    TEST.run('gen 3 | red growset',
+             expected_out=[{0, 1, 2}])
 
 
 @timeit

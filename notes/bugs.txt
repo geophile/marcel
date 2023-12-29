@@ -915,3 +915,36 @@ Traceback (most recent call last):
 FileNotFoundError: [Errno 2] No such file or directory
 jao@loon:/tmp/test_home$ 
 
+----------------------------------------------------------------------
+
+240. Syntax error in startup.py crashes marcel
+
+M 0.21.2 jao@loon ~/hacks/jeffrey$ ws jeffrey
+Workspace(jeffrey)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 367, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 360, in main
+    main_interactive_run()
+  File "/home/jao/git/marcel/marcel/main.py", line 329, in main_interactive_run
+    main = MainInteractive(main, env, workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 199, in __init__
+    super().__init__(env, workspace, testing)
+  File "/home/jao/git/marcel/marcel/main.py", line 109, in __init__
+    startup_vars = self.read_config()
+  File "/home/jao/git/marcel/marcel/main.py", line 121, in read_config
+    self.env.read_config()
+  File "/home/jao/git/marcel/marcel/env.py", line 471, in read_config
+    exec(config_source, self.namespace, locals)
+  File "<string>", line 118
+    return f'{eval(line[:colon)},{float(line[r:r_end])},{float(line[b:b_end])},{float(line[g:g_end])}'
+                                                                                                      ^
+SyntaxError: f-string: closing parenthesis ')' does not match opening parenthesis '['
+
+----------------------------------------------------------------------
+
+241. Command killed by ctrl-c doesn't make it into history?
