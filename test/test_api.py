@@ -418,6 +418,13 @@ def test_expand():
     # Bug 158
     TEST.run(lambda: run(gen(3, 1) | map(lambda x: [str(x * 111)] * x) | expand()),
              expected_out=[111, 222, 222, 333, 333, 333])
+    # dicts
+    TEST.run(test=lambda: run(map(lambda: {1: 2, 3: 4, 5: 6}) | expand()),
+             expected_out=[(1, 2), (3, 4), (5, 6)])
+    TEST.run(test=lambda: run(map(lambda: ("a", {1: 2, 3: 4, 5: 6}, "b")) | expand(1)),
+             expected_out=[('a', (1, 2), 'b'),
+                           ('a', (3, 4), 'b'),
+                           ('a', (5, 6), 'b')])
 
 
 @timeit

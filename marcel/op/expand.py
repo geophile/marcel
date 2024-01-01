@@ -48,8 +48,8 @@ at the indicated position.
 An output tuple is generated for each item in that embedded sequence, replacing the embedded
 sequence by one of its contained items.
 
-The types that can be expanded are sequences ({r:list}, {r:tuple}, {r:str}), {r:generator}s, 
-and {r:iterator}s.
+The types that can be expanded are sequences ({n:list}, {n:tuple}, {n:str}), {n:dict}s, {n:generator}s, 
+{n:iterator}s. For a {n:dict}, each key:value pair is turned into a tuple, (key, value).
 
 {b:Example}: If the input contains these sequences:
 {p,wrap=F}
@@ -112,17 +112,16 @@ class Expander:
 
     @staticmethod
     def expand(x):
-        if marcel.util.is_sequence(x):
-            if len(x) != 1:
-                return x
-            only = x[0]
-            # TODO: Generators
-            if marcel.util.is_sequence(only):
-                return only
-            else:
-                return x
+        if len(x) != 1:
+            return x
+        only = x[0]
+        # TODO: Generators
+        if marcel.util.is_sequence(only) or marcel.util.is_generator(only):
+            return only
+        elif isinstance(only, dict):
+            return list(only.items())
         else:
-            return [x]
+            return x
 
 
 class SequenceExpander(Expander):

@@ -372,14 +372,6 @@ inherited from Pipeline.copy()?
 
 ----------------------------------------------------------------------
 
-IDEA: Implement interactive usage by translating into API.
-
-----------------------------------------------------------------------
-
-Resurrect SQL
-
-----------------------------------------------------------------------
-
 test_ls(): See test_filename_ops. Interactive only, need API vesrion.
 
 ls needs work on links. From bash:
@@ -479,45 +471,6 @@ May 30 03:32:38 cheese MiniMachete: Unmounting backup
 May 30 03:33:09 cheese MiniMachete: backup to acme: Backup starting
 May 30 04:33:51 cheese MiniMachete: backup to acme: Backup finished
 M 0.16.1 jao@cheese ~$ 
-
-----------------------------------------------------------------------
-
-Have expand work on maps?
-
-E.g. expand {'a': 1, 'b': 2} -> ('a', 1), ('b', 2)
-
-----------------------------------------------------------------------
-
-Reduction to form a list is clunky. Need to enclose the items to be
-gathered into lists before reduction with +.
-
-    p = (| n: gen (int(n)) | (x: (x, [x]*x)) | expand 1
-
-    p 5 | (x, y: (x, [y]) | red . +
-
-Also, list growth is quadratic. Each reduction with + requires copying
-of the list.
-
-Could add a reduction function, gather:
-
-    p 5 | red . gather
-
-gather(x) -> x for non-list x.
-
-def gather(acc, x):
-    if acc is None:
-        return [x]
-    else:
-        acc.append(x)
-        return acc
-
-This appends to an accumulating list instead of creating a new list
-each time, so linear.
-
-
-In reduction.py, r_concat does exactly this, so that red . concat works.
-
-But the reduction function must be hardwired. Why not open it up?
             
 ----------------------------------------------------------------------
 
@@ -764,3 +717,21 @@ Ideas about startup:
 help_workspace.py
 
 Mention workspaces in top-level help
+
+----------------------------------------------------------------------
+
+Does util need both of these?
+
+def is_sequence(x):
+    return type(x) is not str and isinstance(x, collections.abc.Sequence)
+
+
+def is_sequence_except_string(x):
+    t = type(x)
+    return t is tuple or t is list
+
+----------------------------------------------------------------------
+
+Have expand work on generators. There's TODO in expand. The problem is
+recognizing a generator. Should include zips, but util.is_generator
+doesn't do it.

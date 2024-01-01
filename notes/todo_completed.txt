@@ -995,3 +995,46 @@ Error: ['\t-abefhkmnptuvxBCHP or -o option']
 ----------------------------------------------------------------------
 
 Need an exit command, which is run by Ctrl-D.
+
+----------------------------------------------------------------------
+
+Resurrect SQL
+
+----------------------------------------------------------------------
+
+Reduction to form a list is clunky. Need to enclose the items to be
+gathered into lists before reduction with +.
+
+    p = (| n: gen (int(n)) | (x: (x, [x]*x)) | expand 1
+
+    p 5 | (x, y: (x, [y]) | red . +
+
+Also, list growth is quadratic. Each reduction with + requires copying
+of the list.
+
+Could add a reduction function, gather:
+
+    p 5 | red . gather
+
+gather(x) -> x for non-list x.
+
+def gather(acc, x):
+    if acc is None:
+        return [x]
+    else:
+        acc.append(x)
+        return acc
+
+This appends to an accumulating list instead of creating a new list
+each time, so linear.
+
+
+In reduction.py, r_concat does exactly this, so that red . concat works.
+
+But the reduction function must be hardwired. Why not open it up?
+
+----------------------------------------------------------------------
+
+Have expand work on maps?
+
+E.g. expand {'a': 1, 'b': 2} -> ('a', 1), ('b', 2)
