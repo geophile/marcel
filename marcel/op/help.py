@@ -63,7 +63,7 @@ class Help(marcel.core.Op):
 
     def run(self, env):
         op_module = env.op_modules.get(self.topic, None)
-        help_text = self.op_help(env, op_module) if op_module else self.topic_help(env)
+        help_text = Help.op_help(env, op_module) if op_module else self.topic_help(env)
         self.send(env, help_text)
         self.send(env, '')
 
@@ -77,7 +77,8 @@ class Help(marcel.core.Op):
 
     # For use by this class
 
-    def op_help(self, env, op_module):
+    @staticmethod
+    def op_help(env, op_module):
         help_text = op_module.help()
         formatter = marcel.helpformatter.HelpFormatter(env.color_scheme())
         return formatter.format(help_text)

@@ -63,10 +63,6 @@ def gid(groupname):
 
 
 def is_sequence(x):
-    return type(x) is not str and isinstance(x, collections.abc.Sequence)
-
-
-def is_sequence_except_string(x):
     t = type(x)
     return t is tuple or t is list
 

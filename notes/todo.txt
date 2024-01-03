@@ -735,3 +735,13 @@ def is_sequence_except_string(x):
 Have expand work on generators. There's TODO in expand. The problem is
 recognizing a generator. Should include zips, but util.is_generator
 doesn't do it.
+
+----------------------------------------------------------------------
+
+3 queens in marcel. First attempt fails:
+
+gen 3 | args (| a: gen 3 | args (| b: gen 3 | args (| c: select (lambda: abs(a-b) != 1 and abs(b-c) != 1 and abs(a-c) != 2) |) |) |)
+
+Error: select cannot be the first operator in a pipeline
+
+Maybe reconsider the restriction?

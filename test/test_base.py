@@ -304,7 +304,7 @@ class TestAPI(TestBase):
         def match():
             if type(expected) != type(actual):
                 return False
-            if not marcel.util.is_sequence_except_string(expected):
+            if not marcel.util.is_sequence(expected):
                 return expected == actual
             if type(expected) is marcel.object.error.Error:
                 return expected.message in actual.message
