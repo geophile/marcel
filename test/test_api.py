@@ -425,6 +425,9 @@ def test_expand():
              expected_out=[('a', (1, 2), 'b'),
                            ('a', (3, 4), 'b'),
                            ('a', (5, 6), 'b')])
+    # Expand generator-like objects (having __next__)
+    TEST.run(test=lambda: run(map(lambda: zip([1, 2, 3], [4, 5, 6])) | expand()),
+             expected_out=[(1, 4), (2, 5), (3, 6)])
 
 
 @timeit
