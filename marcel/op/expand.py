@@ -148,9 +148,15 @@ class ComponentExpander(Expander):
             pre = sequence[:self.position]
             post = sequence[(self.position + 1):]
             send = self.op.send
-            for x in Expander.expand([sequence[self.position]]):
-                send(env, pre + (x,) + post)
-
+            assert type(pre) == type(post)
+            if type(pre) is tuple:
+                for x in Expander.expand([sequence[self.position]]):
+                    send(env, pre + (x,) + post)
+            elif type(pre) is list:
+                for x in Expander.expand([sequence[self.position]]):
+                    send(env, pre + [x,] + post)
+            else:
+                assert False, f'Unanticipated input type: ({type(pre)}) {pre}'
 
 class NotExpandableException(Exception):
     not_expandable = None
