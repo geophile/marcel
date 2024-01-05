@@ -68,7 +68,7 @@ def is_sequence(x):
 
 
 def is_generator(x):
-    return isinstance(x, collections.abc.Generator)
+    return hasattr(x, '__next__')
 
 
 def is_file(x):

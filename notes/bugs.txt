@@ -886,3 +886,117 @@ drwxrwxr-x   jao    jao        4096   2023 Dec 29 15:12:13   venv
 -rw-rw-r--   jao    jao        3541   2023 Dec 29 16:53:54   solve.py
 drwxrwxr-x   jao    jao        4096   2023 Dec 29 16:54:10   .
 -rw-rw-r--   jao    jao     3096968   2023 Dec 29 16:54:10   jeffrey.jpg
+
+----------------------------------------------------------------------
+
+242. Questionable usage causes crash
+
+Same var used for both load and store.
+
+M 0.21.2 (queens) jao@loon ~$ x <$ (x: x+1) >$ x
+Process Process-4:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env, True)
+  File "/home/jao/git/marcel/marcel/core.py", line 228, in execute
+    self.pipeline.setup(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 357, in setup
+    op.setup(env)
+  File "/home/jao/git/marcel/marcel/op/store.py", line 114, in setup
+    self.writer = self.reservoir.writer(append=self.append)
+  File "/home/jao/git/marcel/marcel/picklefile.py", line 57, in writer
+    assert len(self._readers) == 0 and self._writer is None, self
+AssertionError: Reservoir(/home/jao/.local/share/marcel/queens/reservoirs/x.pickle)
+
+----------------------------------------------------------------------
+
+243. List/tuple confusion causes crash
+
+This happens a lot. Revisit tuple/list usage and try to settle on one,
+and not crash when there's a conflict.
+
+M 0.21.2 (queens) jao@loon ~$ c1 = (lambda: lambda n: list(range(int(n))))
+M 0.21.2 (queens) jao@loon ~$ (c1(3))
+[0, 1, 2]
+M 0.21.2 (queens) jao@loon ~$ c2 = (lambda: lambda n: [(x, c1(n)) for x in list(range(int(n)))])
+M 0.21.2 (queens) jao@loon ~$ (c2(3))
+[(0, [0, 1, 2]), (1, [0, 1, 2]), (2, [0, 1, 2])]
+M 0.21.2 (queens) jao@loon ~$ (c2(3)) | expand 1
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 367, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 360, in main
+    main_interactive_run()
+  File "/home/jao/git/marcel/marcel/main.py", line 331, in main_interactive_run
+    main.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 236, in run
+    self.parse_and_run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 147, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 220, in execute_command
+    command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 229, in execute
+    self.pipeline.run(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 362, in run
+    self.ops[0].run(env)
+  File "/home/jao/git/marcel/marcel/op/map.py", line 64, in run
+    self.send(env, self.call(env, self.function))
+  File "/home/jao/git/marcel/marcel/core.py", line 80, in send
+    receiver.receive_input(env, x)
+  File "/home/jao/git/marcel/marcel/core.py", line 113, in receive_input
+    self.receive(env, x if type(x) in (tuple, list) else (x,))
+  File "/home/jao/git/marcel/marcel/op/expand.py", line 102, in receive
+    self.expander.receive(env, x)
+  File "/home/jao/git/marcel/marcel/op/expand.py", line 153, in receive
+    send(env, pre + (x,) + post)
+TypeError: can only concatenate list (not "tuple") to list
+
+----------------------------------------------------------------------
+
+244. ws commands don't work in script
+
+/tmp/q.m:
+
+ws queens
+queens 4
+
+Using it:
+
+jao@loon:~$ marcel /tmp/q.m
+Workspace(queens)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 367, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 362, in main
+    main_script_run(script)
+  File "/home/jao/git/marcel/marcel/main.py", line 351, in main_script_run
+    main.run_script(script_file.read())
+  File "/home/jao/git/marcel/marcel/main.py", line 184, in run_script
+    self.parse_and_run_command(command)
+  File "/home/jao/git/marcel/marcel/main.py", line 147, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 166, in execute_command
+    command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 229, in execute
+    self.pipeline.run(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 362, in run
+    self.ops[0].run(env)
+  File "/home/jao/git/marcel/marcel/op/ws.py", line 176, in run
+    self.impl.run(env)
+  File "/home/jao/git/marcel/marcel/op/ws.py", line 279, in run
+    self.reconfigure(workspace)
+  File "/home/jao/git/marcel/marcel/op/ws.py", line 202, in reconfigure
+    raise marcel.exception.ReconfigureException(workspace)
+marcel.exception.ReconfigureException

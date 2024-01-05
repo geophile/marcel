@@ -115,7 +115,6 @@ class Expander:
         if len(x) != 1:
             return x
         only = x[0]
-        # TODO: Generators
         if marcel.util.is_sequence(only) or marcel.util.is_generator(only):
             return only
         elif isinstance(only, dict):
