@@ -169,22 +169,8 @@ class MainScript(Main):
         run_on_startup = self.env.getvar('RUN_ON_STARTUP')
         if run_on_startup:
             if type(run_on_startup) is str:
-                self.run_script(run_on_startup)
-            else:
-                fail(f'RUN_ON_STARTUP must be a string')
-
-    def run_script(self, script):
-        command = ''
-        for line in script.split('\n'):
-            if len(line.strip()) > 0:
-                if line.endswith('\\'):
-                    command += line[:-1]
-                else:
-                    command += line
+                for command in commands_in_script(run_on_startup):
                     self.parse_and_run_command(command)
-                    command = ''
-        if len(command) > 0:
-            self.parse_and_run_command(command)
 
     # Internal
 
@@ -280,6 +266,20 @@ class MainInteractive(MainScript):
         print(error.render_full(env.color_scheme()), flush=True)
 
 
+def commands_in_script(script):
+    command = ''
+    for line in script.split('\n'):
+        if len(line.strip()) > 0:
+            if line.endswith('\\'):
+                command += line[:-1]
+            else:
+                command += line
+                yield command
+                command = ''
+    if len(command) > 0:
+        yield command
+
+
 def fail(message):
     print(message, file=sys.stderr)
     exit(1)
@@ -342,15 +342,28 @@ def main_interactive_run():
                 main.input = None
 
 
-def main_script_run(script):
-    workspace = marcel.object.workspace.Workspace.default()
-    env = marcel.env.EnvironmentScript.create(marcel.locations.Locations(), workspace)
-    main = MainScript(env, workspace)
+def main_script_run(script_path):
     try:
-        with open(script, 'r') as script_file:
-            main.run_script(script_file.read())
+        with open(script_path, 'r') as script_file:
+            script = script_file.read()
     except FileNotFoundError:
-        fail(f'File not found: {script}')
+        fail(f'File not found: {script_path}')
+    commands = commands_in_script(script)
+    workspace = marcel.object.workspace.Workspace.default()
+    locations = marcel.locations.Locations()
+    env = marcel.env.EnvironmentScript.create(locations, workspace)
+    main = MainScript(env, workspace)
+    for command in commands:
+        try:
+            main.parse_and_run_command(command)
+        except marcel.exception.ReconfigureException as e:
+            main.shutdown(restart=True)
+            # e.workspace_to_open implies startup script change, which shouldn't happen
+            # while running a script.
+            assert e.workspace_to_open is not None
+            workspace = e.workspace_to_open
+            env = marcel.env.EnvironmentScript.create(locations, workspace)
+            main = MainScript(env, workspace)
 
 
 def main():
