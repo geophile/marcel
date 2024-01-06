@@ -147,8 +147,8 @@ class ComponentExpander(Expander):
             assert self.position < len(sequence)
             pre = sequence[:self.position]
             post = sequence[(self.position + 1):]
-            send = self.op.send
             assert type(pre) == type(post)
+            send = self.op.send
             if type(pre) is tuple:
                 for x in Expander.expand([sequence[self.position]]):
                     send(env, pre + (x,) + post)

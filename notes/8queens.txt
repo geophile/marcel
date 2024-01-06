@@ -1,0 +1,131 @@
+The Eight Queens Puzzle
+
+The Eight Queens puzzle is well-known (https://en.wikipedia.org/wiki/Eight_queens_puzzle), and has become a common, easy programming problem. It can be implemented pretty easily in marcel. The implementation here solves the more general N-Queens puzzle.
+
+The problem can be broken into two parts. First, we generate candidate boards -- a position for each queen. For 4-queens, numbering the position in each column starting at zero, we can try (0, 0, 0, 0), (0, 0, 0, 1), ..., (3, 3, 3, 3).
+
+Second, we need to filter the candidates, checking that no two queens attack one another. Obviously we can't have the same position repeated. Two queens, in different columns but the same row, attack each other. Also, adjacent entries cannot differ by 1, as that would give us two queens, one square away from each other diagonally. Generalizing, queens in columns x and x+k must differ by some number other than k.
+
+Let's do the filtering first. We can define a marcel pipeline that, given a candidate c, checks that there are no duplicates and no diagonal attacks:
+
+import functools reduce
+
+queens_filter = (| n: \
+    select (*c: len(set(c)) == len(c) and \
+                reduce(and_all, \
+                       [reduce(and_all, \
+                               [abs(c[i]-c[i+j]) != j \
+                                for i in range(n-j)]) \
+                        for j in range(1, n)])) \
+|)
+
+- queens_filter is a paramterized pipeline. The argument n, is the number of queens, and the size of the board.
+
+- Candidate tuples (like (0, 2, 3, 1)) are piped in and bound to c.
+
+- len(set(c)) == len(c) is true if and only if there are no duplicates in c.
+
+- The rest of the code is two loops. The inner loop checks diagonals that are i columns apart. The outer loop generates increasing values of i.
+
+- The results of all the diagonal tests are combined using Python's functools.reduce.
+
+- The reduction function is and_all, which computes the and of all the individual conditions. It can be defined in marcel:
+
+    and_all = (lambda: lambda acc, x: x if acc is None else (acc and x))
+
+Generating the candidates can be done using Python's itertools.product:
+
+import itertools product
+
+queens_candidates = (| n: (product(range(n), repeat=n)) | expand |)
+
+
+- product(range(n), repeat=n) generates all n**n candidates as a generator.
+
+- expand sends the individual candidates into a stream.
+
+These pipelines can be combined in another pipeline:
+
+queens = (| n: queens_candidates (int(n)) | queens_filter (int(n)) |)
+
+Now, to solve 8-Queens, the marcel command is
+
+     queens 8
+
+This takes nearly 3 minutes on my laptop.
+
+It is easier to do a lot better.  There are n**n candidates, a number which gets large quickly. If you think about it, a solution of N-Queens must be a permutation of (0, 1, 2, 3, 4, 5, 6, 7).  There are n! permutations, and while that is large, it isn't as bad as n**n.  (For 8-queens, n**n is 16,777,216 while n! is 40,320.) This is an easy fix. Use itertools.permutations, and then the filter can be simplified to just check diagonals:
+
+queens_candidates = (| n: (permutations(range(n))) | expand |)
+
+queens_filter = (| n: \
+    select (*c: reduce(and_all, \
+                       [reduce(and_all, \
+                               [abs(c[i]-c[i+j]) != j \
+                                for i in range(n-j)]) \
+                        for j in range(1, n)])) \
+|)
+
+With this improvement, 8-Queens is solved in 1.6 seconds.
+
+Now the inevitable question: Can N-Queends be implemented as a marcel one-liner? Of course, just expand and_all, queens_filter and queens_candidates. Admittedly, it is a long line.
+
+
+queens = (| n: \
+    (permutations(range(int(n)))) | expand | \
+    select (*c: reduce(lambda acc, x: x if acc is None else (acc and x), \
+                       [reduce(lambda acc, x: x if acc is None else (acc and x), \
+                               [abs(c[i]-c[i+j]) != j \
+                                for i in range(int(n)-j)]) \
+                        for j in range(1, int(n))])) \
+|)
+
+
+----------------------------------------------------------------------
+
+import itertools product
+import itertools permutations
+import functools reduce
+
+and_all = (lambda: lambda acc, x: x if acc is None else (acc and x))
+
+# 
+# queens_filter = (| n: \
+#     select (*c: len(set(c)) == len(c) and \
+#                 reduce(and_all, \
+#                        [reduce(and_all, \
+#                                [abs(c[i]-c[i+j]) != j \
+#                                 for i in range(n-j)]) \
+#                         for j in range(1, n)])) \
+# |)
+# 
+# queens_candidates = (| n: (product(range(n), repeat=n)) | expand |)
+# 
+# 
+# queens = (| n: queens_candidates (int(n)) | queens_filter (int(n)) |)
+# 
+# queens 4
+
+# queens_candidates = (| n: (permutations(range(n))) | expand |)
+# 
+# queens_filter = (| n: \
+#     select (*c: reduce(and_all, \
+#                        [reduce(and_all, \
+#                                [abs(c[i]-c[i+j]) != j \
+#                                 for i in range(n-j)]) \
+#                         for j in range(1, n)])) \
+# |)
+# 
+# queens = (| n: queens_candidates (int(n)) | queens_filter (int(n)) |)
+
+queens = (| n: \
+    (permutations(range(int(n)))) | expand | \
+    select (*c: reduce(lambda acc, x: x if acc is None else (acc and x), \
+                       [reduce(lambda acc, x: x if acc is None else (acc and x), \
+                               [abs(c[i]-c[i+j]) != j \
+                                for i in range(int(n)-j)]) \
+                        for j in range(1, int(n))])) \
+|)
+
+
+queens 4
