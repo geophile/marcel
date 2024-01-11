@@ -88,12 +88,15 @@ class Workspace(marcel.object.renderable.Renderable):
         return True
 
     def exists(self, env):
-        locations = env.locations
-        if locations.config_dir_path(self).exists():
-            marker_path = locations.workspace_marker_file_path(self)
-            return marker_path is not None and marker_path.exists()
+        if self.is_open():
+            return True
         else:
-            return False
+            locations = env.locations
+            if locations.config_dir_path(self).exists():
+                marker_path = locations.workspace_marker_file_path(self)
+                return marker_path is not None and marker_path.exists()
+            else:
+                return False
 
     def create(self, env, initial_config_contents=None):
         if not self.exists(env):

@@ -134,7 +134,6 @@ class VarHandlerStartup(object):
         current_value = self.env.namespace.get(var, None)
         self.vars_written.add(var)
         if type(current_value) is marcel.reservoir.Reservoir and value != current_value:
-            print(f'env setvar current: {current_value} new: {value}')
             current_value.ensure_deleted()
         if save:
             self.save_vars.add(var)
@@ -400,6 +399,8 @@ class EnvironmentScript(Environment):
 
     def initialize_namespace(self):
         super().initialize_namespace()
+        if not self.workspace.exists(self):
+            raise marcel.exception.KillShellException(f'{self.workspace} does not exist.')
         self.namespace.update({
             'WORKSPACE': self.workspace.name,
             'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],

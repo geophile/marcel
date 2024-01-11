@@ -54,7 +54,8 @@ class TestBase:
         workspace = marcel.object.workspace.Workspace.default()
         os.system(f'rm -rf {TestBase.test_home}')
         os.system(f'mkdir -p {self.locations.config_dir_path(workspace)}')
-        os.system(f'mkdir -p {self.locations.config_dir_path(workspace)}')
+        os.system(f'mkdir -p {self.locations.data_dir_path(workspace)}')
+        os.system(f'mkdir -p {self.locations.reservoir_dir_path(workspace)}')
         os.system('sudo rm -f /tmp/farcel*.log')
 
     def new_file(self, filename):
