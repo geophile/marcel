@@ -23,3 +23,6 @@ class Renderable:
 
     def render_full(self, color_scheme):
         return str(self)
+
+    def adjust_formatting(self, formatting):
+        pass

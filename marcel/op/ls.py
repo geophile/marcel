@@ -86,8 +86,12 @@ class LsArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
 
 class Ls(marcel.op.filenamesop.FilenamesOp):
 
+    # The number of files to buffer for formatting
+    buffer_size = 100
+
     def __init__(self):
-        super().__init__(Ls.send_path)
+        super().__init__(self.send_path)
+        self.formatting_buffer = FormattingBuffer(self, Ls.buffer_size)
 
     def __repr__(self):
         depth = '0' if self.d0 else '1' if self.d1 else 'recursive' if self.dr else None
@@ -111,10 +115,12 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
     def must_be_first_in_pipeline(self):
         return True
 
+    def flush(self, env):
+        self.formatting_buffer.flush(env)
+
     # For use by this class
 
-    @staticmethod
-    def send_path(op, env, file):
+    def send_path(self, op, env, file):
         assert type(file) is File, f'{type(file)} {file}'
         file_stat = file.path.lstat()
         mode = file_stat.st_mode
@@ -122,13 +128,39 @@ class Ls(marcel.op.filenamesop.FilenamesOp):
         f = stat.S_ISREG(mode) and not s
         d = stat.S_ISDIR(mode) and not s
         if ((op.file and f) or (op.dir and d) or (op.symlink and s)) and file.path not in op.emitted_paths:
+            op.emitted_paths.add(file.path)
             try:
-                op.send(env, file)
+                self.formatting_buffer.send_eventually(env, file)
             except ValueError as e:
+                self.formatting_buffer.flush(env)
                 marcel.util.print_stack_of_current_exception()
                 message = (f'Caught {e.__class__.__name__} on file with '
                            f'device = {file.device} and '
                            f'inode = {file.inode}, '
                            f'(file name may not be printable).')
                 op.non_fatal_error(env, None, message)
-            op.emitted_paths.add(file.path)
+            except:
+                self.formatting_buffer.flush(env)
+                raise
+
+
+# Accumulate Files so that formatting can be made uniform across batches of them.
+
+class FormattingBuffer(object):
+
+    def __init__(self, op, buffer_size):
+        self.op = op
+        self.buffer_size = buffer_size
+        self.formatting = marcel.object.file.FileFormatting()
+        self.buffer = []
+
+    def send_eventually(self, env, file):
+        file.adjust_formatting(self.formatting)
+        self.buffer.append(file)
+        if len(self.buffer) >= self.buffer_size:
+            self.flush(env)
+
+    def flush(self, env):
+        for file in self.buffer:
+            self.op.send(env, file)
+        self.buffer.clear()

@@ -46,7 +46,6 @@ class FilenamesOp(marcel.core.Op):
         # would be bound to the current instance, and that might not be the instance that gets executed later,
         # due to possible pipelines copying. The action should not be a method, e.g. it could be a staticmethod,
         # whose type is FunctionType.
-        assert(isinstance(action, types.FunctionType))
         self.action = action
         self.d0 = False
         self.d1 = False
@@ -120,8 +119,10 @@ class FilenamesOp(marcel.core.Op):
                     except marcel.exception.KillAndResumeException:
                         pass
             except PermissionError:
+                self.flush(env)  # Because ls buffers files before sending them
                 self.non_fatal_error(env, input=root, message='Permission denied')
             except FileNotFoundError:
+                self.flush(env)  # Because ls buffers files before sending them
                 self.non_fatal_error(env, input=root, message='No such file or directory')
             except marcel.exception.KillAndResumeException:
                 pass

@@ -43,7 +43,30 @@ class MetadataCache:
             groupname = marcel.util.groupname(gid)
             self.id_to_name[key] = (username, groupname)
         return username, groupname
-        
+
+
+class FileFormatting(object):
+
+    def __init__(self):
+        self.username_width = 6
+        self.groupname_width = 6
+        self.size_width = 6
+
+    def __repr__(self):
+        return f'FileFormatting({self.username_width}, {self.groupname_width}, {self.size_width})'
+
+    def format_username(self, username):
+        width = self.username_width
+        return f'{username:>{width}}'
+
+    def format_groupname(self, groupname):
+        width = self.username_width
+        return f'{groupname:>{width}}'
+
+    def format_size(self, size):
+        width = self.size_width
+        return f'{size:{width}}'
+
 
 class File(marcel.object.renderable.Renderable):
 
@@ -60,6 +83,7 @@ class File(marcel.object.renderable.Renderable):
         # Used only to survive pickling
         self.path_str = None
         self.base_str = None
+        self.formatting = None
 
     def __getattr__(self, attr):
         return getattr(self.path, attr)
@@ -127,7 +151,15 @@ class File(marcel.object.renderable.Renderable):
             if isinstance(link_target, pathlib.Path):
                 link_target = link_target.as_posix()
             line.append(link_target)
-        return ' '.join(line)
+        return '  '.join(line)
+
+    def adjust_formatting(self, formatting):
+        self.formatting = formatting
+        lstat = self._lstat()
+        username, groupname = self._user_and_group_names(lstat.st_uid, lstat.st_gid)
+        formatting.username_width = max(formatting.username_width, len(username))
+        formatting.groupname_width = max(formatting.groupname_width, len(groupname))
+        formatting.size_width = max(formatting.size_width, len(str(lstat.st_size)))
 
     # File
 
@@ -172,14 +204,12 @@ class File(marcel.object.renderable.Renderable):
         username, groupname = self._user_and_group_names(lstat.st_uid, lstat.st_gid)
         return [
             self._mode_string(lstat.st_mode),
-            ' ',
-            '{:6s}'.format(username),
-            '{:6s}'.format(groupname),
-            '{:8}'.format(lstat.st_size),
-            ' ',
+            self.formatting.format_username(username),
+            self.formatting.format_groupname(groupname),
+            self.formatting.format_size(lstat.st_size),
             self._formatted_mtime(lstat.st_mtime),
-            ' ',
-            self._compact_path().as_posix()]
+            self._compact_path().as_posix()
+        ]
 
     def _lstat(self):
         if self.lstat is None:

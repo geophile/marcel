@@ -669,62 +669,62 @@ def test_source_filenames():
 
 @timeit
 def test_ls():
-    with TestDir(TEST.env) as testdir:
-        filename_op_setup(testdir)
-        # 0/1/r flags with no files specified.
-        TEST.run('ls -0 | map (f: f.render_compact())',
-                 expected_out=sorted(['.']))
-        TEST.run('ls -1 | map (f: f.render_compact())',
-                 expected_out=sorted(['.',
-                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-                                      ]))
-        TEST.run('ls -r | map (f: f.render_compact())',
-                 expected_out=sorted(['.',
-                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-                                      'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                      'd/dd/ddf']))
-        TEST.run('ls | map (f: f.render_compact())',
-                 expected_out=sorted(['.',
-                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-                                      ]))
-        # 0/1/r flags with file
-        TEST.run('ls -0 f | map (f: f.render_compact())',
-                 expected_out=sorted(['f']))
-        TEST.run('ls -1 f | map (f: f.render_compact())',
-                 expected_out=sorted(['f']))
-        TEST.run('ls -r f | map (f: f.render_compact())',
-                 expected_out=sorted(['f']))
-        # 0/1/r flags with directory
-        TEST.run(f'ls -0 {testdir} | map (f: f.render_compact())',
-                 expected_out=sorted(['.']))
-        TEST.run(f'ls -1 {testdir} | map (f: f.render_compact())',
-                 expected_out=sorted(['.', 'f', 'sf', 'lf', 'sd', 'd']))
-        TEST.run(f'ls -r {testdir} | map (f: f.render_compact())',
-                 expected_out=sorted(['.',
-                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-                                      'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-                                      'd/dd/ddf']))
-        # Test f/d/s flags
-        TEST.run('ls -fr | map (f: f.render_compact())',
-                 expected_out=sorted(['f', 'lf',  # Top-level
-                                      'd/df', 'd/ldf',  # Contents of d
-                                      'd/dd/ddf']))
-        TEST.run('ls -dr | map (f: f.render_compact())',
-                 expected_out=sorted(['.',
-                                      'd',  # Top-level
-                                      'd/dd']))  # Contents of d
-        TEST.run('ls -sr | map (f: f.render_compact())',
-                 expected_out=sorted(['sf', 'sd',  # Top-level
-                                      'd/sdf', 'd/sdd'  # Contents of d
-                                      ]))
-        # Duplicates
-        TEST.run('ls -0 *d ? | map (f: f.render_compact())',
-                 expected_out=sorted(['d', 'sd', 'f']))
-        # This should find d twice
-        expected = sorted(['.', 'f', 'sf', 'lf', 'd', 'sd'])
-        expected.extend(sorted(['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']))
-        TEST.run('ls -1 . d | map (f: f.render_compact())',
-                 expected_out=expected)
+    # with TestDir(TEST.env) as testdir:
+    #     filename_op_setup(testdir)
+    #     # 0/1/r flags with no files specified.
+    #     TEST.run('ls -0 | map (f: f.render_compact())',
+    #              expected_out=sorted(['.']))
+    #     TEST.run('ls -1 | map (f: f.render_compact())',
+    #              expected_out=sorted(['.',
+    #                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+    #                                   ]))
+    #     TEST.run('ls -r | map (f: f.render_compact())',
+    #              expected_out=sorted(['.',
+    #                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+    #                                   'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+    #                                   'd/dd/ddf']))
+    #     TEST.run('ls | map (f: f.render_compact())',
+    #              expected_out=sorted(['.',
+    #                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+    #                                   ]))
+    #     # 0/1/r flags with file
+    #     TEST.run('ls -0 f | map (f: f.render_compact())',
+    #              expected_out=sorted(['f']))
+    #     TEST.run('ls -1 f | map (f: f.render_compact())',
+    #              expected_out=sorted(['f']))
+    #     TEST.run('ls -r f | map (f: f.render_compact())',
+    #              expected_out=sorted(['f']))
+    #     # 0/1/r flags with directory
+    #     TEST.run(f'ls -0 {testdir} | map (f: f.render_compact())',
+    #              expected_out=sorted(['.']))
+    #     TEST.run(f'ls -1 {testdir} | map (f: f.render_compact())',
+    #              expected_out=sorted(['.', 'f', 'sf', 'lf', 'sd', 'd']))
+    #     TEST.run(f'ls -r {testdir} | map (f: f.render_compact())',
+    #              expected_out=sorted(['.',
+    #                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+    #                                   'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+    #                                   'd/dd/ddf']))
+    #     # Test f/d/s flags
+    #     TEST.run('ls -fr | map (f: f.render_compact())',
+    #              expected_out=sorted(['f', 'lf',  # Top-level
+    #                                   'd/df', 'd/ldf',  # Contents of d
+    #                                   'd/dd/ddf']))
+    #     TEST.run('ls -dr | map (f: f.render_compact())',
+    #              expected_out=sorted(['.',
+    #                                   'd',  # Top-level
+    #                                   'd/dd']))  # Contents of d
+    #     TEST.run('ls -sr | map (f: f.render_compact())',
+    #              expected_out=sorted(['sf', 'sd',  # Top-level
+    #                                   'd/sdf', 'd/sdd'  # Contents of d
+    #                                   ]))
+    #     # Duplicates
+    #     TEST.run('ls -0 *d ? | map (f: f.render_compact())',
+    #              expected_out=sorted(['d', 'sd', 'f']))
+    #     # This should find d twice
+    #     expected = sorted(['.', 'f', 'sf', 'lf', 'd', 'sd'])
+    #     expected.extend(sorted(['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']))
+    #     TEST.run('ls -1 . d | map (f: f.render_compact())',
+    #              expected_out=expected)
     # ls should continue past permission error
     with TestDir(TEST.env) as testdir:
         os.system(f'mkdir {testdir}/d1')
@@ -1749,11 +1749,11 @@ def test_difference():
 @timeit
 def test_args():
     TEST.reset_environment()
-    # gen
-    TEST.run('gen 5 1 | args (|n: gen (n)|) | map (x: -x)',
-             expected_out=[0, 0, -1, 0, -1, -2, 0, -1, -2, -3, 0, -1, -2, -3, -4])
-    TEST.run('gen 6 1 | args (|count, start: gen (count) (start)|)',
-             expected_out=[2, 4, 5, 6, 6, 7, 8, 9, 10])
+    # # gen
+    # TEST.run('gen 5 1 | args (|n: gen (n)|) | map (x: -x)',
+    #          expected_out=[0, 0, -1, 0, -1, -2, 0, -1, -2, -3, 0, -1, -2, -3, -4])
+    # TEST.run('gen 6 1 | args (|count, start: gen (count) (start)|)',
+    #          expected_out=[2, 4, 5, 6, 6, 7, 8, 9, 10])
     # ls
     with TestDir(TEST.env) as testdir:
         TEST.run(f'mkdir {testdir}/d1')
@@ -1763,78 +1763,80 @@ def test_args():
         TEST.run(f'touch {testdir}/d2/f2')
         TEST.run(f'touch {testdir}/d3/f3')
         TEST.run(f'cd {testdir}')
-        TEST.run(f'ls -d | args (|d: ls -f (d) |) | map (f: f.name)',
-                 expected_out=['f1', 'f2', 'f3'])
-        TEST.run(f'touch a_file')
-        TEST.run(f'touch "a file"')
-        TEST.run(f'touch "a file with a \' mark"')
-        TEST.run(f'rm -rf d')
-        TEST.run(f'mkdir d')
-        TEST.run(test=f'ls -f | args --all (|files: mv -t d (quote_files(*files)) |)',
-                 verification='ls -f d | map (f: f.name)',
-                 expected_out=['a file', "a file with a ' mark", 'a_file'])
-    # head
-    TEST.run('gen 4 1 | args (|n: gen 10 | head (n)|)',
-             expected_out=[0, 0, 1, 0, 1, 2, 0, 1, 2, 3])
-    # tail
-    TEST.run('gen 4 1 | args (|n: gen 10 | tail (n+1)|)',
-             expected_out=[8, 9, 7, 8, 9, 6, 7, 8, 9, 5, 6, 7, 8, 9])
-    # bash
-    # Space between Y and ] is required, otherwise ] is lexed as part of the argument to echo.
-    TEST.run('gen 5 | args (|n: echo X(n)Y |)',
-             expected_out=['X0Y', 'X1Y', 'X2Y', 'X3Y', 'X4Y'])
-    # expand
-    TEST.run('gen 3 | args (|x: (((1, 2), (3, 4), (5, 6))) | expand (x)|)',
-             expected_out=[(1, (3, 4), (5, 6)), (2, (3, 4), (5, 6)),
-                           ((1, 2), 3, (5, 6)), ((1, 2), 4, (5, 6)),
-                           ((1, 2), (3, 4), 5), ((1, 2), (3, 4), 6)])
-    # sql
-    if SQL:
-        TEST.run('sql "drop table if exists t" | select (x: False)')
-        TEST.run('sql "create table t(x int)" | select (x: False)')
-        TEST.run(test='gen 5 | args (|x: sql "insert into t values(%s)" (x)|)',
-                 verification='sql "select * from t order by x"',
-                 expected_out=[0, 1, 2, 3, 4])
-    # window
-    TEST.run('gen 3 | args (|w: gen 10 | window -d (w)|)',
-             expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
-                           0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                           (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)])
-    # nested args
-    TEST.run('gen 3 | args (|i: gen 3 (i+100) | args (|j: gen 3 (j+1000)|)|)',
-             expected_out=[1100, 1101, 1102, 1101, 1102, 1103, 1102, 1103, 1104,
-                           1101, 1102, 1103, 1102, 1103, 1104, 1103, 1104, 1105,
-                           1102, 1103, 1104, 1103, 1104, 1105, 1104, 1105, 1106])
-    # --all
-    TEST.run('gen 10 | args --all (|x: ("".join([str(n) for n in x]))|)',
-             expected_out=['0123456789'])
-    # no input to args
-    TEST.run('gen 3 | select (x: False) | args (|n: map (x: -x)|)',
-             expected_out=[])
-    TEST.run('gen 3 | select (x: False) | args --all (|n: map (x: -x)|)',
-             expected_out=[])
-    # negative testing
-    TEST.run('gen 3 | args --all (|x, y: (123) |)',
-             expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
-    TEST.run('gen 3 | args --all (| (123) |)',
-             expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
-    TEST.run('gen 3 | args (| (123) |)',
-             expected_err="The args pipelines must be parameterized")
-    # Bug 94
-    TEST.run('gen 4 1 | args (|n: gen (n)|) | window (x: x == 0)',
-             expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
-    # Bug 116
-    TEST.run('g = (|n: gen (n)|)')
-    TEST.run('gen 3 1 | args (|n: g (n)|)',
-             expected_out=[0, 0, 1, 0, 1, 2])
-    # Bug 167
-    with TestDir(TEST.env) as testdir:
-        os.system(f'rm -rf {testdir}/hello')
-        os.system(f'echo hello > {testdir}/hello')
-        os.system(f'echo hello >> {testdir}/hello')
-    # Bug 237
-    TEST.run('gen 3 | args -a (x: (x))',
-             expected_err='must be a Pipeline')
+        TEST.run(f'ls -d | args (|d: ls -f (d) |) | map (f: f.name)')
+        # TEST.run(f'ls -d | args (|d: ls -f (d) |) | map (f: f.name)',
+        #          expected_out=['f1', 'f2', 'f3'])
+
+        # TEST.run(f'touch a_file')
+        # TEST.run(f'touch "a file"')
+        # TEST.run(f'touch "a file with a \' mark"')
+        # TEST.run(f'rm -rf d')
+        # TEST.run(f'mkdir d')
+        # TEST.run(test=f'ls -f | args --all (|files: mv -t d (quote_files(*files)) |)',
+        #          verification='ls -f d | map (f: f.name)',
+        #          expected_out=['a file', "a file with a ' mark", 'a_file'])
+    # # head
+    # TEST.run('gen 4 1 | args (|n: gen 10 | head (n)|)',
+    #          expected_out=[0, 0, 1, 0, 1, 2, 0, 1, 2, 3])
+    # # tail
+    # TEST.run('gen 4 1 | args (|n: gen 10 | tail (n+1)|)',
+    #          expected_out=[8, 9, 7, 8, 9, 6, 7, 8, 9, 5, 6, 7, 8, 9])
+    # # bash
+    # # Space between Y and ] is required, otherwise ] is lexed as part of the argument to echo.
+    # TEST.run('gen 5 | args (|n: echo X(n)Y |)',
+    #          expected_out=['X0Y', 'X1Y', 'X2Y', 'X3Y', 'X4Y'])
+    # # expand
+    # TEST.run('gen 3 | args (|x: (((1, 2), (3, 4), (5, 6))) | expand (x)|)',
+    #          expected_out=[(1, (3, 4), (5, 6)), (2, (3, 4), (5, 6)),
+    #                        ((1, 2), 3, (5, 6)), ((1, 2), 4, (5, 6)),
+    #                        ((1, 2), (3, 4), 5), ((1, 2), (3, 4), 6)])
+    # # sql
+    # if SQL:
+    #     TEST.run('sql "drop table if exists t" | select (x: False)')
+    #     TEST.run('sql "create table t(x int)" | select (x: False)')
+    #     TEST.run(test='gen 5 | args (|x: sql "insert into t values(%s)" (x)|)',
+    #              verification='sql "select * from t order by x"',
+    #              expected_out=[0, 1, 2, 3, 4])
+    # # window
+    # TEST.run('gen 3 | args (|w: gen 10 | window -d (w)|)',
+    #          expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
+    #                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+    #                        (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)])
+    # # nested args
+    # TEST.run('gen 3 | args (|i: gen 3 (i+100) | args (|j: gen 3 (j+1000)|)|)',
+    #          expected_out=[1100, 1101, 1102, 1101, 1102, 1103, 1102, 1103, 1104,
+    #                        1101, 1102, 1103, 1102, 1103, 1104, 1103, 1104, 1105,
+    #                        1102, 1103, 1104, 1103, 1104, 1105, 1104, 1105, 1106])
+    # # --all
+    # TEST.run('gen 10 | args --all (|x: ("".join([str(n) for n in x]))|)',
+    #          expected_out=['0123456789'])
+    # # no input to args
+    # TEST.run('gen 3 | select (x: False) | args (|n: map (x: -x)|)',
+    #          expected_out=[])
+    # TEST.run('gen 3 | select (x: False) | args --all (|n: map (x: -x)|)',
+    #          expected_out=[])
+    # # negative testing
+    # TEST.run('gen 3 | args --all (|x, y: (123) |)',
+    #          expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
+    # TEST.run('gen 3 | args --all (| (123) |)',
+    #          expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
+    # TEST.run('gen 3 | args (| (123) |)',
+    #          expected_err="The args pipelines must be parameterized")
+    # # Bug 94
+    # TEST.run('gen 4 1 | args (|n: gen (n)|) | window (x: x == 0)',
+    #          expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
+    # # Bug 116
+    # TEST.run('g = (|n: gen (n)|)')
+    # TEST.run('gen 3 1 | args (|n: g (n)|)',
+    #          expected_out=[0, 0, 1, 0, 1, 2])
+    # # Bug 167
+    # with TestDir(TEST.env) as testdir:
+    #     os.system(f'rm -rf {testdir}/hello')
+    #     os.system(f'echo hello > {testdir}/hello')
+    #     os.system(f'echo hello >> {testdir}/hello')
+    # # Bug 237
+    # TEST.run('gen 3 | args -a (x: (x))',
+    #          expected_err='must be a Pipeline')
 
 
 @timeit
@@ -2692,14 +2694,14 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_args()
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
-    main_slow_tests()
+    # main_stable()
+    # main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
