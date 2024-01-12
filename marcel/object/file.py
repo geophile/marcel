@@ -70,6 +70,8 @@ class FileFormatting(object):
 
 class File(marcel.object.renderable.Renderable):
 
+    default_formatting = FileFormatting()
+
     def __init__(self, path, base=None, metadata_cache=None):
         assert path is not None
         self.metadata_cache = metadata_cache
@@ -200,13 +202,14 @@ class File(marcel.object.renderable.Renderable):
         return self.executable
 
     def _formatted_metadata(self):
+        formatting = self.formatting if self.formatting else File.default_formatting
         lstat = self._lstat()  # Not stat. Don't want to follow symlinks here.
         username, groupname = self._user_and_group_names(lstat.st_uid, lstat.st_gid)
         return [
             self._mode_string(lstat.st_mode),
-            self.formatting.format_username(username),
-            self.formatting.format_groupname(groupname),
-            self.formatting.format_size(lstat.st_size),
+            formatting.format_username(username),
+            formatting.format_groupname(groupname),
+            formatting.format_size(lstat.st_size),
             self._formatted_mtime(lstat.st_mtime),
             self._compact_path().as_posix()
         ]

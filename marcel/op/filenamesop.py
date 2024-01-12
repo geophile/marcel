@@ -46,6 +46,7 @@ class FilenamesOp(marcel.core.Op):
         # would be bound to the current instance, and that might not be the instance that gets executed later,
         # due to possible pipelines copying. The action should not be a method, e.g. it could be a staticmethod,
         # whose type is FunctionType.
+        assert isinstance(action, types.FunctionType)
         self.action = action
         self.d0 = False
         self.d1 = False
@@ -65,6 +66,7 @@ class FilenamesOp(marcel.core.Op):
         # are identified by (stat.st_dev, stat.st_ino).
         self.visited_dirs = None
         self.metadata_cache = None
+        self.formatting = None
 
     # AbstractOp
 
@@ -89,6 +91,7 @@ class FilenamesOp(marcel.core.Op):
         self.roots = sorted(self.roots)
         self.determine_base()
         self.metadata_cache = marcel.object.file.MetadataCache()
+        self.formatting = marcel.object.file.FileFormatting()
 
     # Op
 
@@ -103,6 +106,7 @@ class FilenamesOp(marcel.core.Op):
 
     def visit(self, env, root, level):
         file = File(root, self.base, self.metadata_cache)
+        file.adjust_formatting(self.formatting)
         self.action(self, env, file)
         if root.is_dir() and ((level == 0 and (self.d1 or self.dr)) or self.dr) and not self.dir_already_visited(root):
             try:
@@ -119,10 +123,8 @@ class FilenamesOp(marcel.core.Op):
                     except marcel.exception.KillAndResumeException:
                         pass
             except PermissionError:
-                self.flush(env)  # Because ls buffers files before sending them
                 self.non_fatal_error(env, input=root, message='Permission denied')
             except FileNotFoundError:
-                self.flush(env)  # Because ls buffers files before sending them
                 self.non_fatal_error(env, input=root, message='No such file or directory')
             except marcel.exception.KillAndResumeException:
                 pass
