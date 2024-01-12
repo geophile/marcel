@@ -285,11 +285,21 @@ def fail(message):
     exit(1)
 
 
-def usage():
-    usage = '''marcel [--mpstart fork|spawn|forksever] [SCRIPT]
+def usage(exit_code=1):
+    usage = '''
+    marcel [WORKSPACE] [-e|--execute SCRIPT] [--mpstart fork|spawn|forkserver]
+    marcel [-h|--help]
     
-    Run marcel, interactively if a SCRIPT is not specified. Otherwise, run the SCRIPT.
-    It should not be necessary to specify --mpstart. fork is the default.
+    Run marcel, interactively unless a SCRIPT is provided.
+    
+    if WORKSPACE is specified, then marcel will open the named WORKSPACE before 
+    executing commands interactively or commands from the SCRIPT.
+    
+    This usage message is obtained by running marcel with the -h or --help
+    flag. For more detailed help, run marcel interactively and use the "help" command.
+    
+    Leave out --mpstart unless you really know what you're doing, or you're desperate. 
+    It defaults to fork.
 '''
     print(usage, file=sys.stderr)
     sys.exit(1)
@@ -297,33 +307,38 @@ def usage():
 
 # --mpstart: fork/spawn/forkserver. Use fork if not specified
 def args():
-    flags = ('--mpstart',)
+    workspace= None
+    flags = ('-e', '--execute', '-h', '--help', '--mpstart',)
     mpstart = 'fork'
     script = None
     flag = None
+    first_arg = True
     for arg in sys.argv[1:]:
-        if arg in flags:
+        if first_arg and not arg.startswith('-'):
+            workspace = arg
+        elif arg in flags:
             flag = arg
+        elif flag in ('-h', '--help'):
+            usage(0)
         elif arg.startswith('-'):
             usage()
         else:
-            if flag is None:
-                # arg must be a script name
+            # arg is a flag value
+            assert flag is not None
+            if flag in ('-e', '--execute'):
                 script = arg
-            else:
-                # arg is a flag value
-                if flag == '--mpstart':
-                    if arg in ('fork', 'spawn', 'forkserver'):
-                        mpstart = arg
-                    else:
-                        usage()
-                flag = None
-    return mpstart, script
+            elif flag == '--mpstart':
+                if arg in ('fork', 'spawn', 'forkserver'):
+                    mpstart = arg
+                else:
+                    usage()
+            flag = None
+        first_arg = False
+    return workspace, script, mpstart
 
 
-def main_interactive_run():
+def main_interactive_run(workspace):
     main = None
-    workspace = marcel.object.workspace.Workspace.default()
     while True:
         env = marcel.env.EnvironmentInteractive.create(marcel.locations.Locations(), workspace)
         main = MainInteractive(main, env, workspace)
@@ -342,14 +357,13 @@ def main_interactive_run():
                 main.input = None
 
 
-def main_script_run(script_path):
+def main_script_run(workspace, script_path):
     try:
         with open(script_path, 'r') as script_file:
             script = script_file.read()
     except FileNotFoundError:
         fail(f'File not found: {script_path}')
     commands = commands_in_script(script)
-    workspace = marcel.object.workspace.Workspace.default()
     locations = marcel.locations.Locations()
     env = marcel.env.EnvironmentScript.create(locations, workspace)
     main = MainScript(env, workspace)
@@ -367,12 +381,15 @@ def main_script_run(script_path):
 
 
 def main():
-    mpstart, script = args()
+    workspace_name, script, mpstart = args()
     multiprocessing.set_start_method(mpstart)
+    workspace = (marcel.object.workspace.Workspace.default()
+                 if workspace_name is None else
+                 marcel.object.workspace.WorkspaceNamed(workspace_name))
     if script is None:
-        main_interactive_run()
+        main_interactive_run(workspace)
     else:
-        main_script_run(script)
+        main_script_run(workspace, script)
 
 
 if __name__ == '__main__':
