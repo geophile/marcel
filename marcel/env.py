@@ -208,6 +208,22 @@ class VarHandler(VarHandlerStartup):
 
 class Environment(object):
 
+    class WriteBuffer(object):
+
+        def __init__(self, buffer_size):
+            self.buffer_size = buffer_size
+            self.buffer = []
+
+        def write_eventually(self, x, handle_output):
+            self.buffer.append(x)
+            if len(self.buffer) >= self.buffer_size:
+                self.flush(handle_output)
+
+        def flush(self, handle_output):
+            for x in self.buffer:
+                handle_output(x)
+            self.buffer.clear()
+
     class CheckNestingNoop(object):
 
         def __enter__(self):
@@ -227,6 +243,7 @@ class Environment(object):
         self.var_handler = VarHandlerStartup(self)
         self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
         self.var_handler.add_save_vars('PWD', 'DIRS')
+        self.write_buffer = Environment.WriteBuffer(100)
 
     def initialize_namespace(self):
         try:

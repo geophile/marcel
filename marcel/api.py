@@ -238,9 +238,6 @@ def _run_pipeline(pipeline):
         marcel.util.print_to_stderr(e, _ENV)
 
 
-def _default_error_handler(env, error):
-    print(error.render_full(None), flush=True)
-
 
 def _noop_error_handler(env, error):
     pass
@@ -257,7 +254,6 @@ def run(x):
     pipeline = _prepare_pipeline(x)
     if not isinstance(pipeline.last_op(), _Write):
         pipeline.append(write().op)
-    pipeline.set_error_handler(_default_error_handler)
     _run_pipeline(pipeline)
 
 
@@ -269,7 +265,6 @@ def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
                           errors=errors,
                           error_handler=error_handler)
     pipeline.append(terminal_op)
-    pipeline.set_error_handler(_noop_error_handler)
     _run_pipeline(pipeline)
     return output
 
@@ -282,7 +277,6 @@ def first(x, unwrap_singleton=True, errors=None, error_handler=None):
                          errors=errors,
                          error_handler=error_handler)
     pipeline.append(terminal_op)
-    pipeline.set_error_handler(_noop_error_handler)
     try:
         _run_pipeline(pipeline)
     except _exception.StopAfterFirst:

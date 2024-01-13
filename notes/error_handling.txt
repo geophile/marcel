@@ -1,3 +1,7 @@
+BEFORE MAY 2022
+
+======================================================================
+
 Error handling choices are general -- should apply to CLI, and all APIs:
 
 - Default: Handle it with out, if out is present. But what is the default
@@ -69,3 +73,72 @@ KARE:
 core.receive_input etc.:
 
 - Passes the Error (contained in the KARE) downstream.
+
+======================================================================
+
+1/13/24
+
+Error handling is ancient and broken. I added buffering to write op's
+DefaultWriter, which allows File render_full formatting to do a better
+job with column widths. But buffering changes the timing of output
+with respect to Error output, which simply does a print. Also: Errors
+are sent downstream, which write was just dropping. And then there's
+the Pipeline.set_error_handler wart.
+
+So it's time for an overhaul.
+
+Overview (current state):
+
+- Error is a Renderable.
+
+- KillAndResumeException: Problem with the current input, but continue
+  the command. Raised by the confusingly-named Op.fatal_error. 
+
+  Shouldn't this just inject an Error into the output stream?
+
+  Op.fatal_error is called by:
+
+  - Op.call (used by map, select, etc.)
+
+- KillShellException: As the name says, seems OK.
+
+- KillCommandException
+
+- Pipeline.error_handler: Used in Op.fatal_error.
+
+  - MainScript.default_error_handler: print(error.render_full...)
+    (api, script)
+
+  - API _noop_error_handler for first(), gather() ???
+
+
+Op.call exception:
+
+  self.fatal_error(..., str(exception))
+    error = ... create Error ...
+    self.owner.handle_error    This is the pipeline error handler
+      Main.default_error_handler: print to stdout
+    raise KARE (with message, not Error)
+
+Op.fatal_error is a lot like non_fatal_error. fatal_error raises KARE,
+non_fatal_error does not. NFE used for problem with file during
+FilenamesOp, for example.
+
+----------------------------------------------------------------------
+
+What should happen:
+
+- Error during setup: KillShellException
+
+- Error during command setup: KillCommandException
+
+- Error during command execution: 
+
+  - write Error into stream
+  - keep forwarding until Write.
+
+----------------------------------------------------------------------
+
+TODO:
+
+Merge fatal_error_handler, non_fatal_error_handler?

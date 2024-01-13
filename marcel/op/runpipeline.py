@@ -56,7 +56,6 @@ class RunPipeline(marcel.core.Op):
         # command. This potentially breaks the use of Op state during execution, and also
         # breaks the structure of the pipelines, e.g. Op.receiver.
         self.pipeline = self.pipeline.copy()
-        self.pipeline.set_error_handler(self.owner.error_handler)
         self.pipeline.last_op().receiver = self.receiver
         env.vars().push_scope(self.pipeline_args())
         try:

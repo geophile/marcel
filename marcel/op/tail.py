@@ -66,6 +66,7 @@ class Tail(marcel.core.Op):
 
     def flush(self, env):
         self.impl.flush(env)
+        super().flush(env)
 
 
 class TailImpl:

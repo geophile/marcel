@@ -91,12 +91,6 @@ class MainAPI(Main):
         marcel.object.workspace.Workspace.default().close(self.env)
         return namespace
 
-    # Internal
-
-    @staticmethod
-    def default_error_handler(env, error):
-        print(error.render_full(None), flush=True)
-
 
 class MainScript(Main):
 
@@ -140,7 +134,6 @@ class MainScript(Main):
             try:
                 parser = marcel.parser.Parser(text, self.env)
                 pipeline = parser.parse()
-                pipeline.set_error_handler(MainScript.default_error_handler)
                 if not pipeline.last_op().op_name() == 'write':
                     pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
                 command = marcel.core.Command(text, pipeline)

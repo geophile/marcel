@@ -102,7 +102,6 @@ class PipelineRunner(threading.Thread):
         try:
             # self.check_python_version()
             TRACE.write(f'PipelineRunner: About to setup {self.pipeline}')
-            self.pipeline.set_error_handler(noop_error_handler)
             self.pipeline.setup(self.env)
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
             self.pipeline.first_op().run(self.env)

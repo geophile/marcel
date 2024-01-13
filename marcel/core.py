@@ -112,7 +112,7 @@ class Op(AbstractOp):
             self._count += 1
             self.receive(env, x if type(x) in (tuple, list) else (x,))
         except marcel.exception.KillAndResumeException as e:
-            self.receive_error(env, Error(e))
+            pass
 
     def pos(self):
         return self._count
@@ -142,11 +142,11 @@ class Op(AbstractOp):
         assert (message is None) != (error is None)
         if error is None:
             error = self.error(input, message)
-        self.owner.handle_error(env, error)
+        self.send_error(env, error)
 
     def fatal_error(self, env, input, message):
         error = self.error(input=input, message=message)
-        self.owner.handle_error(env, error)
+        self.send_error(env, error)
         raise marcel.exception.KillAndResumeException(message)
 
     def must_be_first_in_pipeline(self):
@@ -226,9 +226,11 @@ class Command:
         with env.check_nesting():
             env.clear_changes()
             self.pipeline.setup(env)
-            self.pipeline.run(env)
-            self.pipeline.flush(env)
-            self.pipeline.cleanup()
+            try:
+                self.pipeline.run(env)
+            finally:
+                self.pipeline.flush(env)
+                self.pipeline.cleanup()
         # An interactive Command is executed by a multiprocessing.Process (i.e., remotely).
         # Need to transmit the Environment's vars relating to the directory, to the parent
         # process, because they may have changed. This doesn't apply to API usage.
@@ -325,12 +327,6 @@ class PipelineExecutable(AbstractOp):
         for op in self.ops:
             print(f'    {id(op)}  {op}')
 
-    def set_error_handler(self, error_handler):
-        self.error_handler = error_handler
-
-    def handle_error(self, env, error):
-        self.error_handler(env, error)
-
     # Pipelineable
 
     def n_params(self):
@@ -343,7 +339,6 @@ class PipelineExecutable(AbstractOp):
     # AbstractOp
 
     def setup(self, env):
-        assert self.error_handler is not None, f'{self} has no error handler'
         prev_op = None
         for op in self.ops:
             if isinstance(op, Op) and op is not self.ops[0] and op.must_be_first_in_pipeline():
@@ -410,8 +405,6 @@ class PipelineExecutable(AbstractOp):
 class PipelineIterator:
 
     def __init__(self, env, pipeline):
-        # Errors go to output, so no other error handling is needed
-        pipeline.set_error_handler(_noop_error_handler)
         output = []
         gather_op = env.op_modules['gather'].api_function()(output)
         pipeline.append(gather_op)
@@ -507,7 +500,6 @@ class PipelineMarcel(Pipeline):
             executable = self.pipeline_arg
         # Make a copy, in case the pipeline needs an instance per fork.
         executable = executable.copy()
-        executable.set_error_handler(self.error_handler)
         self.pipeline = self.customize_pipeline(env, executable)
         assert self.pipeline is not None
         self.scope = {}
@@ -570,14 +562,12 @@ class PipelinePython(Pipeline):
         pipeline = (self.pipeline_arg.create_pipeline(args)
                     if self.n_params() > 0 else
                     self.pipeline_arg.create_pipeline())
-        pipeline.set_error_handler(self.error_handler)
         self.pipeline = self.customize_pipeline(env, pipeline)
         marcel.core.Command(None, self.pipeline).execute(env)
 
     def prepare_to_receive(self, env):
         assert self.n_params() == 0
         pipeline = self.executable(env)
-        pipeline.set_error_handler(self.error_handler)
         self.pipeline = self.customize_pipeline(env, pipeline)
         self.pipeline.setup(env)
 

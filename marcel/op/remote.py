@@ -163,7 +163,7 @@ class Remote(marcel.core.Op):
                     while True:
                         x = input.load()
                         if isinstance(x, marcel.object.error.Error):
-                            self.send_error(x)
+                            self.send_error(env, x)
                         else:
                             self.send(env, x)
                 except EOFError as e:
@@ -211,7 +211,6 @@ class Remote(marcel.core.Op):
         label_thread = Remote.LabelThread(host)
         label_thread.receiver = self.receiver
         customized_pipeline = marcel.core.PipelineExecutable()
-        customized_pipeline.set_error_handler(pipeline.error_handler)
         customized_pipeline.params = pipeline.params
         customized_pipeline.append(remote)
         customized_pipeline.append(label_thread)

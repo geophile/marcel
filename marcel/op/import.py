@@ -92,7 +92,7 @@ class Import(marcel.core.Op):
                 except KeyError:
                     self.non_fatal_error(message=f'{self.symbol} is not defined in {self.module}')
         except ModuleNotFoundError:
-            self.fatal_error(None, f'Module {self.module} not found.')
+            self.fatal_error(env, None, f'Module {self.module} not found.')
 
     def must_be_first_in_pipeline(self):
         return True
