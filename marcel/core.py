@@ -79,10 +79,10 @@ class Op(AbstractOp):
         if receiver:
             receiver.receive_input(env, x)
 
-    def send_error(self, error):
+    def send_error(self, env, error):
         assert isinstance(error, Error)
         if self.receiver:
-            self.receiver.receive_error(error)
+            self.receiver.receive_error(env, error)
 
     def propagate_flush(self, env):
         if self.receiver:
@@ -112,7 +112,7 @@ class Op(AbstractOp):
             self._count += 1
             self.receive(env, x if type(x) in (tuple, list) else (x,))
         except marcel.exception.KillAndResumeException as e:
-            self.receive_error(Error(e))
+            self.receive_error(env, Error(e))
 
     def pos(self):
         return self._count
@@ -123,9 +123,9 @@ class Op(AbstractOp):
     def receive(self, env, x):
         pass
 
-    def receive_error(self, error):
+    def receive_error(self, env, error):
         assert isinstance(error, Error)
-        self.send_error(error)
+        self.send_error(env, error)
 
     def flush(self, env):
         self.propagate_flush(env)

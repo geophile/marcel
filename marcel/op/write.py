@@ -142,17 +142,25 @@ class Write(marcel.core.Op):
                        CSVWriter(self, COMMA) if self.csv else
                        CSVWriter(self, TAB) if self.tsv else
                        PickleWriter(self) if self.pickle else
-                       DefaultWriter(self, env.color_scheme()))
+                       BufferingWriter(DefaultWriter(self, env.color_scheme()),
+                                       100))
 
     def receive(self, env, x):
         try:
-            self.writer.receive(x)
+            self.writer.receive(env, x)
         except marcel.exception.KillAndResumeException as e:
             self.non_fatal_error(env, input=x, message=str(e))
         except Exception as e:  # E.g. UnicodeEncodeError
             self.non_fatal_error(env, input=x, message=str(e))
         finally:
             self.send(env, x)
+
+    def receive_error(self, env, error):
+        self.writer.receive(env, error)
+
+    def flush(self, env):
+        self.writer.flush(env)
+        super().flush(env)
 
     def cleanup(self):
         self.writer.cleanup()
@@ -176,17 +184,38 @@ class Write(marcel.core.Op):
             return str(x)
 
 
-class Writer:
+class Writer(object):
 
     def __init__(self, op):
         self.op = op
 
-    def receive(self, x):
+    def receive(self, env, x):
         assert False
+
+    def flush(self, env):
+        pass
 
     def cleanup(self):
         pass
 
+
+class BufferingWriter(Writer):
+
+    def __init__(self, writer, buffer_size):
+        super().__init__(writer.op)
+        self.writer = writer
+        self.buffer_size = buffer_size
+        self.buffer = []
+
+    def receive(self, env, x):
+        self.buffer.append(x)
+        if len(self.buffer) >= self.buffer_size:
+            self.flush(env)
+
+    def flush(self, env):
+        for x in self.buffer:
+            self.writer.receive(env, x)
+        self.buffer.clear()
 
 class TextWriter(Writer):
 
@@ -219,7 +248,7 @@ class CSVWriter(TextWriter):
                                  lineterminator='')
         self.row = None
 
-    def receive(self, x):
+    def receive(self, env, x):
         self.writer.writerow(x)
         self.write_line(self.row)
 
@@ -233,7 +262,7 @@ class PythonWriter(TextWriter):
         super().__init__(op)
         self.format = op.format
 
-    def receive(self, x):
+    def receive(self, env, x):
         self.write_line(self.format.format(*x))
 
 
@@ -245,7 +274,7 @@ class DefaultWriter(TextWriter):
                              if self.output == sys.__stdout__ else
                              None)
 
-    def receive(self, x):
+    def receive(self, env, x):
         t = type(x)
         if t in (list, tuple):
             if len(x) == 1:
@@ -256,6 +285,8 @@ class DefaultWriter(TextWriter):
                 out = str(x)
         elif x is None:
             out = None
+        elif t is marcel.object.error.Error:
+            out = x.render_full(self.color_scheme)
         else:
             assert False, type(x)
         self.write_line(out)
@@ -268,7 +299,7 @@ class PickleWriter(Writer):
         assert op.filename is not None  # Should have been checked in setup
         self.writer = marcel.picklefile.PickleFile(op.filename).writer(op.append)
 
-    def receive(self, x):
+    def receive(self, env, x):
         self.writer.write(x)
 
     def cleanup(self):

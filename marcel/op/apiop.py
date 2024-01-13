@@ -47,7 +47,7 @@ class APIOp(marcel.core.Op):
         if self.stop_after_first:
             marcel.exception.StopAfterFirst()
 
-    def receive_error(self, error):
+    def receive_error(self, env, error):
         self.error_handler(error)
         if self.stop_after_first:
             marcel.exception.StopAfterFirst()

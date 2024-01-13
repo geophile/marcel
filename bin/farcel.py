@@ -82,10 +82,10 @@ class PickleOutput(marcel.core.Op):
         TRACE.write('Closing stdout')
         sys.stdout.buffer.close()
 
-    def receive_error(self, error):
+    def receive_error(self, env, error):
         TRACE.write(f'Pickling error: ({type(error)}) {error}')
         self.pickler.dump(error)
-        super().receive_error(error)
+        super().receive_error(env, error)
 
 
 class PipelineRunner(threading.Thread):
@@ -111,7 +111,7 @@ class PipelineRunner(threading.Thread):
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')
             with TRACE.open() as file:
                 marcel.util.print_stack_of_current_exception(file)
-            self.pickler.receive_error(marcel.object.error.Error(e))
+            self.pickler.receive_error(self.env, marcel.object.error.Error(e))
         TRACE.write('PipelineRunner: Execution complete.')
 
     def check_python_version(self):

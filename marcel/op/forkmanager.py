@@ -68,7 +68,7 @@ class ForkWorker(object):
         def receive(self, env, x):
             self.parent.send(dill.dumps(x))
 
-        def receive_error(self, error):
+        def receive_error(self, env, error):
             self.parent.send(dill.dumps(error))
 
     def __init__(self, env, fork_manager, thread_id):

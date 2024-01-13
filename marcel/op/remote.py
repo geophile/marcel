@@ -98,9 +98,9 @@ class Remote(marcel.core.Op):
         def receive(self, env, x):
             self.send(env, self.label_tuple + x if type(x) is tuple else self.label_list + x)
 
-        def receive_error(self, error):
+        def receive_error(self, env, error):
             error.set_label(self.label_tuple[0])
-            super().receive_error(error)
+            super().receive_error(env, error)
 
         # LabelThread internals
 
