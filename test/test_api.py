@@ -1749,25 +1749,6 @@ def test_api_gather():
     # Don't unwrap singletons
     TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x), unwrap_singleton=False),
              expected_return=[(-1.0,), Error('division by zero'), (1.0,)])
-    # Collect errors separately
-    errors = []
-    TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x), errors=errors),
-             expected_return=[-1.0, 1.0],
-             expected_errors=[Error('division by zero')],
-             actual_errors=errors)
-    # error handler
-    errors = []
-    TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x),
-                                 error_handler=lambda error: errors.append(error)),
-             expected_return=[-1.0, 1.0],
-             expected_errors=[Error('division by zero')],
-             actual_errors=errors)
-    # errors and error_handler are mutually exclusive
-    errors = []
-    TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x),
-                                 errors=[],
-                                 error_handler=lambda env, error: errors.append(error)),
-             expected_err='Specify at most one of the errors and error_handler arguments')
 
 
 @timeit
@@ -1781,25 +1762,6 @@ def test_api_first():
     # First is Error
     TEST.run(test=lambda: first(gen(3, 0) | map(lambda x: 1 / x)),
              expected_exception='division by zero')
-    # Collect errors separately
-    errors = []
-    TEST.run(test=lambda: first(gen(3) | map(lambda x: x // 2) | map(lambda x: 1 / x), errors=errors),
-             expected_return=1.0,
-             expected_errors=[Error('division by zero'), Error('division by zero')],
-             actual_errors=errors)
-    # error handler
-    errors = []
-    TEST.run(test=lambda: first(gen(3) | map(lambda x: x // 2) | map(lambda x: 1 / x),
-                                error_handler=lambda error: errors.append(error)),
-             expected_return=1.0,
-             expected_errors=[Error('division by zero'), Error('division by zero')],
-             actual_errors=errors)
-    # errors and error_handler are mutually exclusive
-    errors = []
-    TEST.run(test=lambda: first(gen(3, -1) | map(lambda x: 1 / x),
-                                errors=[],
-                                error_handler=lambda error: errors.append(error)),
-             expected_err='Specify at most one of the errors and error_handler arguments')
 
 
 @timeit
@@ -2043,7 +2005,7 @@ def main():
     TEST.reset_environment()
     main_dev()
     main_stable()
-    # main_slow_tests()
+    main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

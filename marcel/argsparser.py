@@ -263,6 +263,17 @@ class ArgsParser:
             raise ArgsError(arg.op_name, f'{arg.name} argument must be a function.')
         return f
 
+    def function_or_pipeline(self, arg, x):
+        try:
+            a = self.function(arg, x)
+        except ArgsError as fe:
+            try:
+                a = self.check_pipeline(arg, x)
+            except ArgsError as pe:
+                raise ArgsError(arg.op_name, f'{arg.name} is neither a function nor a pipeline')
+        assert a is not None, x
+        return a
+
     # ------------------------------------------------------------------------------------------------------------------
 
     # Parsing

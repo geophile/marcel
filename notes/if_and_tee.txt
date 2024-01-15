@@ -1,0 +1,62 @@
+If and Tee
+
+The ops ifthen, ifelse, and tee, all have nested pipelines which are
+dead ends. There's no way to put the streams back together, and this
+forces the use of stream-valued variables, and then more commands to
+reference those variables later.
+
+Also:
+
+- if* is specific to two cases, tee is more general.
+
+- They have different mechanisms for combining filtering and
+  downstream actions. if* has a separate predicate, while tee does not
+  (relying on a select inside a pipeline instead). Common usage would
+  probably do filtering.
+
+----------------------------------------------------------------------
+
+case COND PIPELINE
+    ...
+    [PIPELINE]  # optional default
+
+tee PIPELINE
+    ...
+
+case guarantees that each input goes to at most one pipeline.
+
+----------------------------------------------------------------------
+
+case PREDICATE PIPELINE ... [PIPELINE]
+
+PREDICATE      Used to determine if an input tuple is passed to the next PIPELINE.
+
+PIPELINE       A pipeline processing input tuples for which the preceding PREDICATE is true.
+
+Input tuples are sent to at most one of the PIPELINEs, and output from
+all the PIPELINEs is sent downstream.
+
+An input tuple is evaluated by each PREDICATE in turn. For the first
+PREDICATE evaluating to True, the input tuple is passed to the
+PIPELINE following the PREDICATE. There may be one PIPELINE at the end
+without a preceding PREDICATE. This is a default case: if a tuple
+evaluates to False with each PREDICATE, then the tuple is passed to
+this default PIPELINE. If there is no default PIPELINE, then a tuple
+evaluating to False with all predicates will not be processed further.
+
+All PIPELINE outputs feed into the output for this operator.
+
+Example:
+
+gen 100 1 | case (x: x % 15 == 0) (| x: (x, 'FizzBuzz') |) \
+                 (x: x % 3 == 0)  (| x: (x, 'Fizz') |) \
+                 (x: x % 5 == 0)  (| x: (x, 'Buzz') |) \
+                                  (| x: (x, x) |) \
+          | sort
+
+This implements FizzBuzz. The integers 1 .. 100 are piped to the case
+operator. The predicates test for divisibility by 15, 3, and 5. It is
+important to handle divisibility by 15 first, since these numbers are
+also divisibly by 3 and 5, and case executes the first PIPELINE whose
+PREDICATE evaluates to True. The default pipeline handles numbers not
+divisible by 3, 5, or 15.

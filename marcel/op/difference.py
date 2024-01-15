@@ -74,9 +74,7 @@ class Difference(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        pipeline = marcel.core.Pipeline.create(self.owner.error_handler,
-                                               self.pipeline_arg,
-                                               self.customize_pipeline)
+        pipeline = marcel.core.Pipeline.create(self.pipeline_arg, self.customize_pipeline)
         pipeline.setup(env)
         pipeline.run_pipeline(env, None)
 

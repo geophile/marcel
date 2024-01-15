@@ -26,18 +26,6 @@ import marcel.util
 Error = marcel.object.error.Error
 
 
-def _noop_error_handler(env, error):
-    pass
-
-
-def kill_command_on_file_open_error(path, mode, error):
-    raise marcel.exception.KillCommandException(f'Unable to open {path} with mode {mode}: {str(error)}')
-
-
-def kill_and_resume_on_file_open_error(path, mode, error):
-    raise marcel.exception.KillAndResumeException(f'Unable to open {path} with mode {mode}: {str(error)}')
-
-
 class AbstractOp(object):
 
     def setup(self, env):
@@ -305,7 +293,6 @@ class PipelineExecutable(AbstractOp):
 
     def __init__(self):
         super().__init__()
-        self.error_handler = None
         self.ops = []
         # Parameters declared for a pipelines
         self.params = None
@@ -383,7 +370,6 @@ class PipelineExecutable(AbstractOp):
         # and be sure that the copy doesn't share state or structure (i.e. Op.receiver) with other uses of the
         # "same" pipelines within the same command.
         copy = PipelineExecutable()
-        copy.error_handler = self.error_handler
         for op in self.ops:
             copy.append(op.copy())
         copy.params = self.params
@@ -429,8 +415,7 @@ class PipelineIterator:
 class Pipeline(object):
 
     # customize_pipeline takes pipelines as an argument, returns None
-    def __init__(self, error_handler, pipeline_arg, customize_pipeline):
-        self.error_handler = error_handler
+    def __init__(self, pipeline_arg, customize_pipeline):
         self.pipeline_arg = pipeline_arg
         self.customize_pipeline = customize_pipeline
         self.pipeline = None
@@ -460,17 +445,14 @@ class Pipeline(object):
         self.pipeline.cleanup()
 
     @staticmethod
-    def create(error_handler,
-               pipeline,
+    def create(pipeline,
                customize_pipeline=lambda env, pipeline: pipeline):
         if type(pipeline) in (str, PipelineExecutable):
             # str: Presumably the name of a variable bound to a PipelineExecutable
-            return PipelineMarcel(error_handler,
-                                  pipeline,
+            return PipelineMarcel(pipeline,
                                   customize_pipeline)
         if callable(pipeline) or type(pipeline) is OpList:
-            return PipelinePython(error_handler,
-                                  pipeline,
+            return PipelinePython(pipeline,
                                   customize_pipeline)
         assert False, pipeline
 
@@ -485,8 +467,8 @@ class Pipeline(object):
 # by the Environment's NestedNamspace, and are pushed/popped around pipeline execution.
 class PipelineMarcel(Pipeline):
 
-    def __init__(self, error_handler, pipeline_arg, customize_pipeline):
-        super().__init__(error_handler, pipeline_arg, customize_pipeline)
+    def __init__(self, pipeline_arg, customize_pipeline):
+        super().__init__(pipeline_arg, customize_pipeline)
         self.params = None
         self.scope = None
 
@@ -542,14 +524,14 @@ class PipelineMarcel(Pipeline):
 # and scoping is taken care of by Python.
 class PipelinePython(Pipeline):
 
-    def __init__(self, error_handler, pipeline_arg, customize_pipeline):
+    def __init__(self, pipeline_arg, customize_pipeline):
         if callable(pipeline_arg):
             pipeline_arg = marcel.core.PipelineFunction(pipeline_arg)
         elif type(pipeline_arg) is OpList:
             pipeline_arg = pipeline_arg.create_pipeline()
         else:
             assert False, pipeline_arg
-        super().__init__(error_handler, pipeline_arg, customize_pipeline)
+        super().__init__(pipeline_arg, customize_pipeline)
         self.pipeline = None
 
     def setup(self, env):

@@ -19,26 +19,17 @@ import marcel.exception
 
 class APIOp(marcel.core.Op):
 
-    def __init__(self, output, unwrap_singleton, errors, error_handler, stop_after_first):
+    def __init__(self, output, unwrap_singleton, errors, stop_after_first):
         super().__init__()
         self.unwrap_singleton = unwrap_singleton
         self.stop_after_first = stop_after_first
         self.output = output
         self.errors = errors
-        self.error_handler = (self.error_to_output if errors is None and error_handler is None else
-                              self.error_to_errors if errors is not None and error_handler is None else
-                              error_handler if errors is None and error_handler is not None else
-                              None)  # indicates incorrect use of errors and error_handler args
 
     def __repr__(self):
         return f'{self.op_name()}()'
 
     # AbstractOp
-
-    def setup(self, env):
-        self.check_arg(self.error_handler is not None,
-                       None,
-                       'Specify at most one of the errors and error_handler arguments.')
 
     def receive(self, env, x):
         if self.unwrap_singleton and len(x) == 1:
@@ -48,14 +39,7 @@ class APIOp(marcel.core.Op):
             marcel.exception.StopAfterFirst()
 
     def receive_error(self, env, error):
-        self.error_handler(error)
         if self.stop_after_first:
             marcel.exception.StopAfterFirst()
-
-    # For use by this class
-
-    def error_to_output(self, error):
-        self.output.append(error)
-
-    def error_to_errors(self, error):
-        self.errors.append(error)
+        else:
+            self.output.append(error)

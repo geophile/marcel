@@ -21,12 +21,6 @@ An C{exception_handler} is a function with these arguments:
     - C{op}: A op of type C{Op}, or, in case of a remote exception, a op description, obtained by applying C{str()}.
     - C{command_input}: Input to the op that raised the exception.
     - C{thread}: The thread on which the exception occurred.
-
-An C{error_handler} is a function with these arguments:
-    - C{line}: A line written to stderr.
-    - C{op}: A op of type C{Op}, or, in case of remote stderr output, a op description, obtained by applying C{str()}.
-    - C{command_input}: Input to the op that generated the stderr output.
-    - C{thread}: The thread on which the stderr output occurred,
 """
 
 import sys

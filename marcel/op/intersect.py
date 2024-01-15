@@ -66,9 +66,7 @@ class Intersect(marcel.core.Op):
 
     def setup(self, env):
         for pipeline_arg in self.pipelines_arg:
-            pipeline = marcel.core.Pipeline.create(self.owner.error_handler,
-                                                   pipeline_arg,
-                                                   self.customize_pipeline)
+            pipeline = marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline)
             # pipelines.setup() will store item counts in self.input.
             self.input = {}
             pipeline.setup(env)

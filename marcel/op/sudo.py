@@ -90,7 +90,7 @@ class Sudo(marcel.core.Op):
                 raise marcel.exception.KillCommandException(
                     f'The variable {last_arg} is not bound to a pipeline')
         else:
-            self.pipeline = marcel.core.Pipeline.create(self.owner.error_handler, last_arg).executable(env)
+            self.pipeline = marcel.core.Pipeline.create(last_arg).executable(env)
 
     # Op
 

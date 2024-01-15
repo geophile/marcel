@@ -239,10 +239,6 @@ def _run_pipeline(pipeline):
 
 
 
-def _noop_error_handler(env, error):
-    pass
-
-
 # Create a pipelines, by copying if necessary. The caller is going to append an op, and we
 # don't want to modify the original.
 def _prepare_pipeline(x):
@@ -257,25 +253,23 @@ def run(x):
     _run_pipeline(pipeline)
 
 
-def gather(x, unwrap_singleton=True, errors=None, error_handler=None):
+def gather(x, unwrap_singleton=True, errors=None):
     pipeline = _prepare_pipeline(x)
     output = []
     terminal_op = _gather(output=output,
                           unwrap_singleton=unwrap_singleton,
-                          errors=errors,
-                          error_handler=error_handler)
+                          errors=errors)
     pipeline.append(terminal_op)
     _run_pipeline(pipeline)
     return output
 
 
-def first(x, unwrap_singleton=True, errors=None, error_handler=None):
+def first(x, unwrap_singleton=True, errors=None):
     pipeline = _prepare_pipeline(x)
     output = []
     terminal_op = _first(output=output,
                          unwrap_singleton=unwrap_singleton,
-                         errors=errors,
-                         error_handler=error_handler)
+                         errors=errors)
     pipeline.append(terminal_op)
     try:
         _run_pipeline(pipeline)

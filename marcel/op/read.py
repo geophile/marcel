@@ -239,7 +239,7 @@ class TextReader(Reader):
     def read_file(self, env, file, label):
         with marcel.util.open_file(file.path,
                                    'r',
-                                   marcel.core.kill_and_resume_on_file_open_error) as input:
+                                   marcel.exception.KillAndResumeException) as input:
             try:
                 line = input.readline()
                 while len(line) > 0:
@@ -274,7 +274,7 @@ class JSONReader(Reader):
         lines = None
         with marcel.util.open_file(file.path,
                                    'r',
-                                   marcel.core.kill_and_resume_on_file_open_error) as input:
+                                   marcel.exception.KillAndResumeException) as input:
             lines = input.readlines()
         assert lines is not None
         json = marcel.jsonutil.JSONUtil().decoder.decode(' '.join(lines))
@@ -297,7 +297,7 @@ class CSVReader(Reader):
     def read_file(self, env, file, label):
         with marcel.util.open_file(file.path,
                                    'r',
-                                   marcel.core.kill_and_resume_on_file_open_error) as input:
+                                   marcel.exception.KillAndResumeException) as input:
             try:
                 first = True
                 line = input.readline()

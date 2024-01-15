@@ -2694,21 +2694,13 @@ def main_stable():
 
 
 def main_dev():
-    os.system('rm -rf /tmp/test')
-    os.system('mkdir /tmp/test')
-    testdir = '/tmp/test'
-    TEST.run(f'gen 4 1 | ifthen (x: x % 2 == 0) (|map (x: x * 10) | write {testdir}/e10x10|)')
-    TEST.run(f'{testdir}/e10x10 <')
-    # TEST.run(test=f'gen 4 1 | ifthen (x: x % 2 == 0) (|map (x: x * 10) > {testdir}/e10x10|)',
-    #          verification=f'read {testdir}/e10x10',
-    #          expected_out=[0, 20, 40, 60, 80])
-
+    pass
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # main_slow_tests()
+    main_stable()
+    main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 

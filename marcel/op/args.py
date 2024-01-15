@@ -81,8 +81,7 @@ class Args(marcel.core.Op):
         # CLI: PipelineExecutable
         assert (callable(pipeline_arg) or
                 isinstance(pipeline_arg, marcel.core.PipelineExecutable))
-        self.pipeline = marcel.core.Pipeline.create(self.owner.error_handler,
-                                                    pipeline_arg,
+        self.pipeline = marcel.core.Pipeline.create(pipeline_arg,
                                                     self.customize_pipeline)
         self.pipeline.setup(env)
         self.n_params = self.pipeline.n_params()

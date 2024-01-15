@@ -145,10 +145,6 @@ def shutdown():
     pass
 
 
-def noop_error_handler(env, error):
-    TRACE.write(f'Pipeline encountered error: {error}')
-
-
 def main():
     try:
         TRACE.write('-' * 80)

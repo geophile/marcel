@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import types
-
 import marcel.argsparser
 import marcel.core
 import marcel.util
@@ -43,9 +41,7 @@ class IfBase(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.then = marcel.core.Pipeline.create(self.owner.error_handler,
-                                                self.then_arg,
-                                                lambda env, pipeline: pipeline)
+        self.then = marcel.core.Pipeline.create(self.then_arg, lambda env, pipeline: pipeline)
         self.then.setup(env)
         self.then.prepare_to_receive(env)
 
