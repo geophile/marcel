@@ -83,14 +83,9 @@ class Sudo(marcel.core.Op):
     def setup(self, env):
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('Missing pipelines')
-        last_arg = self.args.pop()
-        if type(last_arg) is str:
-            self.pipeline = env.getvar(last_arg)
-            if type(self.pipeline) is not marcel.core.PipelineExecutable:
-                raise marcel.exception.KillCommandException(
-                    f'The variable {last_arg} is not bound to a pipeline')
-        else:
-            self.pipeline = marcel.core.Pipeline.create(self.owner.error_handler, last_arg).executable(env)
+        pipeline_arg = self.args.pop()
+        self.pipeline = marcel.core.Pipeline.create(self.owner.error_handler, pipeline_arg)
+        self.pipeline.setup(env)
 
     # Op
 
@@ -109,7 +104,7 @@ class Sudo(marcel.core.Op):
         pickler = dill.Pickler(buffer)
         pickler.dump(marcel.util.python_version())
         pickler.dump(env.marcel_usage())
-        pickler.dump(self.pipeline)
+        self.pipeline.pickle(env, pickler)
         buffer.seek(0)
         stdout, stderr = self.process.communicate(input=buffer.getvalue())
         # Wait for completion (already guaranteed by communicate returning?)

@@ -431,8 +431,10 @@ class PipelineIterator:
 # - PipelineExecutable: Created directly by Parser, and used for execution of pipelines.
 # - OpList: Constructed by marcel.api, can be used to generate PipelineExecutable.
 # - function evaluated to OpList: Also constructed by marcel.api, for parameterized pipelines.
-# - PipelineFunction: Wrapper around function that evaluates to OpList
-# Pipeline provides a uniform interface to all of these.
+# - PipelineFunction: Wrapper around function that evaluates to OpList.
+# Pipeline provides a uniform interface to all of these. There are subclasses (PipelineMarcel, PipelinePython)
+# corresponding to script/interactive vs. API usage. E.g. PipelineMarcel pipelines need parameters and scopes
+# explicitly managed while PiplinePython pipelines do not.
 class Pipeline(object):
 
     # customize_pipeline takes pipelines as an argument, returns None
@@ -451,10 +453,11 @@ class Pipeline(object):
     def n_params(self):
         assert False
 
-    def run_pipeline(self, env, args):
-        assert False
+    def pickle(self, env, pickler):
+        self.create_executable(env)
+        pickler.dump(self.pipeline)
 
-    def executable(self, env):
+    def run_pipeline(self, env, args):
         assert False
 
     def receive(self, env, x):
@@ -487,6 +490,11 @@ class Pipeline(object):
                 if type(env) is marcel.env.EnvironmentAPI
                 else marcel.core.PipelineExecutable())
 
+    # Internal
+
+    def create_executable(self, env):
+        assert False
+
 
 # A pipeline constructed through the marcel parser, via command line or script. Pipeline args are managed
 # by the Environment's NestedNamspace, and are pushed/popped around pipeline execution.
@@ -496,6 +504,8 @@ class PipelineMarcel(Pipeline):
         super().__init__(error_handler, pipeline_arg, customize_pipeline)
         self.params = None
         self.scope = None
+
+    # Pipeline
 
     def setup(self, env):
         if type(self.pipeline_arg) is str:
@@ -532,18 +542,19 @@ class PipelineMarcel(Pipeline):
     def prepare_to_receive(self, env):
         self.pipeline.setup(env)
 
-    def executable(self, env):
+    # Internal
+
+    def create_executable(self, env):
         if type(self.pipeline_arg) is str:
             # Presumably a var
-            pipeline = env.getvar(self.pipeline_arg)
-            if type(pipeline) is not marcel.core.PipelineExecutable:
+            self.pipeline = env.getvar(self.pipeline_arg)
+            if type(self.pipeline) is not marcel.core.PipelineExecutable:
                 raise marcel.exception.KillCommandException(
                     f'The variable {self.pipeline_arg} is not bound to a pipeline')
         elif type(self.pipeline_arg) is PipelineExecutable:
-            pipeline = self.pipeline_arg
+            self.pipeline = self.pipeline_arg
         else:
             assert False, self.pipeline_arg
-        return pipeline
 
 
 # A pipeline created by Python, by using marcel.api. Pipeline variables are ordinary Python variables,
@@ -559,6 +570,8 @@ class PipelinePython(Pipeline):
             assert False, pipeline_arg
         super().__init__(error_handler, pipeline_arg, customize_pipeline)
         self.pipeline = None
+
+    # Pipeline
 
     def setup(self, env):
         pass
@@ -576,10 +589,12 @@ class PipelinePython(Pipeline):
 
     def prepare_to_receive(self, env):
         assert self.n_params() == 0
-        pipeline = self.executable(env)
-        pipeline.set_error_handler(self.error_handler)
-        self.pipeline = self.customize_pipeline(env, pipeline)
+        self.create_executable(env)
+        self.pipeline.set_error_handler(self.error_handler)
+        self.pipeline = self.customize_pipeline(env, self.pipeline)
         self.pipeline.setup(env)
 
-    def executable(self, env):
-        return self.pipeline_arg.create_pipeline()
+    # Internal
+
+    def create_executable(self, env):
+        self.pipeline = self.pipeline_arg.create_pipeline()
