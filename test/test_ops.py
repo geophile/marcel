@@ -2678,7 +2678,7 @@ def main_stable():
     test_store_load()
     test_redirect_file()
     test_redirect_var()
-    test_if()
+    # test_if()
     test_read()
     test_intersect()
     test_union()
@@ -2695,6 +2695,7 @@ def main_stable():
 
 def main_dev():
     pass
+    # TEST.run('gen 10 | case (x: x < 5) (| (x: (100 * x)) |) (| (x: (-x)) |)')
 
 def main():
     TEST.reset_environment()

@@ -412,6 +412,8 @@ class PipelineIterator:
 # - function evaluated to OpList: Also constructed by marcel.api, for parameterized pipelines.
 # - PipelineFunction: Wrapper around function that evaluates to OpList
 # Pipeline provides a uniform interface to all of these.
+# PipelineMarcel and PipelinePython are subclasses that accommodate differences in the handling of a
+# PipelineExecutable, when it is created, and how pipeline parameters are bound.
 class Pipeline(object):
 
     # customize_pipeline takes pipelines as an argument, returns None
@@ -449,11 +451,9 @@ class Pipeline(object):
                customize_pipeline=lambda env, pipeline: pipeline):
         if type(pipeline) in (str, PipelineExecutable):
             # str: Presumably the name of a variable bound to a PipelineExecutable
-            return PipelineMarcel(pipeline,
-                                  customize_pipeline)
+            return PipelineMarcel(pipeline, customize_pipeline)
         if callable(pipeline) or type(pipeline) is OpList:
-            return PipelinePython(pipeline,
-                                  customize_pipeline)
+            return PipelinePython(pipeline, customize_pipeline)
         assert False, pipeline
 
     @staticmethod

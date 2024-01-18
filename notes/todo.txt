@@ -745,3 +745,9 @@ gen 3 | args (| a: gen 3 | args (| b: gen 3 | args (| c: select (lambda: abs(a-b
 Error: select cannot be the first operator in a pipeline
 
 Maybe reconsider the restriction?
+
+----------------------------------------------------------------------
+
+REALLY need a trace facility. 
+
+Decorator would help

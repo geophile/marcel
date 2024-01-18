@@ -18,6 +18,7 @@ public = [
     'assign',
     'bash',
     'bg',
+    'case',
     'cd',
     'difference',
     'dirs',

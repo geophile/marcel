@@ -13,8 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+from collections import namedtuple
+
 import marcel.argsparser
 import marcel.core
+import marcel.exception
+import marcel.opmodule
 
 
 HELP = '''
@@ -40,10 +44,10 @@ All {r:PIPELINE} outputs feed into the output for this operator.
 
 Example:
 
-{L,indent=4,wrap=F}gen 100 1 | case (x: x % 15 == 0) (| x: (x, 'FizzBuzz') |) \
-                 (x: x % 3 == 0)  (| x: (x, 'Fizz') |) \
-                 (x: x % 5 == 0)  (| x: (x, 'Buzz') |) \
-                                  (| x: (x, x) |) \
+{L,indent=4,wrap=F}gen 100 1 | case (x: x % 15 == 0) (| x: (x, 'FizzBuzz') |) \\\\
+                 (x: x % 3 == 0)  (| x: (x, 'Fizz') |) \\\\
+                 (x: x % 5 == 0)  (| x: (x, 'Buzz') |) \\\\
+                                  (| x: (x, x) |) \\\\
           | sort
 
 This implements FizzBuzz. The integers 1 .. 100 are piped to the case
@@ -61,18 +65,20 @@ def case(*args):
 
 class CaseArgsParser(marcel.argsparser.ArgsParser):
 
-    def __init__(self, env, op_name):
-        super().__init__(op_name, env)
+    def __init__(self, env):
+        super().__init__('case', env)
         self.add_anon_list('args', convert=self.function_or_pipeline)
         self.validate()
 
 
 class Case(marcel.core.Op):
 
+    Branch = namedtuple('Branch', ['predicate', 'pipeline'])
+
     def __init__(self):
         super().__init__()
-        self.predicates = None
-        self.pipelines = None
+        self.branches = None
+        self.default_pipeline = None
         self.args = None
 
     def __repr__(self):
@@ -81,4 +87,58 @@ class Case(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        pass
+        # Functions and args alternate. For the API, pipelines can show up as functions, so testing to distinguish
+        # between functions and pipelines cannot be perfect here, have to wait until execution to be sure.
+        self.branches = []
+        predicate = None
+        for a in range(len(self.args) & ~1):
+            arg = self.args[a]
+            if predicate is None:
+                if callable(arg):
+                    predicate = arg
+                else:
+                    raise marcel.exception.KillCommandException(f'Expected function, found {arg}')
+            else:
+                pipeline = marcel.core.Pipeline.create(arg, self.customize_pipeline)
+                pipeline.setup(env)
+                pipeline.prepare_to_receive(env)
+                self.branches.append(Case.Branch(predicate, pipeline))
+                predicate = None
+        if len(self.args) & 1 == 1:
+            # There is a default pipeline
+            pipeline = marcel.core.Pipeline.create(self.args[-1], self.customize_pipeline)
+            pipeline.setup(env)
+            pipeline.prepare_to_receive(env)
+            self.default_pipeline = pipeline
+
+    def receive(self, env, x):
+        pipeline = self.default_pipeline
+        for branch in self.branches:
+            px = (self.call(env, branch.predicate)
+                  if x is None else
+                  self.call(env, branch.predicate, *x))
+            if px:
+                pipeline = branch.pipeline
+        if pipeline:
+            pipeline.receive(env, x)
+
+    def flush(self, env):
+        for branch in self.branches:
+            branch.pipeline.flush(env)
+        if self.default_pipeline:
+            self.default_pipeline.flush(env)
+        self.propagate_flush(env)
+
+    def cleanup(self):
+        for branch in self.branches:
+            branch.pipeline.cleanup()
+        if self.default_pipeline:
+            self.default_pipeline.cleanup()
+
+    # Internal
+
+    def customize_pipeline(self, env, pipeline):
+        # By appending this map invocation to the pipelines, we relay pipeline output
+        # to arg's downstream operator.
+        pipeline.append(marcel.opmodule.create_op(env, 'map', lambda *x: self.send(env, x)))
+        return pipeline
