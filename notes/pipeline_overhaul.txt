@@ -168,3 +168,41 @@ But this doesn't:
     Parsing error at position 8 of "gen (3) | (| n: (x: [x] * n |) 3...": Premature end of input
 
 The syntax is weird, but maybe it should be allowed?
+
+----------------------------------------------------------------------
+
+1/18/24
+
+Pipelines are still a bit messy and confusing. (Discovering this
+working on ifthen/else, tee, case).
+
+Review:
+
+Pipeline
+    - setup
+    - n_params
+    - run_pipeline(env, args)
+    - executable(env) -> PipelineExecutable
+    - receive
+    - flush
+    - cleanup
+    - static create_empty_pipeline -> OpList or PipelineExecutable
+
+    PipelineMarcel
+        - manage scope
+        - setup creates executable
+
+    PipelinePython
+        - No scopes to manage
+        - run_pipeline creates executable
+
+- Why is Pipeline.executable needed if Pipeline has execution methods?
+  (run_piptline, receive, flush, cleanup)
+
+  Used by sudo for pickling. There is fussy logic in Sudo.setup to get
+  the pipeline. Move all this into Pipeline, and replace executable by 
+
+      def pickle(pickler)
+
+- pipeline.prepare_to_receive must be preceded by setup, and also does
+  setup, (for PipeilneMarcel anyway). Confusing.
