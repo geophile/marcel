@@ -5,7 +5,7 @@ import test_base
 TEST = test_base.TestTabCompletion()
 TestDir = test_base.TestDir
 
-ALL_OPS = ['args', 'assign', 'bash', 'bg', 'cd', 'difference', 'dirs', 'download', 'edit', 'exit', 'env', 'expand',
+ALL_OPS = ['args', 'assign', 'bash', 'bg', 'case', 'cd', 'difference', 'dirs', 'download', 'edit', 'exit', 'env', 'expand',
            'fg', 'filter', 'fork', 'gen', 'head', 'help', 'history', 'ifelse', 'ifthen', 'import', 'intersect', 'jobs',
            'join', 'load', 'ls', 'map', 'popd', 'ps', 'pushd', 'pwd', 'read', 'red', 'remote', 'reverse', 'run',
            'select', 'sort', 'sql', 'squish', 'store', 'sudo', 'tail', 'tee', 'timer', 'union', 'unique', 'upload',

@@ -511,6 +511,7 @@ class PipelineMarcel(Pipeline):
             env.vars().pop_scope()
 
     def prepare_to_receive(self, env):
+        self.setup(env)
         self.pipeline.setup(env)
 
     # Internal
@@ -559,6 +560,7 @@ class PipelinePython(Pipeline):
 
     def prepare_to_receive(self, env):
         assert self.n_params() == 0
+        self.setup(env)
         self.create_executable(env)
         self.pipeline = self.customize_pipeline(env, self.pipeline)
         self.pipeline.setup(env)

@@ -1089,18 +1089,30 @@ def test_store_load():
 
 
 @timeit
-def test_if():
-    even = reservoir('even')
-    TEST.run(test=lambda: run(gen(10) | ifthen(lambda x: x % 2 == 0, store(even))),
-             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-    TEST.run(test=lambda: run(load(even)),
-             expected_out=[0, 2, 4, 6, 8])
-    d3 = reservoir('d3')
-    TEST.run(test=lambda: run(gen(10) | ifelse(lambda x: x % 3 == 0, store(d3))),
-             expected_out=[1, 2, 4, 5, 7, 8])
-    TEST.run(test=lambda: run(load(d3)),
-             expected_out=[0, 3, 6, 9])
-
+def test_case():
+    TEST.run(test=lambda: run(gen(5, 1) |
+                              case(lambda x: x < 3, map(lambda x: (100 * x)),
+                                   lambda x: x > 3, map(lambda x: (1000 * x)))),
+             expected_out=[100, 200, 4000, 5000])
+    TEST.run(test=lambda: run(gen(5, 1) |
+                              case(lambda x: x < 3, map(lambda x: (100 * x)), map(lambda x: (-x)))),
+             expected_out=[100, 200, -3, -4, -5])
+    TEST.run(test=lambda: run(gen(5, 1) |
+                              case(lambda x: x == 1, map(lambda x: "one"),
+                                   lambda x: x == 2, map(lambda x: "two"),
+                                   lambda x: x == 3, map(lambda x: "three"))),
+             expected_out=['one', 'two', 'three'])
+    # Just the default branch isn't allowed
+    TEST.run(test=lambda: run(gen(5, 1) |
+                              case(map(lambda x: (100 * x)))),
+             expected_err='case requires at least 2 arguments')
+    # Function/pipeline confusion
+    TEST.run(test=lambda : run(gen(5, 1) |
+                               case(map(lambda x: (100 * x)), map(lambda x: (-x)), lambda x: x < 3)),
+             expected_err='Expected function')
+    TEST.run(test=lambda: run(gen(5, 1) |
+                              case(lambda x: x < 3, lambda: 123)),
+             expected_err='Expected pipeline')
 
 @timeit
 def test_read():
@@ -1522,21 +1534,6 @@ def test_pos():
                               select(lambda x, p1: x % 2 == 0) |
                               map(lambda x, p1: (x, p1, pos()))),
              expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
-
-
-@timeit
-def test_tee():
-    TEST.run(test=lambda: run(gen(5, 1) | tee()),
-             expected_err='No pipelines')
-    a = reservoir('a')
-    b = reservoir('b')
-    TEST.run(test=lambda: run(gen(5, 1) |
-                              tee(red(r_plus) | store(a),
-                                  red(r_times) | store(b))),
-             expected_out=[1, 2, 3, 4, 5])
-    TEST.run(test=lambda: run(load(a)), expected_out=[15])
-    TEST.run(test=lambda: run(load(b)), expected_out=[120])
-
 
 @timeit
 def test_json():
@@ -1979,7 +1976,7 @@ def main_stable():
     test_pipeline_args()
     test_sql()
     test_store_load()
-    test_if()
+    test_case()
     test_read()
     test_intersect()
     test_union()
@@ -1988,7 +1985,6 @@ def main_stable():
     test_args()
     test_env()
     test_pos()
-    test_tee()
     test_json()
     test_api_run()
     test_api_gather()

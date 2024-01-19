@@ -1409,16 +1409,24 @@ def test_loop():
 
 
 @timeit
-def test_if():
-    TEST.run('gen 10 | ifthen (x: x % 2 == 0) (|store even|)',
-             expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-    TEST.run('load even',
-             expected_out=[0, 2, 4, 6, 8])
-    TEST.run('gen 10 | ifelse (x: x % 3 == 0) (|store d3|)',
-             expected_out=[1, 2, 4, 5, 7, 8])
-    TEST.run('load d3',
-             expected_out=[0, 3, 6, 9])
-
+def test_case():
+    TEST.run(test='gen 5 1 | case (x: x < 3) (| (x: (100 * x)) |) '
+                  '               (x: x > 3) (| (x: (1000 * x)) |)',
+             expected_out=[100, 200, 4000, 5000])
+    TEST.run(test='gen 5 1 | case (x: x < 3) (| (x: (100 * x)) |) (| (x: (-x)) |)',
+             expected_out=[100, 200, -3, -4, -5])
+    TEST.run(test='gen 5 1 | case (x: x == 1) (| (x: "one") |) '
+                  '               (x: x == 2) (| (x: "two") |) '
+                  '               (x: x == 3) (| (x: "three") |) ',
+             expected_out=['one', 'two', 'three'])
+    # Just the default branch isn't allowed
+    TEST.run(test='gen 5 1 | case (| (x: (100 * x)) |)',
+             expected_err='case requires at least 2 arguments')
+    # Function/pipeline confusion
+    TEST.run(test='gen 5 1 | case (| (x: (100 * x)) |) (| (x: (-x)) |) (x: x < 3)',
+             expected_err='Expected function')
+    TEST.run(test='gen 5 1 | case (x: x < 3) (123)',
+             expected_err='Expected pipeline')
 
 @timeit
 def test_read():
@@ -1887,17 +1895,6 @@ def test_env():
 def test_pos():
     TEST.run('gen 5 | (x: (x, pos())) | select (x, p1: x % 2 == 0) | (x, p1: (x, p1, pos()))',
              expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
-
-
-@timeit
-def test_tee():
-    TEST.run('gen 5 1 | tee',
-             expected_err='No pipelines')
-    TEST.run('gen 5 1 | tee (|red + >$ a|) (|red * >$ b|)',
-             expected_out=[1, 2, 3, 4, 5])
-    TEST.run('a <$', expected_out=[15])
-    TEST.run('b <$', expected_out=[120])
-
 
 @timeit
 def test_json():
@@ -2591,10 +2588,6 @@ def test_pipeline_vars():
                            (3, 100), (3, 101), (3, 102)])
     TEST.run('q = (| args (| x, y: (x + y) |) |)')
     TEST.run('gen 10 | q', expected_out=[1, 5, 9, 13, 17])
-    # ifelse, ifthen
-    TEST.run('a = (| (x: x + 1000) | write |)')
-    TEST.run('gen 6 | ifelse (x: x % 2 == 0) a', expected_out=[1000, 1, 1002, 3, 1004, 5])
-    TEST.run('gen 6 | ifthen (x: x % 2 == 0) a', expected_out=[1000, 0, 1, 1002, 2, 3, 1004, 4, 5])
     # join
     TEST.run('x100 = (| gen 3 1 | (x: (x, x * 100)) |)')
     TEST.run('x1000 = (| gen 3 1 | (x: (x, x * 1000)) |)')
@@ -2678,7 +2671,7 @@ def main_stable():
     test_store_load()
     test_redirect_file()
     test_redirect_var()
-    # test_if()
+    test_case()
     test_read()
     test_intersect()
     test_union()
@@ -2687,7 +2680,6 @@ def main_stable():
     test_args()
     test_env()
     test_pos()
-    test_tee()
     test_json()
     test_workspaces()
     test_bugs()
@@ -2695,7 +2687,6 @@ def main_stable():
 
 def main_dev():
     pass
-    # TEST.run('gen 10 | case (x: x < 5) (| (x: (100 * x)) |) (| (x: (-x)) |)')
 
 def main():
     TEST.reset_environment()

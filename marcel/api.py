@@ -30,6 +30,7 @@ import marcel.util
 from marcel.op.args import args as _args
 from marcel.op.assign import assign as _assign
 from marcel.op.bash import bash as _bash
+from marcel.op.case import case as _case
 from marcel.op.cd import cd as _cd
 from marcel.op.difference import difference as _difference
 from marcel.op.dirs import dirs as _dirs
@@ -100,6 +101,9 @@ def assign(*args, **kwargs): return _generate_op(_assign, *args, **kwargs)
 
 
 def bash(*args, **kwargs): return _generate_op(_bash, *args, **kwargs)
+
+
+def case(*args, **kwargs): return _generate_op(_case, *args, **kwargs)
 
 
 def cd(*args, **kwargs): return _generate_op(_cd, *args, **kwargs)

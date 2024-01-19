@@ -87,6 +87,18 @@ class Case(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
+        def pipeline(pipeline_arg):
+            pipeline = marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline)
+            try:
+                pipeline.prepare_to_receive(env)
+                if not isinstance(pipeline, marcel.core.Pipeline):
+                    raise marcel.exception.KillCommandException(f'Expected pipeline, found {arg}')
+                return pipeline
+            except:
+                raise marcel.exception.KillCommandException(f'Expected pipeline, found {arg}')
+
+        if len(self.args) < 2:
+            raise marcel.exception.KillCommandException('case requires at least 2 arguments')
         # Functions and args alternate. For the API, pipelines can show up as functions, so testing to distinguish
         # between functions and pipelines cannot be perfect here, have to wait until execution to be sure.
         self.branches = []
@@ -99,17 +111,10 @@ class Case(marcel.core.Op):
                 else:
                     raise marcel.exception.KillCommandException(f'Expected function, found {arg}')
             else:
-                pipeline = marcel.core.Pipeline.create(arg, self.customize_pipeline)
-                pipeline.setup(env)
-                pipeline.prepare_to_receive(env)
-                self.branches.append(Case.Branch(predicate, pipeline))
+                self.branches.append(Case.Branch(predicate, pipeline(arg)))
                 predicate = None
         if len(self.args) & 1 == 1:
-            # There is a default pipeline
-            pipeline = marcel.core.Pipeline.create(self.args[-1], self.customize_pipeline)
-            pipeline.setup(env)
-            pipeline.prepare_to_receive(env)
-            self.default_pipeline = pipeline
+            self.default_pipeline = pipeline(self.args[-1])
 
     def receive(self, env, x):
         pipeline = self.default_pipeline
