@@ -1038,3 +1038,9 @@ But the reduction function must be hardwired. Why not open it up?
 Have expand work on maps?
 
 E.g. expand {'a': 1, 'b': 2} -> ('a', 1), ('b', 2)
+
+----------------------------------------------------------------------
+
+Have expand work on generators. There's TODO in expand. The problem is
+recognizing a generator. Should include zips, but util.is_generator
+doesn't do it.
