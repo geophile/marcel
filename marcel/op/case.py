@@ -44,16 +44,16 @@ All {r:PIPELINE} outputs feed into the output for this operator.
 
 Example:
 
-{L,indent=4,wrap=F}gen 100 1 | case (x: x % 15 == 0) (| x: (x, 'FizzBuzz') |) \\\\
-                 (x: x % 3 == 0)  (| x: (x, 'Fizz') |) \\\\
-                 (x: x % 5 == 0)  (| x: (x, 'Buzz') |) \\\\
-                                  (| x: (x, x) |) \\\\
-          | sort
+{L,indent=4,wrap=F}gen 100 1 | case \\\\
+                 (x: x % 15 == 0) (| (x: (x, 'FizzBuzz')) |) \\\\
+                 (x: x % 3 == 0)  (| (x: (x, 'Fizz')) |) \\\\
+                 (x: x % 5 == 0)  (| (x: (x, 'Buzz')) |) \\\\
+                                  (| (x: (x, x)) |)
 
 This implements FizzBuzz. The integers 1 .. 100 are piped to the case
 operator. The predicates test for divisibility by 15, 3, and 5. It is
-important to handle divisibility by 15 first, since these numbers are
-also divisibly by 3 and 5, and case executes the first {r:PIPELINE} whose
+important to handle divisibility by 15 first, since qualifying numbers are
+also divisible by 3 and 5, and case executes the first {r:PIPELINE} whose
 {r:PREDICATE} evaluates to True. The default pipeline handles numbers not
 divisible by 3, 5, or 15.
 '''
@@ -115,6 +115,9 @@ class Case(marcel.core.Op):
                 predicate = None
         if len(self.args) & 1 == 1:
             self.default_pipeline = pipeline(self.args[-1])
+        for b in self.branches:
+            print(b)
+        print(f'default: {self.default_pipeline}')
 
     def receive(self, env, x):
         pipeline = self.default_pipeline
@@ -124,6 +127,7 @@ class Case(marcel.core.Op):
                   self.call(env, branch.predicate, *x))
             if px:
                 pipeline = branch.pipeline
+                break
         if pipeline:
             pipeline.receive(env, x)
 
