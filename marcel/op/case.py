@@ -115,9 +115,6 @@ class Case(marcel.core.Op):
                 predicate = None
         if len(self.args) & 1 == 1:
             self.default_pipeline = pipeline(self.args[-1])
-        for b in self.branches:
-            print(b)
-        print(f'default: {self.default_pipeline}')
 
     def receive(self, env, x):
         pipeline = self.default_pipeline
