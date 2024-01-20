@@ -216,7 +216,7 @@ class Environment(object):
         def __exit__(self, exc_type, exc_val, exc_tb):
             pass
 
-    def __init__(self, namespace):
+    def __init__(self, namespace, trace):
         # Where environment variables live.
         self.namespace = namespace
         # Directory stack, including current directory.
@@ -227,7 +227,7 @@ class Environment(object):
         self.var_handler = VarHandlerStartup(self)
         self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
         self.var_handler.add_save_vars('PWD', 'DIRS')
-        self.trace = Trace()
+        self.trace = trace if trace else Trace()
 
     def initialize_namespace(self):
         try:
@@ -326,8 +326,8 @@ class Environment(object):
 class EnvironmentAPI(Environment):
 
     # globals: From the module in which marcel.api is imported.
-    def __init__(self, globals):
-        super().__init__(globals)
+    def __init__(self, globals, trace=None):
+        super().__init__(globals, trace)
         self.directory_state = marcel.directorystate.DirectoryState(self)
 
     def clear_changes(self):
@@ -378,8 +378,8 @@ class EnvironmentScript(Environment):
             buffer.append(')')
             return ''.join(buffer)
 
-    def __init__(self, locations, workspace):
-        super().__init__(marcel.nestednamespace.NestedNamespace())
+    def __init__(self, locations, workspace, trace=None):
+        super().__init__(marcel.nestednamespace.NestedNamespace(), trace)
         assert workspace is not None
         # Standard locations of files important to marcel: config, history
         self.locations = locations
@@ -520,8 +520,8 @@ class EnvironmentScript(Environment):
                 x in interactive_executables)
 
     @staticmethod
-    def create(locations, workspace):
-        env = EnvironmentScript(locations, workspace)
+    def create(locations, workspace, trace=None):
+        env = EnvironmentScript(locations, workspace, trace)
         env.initialize_namespace()
         return env
 
@@ -535,8 +535,8 @@ class EnvironmentInteractive(EnvironmentScript):
     DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
     DEFAULT_PROMPT_CONTINUATION = '+$    '
 
-    def __init__(self, locations, workspace):
-        super().__init__(locations, workspace)
+    def __init__(self, locations, workspace, trace=None):
+        super().__init__(locations, workspace, trace)
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
         # Used during readline editing
@@ -582,8 +582,8 @@ class EnvironmentInteractive(EnvironmentScript):
             return EnvironmentInteractive.DEFAULT_PROMPT
 
     @staticmethod
-    def create(locations, workspace):
-        env = EnvironmentInteractive(locations, workspace)
+    def create(locations, workspace, trace=None):
+        env = EnvironmentInteractive(locations, workspace, trace)
         env.initialize_namespace()
         return env
 

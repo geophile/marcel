@@ -322,13 +322,15 @@ def args():
 
 def main_interactive_run(workspace):
     main = None
+    trace = None
     while True:
-        env = marcel.env.EnvironmentInteractive.create(marcel.locations.Locations(), workspace)
+        env = marcel.env.EnvironmentInteractive.create(marcel.locations.Locations(), workspace, trace)
         main = MainInteractive(main, env, workspace)
         try:
             main.run()
             break
         except marcel.exception.ReconfigureException as e:
+            trace = main.env.trace
             main.shutdown(restart=True)
             if e.workspace_to_open is None:
                 # Reconfiguration is due to modified startup script. Same workspace, keep main.input so it is rerun.
@@ -359,7 +361,7 @@ def main_script_run(workspace, script_path):
             # while running a script.
             assert e.workspace_to_open is not None
             workspace = e.workspace_to_open
-            env = marcel.env.EnvironmentScript.create(locations, workspace)
+            env = marcel.env.EnvironmentScript.create(locations, workspace, main.env.trace)
             main = MainScript(env, workspace)
 
 
