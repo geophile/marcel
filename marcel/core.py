@@ -63,11 +63,15 @@ class Op(AbstractOp):
     # Op
 
     def send(self, env, x):
+        if env.trace.is_enabled():
+            env.trace.write(self, x)
         receiver = self.receiver
         if receiver:
             receiver.receive_input(env, x)
 
     def send_error(self, env, error):
+        if env.trace.is_enabled():
+            env.trace.write(self, error)
         assert isinstance(error, Error)
         if self.receiver:
             self.receiver.receive_error(env, error)

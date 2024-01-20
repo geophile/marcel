@@ -61,6 +61,7 @@ public = [
     'tail',
     'tee',
     'timer',
+    'trace',
     'unique',
     'union',
     'upload',

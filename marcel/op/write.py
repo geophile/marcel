@@ -155,6 +155,8 @@ class Write(marcel.core.Op):
             self.send(env, x)
 
     def receive_error(self, env, error):
+        if env.trace.is_enabled():
+            env.trace.write(self, error)
         self.writer.receive(env, error)
 
     def flush(self, env):

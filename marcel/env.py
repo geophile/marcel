@@ -227,6 +227,7 @@ class Environment(object):
         self.var_handler = VarHandlerStartup(self)
         self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
         self.var_handler.add_save_vars('PWD', 'DIRS')
+        self.trace = Trace()
 
     def initialize_namespace(self):
         try:
@@ -585,3 +586,45 @@ class EnvironmentInteractive(EnvironmentScript):
         env = EnvironmentInteractive(locations, workspace)
         env.initialize_namespace()
         return env
+
+
+class Trace(object):
+
+    def __init__(self):
+        self.tracefile = None
+        self.description = None
+
+    def is_enabled(self):
+        return self.tracefile is not None
+
+    def enable(self, target):
+        if target is sys.stdout:
+            self.tracefile = sys.stdout
+            self.description = 'stdout'
+        else:
+            try:
+                self.tracefile = open(target, 'a')
+                self.description = target
+            except Exception as e:
+                raise marcel.exception.KillCommandException(
+                    f'Unable to start tracing to {target}: {e}')
+
+    def disable(self):
+        if self.tracefile and self.tracefile is not sys.stdout:
+            self.tracefile.close()
+        self.tracefile = None
+        self.description = None
+
+    # output argument: output from the execution of the op
+    def write(self, op, output=None):
+        assert self.tracefile
+        if output is None:
+            print(f'{op}', file=self.tracefile)
+        else:
+            print(f'{op} -> {output}', file=self.tracefile)
+
+    def print_status(self):
+        if self.tracefile is None:
+            print('tracing is off')
+        elif self.tracefile is sys.stdout:
+            print(f'tracing to {self.description}')

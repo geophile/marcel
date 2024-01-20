@@ -911,3 +911,10 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/picklefile.py", line 57, in writer
     assert len(self._readers) == 0 and self._writer is None, self
 AssertionError: Reservoir(/home/jao/.local/share/marcel/queens/reservoirs/x.pickle)
+
+----------------------------------------------------------------------
+
+243. Use of term "output stream"
+
+The jobs help info says that output is written to the "output
+stream". Is this right? I think it just goes to stdout.
