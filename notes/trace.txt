@@ -1,0 +1,37 @@
+Trace facility
+
+- Print op and input
+
+- Need ops to identify themselves clearly, to distinguish from other
+  ops of the same type within a command.
+
+- What about between commands? Maybe dump the entire command on start
+  and end of execution.
+
+- Try to keep trace logic in core Op, but this may not always be
+  possible (e.g. Write.receive_error)
+
+- trace op to control
+
+  - Whether trace is on
+  - Where to write output (stdout, file)
+
+- What about
+
+  - Remote execution: Send trace config to farcel? Can results from
+    there be integrated with local trace?
+
+  - Anything run through ForkManager
+
+
+trace op:
+
+      trace # prints trace status
+      trace -s|--stdout
+      trace -f|--file FILE
+      trace -o|--off
+
+
+Bugs:
+
+Preserve tracing across reconfig
