@@ -729,9 +729,3 @@ def is_sequence(x):
 def is_sequence_except_string(x):
     t = type(x)
     return t is tuple or t is list
-
-----------------------------------------------------------------------
-
-REALLY need a trace facility. 
-
-Decorator would help

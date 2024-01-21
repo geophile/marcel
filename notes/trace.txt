@@ -30,8 +30,3 @@ trace op:
       trace -s|--stdout
       trace -f|--file FILE
       trace -o|--off
-
-
-Bugs:
-
-Preserve tracing across reconfig
