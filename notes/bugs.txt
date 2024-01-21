@@ -865,30 +865,6 @@ SyntaxError: f-string: closing parenthesis ')' does not match opening parenthesi
 
 ----------------------------------------------------------------------
 
-241. Fix ls formatting for large file sizes
-
-M 0.21.2 (jeffrey) jao@loon ~/hacks/jeffrey$ ls | ft
--rw-rw-r--   jao    jao    823516880   2023 Dec 16 14:24:12   output.txt
--rw-rw-r--   jao    jao    86083186   2023 Dec 27 13:36:14   CompressedFile.zip
--rw-rw-r--   jao    jao    835703600   2023 Dec 27 14:07:39   output_split.txt
--rw-rw-r--   jao    jao    150673824   2023 Dec 27 14:10:03   coords
--rw-rw-r--   jao    jao    666598081   2023 Dec 27 15:28:57   xyrgb.csv
--rw-rw-r--   jao    jao         550   2023 Dec 27 15:29:18   x
--rw-rw-r--   jao    jao        3941   2023 Dec 27 17:10:40   green
--rw-rw-r--   jao    jao        3941   2023 Dec 27 17:11:42   red
--rw-rw-r--   jao    jao        3941   2023 Dec 27 17:12:41   blue
--rw-rw-r--   jao    jao         643   2023 Dec 28 10:59:27   solve_250_255.py
-lrwxrwxrwx   jao    jao           4   2023 Dec 28 13:14:51   blue.csv -> blue
--rw-rw-r--   jao    jao         603   2023 Dec 28 16:00:39   notes.txt
-drwxrwxr-x   jao    jao        4096   2023 Dec 29 13:45:03   .idea
-drwxrwxr-x   jao    jao        4096   2023 Dec 29 15:12:13   venv
--rw-rw-r--   jao    jao    739754689   2023 Dec 29 15:26:54   xyrgb_sorted.csv
--rw-rw-r--   jao    jao        3541   2023 Dec 29 16:53:54   solve.py
-drwxrwxr-x   jao    jao        4096   2023 Dec 29 16:54:10   .
--rw-rw-r--   jao    jao     3096968   2023 Dec 29 16:54:10   jeffrey.jpg
-
-----------------------------------------------------------------------
-
 242. Questionable usage causes crash
 
 Same var used for both load and store.
