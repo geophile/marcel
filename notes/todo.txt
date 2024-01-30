@@ -729,3 +729,13 @@ def is_sequence(x):
 def is_sequence_except_string(x):
     t = type(x)
     return t is tuple or t is list
+
+----------------------------------------------------------------------
+
+Should restriction on select, write etc. not being permitted as first
+in pipeline be dropped? Inside args, these can be OK. Maybe limit the
+restriction to top-level.
+
+----------------------------------------------------------------------
+
+Op to write commands to script. 

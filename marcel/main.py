@@ -285,7 +285,7 @@ def usage(exit_code=1):
     It defaults to fork.
 '''
     print(usage, file=sys.stderr)
-    sys.exit(1)
+    sys.exit(exit_code)
 
 
 # --mpstart: fork/spawn/forkserver. Use fork if not specified
@@ -301,8 +301,8 @@ def args():
             workspace = arg
         elif arg in flags:
             flag = arg
-        elif flag in ('-h', '--help'):
-            usage(0)
+            if flag in ('-h', '--help'):
+                usage(0)
         elif arg.startswith('-'):
             usage()
         else:

@@ -894,3 +894,101 @@ AssertionError: Reservoir(/home/jao/.local/share/marcel/queens/reservoirs/x.pick
 
 The jobs help info says that output is written to the "output
 stream". Is this right? I think it just goes to stdout.
+
+----------------------------------------------------------------------
+
+245. Crash on write with format
+
+M 0.22.2 jao@loon ~$ gen 3 | args (| x: (x: x) | write -f f'<{x}>' |)
+Process Process-8:
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/marcel/core.py", line 87, in call
+    return function(*args, **kwargs)
+  File "/home/jao/git/marcel/marcel/function.py", line 39, in __call__
+    return self.function(*args, **kwargs)
+TypeError: <lambda>() missing 1 required positional argument: 'x'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/marcel/core.py", line 222, in execute
+    self.pipeline.run(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 348, in run
+    self.ops[0].run(env)
+  File "/home/jao/git/marcel/marcel/op/gen.py", line 100, in run
+    self.send(env, self.apply_padding(x))
+  File "/home/jao/git/marcel/marcel/core.py", line 70, in send
+    receiver.receive_input(env, x)
+  File "/home/jao/git/marcel/marcel/core.py", line 105, in receive_input
+    self.receive(env, x if type(x) in (tuple, list) else (x,))
+  File "/home/jao/git/marcel/marcel/op/args.py", line 93, in receive
+    self.pipeline.run_pipeline(env, self.args)
+  File "/home/jao/git/marcel/marcel/core.py", line 513, in run_pipeline
+    marcel.core.Command(None, self.pipeline).execute(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 222, in execute
+    self.pipeline.run(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 348, in run
+    self.ops[0].run(env)
+  File "/home/jao/git/marcel/marcel/op/map.py", line 64, in run
+    self.send(env, self.call(env, self.function))
+  File "/home/jao/git/marcel/marcel/core.py", line 95, in call
+    self.fatal_error(env, args_description, str(e))
+  File "/home/jao/git/marcel/marcel/core.py", line 141, in fatal_error
+    self.send_error(env, error)
+  File "/home/jao/git/marcel/marcel/core.py", line 77, in send_error
+    self.receiver.receive_error(env, error)
+  File "/home/jao/git/marcel/marcel/op/write.py", line 160, in receive_error
+    self.writer.receive(env, error)
+  File "/home/jao/git/marcel/marcel/op/write.py", line 268, in receive
+    self.write_line(self.format.format(*x))
+TypeError: str.format() argument after * must be an iterable, not Error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/marcel/core.py", line 87, in call
+    return function(*args, **kwargs)
+  File "/home/jao/git/marcel/marcel/function.py", line 39, in __call__
+    return self.function(*args, **kwargs)
+TypeError: <lambda>() missing 1 required positional argument: 'x'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env, True)
+  File "/home/jao/git/marcel/marcel/core.py", line 224, in execute
+    self.pipeline.flush(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 358, in flush
+    self.ops[0].flush(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 123, in flush
+    self.propagate_flush(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 81, in propagate_flush
+    self.receiver.flush(env)
+  File "/home/jao/git/marcel/marcel/op/args.py", line 103, in flush
+    self.pipeline.run_pipeline(env, self.args)
+  File "/home/jao/git/marcel/marcel/core.py", line 513, in run_pipeline
+    marcel.core.Command(None, self.pipeline).execute(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 222, in execute
+    self.pipeline.run(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 348, in run
+    self.ops[0].run(env)
+  File "/home/jao/git/marcel/marcel/op/map.py", line 64, in run
+    self.send(env, self.call(env, self.function))
+  File "/home/jao/git/marcel/marcel/core.py", line 95, in call
+    self.fatal_error(env, args_description, str(e))
+  File "/home/jao/git/marcel/marcel/core.py", line 141, in fatal_error
+    self.send_error(env, error)
+  File "/home/jao/git/marcel/marcel/core.py", line 77, in send_error
+    self.receiver.receive_error(env, error)
+  File "/home/jao/git/marcel/marcel/op/write.py", line 160, in receive_error
+    self.writer.receive(env, error)
+  File "/home/jao/git/marcel/marcel/op/write.py", line 268, in receive
+    self.write_line(self.format.format(*x))
+TypeError: str.format() argument after * must be an iterable, not Error
+M 0.22.2 jao@loon ~$ 
+
