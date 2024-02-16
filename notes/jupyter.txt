@@ -1,0 +1,65 @@
+Marcel and Jupyter
+
+For years, I kept hearing about iPython, as a vastly improved Python REPL. I played with it a little bit, and yes, I saw that. I found that Object Shell (a forerunner of marcel) ran in iPython with no problem. Fine, interesting, but in my day-to-day work, I really had no place for iPython. iPython looks great, but I didn't find any compelling use cases for it. I don't really need a better REPL.   
+
+The reason I wrote marcel (and Object Shell before it) was that I needed two things:
+
+First, I needed a better shell. I was working on a distributed system, running on a cluster. I wanted to be able to submit the same command to all nodes of the cluster, and receive and combine and post-process the results. Often what I needed to do on each node was a database query. So Object Shell, and then marcel, had database access and cluster access. And the combining and post-processing of results gave rise to the idea of piping Python datatypes between operators.
+
+Second, I thought that Python was deficient as a scripting language due to poor shell integration. Bash and Perl were better in this way, and I loathe both of those languages. So I wrote an api module for marcel (as I did for Object Shell), providing shell-like capabilities.
+
+I decided to go back to school to learn more about machine learning and AI. I am learning a new (to me) batch of tools: numpy, sciki-learn, and Jupyter (formerly iPython).
+
+I think that Jupyter notebooks are fantastic for publishing information in a way that encourages analysis and exploration. A published scientific paper cannot compare. Yes, the data and code can be made available, but it is *much* harder to get started playing with the ideas compared to what you have in a Jupyter notebook.
+
+My first exposure to Jupyter was in a machine learning programming assignment. Now for development purposes, I don't think that Jupyter is good, at least for me. It doesn't fit my workflow. It's an inferior IDE (compared to Emacs or PyCharm); it is too easy to forget to rerun code in a cell; the formatting of cells and output is often quite bad; and if you need to escape to the shell, you're still shelling out from Python, which sucks.
+
+So of course I had to try using marcel from Jupyter. That would fix the shelling out problem, at least. So I tried it, and it just works.  My first cell imports the marcel API:
+
+from marcel.api import *
+
+A Hello World command:
+
+who = 'world'
+run(map (lambda: (f'Hello {who}')))
+
+Output:
+
+Hello world
+
+Compute some factorials:
+
+run(gen(10, 1) | red(r_times, incremental=True) | write(format='{}! = {}'))
+
+Output:
+
+1! = 1
+2! = 2
+3! = 6
+4! = 24
+5! = 120
+6! = 720
+7! = 5040
+8! = 40320
+9! = 362880
+10! = 3628800
+
+Now try more shell-like commands. First, define a pipeline that
+filters by file extension:
+
+ext = lambda e: select(lambda f: f.suffix[1:] == e)
+
+This defines a pipeline which takes e, a file extension as a
+parameter. Files are piped in, bound to the variable f, and then the
+select operator passes on those files whose extension is equal to the
+given extension e.
+
+Using this pipeline, we can search a directory recursively, looking
+for .py files that changed in the last ten days:
+
+for f in (ls('~/git/marcel/marcel', file=True, recursive=True) |
+          ext('py') |
+          select(lambda f: now() - f.mtime < days(10))):
+    print(f)
+
+Should you use marcel? Or Jupyter? Why not both?
