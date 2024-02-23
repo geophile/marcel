@@ -4862,3 +4862,35 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/op/ws.py", line 202, in reconfigure
     raise marcel.exception.ReconfigureException(workspace)
 marcel.exception.ReconfigureException
+
+----------------------------------------------------------------------
+
+FIXED
+
+246. Bad handling of workspace in use
+
+(base) jao@loon:~$ marcel pa
+Traceback (most recent call last):
+  File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 382, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 375, in main
+    main_interactive_run(workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 327, in main_interactive_run
+    env = marcel.env.EnvironmentInteractive.create(marcel.locations.Locations(), workspace, trace)
+  File "/home/jao/git/marcel/marcel/env.py", line 587, in create
+    env.initialize_namespace()
+  File "/home/jao/git/marcel/marcel/env.py", line 417, in initialize_namespace
+    self.restore_persistent_state_from_workspace()
+  File "/home/jao/git/marcel/marcel/env.py", line 447, in restore_persistent_state_from_workspace
+    self.workspace.open(self)
+  File "/home/jao/git/marcel/marcel/object/workspace.py", line 202, in open
+    self.lock_workspace(locations)
+  File "/home/jao/git/marcel/marcel/object/workspace.py", line 271, in lock_workspace
+    self.cannot_lock_workspace()
+  File "/home/jao/git/marcel/marcel/object/workspace.py", line 295, in cannot_lock_workspace
+    raise marcel.exception.KillCommandException(f'Workspace {self.name} is in use by another process.')
+marcel.exception.KillCommandException: Workspace pa is in use by another process.

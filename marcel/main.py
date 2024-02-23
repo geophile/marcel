@@ -380,7 +380,8 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except marcel.exception.KillShellException as e:
+    except (marcel.exception.KillShellException,
+            marcel.exception.KillCommandException) as e:
         print(str(e), file=sys.stderr)
     except marcel.exception.ExitException:
         sys.exit(0)

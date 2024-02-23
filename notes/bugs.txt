@@ -961,7 +961,7 @@ Traceback (most recent call last):
     self._target(*self._args, **self._kwargs)
   File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
     child_namespace_changes = command.execute(self.env, True)
-  File "/home/jao/git/marcel/marcel/core.py", line 224, in execute
+1  File "/home/jao/git/marcel/marcel/core.py", line 224, in execute
     self.pipeline.flush(env)
   File "/home/jao/git/marcel/marcel/core.py", line 358, in flush
     self.ops[0].flush(env)
