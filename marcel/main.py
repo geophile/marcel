@@ -382,6 +382,10 @@ if __name__ == '__main__':
         main()
     except (marcel.exception.KillShellException,
             marcel.exception.KillCommandException) as e:
+        # KillCommandException is normally handled deeper down. But starting marcel
+        # on the command line, and specifying a workspace, e.g. "marccel foobar" will
+        # raise KCE if foobar is already in use by another process. It would be incorrect to
+        # raise KSE instead for switching to a workspace from a marcel commandd.
         print(str(e), file=sys.stderr)
     except marcel.exception.ExitException:
         sys.exit(0)
