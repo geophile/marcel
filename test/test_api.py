@@ -1928,6 +1928,14 @@ def test_bug_230():
                  expected_out=['a1', 'a2'])
 
 
+@timeit
+def test_bug_247():
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: x / (1 - x))),
+             expected_out=[0.0, Error('division by zero'), -2.0])
+    TEST.run(test=lambda: run(gen(3) | args(lambda x: map(lambda: x / (1 - x)))),
+             expected_out=[0.0, Error('division by zero'), -2.0])
+
+
 # For bugs that aren't specific to a single op.
 @timeit
 def test_bugs():
@@ -1940,6 +1948,7 @@ def test_bugs():
     test_bug_212()
     test_bug_229()
     test_bug_230()
+    test_bug_247()
 
 
 def main_slow_tests():

@@ -90,8 +90,10 @@ class Args(marcel.core.Op):
     def receive(self, env, x):
         self.args.append(unwrap_op_output(x))
         if not self.all and len(self.args) == self.n_params:
-            self.pipeline.run_pipeline(env, self.args)
-            self.args.clear()
+            try:
+                self.pipeline.run_pipeline(env, self.args)
+            finally:
+                self.args.clear()
 
     def flush(self, env):
         if len(self.args) > 0:
@@ -114,9 +116,24 @@ class Args(marcel.core.Op):
             raise marcel.exception.KillCommandException(error)
 
     def customize_pipeline(self, env, pipeline):
-        # By appending this map invocation to the pipelines, we relay pipelines output
+        class SendToParent(marcel.core.Op):
+
+            def __init__(self, parent):
+                super().__init__()
+                self.parent = parent
+
+            def __repr__(self):
+                return 'sendtoparent()'
+
+            def receive(self, env, x):
+                self.parent.send(env, x)
+
+            def receive_error(self, env, error):
+                self.parent.send(env, error)
+
+        # By appending this map invocation to the pipelines, we relay pipeline's output
         # to arg's downstream operator. But flush is a dead end, it doesn't propagate
         # to arg's downstream, which was the issue in bug 136.
-        pipeline.append(marcel.opmodule.create_op(env, 'map', lambda *x: self.send(env, x)))
+        pipeline.append(SendToParent(self))
         return pipeline
 

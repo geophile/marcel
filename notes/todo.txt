@@ -739,3 +739,8 @@ restriction to top-level.
 ----------------------------------------------------------------------
 
 Op to write commands to script. 
+
+----------------------------------------------------------------------
+
+write op buffering is awkward for slow-running scripts generating
+output.

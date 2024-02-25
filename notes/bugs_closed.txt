@@ -4894,3 +4894,16 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/object/workspace.py", line 295, in cannot_lock_workspace
     raise marcel.exception.KillCommandException(f'Workspace {self.name} is in use by another process.')
 marcel.exception.KillCommandException: Workspace pa is in use by another process.
+
+----------------------------------------------------------------------
+
+FIXED
+
+247. Error inside args kills output
+
+M 0.22.2 jao@loon ~/Downloads/mounish$ gen 3 | args (| x: (x ) |)
+0
+1
+2
+M 0.22.2 jao@loon ~/Downloads/mounish$ gen 3 | args (| x: (x / (1-x)) |)
+M 0.22.2 jao@loon ~/Downloads/mounish$

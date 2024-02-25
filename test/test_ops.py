@@ -2563,6 +2563,14 @@ def test_bug_230():
                  expected_out=['a1', 'a2'])
 
 
+@timeit
+def test_bug_247():
+    TEST.run('gen 3 | (x: x / (1-x))',
+             expected_out=[0.0, Error('division by zero'), -2.0])
+    TEST.run('gen 3 | args (| x: (x / (1-x)) |)',
+             expected_out=[0.0, Error('division by zero'), -2.0])
+
+
 # Generalization of bug 195
 @timeit
 def test_pipeline_vars():
