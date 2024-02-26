@@ -2569,6 +2569,8 @@ def test_bug_247():
              expected_out=[0.0, Error('division by zero'), -2.0])
     TEST.run('gen 3 | args (| x: (x / (1-x)) |)',
              expected_out=[0.0, Error('division by zero'), -2.0])
+    TEST.run('gen 6 | case (x: x%2==0) (| (x: x // (x-2)) |) (| (x: x * 100) |)',
+             expected_out=[0, 100, Error('by zero'), 300, 2, 500])
 
 
 # Generalization of bug 195
@@ -2645,6 +2647,7 @@ def test_bugs():
     test_bug_212()
     test_bug_229()
     test_bug_230()
+    test_bug_247()
 
 
 def main_stable():
@@ -2695,6 +2698,7 @@ def main_stable():
 
 def main_dev():
     pass
+
 
 def main():
     TEST.reset_environment()

@@ -744,3 +744,9 @@ Op to write commands to script.
 
 write op buffering is awkward for slow-running scripts generating
 output.
+
+----------------------------------------------------------------------
+
+Args SendToParent class is probably more broadly useful. Any other op
+relaying output in a similar way probably also needs to implement
+receive_error (bug 247).

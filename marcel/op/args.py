@@ -17,6 +17,7 @@ import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.object.error
+import marcel.op.redirect
 import marcel.opmodule
 import marcel.util
 
@@ -116,24 +117,6 @@ class Args(marcel.core.Op):
             raise marcel.exception.KillCommandException(error)
 
     def customize_pipeline(self, env, pipeline):
-        class SendToParent(marcel.core.Op):
-
-            def __init__(self, parent):
-                super().__init__()
-                self.parent = parent
-
-            def __repr__(self):
-                return 'sendtoparent()'
-
-            def receive(self, env, x):
-                self.parent.send(env, x)
-
-            def receive_error(self, env, error):
-                self.parent.send(env, error)
-
-        # By appending this map invocation to the pipelines, we relay pipeline's output
-        # to arg's downstream operator. But flush is a dead end, it doesn't propagate
-        # to arg's downstream, which was the issue in bug 136.
-        pipeline.append(SendToParent(self))
+        pipeline.append(marcel.op.redirect.Redirect(self))
         return pipeline
 

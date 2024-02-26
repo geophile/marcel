@@ -1934,6 +1934,8 @@ def test_bug_247():
              expected_out=[0.0, Error('division by zero'), -2.0])
     TEST.run(test=lambda: run(gen(3) | args(lambda x: map(lambda: x / (1 - x)))),
              expected_out=[0.0, Error('division by zero'), -2.0])
+    TEST.run(test=lambda: run(gen(6) | case(lambda x: x % 2 == 0, lambda x: x // (x-2), lambda x: x * 100)),
+             expected_out=[0, 100, Error('by zero'), 300, 2, 500])
 
 
 # For bugs that aren't specific to a single op.

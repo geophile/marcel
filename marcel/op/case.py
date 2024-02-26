@@ -18,6 +18,7 @@ from collections import namedtuple
 import marcel.argsparser
 import marcel.core
 import marcel.exception
+import marcel.op.redirect
 import marcel.opmodule
 
 
@@ -144,7 +145,5 @@ class Case(marcel.core.Op):
     # Internal
 
     def customize_pipeline(self, env, pipeline):
-        # By appending this map invocation to the pipelines, we relay pipeline output
-        # to arg's downstream operator.
-        pipeline.append(marcel.opmodule.create_op(env, 'map', lambda *x: self.send(env, x)))
+        pipeline.append(marcel.op.redirect.Redirect(self))
         return pipeline
