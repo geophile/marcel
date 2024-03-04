@@ -1049,3 +1049,9 @@ doesn't do it.
 
 REALLY need a trace facility. 
 
+
+----------------------------------------------------------------------
+
+Args SendToParent class is probably more broadly useful. Any other op
+relaying output in a similar way probably also needs to implement
+receive_error (bug 247).

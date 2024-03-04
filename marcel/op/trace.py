@@ -30,7 +30,7 @@ HELP = '''
 
 {L,indent=4:28}{r:-o}, {r:--off}               Do not product trace output. 
 
-Writes output tracing marcel execution to stdout.
+Writes data tracing marcel execution to stdout or a file.
 
 With no arguments, {r:trace} describes whether tracing is enabled, and if so,
 where trace output is being written.
