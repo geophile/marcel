@@ -27,12 +27,12 @@ HELP = '''
 {L,wrap=F}args [-a|--all] PIPELINE
 
 {L,indent=4:28}{r:-a}, {r:--all}               Accumulate the entire input stream into a list, and bind it to a single
-pipelines parameter. 
+pipeline parameter. 
 
-{L,indent=4:28}{r:PIPELINE}                A parameterized pipelines, to be executed with arguments coming 
+{L,indent=4:28}{r:PIPELINE}                A parameterized pipeline, to be executed with arguments coming 
 from the input stream.
 
-Items in the input stream to {r:args} will be bound to the {r:PIPELINE}s parameters. 
+Items in the input stream to {r:args} will be bound to {r:PIPELINE}'s parameters. 
 
 If {r:--all} is not specified, and the {r:PIPELINE}
 has {i:n} parameters, then {i:n} items from the input stream will be used on each execution of {r:PIPELINE}.
@@ -78,10 +78,8 @@ class Args(marcel.core.Op):
 
     def setup(self, env):
         pipeline_arg = self.pipeline_arg
-        # API: callable
-        # CLI: PipelineExecutable
-        assert (callable(pipeline_arg) or
-                isinstance(pipeline_arg, marcel.core.PipelineExecutable))
+        assert (callable(pipeline_arg) or  # API
+                isinstance(pipeline_arg, marcel.core.PipelineExecutable))  # CLI
         self.pipeline = marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline)
         self.pipeline.setup(env)
         self.n_params = self.pipeline.n_params()
