@@ -1055,3 +1055,22 @@ REALLY need a trace facility.
 Args SendToParent class is probably more broadly useful. Any other op
 relaying output in a similar way probably also needs to implement
 receive_error (bug 247).
+
+----------------------------------------------------------------------
+
+Pipeline args should support optional values, e.g. the graph pipeline. 
+
+Difficult:
+
+- This isn't in a python context, so marcel is doing all the
+  parsing. If we allowed for python syntax, we'd have to allow python
+  expressions, support *args, **kwargs, /, etc. And pipeline scoping
+  rules are non-pythonic, allowing for multiple scopes.
+
+- But turning the whole pipeline into a python something doesn't
+  really work. It would have to span the entire pipeline inside (|
+  ... |).
+
+How about a special case: If a parameterized pipeline has n params,
+then allow for invocation with <= n args. Bind left to right and pad
+with null.

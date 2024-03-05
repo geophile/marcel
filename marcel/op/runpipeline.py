@@ -44,11 +44,6 @@ class RunPipeline(marcel.core.Op):
         if not isinstance(self.pipeline, marcel.core.PipelineExecutable):
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is not bound to anything executable.')
-        n_params = 0 if self.pipeline.parameters() is None else len(self.pipeline.parameters())
-        if n_params != ((0 if self.args is None else len(self.args)) +
-                        (0 if self.kwargs is None else len(self.kwargs))):
-            raise marcel.exception.KillCommandException(
-                f'Wrong number of arguments for pipeline {self.var} = {self.pipeline}')
         # Why copy: A pipelines can be used twice in a command, e.g.
         #    x = (| a: ... |)
         #    x (1) | join (| x (2) |)
@@ -97,24 +92,29 @@ class RunPipeline(marcel.core.Op):
         self.kwargs_arg = kwargs
 
     def pipeline_args(self):
-        map = None
+        pipeline_arg_bindings = None
         params = self.pipeline.parameters()
         if params is not None:
-            map = {}
+            pipeline_arg_bindings = {}
             # Set anonymous args
             if self.args is not None:
                 if len(self.args) > len(params):
                     raise marcel.exception.KillCommandException(
-                        f'Provided {len(self.args)} arguments, but there are only {len(params)} pipeline parameters')
+                        f'Provided {len(self.args)} arguments for {len(params)} pipeline parameter(s)')
                 for i in range(len(self.args)):
-                    map[params[i]] = self.args[i]
+                    pipeline_arg_bindings[params[i]] = self.args[i]
             # Set named args
             if self.kwargs is not None:
-                already_set = set(map.keys()).intersection(self.kwargs.keys())
+                already_set = set(pipeline_arg_bindings.keys()).intersection(self.kwargs.keys())
                 if len(already_set) > 0:
                     raise marcel.exception.KillCommandException(
-                        f'Attempt to set these arguments twice (anonymous and named): {already_set}')
-                map.update(self.kwargs)
-            if len(map) != len(params):
-                raise marcel.exception.KillCommandException(f'Expected arguments: {len(params)}, given: {len(map)}')
-        return map
+                        f'Attempt to set these arguments twice (anonymous and named): {", ".join(already_set)}')
+                pipeline_arg_bindings.update(self.kwargs)
+            all_params = set(params)
+            unset = all_params.difference(pipeline_arg_bindings.keys())
+            # print(f'all_params: {all_params}')
+            # print(f'unset: {unset}')
+            for param in unset:
+                pipeline_arg_bindings[param] = None
+        # print(f'pipeline_arg_bindings: {pipeline_arg_bindings}')
+        return pipeline_arg_bindings

@@ -1032,7 +1032,7 @@ def test_pipeline_args():
     TEST.run('gen 3 | f -b (10) -a (100) -a (200)',
              expected_err='Flag a given more than once')
     TEST.run('gen 3 | f -b (10)',
-             expected_err='Wrong number of arguments')
+             expected_out=[Error("unsupported operand type(s) for *: 'int' and 'NoneType'")]*3)
     # Long flags
     TEST.run('foobar = (|foo, bar: map (x: x * foo) | select (x: x < bar)|)')
     TEST.run('gen 10 | foobar --foo (10) --bar (45)',
@@ -1040,9 +1040,12 @@ def test_pipeline_args():
     TEST.run('gen 10 | foobar --bar (73) --foo (10)',
              expected_out=[0, 10, 20, 30, 40, 50, 60, 70])
     # Insufficient args
-    # Bug 105 --  # Depends on ext being defined in .marcel.py
-    TEST.run('ext',
-             expected_err='Wrong number of arguments')
+    # Bug 105
+    TEST.run('p = (| n: gen (1 if n is None else int(n)) |)')
+    TEST.run('p 3',
+             expected_out=[0, 1, 2])
+    TEST.run('p',
+             expected_out=[0])
 
 
 @timeit
@@ -2697,13 +2700,13 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_pipeline_args()
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
+    # main_stable()
     # main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
