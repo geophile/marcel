@@ -752,3 +752,8 @@ read -c should be able to specify types.
 ----------------------------------------------------------------------
 
 Replace RUN_ON_STARTUP with function call, e.g. run('''...''')
+
+----------------------------------------------------------------------
+
+WS: Add idea of a base directory. This will enable prompt dirs to be
+shorter -- just show the part relative to the base.
