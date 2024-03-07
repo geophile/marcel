@@ -138,8 +138,13 @@ class Op(AbstractOp):
 
     def fatal_error(self, env, input, message):
         error = self.error(input=input, message=message)
-        self.send_error(env, error)
-        raise marcel.exception.KillAndResumeException(message)
+        try:
+            self.send_error(env, error)
+        except:
+            # If the error occurred during setup, then send_error can't work
+            pass
+        finally:
+            raise marcel.exception.KillAndResumeException(message)
 
     def must_be_first_in_pipeline(self):
         return False
@@ -161,7 +166,7 @@ class Op(AbstractOp):
                     x = self.call(env, x)
                 else:
                     x = x()
-            except marcel.exception.KillAndResumeException as e:
+            except Exception as e:
                 # We are doing setup. Resuming isn't a possibility
                 raise marcel.exception.KillCommandException(e)
             if len(types) > 0 and type(x) not in types:
@@ -217,7 +222,11 @@ class Command:
     def execute(self, env, remote=False):
         with env.check_nesting():
             env.clear_changes()
-            self.pipeline.setup(env)
+            try:
+                self.pipeline.setup(env)
+            except marcel.exception.KillAndResumeException as e:
+                # KARE is fatal during setup.
+                raise marcel.exception.KillCommandException(str(e))
             try:
                 self.pipeline.run(env)
             finally:

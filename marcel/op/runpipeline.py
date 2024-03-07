@@ -44,6 +44,12 @@ class RunPipeline(marcel.core.Op):
         if not isinstance(self.pipeline, marcel.core.PipelineExecutable):
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is not bound to anything executable.')
+        n_params = 0 if self.pipeline.parameters() is None else len(self.pipeline.parameters())
+        n_args = 0 if self.args is None else len(self.args)
+        n_kwargs = 0 if self.kwargs is None else len(self.kwargs)
+        if n_params < n_args + n_kwargs:
+            raise marcel.exception.KillCommandException(
+                f'Too many arguments for pipeline {self.var} = {self.pipeline}')
         # Why copy: A pipelines can be used twice in a command, e.g.
         #    x = (| a: ... |)
         #    x (1) | join (| x (2) |)
@@ -112,9 +118,6 @@ class RunPipeline(marcel.core.Op):
                 pipeline_arg_bindings.update(self.kwargs)
             all_params = set(params)
             unset = all_params.difference(pipeline_arg_bindings.keys())
-            # print(f'all_params: {all_params}')
-            # print(f'unset: {unset}')
             for param in unset:
                 pipeline_arg_bindings[param] = None
-        # print(f'pipeline_arg_bindings: {pipeline_arg_bindings}')
         return pipeline_arg_bindings

@@ -2397,12 +2397,16 @@ def test_bug_190():
 
 @timeit
 def test_bug_196():
-    TEST.run('g = (| gen 3 |)')
-    TEST.run('g 5', expected_err='Wrong number of arguments')
+    TEST.run('gn = (| n: (n is None) |)')
+    TEST.run('gn', expected_out=[True])
     TEST.run('gn = (| n: gen (int(n)) |)')
-    TEST.run('gn', expected_err='Wrong number of arguments')
+    TEST.run('gn', expected_err='argument must be')
+    TEST.run('g = (| gen 3 |)')
+    TEST.run('g 5', expected_err='Too many arguments')
+    TEST.run('gn = (| n: gen (int(n)) |)')
+    TEST.run('gn', expected_err='argument must be')
     TEST.run('gn 3', expected_out=[0, 1, 2])
-    TEST.run('gn 3 4', expected_err='Wrong number of arguments')
+    TEST.run('gn 3 4', expected_err='Too many arguments')
 
 
 @timeit
@@ -2461,14 +2465,14 @@ def test_bug_202():
     TEST.run('env -d x | select (*x: False)')
     TEST.run('p = (| x |)')
     TEST.run('p', expected_err="not executable")
-    TEST.run('p 4', expected_err='Wrong number of arguments')
+    TEST.run('p 4', expected_err='Too many arguments')
     TEST.run('x = (| gen 3 |)')
-    TEST.run('p 4', expected_err='Wrong number of arguments')
+    TEST.run('p 4', expected_err='Too many arguments')
     TEST.run('p', expected_out=[0, 1, 2])
     TEST.run('p = (| x 4 |)')
     TEST.run('x = (| n: gen (int(n)) |)')
     TEST.run('p', expected_out=[0, 1, 2, 3])
-    TEST.run('p 6', expected_err='Wrong number of arguments')
+    TEST.run('p 6', expected_err='Too many arguments')
 
 
 @timeit
@@ -2700,14 +2704,14 @@ def main_stable():
 
 
 def main_dev():
-    test_pipeline_args()
+    pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # main_slow_tests()
+    main_stable()
+    main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
