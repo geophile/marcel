@@ -1,15 +1,6 @@
-I was working on a project in which I needed to munge some data,
-producing a stream of (x, y) tuples, and I wanted to create a graph of
-these points. I had always resorted to python scripts when a graph is
-required, but I thought it would be simple to generate graphs from
-marcel. First I'll show you the verbose way of doing it. Then I'll
-show you how to use marcel abstractions to do something much more
-usable.
+I was working on a project in which I needed to munge some data, producing a stream of (x, y) tuples, and I wanted to create a graph of these points. I had always resorted to python scripts when a graph is required, but I thought it would be simple to generate graphs from marcel. First I'll show you the verbose way of doing it. Then I'll show you how to use marcel abstractions to do something much more usable.
 
-The graphing function is easy. This function uses matplotlib to create
-a graph of (x, y) points, connecting adjacent points with a straight
-line. Note that there are two parameters, a list of x values and a
-list of y values.
+The graphing function is easy. This function uses matplotlib to create a graph of (x, y) points, connecting adjacent points with a straight line. Note that there are tw4o parameters, a list of x values and a list of y values.
 
 import matplotlib.pyplot as plt
 
@@ -18,15 +9,9 @@ def plot(xlist, ylist):
     plt.plot(x, y)
     plt.show()
 
-I can put arbitrary code into my marcel startup script (which is
-typically in ~/.config/marcel/startup.py), so I just put this code
-(the import and the function) in there.
+I can put arbitrary code into my marcel startup script (which is typically in ~/.config/marcel/startup.py), so I just put this code (the import and the function) in there.
 
-But the problem is that I was producing a stream of (x, y) values, and
-I needed to separate the x values into one list, and the y values into
-another. That's easy in marcel. For example, suppose I want to plot
-sin(x) for x = 0 .. 360 (degrees). Generating the point coordinates
-can be done as follows:
+But the problem is that I was producing a stream of (x, y) values, and I needed to separate the x values into one list, and the y values into another. That's easy in marcel. For example, suppose I want to plot sin(x) for x = 0 .. 360 (degrees). Generating the point coordinates can be done as follows:
 
 import math
 gen 361 | map (x: (x, math.sin(math.radians(x))))
@@ -47,8 +32,7 @@ gen 361 \
 | map (x: (x, math.sin(math.radians(x)))) \
 | red concat concat
 
-concat is a marcel reduction function. So we are accumulating two
-lists, one for each position of the incoming pairs.
+concat is a marcel reduction function. So we are accumulating two lists, one for each position of the incoming pairs.
 
 Next, I simply invoke the graphing function, plot:
 
@@ -61,24 +45,17 @@ which pops up this graph:
 
 GRAPH
 
-That's kind of a lot to type every time we want a graph. But I can put
-all that in a pipeline, stored in a variable -- basically a function
-with no arguments.
+That's kind of a lot to type every time we want a graph. But I can put all that in a pipeline, stored in a variable -- basically a function with no arguments.
 
 graph = (| red concat concat | map (xlist, ylist: plot(xlist, ylist)) |)
 
-(| ... |) delimits the pipeline. Inside, there is the code that
-converts the (x, y) stream into lists of x and y values, and the
-invocation of the graphing function. To use the pipeline:
+(| ... |) delimits the pipeline. Inside, there is the code that converts the (x, y) stream into lists of x and y values, and the invocation of the graphing function. To use the pipeline:
 
 gen 361 | map (x: (x, math.sin(math.radians(x)))) | graph
 
-And now, anytime I have a stream of (x, y) values, I can use this
-graph pipeline to create a graph.
+And now, anytime I have a stream of (x, y) values, I can use this graph pipeline to create a graph.
 
-Taking things farther: The graph pipeline is fine for quick and dirty
-graphing. But if I want to show the graph to people, I need a few
-additional things:
+Taking things farther: The graph pipeline is fine for quick and dirty graphing. But if I want to show the graph to people, I need a few additional things:
 
 - A title.
 
@@ -102,19 +79,16 @@ def plot(title, xlabel, ylabel, filename, x, y):
         plt.savefig(filename)
     plt.show()
 
-Second, I modify the graph pipeline. Stored pipelines can have
-parameters, allowing you to pass values on the command line. So:
+Second, I modify the graph pipeline. Stored pipelines can have parameters, allowing you to pass values on the command line. So:
 
 graph = (| title, xlabel, ylabel, filename: \
     red concat concat \
     | plot(title, xlabel, ylabel, xlist, ylist) \
 |)
 
-I've added the parameters title, xlabel, ylabel, and filename to the
-pipeline, which passes them to the plot function.
+I've added the parameters title, xlabel, ylabel, and filename to the pipeline, which passes them to the plot function.
 
-So now I can get a graph with a title and labels, simply by passing
-those pieces of text to the graph pipeline:
+So now I can get a graph with a title and labels, simply by passing those pieces of text to the graph pipeline:
 
 gen 361 \
 | map (x: (x, math.sin(math.radians(x)))) \
@@ -122,14 +96,9 @@ gen 361 \
 
 GRAPH
 
-Notice that I didn't specify a value for the filename argument. The
-pipeline will fill in a value of None. The plot value tests the
-filename, and if it is None, then the graph is not saved, (it's still
-displayed though).
+Notice that I didn't specify a value for the filename argument. The pipeline will fill in a value of None. The plot value tests the filename, and if it is None, then the graph is not saved, (it's still displayed though).
 
-Because missing arguments are set to None, I can always leave off the
-title and axis labels, and still get a quick and dirty graph.
+Because missing arguments are set to None, I can always leave off the title and axis labels, and still get a quick and dirty graph.
 
-If you like this graph pipeline, you can put it in your startup
-script, and then it's always there.
+If you like this graph pipeline, you can put it in your startup script, and then it's always there.
 
