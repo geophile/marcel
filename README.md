@@ -1,82 +1,49 @@
 What's New
 ----------
 
-This release contains a major new feature: workspaces. A *workspace*
-contains a startup script, a command history, and environment
-variables, separated from those of other workspaces. 
+Arguments to pipeline parameters can now be omitted.
 
-* **Startup script:** The startup script has always been a convenient
-place to import useful modules, define databases and remote access,
-and define useful functions and variables. By providing a startup
-script for each workspace, you don't have to put everything, for all
-projects, into one startup script.
+In general, a marcel command is a pipeline. E.g., to find the sum of file sizes in 
+the current directory:
 
-* **Command history:** Marcel has always had a persistent command
-history, so the only novelty is the separation by workspace. For
-example, you might have a workspace per project that you're working
-on, and each project would then have its own command history.
-
-* **Environment variables:** Environment variables in workspace
-persist. So any variables defined from the command line are saved, and
-when you next use marcel with the same workspace, your variables are
-still there.
-
-Example: 
-
-* Marcel starts in the default workspace, which has identical behavior
-to that of marcel in previous versions. All workspace operations can
-be accomplished using the `ws` operator. With no arguments `ws`
-returns the current workspace.
-
-```shell script
-M 0.20.0 jao@loon ~$ ws
-Workspace()
-```
-`Workspace()` denotes the default workspace.
-
-If I import a module while in the workspace, it stays imported, even if I exit marcel,
-restart it, and join the workspace again:
-
-```shell script
-# import the math module into the a6 workspace
-M 0.20.0 (a6) jao@loon ~$ import math
-M 0.20.0 (a6) jao@loon ~$ (math.pi)
-3.141592653589793
-# Exit and then restart marcel, and go back to the a6 workspace
-M 0.20.0 (a6) jao@loon ~$ exit
-jao@loon:~$ marcel
-M 0.20.0 jao@loon ~$ ws a6
-Workspace(a6)
-# math is still imported
-M 0.20.0 (a6) jao@loon ~$ (math.pi)
-3.141592653589793
+```shell
+ls -f | map (f: f.size) | red +
 ```
 
-All symbols, not just imported ones are scoped to the workspace, and are persistent.
-For example, a persistent pipeline:
+Pipelines can be assigned to variables, so that they can be run by simply referencing the
+variable. Applying this to the pipeline above:
 
-```shell script
-# Define a pipeline to find all files under a directory, and compute the
-# sum of file sizes with a given extension.
-M 0.20.0 (a6) jao@loon ~$ extspace = (| dir, ext: \
-M +$    ls -fr (dir) \
-M +$    | select (f: f.suffix == ext) \
-M +$    | map (f: f.size) \
-M +$    | red + \
-M +$    |)
-# Try it out
-M 0.20.0 (a6) jao@loon ~$ extspace git/marcel .py
-43637344
-# Exit marcel, restart it, and go back to the workspace
-M 0.20.0 (a6) jao@loon ~$ exit 
-jao@loon:~$ marcel
-M 0.20.0 jao@loon ~$ ws a6
-Workspace(a6)
-# Try the pipeline previously defined.
-M 0.20.0 (a6) jao@loon ~$ extspace git/marcel .py
-43637344 
+```shell
+# Define the pipeline
+filesizes = (| ls -f | map (f: f.size) | red + |)
+
+# Run the pipeline:
+filesizes
 ```
 
+Pipelines can be parameterized. To modify the `filesizes` pipeline to operate on 
+a given directory, `d`:
+
+```shell
+# Define the pipeline with a parameter, d.
+filesizes = (| d: ls -f (d) | map (f: f.size) | red + |)
+
+# Find the size of files in /usr/bin:
+filesizes /usr/bin
+```
+
+As of this release, pipeline arguments are optional. Unbound pipeline parameters will
+be set to `None`. If you omit the filename argument to `filesizes`, you will get an error
+message when ls is applied to `None`. So to fix this, just deal with `None` in the usual
+way.
+
+```shell
+# Allow for d to be unspecified
+filesizes = (| d: ls -f (d if d else '.') | map (f: f.size) | red + |)
+
+# Filesizes in the current directory
+filesizes
+```
 
 Marcel
 ======
