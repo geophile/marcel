@@ -447,15 +447,20 @@ class EnvironmentScript(Environment):
         self.workspace.open(self)
         if not self.workspace.is_default():
             persistent_state = self.workspace.persistent_state
+            # Do the imports before compilation, which may depend on the imports.
+            imports = persistent_state['imports']
+            for i in imports:
+                self.import_module(i.module_name, i.symbol, i.rename)
+            # Restore vars, recompiling as necessary.
             saved_vars = persistent_state['namespace']
             self.namespace.update(saved_vars)
             for var, value in saved_vars.items():
                 if isinstance(value, Compilable):
-                    value.recompile(self)
+                    try:
+                        value.recompile(self)
+                    except Exception as e:
+                        print(f'Unable to restore {var} = {value} because compilation failed: {e}')
             self.var_handler.add_save_vars(*saved_vars)
-            imports = persistent_state['imports']
-            for i in imports:
-                self.import_module(i.module_name, i.symbol, i.rename)
 
     def never_mutable(self):
         vars = set(super().never_mutable())
