@@ -1074,3 +1074,8 @@ Difficult:
 How about a special case: If a parameterized pipeline has n params,
 then allow for invocation with <= n args. Bind left to right and pad
 with null.
+
+----------------------------------------------------------------------
+
+WS: Add idea of a base directory. This will enable prompt dirs to be
+shorter -- just show the part relative to the base.

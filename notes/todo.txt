@@ -755,11 +755,6 @@ Replace RUN_ON_STARTUP with function call, e.g. run('''...''')
 
 ----------------------------------------------------------------------
 
-WS: Add idea of a base directory. This will enable prompt dirs to be
-shorter -- just show the part relative to the base.
-
-----------------------------------------------------------------------
-
 Pipelines have a lot of (x, y, z: ...) | (x, y, z: ...).
 
 It would be nice to have named tuples. E.g.
