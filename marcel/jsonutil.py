@@ -1,13 +1,21 @@
+# This file is part of Marcel.
+#
+# Marcel is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or at your
+# option) any later version.
+#
+# Marcel is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
+
 import json
 
-
-class _O(object):
-
-    def __repr__(self):
-        return str(self.__dict__)
-
-    def __getitem__(self, key):
-        return self.__dict__[key]
+from marcel.structish import Struct as _O
 
 
 class JSONUtil(object):
@@ -29,7 +37,7 @@ class JSONUtil(object):
     def dict_to_object(j):
         if type(j) is dict:
             o = _O()
-            o.__dict__ = {k: JSONUtil.dict_to_object(v) for (k, v) in j.items()}
+            o.assign({k: JSONUtil.dict_to_object(v) for (k, v) in j.items()})
             return o
         elif type(j) is list:
             return [JSONUtil.dict_to_object(x) for x in j]

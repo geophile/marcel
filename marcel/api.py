@@ -25,6 +25,7 @@ import marcel.main as _main
 import marcel.object.error as _error
 import marcel.opmodule
 import marcel.reservoir as _reservoir
+import marcel.structish
 import marcel.util
 
 from marcel.op.args import args as _args
@@ -295,3 +296,6 @@ def reservoir(name):
 
 def pos():
     return _ENV.current_op.pos()
+
+
+o = marcel.structish.o

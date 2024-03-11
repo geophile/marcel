@@ -1770,6 +1770,12 @@ def test_api_iterator():
 
 
 @timeit
+def test_struct():
+    TEST.run(test=lambda: run(gen(3) | map (lambda x: o(x=x, y=x+1)) | map (lambda o: o.x + o.y)),
+             expected_out=[1, 3, 5])
+
+
+@timeit
 def test_bug_10():
     TEST.run(lambda: run(sort()), expected_err='cannot be the first operator in a pipeline')
     TEST.run(lambda: run(unique()), expected_err='cannot be the first operator in a pipeline')

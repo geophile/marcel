@@ -2181,6 +2181,12 @@ def test_workspaces():
 
 
 @timeit
+def test_struct():
+    TEST.run('gen 3 | (x: o(x=x, y=x+1)) | (o: o.x + o.y)',
+             expected_out=[1, 3, 5])
+
+
+@timeit
 def test_upload():
     with TestDir(TEST.env) as testdir:
         os.system(f'mkdir {testdir}/source')
@@ -2700,6 +2706,7 @@ def main_stable():
     test_pos()
     test_json()
     test_workspaces()
+    test_struct()
     test_bugs()
 
 

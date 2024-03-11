@@ -15,7 +15,6 @@
 
 import getpass
 import importlib
-import os
 import pathlib
 import socket
 import sys
@@ -35,6 +34,7 @@ import marcel.object.file
 import marcel.object.process
 import marcel.opmodule
 import marcel.reservoir
+import marcel.structish
 import marcel.util
 import marcel.version
 import marcel.object.workspace
@@ -384,11 +384,10 @@ class EnvironmentScript(Environment):
         assert workspace is not None
         # Standard locations of files important to marcel: config, history
         self.locations = locations
-        # Support for pos()
-        self.current_op = None
         # Vars defined during startup
         self.startup_vars = None
-        # Immutable vars
+        # Support for pos()
+        self.current_op = None
         self.var_handler.add_immutable_vars('pos')
         # Marcel used with a script does not manipulate workspaces, but it is convenient to
         # have workspace defined, for use with Locations.
@@ -411,7 +410,8 @@ class EnvironmentScript(Environment):
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
             'Color': marcel.object.color.Color,
-            'pos': lambda: self.current_op.pos()})
+            'pos': lambda: self.current_op.pos(),
+            'o': marcel.structish.o})
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 self.namespace[key] = value

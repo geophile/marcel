@@ -1079,3 +1079,16 @@ with null.
 
 WS: Add idea of a base directory. This will enable prompt dirs to be
 shorter -- just show the part relative to the base.
+
+----------------------------------------------------------------------
+
+Pipelines have a lot of (x, y, z: ...) | (x, y, z: ...).
+
+It would be nice to have named tuples. E.g.
+
+   (x, y, z: magic_happens_here)
+
+yields objects with attributes x, y, z. Then ... | (x: x.m + x.y ...)
+
+Or maybe a special version of map: ... | fx (x.m + x.y ...). But that
+only works for map. E.g., select would still be "select(x: x.m ...)"

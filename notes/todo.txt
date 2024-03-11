@@ -752,15 +752,3 @@ read -c should be able to specify types.
 ----------------------------------------------------------------------
 
 Replace RUN_ON_STARTUP with function call, e.g. run('''...''')
-
-----------------------------------------------------------------------
-
-Pipelines have a lot of (x, y, z: ...) | (x, y, z: ...).
-
-It would be nice to have named tuples. E.g.
-
-   (x, y, z: magic_happens_here)
-
-yields objects with attributes x, y, z. Then ... | (x: x.m + x.y ...)
-
-Or maybe a special version of map: ... | fx (x.m + x.y ...)
