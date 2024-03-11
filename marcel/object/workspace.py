@@ -150,10 +150,12 @@ class Workspace(marcel.object.renderable.Renderable):
         yield Workspace.default()
         locations = env.locations
         for dir in locations.config_dir_path(Workspace.default()).iterdir():
-            name = dir.name
-            workspace = WorkspaceNamed(name)
-            if dir.is_dir() and locations.workspace_marker_file_path(workspace).exists():
-                yield workspace
+            if dir.is_dir():
+                name = dir.name
+                workspace = WorkspaceNamed(name)
+                if locations.workspace_marker_file_path(workspace).exists():
+                    workspace.read_properties(env)  # So that home is known
+                    yield workspace
 
     # Internal
 

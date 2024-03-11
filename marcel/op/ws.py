@@ -244,8 +244,8 @@ class WsList(WsImpl):
         self.check_anon_arg_absent()
 
     def run(self, env):
-        for wp in Workspace.list(env):
-            self.op.send(env, wp)
+        for ws in Workspace.list(env):
+            self.op.send(env, ws)
 
 
 class WsNew(WsImpl):
