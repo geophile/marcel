@@ -208,6 +208,18 @@ def process_exists(pid):
         assert False, e
 
 
+def accessible(dir):
+    current_dir = os.getcwd()
+    accessible = True
+    try:
+        os.chdir(dir)
+    except PermissionError:
+        accessible = False
+    finally:
+        os.chdir(current_dir)
+        return accessible
+
+
 class Trace:
 
     def __init__(self, tracefile, replace=False):

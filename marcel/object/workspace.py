@@ -1,4 +1,5 @@
 # This file is part of Marcel.
+# This file is part of Marcel.
 #
 # Marcel is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -35,18 +36,25 @@ class WorkspaceProperties(object):
         self.create_time = time.time()
         self.open_time = self.create_time
         self.save_time = self.create_time
+        self.home = None
 
     def __repr__(self):
-        return (f'WorkspaceProperties('
-                f'create = {format_time(self.create_time)}, '
-                f'open = {format_time(self.open_time)}, '
-                f'save = {format_time(self.save_time)})')
+        buffer = ['WorkspaceProperties(']
+        if self.home:
+            buffer.append(f'home = {self.home}')
+        buffer.append(f'create = {format_time(self.create_time)}')
+        buffer.append(f'open = {format_time(self.open_time)}')
+        buffer.append(f'save = {format_time(self.save_time)})')
+        return ', '.join(buffer)
 
     def update_open_time(self):
         self.open_time = time.time()
 
     def update_save_time(self):
         self.save_time = time.time()
+
+    def set_home(self, home):
+        self.home = home
 
 
 class Workspace(marcel.object.renderable.Renderable):
@@ -55,9 +63,6 @@ class Workspace(marcel.object.renderable.Renderable):
 
     def __init__(self):
         self.name = ''
-
-    def __repr__(self):
-        return self.render_compact()
 
     # Renderable
 
@@ -131,6 +136,9 @@ class Workspace(marcel.object.renderable.Renderable):
             reservoir.close()
             reservoir.ensure_deleted()
 
+    def set_home(self, env, homedir):
+        raise marcel.exception.KillCommandException('Default workspace cannot have a home directory.')
+
     @staticmethod
     def default():
         if Workspace._DEFAULT is None:
@@ -171,6 +179,13 @@ class WorkspaceNamed(Workspace):
         self.properties = None
         self.persistent_state = None
 
+    # Renderable
+
+    def render_compact(self):
+        return (super().render_compact()
+                if self.home() is None else
+                f'Workspace({self.name} @ {self.home()})')
+
     # Workspace
 
     @property
@@ -198,38 +213,36 @@ class WorkspaceNamed(Workspace):
 
     def open(self, env):
         if not self.is_open():
-            locations = env.locations
-            self.lock_workspace(locations)
+            self.lock_workspace(env.locations)
             # Properties
-            with open(locations.workspace_properties_file_path(self), 'rb') as properties_file:
-                unpickler = dill.Unpickler(properties_file)
-                self.properties = unpickler.load()
+            self.read_properties(env)
             # Environment
-            with open(locations.workspace_environment_file_path(self), 'rb') as environment_file:
+            with open(env.locations.workspace_environment_file_path(self), 'rb') as environment_file:
                 unpickler = dill.Unpickler(environment_file)
                 self.persistent_state = unpickler.load()
-            self.properties.update_open_time()
 
     def close(self, env):
         if self.is_open():
-            self.properties.update_save_time()
-            locations = env.locations
             # Properties
-            with open(locations.workspace_properties_file_path(self), 'wb') as properties_file:
-                pickler = dill.Pickler(properties_file)
-                pickler.dump(self.properties)
+            self.write_properties(env)
             # Reservoirs
             for var, reservoir in env.reservoirs():
                 assert type(reservoir) is marcel.reservoir.Reservoir
                 reservoir.close()
             # Environment (Do this last because env.persistent_state() is destructive.)
-            with open(locations.workspace_environment_file_path(self), 'wb') as environment_file:
+            with open(env.locations.workspace_environment_file_path(self), 'wb') as environment_file:
                 pickler = dill.Pickler(environment_file)
                 pickler.dump(env.persistent_state())
             # Mark this workspace object as closed
             self.properties = None
             # Unlock
-            self.unlock_workspace(locations)
+            self.unlock_workspace(env.locations)
+
+    def set_home(self, env, home):
+        self.properties.set_home(home)
+        self.write_properties(env)
+
+    # WorkspaceNamed
 
     def delete(self, env):
         assert not self.is_open()  # Caller should have guaranteed this
@@ -249,6 +262,10 @@ class WorkspaceNamed(Workspace):
             reservoir_file.unlink()
         reservoir_dir.rmdir()
         locations.data_dir_path(self).rmdir()
+
+    def home(self):
+        # Older workspaces won't have a home property
+        return None if self.is_default() or not hasattr(self.properties, 'home') else self.properties.home
 
     # Internal
 
@@ -293,6 +310,18 @@ class WorkspaceNamed(Workspace):
 
     def cannot_lock_workspace(self):
         raise marcel.exception.KillCommandException(f'Workspace {self.name} is in use by another process.')
+
+    def read_properties(self, env):
+        with open(env.locations.workspace_properties_file_path(self), 'rb') as properties_file:
+            unpickler = dill.Unpickler(properties_file)
+            self.properties = unpickler.load()
+        self.properties.update_open_time()
+
+    def write_properties(self, env):
+        with open(env.locations.workspace_properties_file_path(self), 'wb') as properties_file:
+            pickler = dill.Pickler(properties_file)
+            pickler.dump(self.properties)
+        self.properties.update_save_time()
 
     @staticmethod
     def owner(marker_file_path):
