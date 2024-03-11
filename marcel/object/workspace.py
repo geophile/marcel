@@ -64,9 +64,6 @@ class Workspace(marcel.object.renderable.Renderable):
     def __init__(self):
         self.name = ''
 
-    def __repr__(self):
-        return self.render_compact()
-
     # Renderable
 
     def render_compact(self):
@@ -181,6 +178,13 @@ class WorkspaceNamed(Workspace):
         self.name = name
         self.properties = None
         self.persistent_state = None
+
+    # Renderable
+
+    def render_compact(self):
+        return (super().render_compact()
+                if self.home() is None else
+                f'Workspace({self.name} @ {self.home()})')
 
     # Workspace
 
