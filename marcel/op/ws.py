@@ -26,7 +26,8 @@ HELP = '''
 {L,wrap=F}ws [-l|--list]
 {L,wrap=F}ws [-n|--new] NAME
 {L,wrap=F}ws [-o|--open] NAME
-{L,wrap=F}ws [-c|--close] 
+{L,wrap=F}ws [-c|--close]
+{L,wrap=F}ws [-h|--home] DIR
 {L,wrap=F}ws [-d|--delete] NAME
 {L,wrap=F}ws [-r|--rename] OLD_NAME NEW_NAME
 {L,wrap=F}ws [-2|--copy] NAME COPY_NAME
@@ -40,6 +41,8 @@ HELP = '''
 {L,indent=4:28}{r:-o}, {r:--open}              Open the workspace with the given NAME.
 
 {L,indent=4:28}{r:-c}, {r:--close}             Close the current workspace.
+
+{L,indent=4:28}{r:-h}, {r:--home}              Set the workspace home directory.
 
 {L,indent=4:28}{r:-d}, {r:--delete}            Delete the workspace with the given NAME.
 
@@ -67,6 +70,9 @@ Without any arguments, {r:ws} writes the current workspace to the output stream.
 {r:--delete} deletes the named workspace. This can only be done while no processes, including the current one,
 are not using the workspace.
 
+{r:--home} sets the workspace's home directory. This can be used to abbreviate the directory printed at the 
+marcel prompt.
+
 {r:--rename}, {r:--copy}, {r:--export}, and {r:--import} are not yet
 implemented.
 '''
@@ -77,6 +83,7 @@ def ws(list=False,
        open=None,
        close=False,
        delete=None,
+       home=None,
        rename=None,
        copy=None,
        exp=None,
@@ -93,6 +100,8 @@ def ws(list=False,
         args.append('--close')
     if delete:
         args.extend(['--delete', delete])
+    if home:
+        args.extend(['--home', home])
     if rename:
         args.extend(['--rename', rename])
     if copy:
@@ -115,12 +124,13 @@ class WsArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_one_value('open', '-o', '--open')
         self.add_flag_no_value('close', '-c', '--close')
         self.add_flag_one_value('delete', '-d', '--delete')
+        self.add_flag_one_value('home', '-h', '--home')
         self.add_flag_one_value('rename', '-r', '--rename')
         self.add_flag_one_value('copy', '-2', '--copy')
         self.add_flag_one_value('export', '-e', '--export', target='exp')
         self.add_flag_one_value('import', '-i', '--import', target='imp')
         self.add_anon('name', default=None)
-        self.at_most_one('list', 'new', 'open', 'close', 'delete', 'rename', 'copy', 'export', 'import')
+        self.at_most_one('list', 'new', 'open', 'close', 'delete', 'home', 'rename', 'copy', 'export', 'import')
         self.validate()
 
 
@@ -133,6 +143,7 @@ class Ws(marcel.core.Op):
         self.open = None
         self.close = None
         self.delete = None
+        self.home = None
         self.rename = None
         self.copy = None
         self.exp = None
@@ -156,6 +167,8 @@ class Ws(marcel.core.Op):
             self.impl = WsClose(self)
         elif self.delete is not None:
             self.impl = WsDelete(self)
+        elif self.home is not None:
+            self.impl = WsHome(self)
         elif self.rename is not None:
             self.impl = WsRename(self)
         elif self.copy is not None:
@@ -317,6 +330,22 @@ class WsDelete(WsImpl):
             raise marcel.exception.KillCommandException(
                 f'You are using workspace {name}. It cannot be deleted while it is in use.')
         Workspace(name).delete(env)
+
+
+class WsHome(WsImpl):
+
+    def __init__(self, op):
+        super().__init__(op, op.home)
+
+    def __repr__(self):
+        return f'ws(home {self.op.home})'
+
+    def setup(self, env):
+        self.check_anon_arg_present('DIR')
+
+    def run(self, env):
+        workspace = env.workspace
+        workspace.set_home(env, self.op.home)
 
 
 class WsRename(WsImpl):

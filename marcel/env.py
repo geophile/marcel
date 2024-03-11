@@ -15,6 +15,7 @@
 
 import getpass
 import importlib
+import os
 import pathlib
 import socket
 import sys
@@ -557,6 +558,29 @@ class EnvironmentInteractive(EnvironmentScript):
                                             'Color')
 
     def prompts(self):
+        def prompt_dir():
+            dir = self.getvar('PWD')
+            home = self.getvar('HOME')
+            if self.workspace.is_default():
+                return '~' + dir[len(home):] if dir.startswith(home) else dir
+            else:
+                try:
+                    workspace_home = self.workspace.home()
+                    if workspace_home:
+                        dir = pathlib.Path(dir).expanduser()
+                        workspace_home = pathlib.Path(workspace_home).expanduser()
+                        prompt_dir = dir.relative_to(workspace_home).as_posix()
+                        if prompt_dir == '.':
+                            prompt_dir = ''
+                    else:
+                        prompt_dir = dir
+                    return prompt_dir
+                except ValueError:
+                    # dir is not under home
+                    return dir
+
+        # Set PROMPT_DIR in case PROMPT or PROMPT_CONTINUATION uses it.
+        self.setvar('PROMPT_DIR', prompt_dir())
         return (self.prompt_string(self.getvar('PROMPT')),
                 self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
 
