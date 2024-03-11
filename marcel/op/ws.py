@@ -346,6 +346,7 @@ class WsHome(WsImpl):
     def run(self, env):
         workspace = env.workspace
         workspace.set_home(env, self.op.home)
+        self.op.send(env, workspace)
 
 
 class WsRename(WsImpl):
