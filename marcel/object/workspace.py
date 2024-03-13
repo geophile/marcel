@@ -16,6 +16,7 @@
 
 import dill
 import os
+import tempfile
 import time
 
 import marcel.exception
@@ -61,47 +62,18 @@ class Workspace(marcel.object.renderable.Renderable):
 
     _DEFAULT = None
 
-    def __init__(self):
-        self.name = ''
-
     # Renderable
-
-    def render_compact(self):
-        return f'Workspace({self.name})'
 
     def render_full(self, color_scheme):
         return self.render_compact()
 
     # Workspace
 
-    @property
-    def create_time(self):
-        return None
-
-    @property
-    def open_time(self):
-        return None
-
-    @property
-    def save_time(self):
-        return None
-
     def is_default(self):
-        return True
-
-    def is_open(self):
-        return True
+        return False
 
     def exists(self, env):
-        if self.is_open():
-            return True
-        else:
-            locations = env.locations
-            if locations.config_dir_path(self).exists():
-                marker_path = locations.workspace_marker_file_path(self)
-                return marker_path is not None and marker_path.exists()
-            else:
-                return False
+        assert False
 
     def create(self, env, initial_config_contents=None):
         if not self.exists(env):
@@ -137,12 +109,12 @@ class Workspace(marcel.object.renderable.Renderable):
             reservoir.ensure_deleted()
 
     def set_home(self, env, homedir):
-        raise marcel.exception.KillCommandException('Default workspace cannot have a home directory.')
+        assert False
 
     @staticmethod
     def default():
         if Workspace._DEFAULT is None:
-            Workspace._DEFAULT = Workspace()
+            Workspace._DEFAULT = WorkspaceDefault()
         return Workspace._DEFAULT
 
     @staticmethod
@@ -170,6 +142,52 @@ class Workspace(marcel.object.renderable.Renderable):
                 f'Workspace name must be usable as a legal filename: {self.name}')
 
 
+class WorkspaceDefault(Workspace):
+
+    def __init__(self):
+        super().__init__()
+        self.env_file = None
+
+    # Renderable
+
+    def render_compact(self):
+        return 'Workspace()'
+
+    # Workspace
+
+    @property
+    def name(self):
+        return ''
+
+    @property
+    def create_time(self):
+        return None
+
+    @property
+    def open_time(self):
+        return None
+
+    @property
+    def save_time(self):
+        return None
+
+    def is_default(self):
+        return True
+
+    def exists(self, env):
+        return True
+
+    def open(self, env):
+        pass
+
+    def close(self, env):
+        super().close(env)
+        pass
+
+    def set_home(self, env, homedir):
+        raise marcel.exception.KillCommandException('Default workspace cannot have a home directory.')
+
+
 class WorkspaceNamed(Workspace):
 
     MARKER = '.WORKSPACE'
@@ -184,7 +202,7 @@ class WorkspaceNamed(Workspace):
     # Renderable
 
     def render_compact(self):
-        return (super().render_compact()
+        return (f'Workspace({self.name})'
                 if self.home() is None else
                 f'Workspace({self.name} @ {self.home()})')
 
@@ -202,11 +220,13 @@ class WorkspaceNamed(Workspace):
     def save_time(self):
         return self.properties.save_time
 
-    def is_default(self):
-        return False
-
-    def is_open(self):
-        return self.properties is not None
+    def exists(self, env):
+        locations = env.locations
+        if locations.config_dir_path(self).exists():
+            marker_path = locations.workspace_marker_file_path(self)
+            return marker_path is not None and marker_path.exists()
+        else:
+            return False
 
     def create(self, env, initial_config_contents=None):
         super().create(env, initial_config_contents)
@@ -216,12 +236,8 @@ class WorkspaceNamed(Workspace):
     def open(self, env):
         if not self.is_open():
             self.lock_workspace(env.locations)
-            # Properties
             self.read_properties(env)
-            # Environment
-            with open(env.locations.workspace_environment_file_path(self), 'rb') as environment_file:
-                unpickler = dill.Unpickler(environment_file)
-                self.persistent_state = unpickler.load()
+            self.read_environment(env)
 
     def close(self, env):
         if self.is_open():
@@ -232,9 +248,7 @@ class WorkspaceNamed(Workspace):
                 assert type(reservoir) is marcel.reservoir.Reservoir
                 reservoir.close()
             # Environment (Do this last because env.persistent_state() is destructive.)
-            with open(env.locations.workspace_environment_file_path(self), 'wb') as environment_file:
-                pickler = dill.Pickler(environment_file)
-                pickler.dump(env.persistent_state())
+            self.write_environment(env)
             # Mark this workspace object as closed
             self.properties = None
             # Unlock
@@ -270,6 +284,9 @@ class WorkspaceNamed(Workspace):
         return None if self.is_default() or not hasattr(self.properties, 'home') else self.properties.home
 
     # Internal
+
+    def is_open(self):
+        return self.properties is not None
 
     def lock_workspace(self, locations):
         marker_path = locations.workspace_marker_file_path(self)
@@ -324,6 +341,16 @@ class WorkspaceNamed(Workspace):
             pickler = dill.Pickler(properties_file)
             pickler.dump(self.properties)
         self.properties.update_save_time()
+
+    def read_environment(self, env):
+        with open(env.locations.workspace_environment_file_path(self), 'rb') as environment_file:
+            unpickler = dill.Unpickler(environment_file)
+            self.persistent_state = unpickler.load()
+
+    def write_environment(self, env):
+        with open(env.locations.workspace_environment_file_path(self), 'wb') as environment_file:
+            pickler = dill.Pickler(environment_file)
+            pickler.dump(env.persistent_state())
 
     @staticmethod
     def owner(marker_file_path):

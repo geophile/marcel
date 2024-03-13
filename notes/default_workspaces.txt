@@ -1,0 +1,101 @@
+
+exists: true for default, otherwise, see if marker exists
+
+Workspace
+    - name
+    create_time()
+    open_time()
+    save_time()
+    is_default()
+    exists()
+    create()
+    open()
+    close()
+    set_home()
+
+WorkspaceNamed
+    - properties
+    - persistent_state
+    create_time()
+    open_time()
+    save_time()
+    is_default()
+    is_open()
+    create()
+    open()
+    close()
+    set_home()
+
+    delete()
+    home()
+
+WorkspaceDefault
+
+close()
+
+- Sets self.env_file to temp file, writes env there. 
+
+*** But this deletes reservoirs! Need to rethink ws lifecycle across ReconfigureException.
+
+open()
+
+- Reads and discards temp file
+
+----------------------------------------------------------------------
+
+Workspace.close: 
+
+- Close and delete reservoirs.
+
+- This is correct for default workspace on shutdown, but not on restart.
+
+WorkspaceNamed.close:
+
+- Close reservoirs, don't delete them.
+
+WorkspaceDefault.close:
+
+- Close reservoirs. On shutdown, delete them. On restart, keep them.
+
+----------------------------------------------------------------------
+
+To do:
+
+- lifecycle testing: Check across process and ws boundaries:
+
+    - reservoirs
+
+    - imports
+
+    - assigned vars
+
+
+Current structure on disk:
+
+    .config/marcel/
+        startup.py  # For anon workspaces, and template for named
+        workspaces
+        .WORKSPACE  # Marker for default workspace
+        WORKSPACE_NAME/
+            .WORKSPACE  # Empty file marking this directory as a workspace
+            startup.py
+
+    .local/share/marcel/
+        history
+        reservoirs/  # FOR DEFAULT WORKSPACE 
+            <pid>.<varname>.pickle  # Deleted at end of session
+        WORKSPACE_NAME/
+            properties.pickle
+            env.pickle
+            history
+            reservoirs/
+                <varname>.pickle
+
+Default workspaces now get a .local directory too, <pid>.WORKSPACE. 
+
+- No workspace.p
+- No history
+
+
+Test for valid new workspace name. What happens if creating the dir
+fails due to a bad filename?

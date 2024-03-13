@@ -223,8 +223,8 @@ Structure on disk:
     reservoirs/  # FOR DEFAULT WORKSPACE 
         <pid>.<varname>.pickle  # Deleted at end of session
     WORKSPACE_NAME/
-        workspace.p
-        env.p: Pickled environment
+        properties.pickle
+        env.pickle
         history
         reservoirs/
             <varname>.pickle
@@ -382,6 +382,4 @@ modified to add xyz?
 - Conflict in startup script: Kill shell, notify user
 
 - Conflict in env.py: rename stored var, notify user
-
-
 

@@ -752,3 +752,9 @@ read -c should be able to specify types.
 ----------------------------------------------------------------------
 
 Replace RUN_ON_STARTUP with function call, e.g. run('''...''')
+
+----------------------------------------------------------------------
+
+Having a reservoirs directory in the same directory as named
+workspaces is a bad idea. What if someone wants a directory named
+"reservoirs"?

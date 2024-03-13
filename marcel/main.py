@@ -246,7 +246,9 @@ class MainInteractive(MainScript):
         config_path = self.env.locations.config_file_path(self.workspace)
         config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
         if self.config_time and config_mtime > self.config_time:
-            raise marcel.exception.ReconfigureException(None)  # self.env.workspace)
+            # The workspace argument is used to open a new workspace, different from the previous one, e.g.
+            # on ws -c, or ws -o. We aren't changing the workspace here, so pass None.
+            raise marcel.exception.ReconfigureException(workspace=None)
 
 
 def commands_in_script(script):
