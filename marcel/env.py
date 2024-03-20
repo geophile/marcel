@@ -400,8 +400,6 @@ class EnvironmentScript(Environment):
 
     def initialize_namespace(self):
         super().initialize_namespace()
-        if not self.workspace.exists(self):
-            raise marcel.exception.KillShellException(f'{self.workspace} does not exist.')
         self.namespace.update({
             'WORKSPACE': self.workspace.name,
             'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],

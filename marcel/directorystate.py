@@ -97,6 +97,8 @@ class DirectoryState:
         removed = []
         dirs = self._dir_stack()
         for dir in dirs:
+            if isinstance(dir, pathlib.Path):
+                dir = dir.as_posix()
             if os.path.exists(dir) and os.access(dir, mode=os.X_OK, follow_symlinks=True):
                 clean.append(dir)
             else:

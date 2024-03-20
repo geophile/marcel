@@ -17,6 +17,7 @@ import os
 import pathlib
 
 import marcel.exception
+import marcel.object.workspace
 
 
 # ws_name is the empty string for default workspaces. Default workspaces have a config dir and file,
@@ -25,7 +26,6 @@ import marcel.exception
 # string for obtaining the names of files that don't exist for default workspaces.
 class Locations(object):
 
-    # home, config_base, data_base should be specified only during testing
     def __init__(self):
         self.home = Locations.normalize_dir(
             'home directory',
@@ -40,17 +40,17 @@ class Locations(object):
             os.environ.get('XDG_DATA_HOME', None),
             self.home / '.local' / 'share')
 
+    def config_base_path(self):
+        return Locations.marcel_dir(self.config_base)
+
+    def data_base_path(self):
+        return Locations.marcel_dir(self.data_base)
+
     def config_dir_path(self, workspace):
-        path = Locations.marcel_dir(self.config_base)
-        if not workspace.is_default():
-            path = path / workspace.name
-        return path
+        return Locations.marcel_dir(self.config_base) / Locations.workspace_dir_name(workspace)
 
     def data_dir_path(self, workspace):
-        path = Locations.marcel_dir(self.data_base)
-        if not workspace.is_default():
-            path = path / workspace.name
-        return path
+        return Locations.marcel_dir(self.data_base) / Locations.workspace_dir_name(workspace)
 
     def reservoir_dir_path(self, workspace):
         return self.data_dir_path(workspace) / 'reservoirs'
@@ -81,6 +81,9 @@ class Locations(object):
         filename = f'{os.getpid()}.{name}.pickle' if workspace.is_default() else f'{name}.pickle'
         return self.reservoir_dir_path(workspace) / filename
 
+    def version_file_path(self):
+        return Locations.marcel_dir(self.config_base) / 'VERSION'
+
     @staticmethod
     def marcel_dir(base):
         dir = base / 'marcel'
@@ -109,3 +112,7 @@ class Locations(object):
             raise marcel.exception.KillShellException(
                 f'Unable to start because value of {description} cannot be determined: {e}')
         return dir
+
+    @staticmethod
+    def workspace_dir_name(workspace):
+        return marcel.object.workspace.WorkspaceDefault.DIR_NAME if workspace.is_default() else workspace.name

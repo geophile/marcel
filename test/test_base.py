@@ -8,6 +8,7 @@ import time
 
 import dill.source
 
+import marcel.api
 import marcel.env
 import marcel.exception
 import marcel.locations
@@ -51,11 +52,7 @@ class TestBase:
             self.main.shutdown()
         os.environ['HOME'] = TestBase.test_home
         self.locations = marcel.locations.Locations()
-        workspace = marcel.object.workspace.Workspace.default()
         os.system(f'rm -rf {TestBase.test_home}')
-        os.system(f'mkdir -p {self.locations.config_dir_path(workspace)}')
-        os.system(f'mkdir -p {self.locations.data_dir_path(workspace)}')
-        os.system(f'mkdir -p {self.locations.reservoir_dir_path(workspace)}')
         os.system('sudo rm -f /tmp/farcel*.log')
 
     def new_file(self, filename):
@@ -228,6 +225,7 @@ class TestAPI(TestBase):
     def reset_environment(self, config_file='./.marcel.py'):
         super().reset_environment()
         self.env = marcel.api._ENV
+        os.mkdir(TestBase.test_home)
         self.env.dir_state().change_current_dir(TestBase.start_dir)
 
     def run(self,

@@ -16,7 +16,6 @@
 
 import dill
 import os
-import tempfile
 import time
 
 import marcel.exception
@@ -73,19 +72,17 @@ class Workspace(marcel.object.renderable.Renderable):
         return False
 
     def exists(self, env):
-        assert False
+        locations = env.locations
+        if locations.config_dir_path(self).exists():
+            marker_path = locations.workspace_marker_file_path(self)
+            return marker_path is not None and marker_path.exists()
+        else:
+            return False
 
     def create(self, env, initial_config_contents=None):
+        assert initial_config_contents is not None
         if not self.exists(env):
             locations = env.locations
-            # initial_config_contents specified only for default workspace. For named workspaces, config
-            # is copied from default.
-            if initial_config_contents is None:
-                assert not self.is_default()
-                with open(locations.config_file_path(Workspace.default()), 'r') as config_file:
-                    initial_config_contents = config_file.read()
-            else:
-                assert self.is_default()
             # config
             config_dir = locations.config_dir_path(self)
             self.create_dir(config_dir)
@@ -121,13 +118,14 @@ class Workspace(marcel.object.renderable.Renderable):
     def list(env):
         yield Workspace.default()
         locations = env.locations
-        for dir in locations.config_dir_path(Workspace.default()).iterdir():
+        for dir in locations.config_base_path().iterdir():
             if dir.is_dir():
                 name = dir.name
-                workspace = WorkspaceNamed(name)
-                if locations.workspace_marker_file_path(workspace).exists():
-                    workspace.read_properties(env)  # So that home is known
-                    yield workspace
+                if name != WorkspaceDefault.DIR_NAME:
+                    workspace = WorkspaceNamed(name)
+                    if locations.workspace_marker_file_path(workspace).exists():
+                        workspace.read_properties(env)  # So that home is known
+                        yield workspace
 
     # Internal
 
@@ -143,6 +141,8 @@ class Workspace(marcel.object.renderable.Renderable):
 
 
 class WorkspaceDefault(Workspace):
+
+    DIR_NAME = '__DEFAULT_WORKSPACE__'
 
     def __init__(self):
         super().__init__()
@@ -174,8 +174,9 @@ class WorkspaceDefault(Workspace):
     def is_default(self):
         return True
 
-    def exists(self, env):
-        return True
+    def create(self, env, initial_config_contents=None):
+        assert initial_config_contents is not None
+        super().create(env, initial_config_contents)
 
     def open(self, env):
         pass
@@ -220,15 +221,10 @@ class WorkspaceNamed(Workspace):
     def save_time(self):
         return self.properties.save_time
 
-    def exists(self, env):
-        locations = env.locations
-        if locations.config_dir_path(self).exists():
-            marker_path = locations.workspace_marker_file_path(self)
-            return marker_path is not None and marker_path.exists()
-        else:
-            return False
-
     def create(self, env, initial_config_contents=None):
+        assert initial_config_contents is None
+        with open(env.locations.config_file_path(Workspace.default()), 'r') as config_file:
+            initial_config_contents = config_file.read()
         super().create(env, initial_config_contents)
         self.properties = WorkspaceProperties()
         self.close(env)
