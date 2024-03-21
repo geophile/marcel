@@ -97,13 +97,10 @@ class Workspace(marcel.object.renderable.Renderable):
             locations.history_file_path(self).touch(mode=0o600, exist_ok=False)
 
     def open(self, env):
-        pass
+        assert False
 
     def close(self, env):
-        for _, reservoir in env.reservoirs():
-            assert type(reservoir) is marcel.reservoir.Reservoir
-            reservoir.close()
-            reservoir.ensure_deleted()
+        assert False
 
     def set_home(self, env, homedir):
         assert False
@@ -182,8 +179,10 @@ class WorkspaceDefault(Workspace):
         pass
 
     def close(self, env):
-        super().close(env)
-        pass
+        for _, reservoir in env.reservoirs():
+            assert type(reservoir) is marcel.reservoir.Reservoir
+            reservoir.close()
+            reservoir.ensure_deleted()
 
     def set_home(self, env, homedir):
         raise marcel.exception.KillCommandException('Default workspace cannot have a home directory.')

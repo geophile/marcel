@@ -111,7 +111,7 @@ class EditImpl(object):
     def run(self, env):
         assert False
 
-    # For use by sumbclasses
+    # For use by subclasses
 
     def edit(self, file):
         edit_command = f'{self.editor} {file}'
