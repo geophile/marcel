@@ -1001,20 +1001,6 @@ record history, does it?
 
 ----------------------------------------------------------------------
 
-249. edit -s loses import
-
-    M 0.23.0 jao@loon ~$ import math
-    M 0.23.0 jao@loon ~$ (math)
-    <module 'math' from '/home/jao/miniconda3/lib/python3.10/lib-dynload/math.cpython-310-x86_64-linux-gnu.so'>
-    M 0.23.0 jao@loon ~$ edit -s
-    M 0.23.0 jao@loon ~$ (math)
-    Error: Running map(lambda: math): name 'math' is not defined
-
-Probably only a problem with default namespace. Probably lose other
-definitions too.
-
-----------------------------------------------------------------------
-
 250. Crash when starting marcel with non-existent workspace
 
 (base) jao@loon:~$ marcel hw3

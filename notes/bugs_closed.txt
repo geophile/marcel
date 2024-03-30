@@ -4907,3 +4907,19 @@ M 0.22.2 jao@loon ~/Downloads/mounish$ gen 3 | args (| x: (x ) |)
 2
 M 0.22.2 jao@loon ~/Downloads/mounish$ gen 3 | args (| x: (x / (1-x)) |)
 M 0.22.2 jao@loon ~/Downloads/mounish$
+
+----------------------------------------------------------------------
+
+FIXED
+
+249. edit -s loses import
+
+    M 0.23.0 jao@loon ~$ import math
+    M 0.23.0 jao@loon ~$ (math)
+    <module 'math' from '/home/jao/miniconda3/lib/python3.10/lib-dynload/math.cpython-310-x86_64-linux-gnu.so'>
+    M 0.23.0 jao@loon ~$ edit -s
+    M 0.23.0 jao@loon ~$ (math)
+    Error: Running map(lambda: math): name 'math' is not defined
+
+Probably only a problem with default namespace. Probably lose other
+definitions too.
