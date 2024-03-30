@@ -32,15 +32,18 @@ def installed_version(locations):
 
 
 def migrate():
+    def update_version_file():
+        # Write current version number to VERSION file, which should already exist.
+        if iv < marcel.version.VERSION:
+            version_file_path = locations.version_file_path()
+            version_file_path.chmod(0o600)
+            with open(version_file_path, 'w') as version_file:
+                version_file.write(marcel.version.VERSION)
+            version_file_path.chmod(0o400)
+        assert installed_version(locations) == marcel.version.VERSION
+
     locations = marcel.locations.Locations()
     iv = installed_version(locations)
     if iv < '0.24':
         marcel.migration.migration024.migrate(locations)
-    # Write current version number to VERSION file, which should already exist.
-    if iv < marcel.version.VERSION:
-        version_file_path = locations.version_file_path()
-        version_file_path.chmod(0o600)
-        with open(version_file_path, 'w') as version_file:
-            version_file.write(marcel.version.VERSION)
-        version_file_path.chmod(0o400)
-    assert installed_version(locations) == marcel.version.VERSION
+    update_version_file()
