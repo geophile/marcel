@@ -1,37 +1,19 @@
 What's New
 ----------
 
-Marcel commands with long pipelines sometimes repeat argument lists a lot. For example, this
-command repeats a list of four arguments in three operators. A CSV file is read. The first `map` 
-operator converts the strings in the CSV file to `float`s. The `select` keeps only entries with
-altitude < 1000. The second `map` passes the data to a graphing function. 
+Mostly internal changes to workspaces. It all works the same, but
+there were some bugs in the handling of persistent state, and I've cleaned
+up the handling of default workspaces and named workspaces. They are more
+similar internally, now. As part of this, the organization of marcel's storage
+on disk was tweaked.
 
-```shell
-read -c data.csv \
-| map (lat, lon, altitude, x: (float(lat), float(lon), float(altitude), float(x))) \
-| select (lat, lon, altitude, x: altitude < 1000) \
-| map (lat, lon, altitude, x: graph(lat, lon, altitude, x))
-```
-
-This release intoduces a mechanism for avoiding this repetition, by making it easy
-to introduce struct-like objects, whose attributes replace the variables. The
-pipeline above can now be rewritten as:
-
-```shell
-read -c data.csv \
-| map (lat, lon, altitude, x: o(lat=float(lat), lon=float(lon), alt=float(altitude), x=float(x))) \
-| select (o: o.alt < 1000) \
-| map (o: graph(o.lat, o.lon, o.alt, o.x))
-```
-
-The first `map` does the conversion to `float`, passing each value to the new marcel function `o` using
-keyword arguments. This creates an object with attributes `lat`, `lon`, `alt` and `x`. 
-Note that those names don't have to match the map operator's argument names,
-and in fact we mapped the `altitude` argument to the keyword `alt`.
-
-Now, in the `select` and second `map` operators, we just take a single argument, `o`, which can
-be accessed using dot notation. (There is no need for the argument name to be `o`, matching the
-marcel function `o`.)
+Related to this I've implemented a migration capability. This will
+support migrations in general, for those rare instances when the on-disk 
+representation changes. If you're curious, note that ~/.marcel/config/VERSION is new. 
+If you install this version, and run marcel (causing the migration), this file will
+be created and contain the value 0.24.0. In the future, 
+that value will get updated each time
+that you upgrade your marcel release.
 
 Marcel
 ======
