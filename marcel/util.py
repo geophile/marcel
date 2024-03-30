@@ -132,7 +132,8 @@ def print_stack_of_current_exception(file=None):
 def print_stack(file=None):
     if file is None:
         file = sys.__stderr__
-    print(inspect.stack(), file=file)
+    for line in traceback.format_stack()[:-2]:
+        print(line.strip(), file=file)
 
 
 def colorize(s, color, readline=False):

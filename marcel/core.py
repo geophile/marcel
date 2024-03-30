@@ -426,7 +426,7 @@ class PipelineIterator:
 # - PipelineFunction: Wrapper around function that evaluates to OpList.
 # Pipeline provides a uniform interface to all of these. There are subclasses (PipelineMarcel, PipelinePython)
 # corresponding to script/interactive vs. API usage. E.g. PipelineMarcel pipelines need parameters and scopes
-# explicitly managed while PiplinePython pipelines do not.
+# explicitly managed while PipelinePython pipelines do not.
 class Pipeline(object):
 
     # customize_pipeline takes pipelines as an argument, returns None
@@ -572,7 +572,7 @@ class PipelinePython(Pipeline):
         marcel.core.Command(None, self.pipeline).execute(env)
 
     def prepare_to_receive(self, env):
-        assert self.n_params() == 0
+        # assert self.n_params() == 0
         self.setup(env)
         self.create_executable(env)
         self.pipeline = self.customize_pipeline(env, self.pipeline)

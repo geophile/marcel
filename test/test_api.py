@@ -29,6 +29,7 @@ def find_node(cluster, node_name):
             return host
     return None
 
+
 CLUSTER1 = cluster(user='jao',
                    identity='/home/jao/.ssh/id_rsa',
                    host='127.0.0.1')
@@ -43,6 +44,7 @@ jdb = database(driver='psycopg2',
                password='jao')
 ENV = marcel.api._ENV
 ENV.setvar('DB_DEFAULT', jdb)
+
 
 # Utilities for testing filename ops
 
@@ -1107,12 +1109,13 @@ def test_case():
                               case(map(lambda x: (100 * x)))),
              expected_err='case requires at least 2 arguments')
     # Function/pipeline confusion
-    TEST.run(test=lambda : run(gen(5, 1) |
-                               case(map(lambda x: (100 * x)), map(lambda x: (-x)), lambda x: x < 3)),
+    TEST.run(test=lambda: run(gen(5, 1) |
+                              case(map(lambda x: (100 * x)), map(lambda x: (-x)), lambda x: x < 3)),
              expected_err='Expected function')
     TEST.run(test=lambda: run(gen(5, 1) |
                               case(lambda x: x < 3, lambda: 123)),
              expected_err='Expected pipeline')
+
 
 @timeit
 def test_read():
@@ -1520,11 +1523,10 @@ def test_env():
              expected_err='is undefined')
     TEST.run(test=lambda: run(env('SHELL', os=True)),
              expected_out=[('SHELL', os.getenv('SHELL'))])
-    TEST.run(test=lambda: run(env(pattern='SHELL', os=True) | select (lambda k, v: k == "SHELL")),
+    TEST.run(test=lambda: run(env(pattern='SHELL', os=True) | select(lambda k, v: k == "SHELL")),
              expected_out=[('SHELL', os.getenv('SHELL'))])
     TEST.run(test=lambda: run(env(delete='SHELL', os=True)),
              expected_err='Cannot specify more than one of')
-
 
 
 @timeit
@@ -1534,6 +1536,7 @@ def test_pos():
                               select(lambda x, p1: x % 2 == 0) |
                               map(lambda x, p1: (x, p1, pos()))),
              expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
+
 
 @timeit
 def test_json():
@@ -1771,7 +1774,7 @@ def test_api_iterator():
 
 @timeit
 def test_struct():
-    TEST.run(test=lambda: run(gen(3) | map (lambda x: o(x=x, y=x+1)) | map (lambda o: o.x + o.y)),
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: o(x=x, y=x + 1)) | map(lambda o: o.x + o.y)),
              expected_out=[1, 3, 5])
 
 
@@ -1940,7 +1943,9 @@ def test_bug_247():
              expected_out=[0.0, Error('division by zero'), -2.0])
     TEST.run(test=lambda: run(gen(3) | args(lambda x: map(lambda: x / (1 - x)))),
              expected_out=[0.0, Error('division by zero'), -2.0])
-    TEST.run(test=lambda: run(gen(6) | case(lambda x: x % 2 == 0, lambda x: x // (x-2), lambda x: x * 100)),
+    TEST.run(test=lambda: run(gen(6) | case(lambda x: x % 2 == 0,
+                                            map(lambda x: x // (x-2)),
+                                            map(lambda x: x * 100))),
              expected_out=[0, 100, Error('by zero'), 300, 2, 500])
 
 

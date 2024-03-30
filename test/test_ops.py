@@ -2096,7 +2096,7 @@ def test_workspace_lifecycle():
 def test_workspaces_and_reservoirs():
     TEST.reset_environment()
     ws_default = marcel.object.workspace.Workspace.default()
-    ws_restest = marcel.object.workspace.WorkspaceNamed('restest')
+    ws_restest = marcel.object.workspace.Workspace('restest')
     # Default reservoir including its location
     TEST.run(test='gen 3 >$ g3_default',
              verification='g3_default <$',
@@ -2105,8 +2105,8 @@ def test_workspaces_and_reservoirs():
              expected_out=[1])
     # Leave the default workspace and check that the reservoir disappears
     TEST.run(test='ws -n restest',
-             verification=f'ls -f {TEST.locations.reservoir_dir_path(ws_default)} | red count',
-             expected_out=[0])
+             verification='ws',
+             expected_out=['Workspace(restest)'])
     # Create a reservoir in the restest workspace
     TEST.run(test='gen 3 >$ g3_restest',
              verification='g3_restest <$',
@@ -2118,7 +2118,7 @@ def test_workspaces_and_reservoirs():
              verification='ws | (w: str(w))',
              expected_out=['Workspace()'])
     TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_default)} | red count',
-             expected_out=[0])
+             expected_out=[1])
     TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_restest)} | red count',
              expected_out=[1])
     # Re-enter restest, check again
@@ -2126,7 +2126,7 @@ def test_workspaces_and_reservoirs():
              verification='ws | (w: str(w))',
              expected_out=['Workspace(restest)'])
     TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_default)} | red count',
-             expected_out=[0])
+             expected_out=[1])
     TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_restest)} | red count',
              expected_out=[1])
     # And contents

@@ -8,7 +8,6 @@ import time
 
 import dill.source
 
-import marcel.api
 import marcel.env
 import marcel.exception
 import marcel.locations
@@ -221,6 +220,8 @@ class TestAPI(TestBase):
 
     def __init__(self, main):
         super().__init__(config_file=None, main=main)
+        # Don't do this at top-level. Otherwise, marcel.api's atexit call can interfere with main's.
+        import marcel.api
 
     def reset_environment(self, config_file='./.marcel.py'):
         super().reset_environment()

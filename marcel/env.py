@@ -413,12 +413,12 @@ class EnvironmentScript(Environment):
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 self.namespace[key] = value
-        self.restore_persistent_state_from_workspace()
         self.dir_state().change_current_dir(self.getvar('PWD'))
         # Need to make sure default workspace exists. Timing is delicate, this needs to be done before
         # Main runs Environment.read_config(). We are now toward the end of Environment creation, for both
         # Interactive and Script usage. (API doesn't use workspaces.)
-        marcel.object.workspace.Workspace.default().create(self, DEFAULT_CONFIG)
+        marcel.object.workspace.Workspace.default().ensure_exists(self, DEFAULT_CONFIG)
+        self.restore_persistent_state_from_workspace()
 
     # This is destructive. Should be called only as the current workspace is being closed, and this Environment
     # is being saved.
@@ -444,22 +444,21 @@ class EnvironmentScript(Environment):
 
     def restore_persistent_state_from_workspace(self):
         self.workspace.open(self)
-        if not self.workspace.is_default():
-            persistent_state = self.workspace.persistent_state
-            # Do the imports before compilation, which may depend on the imports.
-            imports = persistent_state['imports']
-            for i in imports:
-                self.import_module(i.module_name, i.symbol, i.rename)
-            # Restore vars, recompiling as necessary.
-            saved_vars = persistent_state['namespace']
-            self.namespace.update(saved_vars)
-            for var, value in saved_vars.items():
-                if isinstance(value, Compilable):
-                    try:
-                        value.recompile(self)
-                    except Exception as e:
-                        print(f'Unable to restore {var} = {value} because compilation failed: {e}')
-            self.var_handler.add_save_vars(*saved_vars)
+        persistent_state = self.workspace.persistent_state
+        # Do the imports before compilation, which may depend on the imports.
+        imports = persistent_state['imports']
+        for i in imports:
+            self.import_module(i.module_name, i.symbol, i.rename)
+        # Restore vars, recompiling as necessary.
+        saved_vars = persistent_state['namespace']
+        self.namespace.update(saved_vars)
+        for var, value in saved_vars.items():
+            if isinstance(value, Compilable):
+                try:
+                    value.recompile(self)
+                except Exception as e:
+                    print(f'Unable to restore {var} = {value} because compilation failed: {e}')
+        self.var_handler.add_save_vars(*saved_vars)
 
     def never_mutable(self):
         vars = set(super().never_mutable())

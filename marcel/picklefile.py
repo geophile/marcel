@@ -13,15 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
 import dill
+import pathlib
+import os
 import time
 
 
 class PickleFile:
 
     def __init__(self, path):
-        self.path = path
+        self.path = pathlib.Path(path)
         self._readers = {}  # path -> Reader
         self._writer = None
 
@@ -29,7 +30,7 @@ class PickleFile:
         return f'{self.__class__.__name__}({self.path})'
 
     def __hash__(self):
-        return self.path.hash()
+        return hash(self.path)
 
     def __eq__(self, other):
         return self is other or (type(self) is type(other) and self.path == other.path)
@@ -124,6 +125,7 @@ class Writer(Access):
     def __init__(self, owner, append):
         super().__init__(owner)
         self.append = append
+        owner.path.touch(mode=0o600)
         self.file = open(owner.path, 'ab' if self.append else 'wb')
         self.pickler = dill.Pickler(self.file)
         self.last_flush = time.time()

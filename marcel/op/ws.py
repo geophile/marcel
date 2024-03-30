@@ -18,7 +18,7 @@ import marcel.core
 import marcel.exception
 import marcel.object.workspace
 
-Workspace = marcel.object.workspace.WorkspaceNamed
+Workspace = marcel.object.workspace.Workspace
 
 HELP = '''
 {L,wrap=F}ws
@@ -174,9 +174,9 @@ class Ws(marcel.core.Op):
         elif self.copy is not None:
             self.impl = WsCopy(self)
         elif self.exp is not None:
-            self.impl = WsExp(self)
+            self.impl = WsExport(self)
         elif self.imp is not None:
-            self.impl = WsImp(self)
+            self.impl = WsImport(self)
         elif self.name is not None:
             self.open = self.name
             self.impl = WsOpen(self)
@@ -305,7 +305,7 @@ class WsClose(WsImpl):
 
     def run(self, env):
         workspace = env.workspace
-        workspace.close(env)
+        workspace.close(env, restart=True)
         if not workspace.is_default():
             workspace = Workspace.default()
             workspace.open(env)
@@ -373,7 +373,7 @@ class WsCopy(WsImpl):
         self.check_anon_arg_present('COPY_NAME')
 
 
-class WsExp(WsImpl):
+class WsExport(WsImpl):
     
     def __init__(self, op):
         super().__init__(op, op.name)
@@ -385,7 +385,7 @@ class WsExp(WsImpl):
         self.check_anon_arg_present('MWS_FILENAME')
 
 
-class WsImp(WsImpl):
+class WsImport(WsImpl):
     
     def __init__(self, op):
         super().__init__(op, op.name)

@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import atexit
 import getpass
 import os
 import signal

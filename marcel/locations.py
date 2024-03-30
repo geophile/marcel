@@ -39,6 +39,9 @@ class Locations(object):
             'application data directory (e.g. XDG_DATA_HOME)',
             os.environ.get('XDG_DATA_HOME', None),
             self.home / '.local' / 'share')
+        # Record the pid. Process spawning creates children with different pids, but when a pid shows up in
+        # a filename, we want the pid of the topmost process.
+        self.pid = os.getpid()
 
     def config_base_path(self):
         return Locations.marcel_dir(self.config_base)
@@ -66,19 +69,17 @@ class Locations(object):
         return self.data_dir_path(workspace) / 'properties.pickle'
 
     def workspace_environment_file_path(self, workspace):
-        assert not workspace.is_default()
-        return self.data_dir_path(workspace) / 'env.pickle'
+        filename = f'{self.pid}.env.pickle' if workspace.is_default() else 'env.pickle'
+        return self.data_dir_path(workspace) / filename
 
-    def workspace_marker_file_path(self, workspace):
-        for file_path in self.config_dir_path(workspace).iterdir():
-            if file_path.name.startswith('.WORKSPACE'):
-                return file_path
-        # If the config directory doesn't have a .WORKSPACE file, it should. Presumably we are in the process
-        # of creating a new workspace.
+    def workspace_unowned_marker_file_path(self, workspace):
         return self.config_dir_path(workspace) / '.WORKSPACE'
 
+    def workspace_owned_marker_file_path(self, workspace):
+        return self.config_dir_path(workspace) / f'.WORKSPACE.{self.pid}'
+
     def reservoir_file_path(self, workspace, name):
-        filename = f'{os.getpid()}.{name}.pickle' if workspace.is_default() else f'{name}.pickle'
+        filename = f'{self.pid}.{name}.pickle' if workspace.is_default() else f'{name}.pickle'
         return self.reservoir_dir_path(workspace) / filename
 
     def version_file_path(self):

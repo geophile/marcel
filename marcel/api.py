@@ -78,21 +78,31 @@ from marcel.builtin import *
 from marcel.reduction import *
 
 
+class _ShutdownHook(object):
+
+    def __init__(self):
+        self.registered = False
+
+    def ensure_registered(self):
+        if not self.registered:
+            atexit.register(_ShutdownHook.shutdown)
+            self.registered = True
+
+    @staticmethod
+    def shutdown():
+        for reservoir in _RESERVOIRS:
+            reservoir.ensure_deleted()
+
+
 _RESERVOIRS = []
-
-
-def shutdown():
-    for reservoir in _RESERVOIRS:
-        reservoir.ensure_deleted()
-
-# TODO: This is work in progress. Main is there only to get env for now. Should be gone eventually.
 PWD = None
 DIRS = [_pathlib.Path(_os.getcwd())]
 DB_DEFAULT = None
 _ENV = _env_.EnvironmentAPI.create(globals())
 _MAIN = _main.MainAPI(_ENV)
+SHUTDOWN_HOOK = _ShutdownHook()
 
-atexit.register(shutdown)
+
 
 
 def args(*args, **kwargs): return _generate_op(_args, *args, **kwargs)
@@ -252,6 +262,7 @@ def _prepare_pipeline(x):
 
 
 def run(x):
+    SHUTDOWN_HOOK.ensure_registered()
     pipeline = _prepare_pipeline(x)
     if not isinstance(pipeline.last_op(), _Write):
         pipeline.append(write().op)
@@ -259,6 +270,7 @@ def run(x):
 
 
 def gather(x, unwrap_singleton=True, errors=None):
+    SHUTDOWN_HOOK.ensure_registered()
     pipeline = _prepare_pipeline(x)
     output = []
     terminal_op = _gather(output=output,
@@ -270,6 +282,7 @@ def gather(x, unwrap_singleton=True, errors=None):
 
 
 def first(x, unwrap_singleton=True, errors=None):
+    SHUTDOWN_HOOK.ensure_registered()
     pipeline = _prepare_pipeline(x)
     output = []
     terminal_op = _first(output=output,

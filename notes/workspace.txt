@@ -383,3 +383,200 @@ modified to add xyz?
 
 - Conflict in env.py: rename stored var, notify user
 
+======================================================================
+
+
+exists: true for default, otherwise, see if marker exists
+
+Workspace
+    - name
+    create_time()
+    open_time()
+    save_time()
+    is_default()
+    exists()
+    create()
+    open()
+    close()
+    set_home()
+
+WorkspaceNamed
+    - properties
+    - persistent_state
+    create_time()
+    open_time()
+    save_time()
+    is_default()
+    is_open()
+    create()
+    open()
+    close()
+    set_home()
+
+    delete()
+    home()
+
+WorkspaceDefault
+
+close()
+
+- Sets self.env_file to temp file, writes env there. 
+
+*** But this deletes reservoirs! Need to rethink ws lifecycle across ReconfigureException.
+
+open()
+
+- Reads and discards temp file
+
+----------------------------------------------------------------------
+
+Workspace.close: 
+
+- Close and delete reservoirs.
+
+- This is correct for default workspace on shutdown, but not on restart.
+
+WorkspaceNamed.close:
+
+- Close reservoirs, don't delete them.
+
+WorkspaceDefault.close:
+
+- Close reservoirs. On shutdown, delete them. On restart, keep them.
+
+----------------------------------------------------------------------
+
+To do:
+
+- lifecycle testing: Check across process and ws boundaries:
+
+    - reservoirs
+
+    - imports
+
+    - assigned vars
+
+
+Structure on disk:
+
+    CURRENT:
+
+    .config/marcel/
+        startup.py  # For anon workspaces, and template for named
+        .WORKSPACE  # Marker for default workspace
+        WORKSPACE_NAME/
+            .WORKSPACE  # Empty file marking this directory as a workspace
+            startup.py
+
+    .local/share/marcel/
+        history
+        reservoirs/  # FOR DEFAULT WORKSPACE 
+            <pid>.<varname>.pickle  # Deleted at end of session
+        WORKSPACE_NAME/
+            properties.pickle
+            env.pickle
+            history
+            reservoirs/
+                <varname>.pickle
+
+    NEW:
+
+    .config/marcel/
+        __DEFAULT_WORKSPACE__
+            startup.py
+            .WORKSPACE
+        WORKSPACE_NAME/
+            .WORKSPACE  # Empty file marking this directory as a workspace
+            startup.py
+
+    .local/share/marcel/
+        __DEFAULT_WORKSPACE__
+            <pid>.env.pickle  # Deleted on non-restart shutdown
+            history
+            reservoirs/
+                <pid>.<varname>.pickle  # Deleted on non-restart shutdown
+        WORKSPACE_NAME/
+            properties.pickle
+            env.pickle
+            history
+            reservoirs/
+                <varname>.pickle
+
+ 
+  - Similar for .local/share/marcel
+  
+----------------------------------------------------------------------
+
+3/28/24
+
+Lifecycle
+
+Workspace.create
+    - Check exists (marker file is present)
+    - Create config dir
+    - Write startup.py
+    - Create marker file
+    - Create data and reservoir dirs
+    - touch history file
+
+Workspace.open
+    - lock marker
+    - read properties
+    - read env
+
+Workspace.close
+    - check open
+    - write properties
+    - close reservoirs
+    - write env
+    - unlock marker
+
+Workspace.delete
+    - assert not open
+    - lock workspace
+    - delete everything
+
+......................................................................
+
+WsNew
+    - create ws
+    - open ws
+    - raise reconfigure exception
+
+WsOpen
+    - open ws
+    - raise reconfigure exception
+
+WsClose
+    - close ws
+    - if not default: open default, raise
+    *** So if it is default it stays closed?!
+
+WsDelete
+    - delete ws (doesn't affect current ws)
+
+----------------------------------------------------------------------
+
+TODO:
+
+- Test for valid new workspace name. What happens if creating the dir
+  fails due to a bad filename?
+
+- If any (other) marcel process is running, and migration is needed,
+  don't start.
+
+- Should probably have marker files for default workspaces,
+  e.g. .WORKSPACE.<pid> works, as for named workspaces, but
+  always keep the original (.WORKSPACE), don't rename it.
+
+  Otherwise, we can't tell if a default workspace process is running,
+  which should block migration. (Testing for any .WORKSPACE.<pid> is
+  unreliable, but better than nothing.)
+
+- For persistence across restart after edit -s:
+
+  - Store env in __DEFAULT_WORKSPACE__/<pid>.env.pickle
+
+  - If shutdown is for restart, don't delete reservoirs, just close
+    them. Maybe always just close reservoirs, and then delete is an
+    extra step, just for default, just on non-restart shutdown.

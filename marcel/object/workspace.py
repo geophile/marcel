@@ -1,5 +1,4 @@
 # This file is part of Marcel.
-# This file is part of Marcel.
 #
 # Marcel is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -15,7 +14,6 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import dill
-import os
 import time
 
 import marcel.exception
@@ -59,141 +57,10 @@ class WorkspaceProperties(object):
 
 class Workspace(marcel.object.renderable.Renderable):
 
+    _MARKER = '.WORKSPACE'
     _DEFAULT = None
 
-    # Renderable
-
-    def render_full(self, color_scheme):
-        return self.render_compact()
-
-    # Workspace
-
-    def is_default(self):
-        return False
-
-    def exists(self, env):
-        locations = env.locations
-        if locations.config_dir_path(self).exists():
-            marker_path = locations.workspace_marker_file_path(self)
-            return marker_path is not None and marker_path.exists()
-        else:
-            return False
-
-    def create(self, env, initial_config_contents=None):
-        assert initial_config_contents is not None
-        if not self.exists(env):
-            locations = env.locations
-            # config
-            config_dir = locations.config_dir_path(self)
-            self.create_dir(config_dir)
-            config_file_path = locations.config_file_path(self)
-            with open(config_file_path, 'w') as config_file:
-                config_file.write(initial_config_contents)
-            config_file_path.chmod(0o600)
-            locations.workspace_marker_file_path(self).touch(mode=0o000, exist_ok=False)
-            # data
-            self.create_dir(locations.data_dir_path(self))
-            self.create_dir(locations.reservoir_dir_path(self))
-            locations.history_file_path(self).touch(mode=0o600, exist_ok=False)
-
-    def open(self, env):
-        assert False
-
-    def close(self, env):
-        assert False
-
-    def set_home(self, env, homedir):
-        assert False
-
-    @staticmethod
-    def default():
-        if Workspace._DEFAULT is None:
-            Workspace._DEFAULT = WorkspaceDefault()
-        return Workspace._DEFAULT
-
-    @staticmethod
-    def list(env):
-        yield Workspace.default()
-        locations = env.locations
-        for dir in locations.config_base_path().iterdir():
-            if dir.is_dir():
-                name = dir.name
-                if name != WorkspaceDefault.DIR_NAME:
-                    workspace = WorkspaceNamed(name)
-                    if locations.workspace_marker_file_path(workspace).exists():
-                        workspace.read_properties(env)  # So that home is known
-                        yield workspace
-
-    # Internal
-
-    def create_dir(self, dir):
-        try:
-            dir.mkdir(parents=True)
-            assert dir.exists(), dir
-        except FileExistsError:
-            pass
-        except FileNotFoundError:
-            raise marcel.exception.KillCommandException(
-                f'Workspace name must be usable as a legal filename: {self.name}')
-
-
-class WorkspaceDefault(Workspace):
-
-    DIR_NAME = '__DEFAULT_WORKSPACE__'
-
-    def __init__(self):
-        super().__init__()
-        self.env_file = None
-
-    # Renderable
-
-    def render_compact(self):
-        return 'Workspace()'
-
-    # Workspace
-
-    @property
-    def name(self):
-        return ''
-
-    @property
-    def create_time(self):
-        return None
-
-    @property
-    def open_time(self):
-        return None
-
-    @property
-    def save_time(self):
-        return None
-
-    def is_default(self):
-        return True
-
-    def create(self, env, initial_config_contents=None):
-        assert initial_config_contents is not None
-        super().create(env, initial_config_contents)
-
-    def open(self, env):
-        pass
-
-    def close(self, env):
-        for _, reservoir in env.reservoirs():
-            assert type(reservoir) is marcel.reservoir.Reservoir
-            reservoir.close()
-            reservoir.ensure_deleted()
-
-    def set_home(self, env, homedir):
-        raise marcel.exception.KillCommandException('Default workspace cannot have a home directory.')
-
-
-class WorkspaceNamed(Workspace):
-
-    MARKER = '.WORKSPACE'
-
     def __init__(self, name):
-        super().__init__()
         assert name is not None
         self.name = name
         self.properties = None
@@ -206,36 +73,33 @@ class WorkspaceNamed(Workspace):
                 if self.home() is None else
                 f'Workspace({self.name} @ {self.home()})')
 
+    def render_full(self, color_scheme):
+        return self.render_compact()
+
     # Workspace
 
-    @property
-    def create_time(self):
-        return self.properties.create_time
+    def is_default(self):
+        return False
 
-    @property
-    def open_time(self):
-        return self.properties.open_time
+    def exists(self, env):
+        locations = env.locations
+        return self.any_marker_exists(env) if locations.config_dir_path(self).exists() else False
 
-    @property
-    def save_time(self):
-        return self.properties.save_time
-
-    def create(self, env, initial_config_contents=None):
-        assert initial_config_contents is None
-        with open(env.locations.config_file_path(Workspace.default()), 'r') as config_file:
+    def create(self, env):
+        assert not self.exists(env)
+        locations = env.locations
+        with open(locations.config_file_path(Workspace.default()), 'r') as config_file:
             initial_config_contents = config_file.read()
-        super().create(env, initial_config_contents)
-        self.properties = WorkspaceProperties()
-        self.close(env)
+        self.create_on_disk(env, initial_config_contents)
 
     def open(self, env):
-        if not self.is_open():
+        if not self.is_open(env):
             self.lock_workspace(env.locations)
             self.read_properties(env)
             self.read_environment(env)
 
-    def close(self, env):
-        if self.is_open():
+    def close(self, env, restart):
+        if self.is_open(env):
             # Properties
             self.write_properties(env)
             # Reservoirs
@@ -253,15 +117,13 @@ class WorkspaceNamed(Workspace):
         self.properties.set_home(home)
         self.write_properties(env)
 
-    # WorkspaceNamed
-
     def delete(self, env):
-        assert not self.is_open()  # Caller should have guaranteed this
+        assert not self.is_open(env)  # Caller should have guaranteed this
         locations = env.locations
         self.lock_workspace(locations)
         # Use missing_ok = True to enable deletion of damaged workspaces, missing files.
         # config directory
-        locations.workspace_marker_file_path(self).unlink(missing_ok=True)
+        locations.workspace_owned_marker_file_path(self).unlink(missing_ok=True)
         locations.config_file_path(self).unlink(missing_ok=True)
         locations.config_dir_path(self).rmdir()
         # data directory
@@ -278,22 +140,87 @@ class WorkspaceNamed(Workspace):
         # Older workspaces won't have a home property
         return None if self.is_default() or not hasattr(self.properties, 'home') else self.properties.home
 
+    @staticmethod
+    def default():
+        if Workspace._DEFAULT is None:
+            Workspace._DEFAULT = WorkspaceDefault()
+        return Workspace._DEFAULT
+
+    @staticmethod
+    def list(env):
+        yield Workspace.default()
+        locations = env.locations
+        for dir in locations.config_base_path().iterdir():
+            if dir.is_dir():
+                name = dir.name
+                if name != WorkspaceDefault.DIR_NAME:
+                    workspace = Workspace(name)
+                    if workspace.any_marker_exists(env):
+                        workspace.read_properties(env)  # So that home is known
+                        yield workspace
+
     # Internal
 
-    def is_open(self):
-        return self.properties is not None
+    def create_on_disk(self, env, initial_config_contents):
+        locations = env.locations
+        # config
+        config_dir = locations.config_dir_path(self)
+        self.create_dir(config_dir)
+        config_file_path = locations.config_file_path(self)
+        with open(config_file_path, 'w') as config_file:
+            config_file.write(initial_config_contents)
+        config_file_path.chmod(0o600)
+        locations.workspace_unowned_marker_file_path(self).touch(mode=0o000, exist_ok=False)
+        # data
+        self.create_dir(locations.data_dir_path(self))
+        self.create_dir(locations.reservoir_dir_path(self))
+        self.write_environment(env)
+        if not self.is_default():
+            self.properties = WorkspaceProperties()
+            self.write_properties(env)
+        locations.history_file_path(self).touch(mode=0o600, exist_ok=False)
+
+    def create_dir(self, dir):
+        try:
+            dir.mkdir(parents=True)
+            assert dir.exists(), dir
+        except FileExistsError:
+            pass
+        except FileNotFoundError:
+            raise marcel.exception.KillCommandException(
+                f'Workspace name must be usable as a legal filename: {self.name}')
+
+    # Checks for owned and unowned marker files
+    def any_marker_exists(self, env):
+        locations = env.locations
+        return (locations.workspace_owned_marker_file_path(self).exists() or
+                locations.workspace_unowned_marker_file_path(self).exists())
+
+    # A workspace is considered open if it's locked or shared marker file is owned by this process.
+    def is_open(self, env):
+        return env.locations.workspace_owned_marker_file_path(self).exists()
+
+    def share_workspace(self, locations):
+        assert self.is_default()
+        # exist_ok = True: We could be returning to the default workspace, previously opened in this process.
+        locations.workspace_owned_marker_file_path(self).touch(mode=0o000, exist_ok=True)
+
+    def unshare_workspace(self, locations):
+        assert self.is_default()
+        locations.workspace_owned_marker_file_path(self).unlink(missing_ok=True)
 
     def lock_workspace(self, locations):
-        marker_path = locations.workspace_marker_file_path(self)
-        owner = WorkspaceNamed.owner(marker_path)
+        assert not self.is_default()
+        owner = self.owner(locations)
         if owner is None:
             # Lock the file by renaming it. Check for success, to guard against another process trying to
             # lock the same workspace.
-            locked_marker_path = marker_path.parent / f'{WorkspaceNamed.MARKER}.{os.getpid()}'
-            marker_path.rename(locked_marker_path)
-            if not locked_marker_path.exists():
+            owned_marker_path = locations.workspace_owned_marker_file_path(self)
+            unowned_marker_path = locations.workspace_unowned_marker_file_path(self)
+            unowned_marker_path.rename(owned_marker_path)
+            if not owned_marker_path.exists():
                 self.cannot_lock_workspace()
-        elif owner == os.getpid():
+        elif owner == locations.pid:  # locations.pid is the pid of the topmost process
             # Already locked
             pass
         else:
@@ -301,37 +228,42 @@ class WorkspaceNamed(Workspace):
             if marcel.util.process_exists(owner):
                 self.cannot_lock_workspace()
             else:
-                # Owner disappeared. Rename the file and try again.
-                unlocked_marker_path = marker_path.parent / WorkspaceNamed.MARKER
-                marker_path.rename(unlocked_marker_path)
-                assert unlocked_marker_path.exists(), unlocked_marker_path
-                self.lock_workspace(locations)
+                # Owner disappeared. Steal the marker file.
+                abandoned_marker_path = locations.workspace_marker_file_path(self) / f'{Workspace._MARKER}.{owner}'
+                owned_marker_path = locations.workspace_owned_marker_file_path(self)
+                abandoned_marker_path.rename(owned_marker_path)
+                if not owned_marker_path.exists():
+                    # Another process trying to steal at exactly the same time?!
+                    self.cannot_lock_workspace()
 
     def unlock_workspace(self, locations):
-        marker_path = locations.workspace_marker_file_path(self)
-        owner = WorkspaceNamed.owner(marker_path)
+        assert not self.is_default()
+        owner = self.owner(locations)
         if owner is None:
             # Someone is unlocking an unlocked workspace? I'll allow it.
             pass
-        elif owner == os.getpid():
+        elif owner == locations.pid:  # locations.pid is the pid of the topmost process
             # Unlock
-            unlocked_marker_path = marker_path.parent / WorkspaceNamed.MARKER
-            marker_path.rename(unlocked_marker_path)
-            assert unlocked_marker_path.exists(), marker_path
+            owned_marker_path = locations.workspace_owned_marker_file_path(self)
+            unowned_marker_path = locations.workspace_unowned_marker_file_path(self)
+            owned_marker_path.rename(unowned_marker_path)
+            assert unowned_marker_path.exists(), self
         else:
             # Owned by someone else?!
-            assert False, marker_path
+            assert False, self
 
     def cannot_lock_workspace(self):
         raise marcel.exception.KillCommandException(f'Workspace {self.name} is in use by another process.')
 
     def read_properties(self, env):
+        assert not self.is_default()
         with open(env.locations.workspace_properties_file_path(self), 'rb') as properties_file:
             unpickler = dill.Unpickler(properties_file)
             self.properties = unpickler.load()
         self.properties.update_open_time()
 
     def write_properties(self, env):
+        assert not self.is_default()
         with open(env.locations.workspace_properties_file_path(self), 'wb') as properties_file:
             pickler = dill.Pickler(properties_file)
             pickler.dump(self.properties)
@@ -347,12 +279,77 @@ class WorkspaceNamed(Workspace):
             pickler = dill.Pickler(environment_file)
             pickler.dump(env.persistent_state())
 
-    @staticmethod
-    def owner(marker_file_path):
-        if marker_file_path.name == WorkspaceNamed.MARKER:
+    # Return pid of owning process, or None if unowned.
+    def owner(self, locations):
+        # Should only need this for named workspaces.
+        assert not self.is_default()
+        if locations.workspace_unowned_marker_file_path(self).exists():
             return None
-        else:
-            assert marker_file_path.name[len(WorkspaceNamed.MARKER)] == '.'
-            owner_pid = marker_file_path.name[len(WorkspaceNamed.MARKER) + 1:]
-            return int(owner_pid)
+        marker_dir = locations.workspace_owned_marker_file_path(self).parent
+        marker_filename = None
+        for file in marker_dir.iterdir():
+            if file.name.startswith(Workspace._MARKER):
+                if marker_filename is None:
+                    marker_filename = file.name
+                else:
+                    assert False, f'Multiple marker files in {marker_dir}'
+        assert marker_filename is not None
+        return Workspace.marker_filename_pid(marker_filename)
 
+    @staticmethod
+    def marker_filename_pid(marker_filename):
+        assert marker_filename.startswith(Workspace._MARKER)
+        return int(marker_filename[marker_filename.rfind('.') + 1:])
+
+
+class WorkspaceDefault(Workspace):
+    DIR_NAME = '__DEFAULT_WORKSPACE__'
+
+    def __init__(self):
+        super().__init__('')
+
+    # Workspace
+
+    def is_default(self):
+        return True
+
+    def open(self, env):
+        self.share_workspace(env.locations)
+        self.read_environment(env)
+
+    def close(self, env, restart):
+        # Reservoirs
+        for var, reservoir in env.reservoirs():
+            assert type(reservoir) is marcel.reservoir.Reservoir
+            reservoir.close()
+            if not restart:
+                reservoir.ensure_deleted()
+        # Environment (Do this last because env.persistent_state() is destructive.)
+        if restart:
+            self.write_environment(env)
+        else:
+            env.locations.workspace_environment_file_path(self).unlink(missing_ok=True)
+        self.unshare_workspace(env.locations)
+
+    def set_home(self, env, homedir):
+        raise marcel.exception.KillCommandException('Default workspace does not have a home directory.')
+
+    # WorkspaceDefault
+
+    def ensure_exists(self, env, initial_config_contents):
+        assert initial_config_contents is not None
+        if not self.exists(env):
+            self.create_on_disk(env, initial_config_contents)
+
+    # Internal
+
+    def read_environment(self, env):
+        try:
+            super().read_environment(env)
+        except FileNotFoundError:
+            # This can happen on startup when the default workspace for this process hasn't been saved yet.
+            # EnvironmentScript.restore_persistent_state_from_workspace defines what keys should be in persistent_state.
+            self.persistent_state = {
+                'namespace': {},
+                'imports': []
+            }

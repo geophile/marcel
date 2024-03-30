@@ -89,7 +89,6 @@ class MainAPI(Main):
 
     def shutdown(self, restart=False):
         namespace = self.env.namespace
-        marcel.object.workspace.Workspace.default().close(self.env)
         return namespace
 
 
@@ -148,7 +147,7 @@ class MainScript(Main):
                 pass
 
     def shutdown(self, restart=False):
-        self.workspace.close(self.env)
+        self.workspace.close(self.env, restart)
         # The current main is about to be obsolete, but it still exists, and is registered with atexit,
         # keeping it alive, I think. So it's shutdown handler gets run on shutdown. atexit.unregister
         # prevents this, and only the current Main's shutdown will run, on shutdown.
@@ -374,7 +373,7 @@ def main():
     marcel.migration.migration.migrate()
     workspace = (marcel.object.workspace.Workspace.default()
                  if workspace_name is None else
-                 marcel.object.workspace.WorkspaceNamed(workspace_name))
+                 marcel.object.workspace.Workspace(workspace_name))
     if script is None:
         main_interactive_run(workspace)
     else:
