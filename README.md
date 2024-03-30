@@ -9,7 +9,7 @@ on disk was tweaked.
 
 Related to this I've implemented a migration capability. This will
 support migrations in general, for those rare instances when the on-disk 
-representation changes. If you're curious, note that ~/.marcel/config/VERSION is new. 
+representation changes. If you're curious, note that `~/.config/marcel/VERSION` is new. 
 If you install this version, and run marcel (causing the migration), this file will
 be created and contain the value 0.24.0. In the future, 
 that value will get updated each time
