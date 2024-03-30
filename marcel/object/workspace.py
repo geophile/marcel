@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import dill
+import pathlib
 import time
 
 import marcel.exception
@@ -114,6 +115,7 @@ class Workspace(marcel.object.renderable.Renderable):
             self.unlock_workspace(env.locations)
 
     def set_home(self, env, home):
+        home = pathlib.Path(home).absolute()
         self.properties.set_home(home)
         self.write_properties(env)
 
