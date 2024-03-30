@@ -762,3 +762,7 @@ workspaces is a bad idea. What if someone wants a directory named
 ----------------------------------------------------------------------
 
 Migration test
+
+----------------------------------------------------------------------
+
+Prettyprint pipelines. Use it for rendering pipeline code.
