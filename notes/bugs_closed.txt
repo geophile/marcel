@@ -4923,3 +4923,38 @@ FIXED
 
 Probably only a problem with default namespace. Probably lose other
 definitions too.
+
+----------------------------------------------------------------------
+
+FIXED
+
+250. Crash when starting marcel with non-existent workspace
+
+(base) jao@loon:~$ marcel hw3
+Traceback (most recent call last):
+  File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 386, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 379, in main
+    main_interactive_run(workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 330, in main_interactive_run
+    env = marcel.env.EnvironmentInteractive.create(marcel.locations.Locations(), workspace, trace)
+  File "/home/jao/git/marcel/marcel/env.py", line 614, in create
+    env.initialize_namespace()
+  File "/home/jao/git/marcel/marcel/env.py", line 422, in initialize_namespace
+    self.restore_persistent_state_from_workspace()
+  File "/home/jao/git/marcel/marcel/env.py", line 447, in restore_persistent_state_from_workspace
+    self.workspace.open(self)
+  File "/home/jao/git/marcel/marcel/object/workspace.py", line 123, in open
+    self.lock_workspace(env.locations)
+  File "/home/jao/git/marcel/marcel/object/workspace.py", line 214, in lock_workspace
+    marker_path = locations.workspace_marker_file_path(self)
+  File "/home/jao/git/marcel/marcel/locations.py", line 76, in workspace_marker_file_path
+    for file_path in self.config_dir_path(workspace).iterdir():
+  File "/home/jao/miniconda3/lib/python3.10/pathlib.py", line 1017, in iterdir
+    for name in self._accessor.listdir(self):
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jao/.config/marcel/hw3'
+(base) jao@loon:~$ 

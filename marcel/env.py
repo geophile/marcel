@@ -418,7 +418,10 @@ class EnvironmentScript(Environment):
         # Main runs Environment.read_config(). We are now toward the end of Environment creation, for both
         # Interactive and Script usage. (API doesn't use workspaces.)
         marcel.object.workspace.Workspace.default().ensure_exists(self, DEFAULT_CONFIG)
-        self.restore_persistent_state_from_workspace()
+        if self.workspace.exists(self):
+            self.restore_persistent_state_from_workspace()
+        else:
+            raise marcel.exception.KillShellException(f'There is no workspace named {self.workspace.name}.')
 
     # This is destructive. Should be called only as the current workspace is being closed, and this Environment
     # is being saved.
