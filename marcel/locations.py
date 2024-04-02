@@ -72,12 +72,6 @@ class Locations(object):
         filename = f'{self.pid}.env.pickle' if workspace.is_default() else 'env.pickle'
         return self.data_dir_path(workspace) / filename
 
-    def workspace_unowned_marker_file_path(self, workspace):
-        return self.config_dir_path(workspace) / '.WORKSPACE'
-
-    def workspace_owned_marker_file_path(self, workspace):
-        return self.config_dir_path(workspace) / f'.WORKSPACE.{self.pid}'
-
     def reservoir_file_path(self, workspace, name):
         filename = f'{self.pid}.{name}.pickle' if workspace.is_default() else f'{name}.pickle'
         return self.reservoir_dir_path(workspace) / filename

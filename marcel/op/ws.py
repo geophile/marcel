@@ -305,7 +305,7 @@ class WsClose(WsImpl):
 
     def run(self, env):
         workspace = env.workspace
-        workspace.close(env, restart=True)
+        # DON'T close the workspace. That will happend following the ReconfigureException.
         if not workspace.is_default():
             workspace = Workspace.default()
             workspace.open(env)
