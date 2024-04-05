@@ -4958,3 +4958,14 @@ Traceback (most recent call last):
     for name in self._accessor.listdir(self):
 FileNotFoundError: [Errno 2] No such file or directory: '/home/jao/.config/marcel/hw3'
 (base) jao@loon:~$ 
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+251. Default workspace marker files
+
+- .WORKSPACE disappers (renamed?) on startup.
+
+- .WORKSPACE.<pid> files accumulate.

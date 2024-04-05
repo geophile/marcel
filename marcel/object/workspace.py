@@ -230,7 +230,7 @@ class Workspace(marcel.object.renderable.Renderable):
 
     def unshare_workspace(self, env):
         assert self.is_default()
-        self.marker.unowned(env).unlink(missing_ok=True)
+        self.marker.owned(env).unlink(missing_ok=True)
 
     def lock_workspace(self, env):
         assert not self.is_default()
