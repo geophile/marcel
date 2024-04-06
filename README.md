@@ -1,19 +1,17 @@
 What's New
 ----------
 
-Mostly internal changes to workspaces. It all works the same, but
-there were some bugs in the handling of persistent state, and I've cleaned
-up the handling of default workspaces and named workspaces. They are more
-similar internally, now. As part of this, the organization of marcel's storage
-on disk was tweaked.
+This release contains a minor change to the startup script, which 
+is typically located in 
+`~/.config/marcel/startup.py`. Previously, you could include marcel
+commands to be run in the startup process (just before the first prompt),
+by assigning a string containing marcel commands to `RUN_ON_STARTUP`.
 
-Related to this I've implemented a migration capability. This will
-support migrations in general, for those rare instances when the on-disk 
-representation changes. If you're curious, note that `~/.config/marcel/VERSION` is new. 
-If you install this version, and run marcel (causing the migration), this file will
-be created and contain the value 0.24.0. In the future, 
-that value will get updated each time
-that you upgrade your marcel release.
+As of this release, `RUN_ON_STARTUP` processing is no longer supported. 
+Instead, pass the script to the `run_on_startup` function. You can call
+`run_on_startup` multiple times in your startup script. The scripts are
+not run immediately, but will be run in the order provided before
+the first prompt appears.
 
 Marcel
 ======
