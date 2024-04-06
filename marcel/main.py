@@ -113,7 +113,7 @@ class MainScript(Main):
                                 if var in never_mutable_vars}
         # Read the startup script, and then any marcel code contained in it.
         self.env.read_config()
-        self.run_startup()
+        self.run_startup_scripts()
         # Find the vars defined during startup
         keys_after = set(self.env.namespace.keys())
         startup_vars = keys_after - keys_before
@@ -158,11 +158,11 @@ class MainScript(Main):
     def execute_command(self, command, pipeline):
         command.execute(self.env)
 
-    def run_startup(self):
-        run_on_startup = self.env.getvar('RUN_ON_STARTUP')
-        if run_on_startup:
-            if type(run_on_startup) is str:
-                for command in commands_in_script(run_on_startup):
+    def run_startup_scripts(self):
+        startup_scripts = self.env.getvar('STARTUP_SCRIPTS')
+        for script in startup_scripts:
+            if type(script) is str:
+                for command in commands_in_script(script):
                     self.parse_and_run_command(command)
 
 

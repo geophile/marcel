@@ -27,6 +27,7 @@ from marcel.util import username, groupname, quote_files
 # Needed here but we don't want them public
 from marcel.jsonutil import JSONUtil as _JSONUtil
 _JSON_UTIL = _JSONUtil()
+STARTUP_SCRIPTS = []
 
 
 def minutes(n):
@@ -59,3 +60,8 @@ def json_parse(x):
 
 def json_format(x):
     return _JSON_UTIL.encoder.encode(x)
+
+
+def run_on_startup(script):
+    global STARTUP_SCRIPTS
+    STARTUP_SCRIPTS.append(script)

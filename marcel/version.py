@@ -15,7 +15,7 @@
 
 import marcel.exception
 
-VERSION = '0.24.2'
+VERSION = '0.24.3'
 
 
 def _kill_shell(message):

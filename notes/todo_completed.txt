@@ -1092,3 +1092,9 @@ yields objects with attributes x, y, z. Then ... | (x: x.m + x.y ...)
 
 Or maybe a special version of map: ... | fx (x.m + x.y ...). But that
 only works for map. E.g., select would still be "select(x: x.m ...)"
+
+----------------------------------------------------------------------
+
+Having a reservoirs directory in the same directory as named
+workspaces is a bad idea. What if someone wants a directory named
+"reservoirs"?
