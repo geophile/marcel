@@ -30,4 +30,4 @@ class Redirect(marcel.core.Op):
         self.parent.send(env, x)
 
     def receive_error(self, env, error):
-        self.parent.send(env, error)
+        self.parent.send_error(env, error)

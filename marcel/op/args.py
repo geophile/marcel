@@ -101,8 +101,14 @@ class Args(marcel.core.Op):
             else:
                 while len(self.args) < self.n_params:
                     self.args.append(None)
-            self.pipeline.run_pipeline(env, self.args)
-            self.args.clear()
+            try:
+                self.pipeline.run_pipeline(env, self.args)
+            finally:
+                self.args.clear()
+                # Need to ensure that flush is propagated no matter what happens
+                self.propagate_flush(env)
+        # If there was an exception, and we flushed already, this should still be OK. Propagating a
+        # flush a second time should be a noop.
         self.propagate_flush(env)
 
     def check_args(self):

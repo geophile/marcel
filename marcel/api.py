@@ -251,7 +251,9 @@ def _run_pipeline(pipeline):
         command.execute(_ENV)
     except marcel.exception.KillCommandException as e:
         marcel.util.print_to_stderr(e, _ENV)
-
+    except marcel.exception.KillAndResumeException:
+        # Error handler printed the error
+        pass
 
 
 # Create a pipelines, by copying if necessary. The caller is going to append an op, and we

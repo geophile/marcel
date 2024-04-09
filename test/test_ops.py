@@ -2586,6 +2586,18 @@ def test_bug_247():
              expected_out=[0, 100, Error('by zero'), 300, 2, 500])
 
 
+@timeit
+def test_bug_252():
+    TEST.run('gen 9 | args (| a, b, c: ((-a, -b, -c)) |)',
+             expected_out=[(0, -1, -2),
+                           (-3, -4, -5),
+                           (-6, -7, -8)])
+    TEST.run('gen 8 | args (| a, b, c: ((-a, -b, -c)) |)',
+             expected_out=[(0, -1, -2),
+                           (-3, -4, -5),
+                           Error('bad operand type')])
+
+
 # Generalization of bug 195
 @timeit
 def test_pipeline_vars():
@@ -2661,6 +2673,7 @@ def test_bugs():
     test_bug_229()
     test_bug_230()
     test_bug_247()
+    test_bug_252()
 
 
 def main_stable():
@@ -2711,7 +2724,7 @@ def main_stable():
 
 
 def main_dev():
-    pass
+    test_bug_252()
 
 
 def main():

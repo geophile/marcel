@@ -1949,6 +1949,18 @@ def test_bug_247():
              expected_out=[0, 100, Error('by zero'), 300, 2, 500])
 
 
+@timeit
+def test_bug_252():
+    TEST.run(test=lambda: run(gen(9) | args(lambda a, b, c: map(lambda: (-a, -b, -c)))),
+             expected_out=[(0, -1, -2),
+                           (-3, -4, -5),
+                           (-6, -7, -8)])
+    TEST.run(test=lambda: run(gen(8) | args(lambda a, b, c: map(lambda: (-a, -b, -c)))),
+             expected_out=[(0, -1, -2),
+                           (-3, -4, -5),
+                           Error('bad operand type')])
+
+
 # For bugs that aren't specific to a single op.
 @timeit
 def test_bugs():
@@ -1962,6 +1974,7 @@ def test_bugs():
     test_bug_229()
     test_bug_230()
     test_bug_247()
+    test_bug_252()
 
 
 def main_slow_tests():

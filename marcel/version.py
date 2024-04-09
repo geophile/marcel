@@ -13,22 +13,4 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import marcel.exception
-
 VERSION = '0.24.3'
-
-
-def _kill_shell(message):
-    raise marcel.exception.KillShellException(message)
-
-
-def major_minor(version=VERSION):
-    if type(version) is not str:
-        _kill_shell(f'Version number not a string: {version}')
-    version_parts = version.split('.')
-    if len(version_parts) != 3:
-        _kill_shell(f'Incorrectly formatted version number: {version}')
-    for part in version_parts:
-        if not part.isdigit():
-            _kill_shell(f'Invalid version number: {version}')
-    return '.'.join(version_parts[:2])
