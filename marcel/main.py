@@ -148,6 +148,9 @@ class MainScript(Main):
 
     def shutdown(self, restart=False):
         self.workspace.close(self.env, restart)
+        # If we're shutting down for real (not restarting) then the default workspace needs to be closed too.
+        if not restart:
+            marcel.object.workspace.Workspace.default().close(self.env, restart)
         # The current main is about to be obsolete, but it still exists, and is registered with atexit,
         # keeping it alive, I think. So it's shutdown handler gets run on shutdown. atexit.unregister
         # prevents this, and only the current Main's shutdown will run, on shutdown.
