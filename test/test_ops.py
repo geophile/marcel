@@ -2187,6 +2187,34 @@ def test_struct():
 
 
 @timeit
+def test_cast():
+    TEST.run('gen 3 | cast str | (s: f"<<<{s}>>>")',
+             expected_out=['<<<0>>>', '<<<1>>>', '<<<2>>>'])
+    TEST.run('gen 3 | cast str | cast float',
+             expected_out=[0.0, 1.0, 2.0])
+    TEST.run('gen 3 | cast float float',
+             expected_out=[0.0, 1.0, 2.0])
+    TEST.run('gen 3 | (x: (x, x, x)) | cast float str',
+             expected_out=[(0.0, '0', 0),
+                           (1.0, '1', 1),
+                           (2.0, '2', 2)])
+    TEST.run('gen 1 | (x: (x, x, x)) | cast float str | (a, b, c: (type(a), type(b), type(c)))',
+             expected_out=[(float, str, int)])
+    TEST.run('((None, None, None)) | cast str float',
+             expected_out=[(None, None, None)])
+    # Errors
+    # Not defined
+    TEST.run('gen 1 | cast asdf',
+             expected_err='Not a valid casting function')
+    # A marcel function
+    TEST.run('gen 1 | cast map',
+             expected_out=[Error('map')])
+    # A python function
+    TEST.run('gen 1 | cast list',
+             expected_out=[Error('list')])
+
+
+@timeit
 def test_upload():
     with TestDir(TEST.env) as testdir:
         os.system(f'mkdir {testdir}/source')
@@ -2720,11 +2748,12 @@ def main_stable():
     test_json()
     test_workspaces()
     test_struct()
+    test_cast()
     test_bugs()
 
 
 def main_dev():
-    test_bug_252()
+    pass
 
 
 def main():

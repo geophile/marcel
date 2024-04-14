@@ -1,17 +1,23 @@
 What's New
 ----------
 
-This release contains a minor change to the startup script, which 
-is typically located in 
-`~/.config/marcel/startup.py`. Previously, you could include marcel
-commands to be run in the startup process (just before the first prompt),
-by assigning a string containing marcel commands to `RUN_ON_STARTUP`.
+This release contains a new operator, `cast`. When reading a CSV file,
+you often want to specify the types of the columns. For example, `scores.csv`
+might contain names and integer scores. In order to treat the scores as
+`int`s, you would have to do something like this:
 
-As of this release, `RUN_ON_STARTUP` processing is no longer supported. 
-Instead, pass the script to the `run_on_startup` function. You can call
-`run_on_startup` multiple times in your startup script. The scripts are
-not run immediately, but will be run in the order provided before
-the first prompt appears.
+```shell
+read -cs scores.csv | (name, score: (name, int(score))) | ...
+```
+
+The `cast` operator makes this a bit simpler:
+
+```shell
+read -cs scores.csv | cast str int | ...
+```
+
+This is pretty minor, but I found myself doing this sort of conversion
+so often, that I thought a simpler way was needed.
 
 Marcel
 ======

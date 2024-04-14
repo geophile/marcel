@@ -19,6 +19,7 @@ public = [
     'bash',
     'bg',
     'case',
+    'cast',
     'cd',
     'difference',
     'dirs',

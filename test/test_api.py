@@ -1779,6 +1779,34 @@ def test_struct():
 
 
 @timeit
+def test_cast():
+    TEST.run(test=lambda: run(gen(3) | cast(str) | map(lambda s: f"<<<{s}>>>")),
+             expected_out=['<<<0>>>', '<<<1>>>', '<<<2>>>'])
+    TEST.run(test=lambda: run(gen(3) | cast(str) | cast(float)),
+             expected_out=[0.0, 1.0, 2.0])
+    TEST.run(test=lambda: run(gen(3) | cast(float, float)),
+             expected_out=[0.0, 1.0, 2.0])
+    TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, x, x)) | cast(float, str)),
+             expected_out=[(0.0, '0', 0),
+                           (1.0, '1', 1),
+                           (2.0, '2', 2)])
+    TEST.run(test=lambda: run(gen(1) |
+                              map(lambda x: (x, x, x)) |
+                              cast(float, str) |
+                              map(lambda a, b, c: (type(a), type(b), type(c)))),
+             expected_out=[(float, str, int)])
+    TEST.run(test=lambda: run(map(lambda: (None, None, None)) | cast(str, float)),
+             expected_out=[(None, None, None)])
+    # Errors
+    # A marcel function
+    TEST.run(test=lambda: run(gen(1) | cast(map)),
+             expected_out=[Error('map')])
+    # A python function
+    TEST.run(test=lambda: run(gen(1) | cast(list)),
+             expected_out=[Error('list')])
+
+
+@timeit
 def test_bug_10():
     TEST.run(lambda: run(sort()), expected_err='cannot be the first operator in a pipeline')
     TEST.run(lambda: run(unique()), expected_err='cannot be the first operator in a pipeline')
@@ -2021,6 +2049,8 @@ def main_stable():
     test_env()
     test_pos()
     test_json()
+    test_struct()
+    test_cast()
     test_api_run()
     test_api_gather()
     test_api_first()

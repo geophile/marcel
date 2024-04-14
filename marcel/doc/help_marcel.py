@@ -42,15 +42,15 @@ as in other shells.
 
 {p,wrap=F}
     - {n:args}        - {n:bash}        - {n:bg}          - {n:case}
-    - {n:cd}          - {n:difference}  - {n:dirs}        - {n:edit}
-    - {n:env}         - {n:exit}        - {n:expand}      - {n:fg}          
-    - {n:filter}      - {n:gen}         - {n:head}        - {n:help}  
-    - {n:history}     - {n:import}      - {n:intersect}   - {n:jobs}
-    - {n:join}        - {n:load}        - {n:ls}          - {n:map} 
-    - {n:popd}        - {n:ps}          - {n:pushd}       - {n:pwd}
-    - {n:red}         - {n:remote}      - {n:reverse}     - {n:run}
-    - {n:select}      - {n:sort}        - {n:sql}         - {n:squish}
-    - {n:store}       - {n:sudo}        - {n:tail}        - {n:timer}
-    - {n:unique}      - {n:union}       - {n:version}     - {n:window} 
-    - {n:write}       - {n:ws}
+    - {n:cast}        - {n:cd}          - {n:difference}  - {n:dirs}
+    - {n:edit}        - {n:env}         - {n:exit}        - {n:expand}
+    - {n:fg}          - {n:filter}      - {n:gen}         - {n:head}
+    - {n:help}        - {n:history}     - {n:import}      - {n:intersect}
+    - {n:jobs}        - {n:join}        - {n:load}        - {n:ls}
+    - {n:map}         - {n:popd}        - {n:ps}          - {n:pushd}
+    - {n:pwd}         - {n:red}         - {n:remote}      - {n:reverse}
+    - {n:run}         - {n:select}      - {n:sort}        - {n:sql}
+    - {n:squish}      - {n:store}       - {n:sudo}        - {n:tail}
+    - {n:timer}       - {n:unique}      - {n:union}       - {n:version}
+    - {n:window}      - {n:write}       - {n:ws}
 '''
