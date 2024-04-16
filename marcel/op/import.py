@@ -19,15 +19,15 @@ import marcel.exception
 
 
 HELP = '''
-{L,wrap=F}import [[--as|-a] NAME] MODULE 
-{L,wrap=F}import [[--as|-a] NAME] MODULE SYMBOL 
+{L,wrap=F}import [-a|--as NAME] MODULE 
+{L,wrap=F}import [-a|--as NAME] MODULE SYMBOL 
 {L,wrap=F}import MODULE *
 
 {L,indent=4:28}{r:MODULE}                  Name of the module to import.
 
 {L,indent=4:28}{r:SYMBOL}                  Name of the symbol in {r:MODULE} to import.
 
-{L,indent=4:28}{r:NAME}                    Name to assign to the imported symbol.
+{L,indent=4:28}{r:-a}, {r:--as} {r:NAME}           Name to assign to the imported symbol.
 
 Imports symbols into the marcel namespace, so that they can be used in marcel functions. The {r:import} operator
 provides some but not all of the capabilities of Python's {n:import} statement. In some cases, you may need

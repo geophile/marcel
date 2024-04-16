@@ -20,7 +20,7 @@ import marcel.exception
 HELP = '''
 {L,wrap=F}gen [-p|--pad PAD] [COUNT [START]]
 
-{L,indent=4:28}{r:-p,} {r:--pad}               Specifies the width of the padded output.
+{L,indent=4:28}{r:-p}, {r:--pad}               Specifies the width of the padded output.
 
 {L,indent=4:28}{r:COUNT}                   The number of integers to be written to output. 
 

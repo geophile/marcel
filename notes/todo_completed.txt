@@ -1102,3 +1102,10 @@ workspaces is a bad idea. What if someone wants a directory named
 ----------------------------------------------------------------------
 
 Replace RUN_ON_STARTUP with function call, e.g. run('''...''')
+
+
+----------------------------------------------------------------------
+
+read -c should be able to specify types.
+
+(cast op)
