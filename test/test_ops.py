@@ -1078,19 +1078,36 @@ def test_sql():
 
 @timeit
 def test_import():
-    TEST.run('import math')
+    # import MODULE
+    TEST.run(test='import math',
+             verification='env math | (k, v: k)',
+             expected_out=['math'])
     TEST.run('(math.pi)', expected_out=[math.pi])
     TEST.run('(math.e)', expected_out=[math.e])
-    TEST.run('import math pi')
-    TEST.run('(pi)', expected_out=[math.pi])
-    TEST.run('import sys *')
-    TEST.run('(version)', expected_out=[sys.version])
-    TEST.run('import sys')
-    TEST.run('(version)', expected_out=[sys.version])
-    TEST.run('import os')
-    TEST.run('(os.popen)', expected_out=[os.popen])
-    # Delete version var so that it does not mask the version op.
-    TEST.run('env -d version | select (*_: False)')
+    TEST.run(test='import nosuchmodule',
+             expected_err='nosuchmodule not found')
+    # import --as NAME MODULE
+    TEST.run(test='import --as PATHLIB pathlib',
+             verification='env PATHLIB | (k, v: k)',
+             expected_out=['PATHLIB'])
+    TEST.run(test='import --as 123badname pathlib',
+             expected_err='not a valid identifier')
+    # import MODULE SYMBOL
+    TEST.run(test='import math pi',
+             verification='(pi)',
+             expected_out=[math.pi])
+    TEST.run(test='import math nosuchsymbol',
+             expected_err='nosuchsymbol is not defined')
+    # import --as NAME MODULE SYMBOL
+    TEST.run(test='import --as PI math pi',
+             verification='(PI)',
+             expected_out=[math.pi])
+    TEST.run(test='import --as 123oops math pi',
+             expected_err='not a valid identifier')
+    # import MODULE *
+    TEST.run(test='import sys *',
+             verification='(version)',
+             expected_out=[sys.version])
     TEST.reset_environment()
 
 

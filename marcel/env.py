@@ -365,17 +365,17 @@ class EnvironmentScript(Environment):
     # and handle reimportation.
     class Import(object):
 
-        def __init__(self, module_name, symbol=None, rename=None):
+        def __init__(self, module_name, symbol, name):
             self.module_name = module_name
             self.symbol = symbol
-            self.rename = rename
+            self.name = name
 
         def __repr__(self):
             buffer = [f'import({self.module_name}']
             if self.symbol is not None:
                 buffer.append(f' {self.symbol}')
-            if self.rename is not None:
-                buffer.append(f' as {self.rename}')
+            if self.name is not None:
+                buffer.append(f' as {self.name}')
             buffer.append(')')
             return ''.join(buffer)
 
@@ -451,7 +451,7 @@ class EnvironmentScript(Environment):
         # Do the imports before compilation, which may depend on the imports.
         imports = persistent_state['imports']
         for i in imports:
-            self.import_module(i.module_name, i.symbol, i.rename)
+            self.import_module(i.module_name, i.symbol, i.name)
         # Restore vars, recompiling as necessary.
         saved_vars = persistent_state['namespace']
         self.namespace.update(saved_vars)
@@ -491,19 +491,22 @@ class EnvironmentScript(Environment):
     def mark_possibly_changed(self, var):
         self.var_handler.add_changed_var(var)
 
-    def import_module(self, module_name, symbol=None, rename=None):
-        self.imports.append(EnvironmentScript.Import(module_name, symbol, rename))
+    def import_module(self, module_name, symbol, name):
+        self.imports.append(EnvironmentScript.Import(module_name, symbol, name))
         # Exceptions handle by import op
         module = importlib.import_module(module_name)
         if symbol is None:
-            self.var_handler.setvar(module_name, module, save=False)
+            if name is None:
+                name = module_name
+            self.var_handler.setvar(name, module, save=False)
         elif symbol == '*':
             for name, value in module.__dict__.items():
                 if not name.startswith('_'):
                     self.var_handler.setvar(name, value, save=False)
         else:
             value = module.__dict__[symbol]
-            name = rename if rename is not None else symbol
+            if name is None:
+                name = symbol
             self.var_handler.setvar(name, value, save=False)
 
     def db(self, name):

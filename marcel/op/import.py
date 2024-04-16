@@ -19,9 +19,9 @@ import marcel.exception
 
 
 HELP = '''
-{L,wrap=F}import MODULE
+{L,wrap=F}import [[--as|-a] NAME] MODULE 
+{L,wrap=F}import [[--as|-a] NAME] MODULE SYMBOL 
 {L,wrap=F}import MODULE *
-{L,wrap=F}import MODULE SYMBOL [NAME]
 
 {L,indent=4:28}{r:MODULE}                  Name of the module to import.
 
@@ -29,31 +29,32 @@ HELP = '''
 
 {L,indent=4:28}{r:NAME}                    Name to assign to the imported symbol.
 
-Imports symbols into the marcel namespace, so that they can be used in marcel functions. The import operator
+Imports symbols into the marcel namespace, so that they can be used in marcel functions. The {r:import} operator
 provides some but not all of the capabilities of Python's {n:import} statement. In some cases, you may need
 to use multiple invocations of the operator where one statement would have sufficed.
 
 {r:import MODULE} imports {r:MODULE} into the marcel namespace. Symbols within that module need to be qualified.
 I.e., it has the same effect as the Python statement {n:import MODULE}.
 
-{r:import MODULE *} imports all of the symbols inside {r:MODULE}, placing those symbols in the marcel
-namespace. This is like running the Python statement {n:from MODULE import *}.
-
 {r:import MODULE SYMBOL} imports just {r:SYMBOL} from {r:MODULE}, place it in the marcel namespace.
 This is like running the Python statement {n:from MODULE import SYMBOL}.
 
-{r:import MODULE SYMBOL NAME} imports just {r:SYMBOL}, but places it in the marcel namespace under {r:NAME}.
-I.e., it is like running {n:from MODULE import SYMBOL as NAME}.
+{r:--as} changes the name of the symbol being imported. So {n:import MODULE --as NAME} is like the Python
+statement {n:import MODULE as NAME}, and {n:import MODULE SYMBOL --as NAME} is like
+{n:from MODULE import SYMBOL as NAME}
+
+{r:import MODULE *} imports all of the symbols inside {r:MODULE}, placing those symbols in the marcel
+namespace. This is like running the Python statement {n:from MODULE import *}.
 '''
 
 
 class ImportArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
-        super().__init__('head', env)
+        super().__init__('import', env)
+        self.add_flag_one_value('as', '-a', '--as', target='name')
         self.add_anon('module')
         self.add_anon('symbol', default=None)
-        self.add_anon('name', default=None)
         self.validate()
 
 
@@ -66,33 +67,33 @@ class Import(marcel.core.Op):
         self.name = None
 
     def __repr__(self):
-        buffer = [f'import({self.module}']
+        buffer = []
+        if self.name:
+            buffer.append(f', --as {self.name}')
+        buffer.append(f'import({self.module}')
         if self.symbol:
             buffer.append(f', {self.symbol}')
-        if self.name:
-            buffer.append(f', {self.name}')
         buffer.append(')')
         return ''.join(buffer)
 
     # AbstractOp
     
     def setup(self, env):
-        if self.symbol and not (self.symbol == '*' or self.symbol.isidentifier()):
+        wildcard = self.symbol == '*'
+        if self.symbol and not (wildcard or self.symbol.isidentifier()):
             raise marcel.exception.KillCommandException(f'symbol must be * or a valid identifier: {self.symbol}')
         if self.name and not self.name.isidentifier():
             raise marcel.exception.KillCommandException(f'name is not a valid identifier: {self.name}')
+        if wildcard and self.name is not None:
+            raise marcel.exception.KillCommandException(f'Cannot specify --as value when importing *.')
 
     def run(self, env):
         try:
-            if self.symbol is None:
-                env.import_module(self.module)
-            else:
-                try:
-                    env.import_module(self.module, self.symbol, self.name)
-                except KeyError:
-                    self.non_fatal_error(message=f'{self.symbol} is not defined in {self.module}')
+            env.import_module(self.module, self.symbol, self.name)
         except ModuleNotFoundError:
-            self.fatal_error(env, None, f'Module {self.module} not found.')
+            raise marcel.exception.KillCommandException(f'Module {self.module} not found.')
+        except KeyError:
+            raise marcel.exception.KillCommandException(f'{self.symbol} is not defined in {self.module}')
 
     def must_be_first_in_pipeline(self):
         return True

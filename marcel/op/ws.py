@@ -355,7 +355,7 @@ class WsRename(WsImpl):
         super().__init__(op, op.name)
 
     def __repr__(self):
-        return f'ws(rename {self.op.rename} {self.op.name})'
+        return f'ws(rename {self.op.name} {self.op.name})'
 
     def setup(self, env):
         self.check_anon_arg_present('NEW_NAME')

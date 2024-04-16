@@ -5062,3 +5062,46 @@ But this provides no output:
 
 
 M 0.24.3 jao@loon ~/.local/share/marcel/__DEFAULT_WORKSPACE__$ gen 2999 | (x: random.random()) | args (| x, y, c: ((int(x*100), int(y*100), int(c*3))) |) 
+
+----------------------------------------------------------------------
+
+FIXED
+
+253. Crash on bad import
+
+M 0.24.5 h5 jao@loon dev5$ import numpy np
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/marcel/op/import.py", line 91, in run
+    env.import_module(self.module, self.symbol, self.name)
+  File "/home/jao/git/marcel/marcel/env.py", line 505, in import_module
+    value = module.__dict__[symbol]
+KeyError: 'np'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 388, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 381, in main
+    main_interactive_run(workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 335, in main_interactive_run
+    main.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 212, in run
+    self.parse_and_run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 140, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 196, in execute_command
+    command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 231, in execute
+    self.pipeline.run(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 357, in run
+    self.ops[0].run(env)
+  File "/home/jao/git/marcel/marcel/op/import.py", line 93, in run
+    self.non_fatal_error(message=f'{self.symbol} is not defined in {self.module}')
+TypeError: Op.non_fatal_error() missing 1 required positional argument: 'env'
+
+ALSO: This crash leaves an owned .WORKSPACE file.
