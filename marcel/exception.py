@@ -76,6 +76,13 @@ class ExitException(BaseException):
     pass
 
 
+class ImportException(BaseException):
+
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
+
+
 def _format_input_for_reporting(command_input, buffer):
     if isinstance(command_input, list):
         buffer.append(str(tuple(command_input)))

@@ -752,3 +752,13 @@ Migration test
 ----------------------------------------------------------------------
 
 Prettyprint pipelines. Use it for rendering pipeline code.
+
+----------------------------------------------------------------------
+
+Need a something to completely wipe out a workspace from the command
+line. Or maybe on creation, when detecting a previously partially
+cleaned up workspace. 
+
+----------------------------------------------------------------------
+
+Should extend Exception, not BaseException: https://docs.python.org/3/library/exceptions.html#base-classes

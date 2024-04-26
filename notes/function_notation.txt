@@ -1,6 +1,9 @@
+Assigning lambdas
+
+
 Here is a function:
 
-    (lambda x: x + 1)g
+    (lambda x: x + 1)
 
 The lambda can be omitted, so this works:
 
@@ -21,6 +24,8 @@ This is handy for examining vars, e.g.
 The focus here is on assignment statements. These do the same thing:
 
     ELEVEN = (lambda: 5 + 6)
+
+    ELEVEN = (: 5 + 6)
 
     ELEVEN = (5 + 6)
 

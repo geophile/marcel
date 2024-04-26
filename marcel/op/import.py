@@ -90,10 +90,8 @@ class Import(marcel.core.Op):
     def run(self, env):
         try:
             env.import_module(self.module, self.symbol, self.name)
-        except ModuleNotFoundError:
-            raise marcel.exception.KillCommandException(f'Module {self.module} not found.')
-        except KeyError:
-            raise marcel.exception.KillCommandException(f'{self.symbol} is not defined in {self.module}')
+        except marcel.exception.ImportException as e:
+            raise marcel.exception.KillCommandException(e.message)
 
     def must_be_first_in_pipeline(self):
         return True

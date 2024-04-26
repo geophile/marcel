@@ -379,6 +379,7 @@ class EnvironmentScript(Environment):
             buffer.append(')')
             return ''.join(buffer)
 
+
     def __init__(self, locations, workspace, trace=None):
         super().__init__(marcel.nestednamespace.NestedNamespace(), trace)
         assert workspace is not None
@@ -451,7 +452,10 @@ class EnvironmentScript(Environment):
         # Do the imports before compilation, which may depend on the imports.
         imports = persistent_state['imports']
         for i in imports:
-            self.import_module(i.module_name, i.symbol, i.name)
+            try:
+                self.import_module(i.module_name, i.symbol, i.name)
+            except marcel.exception.ImportException as e:
+                print(f'Unable to import {i.module_name}.', file=sys.stderr)
         # Restore vars, recompiling as necessary.
         saved_vars = persistent_state['namespace']
         self.namespace.update(saved_vars)
@@ -460,7 +464,8 @@ class EnvironmentScript(Environment):
                 try:
                     value.recompile(self)
                 except Exception as e:
-                    print(f'Unable to restore {var} = {value} because compilation failed: {e}')
+                    print(f'Unable to restore {var} = {value} because compilation failed. '
+                          f'Removing {var} from environment: {e}', file=sys.stderr)
         self.var_handler.add_save_vars(*saved_vars)
 
     def never_mutable(self):
@@ -492,22 +497,26 @@ class EnvironmentScript(Environment):
         self.var_handler.add_changed_var(var)
 
     def import_module(self, module_name, symbol, name):
-        self.imports.append(EnvironmentScript.Import(module_name, symbol, name))
-        # Exceptions handle by import op
-        module = importlib.import_module(module_name)
-        if symbol is None:
-            if name is None:
-                name = module_name
-            self.var_handler.setvar(name, module, save=False)
-        elif symbol == '*':
-            for name, value in module.__dict__.items():
-                if not name.startswith('_'):
-                    self.var_handler.setvar(name, value, save=False)
-        else:
-            value = module.__dict__[symbol]
-            if name is None:
-                name = symbol
-            self.var_handler.setvar(name, value, save=False)
+        try:
+            module = importlib.import_module(module_name)
+            if symbol is None:
+                if name is None:
+                    name = module_name
+                self.var_handler.setvar(name, module, save=False)
+            elif symbol == '*':
+                for name, value in module.__dict__.items():
+                    if not name.startswith('_'):
+                        self.var_handler.setvar(name, value, save=False)
+            else:
+                value = module.__dict__[symbol]
+                if name is None:
+                    name = symbol
+                self.var_handler.setvar(name, value, save=False)
+            self.imports.append(EnvironmentScript.Import(module_name, symbol, name))
+        except ModuleNotFoundError:
+            raise marcel.exception.ImportException(f'Module {module_name} not found.')
+        except KeyError:
+            raise marcel.exception.ImportException(f'{symbol} is not defined in {module_name}')
 
     def db(self, name):
         db = None
