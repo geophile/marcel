@@ -926,4 +926,19 @@ record history, does it?
 
 ----------------------------------------------------------------------
 
-254.
+254. Pipeline saved in ws can't be recompiled
+
+(cs135_env) jao@loon:~$ marcel pb
+Unable to restore look = f: read -cs (f)         | (e, l, tr, va, *_: (e, tr, va))         | cast float float float         | graph2 because compilation failed. Removing look from environment: 
+M 0.24.5 pb jao@loon $ look = (| f: read -cs (f) \
+        | (e, l, tr, va, *_: (e, tr, va)) \
+        | cast float float float \
+        | graph2 |)
+M 0.24.5 pb jao@loon $ 
+(cs135_env) jao@loon:~$ marcel pb
+Unable to restore look = f: read -cs (f)         | (e, l, tr, va, *_: (e, tr, va))         | cast float float float         | graph2 because compilation failed. Removing look from environment: 
+M 0.24.5 pb jao@loon $ 
+
+----------------------------------------------------------------------
+
+256.

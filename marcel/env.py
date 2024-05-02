@@ -455,7 +455,7 @@ class EnvironmentScript(Environment):
             try:
                 self.import_module(i.module_name, i.symbol, i.name)
             except marcel.exception.ImportException as e:
-                print(f'Unable to import {i.module_name}.', file=sys.stderr)
+                print(f'Unable to import {i.module_name}: e.message', file=sys.stderr)
         # Restore vars, recompiling as necessary.
         saved_vars = persistent_state['namespace']
         self.namespace.update(saved_vars)
