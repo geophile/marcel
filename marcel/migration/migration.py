@@ -44,6 +44,6 @@ def migrate():
 
     locations = marcel.locations.Locations()
     iv = installed_version(locations)
-    if iv and iv < '0.24':
+    if iv != PREMIGRATION and iv < '0.24':
         marcel.migration.migration024.migrate(locations)
-    update_version_file()
+        update_version_file()
