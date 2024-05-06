@@ -5105,3 +5105,45 @@ Traceback (most recent call last):
 TypeError: Op.non_fatal_error() missing 1 required positional argument: 'env'
 
 ALSO: This crash leaves an owned .WORKSPACE file.
+
+
+----------------------------------------------------------------------
+
+FIXED
+
+254. First startup of marcel is failing
+
+    (base) jao@loon:~$ marcel
+    Traceback (most recent call last):
+      File "/home/jao/miniconda3/lib/python3.10/shutil.py", line 816, in move
+        os.rename(src, real_dst)
+    FileNotFoundError: [Errno 2] No such file or directory: '/home/jao/.config/marcel/startup.py' -> '/home/jao/.config/marcel/__DEFAULT_WORKSPACE__/startup.py'
+    
+    During handling of the above exception, another exception occurred:
+    
+    Traceback (most recent call last):
+      File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+        return _run_code(code, main_globals, None,
+      File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 86, in _run_code
+        exec(code, run_globals)
+      File "/home/jao/git/marcel/marcel/main.py", line 388, in <module>
+        main()
+      File "/home/jao/git/marcel/marcel/main.py", line 376, in main
+        marcel.migration.migration.migrate()
+      File "/home/jao/git/marcel/marcel/migration/migration.py", line 48, in migrate
+        marcel.migration.migration024.migrate(locations)
+      File "/home/jao/git/marcel/marcel/migration/migration024.py", line 83, in migrate
+        shutil.move(config_dir_path_old / 'startup.py', config_dir_path)
+      File "/home/jao/miniconda3/lib/python3.10/shutil.py", line 836, in move
+        copy_function(src, real_dst)
+      File "/home/jao/miniconda3/lib/python3.10/shutil.py", line 434, in copy2
+        copyfile(src, dst, follow_symlinks=follow_symlinks)
+      File "/home/jao/miniconda3/lib/python3.10/shutil.py", line 254, in copyfile
+        with open(src, 'rb') as fsrc:
+    FileNotFoundError: [Errno 2] No such file or directory: '/home/jao/.config/marcel/startup.py'
+
+main runs migration, there is no previous installation, so
+PREMIGRATION applies, and then the attempt to upgrade fails,
+attempting to move ~/.config/marcel/startup.py to inside
+__DEFAULT_WORKSPACE__, none of which exists.
+

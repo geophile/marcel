@@ -923,7 +923,3 @@ M 0.22.2 jao@loon ~$
 
 Ws in use interactively. Should that block script use? Script doesn't
 record history, does it?
-
-----------------------------------------------------------------------
-
-254.

@@ -79,6 +79,11 @@ class Locations(object):
     def version_file_path(self):
         return Locations.marcel_dir(self.config_base) / 'VERSION'
 
+    def fresh_install(self):
+        # Don't rely on Locations.marcel_dir(self.config_base), because it will create .config/marcel if it
+        # doesn't exist. Right now, we're just trying to see if it does exist, to guide startup and migration.
+        return not (self.config_base / 'marcel').exists()
+
     @staticmethod
     def marcel_dir(base):
         dir = base / 'marcel'
