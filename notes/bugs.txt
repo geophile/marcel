@@ -941,4 +941,43 @@ M 0.24.5 pb jao@loon $
 
 ----------------------------------------------------------------------
 
-256.
+256. Reservoir files disappeared!
+
+They seem to disappear on exiting marcel.
+
+M 0.24.5 pb jao@loon data_movie_lens_100k$ movies_info <$
+Process Process-1:
+Traceback (most recent call last):
+  File "/home/jao/miniconda3/envs/cs135_env/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/jao/miniconda3/envs/cs135_env/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env, True)
+  File "/home/jao/git/marcel/marcel/core.py", line 226, in execute
+    self.pipeline.setup(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 352, in setup
+    op.setup(env)
+  File "/home/jao/git/marcel/marcel/op/load.py", line 99, in setup
+    self.reader = iter(self.picklefile)
+  File "/home/jao/git/marcel/marcel/picklefile.py", line 42, in __iter__
+    return self.reader()
+  File "/home/jao/git/marcel/marcel/picklefile.py", line 53, in reader
+    reader = Reader(self)
+  File "/home/jao/git/marcel/marcel/picklefile.py", line 98, in __init__
+    self.file = open(owner.path, 'rb')
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jao/.local/share/marcel/pb/reservoirs/movies_info.pickle'
+
+----------------------------------------------------------------------
+
+257. Files not being found?!
+
+Is diff working with a different idea of current directory?
+
+M 0.24.5 pb jao@loon src_starter$ diff recommendations_2.csv recommendations_10.csv 
+Error: diff: recommendations_2.csv: No such file or directory
+Error: diff: recommendations_10.csv: No such file or directory
+M 0.24.5 pb jao@loon src_starter$ ls rec*
+-rw-rw-r--     jao     jao  179984  2024 May 05 11:47:31  recommendations_10.csv
+-rw-rw-r--     jao     jao  179984  2024 May 05 11:46:49  recommendations_2.csv
+-rw-rw-r--     jao     jao  179984  2024 May 04 21:28:43  recommendations_50.csv
