@@ -752,3 +752,18 @@ Migration test
 ----------------------------------------------------------------------
 
 Prettyprint pipelines. Use it for rendering pipeline code.
+
+----------------------------------------------------------------------
+
+Clean up startup and migration. 
+
+Fresh start now works (post-PREMIGRATION). Seems like cleanup is needed. 
+
+And broken installs need some attention, e.g. .WORKSPACE file is
+missing. 
+
+- Need to check structure.
+
+- Clean up files associated with non-existent pids?
+
+- If problem is found: what then?
