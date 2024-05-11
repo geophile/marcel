@@ -2643,6 +2643,13 @@ def test_bug_252():
                            Error('bad operand type')])
 
 
+@timeit
+def test_bug_258():
+    TEST.run(test='cd /',
+             verification='pwd | (p: str(p))',
+             expected_out=['/'])
+
+
 # Generalization of bug 195
 @timeit
 def test_pipeline_vars():
@@ -2719,6 +2726,7 @@ def test_bugs():
     test_bug_230()
     test_bug_247()
     test_bug_252()
+    test_bug_258()
 
 
 def main_stable():

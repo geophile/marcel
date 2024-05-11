@@ -5141,3 +5141,11 @@ Traceback (most recent call last):
   File "/home/jao/miniconda3/envs/cs135_env/lib/python3.10/pathlib.py", line 1032, in glob
     raise NotImplementedError("Non-relative patterns are unsupported")
 NotImplementedError: Non-relative patterns are unsupported
+
+----------------------------------------------------------------------
+
+FIXED
+
+258. cd / -> Too many paths
+
+This is github issue 5.
