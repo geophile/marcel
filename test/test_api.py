@@ -1989,6 +1989,13 @@ def test_bug_252():
                            Error('bad operand type')])
 
 
+@timeit
+def test_bug_258():
+    TEST.run(test=lambda: run(cd('/')),
+             verification=lambda: run(pwd() | map(lambda p: str(p))),
+             expected_out=['/'])
+
+
 # For bugs that aren't specific to a single op.
 @timeit
 def test_bugs():
@@ -2003,6 +2010,7 @@ def test_bugs():
     test_bug_230()
     test_bug_247()
     test_bug_252()
+    test_bug_258()
 
 
 def main_slow_tests():

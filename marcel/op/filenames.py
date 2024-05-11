@@ -34,6 +34,8 @@ File = marcel.object.file.File
 
 class Filenames(object):
 
+    ROOT = pathlib.Path('/')
+
     def __init__(self, env, filenames):
         self.filenames = filenames
         self.current_dir = env.dir_state().current_dir()
@@ -46,15 +48,18 @@ class Filenames(object):
         for path in paths:
             # Proceed as if path is a glob pattern, but this works for non-globs too.
             path_str = path.as_posix()
-            glob_base, glob_pattern = ((pathlib.Path('/'), path_str[1:])
-                                       if path.is_absolute() else
-                                       (self.current_dir, path_str))
-            for root in (glob_base.glob(glob_pattern)
-                         if len(glob_pattern) > 0 else
-                         glob_base.iterdir()):
-                if root not in roots_set:
-                    roots_set.add(root)
-                    roots.append(root)
+            if path_str == '/':
+                roots.append(Filenames.ROOT)
+            else:
+                glob_base, glob_pattern = ((Filenames.ROOT, path_str[1:])
+                                           if path.is_absolute() else
+                                           (self.current_dir, path_str))
+                for root in (glob_base.glob(glob_pattern)
+                             if len(glob_pattern) > 0 else
+                             glob_base.iterdir()):
+                    if root not in roots_set:
+                        roots_set.add(root)
+                        roots.append(root)
         return roots
 
     def _normalize_paths(self):
