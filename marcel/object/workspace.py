@@ -118,11 +118,14 @@ class Workspace(marcel.object.renderable.Renderable):
         self.create_on_disk(env, initial_config_contents)
 
     def open(self, env):
-        if self.lock_workspace(env):
-            self.read_properties(env)
-            self.read_environment(env)
+        if self.exists(env):
+            if self.lock_workspace(env):
+                self.read_properties(env)
+                self.read_environment(env)
+            else:
+                self.cannot_lock_workspace()
         else:
-            self.cannot_lock_workspace()
+            self.does_not_exist()
 
     def close(self, env, restart):
         # Relocking is okay, so this is a convenient way to test that the workspace is locked.
@@ -148,26 +151,29 @@ class Workspace(marcel.object.renderable.Renderable):
         self.write_properties(env)
 
     def delete(self, env):
-        if self.lock_workspace(env):
-            locations = env.locations
-            # config directory
-            # Use missing_ok = True to enable deletion of damaged workspaces, missing files.
-            owned_marker_path = self.marker.owned(env)
-            assert owned_marker_path is not None, self
-            owned_marker_path.unlink(missing_ok=False)
-            locations.config_file_path(self).unlink(missing_ok=True)
-            locations.config_dir_path(self).rmdir()
-            # data directory
-            locations.history_file_path(self).unlink(missing_ok=True)
-            locations.workspace_properties_file_path(self).unlink(missing_ok=True)
-            locations.workspace_environment_file_path(self).unlink(missing_ok=True)
-            reservoir_dir = locations.reservoir_dir_path(self)
-            for reservoir_file in reservoir_dir.iterdir():
-                reservoir_file.unlink()
-            reservoir_dir.rmdir()
-            locations.data_dir_path(self).rmdir()
+        if self.exists(env):
+            if self.lock_workspace(env):
+                locations = env.locations
+                # config directory
+                # Use missing_ok = True to enable deletion of damaged workspaces, missing files.
+                owned_marker_path = self.marker.owned(env)
+                assert owned_marker_path is not None, self
+                owned_marker_path.unlink(missing_ok=False)
+                locations.config_file_path(self).unlink(missing_ok=True)
+                locations.config_dir_path(self).rmdir()
+                # data directory
+                locations.history_file_path(self).unlink(missing_ok=True)
+                locations.workspace_properties_file_path(self).unlink(missing_ok=True)
+                locations.workspace_environment_file_path(self).unlink(missing_ok=True)
+                reservoir_dir = locations.reservoir_dir_path(self)
+                for reservoir_file in reservoir_dir.iterdir():
+                    reservoir_file.unlink()
+                reservoir_dir.rmdir()
+                locations.data_dir_path(self).rmdir()
+            else:
+                self.cannot_lock_workspace()
         else:
-            self.cannot_lock_workspace()
+            self.does_not_exist()
 
     def home(self):
         # Older workspaces won't have a home property
@@ -274,6 +280,9 @@ class Workspace(marcel.object.renderable.Renderable):
     def cannot_lock_workspace(self):
         raise marcel.exception.KillCommandException(f'Workspace {self.name} is in use by another process.')
 
+    def does_not_exist(self):
+        raise marcel.exception.KillCommandException(f'There is no workspace named {self.name}.')
+
     def read_properties(self, env):
         assert not self.is_default()
         with open(env.locations.workspace_properties_file_path(self), 'rb') as properties_file:
@@ -305,7 +314,10 @@ class Workspace(marcel.object.renderable.Renderable):
         if self.marker.unowned(env).exists():
             return None
         # First get rid of any markers from processes that don't exist. Shouldn't happend, but still.
-        for file in env.locations.config_dir_path(self).iterdir():
+        config_dir_path = env.locations.config_dir_path(self)
+        if not config_dir_path.exists():
+            return None
+        for file in config_dir_path.iterdir():
             if file.name.startswith(Marker.FILENAME_ROOT) and len(file.name) > len(Marker.FILENAME_ROOT):
                 if not marcel.util.process_exists(Workspace.marker_filename_pid(file.name)):
                     file.unlink()

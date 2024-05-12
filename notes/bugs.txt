@@ -930,12 +930,23 @@ record history, does it?
 
 They seem to disappear on exiting marcel.
 
-M 0.24.5 pb jao@loon data_movie_lens_100k$ movies_info <$
+M 0.27.1 jao@loon ~/git/marcel/test$ ws -n test
+Workspace(test)
+M 0.27.1 test jao@loon /home/jao/git/marcel/test$ gen 5 >$ g
+M 0.27.1 test jao@loon /home/jao/git/marcel/test$ g <$
+0
+1
+2
+3
+4
+M 0.27.1 test jao@loon /home/jao/git/marcel/test$ 
+jao@loon:~/git/marcel/test$ marcel test
+M 0.27.1 test jao@loon /home/jao/git/marcel/test$ g <$
 Process Process-1:
 Traceback (most recent call last):
-  File "/home/jao/miniconda3/envs/cs135_env/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
     self.run()
-  File "/home/jao/miniconda3/envs/cs135_env/lib/python3.10/multiprocessing/process.py", line 108, in run
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
     self._target(*self._args, **self._kwargs)
   File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
     child_namespace_changes = command.execute(self.env, True)
@@ -951,4 +962,4 @@ Traceback (most recent call last):
     reader = Reader(self)
   File "/home/jao/git/marcel/marcel/picklefile.py", line 98, in __init__
     self.file = open(owner.path, 'rb')
-FileNotFoundError: [Errno 2] No such file or directory: '/home/jao/.local/share/marcel/pb/reservoirs/movies_info.pickle'
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jao/.local/share/marcel/test/reservoirs/g.pickle'

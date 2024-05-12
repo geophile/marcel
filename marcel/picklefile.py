@@ -18,6 +18,8 @@ import pathlib
 import os
 import time
 
+import marcel.util
+
 
 class PickleFile:
 
