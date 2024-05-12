@@ -5149,6 +5149,8 @@ __DEFAULT_WORKSPACE__, none of which exists.
 
 ----------------------------------------------------------------------
 
+FIXED
+
 254. Pipeline saved in ws can't be recompiled
 
 (cs135_env) jao@loon:~$ marcel pb
