@@ -952,17 +952,3 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/picklefile.py", line 98, in __init__
     self.file = open(owner.path, 'rb')
 FileNotFoundError: [Errno 2] No such file or directory: '/home/jao/.local/share/marcel/pb/reservoirs/movies_info.pickle'
-
-----------------------------------------------------------------------
-
-257. Files not being found?!
-
-Is diff working with a different idea of current directory?
-
-M 0.24.5 pb jao@loon src_starter$ diff recommendations_2.csv recommendations_10.csv 
-Error: diff: recommendations_2.csv: No such file or directory
-Error: diff: recommendations_10.csv: No such file or directory
-M 0.24.5 pb jao@loon src_starter$ ls rec*
--rw-rw-r--     jao     jao  179984  2024 May 05 11:47:31  recommendations_10.csv
--rw-rw-r--     jao     jao  179984  2024 May 05 11:46:49  recommendations_2.csv
--rw-rw-r--     jao     jao  179984  2024 May 04 21:28:43  recommendations_50.csv

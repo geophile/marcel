@@ -15,6 +15,7 @@
 
 import getpass
 import importlib
+import os
 import pathlib
 import socket
 import sys
@@ -480,6 +481,8 @@ class EnvironmentScript(Environment):
             # This assigns env to the var's value, which should be a compilable. This will allow compilation
             # to occur when needed.
             self.getvar(var)
+        # Reflect current dir in OS. I think this fixes bug 257.
+        os.chdir(self.getvar('PWD'))
 
     def never_mutable(self):
         vars = set(super().never_mutable())
