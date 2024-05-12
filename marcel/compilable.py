@@ -45,6 +45,9 @@ class Compilable(object):
     def compile(self):
         assert False
 
+    def setenv(self, env):
+        self.env = env
+
     @staticmethod
     def for_function(env, source, function):
         assert callable(function), function

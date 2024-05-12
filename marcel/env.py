@@ -125,6 +125,7 @@ class VarHandlerStartup(object):
             value = self.env.namespace[var]
             self.vars_read.add(var)
             if isinstance(value, marcel.compilable.Compilable):
+                value.setenv(self.env)  # Needed for compilatoin
                 value = value.value()
         except KeyError:
             value = None
@@ -222,6 +223,8 @@ class Environment(object):
         self.namespace = namespace
         # Directory stack, including current directory.
         self.directory_state = None
+        # Compilables need to be compiled in order of creation. (Locating them in namespace does not preserve order.)
+        self.compilables = []  # list of var names
         # Source of ops and arg parsers.
         self.op_modules = marcel.opmodule.import_op_modules()
         # Lax var handling for now. Check immutability after startup is complete.
@@ -272,12 +275,6 @@ class Environment(object):
     def setvar(self, var, value):
         self.var_handler.setvar(var, value)
 
-    def delvar(self, var):
-        return self.var_handler.delvar(var)
-
-    def vars(self):
-        return self.var_handler.vars()
-
     # Should only call this from the assign op, when assigning something that is compilable,
     # i.e., something with source.
     def setvar_with_source(self, var, value, source):
@@ -285,7 +282,14 @@ class Environment(object):
             value = Compilable.for_function(self, f'({source})', value)
         elif type(value) is marcel.core.PipelineExecutable:
             value = Compilable.for_pipeline(self, source, value)
+        self.compilables.append(var)
         self.setvar(var, value)
+
+    def delvar(self, var):
+        return self.var_handler.delvar(var)
+
+    def vars(self):
+        return self.var_handler.vars()
 
     def reservoirs(self):
         return self.var_handler.reservoirs()
@@ -430,6 +434,7 @@ class EnvironmentScript(Environment):
         # Things to persist:
         # - vars mentioned in save_vars
         # - imports
+        # - compilables
         save = dict()
         save_vars = self.var_handler.save_vars
         compilable_vars = []
@@ -444,7 +449,8 @@ class EnvironmentScript(Environment):
         for var in compilable_vars:
             del self.namespace[var]
         return {'namespace': save,
-                'imports': self.imports}
+                'imports': self.imports,
+                'compilables': self.compilables}
 
     def restore_persistent_state_from_workspace(self):
         self.workspace.open(self)
@@ -456,17 +462,24 @@ class EnvironmentScript(Environment):
                 self.import_module(i.module_name, i.symbol, i.name)
             except marcel.exception.ImportException as e:
                 print(f'Unable to import {i.module_name}: e.message', file=sys.stderr)
-        # Restore vars, recompiling as necessary.
+        # Restore vars.
         saved_vars = persistent_state['namespace']
         self.namespace.update(saved_vars)
-        for var, value in saved_vars.items():
-            if isinstance(value, Compilable):
-                try:
-                    value.recompile(self)
-                except Exception as e:
-                    print(f'Unable to restore {var} = {value} because compilation failed. '
-                          f'Removing {var} from environment: {e}', file=sys.stderr)
         self.var_handler.add_save_vars(*saved_vars)
+        # Recompile compilables. Tracking of compilables in persistent state is new as of 0.26.0, so
+        # allow for them to be missing. (We are then subject to bug 254, which is why self.compilables
+        # was introduced.)
+        try:
+            compilables = persistent_state['compilables']
+        except KeyError:
+            compilables = []
+            for var, value in saved_vars.items():
+                if isinstance(value, Compilable):
+                    compilables.append(var)
+        for var in compilables:
+            # This assigns env to the var's value, which should be a compilable. This will allow compilation
+            # to occur when needed.
+            self.getvar(var)
 
     def never_mutable(self):
         vars = set(super().never_mutable())
