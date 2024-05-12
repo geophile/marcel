@@ -268,7 +268,7 @@ def test_red():
              expected_out=[1])
     TEST.run('gen 20 1 | select (x: x in (3, 7, 15)) | red &',
              expected_out=[3])
-    TEST.run('gen 75 | select (x: x in (18, 36, 73)) | red \|',
+    TEST.run('gen 75 | select (x: x in (18, 36, 73)) | red \\|',
              expected_out=[127])
     TEST.run('gen 3 | map (x: x == 1) | red and',
              expected_out=[False])

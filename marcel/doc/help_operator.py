@@ -78,9 +78,9 @@ The {n:write} command can be made explicit to add formatting and redirection opt
 For example, to format the above output differently:
 
 {p,wrap=F,indent=4}
-ls -f | map (f: (f.name, f.size)) | out '\{\}: \{\}'
+ls -f | map (f: (f.name, f.size)) | out '\\{\\}: \\{\\}'
 
-The standard Python formatting string, '\{\}: \{\}' produces this output:
+The standard Python formatting string, '\\{\\}: \\{\\}' produces this output:
 
 {p,wrap=F,indent=4}
 10-console-messages.conf: 77

@@ -52,12 +52,12 @@ COLOR_SCHEME.file_file = COLOR_WHITE_BOLD
 COLOR_SCHEME.file_dir = Color(0, 2, 3, BOLD)
 COLOR_SCHEME.file_link = Color(4, 2, 0, BOLD)
 COLOR_SCHEME.file_executable = Color(0, 4, 0, BOLD)
-COLOR_SCHEME.file_extension =  \{'.jpg': COLOR_IMAGE_HIGHLIGHT,
+COLOR_SCHEME.file_extension =  \\{'.jpg': COLOR_IMAGE_HIGHLIGHT,
                                 '.jpeg': COLOR_IMAGE_HIGHLIGHT,
                                 '.png': COLOR_IMAGE_HIGHLIGHT,
                                 '.mov': COLOR_IMAGE_HIGHLIGHT,
                                 '.avi': COLOR_IMAGE_HIGHLIGHT,
-                                '.gif': COLOR_IMAGE_HIGHLIGHT\}
+                                '.gif': COLOR_IMAGE_HIGHLIGHT\\}
 COLOR_SCHEME.error = Color(5, 5, 0)
 COLOR_SCHEME.process_pid = Color(0, 2, 4, BOLD)
 COLOR_SCHEME.process_command = Color(3, 2, 0, BOLD)
