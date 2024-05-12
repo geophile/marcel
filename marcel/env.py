@@ -429,6 +429,9 @@ class EnvironmentScript(Environment):
         else:
             raise marcel.exception.KillShellException(f'There is no workspace named {self.workspace.name}.')
 
+    def pid(self):
+        return self.locations.pid
+
     # This is destructive. Should be called only as the current workspace is being closed, and this Environment
     # is being saved.
     def persistent_state(self):

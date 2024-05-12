@@ -777,3 +777,14 @@ cleaned up workspace.
 ----------------------------------------------------------------------
 
 Should extend Exception, not BaseException: https://docs.python.org/3/library/exceptions.html#base-classes
+
+----------------------------------------------------------------------
+
+Shutdown of workspaces is messy. The current workspace is closed. But
+also the default workspace, which is hanging around to keep the
+environment alive. Maybe:
+
+- Allow default workspaces to persist within a process, using PID
+  prefixes of persistent state.
+
+- Delete that stuff when shutting down for real.

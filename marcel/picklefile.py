@@ -78,6 +78,13 @@ class PickleFile:
         if access is not None:
             access.close_file()
 
+    # A reservoir owned by a default workspace has a filename of the form PID.varname.pickle. Return the pid,
+    # or None if there is none.
+    def pid(self):
+        first_dot = self.path.name.find('.')
+        last_dot = self.path.name.rfind('.')
+        return int(self.path.name[:first_dot]) if first_dot < last_dot else None
+
 
 class Access:
 

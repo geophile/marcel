@@ -357,9 +357,10 @@ class WorkspaceDefault(Workspace):
         # Reservoirs
         for var, reservoir in env.reservoirs():
             assert type(reservoir) is marcel.reservoir.Reservoir
-            reservoir.close()
-            if not restart:
-                reservoir.ensure_deleted()
+            if reservoir.pid() == env.pid():
+                reservoir.close()
+                if not restart:
+                    reservoir.ensure_deleted()
         # Environment (Do this last because env.persistent_state() is destructive.)
         if restart:
             self.write_environment(env)
