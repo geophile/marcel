@@ -2108,6 +2108,11 @@ def test_workspace_lifecycle():
              expected_out=['Workspace()'])
     TEST.run(test='ws hello',
              expected_err='no workspace named hello')
+    # Workspace that does not exist.
+    TEST.run(test='ws this_is_not_a_workspace',
+             expected_err='There is no workspace')
+    TEST.run(test='ws -d this_is_not_a_workspace',
+             expected_err='There is no workspace')
 
 
 def test_workspaces_and_reservoirs():
@@ -2778,14 +2783,14 @@ def main_stable():
 
 
 def main_dev():
-    test_workspaces()
+    pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # main_slow_tests()
+    main_stable()
+    main_slow_tests()
     print(f'Test failures: {TEST.failures}')
     sys.exit(TEST.failures)
 
