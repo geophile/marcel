@@ -788,3 +788,4 @@ environment alive. Maybe:
   prefixes of persistent state.
 
 - Delete that stuff when shutting down for real.
+

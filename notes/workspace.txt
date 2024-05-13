@@ -580,3 +580,88 @@ TODO:
   - If shutdown is for restart, don't delete reservoirs, just close
     them. Maybe always just close reservoirs, and then delete is an
     extra step, just for default, just on non-restart shutdown.
+
+----------------------------------------------------------------------
+
+Workspace validation
+
+- Workspace on disk may be broken because of bugs or user action,
+  e.g. marker file missing.
+
+- This creates havoc for workspace operations.
+
+- Need validation. Check all workspaces on startup: directories under
+  ./config/marcel and .local/share/marcel.
+
+- Report problems on startup (i.e., contents of broken dirs). Report
+  newly discovered problems, and previous ones separately.
+
+- New ws command:
+
+    ws [-x|--exterminate] [WS_NAME ...]
+
+  Deletes named broken workspaces, or all broken workspaces if no names provided.
+
+- Structure:
+
+  Current:
+
+    .config/marcel/
+        __DEFAULT_WORKSPACE__
+            startup.py
+            .WORKSPACE
+        WORKSPACE_NAME/
+            .WORKSPACE  # Empty file marking this directory as a workspace
+            startup.py
+
+    .local/share/marcel/
+        __DEFAULT_WORKSPACE__
+            <pid>.env.pickle  # Deleted on non-restart shutdown
+            history
+            reservoirs/
+                <pid>.<varname>.pickle  # Deleted on non-restart shutdown
+        WORKSPACE_NAME/
+            properties.pickle
+            env.pickle
+            history
+            reservoirs/
+                <varname>.pickle
+
+  New:
+
+    .config/marcel/
+        broken
+            <workspace dirs>
+        workspace
+            __DEFAULT__
+                .WORKSPACE
+                startup.py
+            WORKSPACE_NAME/
+                .WORKSPACE  # Empty file marking this directory as a workspace
+                startup.py
+
+    .local/share/marcel/
+        broken
+            <workspace dirs>
+        workspace
+            __DEFAULT__
+                <pid>.env.pickle  # Deleted on non-restart shutdown
+                history
+                reservoirs/
+                    <pid>.<varname>.pickle  # Deleted on non-restart shutdown
+            WORKSPACE_NAME/
+                properties.pickle
+                env.pickle
+                history
+                reservoirs/
+                    <varname>.pickle
+
+  Changes:
+
+  - Add "broken" dirs
+  
+  - Add "workspace" dirs 
+  
+  - Move workspace dirs inside "workspace"
+
+  - Rename __DEFAULT_WORKSPACE__ to __DEFAULT__
