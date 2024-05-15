@@ -18,6 +18,7 @@ import pathlib
 import time
 
 import marcel.exception
+import marcel.locations
 import marcel.object.renderable
 import marcel.reservoir
 import marcel.util
@@ -189,10 +190,10 @@ class Workspace(marcel.object.renderable.Renderable):
     def list(env):
         yield Workspace.default()
         locations = env.locations
-        for dir in locations.config_base_path().iterdir():
+        for dir in locations.config_workspace_base_path().iterdir():
             if dir.is_dir():
                 name = dir.name
-                if name != WorkspaceDefault.DIR_NAME:
+                if name != marcel.locations.Locations.DEFAULT_WORKSPACE_DIR_NAME:
                     workspace = Workspace(name)
                     if workspace.marker.exists(env):
                         workspace.read_properties(env)  # So that home is known
@@ -339,7 +340,6 @@ class Workspace(marcel.object.renderable.Renderable):
 
 
 class WorkspaceDefault(Workspace):
-    DIR_NAME = '__DEFAULT_WORKSPACE__'
 
     def __init__(self):
         super().__init__('')

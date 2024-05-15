@@ -26,6 +26,11 @@ import marcel.object.workspace
 # string for obtaining the names of files that don't exist for default workspaces.
 class Locations(object):
 
+    MARCEL_DIR_NAME = 'marcel'
+    WORKSPACE_DIR_NAME = 'workspace'
+    BROKEN_WORKSPACE_DIR_NAME = 'broken'
+    DEFAULT_WORKSPACE_DIR_NAME = '__DEFAULT__'
+
     def __init__(self):
         self.home = Locations.normalize_dir(
             'home directory',
@@ -44,16 +49,38 @@ class Locations(object):
         self.pid = os.getpid()
 
     def config_base_path(self):
-        return Locations.marcel_dir(self.config_base)
+        return Locations.ensure_dir_exists(self.config_base /
+                                           Locations.MARCEL_DIR_NAME)
+
+    def config_workspace_base_path(self):
+        return Locations.ensure_dir_exists(self.config_base /
+                                           Locations.MARCEL_DIR_NAME /
+                                           Locations.WORKSPACE_DIR_NAME)
+
+    def config_broken_workspace_base_path(self):
+        return Locations.ensure_dir_exists(self.config_base /
+                                           Locations.MARCEL_DIR_NAME /
+                                           Locations.BROKEN_WORKSPACE_DIR_NAME)
 
     def data_base_path(self):
-        return Locations.marcel_dir(self.data_base)
+        return Locations.ensure_dir_exists(self.data_base /
+                                           Locations.MARCEL_DIR_NAME)
+
+    def data_workspace_base_path(self):
+        return Locations.ensure_dir_exists(self.data_base /
+                                           Locations.MARCEL_DIR_NAME /
+                                           Locations.WORKSPACE_DIR_NAME)
+
+    def data_broken_workspace_base_path(self):
+        return Locations.ensure_dir_exists(self.data_base /
+                                           Locations.MARCEL_DIR_NAME /
+                                           Locations.BROKEN_WORKSPACE_DIR_NAME)
 
     def config_dir_path(self, workspace):
-        return Locations.marcel_dir(self.config_base) / Locations.workspace_dir_name(workspace)
+        return self.config_workspace_base_path() / Locations.workspace_dir_name(workspace)
 
     def data_dir_path(self, workspace):
-        return Locations.marcel_dir(self.data_base) / Locations.workspace_dir_name(workspace)
+        return self.data_workspace_base_path() / Locations.workspace_dir_name(workspace)
 
     def reservoir_dir_path(self, workspace):
         return self.data_dir_path(workspace) / 'reservoirs'
@@ -77,16 +104,16 @@ class Locations(object):
         return self.reservoir_dir_path(workspace) / filename
 
     def version_file_path(self):
-        return Locations.marcel_dir(self.config_base) / 'VERSION'
+        return Locations.ensure_dir_exists(self.config_base /
+                                           Locations.MARCEL_DIR_NAME) / 'VERSION'
 
     def fresh_install(self):
         # Don't rely on Locations.marcel_dir(self.config_base), because it will create .config/marcel if it
         # doesn't exist. Right now, we're just trying to see if it does exist, to guide startup and migration.
-        return not (self.config_base / 'marcel').exists()
+        return not (self.config_base / Locations.MARCEL_DIR_NAME).exists()
 
     @staticmethod
-    def marcel_dir(base):
-        dir = base / 'marcel'
+    def ensure_dir_exists(dir):
         if dir.exists():
             if not dir.is_dir():
                 raise marcel.exception.KillShellException(f'Not a directory: {dir}')
@@ -115,4 +142,4 @@ class Locations(object):
 
     @staticmethod
     def workspace_dir_name(workspace):
-        return marcel.object.workspace.WorkspaceDefault.DIR_NAME if workspace.is_default() else workspace.name
+        return Locations.DEFAULT_WORKSPACE_DIR_NAME if workspace.is_default() else workspace.name

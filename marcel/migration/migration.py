@@ -34,9 +34,13 @@ def installed_version(locations):
 
 def migrate():
     def create_marcel_dirs():
-        # These calls create the directories if they don't exist
+        # These calls create the v0.28 directories if they don't exist
         locations.config_base_path()
+        locations.config_workspace_base_path()
+        locations.config_broken_workspace_base_path()
         locations.data_base_path()
+        locations.data_workspace_base_path()
+        locations.data_broken_workspace_base_path()
 
     def create_version_file():
         version_file_path = locations.version_file_path()
