@@ -17,6 +17,7 @@ import marcel.exception
 import marcel.locations
 import marcel.version
 import marcel.migration.migration024
+import marcel.migration.migration028
 
 PREMIGRATION = '0.0'
 
@@ -39,8 +40,7 @@ def migrate():
 
     def create_version_file():
         version_file_path = locations.version_file_path()
-        with open(version_file_path, 'w') as version_file:
-            version_file.write(marcel.version.VERSION)
+        version_file_path.write_text(marcel.version.VERSION)
         version_file_path.chmod(0o400)
 
     def update_version_file():
@@ -48,8 +48,7 @@ def migrate():
         if iv < marcel.version.VERSION:
             version_file_path = locations.version_file_path()
             version_file_path.chmod(0o600)
-            with open(version_file_path, 'w') as version_file:
-                version_file.write(marcel.version.VERSION)
+            version_file_path.write_text(marcel.version.VERSION)
             version_file_path.chmod(0o400)
 
     locations = marcel.locations.Locations()
@@ -60,6 +59,8 @@ def migrate():
         iv = installed_version(locations)
         if iv < '0.24':
             marcel.migration.migration024.migrate(locations)
+        if iv < '0.28':
+            marcel.migration.migration028.migrate(locations)
         update_version_file()
     assert installed_version(locations) == marcel.version.VERSION
 

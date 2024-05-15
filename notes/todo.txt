@@ -789,3 +789,6 @@ environment alive. Maybe:
 
 - Delete that stuff when shutting down for real.
 
+----------------------------------------------------------------------
+
+If Marcel cared about portability, rm, my, etc. would have to be implemented. Couldn’t rely on host. 
