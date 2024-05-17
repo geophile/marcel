@@ -665,3 +665,23 @@ Workspace validation
   - Move workspace dirs inside "workspace"
 
   - Rename __DEFAULT_WORKSPACE__ to __DEFAULT__
+
+----------------------------------------------------------------------
+
+To do:
+
+- Validation
+
+    - Implementation
+
+    - Check on startup
+
+- Broken workspaces
+
+    - Repairs?
+
+    - Put in broken directory
+
+    - Naming? Have to handle multiple broken workspaces with the same
+      name.
+

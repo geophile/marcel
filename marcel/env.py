@@ -243,8 +243,7 @@ class Environment(object):
         try:
             current_dir = pathlib.Path.cwd().resolve().as_posix()
         except FileNotFoundError:
-            raise marcel.exception.KillShellException(
-                'Current directory does not exist! cd somewhere else and try again.')
+            current_dir = homedir
         self.namespace.update({
             'MARCEL_VERSION': marcel.version.VERSION,
             'HOME': homedir,
@@ -253,7 +252,7 @@ class Environment(object):
             'USER': getpass.getuser(),
             'HOST': socket.gethostname()
         })
-        self.dir_state().change_current_dir(self.getvar('PWD'))
+        self.dir_state().change_current_dir(self.pwd_or_alternative())
 
     def dir_state(self):
         return self.directory_state
@@ -327,6 +326,17 @@ class Environment(object):
 
     def api_usage(self):
         return self.marcel_usage() == 'api'
+
+    # The directory named by PWD can disappear, and going to it will fail.
+    # Use HOME as an alternative.
+    def pwd_or_alternative(self):
+        dir = self.getvar('PWD')
+        if dir:  # True for '',  None
+            if not (os.path.exists(dir) and not os.path.isdir(dir)):
+                dir = None
+        if not dir:
+            dir = self.getvar('HOME')
+        return dir
 
 
 class EnvironmentAPI(Environment):
@@ -419,7 +429,7 @@ class EnvironmentScript(Environment):
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 self.namespace[key] = value
-        self.dir_state().change_current_dir(self.getvar('PWD'))
+        self.dir_state().change_current_dir(self.pwd_or_alternative())
         # Need to make sure default workspace exists. Timing is delicate, this needs to be done before
         # Main runs Environment.read_config(). We are now toward the end of Environment creation, for both
         # Interactive and Script usage. (API doesn't use workspaces.)
@@ -485,7 +495,8 @@ class EnvironmentScript(Environment):
             # to occur when needed.
             self.getvar(var)
         # Reflect current dir in OS. I think this fixes bug 257.
-        os.chdir(self.getvar('PWD'))
+        dir = self.pwd_or_alternative()
+        os.chdir(dir)
 
     def never_mutable(self):
         vars = set(super().never_mutable())

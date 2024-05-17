@@ -36,13 +36,13 @@ class DirectoryState:
         if type(directory) is str:
             directory = pathlib.Path(directory)
         isinstance(directory, pathlib.Path), directory
-        self._clean_dir_stack()
+        # current_dir() calls _clean_dir_stack(),
         new_dir = (self.current_dir() / directory.expanduser()).resolve(False)  # False: due to bug 27
+        dir_stack = self._dir_stack()
         if new_dir.exists():
             new_dir = new_dir.as_posix()
             # So that executables have the same view of the current directory.
             os.chdir(new_dir)
-            dir_stack = self._dir_stack()
             if len(dir_stack) == 0:
                 dir_stack.append(new_dir)
             else:
@@ -53,7 +53,7 @@ class DirectoryState:
             marcel.util.print_to_stderr(f'Directory {new_dir} does not exist, '
                                         f'going to home directory instead: {home}',
                                         self.env)
-            if self._dir_stack()[-1] != home:
+            if len(dir_stack) == 0 or dir_stack[-1] != home:
                 self.push_dir(home)
 
     def push_dir(self, directory):
@@ -103,7 +103,7 @@ class DirectoryState:
                 clean.append(dir)
             else:
                 removed.append(dir)
-        if len(clean) < len(dirs):
+        if len(removed) > 0:
             self.env.namespace['DIRS'] = clean
             buffer = ['The following directories have been removed from the directory stack because',
                       'they are no longer accessible:']

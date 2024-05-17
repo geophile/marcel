@@ -51,7 +51,10 @@ class TestBase:
             self.main.shutdown()
         os.environ['HOME'] = TestBase.test_home
         self.locations = marcel.locations.Locations()
-        os.system(f'rm -rf {TestBase.test_home}')
+        shutil.rmtree(TestBase.test_home)
+        os.makedirs(TestBase.test_home)
+        # os.system requires a working directory that actually exists. Go to one, doesn't matter which.
+        os.chdir(TestBase.test_home)
         os.system('sudo rm -f /tmp/farcel*.log')
 
     def new_file(self, filename):
@@ -226,7 +229,10 @@ class TestAPI(TestBase):
     def reset_environment(self, config_file='./.marcel.py'):
         super().reset_environment()
         self.env = marcel.api._ENV
-        os.mkdir(TestBase.test_home)
+        try:
+            os.mkdir(TestBase.test_home)
+        except FileExistsError:
+            pass
         self.env.dir_state().change_current_dir(TestBase.start_dir)
 
     def run(self,
