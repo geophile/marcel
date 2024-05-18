@@ -218,15 +218,18 @@ class Workspace(marcel.object.renderable.Renderable):
         check_dir_exists(locations.data_ws(), 'Workspace data')
         check_dir_exists(locations.data_bws(), 'Broken workspace data')
         # The data and config workspace directories should have subdirectories with matching names.
-        config_workspaces = set(locations.config_ws().iterdir())
-        data_workspaces = set(locations.data_ws().iterdir())
-        broken_workspaces = ((config_workspaces - data_workspaces) |
-                             (data_workspaces - config_workspaces))
+        config_workspace_names = set([f.name for f in locations.config_ws().iterdir()])
+        data_workspace_names = set([f.name for f in locations.data_ws().iterdir()])
+        broken_workspaces = ((config_workspace_names - data_workspace_names) |
+                             (data_workspace_names - config_workspace_names))
         for workspace in Workspace.list(env):
-            workspace_problems = workspace.validate(env)
-            for problem in workspace_problems:
-                print(problem, file=sys.stderr)
-            broken_workspaces.add(workspace.name)
+            # TODO: Default workspace validation
+            if not workspace.is_default():
+                problems = workspace.validate(env)
+                if len(problems) > 0:
+                    for problem in problems:
+                        print(problem, file=sys.stderr)
+                    broken_workspaces.add(workspace.name)
 
     # Internal
 
@@ -393,11 +396,11 @@ class Workspace(marcel.object.renderable.Renderable):
         locations = env.locations
         config_source = locations.config_ws(self)
         if config_source.exists():
-            config_target = locations.broken_config_dir_path(self, now)
+            config_target = locations.config_bws(self, now)
             shutil.move(config_source, config_target)
         data_source = locations.data_ws(self)
         if data_source.exists():
-            data_target = locations.broken_data_dir_path(self, now)
+            data_target = locations.data_bws(self, now)
             shutil.move(data_source, data_target)
 
     def cannot_lock_workspace(self):

@@ -103,6 +103,7 @@ class MainScript(Main):
         startup_vars = self.read_config()
         self.env.enforce_var_immutability(startup_vars)
         atexit.register(self.shutdown)
+        # marcel.object.workspace.Workspace.validate_all(env)
 
     def read_config(self):
         # Comparing keys_before/after tells us what vars were defined by the startup script.

@@ -92,7 +92,7 @@ class Locations(object):
             / Locations.BROKEN_WORKSPACE_DIR_NAME)
         if workspace is not None and timestamp is not None:
             bws_dir = bws_dir / str(timestamp) / Locations.workspace_dir_name(workspace)
-        return bws_dir
+        return Locations.ensure_dir_exists(bws_dir)
 
     def config_ws_startup(self, workspace):
         return self.config_ws(workspace) / 'startup.py'
@@ -118,7 +118,7 @@ class Locations(object):
             Locations.BROKEN_WORKSPACE_DIR_NAME)
         if workspace is not None and timestamp is not None:
             bws_dir = bws_dir / str(timestamp) / Locations.workspace_dir_name(workspace)
-        return bws_dir
+        return Locations.ensure_dir_exists(bws_dir)
 
     def data_ws_prop(self, workspace):
         assert not workspace.is_default()
