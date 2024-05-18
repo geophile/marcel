@@ -791,4 +791,9 @@ environment alive. Maybe:
 
 ----------------------------------------------------------------------
 
-If Marcel cared about portability, rm, my, etc. would have to be implemented. Couldn’t rely on host. 
+If Marcel cared about portability, rm, my, etc. would have to be
+implemented. Couldn’t rely on host.
+
+----------------------------------------------------------------------
+
+test_args is mostly disabled in test_ops.
