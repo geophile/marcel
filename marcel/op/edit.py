@@ -156,4 +156,4 @@ class EditCommand(EditImpl):
 class EditStartup(EditImpl):
 
     def run(self, env):
-        self.edit(env.locations.config_file_path(env.workspace))
+        self.edit(env.locations.config_ws_startup(env.workspace))

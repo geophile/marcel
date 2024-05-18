@@ -607,6 +607,7 @@ Workspace validation
   Current:
 
     .config/marcel/
+        VERSION
         __DEFAULT_WORKSPACE__
             startup.py
             .WORKSPACE
@@ -630,6 +631,7 @@ Workspace validation
   New:
 
     .config/marcel/
+        VERSION
         broken
             <timestamp>/  # When damage detected
                 <workspace dirs>
@@ -680,6 +682,8 @@ To do:
 
     - Check on startup
 
+    - Validate on open, close
+
 - Broken workspaces
 
     - Repairs?
@@ -689,3 +693,37 @@ To do:
     - Naming? Have to handle multiple broken workspaces with the same
       name.
 
+- Locations cleanup:
+
+    .config/marcel/                             config_base_path()                                      config()
+        VERSION                                 version_file_path()                                     config_version()
+        broken                                  config_broken_workspace_base_path()                     * config_bws()
+            <timestamp>/                        
+                <workspace dirs>                broken_config_dir_path(workspace, timestamp)            * config_bws(workspace, timestamp)
+        workspace                               config_workspace_base_path()                            * config_ws()
+            WORKSPACE_NAME/                     config_dir_path(workspace)                              * config_ws(workspace)
+                .WORKSPACE
+                startup.py                      config_file_path(workspace)                             config_ws_startup(workspace)
+
+    .local/share/marcel/                        data_base_path()                                        data()
+        broken                                  data_broken_workspace_base_path()                       * data_bws()
+            <timestamp>/                        
+                <workspace dirs>                broken_data_dir_path(workspace, timestamp)              * data_bws(workspace, timestamp)
+        workspace                               data_workspace_base_path()                              * data_ws()
+            WORKSPACE_NAME/                     data_dir_path(workspace)                                * data_ws(workspace)
+                properties.pickle               workspace_properties_file_path(workspace)               data_ws_prop(workspace)
+                env.pickle                      workspace_environment_file_path(workspace)              data_ws_env(workspace)
+                history                         history_file_path(workspace)                            data_ws_hist(workspace)
+                reservoirs/                     reservoir_dir_path(workspace)                           * data_ws_res(workspace)
+                    <varname>.pickle            reservoir_file_path(workspace, name)                    * data_ws_res(workspace, name)
+
+- Get rid of _path from all names, doesn't convey anything useful.
+- workspace_properties_file_path: workspace_ is unnecessary
+- workspace_environment_file_path: workspace_ is unnecessary
+- Use config and data prefixes consistently
+- workspace -> ws
+- workspace_broken -> bws
+- Get rid of _base from all names
+- Get rid of file, dir
+
+* Overloaded (which is OK)

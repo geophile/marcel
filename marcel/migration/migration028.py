@@ -104,7 +104,7 @@ def migrate(locations):
 
     def migrate_config():
         # Get the workspace dirs
-        config_base = locations.config_base_path()  # .config/marcel
+        config_base = locations.config()  # .config/marcel
         workspace_dirs = subdirs(config_base)
         # Create broken and workspace directories
         tmp_broken_dir_path = pathlib.Path(tempfile.TemporaryDirectory(dir=config_base).name)
@@ -121,7 +121,7 @@ def migrate(locations):
 
     def migrate_data():
         # Get the workspace dirs
-        data_base = locations.data_base_path()  # .local/share/marcel
+        data_base = locations.data()  # .local/share/marcel
         workspace_dirs = subdirs(data_base)
         # Create broken and workspace directories
         tmp_broken_dir_path = data_base / 'broken'

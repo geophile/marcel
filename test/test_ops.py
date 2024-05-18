@@ -2123,7 +2123,7 @@ def test_workspaces_and_reservoirs():
     TEST.run(test='gen 3 >$ g3_default',
              verification='g3_default <$',
              expected_out=[0, 1, 2])
-    TEST.run(test=f'ls -f {TEST.locations.reservoir_file_path(ws_default, "g3_default")} | red count',
+    TEST.run(test=f'ls -f {TEST.locations.data_ws_res(ws_default, "g3_default")} | red count',
              expected_out=[1])
     # Leave the default workspace and check that the reservoir disappears
     TEST.run(test='ws -n restest',
@@ -2133,23 +2133,23 @@ def test_workspaces_and_reservoirs():
     TEST.run(test='gen 3 >$ g3_restest',
              verification='g3_restest <$',
              expected_out=[0, 1, 2])
-    TEST.run(test=f'ls {TEST.locations.reservoir_file_path(ws_restest, "g3_restest")} | (f: f.as_posix())',
-             expected_out=[f'{TEST.locations.reservoir_file_path(ws_restest, "g3_restest")}'])
+    TEST.run(test=f'ls {TEST.locations.data_ws_res(ws_restest, "g3_restest")} | (f: f.as_posix())',
+             expected_out=[f'{TEST.locations.data_ws_res(ws_restest, "g3_restest")}'])
     # Go back to the default workspace and check the reservoirs
     TEST.run(test='ws -c',
              verification='ws | (w: str(w))',
              expected_out=['Workspace()'])
-    TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_default)} | red count',
+    TEST.run(test=f'ls -f {TEST.locations.data_ws_res(ws_default)} | red count',
              expected_out=[1])
-    TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_restest)} | red count',
+    TEST.run(test=f'ls -f {TEST.locations.data_ws_res(ws_restest)} | red count',
              expected_out=[1])
     # Re-enter restest, check again
     TEST.run(test='ws restest',
              verification='ws | (w: str(w))',
              expected_out=['Workspace(restest)'])
-    TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_default)} | red count',
+    TEST.run(test=f'ls -f {TEST.locations.data_ws_res(ws_default)} | red count',
              expected_out=[1])
-    TEST.run(test=f'ls -f {TEST.locations.reservoir_dir_path(ws_restest)} | red count',
+    TEST.run(test=f'ls -f {TEST.locations.data_ws_res(ws_restest)} | red count',
              expected_out=[1])
     # And contents
     TEST.run(test='g3_restest <$',

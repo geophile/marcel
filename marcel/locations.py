@@ -20,12 +20,31 @@ import marcel.exception
 import marcel.object.workspace
 
 
-# ws_name is the empty string for default workspaces. Default workspaces have a config dir and file,
-# and a data dir and history file. But they don't have a workspace properties file, environment file, or
-# a marker file. This explains the different handling of ws_name. ws_name is asserted not to be an empty
-# string for obtaining the names of files that don't exist for default workspaces.
-class Locations(object):
+# Location structure -> interface
+# 
+#     .config/marcel/                             config()
+#         VERSION                                 config_version()
+#         broken                                  config_bws()
+#             <timestamp>/                        
+#                 <workspace dirs>                config_bws(workspace, timestamp)
+#         workspace                               config_ws()
+#             WORKSPACE_NAME/                     config_ws(workspace)
+#                 .WORKSPACE
+#                 startup.py                      config_ws_startup(workspace)
+# 
+#     .local/share/marcel/                        data()
+#         broken                                  data_bws()
+#             <timestamp>/                        
+#                 <workspace dirs>                data_bws(workspace, timestamp)
+#         workspace                               data_ws()
+#             WORKSPACE_NAME/                     data_ws(workspace)
+#                 properties.pickle               data_ws_prop(workspace)
+#                 env.pickle                      data_ws_env(workspace)
+#                 history                         data_ws_hist(workspace)
+#                 reservoirs/                     data_ws_res(workspace)
+#                     <varname>.pickle            data_ws_res(workspace, name)
 
+class Locations(object):
     MARCEL_DIR_NAME = 'marcel'
     WORKSPACE_DIR_NAME = 'workspace'
     BROKEN_WORKSPACE_DIR_NAME = 'broken'
@@ -48,70 +67,76 @@ class Locations(object):
         # a filename, we want the pid of the topmost process.
         self.pid = os.getpid()
 
-    def config_base_path(self):
+    def config(self):
         return Locations.ensure_dir_exists(self.config_base /
                                            Locations.MARCEL_DIR_NAME)
 
-    def config_workspace_base_path(self):
-        return Locations.ensure_dir_exists(self.config_base /
-                                           Locations.MARCEL_DIR_NAME /
-                                           Locations.WORKSPACE_DIR_NAME)
-
-    def config_broken_workspace_base_path(self):
-        return Locations.ensure_dir_exists(self.config_base /
-                                           Locations.MARCEL_DIR_NAME /
-                                           Locations.BROKEN_WORKSPACE_DIR_NAME)
-
-    def data_base_path(self):
-        return Locations.ensure_dir_exists(self.data_base /
-                                           Locations.MARCEL_DIR_NAME)
-
-    def data_workspace_base_path(self):
-        return Locations.ensure_dir_exists(self.data_base /
-                                           Locations.MARCEL_DIR_NAME /
-                                           Locations.WORKSPACE_DIR_NAME)
-
-    def data_broken_workspace_base_path(self):
-        return Locations.ensure_dir_exists(self.data_base /
-                                           Locations.MARCEL_DIR_NAME /
-                                           Locations.BROKEN_WORKSPACE_DIR_NAME)
-
-    def config_dir_path(self, workspace):
-        return self.config_workspace_base_path() / Locations.workspace_dir_name(workspace)
-
-    def broken_config_dir_path(self, workspace, timestamp):
-        return self.config_broken_workspace_base_path() / str(timestamp) / Locations.workspace_dir_name(workspace)
-
-    def data_dir_path(self, workspace):
-        return self.data_workspace_base_path() / Locations.workspace_dir_name(workspace)
-
-    def broken_data_dir_path(self, workspace, timestamp):
-        return self.data_broken_workspace_base_path() / str(timestamp) / Locations.workspace_dir_name(workspace)
-
-    def reservoir_dir_path(self, workspace):
-        return self.data_dir_path(workspace) / 'reservoirs'
-
-    def config_file_path(self, workspace):
-        return self.config_dir_path(workspace) / 'startup.py'
-
-    def history_file_path(self, workspace):
-        return self.data_dir_path(workspace) / 'history'
-
-    def workspace_properties_file_path(self, workspace):
-        assert not workspace.is_default()
-        return self.data_dir_path(workspace) / 'properties.pickle'
-
-    def workspace_environment_file_path(self, workspace):
-        filename = f'{self.pid}.env.pickle' if workspace.is_default() else 'env.pickle'
-        return self.data_dir_path(workspace) / filename
-
-    def reservoir_file_path(self, workspace, name):
-        filename = f'{self.pid}.{name}.pickle' if workspace.is_default() else f'{name}.pickle'
-        return self.reservoir_dir_path(workspace) / filename
-
-    def version_file_path(self):
+    def config_version(self):
         return Locations.ensure_dir_exists(self.config_base /
                                            Locations.MARCEL_DIR_NAME) / 'VERSION'
+
+    def config_ws(self, workspace=None):
+        ws_dir = Locations.ensure_dir_exists(
+            self.config_base
+            / Locations.MARCEL_DIR_NAME
+            / Locations.WORKSPACE_DIR_NAME)
+        if workspace:
+            ws_dir = ws_dir / Locations.workspace_dir_name(workspace)
+        return ws_dir
+
+    def config_bws(self, workspace=None, timestamp=None):
+        assert (workspace is None) == (timestamp is None)
+        bws_dir = Locations.ensure_dir_exists(
+            self.config_base
+            / Locations.MARCEL_DIR_NAME
+            / Locations.BROKEN_WORKSPACE_DIR_NAME)
+        if workspace is not None and timestamp is not None:
+            bws_dir = bws_dir / str(timestamp) / Locations.workspace_dir_name(workspace)
+        return bws_dir
+
+    def config_ws_startup(self, workspace):
+        return self.config_ws(workspace) / 'startup.py'
+
+    def data(self):
+        return Locations.ensure_dir_exists(self.data_base /
+                                           Locations.MARCEL_DIR_NAME)
+
+    def data_ws(self, workspace=None):
+        ws_dir = Locations.ensure_dir_exists(
+            self.data_base /
+            Locations.MARCEL_DIR_NAME /
+            Locations.WORKSPACE_DIR_NAME)
+        if workspace:
+            ws_dir = ws_dir / Locations.workspace_dir_name(workspace)
+        return ws_dir
+
+    def data_bws(self, workspace=None, timestamp=None):
+        assert (workspace is None) == (timestamp is None)
+        bws_dir = Locations.ensure_dir_exists(
+            self.data_base /
+            Locations.MARCEL_DIR_NAME /
+            Locations.BROKEN_WORKSPACE_DIR_NAME)
+        if workspace is not None and timestamp is not None:
+            bws_dir = bws_dir / str(timestamp) / Locations.workspace_dir_name(workspace)
+        return bws_dir
+
+    def data_ws_prop(self, workspace):
+        assert not workspace.is_default()
+        return self.data_ws(workspace) / 'properties.pickle'
+
+    def data_ws_env(self, workspace):
+        filename = f'{self.pid}.env.pickle' if workspace.is_default() else 'env.pickle'
+        return self.data_ws(workspace) / filename
+
+    def data_ws_hist(self, workspace):
+        return self.data_ws(workspace) / 'history'
+
+    def data_ws_res(self, workspace, name=None):
+        res_dir = self.data_ws(workspace) / 'reservoirs'
+        if name:
+            filename = f'{self.pid}.{name}.pickle' if workspace.is_default() else f'{name}.pickle'
+            res_dir = res_dir / filename
+        return res_dir
 
     def fresh_install(self):
         # Don't rely on Locations.marcel_dir(self.config_base), because it will create .config/marcel if it

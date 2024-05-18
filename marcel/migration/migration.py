@@ -23,7 +23,7 @@ PREMIGRATION = '0.0'
 
 
 def installed_version(locations):
-    version_file_path = locations.version_file_path()
+    version_file_path = locations.config_version()
     if version_file_path.exists():
         with open(version_file_path) as version_file:
             installed_version = version_file.readline().strip()
@@ -35,22 +35,22 @@ def installed_version(locations):
 def migrate():
     def create_marcel_dirs():
         # These calls create the v0.28 directories if they don't exist
-        locations.config_base_path()
-        locations.config_workspace_base_path()
-        locations.config_broken_workspace_base_path()
-        locations.data_base_path()
-        locations.data_workspace_base_path()
-        locations.data_broken_workspace_base_path()
+        locations.config()
+        locations.config_ws()
+        locations.config_bws()
+        locations.data()
+        locations.data_ws()
+        locations.data_bws()
 
     def create_version_file():
-        version_file_path = locations.version_file_path()
+        version_file_path = locations.config_version()
         version_file_path.write_text(marcel.version.VERSION)
         version_file_path.chmod(0o400)
 
     def update_version_file():
         # Write current version number to VERSION file, which should already exist.
         if iv < marcel.version.VERSION:
-            version_file_path = locations.version_file_path()
+            version_file_path = locations.config_version()
             version_file_path.chmod(0o600)
             version_file_path.write_text(marcel.version.VERSION)
             version_file_path.chmod(0o400)

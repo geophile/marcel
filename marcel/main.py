@@ -225,7 +225,7 @@ class MainInteractive(MainScript):
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
         readline.set_pre_input_hook(self.insert_edited_command)
-        self.env.reader = Reader(self.env, self.env.locations.history_file_path(self.workspace))
+        self.env.reader = Reader(self.env, self.env.locations.data_ws_hist(self.workspace))
         return self.env.reader
 
     def insert_edited_command(self):
@@ -246,7 +246,7 @@ class MainInteractive(MainScript):
             self.env.setvar(var, value)
 
     def check_for_config_update(self):
-        config_path = self.env.locations.config_file_path(self.workspace)
+        config_path = self.env.locations.config_ws_startup(self.workspace)
         config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
         if self.config_time and config_mtime > self.config_time:
             # The workspace argument is used to open a new workspace, different from the previous one, e.g.

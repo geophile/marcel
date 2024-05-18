@@ -148,7 +148,7 @@ class TestConsole(TestBase):
         super().reset_environment()
         workspace = marcel.object.workspace.Workspace.default()
         env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
-        os.system(f'cp {TestBase.start_dir}/{config_file} {self.locations.config_file_path(workspace)}')
+        os.system(f'cp {TestBase.start_dir}/{config_file} {self.locations.config_ws_startup(workspace)}')
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
                                                 workspace=workspace,
@@ -350,7 +350,7 @@ class TestTabCompletion(TestBase):
                                                 testing=True)
         self.env = env
         self.env.dir_state().change_current_dir(TestBase.start_dir)
-        os.system(f'cp {config_file} {self.locations.config_file_path(workspace)}')
+        os.system(f'cp {config_file} {self.locations.config_ws_startup(workspace)}')
 
     def run(self, line, text=None, expected=None):
         if text is None:

@@ -36,7 +36,7 @@ class Marker(object):
 
     def exists(self, env):
         locations = env.locations
-        config_dir = locations.config_dir_path(self.workspace)
+        config_dir = locations.config_ws(self.workspace)
         if config_dir.exists():
             for file in config_dir.iterdir():
                 if file.name.startswith(Marker.FILENAME_ROOT):
@@ -44,12 +44,12 @@ class Marker(object):
         return False
 
     def unowned(self, env):
-        return env.locations.config_dir_path(self.workspace) / Marker.FILENAME_ROOT
+        return env.locations.config_ws(self.workspace) / Marker.FILENAME_ROOT
 
     def owned(self, env, pid=None):
         if pid is None:
             pid = env.locations.pid
-        return env.locations.config_dir_path(self.workspace) / f'{Marker.FILENAME_ROOT}.{pid}'
+        return env.locations.config_ws(self.workspace) / f'{Marker.FILENAME_ROOT}.{pid}'
 
 
 class WorkspaceProperties(object):
@@ -114,7 +114,7 @@ class Workspace(marcel.object.renderable.Renderable):
     def create(self, env):
         assert not self.exists(env)
         locations = env.locations
-        with open(locations.config_file_path(Workspace.default()), 'r') as config_file:
+        with open(locations.config_ws_startup(Workspace.default()), 'r') as config_file:
             initial_config_contents = config_file.read()
         self.create_on_disk(env, initial_config_contents)
 
@@ -160,17 +160,17 @@ class Workspace(marcel.object.renderable.Renderable):
                 owned_marker_path = self.marker.owned(env)
                 assert owned_marker_path is not None, self
                 owned_marker_path.unlink(missing_ok=False)
-                locations.config_file_path(self).unlink(missing_ok=True)
-                locations.config_dir_path(self).rmdir()
+                locations.config_ws_startup(self).unlink(missing_ok=True)
+                locations.config_ws(self).rmdir()
                 # data directory
-                locations.history_file_path(self).unlink(missing_ok=True)
-                locations.workspace_properties_file_path(self).unlink(missing_ok=True)
-                locations.workspace_environment_file_path(self).unlink(missing_ok=True)
-                reservoir_dir = locations.reservoir_dir_path(self)
+                locations.data_ws_hist(self).unlink(missing_ok=True)
+                locations.data_ws_prop(self).unlink(missing_ok=True)
+                locations.data_ws_env(self).unlink(missing_ok=True)
+                reservoir_dir = locations.data_ws_res(self)
                 for reservoir_file in reservoir_dir.iterdir():
                     reservoir_file.unlink()
                 reservoir_dir.rmdir()
-                locations.data_dir_path(self).rmdir()
+                locations.data_ws(self).rmdir()
             else:
                 self.cannot_lock_workspace()
         else:
@@ -190,7 +190,7 @@ class Workspace(marcel.object.renderable.Renderable):
     def list(env):
         yield Workspace.default()
         locations = env.locations
-        for dir in locations.config_workspace_base_path().iterdir():
+        for dir in locations.config_ws().iterdir():
             if dir.is_dir():
                 name = dir.name
                 if name != marcel.locations.Locations.DEFAULT_WORKSPACE_DIR_NAME:
@@ -210,15 +210,16 @@ class Workspace(marcel.object.renderable.Renderable):
                     f'{description} directory is not actually a directory.')
 
         locations = env.locations
+        # TODO: Check VERSION file
         # Config dir has broken/, workspace/ and nothing else.
-        check_dir_exists(locations.config_workspace_base_path(), 'Workspace configuration')
-        check_dir_exists(locations.config_broken_workspace_base_path(), 'Broken workspace configuration')
+        check_dir_exists(locations.config_ws(), 'Workspace configuration')
+        check_dir_exists(locations.config_bws(), 'Broken workspace configuration')
         # Data dir has broken/, workspace/ and nothing else.
-        check_dir_exists(locations.data_workspace_base_path(), 'Workspace data')
-        check_dir_exists(locations.data_broken_workspace_base_path(), 'Broken workspace data')
+        check_dir_exists(locations.data_ws(), 'Workspace data')
+        check_dir_exists(locations.data_bws(), 'Broken workspace data')
         # The data and config workspace directories should have subdirectories with matching names.
-        config_workspaces = set(locations.config_workspace_base_path().iterdir())
-        data_workspaces = set(locations.data_workspace_base_path().iterdir())
+        config_workspaces = set(locations.config_ws().iterdir())
+        data_workspaces = set(locations.data_ws().iterdir())
         broken_workspaces = ((config_workspaces - data_workspaces) |
                              (data_workspaces - config_workspaces))
         for workspace in Workspace.list(env):
@@ -232,21 +233,21 @@ class Workspace(marcel.object.renderable.Renderable):
     def create_on_disk(self, env, initial_config_contents):
         locations = env.locations
         # config
-        config_dir = locations.config_dir_path(self)
+        config_dir = locations.config_ws(self)
         self.create_dir(config_dir)
-        config_file_path = locations.config_file_path(self)
+        config_file_path = locations.config_ws_startup(self)
         with open(config_file_path, 'w') as config_file:
             config_file.write(initial_config_contents)
         config_file_path.chmod(0o600)
         self.marker.unowned(env).touch(mode=0o000, exist_ok=False)
         # data
-        self.create_dir(locations.data_dir_path(self))
-        self.create_dir(locations.reservoir_dir_path(self))
+        self.create_dir(locations.data_ws(self))
+        self.create_dir(locations.data_ws_res(self))
         self.write_environment(env)
         if not self.is_default():
             self.properties = WorkspaceProperties()
             self.write_properties(env)
-        locations.history_file_path(self).touch(mode=0o600, exist_ok=False)
+        locations.data_ws_hist(self).touch(mode=0o600, exist_ok=False)
 
     def create_dir(self, dir):
         try:
@@ -308,7 +309,7 @@ class Workspace(marcel.object.renderable.Renderable):
 
     def read_properties(self, env):
         assert not self.is_default()
-        with open(env.locations.workspace_properties_file_path(self), 'rb') as properties_file:
+        with open(env.locations.data_ws_prop(self), 'rb') as properties_file:
             unpickler = dill.Unpickler(properties_file)
             self.properties = unpickler.load()
         self.properties.update_open_time()
@@ -316,17 +317,17 @@ class Workspace(marcel.object.renderable.Renderable):
     def write_properties(self, env):
         assert not self.is_default()
         self.properties.update_save_time()
-        with open(env.locations.workspace_properties_file_path(self), 'wb') as properties_file:
+        with open(env.locations.data_ws_prop(self), 'wb') as properties_file:
             pickler = dill.Pickler(properties_file)
             pickler.dump(self.properties)
 
     def read_environment(self, env):
-        with open(env.locations.workspace_environment_file_path(self), 'rb') as environment_file:
+        with open(env.locations.data_ws_env(self), 'rb') as environment_file:
             unpickler = dill.Unpickler(environment_file)
             self.persistent_state = unpickler.load()
 
     def write_environment(self, env):
-        with open(env.locations.workspace_environment_file_path(self), 'wb') as environment_file:
+        with open(env.locations.data_ws_env(self), 'wb') as environment_file:
             pickler = dill.Pickler(environment_file)
             pickler.dump(env.persistent_state())
 
@@ -337,7 +338,7 @@ class Workspace(marcel.object.renderable.Renderable):
         if self.marker.unowned(env).exists():
             return None
         # First get rid of any markers from processes that don't exist. Shouldn't happend, but still.
-        config_dir_path = env.locations.config_dir_path(self)
+        config_dir_path = env.locations.config_ws(self)
         if not config_dir_path.exists():
             return None
         for file in config_dir_path.iterdir():
@@ -346,12 +347,12 @@ class Workspace(marcel.object.renderable.Renderable):
                     file.unlink()
         # Now find the marker. Something is very wrong if there is anything other than one.
         marker_filename = None
-        for file in env.locations.config_dir_path(self).iterdir():
+        for file in env.locations.config_ws(self).iterdir():
             if file.name.startswith(Marker.FILENAME_ROOT):
                 if marker_filename is None:
                     marker_filename = file.name
                 else:
-                    assert False, f'Multiple marker files in {env.locations.config_file_path(self)}'
+                    assert False, f'Multiple marker files in {env.locations.config_ws_startup(self)}'
         assert marker_filename is not None
         return Workspace.marker_filename_pid(marker_filename)
 
@@ -359,42 +360,42 @@ class Workspace(marcel.object.renderable.Renderable):
         locations = env.locations
         problems = []
         # Config dir has marker file.
-        config_dir_path = locations.config_dir_path(self)
+        config_dir_path = locations.config_ws(self)
         if not self.marker.exists(env):
             problems.append(f'{self}: {Marker.FILENAME_ROOT} marker file is missing.')
         # Config dir has startup.py.
-        if not locations.config_file_path(self).exists():
+        if not locations.config_ws_startup(self).exists():
             problems.append(f'{self}: startup.py file is missing.')
         # Config dir has nothing else.
         if len(list(config_dir_path.iterdir())) > 2:
             problems.append(f'{self}: Extraneous files in config directory.')
         # Data dir has env.pickle file.
-        if not locations.workspace_environment_file_path(self).exists():
+        if not locations.data_ws_env(self).exists():
             problems.append(f'{self}: Environment file is missing.')
         # Data dir has properties.pickle file.
-        if not locations.workspace_properties_file_path(self).exists():
+        if not locations.data_ws_prop(self).exists():
             problems.append(f'{self}: Properties file is missing.')
         # Data dir has history files.
-        if not locations.history_file_path(self).exists():
+        if not locations.data_ws_hist(self).exists():
             problems.append(f'{self}: History file is missing.')
         # Data dir has reservoirs directory.
-        if not locations.reservoir_dir_path(self).exists():
+        if not locations.data_ws_res(self).exists():
             problems.append(f'{self}: Reservoir directory is missing.')
-        if not locations.reservoir_dir_path(self).is_dir():
+        if not locations.data_ws_res(self).is_dir():
             problems.append(f'{self}: Reservoir directory is not actually a directory.')
         # Data dir has nothing else.
-        if len(list(locations.data_dir_path(self).iterdir())) > 4:
+        if len(list(locations.data_ws(self).iterdir())) > 4:
             problems.append(f'{self}: Extraneous files in data directory.')
         return problems
 
     def mark_broken(self, env, now):
         # TODO: Probably not OK to do the following to an open workspace. The marker file indicates in-use.
         locations = env.locations
-        config_source = locations.config_dir_path(self)
+        config_source = locations.config_ws(self)
         if config_source.exists():
             config_target = locations.broken_config_dir_path(self, now)
             shutil.move(config_source, config_target)
-        data_source = locations.data_dir_path(self)
+        data_source = locations.data_ws(self)
         if data_source.exists():
             data_target = locations.broken_data_dir_path(self, now)
             shutil.move(data_source, data_target)
@@ -437,7 +438,7 @@ class WorkspaceDefault(Workspace):
         if restart:
             self.write_environment(env)
         else:
-            env.locations.workspace_environment_file_path(self).unlink(missing_ok=True)
+            env.locations.data_ws_env(self).unlink(missing_ok=True)
         self.unshare_workspace(env)
 
     def set_home(self, env, homedir):

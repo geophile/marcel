@@ -70,12 +70,12 @@ def should_not_exist(path):
 
 def migrate(locations):
     # Create VERSION file. (Caller will fill in the value.)
-    version_file_path = locations.version_file_path()
+    version_file_path = locations.config_version()
     should_not_exist(version_file_path)
     version_file_path.touch(mode=0o400, exist_ok=True)  # Allow for race
     # config __DEFAULT_WORKSPACE__
     default_workspace = Workspace.default()
-    config_dir_path = locations.config_dir_path(default_workspace)
+    config_dir_path = locations.config_ws(default_workspace)
     should_not_exist(config_dir_path)
     try:
         config_dir_path.mkdir(parents=True, exist_ok=False)
@@ -86,7 +86,7 @@ def migrate(locations):
         # Must be a race with another process also doing migration
         pass
     # data __DEFAULT_WORKSPACE__
-    data_dir_path = locations.data_dir_path(default_workspace)
+    data_dir_path = locations.data_ws(default_workspace)
     should_not_exist(data_dir_path)
     try:
         data_dir_path.mkdir(parents=True, exist_ok=False)
