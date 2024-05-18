@@ -12,9 +12,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
+import shutil
 
 import dill
 import pathlib
+import sys
 import time
 
 import marcel.exception
@@ -27,7 +29,6 @@ WORKSPACE_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
 class Marker(object):
-
     FILENAME_ROOT = '.WORKSPACE'
 
     def __init__(self, workspace):
@@ -83,7 +84,6 @@ class WorkspaceProperties(object):
 
 
 class Workspace(marcel.object.renderable.Renderable):
-
     DEFAULT = None
 
     def __init__(self, name):
@@ -199,6 +199,34 @@ class Workspace(marcel.object.renderable.Renderable):
                         workspace.read_properties(env)  # So that home is known
                         yield workspace
 
+    @staticmethod
+    def validate_all(env):
+        def check_dir_exists(path, description):
+            if not path.exists():
+                raise marcel.exception.KillShellException(
+                    f'{description} directory missing.')
+            if not path.is_dir():
+                raise marcel.exception.KillShellException(
+                    f'{description} directory is not actually a directory.')
+
+        locations = env.locations
+        # Config dir has broken/, workspace/ and nothing else.
+        check_dir_exists(locations.config_workspace_base_path(), 'Workspace configuration')
+        check_dir_exists(locations.config_broken_workspace_base_path(), 'Broken workspace configuration')
+        # Data dir has broken/, workspace/ and nothing else.
+        check_dir_exists(locations.data_workspace_base_path(), 'Workspace data')
+        check_dir_exists(locations.data_broken_workspace_base_path(), 'Broken workspace data')
+        # The data and config workspace directories should have subdirectories with matching names.
+        config_workspaces = set(locations.config_workspace_base_path().iterdir())
+        data_workspaces = set(locations.data_workspace_base_path().iterdir())
+        broken_workspaces = ((config_workspaces - data_workspaces) |
+                             (data_workspaces - config_workspaces))
+        for workspace in Workspace.list(env):
+            workspace_problems = workspace.validate(env)
+            for problem in workspace_problems:
+                print(problem, file=sys.stderr)
+            broken_workspaces.add(workspace.name)
+
     # Internal
 
     def create_on_disk(self, env, initial_config_contents):
@@ -278,12 +306,6 @@ class Workspace(marcel.object.renderable.Renderable):
             # Owned by someone else?!
             assert False, self
 
-    def cannot_lock_workspace(self):
-        raise marcel.exception.KillCommandException(f'Workspace {self.name} is in use by another process.')
-
-    def does_not_exist(self):
-        raise marcel.exception.KillCommandException(f'There is no workspace named {self.name}.')
-
     def read_properties(self, env):
         assert not self.is_default()
         with open(env.locations.workspace_properties_file_path(self), 'rb') as properties_file:
@@ -332,6 +354,56 @@ class Workspace(marcel.object.renderable.Renderable):
                     assert False, f'Multiple marker files in {env.locations.config_file_path(self)}'
         assert marker_filename is not None
         return Workspace.marker_filename_pid(marker_filename)
+
+    def validate(self, env):
+        locations = env.locations
+        problems = []
+        # Config dir has marker file.
+        config_dir_path = locations.config_dir_path(self)
+        if not self.marker.exists(env):
+            problems.append(f'{self}: {Marker.FILENAME_ROOT} marker file is missing.')
+        # Config dir has startup.py.
+        if not locations.config_file_path(self).exists():
+            problems.append(f'{self}: startup.py file is missing.')
+        # Config dir has nothing else.
+        if len(list(config_dir_path.iterdir())) > 2:
+            problems.append(f'{self}: Extraneous files in config directory.')
+        # Data dir has env.pickle file.
+        if not locations.workspace_environment_file_path(self).exists():
+            problems.append(f'{self}: Environment file is missing.')
+        # Data dir has properties.pickle file.
+        if not locations.workspace_properties_file_path(self).exists():
+            problems.append(f'{self}: Properties file is missing.')
+        # Data dir has history files.
+        if not locations.history_file_path(self).exists():
+            problems.append(f'{self}: History file is missing.')
+        # Data dir has reservoirs directory.
+        if not locations.reservoir_dir_path(self).exists():
+            problems.append(f'{self}: Reservoir directory is missing.')
+        if not locations.reservoir_dir_path(self).is_dir():
+            problems.append(f'{self}: Reservoir directory is not actually a directory.')
+        # Data dir has nothing else.
+        if len(list(locations.data_dir_path(self).iterdir())) > 4:
+            problems.append(f'{self}: Extraneous files in data directory.')
+        return problems
+
+    def mark_broken(self, env, now):
+        # TODO: Probably not OK to do the following to an open workspace. The marker file indicates in-use.
+        locations = env.locations
+        config_source = locations.config_dir_path(self)
+        if config_source.exists():
+            config_target = locations.broken_config_dir_path(self, now)
+            shutil.move(config_source, config_target)
+        data_source = locations.data_dir_path(self)
+        if data_source.exists():
+            data_target = locations.broken_data_dir_path(self, now)
+            shutil.move(data_source, data_target)
+
+    def cannot_lock_workspace(self):
+        raise marcel.exception.KillCommandException(f'Workspace {self.name} is in use by another process.')
+
+    def does_not_exist(self):
+        raise marcel.exception.KillCommandException(f'There is no workspace named {self.name}.')
 
     @staticmethod
     def marker_filename_pid(marker_filename):

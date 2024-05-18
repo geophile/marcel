@@ -631,7 +631,8 @@ Workspace validation
 
     .config/marcel/
         broken
-            <workspace dirs>
+            <timestamp>/  # When damage detected
+                <workspace dirs>
         workspace
             __DEFAULT__
                 .WORKSPACE
@@ -642,7 +643,8 @@ Workspace validation
 
     .local/share/marcel/
         broken
-            <workspace dirs>
+            <timestamp>/  # When damage detected
+                <workspace dirs>
         workspace
             __DEFAULT__
                 <pid>.env.pickle  # Deleted on non-restart shutdown
@@ -673,6 +675,8 @@ To do:
 - Validation
 
     - Implementation
+
+    - Default workspace validation
 
     - Check on startup
 

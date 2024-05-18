@@ -79,8 +79,14 @@ class Locations(object):
     def config_dir_path(self, workspace):
         return self.config_workspace_base_path() / Locations.workspace_dir_name(workspace)
 
+    def broken_config_dir_path(self, workspace, timestamp):
+        return self.config_broken_workspace_base_path() / str(timestamp) / Locations.workspace_dir_name(workspace)
+
     def data_dir_path(self, workspace):
         return self.data_workspace_base_path() / Locations.workspace_dir_name(workspace)
+
+    def broken_data_dir_path(self, workspace, timestamp):
+        return self.data_broken_workspace_base_path() / str(timestamp) / Locations.workspace_dir_name(workspace)
 
     def reservoir_dir_path(self, workspace):
         return self.data_dir_path(workspace) / 'reservoirs'
