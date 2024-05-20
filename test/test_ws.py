@@ -253,7 +253,7 @@ def test_workspace_validation():
     TEST.run('ws -c')
     check_validation(validate_all(TEST.env))
     # Break the workspace by removing the marker
-    os.system(f'rm {TEST.test_home}/.config/marcel/workspace/w1/.WORKSPACE')
+    os.system(f'rm -f {TEST.test_home}/.config/marcel/workspace/w1/.WORKSPACE')
     check_validation(validate_all(TEST.env),
                      ValidationError('w1', '.WORKSPACE is missing'))
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w1')
@@ -322,9 +322,9 @@ def test_workspace_validation():
 
 
 def main_stable():
-    # test_workspace_lifecycle()
-    # test_workspaces_and_reservoirs()
-    # test_workspaces_and_compilables()
+    test_workspace_lifecycle()
+    test_workspaces_and_reservoirs()
+    test_workspaces_and_compilables()
     test_workspace_validation()
 
 
