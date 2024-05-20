@@ -13,5 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-all = ['migration']
+all = ['migration',
+       'persistence']
 

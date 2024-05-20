@@ -16,8 +16,8 @@
 import marcel.exception
 import marcel.locations
 import marcel.version
-import marcel.migration.migration024
-import marcel.migration.migration028
+import marcel.persistence.migration024
+import marcel.persistence.migration028
 
 PREMIGRATION = '0.0'
 
@@ -44,9 +44,9 @@ def migrate():
     locations = marcel.locations.Locations()
     iv = installed_version(locations)
     if iv < '0.24':
-        marcel.migration.migration024.migrate(locations)
+        marcel.persistence.migration024.migrate(locations)
     if iv < '0.28':
-        marcel.migration.migration028.migrate(locations)
+        marcel.persistence.migration028.migrate(locations)
     update_version_file()
     assert installed_version(locations) == marcel.version.VERSION
 

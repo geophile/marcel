@@ -12,6 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
+
 import shutil
 
 import dill
@@ -209,47 +210,6 @@ class Workspace(marcel.object.renderable.Renderable):
                     if workspace.marker.exists(env):
                         workspace.read_properties(env)  # So that home is known
                         yield workspace
-
-    @staticmethod
-    def validate_all(env):
-        def check_dir_exists(path, description):
-            if not path.exists():
-                raise marcel.exception.KillShellException(
-                    f'{description} directory missing.')
-            if not path.is_dir():
-                raise marcel.exception.KillShellException(
-                    f'{description} directory is not actually a directory.')
-
-        locations = env.locations
-        errors = []
-        # TODO: Check VERSION file
-        # Config dir has broken/, workspace/ and nothing else.
-        check_dir_exists(locations.config_ws(), 'Workspace configuration')
-        check_dir_exists(locations.config_bws(), 'Broken workspace configuration')
-        # Data dir has broken/, workspace/ and nothing else.
-        check_dir_exists(locations.data_ws(), 'Workspace data')
-        check_dir_exists(locations.data_bws(), 'Broken workspace data')
-        # The data and config workspace directories should have subdirectories with matching names.
-        config_workspace_names = set([f.name for f in locations.config_ws().iterdir()])
-        data_workspace_names = set([f.name for f in locations.data_ws().iterdir()])
-        for missing_data_dir in (config_workspace_names - data_workspace_names):
-            broken = Workspace(missing_data_dir)
-            errors.append(Workspace.ValidationError(broken.name, f'{locations.data_ws(broken)} is missing'))
-        for missing_config_dir in (data_workspace_names - config_workspace_names):
-            broken = Workspace(missing_config_dir)
-            errors.append(Workspace.ValidationError(broken.name, f'{locations.config_ws(broken)} is missing'))
-        # Validate each workspace. Don't rely on Workspace.list(), which assumes valid workspaces.
-        # E.g., a missing marker file will cause the broken workspace to not be included in the output.
-        for dir in locations.config_ws().iterdir():
-            # TODO: Default workspace validation
-            if dir.name != marcel.locations.Locations.DEFAULT_WORKSPACE_DIR_NAME:
-                if dir.name in data_workspace_names:
-                    workspace = Workspace(dir.name)
-                    ws_errors = workspace.validate(env)
-                    if len(ws_errors) > 0:
-                        errors.extend(ws_errors)
-                # else: Missing data workspace directory has already been noted.
-        return errors
 
     # Internal
 

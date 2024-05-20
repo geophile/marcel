@@ -42,7 +42,7 @@ import marcel.env
 import marcel.exception
 import marcel.job
 import marcel.locations
-import marcel.migration.migration
+import marcel.persistence.migration
 import marcel.multilinereader
 import marcel.object.workspace
 import marcel.opmodule
@@ -387,7 +387,7 @@ def initialize_persistent_config_and_data(locations):
 def main():
     workspace_name, script, mpstart = args()
     multiprocessing.set_start_method(mpstart)
-    marcel.migration.migration.migrate()
+    marcel.persistence.migration.migrate()
     workspace = (marcel.object.workspace.Workspace.default()
                  if workspace_name is None else
                  marcel.object.workspace.Workspace(workspace_name))

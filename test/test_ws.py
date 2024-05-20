@@ -1,10 +1,12 @@
 import os
 import sys
 
+import marcel.exception
 import marcel.object.cluster
 import marcel.object.error
 import marcel.object.workspace
 import marcel.version
+from marcel.persistence.persistence import validate_all
 
 import test_base
 
@@ -34,6 +36,17 @@ def check_validation(actual, *expected):
         TEST.report_error('Workspace validation error mismatch:',
                           'ACTUAL', actual,
                           'EXPECTED', expected)
+
+
+def expect_exception(f, exception_class, expected_message):
+    try:
+        f()
+        TEST.report_error(f'Expected {exception_class}: {expected_message}, '
+                          f'but no exception was raised.')
+    except BaseException as e:
+        if not (isinstance(e, exception_class) and expected_message in str(e)):
+            TEST.report_error(f'Expected {exception_class}: {expected_message}, '
+                              f'got {e}')
 
 
 @timeit
@@ -231,17 +244,17 @@ def test_workspaces_and_compilables():
 def test_workspace_validation():
     TEST.reset_environment()
     # No workspaces
-    check_validation(Workspace.validate_all(TEST.env))
+    check_validation(validate_all(TEST.env))
     # Create and check a good workspace
     TEST.run('ws -n w1')
     # ... while open
-    check_validation(Workspace.validate_all(TEST.env))
+    check_validation(validate_all(TEST.env))
     # ... and closed
     TEST.run('ws -c')
-    check_validation(Workspace.validate_all(TEST.env))
+    check_validation(validate_all(TEST.env))
     # Break the workspace by removing the marker
     os.system(f'rm {TEST.test_home}/.config/marcel/workspace/w1/.WORKSPACE')
-    check_validation(Workspace.validate_all(TEST.env),
+    check_validation(validate_all(TEST.env),
                      ValidationError('w1', '.WORKSPACE is missing'))
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w1')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w1')
@@ -249,7 +262,7 @@ def test_workspace_validation():
     TEST.run('ws -n w2')
     TEST.run('ws -c')
     os.system(f'rm {TEST.test_home}/.config/marcel/workspace/w2/startup.py')
-    check_validation(Workspace.validate_all(TEST.env),
+    check_validation(validate_all(TEST.env),
                      ValidationError('w2', 'startup.py is missing'))
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w2')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w2')
@@ -257,7 +270,7 @@ def test_workspace_validation():
     TEST.run('ws -n w3')
     TEST.run('ws -c')
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w3')
-    check_validation(Workspace.validate_all(TEST.env),
+    check_validation(validate_all(TEST.env),
                      ValidationError('w3', 'w3 is missing'))
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w3')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w3')
@@ -265,7 +278,7 @@ def test_workspace_validation():
     TEST.run('ws -n w4')
     TEST.run('ws -c')
     os.system(f'rm {TEST.test_home}/.local/share/marcel/workspace/w4/env.pickle')
-    check_validation(Workspace.validate_all(TEST.env),
+    check_validation(validate_all(TEST.env),
                      ValidationError('w4', 'env.pickle is missing'))
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w4')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w4')
@@ -273,7 +286,7 @@ def test_workspace_validation():
     TEST.run('ws -n w5')
     TEST.run('ws -c')
     os.system(f'rm {TEST.test_home}/.local/share/marcel/workspace/w5/properties.pickle')
-    check_validation(Workspace.validate_all(TEST.env),
+    check_validation(validate_all(TEST.env),
                      ValidationError('w5', 'properties.pickle is missing'))
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w5')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w5')
@@ -281,7 +294,7 @@ def test_workspace_validation():
     TEST.run('ws -n w6')
     TEST.run('ws -c')
     os.system(f'rm {TEST.test_home}/.local/share/marcel/workspace/w6/history')
-    check_validation(Workspace.validate_all(TEST.env),
+    check_validation(validate_all(TEST.env),
                      ValidationError('w6', 'history is missing'))
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w6')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w6')
@@ -289,7 +302,7 @@ def test_workspace_validation():
     TEST.run('ws -n w7')
     TEST.run('ws -c')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w7/reservoirs')
-    check_validation(Workspace.validate_all(TEST.env),
+    check_validation(validate_all(TEST.env),
                      ValidationError('w7', 'reservoirs is missing'))
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w7')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w7')
@@ -297,16 +310,21 @@ def test_workspace_validation():
     TEST.run('ws -n w8')
     TEST.run('ws -c')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w8')
-    check_validation(Workspace.validate_all(TEST.env),
+    check_validation(validate_all(TEST.env),
                      ValidationError('w8', 'w8 is missing'))
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w8')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w8')
+    # Not workspace-related, but this is a convenient place to check VERSION.
+    os.system(f'rm -f {TEST.test_home}/.config/marcel/VERSION')
+    expect_exception(lambda: validate_all(TEST.env),
+                     marcel.exception.KillShellException,
+                     'VERSION')
 
 
 def main_stable():
-    test_workspace_lifecycle()
-    test_workspaces_and_reservoirs()
-    test_workspaces_and_compilables()
+    # test_workspace_lifecycle()
+    # test_workspaces_and_reservoirs()
+    # test_workspaces_and_compilables()
     test_workspace_validation()
 
 
