@@ -50,6 +50,7 @@ import marcel.parser
 import marcel.reservoir
 import marcel.tabcompleter
 import marcel.util
+import marcel.version
 
 HISTORY_LENGTH = 1000
 
@@ -326,11 +327,11 @@ def args():
     return workspace, script, mpstart
 
 
-def main_interactive_run(workspace):
+def main_interactive_run(locations, workspace):
     main = None
     trace = None
     while True:
-        env = marcel.env.EnvironmentInteractive.create(marcel.locations.Locations(), workspace, trace)
+        env = marcel.env.EnvironmentInteractive.create(locations, workspace, trace)
         main = MainInteractive(main, env, workspace)
         try:
             main.run()
@@ -348,14 +349,13 @@ def main_interactive_run(workspace):
                 main.input = None
 
 
-def main_script_run(workspace, script_path):
+def main_script_run(locations, workspace, script_path):
     try:
         with open(script_path, 'r') as script_file:
             script = script_file.read()
     except FileNotFoundError:
         fail(f'File not found: {script_path}')
     commands = commands_in_script(script)
-    locations = marcel.locations.Locations()
     env = marcel.env.EnvironmentScript.create(locations, workspace)
     main = MainScript(env, workspace)
     for command in commands:
@@ -371,6 +371,19 @@ def main_script_run(workspace, script_path):
             main = MainScript(env, workspace)
 
 
+def initialize_persistent_config_and_data(locations):
+    # These calls ensure the config and data directories exist.
+    locations.config()
+    locations.config_ws()
+    locations.config_bws()
+    locations.data()
+    locations.data_ws()
+    locations.data_bws()
+    # Version
+    locations.config_version().write_text(marcel.version.VERSION)
+    locations.config_version().chmod(0o400)
+
+
 def main():
     workspace_name, script, mpstart = args()
     multiprocessing.set_start_method(mpstart)
@@ -378,10 +391,13 @@ def main():
     workspace = (marcel.object.workspace.Workspace.default()
                  if workspace_name is None else
                  marcel.object.workspace.Workspace(workspace_name))
+    locations = marcel.locations.Locations()
+    if locations.fresh_install():
+        initialize_persistent_config_and_data(locations)
     if script is None:
-        main_interactive_run(workspace)
+        main_interactive_run(locations, workspace)
     else:
-        main_script_run(workspace, script)
+        main_script_run(locations, workspace, script)
 
 
 if __name__ == '__main__':

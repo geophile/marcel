@@ -28,15 +28,23 @@ import marcel.object.workspace
 #             <timestamp>/                        
 #                 <workspace dirs>                config_bws(workspace, timestamp)
 #         workspace                               config_ws()
+#             __DEFAULT__/                        config_ws(workspace)
+#                 .WORKSPACE
+#                 startup.py                      config_ws_startup(workspace)
 #             WORKSPACE_NAME/                     config_ws(workspace)
 #                 .WORKSPACE
 #                 startup.py                      config_ws_startup(workspace)
-# 
+#
 #     .local/share/marcel/                        data()
 #         broken                                  data_bws()
 #             <timestamp>/                        
 #                 <workspace dirs>                data_bws(workspace, timestamp)
 #         workspace                               data_ws()
+#             __DEFAULT__/                        data_ws(workspace)
+#                 <pid>.env.pickle                data_ws_env(workspace)
+#                 history                         data_ws_hist(workspace)
+#                 reservoirs/                     data_ws_res(workspace)
+#                     <pid>.<varname>.pickle      data_ws_res(workspace, name)
 #             WORKSPACE_NAME/                     data_ws(workspace)
 #                 properties.pickle               data_ws_prop(workspace)
 #                 env.pickle                      data_ws_env(workspace)

@@ -16,7 +16,6 @@ import shutil
 
 import dill
 import pathlib
-import sys
 import time
 
 import marcel.exception
@@ -84,6 +83,18 @@ class WorkspaceProperties(object):
 
 
 class Workspace(marcel.object.renderable.Renderable):
+
+    class ValidationError(object):
+
+        def __init__(self, workspace_name, message):
+            assert type(workspace_name) is str
+            assert type(message) is str
+            self.workspace_name = workspace_name
+            self.message = message
+
+        def __repr__(self):
+            return f'{self.workspace_name}: {self.message}'
+
     DEFAULT = None
 
     def __init__(self, name):
@@ -210,6 +221,7 @@ class Workspace(marcel.object.renderable.Renderable):
                     f'{description} directory is not actually a directory.')
 
         locations = env.locations
+        errors = []
         # TODO: Check VERSION file
         # Config dir has broken/, workspace/ and nothing else.
         check_dir_exists(locations.config_ws(), 'Workspace configuration')
@@ -220,16 +232,24 @@ class Workspace(marcel.object.renderable.Renderable):
         # The data and config workspace directories should have subdirectories with matching names.
         config_workspace_names = set([f.name for f in locations.config_ws().iterdir()])
         data_workspace_names = set([f.name for f in locations.data_ws().iterdir()])
-        broken_workspaces = ((config_workspace_names - data_workspace_names) |
-                             (data_workspace_names - config_workspace_names))
-        for workspace in Workspace.list(env):
+        for missing_data_dir in (config_workspace_names - data_workspace_names):
+            broken = Workspace(missing_data_dir)
+            errors.append(Workspace.ValidationError(broken.name, f'{locations.data_ws(broken)} is missing'))
+        for missing_config_dir in (data_workspace_names - config_workspace_names):
+            broken = Workspace(missing_config_dir)
+            errors.append(Workspace.ValidationError(broken.name, f'{locations.config_ws(broken)} is missing'))
+        # Validate each workspace. Don't rely on Workspace.list(), which assumes valid workspaces.
+        # E.g., a missing marker file will cause the broken workspace to not be included in the output.
+        for dir in locations.config_ws().iterdir():
             # TODO: Default workspace validation
-            if not workspace.is_default():
-                problems = workspace.validate(env)
-                if len(problems) > 0:
-                    for problem in problems:
-                        print(problem, file=sys.stderr)
-                    broken_workspaces.add(workspace.name)
+            if dir.name != marcel.locations.Locations.DEFAULT_WORKSPACE_DIR_NAME:
+                if dir.name in data_workspace_names:
+                    workspace = Workspace(dir.name)
+                    ws_errors = workspace.validate(env)
+                    if len(ws_errors) > 0:
+                        errors.extend(ws_errors)
+                # else: Missing data workspace directory has already been noted.
+        return errors
 
     # Internal
 
@@ -360,36 +380,51 @@ class Workspace(marcel.object.renderable.Renderable):
         return Workspace.marker_filename_pid(marker_filename)
 
     def validate(self, env):
+        def missing(path):
+            ws_errors.append(Workspace.ValidationError(self.name, f'{path} is missing'))
+
+        def extraneous(path):
+            ws_errors.append(Workspace.ValidationError(self.name, f'{path} has extraneous files'))
+
+        def not_a_directory(path):
+            ws_errors.append(Workspace.ValidationError(self.name, f'{path} is not actually a directory'))
+
         locations = env.locations
-        problems = []
+        ws_errors = []
+        # Don't need to check existence of config dir. The validate_all loop checks workspaces that
+        # exist in this dir.
         # Config dir has marker file.
         config_dir_path = locations.config_ws(self)
         if not self.marker.exists(env):
-            problems.append(f'{self}: {Marker.FILENAME_ROOT} marker file is missing.')
+            missing(config_dir_path / Marker.FILENAME_ROOT)
         # Config dir has startup.py.
         if not locations.config_ws_startup(self).exists():
-            problems.append(f'{self}: startup.py file is missing.')
+            missing(locations.config_ws_startup(self))
         # Config dir has nothing else.
         if len(list(config_dir_path.iterdir())) > 2:
-            problems.append(f'{self}: Extraneous files in config directory.')
-        # Data dir has env.pickle file.
-        if not locations.data_ws_env(self).exists():
-            problems.append(f'{self}: Environment file is missing.')
-        # Data dir has properties.pickle file.
-        if not locations.data_ws_prop(self).exists():
-            problems.append(f'{self}: Properties file is missing.')
-        # Data dir has history files.
-        if not locations.data_ws_hist(self).exists():
-            problems.append(f'{self}: History file is missing.')
-        # Data dir has reservoirs directory.
-        if not locations.data_ws_res(self).exists():
-            problems.append(f'{self}: Reservoir directory is missing.')
-        if not locations.data_ws_res(self).is_dir():
-            problems.append(f'{self}: Reservoir directory is not actually a directory.')
-        # Data dir has nothing else.
-        if len(list(locations.data_ws(self).iterdir())) > 4:
-            problems.append(f'{self}: Extraneous files in data directory.')
-        return problems
+            extraneous(config_dir_path)
+        # Data dir exists
+        if not locations.data_ws(self).exists():
+            missing(locations.data_ws(self))
+        else:
+            # Data dir has env.pickle file.
+            if not locations.data_ws_env(self).exists():
+                missing(locations.data_ws_env(self))
+            # Data dir has properties.pickle file.
+            if not locations.data_ws_prop(self).exists():
+                missing(locations.data_ws_prop(self))
+            # Data dir has history files.
+            if not locations.data_ws_hist(self).exists():
+                missing(locations.data_ws_hist(self))
+            # Data dir has reservoirs directory.
+            if not locations.data_ws_res(self).exists():
+                missing(locations.data_ws_res(self))
+            elif not locations.data_ws_res(self).is_dir():
+                not_a_directory(locations.data_ws_res(self))
+            # Data dir has nothing else.
+            if len(list(locations.data_ws(self).iterdir())) > 4:
+                extraneous(locations.data_ws(self))
+        return ws_errors
 
     def mark_broken(self, env, now):
         # TODO: Probably not OK to do the following to an open workspace. The marker file indicates in-use.

@@ -51,8 +51,8 @@ class TestBase:
             self.main.shutdown()
         os.environ['HOME'] = TestBase.test_home
         self.locations = marcel.locations.Locations()
-        shutil.rmtree(TestBase.test_home)
-        os.makedirs(TestBase.test_home)
+        shutil.rmtree(TestBase.test_home, ignore_errors=True)
+        marcel.main.initialize_persistent_config_and_data(self.locations)
         # os.system requires a working directory that actually exists. Go to one, doesn't matter which.
         os.chdir(TestBase.test_home)
         os.system('sudo rm -f /tmp/farcel*.log')
@@ -217,6 +217,17 @@ class TestConsole(TestBase):
                                                     e.workspace_to_open,
                                                     testing=True)
             return None, None
+
+    def report_error(self, *messages):
+        self.failures += 1
+        for message in messages:
+            if type(message) is tuple:
+                message = list(message)
+            if type(message) is list:
+                message = '\n'.join([str(m) for m in message])
+            elif type(message) is not str:
+                message = str(message)
+            print(message, file=sys.__stdout__)
 
 
 class TestAPI(TestBase):
