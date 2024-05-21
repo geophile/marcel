@@ -50,9 +50,9 @@ class DirectoryState:
             self.env.namespace['PWD'] = new_dir
         else:
             home = pathlib.Path.home().resolve()
-            marcel.util.print_to_stderr(f'Directory {new_dir} does not exist, '
-                                        f'going to home directory instead: {home}',
-                                        self.env)
+            marcel.util.print_to_stderr(self.env,
+                                        f'Directory {new_dir} does not exist, '
+                                        f'going to home directory instead: {home}')
             if len(dir_stack) == 0 or dir_stack[-1] != home:
                 self.push_dir(home)
 
@@ -109,4 +109,4 @@ class DirectoryState:
                       'they are no longer accessible:']
             buffer.extend(removed)
             message = '\n'.join(buffer)
-            marcel.util.print_to_stderr(message, self.env)
+            marcel.util.print_to_stderr(self.env, message)

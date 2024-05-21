@@ -208,7 +208,7 @@ class Interactive(Escape):
     def receive(self, env, _):
         self.process.wait()
         if self.process.returncode != 0:
-            marcel.util.print_to_stderr(self.process.stderr, env)
+            marcel.util.print_to_stderr(env, self.process.stderr)
 
 
 class BashShell(Escape):
@@ -223,7 +223,7 @@ class BashShell(Escape):
     def receive(self, env, _):
         self.process.wait()
         if self.process.returncode != 0:
-            marcel.util.print_to_stderr(self.process.stderr, env)
+            marcel.util.print_to_stderr(env, self.process.stderr)
 
 
 class ProcessOutputHandler(threading.Thread):

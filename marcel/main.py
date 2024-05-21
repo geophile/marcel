@@ -43,6 +43,7 @@ import marcel.exception
 import marcel.job
 import marcel.locations
 import marcel.persistence.migration
+import marcel.persistence.persistence
 import marcel.multilinereader
 import marcel.object.workspace
 import marcel.opmodule
@@ -104,7 +105,7 @@ class MainScript(Main):
         startup_vars = self.read_config()
         self.env.enforce_var_immutability(startup_vars)
         atexit.register(self.shutdown)
-        # marcel.object.workspace.Workspace.validate_all(env)
+        marcel.persistence.persistence.validate_all(env, MainScript.handle_persistence_validation_errors)
 
     def read_config(self):
         # Comparing keys_before/after tells us what vars were defined by the startup script.
@@ -143,7 +144,7 @@ class MainScript(Main):
             except marcel.parser.EmptyCommand:
                 pass
             except marcel.exception.KillCommandException as e:
-                marcel.util.print_to_stderr(e, self.env)
+                marcel.util.print_to_stderr(self.env, e)
             except marcel.exception.KillAndResumeException:
                 # Error handler printed the error
                 pass
@@ -169,6 +170,24 @@ class MainScript(Main):
             if type(script) is str:
                 for command in commands_in_script(script):
                     self.parse_and_run_command(command)
+
+    # Internal
+
+    @staticmethod
+    def handle_persistence_validation_errors(env, errors):
+        if len(errors) > 0:
+            now = time.time()
+            broken_ws_config = env.locations.config_bws() / str(now)
+            broken_ws_data = env.locations.data_bws() / str(now)
+            marcel.util.print_to_stderr(env,
+                                        f'Damaged workspaces have been detected. Their contents will be moved to:'
+                                        f'\n    {broken_ws_config}'
+                                        f'\n    {broken_ws_data}')
+            for validation_error in errors:
+                marcel.util.print_to_stderr(env, str(validation_error))
+                ws_name = validation_error.workspace_name
+                broken_ws = marcel.object.workspace.Workspace(ws_name)
+                broken_ws.mark_broken(env, now)
 
 
 class MainInteractive(MainScript):

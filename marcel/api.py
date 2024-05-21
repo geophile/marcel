@@ -254,7 +254,7 @@ def _run_pipeline(pipeline):
     try:
         command.execute(_ENV)
     except marcel.exception.KillCommandException as e:
-        marcel.util.print_to_stderr(e, _ENV)
+        marcel.util.print_to_stderr(_ENV, e)
     except marcel.exception.KillAndResumeException:
         # Error handler printed the error
         pass

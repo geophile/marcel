@@ -411,7 +411,7 @@ class PipelineIterator:
         try:
             command.execute(env)
         except marcel.exception.KillCommandException as e:
-            marcel.util.print_to_stderr(e, env)
+            marcel.util.print_to_stderr(env, e)
         finally:
             self.iterator = iter(output)
 

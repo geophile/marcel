@@ -394,7 +394,6 @@ class EnvironmentScript(Environment):
             buffer.append(')')
             return ''.join(buffer)
 
-
     def __init__(self, locations, workspace, trace=None):
         super().__init__(marcel.nestednamespace.NestedNamespace(), trace)
         assert workspace is not None

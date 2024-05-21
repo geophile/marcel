@@ -14,12 +14,13 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import marcel.exception
+import marcel.locations
 import marcel.object.workspace
 
 Workspace = marcel.object.workspace.Workspace
 
 
-def validate_all(env):
+def validate_all(env, error_handler):
     def check_dir_exists(path, description):
         if not path.exists():
             raise marcel.exception.KillShellException(
@@ -66,4 +67,5 @@ def validate_all(env):
                 if len(ws_errors) > 0:
                     errors.extend(ws_errors)
             # else: Missing data workspace directory has already been noted.
+    error_handler(env, errors)
     return errors
