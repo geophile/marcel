@@ -67,5 +67,5 @@ def validate_all(env, error_handler):
                 if len(ws_errors) > 0:
                     errors.extend(ws_errors)
             # else: Missing data workspace directory has already been noted.
-    error_handler(env, errors)
+    error_handler(errors)
     return errors

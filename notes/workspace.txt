@@ -686,9 +686,7 @@ To do:
 
 - Broken workspaces
 
-    - Repairs?
-
-    - Put in broken directory
+    * Put in broken directory
 
     * Naming? Have to handle multiple broken workspaces with the same
       name.
@@ -697,8 +695,14 @@ To do:
   only run for MainScript, MainInteractive. Is on-disk required for
   API-only usage?
 
-- validate_all doesn't belong in Workspace. It checks the marcel
+* validate_all doesn't belong in Workspace. It checks the marcel
   on-disk state, not just workspaces.
+
+- Staring marcel with a broken ws is bad. Startup moves the workspace
+  state. Don't operate with the workspace in this condition. Need to
+  restart with default workspace, and a message indicating the
+  problem.
+
 
 - Locations cleanup:
 

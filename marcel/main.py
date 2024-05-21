@@ -53,6 +53,7 @@ import marcel.tabcompleter
 import marcel.util
 import marcel.version
 
+Workspace = marcel.object.workspace.Workspace
 HISTORY_LENGTH = 1000
 
 
@@ -104,8 +105,9 @@ class MainScript(Main):
         self.config_time = time.time()
         startup_vars = self.read_config()
         self.env.enforce_var_immutability(startup_vars)
+        self.needs_restart = False
+        marcel.persistence.persistence.validate_all(env, self.handle_persistence_validation_errors)
         atexit.register(self.shutdown)
-        marcel.persistence.persistence.validate_all(env, MainScript.handle_persistence_validation_errors)
 
     def read_config(self):
         # Comparing keys_before/after tells us what vars were defined by the startup script.
@@ -150,10 +152,16 @@ class MainScript(Main):
                 pass
 
     def shutdown(self, restart=False):
-        self.workspace.close(self.env, restart)
+        try:
+            self.workspace.close(self.env, restart)
+        except:
+            pass
         # If we're shutting down for real (not restarting) then the default workspace needs to be closed too.
         if not restart:
-            marcel.object.workspace.Workspace.default().close(self.env, restart)
+            try:
+                Workspace.default().close(self.env, restart)
+            except:
+                pass
         # The current main is about to be obsolete, but it still exists, and is registered with atexit,
         # keeping it alive, I think. So it's shutdown handler gets run on shutdown. atexit.unregister
         # prevents this, and only the current Main's shutdown will run, on shutdown.
@@ -173,21 +181,30 @@ class MainScript(Main):
 
     # Internal
 
-    @staticmethod
-    def handle_persistence_validation_errors(env, errors):
+    def handle_persistence_validation_errors(self, errors):
         if len(errors) > 0:
             now = time.time()
-            broken_ws_config = env.locations.config_bws() / str(now)
-            broken_ws_data = env.locations.data_bws() / str(now)
-            marcel.util.print_to_stderr(env,
+            broken_ws_config = self.env.locations.config_bws() / str(now)
+            broken_ws_data = self.env.locations.data_bws() / str(now)
+            marcel.util.print_to_stderr(self.env,
                                         f'Damaged workspaces have been detected. Their contents will be moved to:'
                                         f'\n    {broken_ws_config}'
                                         f'\n    {broken_ws_data}')
+            started_in_broken_ws = False
             for validation_error in errors:
-                marcel.util.print_to_stderr(env, str(validation_error))
+                marcel.util.print_to_stderr(self.env, str(validation_error))
                 ws_name = validation_error.workspace_name
-                broken_ws = marcel.object.workspace.Workspace(ws_name)
-                broken_ws.mark_broken(env, now)
+                broken_ws = Workspace (ws_name)
+                started_in_broken_ws = started_in_broken_ws or (self.env.workspace.name == ws_name)
+                broken_ws.mark_broken(self.env, now)
+            if started_in_broken_ws:
+                # This marks this MainScript object as needing a restart. Don't want to continue with a broken
+                # workspace, but throwing a ReconfigureException right now (during MainScript.__init__)
+                # is messy, since we're then shutting down an incompletely initialized main.
+                self.needs_restart = True
+                marcel.util.print_to_stderr(
+                    self.env,
+                    f'Selected workspace {self.workspace.name} is damaged, starting in default workspace.')
 
 
 class MainInteractive(MainScript):
@@ -195,7 +212,11 @@ class MainInteractive(MainScript):
     def __init__(self, old_main, env, workspace, testing=None):
         super().__init__(env, workspace, testing)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
-        self.reader = self.initialize_reader()
+        try:
+            self.reader = self.initialize_reader()
+        except FileNotFoundError:
+            # Probably a damaged workspace. Restart in default workspace.
+            self.needs_restart = True
         self.job_control = marcel.job.JobControl.start(self.env, self.update_namespace)
         self.input = None
         if old_main:
@@ -206,8 +227,14 @@ class MainInteractive(MainScript):
     # Main
 
     def shutdown(self, restart=False):
-        self.reader.close()
-        self.job_control.shutdown()
+        try:
+            self.reader.close()
+        except:
+            pass
+        try:
+            self.job_control.shutdown()
+        except:
+            pass
         return super().shutdown(restart)
 
     # MainScript
@@ -347,12 +374,25 @@ def args():
 
 
 def main_interactive_run(locations, workspace):
+    def restart_in_default_workspace():
+        raise marcel.exception.ReconfigureException(Workspace.default())
+
     main = None
     trace = None
     while True:
-        env = marcel.env.EnvironmentInteractive.create(locations, workspace, trace)
+        try:
+            env = marcel.env.EnvironmentInteractive.create(locations, workspace, trace)
+        except Exception as e:
+            # Something ws-related? Try starting in default
+            workspace = Workspace.default()
+            env = marcel.env.EnvironmentInteractive.create(locations, workspace, trace)
+            marcel.util.print_to_stderr(
+                env,
+                f'Caught {type(e)} during startup. Starting in default workspace. {str(e)}')
         main = MainInteractive(main, env, workspace)
         try:
+            if main.needs_restart:
+                restart_in_default_workspace()
             main.run()
             break
         except marcel.exception.ReconfigureException as e:
@@ -407,9 +447,9 @@ def main():
     workspace_name, script, mpstart = args()
     multiprocessing.set_start_method(mpstart)
     marcel.persistence.migration.migrate()
-    workspace = (marcel.object.workspace.Workspace.default()
+    workspace = (Workspace .default()
                  if workspace_name is None else
-                 marcel.object.workspace.Workspace(workspace_name))
+                 Workspace (workspace_name))
     locations = marcel.locations.Locations()
     if locations.fresh_install():
         initialize_persistent_config_and_data(locations)
