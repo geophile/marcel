@@ -242,15 +242,6 @@ class Workspace(marcel.object.renderable.Renderable):
             raise marcel.exception.KillCommandException(
                 f'Workspace name must be usable as a legal filename: {self.name}')
 
-    def share_workspace(self, env):
-        assert self.is_default()
-        # exist_ok = True: We could be returning to the default workspace, previously opened in this process.
-        self.marker.owned(env).touch(mode=0o000, exist_ok=True)
-
-    def unshare_workspace(self, env):
-        assert self.is_default()
-        self.marker.owned(env).unlink(missing_ok=True)
-
     def lock_workspace(self, env):
         assert not self.is_default()
         owner = self.owner(env)
@@ -421,7 +412,6 @@ class WorkspaceDefault(Workspace):
         return True
 
     def open(self, env):
-        self.share_workspace(env)
         self.read_environment(env)
 
     def close(self, env, restart):
@@ -437,7 +427,6 @@ class WorkspaceDefault(Workspace):
             self.write_environment(env)
         else:
             env.locations.data_ws_env(self).unlink(missing_ok=True)
-        self.unshare_workspace(env)
 
     def set_home(self, env, homedir):
         raise marcel.exception.KillCommandException('Default workspace does not have a home directory.')

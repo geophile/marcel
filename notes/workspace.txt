@@ -680,7 +680,7 @@ To do:
 
     - Default workspace validation
 
-    - Check on startup
+    * Check on startup
 
     - Validate on open, close
 
@@ -698,7 +698,7 @@ To do:
 * validate_all doesn't belong in Workspace. It checks the marcel
   on-disk state, not just workspaces.
 
-- Staring marcel with a broken ws is bad. Startup moves the workspace
+* Staring marcel with a broken ws is bad. Startup moves the workspace
   state. Don't operate with the workspace in this condition. Need to
   restart with default workspace, and a message indicating the
   problem.
