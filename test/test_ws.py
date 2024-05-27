@@ -11,7 +11,7 @@ from marcel.persistence.persistence import validate_all
 import test_base
 
 Workspace = marcel.object.workspace.Workspace
-ValidationError = Workspace.ValidationError
+ValidationError = marcel.object.workspace.WorkspaceValidater.Error
 timeit = test_base.timeit
 TestDir = test_base.TestDir
 

@@ -52,10 +52,6 @@ class TestBase:
         os.environ['HOME'] = TestBase.test_home
         self.locations = marcel.locations.Locations()
         shutil.rmtree(TestBase.test_home, ignore_errors=True)
-        marcel.main.initialize_persistent_config_and_data(self.locations)
-        # os.system requires a working directory that actually exists. Go to one, doesn't matter which.
-        os.chdir(TestBase.test_home)
-        os.system('sudo rm -f /tmp/farcel*.log')
 
     def new_file(self, filename):
         path = pathlib.Path(filename)
@@ -148,13 +144,17 @@ class TestConsole(TestBase):
         super().reset_environment()
         workspace = marcel.object.workspace.Workspace.default()
         env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
-        os.system(f'cp {TestBase.start_dir}/{config_file} {self.locations.config_ws_startup(workspace)}')
+        # os.system(f'cp {TestBase.start_dir}/{config_file} {self.locations.config_ws_startup(workspace)}')
+        test_config = pathlib.Path(f'{TestBase.start_dir}/{config_file}').read_text()
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
                                                 workspace=workspace,
-                                                testing=True)
+                                                testing=True,
+                                                initial_config=test_config)
         self.env = env
+        # marcel.main.initialize_persistent_config_and_data(env)
         self.env.dir_state().change_current_dir(TestBase.start_dir)
+        os.system('sudo rm -f /tmp/farcel*.log')
 
     def run(self,
             test,

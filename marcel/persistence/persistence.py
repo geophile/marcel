@@ -18,6 +18,7 @@ import marcel.locations
 import marcel.object.workspace
 
 Workspace = marcel.object.workspace.Workspace
+WorkspaceValidater = marcel.object.workspace.WorkspaceValidater
 
 
 def validate_all(env, error_handler):
@@ -57,10 +58,10 @@ def validate_all(env, error_handler):
     data_workspace_names = set([f.name for f in locations.data_ws().iterdir()])
     for missing_data_dir in (config_workspace_names - data_workspace_names):
         broken = Workspace(missing_data_dir)
-        errors.append(Workspace.ValidationError(broken.name, f'{locations.data_ws(broken)} is missing'))
+        errors.append(WorkspaceValidater.Error(broken.name, f'{locations.data_ws(broken)} is missing'))
     for missing_config_dir in (data_workspace_names - config_workspace_names):
         broken = Workspace(missing_config_dir)
-        errors.append(Workspace.ValidationError(broken.name, f'{locations.config_ws(broken)} is missing'))
+        errors.append(WorkspaceValidater.Error(broken.name, f'{locations.config_ws(broken)} is missing'))
     # Validate each workspace. Don't rely on Workspace.list(), which assumes valid workspaces.
     # E.g., a missing marker file will cause the broken workspace to not be included in the output.
     for dir in locations.config_ws().iterdir():

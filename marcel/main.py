@@ -126,11 +126,9 @@ class Reader(marcel.multilinereader.MultiLineReader):
 
 class Main(object):
 
-    def __init__(self, env):
+    def __init__(self, env, testing=None):
         self.main_pid = os.getpid()
         self.env = env
-        if not self.env.locations.fresh_install():
-            marcel.persistence.migration.migrate()
 
     # Main
 
@@ -155,12 +153,12 @@ class MainAPI(Main):
 class MainScript(Main):
 
     # If a test is being run, testing is set to a directory pretending to be the user's home.
-    def __init__(self, env, workspace, testing=None):
-        super().__init__(env)
+    def __init__(self, env, workspace, testing=None, initial_config=DEFAULT_CONFIG):
+        super().__init__(env, testing)
         self.workspace = workspace
         # Ensure that on-disk state is set up and correct.
         if env.locations.fresh_install():
-            initialize_persistent_config_and_data(env)
+            initialize_persistent_config_and_data(env, initial_config)
         marcel.persistence.persistence.validate_all(env, self.handle_persistence_validation_errors)
         if not Workspace.default().exists(env):
             # The default workspace was found to be broken, and was removed. Create a new one.
@@ -175,6 +173,8 @@ class MainScript(Main):
         startup_vars = self.read_config()
         self.env.enforce_var_immutability(startup_vars)
         self.needs_restart = False
+        if not testing and not self.env.locations.fresh_install():
+            marcel.persistence.migration.migrate()
         atexit.register(self.shutdown)
 
     def read_config(self):
@@ -278,8 +278,8 @@ class MainScript(Main):
 
 class MainInteractive(MainScript):
 
-    def __init__(self, old_main, env, workspace, testing=None):
-        super().__init__(env, workspace, testing)
+    def __init__(self, old_main, env, workspace, testing=None, initial_config=DEFAULT_CONFIG):
+        super().__init__(env, workspace, testing, initial_config)
         self.tab_completer = marcel.tabcompleter.TabCompleter(self)
         try:
             self.reader = self.initialize_reader()
@@ -499,7 +499,7 @@ def main_script_run(locations, workspace, script_path):
             main = MainScript(env, workspace)
 
 
-def initialize_persistent_config_and_data(env):
+def initialize_persistent_config_and_data(env, initial_config):
     locations = env.locations
     # These calls ensure the config and data directories exist.
     locations.config()
@@ -512,7 +512,7 @@ def initialize_persistent_config_and_data(env):
     locations.config_version().write_text(marcel.version.VERSION)
     locations.config_version().chmod(0o400)
     # Default workspace
-    Workspace.default().create_on_disk(env, DEFAULT_CONFIG)
+    Workspace.default().create_on_disk(env, initial_config)
 
 
 def main():

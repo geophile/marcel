@@ -276,8 +276,8 @@ class Environment(object):
     # Use HOME as an alternative.
     def pwd_or_alternative(self):
         dir = self.getvar('PWD')
-        if dir:  # True for '',  None
-            if not (os.path.exists(dir) and not os.path.isdir(dir)):
+        if dir:  # False for '',  None
+            if not (os.path.exists(dir) and os.path.isdir(dir)):
                 dir = None
         if not dir:
             dir = self.getvar('HOME')
