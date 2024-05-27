@@ -37,6 +37,11 @@ def validate_all(env, error_handler):
             raise marcel.exception.KillShellException(
                 f'{description} is not actually a file.')
 
+    def workspace_named(name):
+        return (Workspace.default()
+                if name == env.locations.DEFAULT_WORKSPACE_DIR_NAME else
+                Workspace(name))
+
     locations = env.locations
     errors = []
     # Version
@@ -59,13 +64,11 @@ def validate_all(env, error_handler):
     # Validate each workspace. Don't rely on Workspace.list(), which assumes valid workspaces.
     # E.g., a missing marker file will cause the broken workspace to not be included in the output.
     for dir in locations.config_ws().iterdir():
-        # TODO: Default workspace validation
-        if dir.name != marcel.locations.Locations.DEFAULT_WORKSPACE_DIR_NAME:
-            if dir.name in data_workspace_names:
-                workspace = Workspace(dir.name)
-                ws_errors = workspace.validate(env)
-                if len(ws_errors) > 0:
-                    errors.extend(ws_errors)
-            # else: Missing data workspace directory has already been noted.
+        if dir.name in data_workspace_names:
+            workspace = workspace_named(dir.name)
+            ws_errors = workspace.validate(env)
+            if len(ws_errors) > 0:
+                errors.extend(ws_errors)
+        # else: Missing data workspace directory has already been noted.
     error_handler(errors)
     return errors

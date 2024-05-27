@@ -56,6 +56,61 @@ import marcel.version
 Workspace = marcel.object.workspace.Workspace
 HISTORY_LENGTH = 1000
 
+DEFAULT_CONFIG = '''from marcel.builtin import *
+
+# COLOR_EXT_IMAGE = Color(3, 0, 2, BOLD)
+# COLOR_EXT_SOURCE = Color(0, 3, 4, BOLD)
+# 
+# COLOR_SCHEME.file_file = Color(5, 5, 5, BOLD)
+# COLOR_SCHEME.file_dir = Color(0, 2, 3, BOLD)
+# COLOR_SCHEME.file_link = Color(4, 2, 0, BOLD)
+# COLOR_SCHEME.file_executable = Color(0, 4, 0, BOLD)
+# COLOR_SCHEME.file_extension = {
+#     'jpg': COLOR_EXT_IMAGE,
+#     'jpeg': COLOR_EXT_IMAGE,
+#     'png': COLOR_EXT_IMAGE,
+#     'mov': COLOR_EXT_IMAGE,
+#     'avi': COLOR_EXT_IMAGE,
+#     'gif': COLOR_EXT_IMAGE,
+#     'py': COLOR_EXT_SOURCE,
+#     'c': COLOR_EXT_SOURCE,
+#     'c++': COLOR_EXT_SOURCE,
+#     'cpp': COLOR_EXT_SOURCE,
+#     'cxx': COLOR_EXT_SOURCE,
+#     'h': COLOR_EXT_SOURCE,
+#     'java': COLOR_EXT_SOURCE,
+#     'php': COLOR_EXT_SOURCE
+# }
+# COLOR_SCHEME.error = Color(5, 5, 0)
+# COLOR_SCHEME.process_pid = Color(0, 3, 5, BOLD)
+# COLOR_SCHEME.process_ppid = Color(0, 2, 4, BOLD)
+# COLOR_SCHEME.process_status = Color(3, 1, 0, BOLD)
+# COLOR_SCHEME.process_user = Color(0, 2, 2, BOLD)
+# COLOR_SCHEME.process_command = Color(3, 2, 0, BOLD)
+# COLOR_SCHEME.help_reference = Color(5, 3, 0)
+# COLOR_SCHEME.help_bold = Color(5, 4, 1, BOLD)
+# COLOR_SCHEME.help_italic = Color(5, 5, 2, ITALIC)
+# COLOR_SCHEME.help_name = Color(4, 1, 0)
+# COLOR_SCHEME.history_id = Color(0, 3, 5, BOLD)
+# COLOR_SCHEME.history_command = Color(4, 3, 0, BOLD)
+# COLOR_SCHEME.color_scheme_key = Color(2, 4, 0)
+# COLOR_SCHEME.color_scheme_value = Color(0, 3, 4)
+
+PROMPT = [lambda: PWD, ' $ ']
+PROMPT_CONTINUATION = [lambda: PWD, ' + ']
+
+INTERACTIVE_EXECUTABLES = [
+    'emacs',
+    'less',
+    'man',
+    'more',
+    'psql',
+    'top',
+    'vi',
+    'vim'
+]
+'''
+
 
 class Reader(marcel.multilinereader.MultiLineReader):
 
@@ -74,6 +129,8 @@ class Main(object):
     def __init__(self, env):
         self.main_pid = os.getpid()
         self.env = env
+        if not self.env.locations.fresh_install():
+            marcel.persistence.migration.migrate()
 
     # Main
 
@@ -101,12 +158,23 @@ class MainScript(Main):
     def __init__(self, env, workspace, testing=None):
         super().__init__(env)
         self.workspace = workspace
+        # Ensure that on-disk state is set up and correct.
+        if env.locations.fresh_install():
+            initialize_persistent_config_and_data(env)
+        marcel.persistence.persistence.validate_all(env, self.handle_persistence_validation_errors)
+        if not Workspace.default().exists(env):
+            # The default workspace was found to be broken, and was removed. Create a new one.
+            Workspace.default().create_on_disk(env, DEFAULT_CONFIG)
+        # Restore workspace state
+        if self.workspace.exists(env):
+            env.restore_persistent_state_from_workspace()
+        else:
+            self.workspace.does_not_exist()
         self.testing = testing
         self.config_time = time.time()
         startup_vars = self.read_config()
         self.env.enforce_var_immutability(startup_vars)
         self.needs_restart = False
-        marcel.persistence.persistence.validate_all(env, self.handle_persistence_validation_errors)
         atexit.register(self.shutdown)
 
     def read_config(self):
@@ -202,9 +270,10 @@ class MainScript(Main):
                 # workspace, but throwing a ReconfigureException right now (during MainScript.__init__)
                 # is messy, since we're then shutting down an incompletely initialized main.
                 self.needs_restart = True
-                marcel.util.print_to_stderr(
-                    self.env,
-                    f'Selected workspace {self.workspace.name} is damaged, starting in default workspace.')
+                message = ('Default workspace was damaged. Starting in a recreated default workspace.'
+                           if self.workspace.is_default() else
+                           f'Selected workspace {self.workspace.name} is damaged, starting in default workspace.')
+                marcel.util.print_to_stderr(self.env, message)
 
 
 class MainInteractive(MainScript):
@@ -430,7 +499,8 @@ def main_script_run(locations, workspace, script_path):
             main = MainScript(env, workspace)
 
 
-def initialize_persistent_config_and_data(locations):
+def initialize_persistent_config_and_data(env):
+    locations = env.locations
     # These calls ensure the config and data directories exist.
     locations.config()
     locations.config_ws()
@@ -441,18 +511,15 @@ def initialize_persistent_config_and_data(locations):
     # Version
     locations.config_version().write_text(marcel.version.VERSION)
     locations.config_version().chmod(0o400)
+    # Default workspace
+    Workspace.default().create_on_disk(env, DEFAULT_CONFIG)
 
 
 def main():
     workspace_name, script, mpstart = args()
     multiprocessing.set_start_method(mpstart)
-    marcel.persistence.migration.migrate()
-    workspace = (Workspace .default()
-                 if workspace_name is None else
-                 Workspace (workspace_name))
+    workspace = Workspace.named(workspace_name)
     locations = marcel.locations.Locations()
-    if locations.fresh_install():
-        initialize_persistent_config_and_data(locations)
     if script is None:
         main_interactive_run(locations, workspace)
     else:

@@ -632,11 +632,11 @@ Workspace validation
 
     .config/marcel/
         VERSION
-        broken
+        broken/
             <timestamp>/  # When damage detected
                 <workspace dirs>
-        workspace
-            __DEFAULT__
+        workspace/
+            __DEFAULT__/
                 .WORKSPACE
                 startup.py
             WORKSPACE_NAME/
@@ -644,11 +644,11 @@ Workspace validation
                 startup.py
 
     .local/share/marcel/
-        broken
+        broken/
             <timestamp>/  # When damage detected
                 <workspace dirs>
-        workspace
-            __DEFAULT__
+        workspace/
+            __DEFAULT__/
                 <pid>.env.pickle  # Deleted on non-restart shutdown
                 history
                 reservoirs/
@@ -712,6 +712,9 @@ To do:
             <timestamp>/                        
                 <workspace dirs>                * config_bws(workspace, timestamp)
         workspace                               * config_ws()
+            __DEFAULT__
+                .WORKSPACE
+                startup.py                      config_ws_startup(workspace)
             WORKSPACE_NAME/                     * config_ws(workspace)
                 .WORKSPACE
                 startup.py                      config_ws_startup(workspace)
@@ -721,6 +724,11 @@ To do:
             <timestamp>/                        
                 <workspace dirs>                * data_bws(workspace, timestamp)
         workspace                               * data_ws()
+            __DEFAULT__
+                <pid>.env.pickle
+                history
+                reservoirs/
+                    <pid>.<varname>.pickle
             WORKSPACE_NAME/                     * data_ws(workspace)
                 properties.pickle               data_ws_prop(workspace)
                 env.pickle                      data_ws_env(workspace)
@@ -730,3 +738,34 @@ To do:
 
 * Overloaded (which is OK)
 
+----------------------------------------------------------------------
+
+workspace read/write env
+
+- Weird special case override in WorkspaceDefault
+
+read_environment
+    open
+        Ws.new
+        Ws.open
+
+write_environment
+    close
+    create_on_disk
+        create
+        WorkspaceDefault.ensure_exists
+
+
+Instead of WD.ensure_exists:
+main.initialize_persistent_config_and_data could create the default
+ws.
+
+WD.ensure_exists
+    EnvironmentScript.initialize_namespace
+        EnvironmentScript.create
+            main_script_run
+                main()
+
+main handles fresh install before main_script_run
+
+WS.create_on_disk needs env
