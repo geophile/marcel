@@ -494,7 +494,8 @@ class WorkspaceDefaultValidater(WorkspaceValidater):
                             file.unlink()
                     except ValueError:
                         self.errors.append(
-                            WorkspaceValidater.Error(self.workspace.name, f'Unexpected workspace env filename: {file}'))
+                            WorkspaceValidater.Error(self.workspace.name,
+                                                     f'Unexpected workspace filename in {dir}: {file}'))
 
         # Delete abandoned files: associated with processes no longer running.
         locations = self.env.locations

@@ -124,8 +124,8 @@ def migrate(locations):
         data_base = locations.data()  # .local/share/marcel
         workspace_dirs = subdirs(data_base)
         # Create broken and workspace directories
-        tmp_broken_dir_path = data_base / 'broken'
-        tmp_workspace_dir_path = data_base / 'workspace'
+        tmp_broken_dir_path = pathlib.Path(tempfile.TemporaryDirectory(dir=data_base).name)
+        tmp_workspace_dir_path = pathlib.Path(tempfile.TemporaryDirectory(dir=data_base).name)
         tmp_broken_dir_path.mkdir(parents=True, exist_ok=False)
         tmp_workspace_dir_path.mkdir(parents=True, exist_ok=False)
         # Move workspace directories
