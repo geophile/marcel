@@ -1,0 +1,67 @@
+#!/bin/bash
+
+export MARCEL_HOME=/home/jao/git/marcel/test/system/expected
+export TEST_HOME=/tmp/test_home
+export ACTUAL=/tmp/test_actual
+export EXPECTED=$MARCEL_HOME
+export XDG_CONFIG_HOME=$TEST_HOME/.config
+export XDG_DATA_HOME=$TEST_HOME/.local/share
+
+list_config_and_data() {
+  # Don't use marcel for the listing, because running marcel can
+  # change what's in the directories being examined.
+  find $TEST_HOME > $ACTUAL/$1
+}
+
+check() {
+  diff $EXPECTED/$1 $ACTUAL/$1 > /dev/null
+  if [ $? != '0' ]; then
+    echo "Error on $1"
+  fi
+}
+
+initialize() {
+  sudo rm -rf $TEST_HOME >& /dev/null
+  mkdir -p $XDG_CONFIG_HOME >& /dev/null
+  mkdir -p $XDG_DATA_HOME >& /dev/null
+  sudo rm -rf $ACTUAL >& /dev/null
+  mkdir -p $ACTUAL >& /dev/null
+}
+
+test_before_install() {
+  list_config_and_data before_install
+  check before_install
+}
+
+test_after_install() {
+  marcel <<EOF
+EOF
+  list_config_and_data after_install
+  check after_install
+}
+
+test_create_workspace() {
+  marcel <<EOF
+  ws -n $1 | select (x: False)
+  gen 3 >$ g3
+EOF
+  list_config_and_data ws_create_w
+  check ws_create_w
+}
+
+test_workspace_in_use() {
+  marcel $1 <<EOF
+  bash "find $TEST_HOME > $ACTUAL/ws_use_w"
+EOF
+  check ws_use_w
+}
+
+main() {
+  initialize
+  test_before_install
+  test_after_install
+  test_create_workspace w
+  test_workspace_in_use w
+}
+
+main

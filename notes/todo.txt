@@ -801,3 +801,13 @@ test_args is mostly disabled in test_ops.
 ----------------------------------------------------------------------
 
 Disable workspaces for farcel
+
+----------------------------------------------------------------------
+
+Something approximately like:
+
+    bash "xyz <<EOF
+    ...
+    EOF"
+
+should work.
