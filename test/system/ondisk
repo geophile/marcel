@@ -1,21 +1,37 @@
 #!/bin/bash
 
-export MARCEL_HOME=/home/jao/git/marcel/test/system/expected
+export MARCEL_HOME=/home/jao/git/marcel/test/system
 export TEST_HOME=/tmp/test_home
 export ACTUAL=/tmp/test_actual
-export EXPECTED=$MARCEL_HOME
+export EXPECTED=$MARCEL_HOME/expected028
 export XDG_CONFIG_HOME=$TEST_HOME/.config
 export XDG_DATA_HOME=$TEST_HOME/.local/share
+
+FAILURES=$((0))
+
+normalize() {
+  mv $1 $1.tmp
+  marcel <<EOF
+  read $1.tmp \
+  | head -1 \
+  | (f: f[len('$TEST_HOME/'):]) \
+  | sort \
+  > $1
+EOF
+  rm $1.tmp
+}
 
 list_config_and_data() {
   # Don't use marcel for the listing, because running marcel can
   # change what's in the directories being examined.
   find $TEST_HOME > $ACTUAL/$1
+  normalize $ACTUAL/$1
 }
 
 check() {
   diff $EXPECTED/$1 $ACTUAL/$1 > /dev/null
   if [ $? != '0' ]; then
+    FAILURES=$(($FAILURES+1))
     echo "Error on $1"
   fi
 }
@@ -29,11 +45,13 @@ initialize() {
 }
 
 test_before_install() {
+  echo $FUNCNAME
   list_config_and_data before_install
   check before_install
 }
 
 test_after_install() {
+  echo $FUNCNAME
   marcel <<EOF
 EOF
   list_config_and_data after_install
@@ -41,6 +59,7 @@ EOF
 }
 
 test_create_workspace() {
+  echo $FUNCNAME
   marcel <<EOF
   ws -n $1 | select (x: False)
   gen 3 >$ g3
@@ -49,11 +68,25 @@ EOF
   check ws_create_w
 }
 
-test_workspace_in_use() {
+test_use_workspace() {
+  echo $FUNCNAME
   marcel $1 <<EOF
-  bash "find $TEST_HOME > $ACTUAL/ws_use_w"
+  bash "find $TEST_HOME" \
+  | case (f: '.WORKSPACE.' in f) (| (f: f[:f.rfind('/')] + '/.WORKSPACE.<pid>') |) \
+                                 (| (f: f) |) \
+  > $ACTUAL/ws_use_w 
 EOF
+  normalize $ACTUAL/ws_use_w
   check ws_use_w
+}
+
+test_delete_workspace() {
+  echo $FUNCNAME
+  marcel <<EOF
+  ws -d $1
+EOF
+  list_config_and_data ws_delete_w
+  check ws_delete_w
 }
 
 main() {
@@ -61,7 +94,9 @@ main() {
   test_before_install
   test_after_install
   test_create_workspace w
-  test_workspace_in_use w
+  test_use_workspace w
+  test_delete_workspace w
+  echo "$FAILURES failures: $0"
 }
 
 main

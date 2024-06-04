@@ -80,7 +80,7 @@ def test_cp():
 def main():
     test_mv()
     test_cp()
-    print(f'Test failures: {TEST.failures}')
+    TEST.report_failures('test_native_filename_ops')
 
 
 main()

@@ -134,6 +134,9 @@ class TestBase:
             print(f'    actual:\n<<<{actual}>>>', file=sys.__stdout__)
             self.failures += 1
 
+    def report_failures(self, label):
+        print(f'{self.failures} failures: {label}')
+
 
 class TestConsole(TestBase):
 

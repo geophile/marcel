@@ -811,3 +811,18 @@ Something approximately like:
     EOF"
 
 should work.
+
+----------------------------------------------------------------------
+
+Case can't be first in a pipeline, although it makes sense here, with
+stdin piped from bash:
+
+jao@loon:/tmp$ find test_home | marcel <<EOF
+> case (f: f.name == 'g3.pickle') (| (f: 'G3.PICKLE') |) \
+>                                 (| (f: f) |)
+> EOF
+case cannot be the first operator in a pipeline
+
+jao@loon:/tmp$ find test_home | marcel <<EOF
+case (f: f.name == 'g3.pickle') (| (f: 'G3.PICKLE') |)                                 (| (f: f) |)
+EOF

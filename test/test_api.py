@@ -2075,7 +2075,7 @@ def main():
     main_dev()
     main_stable()
     main_slow_tests()
-    print(f'Test failures: {TEST.failures}')
+    TEST.report_failures('test_api')
     sys.exit(TEST.failures)
 
 
