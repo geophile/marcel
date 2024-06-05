@@ -332,7 +332,9 @@ class MainInteractive(MainScript):
                 except KeyboardInterrupt:  # ctrl-C
                     print()
         except EOFError:  # ctrl-D
-            print()
+            if print_prompt:
+                print()
+            # else: not a tty, and we don't want an extra line at end of script execution.
 
     # Internal
 

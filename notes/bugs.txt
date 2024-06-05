@@ -926,17 +926,4 @@ record history, does it?
 
 ----------------------------------------------------------------------
 
-260. Extra line at end
-
-
-
-    jao@loon:~/git/marcel/test/system$ marcel <<EOF
-    > gen 3
-    > EOF
-    0
-    1
-    2
-    <THIS LINE IS BLANK>
-
-There is an extra line at the end. Undesirable in general, but
-especially when embedded in bash scripts.
+261.
