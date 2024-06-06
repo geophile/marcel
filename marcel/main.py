@@ -331,7 +331,7 @@ class MainInteractive(MainScript):
                     self.job_control.wait_for_idle_foreground()
                 except KeyboardInterrupt:  # ctrl-C
                     print()
-        except EOFError:  # ctrl-D
+        except EOFError:
             if print_prompt:
                 print()
             # else: not a tty, and we don't want an extra line at end of script execution.
