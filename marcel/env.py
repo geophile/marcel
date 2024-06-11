@@ -225,9 +225,10 @@ class Environment(object):
     def setvar_with_source(self, var, value, source):
         if callable(value):
             value = Compilable.for_function(self, f'({source})', value)
+            self.compilables.append(var)
         elif type(value) is marcel.core.PipelineExecutable:
             value = Compilable.for_pipeline(self, source, value)
-        self.compilables.append(var)
+            self.compilables.append(var)
         self.setvar(var, value)
 
     def delvar(self, var):

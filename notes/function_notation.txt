@@ -31,7 +31,7 @@ The focus here is on assignment statements. These do the same thing:
 
 In other words:
 
-- If no lambda is present, "lambda:" is assumed.
+- If "lambda " is not present, "lambda: " is assumed.
 
 - The resulting stuff between parens is evaluated as a function.
 
@@ -50,3 +50,21 @@ Fix:
 
 - If you really want a function of zero args, it would have to be
   (lambda: lambda: ...) But that should be pretty uncommon.
+
+
+                        Assign   Other context
+
+  (lambda: ...)         eval     eval
+
+  (lambda args: ...)    (1)      eval
+
+  (...)                 eval     eval
+
+  (: ...)               eval     eval
+
+  (args: ...)           (2)      eval
+
+
+1) Add "lambda: " prefix, then eval
+
+2) Add "lambda: lambda " prefix, then eval

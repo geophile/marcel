@@ -1,23 +1,35 @@
 What's New
 ----------
 
-This release contains a new operator, `cast`. When reading a CSV file,
-you often want to specify the types of the columns. For example, `scores.csv`
-might contain names and integer scores. In order to treat the scores as
-`int`s, you would have to do something like this:
+You can assign the value of a Python expression to a variable, e.g.
 
 ```shell
-read -cs scores.csv | (name, score: (name, int(score))) | ...
+x = (5 + 6)
 ```
 
-The `cast` operator makes this a bit simpler:
+assigns 11 to the variable `x`. The RHS, `(5 + 6)` is shorthand for `(lambda: 5 + 6)`. In other words,
+the expression inside the parens is evaluated, and the resutling value is assigned.
+
+Sometimes you want to assign a function to a variable. Following the previous example, you would
+have to do something like this to create a function that adds 1 to a number:
 
 ```shell
-read -cs scores.csv | cast str int | ...
+inc = (lambda: lambda x: x + 1)
 ```
 
-This is pretty minor, but I found myself doing this sort of conversion
-so often, that I thought a simpler way was needed.
+Evaluating `(lambda: lambda x: x + 1)` yields the function `lambda x: x + 1` which is assigned to
+`inc`. That is kind of clunky, and while obviously correct and consistent, it isn't what you
+normally think of first. Or at least I didn't, I tried `inc = (lambda x: x + 1)` and got an error
+message because `(lambda x: x + 1)` cannot be evaluated without binding a value to `x`.
+
+In this release, the less clunky, less consistent syntax is permitted. If you write:
+
+```shell
+inc = (lambda x: x + 1)
+```
+
+then `inc` will be assigned `lambda x: x + 1`. I.e., it will be understood that you really
+meant `inc = (lambda: lambda x: x + 1)`
 
 Marcel
 ======

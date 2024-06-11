@@ -317,12 +317,12 @@ class MainInteractive(MainScript):
     # MainInteractive
 
     def run(self):
-        print_prompt = sys.stdin.isatty()
+        interactive = sys.stdin.isatty()
         try:
             while True:
                 try:
                     if self.input is None:
-                        prompts = self.env.prompts() if print_prompt else (None, None)
+                        prompts = self.env.prompts() if interactive else (None, None)
                         self.input = self.reader.input(*prompts)
                     # else: Restarted main, and self.input was from the previous incarnation.
                     self.check_for_config_update()
@@ -332,7 +332,7 @@ class MainInteractive(MainScript):
                 except KeyboardInterrupt:  # ctrl-C
                     print()
         except EOFError:
-            if print_prompt:
+            if interactive:
                 print()
             # else: not a tty, and we don't want an extra line at end of script execution.
 

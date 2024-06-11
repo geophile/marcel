@@ -241,7 +241,7 @@ def test_map():
              expected_out=['/tmp'])
     # Empty function definition
     TEST.run('gen 3 | map ()',
-             expected_err='Empty function definition')
+             expected_err='invalid syntax')
     # Mix of output and error
     TEST.run('gen 3 | (x: 1 / (1 - x))',
              expected_out=[1.0, Error('division by zero'), -1.0])
@@ -617,7 +617,7 @@ def test_namespace():
              expected_out=['USER'])
     # Try to use an undefined symbol
     TEST.run('map (pi)',
-             expected_out=[Error("name 'pi' is not defined")])
+             expected_out=[Error('not defined')])
     TEST.run(test='import math *',
              verification='map (pi)',
              expected_out=['3.141592653589793'])
@@ -626,7 +626,7 @@ def test_namespace():
              expected_out=['Workspace()'])
     TEST.run('ws -d namespace_test')
     TEST.run('map (pi)',
-             expected_out=[Error("name 'pi' is not defined")])
+             expected_out=[Error('not defined')])
 
 
 @timeit
@@ -947,6 +947,26 @@ def test_assign():
     TEST.run(test='env -d ls',
              verification='env -p ls',
              expected_out=[])
+    # Evaluate -> int (non-function)
+    TEST.run(test='a = (lambda: 5+6)',
+             verification='(a)',
+             expected_out=[11])
+    TEST.run(test='a = (: 5+6)',
+             verification='(a)',
+             expected_out=[11])
+    TEST.run(test='a = (5+6)',
+             verification='(a)',
+             expected_out=[11])
+    # Evaluate -> function
+    TEST.run(test='b = (lambda: lambda x: 5+6+x)',
+             verification='(b(7))',
+             expected_out=[18])
+    TEST.run(test='b = (lambda x: 5+6+x)',
+             verification='(b(7))',
+             expected_out=[18])
+    TEST.run(test='b = (x: 5+6+x)',
+             verification='(b(7))',
+             expected_out=[18])
 
 
 @timeit

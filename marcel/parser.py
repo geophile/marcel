@@ -19,6 +19,7 @@ import marcel.exception
 import marcel.function
 import marcel.opmodule
 import marcel.util
+from marcel.function_args_parser import FunctionArgsParser
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -330,32 +331,38 @@ class Expression(Token):
         super().__init__(parser, text, position)
         self._source = None
         self._function = None
+        self._for_assignment = False
         self.scan()
 
+    # The result of evaluation this expression is a function.
     def value(self):
         try:
             if self._function is None:
-                source = self.source()
                 globals = self.parser.env.namespace
-                split = source.split()
-                if len(split) == 0:
-                    raise marcel.exception.KillCommandException(f'Empty function definition.')
-                if split[0] in ('lambda', 'lambda:'):
-                    function = eval(source, globals)
+                # source may be used for compilation eventually, so it has to be valid Python source which, when
+                # evaluated yields a function. (I.e., not the source of marcel shorthand, omitting lambda.)
+                source = self.source()
+                function_args_parser = FunctionArgsParser(source)
+                function_args_parser.parse()
+                # Source may need to be tweaked. E.g. for "inc = (lambda x: x + 1)", we want to return the function,
+                # not the evaluation of the function, so prepend "lambda: ".
+                # The rationale and details are discussed in notes/function_notation.txt
+                if function_args_parser.explicit_lambda:
+                    if function_args_parser.has_args and self._for_assignment:
+                        prefix = 'lambda: '
+                    else:
+                        prefix = ''
                 else:
-                    try:
-                        function = eval('lambda ' + source, globals)
-                        source = 'lambda ' + source
-                    except Exception:
-                        try:
-                            function = eval('lambda: ' + source, globals)
-                            source = 'lambda: ' + source
-                        except Exception:
-                            raise marcel.exception.KillCommandException(f'Invalid function syntax: {source}')
+                    if function_args_parser.has_args:
+                        prefix = 'lambda: lambda ' if self._for_assignment else 'lambda '
+                    else:
+                        prefix = 'lambda ' if function_args_parser.explicit_colon else 'lambda: '
+                source = prefix + source
+                function = eval(source, globals)
                 self._function = marcel.function.SourceFunction(function=function, source=source)
             return self._function
         except Exception as e:
-            raise SyntaxError(self, f'Error in function: {e}')
+            raise marcel.exception.KillCommandException(f'Error in function "{self.source()}": {e}')
 
     def is_expr(self):
         return True
@@ -381,6 +388,9 @@ class Expression(Token):
                 self.end = PythonString(self.parser, self.text, self.end - 1).end
         if self.text[self.end - 1] != Token.CLOSE:
             raise LexerException(self, 'Malformed Python expression')
+
+    def mark_for_assignment(self):
+        self._for_assignment = True
 
 
 class String(Token):
@@ -973,9 +983,10 @@ class Parser(object):
         arg = self.arg()
         source = None
         if isinstance(arg, Token):
-            value = arg.value()
             if type(arg) is Expression:
                 source = arg.source()
+                arg.mark_for_assignment()
+            value = arg.value()
         elif type(arg) is marcel.core.PipelineExecutable:
             value = arg
             source = arg.source
