@@ -8,10 +8,11 @@ x = (5 + 6)
 ```
 
 assigns 11 to the variable `x`. The RHS, `(5 + 6)` is shorthand for `(lambda: 5 + 6)`. In other words,
-the expression inside the parens is evaluated, and the resutling value is assigned.
+the function inside the parens is invoked, and the resulting value is assigned.
 
-Sometimes you want to assign a function to a variable. Following the previous example, you would
-have to do something like this to create a function that adds 1 to a number:
+Sometimes you want to assign a function to a variable. Following the previous example, 
+to assign to `inc` a function that adds 1 to its input,
+you would have to do something like this:
 
 ```shell
 inc = (lambda: lambda x: x + 1)
@@ -30,7 +31,8 @@ inc = (lambda x: x + 1)
 
 then `inc` will be assigned `lambda x: x + 1`. I.e., it will be understood that you really
 meant `inc = (lambda: lambda x: x + 1)`. This only happens when assigning expressions
-to variables. In other contexts, (e.g. the function used with `map` or `select`), there
+to variables, and the parenthesize function has more than zero arguments.
+In other contexts, (e.g. the function used with `map` or `select`), there
 is no similar tweaking of the expression.
 
 Marcel
