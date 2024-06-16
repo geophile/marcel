@@ -31,7 +31,7 @@ inc = (lambda x: x + 1)
 
 then `inc` will be assigned `lambda x: x + 1`. I.e., it will be understood that you really
 meant `inc = (lambda: lambda x: x + 1)`. This only happens when assigning expressions
-to variables, and the parenthesize function has more than zero arguments.
+to variables, and the parenthesized function has more than zero arguments.
 In other contexts, (e.g. the function used with `map` or `select`), there
 is no similar tweaking of the expression.
 
