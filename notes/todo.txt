@@ -840,3 +840,8 @@ Buffering for constant width ls displays:
 - Another possibility: Instead of buffering, just keep track of widths
   and grow them as necessary. Will lead to some irregularities early
   in a listing, but buffering sucks.
+
+----------------------------------------------------------------------
+
+function_args_parser: Doesn't check that star is used only with last
+arg. Although, python parsing catches it.

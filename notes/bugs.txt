@@ -926,4 +926,16 @@ record history, does it?
 
 ----------------------------------------------------------------------
 
-261.
+261. Migration from pre024 failing
+
+z@loon ~ $ marcel
+VERSION file missing.
+z@loon ~ $ marcel
+VERSION file missing.
+z@loon ~ $ cd .config/marcel
+z@loon ~/.config/marcel $ ls
+startup.py
+z@loon ~/.config/marcel $ find .
+.
+./startup.py
+./.WORKSPACE
