@@ -142,7 +142,7 @@ class Write(marcel.core.Op):
                        CSVWriter(self, COMMA) if self.csv else
                        CSVWriter(self, TAB) if self.tsv else
                        PickleWriter(self) if self.pickle else
-                       BufferingWriter(DefaultWriter(self, env.color_scheme()), 100))
+                       DefaultWriter(self, env.color_scheme()))
 
     def receive(self, env, x):
         try:
@@ -198,25 +198,6 @@ class Writer(object):
 
     def cleanup(self):
         pass
-
-
-class BufferingWriter(Writer):
-
-    def __init__(self, writer, buffer_size):
-        super().__init__(writer.op)
-        self.writer = writer
-        self.buffer_size = buffer_size
-        self.buffer = []
-
-    def receive(self, env, x):
-        self.buffer.append(x)
-        if len(self.buffer) >= self.buffer_size:
-            self.flush(env)
-
-    def flush(self, env):
-        for x in self.buffer:
-            self.writer.receive(env, x)
-        self.buffer.clear()
 
 
 class TextWriter(Writer):

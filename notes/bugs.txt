@@ -939,3 +939,34 @@ z@loon ~/.config/marcel $ find .
 .
 ./startup.py
 ./.WORKSPACE
+
+----------------------------------------------------------------------
+
+262. Paths with spaces screws up cd and tab completion
+
+M 0.29.2 jao@loon ~/Music/iTunes/iTunes Music/XTC/English Settlement$ ls
+drwx---r-x     jao     jao    4096  2007 Feb 23 23:24:57  .
+-rw----r--     jao     jao  7284135  2007 Feb 25 19:45:59  01 Runaways.mp3
+-rw----r--     jao     jao  6972053  2007 Feb 25 19:45:59  02 Ball And Chain.mp3
+-rw----r--     jao     jao  7583446  2007 Feb 25 19:46:00  03 Senses Working Overtime.mp3
+-rw----r--     jao     jao  9081957  2007 Feb 25 19:46:01  04 Jason And The Argonauts.mp3
+-rw----r--     jao     jao  7923781  2007 Feb 25 19:46:02  05 No Thugs In Our House.mp3
+-rw----r--     jao     jao  6017539  2007 Feb 25 19:46:02  06 Yacht Dance.mp3
+-rw----r--     jao     jao  7959011  2007 Feb 25 19:46:03  07 All Of A Sudden (It's Too Late).mp3
+-rw----r--     jao     jao  10570315  2007 Feb 25 19:46:04  08 Melt The Guns.mp3
+-rw----r--     jao     jao   7028605  2007 Feb 25 19:46:05  09 Leisure.mp3
+-rw----r--     jao     jao   5950292  2007 Feb 25 19:46:05  10 It's Nearly Africa.mp3
+-rw----r--     jao     jao   6440826  2007 Feb 25 19:46:06  11 Knuckle Down.mp3
+-rw----r--     jao     jao   5238937  2007 Feb 25 19:46:06  12 Fly On The Wall.mp3
+-rw----r--     jao     jao   8300446  2007 Feb 25 19:46:07  13 Down In The Cockpit.mp3
+-rw----r--     jao     jao   5547336  2007 Feb 25 19:46:07  14 English Roundabout.mp3
+-rw----r--     jao     jao   7893040  2007 Feb 25 19:46:08  15 Snowman.mp3
+M 0.29.2 jao@loon ~/Music/iTunes/iTunes Music/XTC/English Settlement$ pwd
+drwx---r-x     jao     jao    4096  2007 Feb 23 23:24:57  /home/jao/Music/iTunes/iTunes Music/XTC/English Settlement
+M 0.29.2 jao@loon ~/Music/iTunes/iTunes Music/XTC/English Settlement$ cp Leis* /tmp/f
+Error: cp: cannot stat 'Leis*': No such file or directory
+M 0.29.2 jao@loon ~/Music/iTunes/iTunes Music/XTC/English Settlement$ ls Leis*
+No qualifying paths, (possibly due to permission errors): ['Leis*']
+M 0.29.2 jao@loon ~/Music/iTunes/iTunes Music/XTC/English Settlement$ cd ~/Music/iTunes/iT*Music/XTC/Eng*
+M 0.29.2 jao@loon ~/Music/iTunes/iTunes Music/XTC/English Settlement$ ls Leis*
+No qualifying paths, (possibly due to permission errors): ['Leis*']

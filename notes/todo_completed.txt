@@ -1109,3 +1109,22 @@ Replace RUN_ON_STARTUP with function call, e.g. run('''...''')
 read -c should be able to specify types.
 
 (cast op)
+
+----------------------------------------------------------------------
+
+
+----------------------------------------------------------------------
+
+Buffering for constant width ls displays:
+
+- The buffering affects all commands, since the buffering is in the
+  write op. Not good. Completely messes up this, for example:
+
+  timer 1
+
+- Can the buffering be done inside of render_full? It's really only
+  needed inside File.render_full. Maybe ps too.
+
+- Another possibility: Instead of buffering, just keep track of widths
+  and grow them as necessary. Will lead to some irregularities early
+  in a listing, but buffering sucks.
