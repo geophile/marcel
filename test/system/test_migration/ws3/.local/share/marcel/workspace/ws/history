@@ -1,0 +1,539 @@
+ls
+gen 3
+ls
+pushd ~/.config
+ls
+ls | sort (f: f.size)
+rm *jamie*
+du -hs .
+cd ..
+ls
+cd customizations/
+ls
+popd
+grep "battery: " a1.out | (x: int(x.split()[-1])) | window -o 2 | (x, y: (1, 0) if y is not None and x < y else (0, 1)) | red + + | (c, d: (f"Charging: {c}", f"Discharging: {d}")) | expand
+f = (lambda: \
+lambda x, y: x + y \
+)
+(f(3,4))
+(asdf(1))
+(asdf())
+(hello('world'))
+f = (lambda:
+ls
+pushd /tmp
+dirs | concat | expand
+dirs | concat 
+popd
+read max.txt 
+ls
+cd consulting/
+ls
+ls connectionpool/
+ls cram
+read cram/notes.txt
+ls
+ls kiran
+du -hs *
+cd nc
+ls
+more 2023.02.18.txt 
+mv * ../AINC
+cd ..
+rmdir nc
+ls
+git branch
+gen 0 | head 1
+gen 0 | select (x: x == 1000000)
+gen 0 | select (x: x == 10000000)
+gen 1
+gen 2 | head 3
+# gen 10 | ifthen (x: x < 5) (| head 1 | write |)
+help write
+gen 10 | ifthen (x: x < 5) (| head 1 | write -f f"<<<{}>>>" |)
+grep "battery: " main.out | (x: int(x.split()[-1])) | window -o 2 | (x, y: (1, 0) if y is not None and x < y else (0, 1)) | red + + | (c, d: (f"Charging: {c}", f"Discharging: {d}")) | expand
+help read
+read -cs sudoku.csv | (puzzle, solution: puzzle) > puzzles
+wc -l *.csv puzzles 
+bash
+(hex(806))
+bash
+cd tufts/cs131/
+ls
+mkdir a2
+cd a2
+bash
+ls
+cd gro
+cd frog/
+ls
+eog 
+bg 0
+jobs
+ls
+cd ..
+ls
+pushd /tmp
+ls
+dirs
+pushd
+pwd
+ls
+cd opt
+ls
+du -hs *
+(270 * 5 / 8)
+(75*6.5)
+(450/75)
+(24*75)
+history
+ls
+cd tufts/cs131/
+ls
+ls a2
+rm -rf a2
+ls
+which python3
+cd assignments/a2
+ls
+ls -fr venv
+ls
+rm -rf venv .idea
+cd ../..
+ls
+rm -rf a2
+python3
+bash
+import typing
+(dir(typing)) | expand
+(dir(typing)) | expand | select (t: 'ange' in t)
+(type(range))
+ls -fr | ext py | select (f: 'pygraph' in f.read())
+ls -fr | ext py | select (f: 'matplot' in f.read())
+ls -fr | ext py | select (f: 'matplot' in f.read()) | (f: f.parent)
+marcel <<EOF
+ls -fr | ext py | select (f: 'matplot' in f.read()) | select (f: 'venv' not in str(f))
+gen 8 1 | red *
+cd tufts/cs131/assignments/a2
+ls
+ls -fr db
+rm x
+read -p db/5.pancakes 
+python3 ./main.py
+gen 9 1 | red -i *
+bash
+import typing
+gen 7 1 | args (| a: python3 ./main.py (a) |)
+env 
+env | select (k, v: 'python' in v)
+env | select (k, v: type(v) is str and 'python' in v)
+gen 3 10 | args (| n: python3 ./main.py (n) -p |)
+ls
+bash
+bash python3 -m http.server 8000
+help ps
+ps -c python
+ps -p 22110 | (p: p.signal(9))
+ps -c python
+ps
+ls
+cd tufts/cs131/assignments/a2
+ls
+read runall 
+gen 10 1 | args (| n: python3 ./main.py (n) |)
+gen 10 1 | args (| n: python3 ./main.py (n) |)
+(2*65/52+2*713/26+3*(-311/26)+363/26)
+(13/6 + 2*11/3 - 3 * 7/6)
+(2*13/6 - 11/3 + 4 * 7/6)
+(70/19 + 2*49/19 - 3*18/19)
+(2*70/19 - 49/19 + 4*18/19)
+(22/7 + 2*19/7 - 3*9/7)
+(17/5 + 2*(-7)/5 -3*(-9/5))
+(2*17/5 - (-7/5) + 4*(-9)/5)
+(17/5 - (-7/5) + (-9)/5)
+ls IMG* | args (| f: (md5sum(f), f) |)
+which md5sum
+ls IMG* | args (| f: ((md5sum(f), f)) |)
+md5sum IMG_0109.MOV 
+ls IMG* | args (| f: md5sum (f) | (x: (x.split()[0], f)) |)
+ls IMG* | args (| f: md5sum (f) | (x: (x.split()[0], f)) |) | sort
+ls IMG* | args (| f: md5sum (f) | (x: (x.split()[0], f)) |) | red . concat
+ls IMG* | args (| f: md5sum (f) | (x: (x.split()[0], f)) |) | red . concat | select (h, x: len(x) > 1)
+ls IMG* | args (| f: md5sum (f) | (x: (x.split()[0], f)) |) | red . concat | select (h, x: len(x) > 1) | (h, x: x[0])
+ls IMG* | args (| f: md5sum (f) | (x: (x.split()[0], f)) |) | red . concat | select (h, x: len(x) > 1) | (h, x: x[0]) | args (| dup: rm (dup) |)
+ls IMG* | args (| f: md5sum (f) | (x: (x.split()[0], f)) |) | red . concat | select (h, x: len(x) > 1) | (h, x: x[0])
+ls
+vlc IMG_0109.MOV
+vlc IMG_0109\ \(1\).MOV
+ls *.MOV
+rm IMG_0109\ *.MOV
+ls *.MOV
+ls
+which heic2jpg 
+read /home/jao/bin/heic2jpg 
+mkdir vicki
+ls *.HEIC | args (| f: heic2jpg (f) vicki |)
+ls vicki
+ls *.HEIC
+mv *.MOV vicki
+ls
+sudo (| mv vicki ~z |)
+sudo (| chown -R z.z /home/z/vicki |)
+ls
+rm *.HEIC
+ls
+rm vivek-ramaswamy-1-640x335.jpeg butthead.jpg 
+more sab.txt 
+rm sab.txt 
+help ifthen
+gen 100
+gen 100 | ifthen (x: 20 <= x < 30 or 50 <= x < 60) (| write -f 'SELECTED {}' |)
+gen 100 | ifthen (x: 20 <= x < 30 or 50 <= x < 60) (| write -f 'SELECTED {}' |) | select (x: False)
+gen 100 | ifthen (x: 20 <= x < 30 or 50 <= x < 60) (| head 2 |) | select (x: False)
+gen 100 | ifthen (x: 20 <= x < 30 or 50 <= x < 60) (| head 2 | write |) | select (x: False)
+gen 5
+gen 5 | quiet
+gen 5 | (x: x * (x,))
+gen 5 | (x: x * (x,)) | quiet
+p = (| x: gen (x) | (x: (x, -x)) |)
+p 3
+p = (| x: gen (int(x)) | (x: (x, -x)) |)
+p 3
+p 4
+p 3 | join (| p 4 |)
+p 4 | join -k (| p 3 |)
+p = (| x: gen (int(x)) | (x: (x, -x)) |)
+p 4 | join -k (| p 3 |)
+p = (| x: gen (int(x)) | (x: (x, -x)) |)
+p 4 | join -k (| p 3 |)
+((104-8)/10)
+ls /usr/share/dict/words
+read /usr/share/dict/words | (w: set('plentyo') in set(w))
+read /usr/share/dict/words | select (w: set('plentyo') in set(w))
+(set('abc') in set('ddcba'))
+(dir(set))
+read /usr/share/dict/words | select (w: set('plentyo').issubset(set(w)))
+read /usr/share/dict/words | select (w: set('plentyo') == set(w))
+(dir(set))
+(set('abcd') == set('dcba'))
+read /usr/share/dict/words | select (w: set('plentyo') == set(w))
+cd tufts/cs131/assignments/a3
+python3 ./main.py -a
+python3 ./main.py 
+git branch
+python3 ./main.py 
+python3 ./main.py -a
+python3 ./main.py 
+python3 ./main.py -a
+python3 ./main.py 
+python3 ./main.py -a
+python3 ./main.py 
+python3 ./main.py -a
+python3 ./main.py 
+git status
+git commit -a
+python3 ./main.py 
+git diff
+bash
+(int(1.1))
+(int(1.9))
+cd tufts/cs131/assignments/a3
+python main.py -a
+bash python main.py -a
+bash
+cd tufts/cs131/assignments/a3
+ls
+python3 main.py -a
+python3 main.py 
+python3 main.py > x
+python3 main.py 
+d = (lambda: lambda x: x * 2))
+d = (lambda: lambda x: x * 2)
+(d(3))
+ls | (f: f.mtime)
+ls | (f: f.mtime())
+gen 10 | red + >$ x
+x <$
+gen 3 | store x
+(x)
+env -d x
+(x)
+help assign
+assign x (3)
+(x)
+x = (3+1)
+(x=1)
+ps | select (p: 'marcel' in p.cmdline)
+ps | select (p: 'marcel' in p.commandline)
+ps | select (p: 'marcel' in p.cmdline)
+ps
+ps -c marcel
+l = (|
+l = (| ls |)
+l
+l zack
+ls zack
+l = (| dir: ls (dir) |)
+l zack
+cd /tmp
+mkdir 'a b'
+ls a\ b
+ls a\ b/
+touch a\ b/c
+ls a\ b
+mkdir -p a\ b/\ \[GOG\]/asdf
+find a\ b
+ls -fr a\ b
+find a\ b
+ls -fr a\ b
+ls a\ b/\ *
+ls -0 a\ b/\ *
+ls -0 a\ b/\ G*
+rm -rf a\ b
+touch 'a b'
+toucn ' c d'
+touch ' c d'
+ls a*
+ls *c*
+ls *d
+rm a\ b
+rm \ c\ d
+touch a\ b
+touch \ c\ d
+ls a*
+ls *d
+ls \ c\ d
+touch \[abc\]
+ls \[abc\]
+ls *abc*
+ls \[*
+ls *\]
+ls \[abc\]
+mkdir t
+cd t
+cd ..
+rm -rf t
+mkdir t
+touch a\ b
+touch \ c\ d
+touch \[xyz\]
+ls a*
+ls a\ b
+ls \ c*
+ls *\ d
+ls \[*
+cd t
+touch a\ b
+touch \ c\ d
+touch \[xyz\]
+ls a*
+ls a\ b
+ls \ c*
+ls \ c\ d
+ls \[*
+ls *\]
+ls \[xyz\]
+ls [xyz]
+ls
+ls \ [c]*
+ls
+touch x y z
+ls
+ls \[xyz\]
+ls [xyz]
+(now())
+cd git/marcel/marcel
+recent = (| n: ls -fr | select (f: now() - f.mtime < days(int(n)) |)
+recent = (| n: ls -fr | select (f: now() - f.mtime < days(int(n))) |)
+recent 1
+recent 3
+recent 5
+recent 10
+recent 0
+recent 20
+ls -fr | ext pyc
+ls -fr | ext pyc | args (| f: ls (f) |)
+ls -fr | ext pyc | args (| f: ls (f) | (f: f.name) |)
+ls -fr | ext pyc | args (| f: rm (f) |)
+ls -fr | ext pyc
+touch env.py main.py object/color.py object/file.py parser.py
+git status
+recent 1
+recent -n 1
+ls *.py >$ pyfiles
+pyfiles <$
+cd ../test
+ls
+ls test*
+ls test*.py
+ls test*.py >$ testfiles
+testfiles <$
+ls bug*.py >>$ testfiles
+testfiles <$
+ls test*.py >$ testfiles
+testfiles <$
+testfiles <$ select (f: f.size > 10000)
+help process
+ps | ifelse (p: p.username == 'root') (| >$ root |) >$ other
+root <$
+other <$
+cd ..
+ls -fr | recent 1
+cd marcel
+touch env.py main.py object/color.py object/file.py parser.py
+cd marcel
+ls -fr | recent 1
+ls env.py
+(recent)
+recent 0
+recent 100
+recent 1
+(File('env.py').mtime)
+now()
+(now() - File('env.py').mtime)
+(recent0
+(recent)
+recent 1
+ls -fr | recent 1
+rm doc/__pycache__/help_process.cpython-310.pyc 
+ls -fr | recent 1
+r = recent
+ls -fr | r 1 >$ recent
+r = (recent)
+ls -fr | r 1 >$ recent
+recent <$
+ls -fr | ext py > py
+py <$
+ls -fr | ext py >$ py
+py <$
+recent <$ intersect (| py <$ |)
+cd ..
+recent <$ intersect (| py <$ |)
+ls /root/.ssh
+sudo (| ls /root/.ssh |)
+ls marcel/*.py
+ls -fr | map (f: (f.suffix, 1)) | red . + | sort
+ls
+ls -fr dist | map (f: (f.suffix, 1)) | red . + | sort
+ls -fr build | map (f: (f.suffix, 1)) | red . + | sort
+ls -fr dist | map (f: (f.suffix, 1)) | red . + | sort
+ls -fr test | map (f: (f.suffix, 1)) | red . + | sort
+ps -c marcel
+ps
+help ps
+ls
+ls -fr | (f: (f.suffix, 1)) | red . +
+ls -fr | (f: (f.suffix, 1)) | red . + | sort (e, n: n)
+help process
+ps | (p: p.create_time)
+ls
+help
+ls -fr | ext csv
+cd
+ls -fr | ext csv
+read -c 2022taxes/gas.csv
+read -c 2022taxes/gas.csv | select (date, credit_card, vendor, amount, *_: float(amount)) | red +
+read -c 2022taxes/gas.csv | map (date, credit_card, vendor, amount, *_: float(amount)) | red +
+cd git/marcel
+ls
+ls -fr | (f: f.suffix) | unique
+ls -fr | (f: (f.suffix, f.size)) | red . + | sort (ext, size: size) | head 3
+ls -fr | (f: (f.suffix, f.size)) | red . + | sort (ext, size: size) | tail 3
+ls -fr | (f: (f.suffix, f.size)) | red . + | sort (ext, size: size) | tail 5
+ls -fr | (f: (f.suffix, f.size)) | select (ext, size: ext != '') | red . + | sort (ext, size: size) | tail 5
+ls -fr | select (f: f.suffix == '.pack')
+history 4
+ls -fr \
+| map (f: (f.suffix, f.size)) \
+| select (ext, size: ext != '') \
+| red . + \
+| sort (ext, size: size) \
+| tail 5
+ls -fr \
+| map (f: (f.suffix, f.size)) \
+| select (ext, size: ext != '') \
+| red . + \
+sort (ext, size: size) \
+ls -fr \
+| map (f: (f.suffix, f.size)) \
+| select (ext, size: ext != '') \
+| red . + \
+| sort (ext, size: size) \
+| tail 5
+ps -c python
+gen 100 1 | red *
+cd git/marcel
+gen 100 1 | red *
+cat /usr/share/dict/words \
+| map (w: (len(w), 1)) \
+| red . + \
+| sort
+((1 + sqrt(5)) / 2)
+from math import *
+((1 + sqrt(5)) / 2)
+import math *
+((1 + sqrt(5)) / 2)
+gen 100 1 \
+| map (x: 'FizzBuzz' if x % 15 == 0 else \
+          'Fizz' if x % 3 == 0 else \
+          'Buzz' if x % 5 == 0 else \
+          x)
+help
+help jobs
+help fg
+help ls
+help File
+gen 1000 1 | red *
+history
+history 20
+gen 10 | red (lambda acc, x: acc + x if acc else x)
+gen 10 1 | red (lambda acc, x: acc * x if acc else x)
+(USER)
+cd /tmp
+cd /home/(USER)
+pwd
+help args
+gen 100 | args (| a, b, c, d, e: ((a, b, c, d, e)) |)
+help window
+gen 100 | window -d 5
+gen 100 | args (| *x: x |)
+gen 100 | args (| *x: (x) |)
+gen 5 | (x: (x, x)) | cat
+# group_sum <$ map (*x: (0,) + x) \
+# | join (| q_sum <$ (*x: (0,) + x) |) \
+# | map (j, q, group_sum, q_sum: q + (group_sum / q_sum,))
+gen 3 1 | tee (| (x: x + 100) |) (| (x: -x) |)
+help tee
+gn = (| n: gen (int(n)) >$ g |)
+gn 3
+(g)
+g >$
+g <$
+env -d g
+(g)
+gn 3
+g <$
+gn = (| n: gen (int(n)) >$ g |)
+gn 3
+g <$
+git status
+cd git/marcel
+git status
+git add notes/sessions.txt 
+git commit -a
+git branch
+git branch bug229
+git checkout bug229
+cd test
+./testall | grep fail
+git diff > /tmp/m.diff
+git commit -a
+git log
+bash
+g
+ps -c marcel
+touch ~/.config/marcel/startup.py 
+ps -c marcel
+(xx)
+(xxx)
+(95/990)

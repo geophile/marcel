@@ -159,7 +159,6 @@ class MainScript(Main):
         # Ensure that on-disk state is set up and correct.
         if env.locations.fresh_install():
             initialize_persistent_config_and_data(env, initial_config)
-        marcel.persistence.persistence.validate_all(env, self.handle_persistence_validation_errors)
         if not Workspace.default().exists(env):
             # The default workspace was found to be broken, and was removed. Create a new one.
             Workspace.default().create_on_disk(env, DEFAULT_CONFIG)
@@ -175,6 +174,7 @@ class MainScript(Main):
         self.needs_restart = False
         if not testing and not self.env.locations.fresh_install():
             marcel.persistence.migration.migrate()
+        marcel.persistence.persistence.validate_all(env, self.handle_persistence_validation_errors)
         atexit.register(self.shutdown)
 
     def read_config(self):
@@ -249,13 +249,14 @@ class MainScript(Main):
 
     # Internal
 
-    def handle_persistence_validation_errors(self, errors):
+    def handle_persistence_validation_errors(self, broken_workspace_names, errors):
         if len(errors) > 0:
             now = time.time()
             broken_ws_config = self.env.locations.config_bws() / str(now)
             broken_ws_data = self.env.locations.data_bws() / str(now)
             marcel.util.print_to_stderr(self.env,
-                                        f'Damaged workspaces have been detected. Their contents will be moved to:'
+                                        f'Damaged workspaces have been detected: {sorted(broken_workspace_names)}. '
+                                        f'Their contents will be moved to:'
                                         f'\n    {broken_ws_config}'
                                         f'\n    {broken_ws_data}')
             started_in_broken_ws = False

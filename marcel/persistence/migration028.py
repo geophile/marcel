@@ -71,6 +71,8 @@ import tempfile
 
 import marcel.exception
 import marcel.version
+import marcel.locations
+import marcel.object.workspace
 
 
 def should_not_exist(path):
@@ -94,29 +96,41 @@ def migrate(locations):
 
     def move_workspace_dirs(workspace_dirs, new_workspace_base):
         for workspace_dir in workspace_dirs:
-            shutil.move(workspace_dir, new_workspace_base)
-            should_not_exist(workspace_dir)
+            if workspace_dir.name != marcel.locations.Locations.WORKSPACE_DIR_NAME:
+                print(f'Moving {workspace_dir} to {new_workspace_base}')
+                shutil.move(workspace_dir, new_workspace_base)
+                should_not_exist(workspace_dir)
 
     def rename_default_workspace_dir(workspace_dir_path):
         old_default_dir = workspace_dir_path / '__DEFAULT_WORKSPACE__'
-        old_default_dir.rename(old_default_dir.parent / '__DEFAULT__')
-        should_not_exist(old_default_dir)
+        new_default_dir = old_default_dir.parent / '__DEFAULT__'
+        # Make old marker file deletable
+        (old_default_dir / marcel.object.workspace.Marker.FILENAME_ROOT).chmod(0o700)
+        # Could move files, except that __DEFAULT__/startup.py is created on first execution. It has to be overwritten
+        # by the existing __DEFAULT_WORKSPACE__/startup.py.
+        for default_workspace_file in old_default_dir.iterdir():
+            if default_workspace_file.name != marcel.object.workspace.Marker.FILENAME_ROOT:
+                print(f'In {old_default_dir}: {default_workspace_file}')
+            shutil.copy(default_workspace_file, new_default_dir)
+        shutil.rmtree(old_default_dir)
 
     def migrate_config():
         # Get the workspace dirs
         config_base = locations.config()  # .config/marcel
         workspace_dirs = subdirs(config_base)
-        # Create broken and workspace directories
+        workspace_dir_path = locations.config_ws()
+        assert workspace_dir_path.exists(), workspace_dir_path
+        # Create temp directory for broken workspaces. A temp directory in case there was a workspace
+        # named "broken". (The same problem doesn't exist for "workspace", since the previous version
+        # of marcel reserved that name.)
         tmp_broken_dir_path = pathlib.Path(tempfile.TemporaryDirectory(dir=config_base).name)
-        tmp_workspace_dir_path = pathlib.Path(tempfile.TemporaryDirectory(dir=config_base).name)
         tmp_broken_dir_path.mkdir(parents=True, exist_ok=False)
-        tmp_workspace_dir_path.mkdir(parents=True, exist_ok=False)
         # Move workspace directories
-        move_workspace_dirs(workspace_dirs, tmp_workspace_dir_path)
+        move_workspace_dirs(workspace_dirs, workspace_dir_path)
         # Rename __DEFAULT_WORKSPACE__ to __DEFAULT__
-        rename_default_workspace_dir(tmp_workspace_dir_path)
+        rename_default_workspace_dir(workspace_dir_path)
         # Rename new directories to their permanent names
-        tmp_workspace_dir_path.rename(config_base / 'workspace')
+        print(f'rename {tmp_broken_dir_path} to {config_base/"workspace"}')
         tmp_broken_dir_path.rename(config_base / 'broken')
 
     def migrate_data():

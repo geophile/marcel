@@ -831,3 +831,13 @@ EOF
 
 function_args_parser: Doesn't check that star is used only with last
 arg. Although, python parsing catches it.
+
+----------------------------------------------------------------------
+
+Use backups to get old marcel layouts:
+
+- pre-024
+- 024
+- 028
+
+System tests to make sure upgrades work.

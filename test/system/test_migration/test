@@ -1,9 +1,9 @@
 #!/bin/bash
 
-export MARCEL_HOME=/home/jao/git/marcel/test/system
+export TEST_DIR=/home/jao/git/marcel/test/system/test_migration
 export TEST_HOME=/tmp/test_home
 export ACTUAL=/tmp/test_actual
-export EXPECTED=$MARCEL_HOME/expected028
+export EXPECTED=$TEST_DIR/expected028
 export XDG_CONFIG_HOME=$TEST_HOME/.config
 export XDG_DATA_HOME=$TEST_HOME/.local/share
 
@@ -34,14 +34,6 @@ check() {
     FAILURES=$(($FAILURES+1))
     echo "Error on $1"
   fi
-}
-
-initialize() {
-  sudo rm -rf $TEST_HOME >& /dev/null
-  mkdir -p $XDG_CONFIG_HOME >& /dev/null
-  mkdir -p $XDG_DATA_HOME >& /dev/null
-  sudo rm -rf $ACTUAL >& /dev/null
-  mkdir -p $ACTUAL >& /dev/null
 }
 
 test_before_install() {
@@ -89,13 +81,33 @@ EOF
   check ws_delete_w
 }
 
+# ---------------------------------------------------------------
+
+export TEST_DIR=/home/jao/git/marcel/test/system/test_migration
+export TEST_HOME=/tmp/test_home
+export TEST_ARTIFACTS=/tmp/test_artifacts
+export WS2=$TEST_DIR/
+export XDG_CONFIG_HOME=$TEST_HOME/.config
+export XDG_DATA_HOME=$TEST_HOME/.local/share
+
+FAILURES=$((0))
+
+initialize() {
+  sudo rm -rf $TEST_HOME >& /dev/null
+  sudo rm -rf $TEST_ARTIFACTS
+  mkdir -p $TEST_ARTIFACTS
+}
+
+test_ws2_to_ws3() {
+  cp -rp $TEST_DIR/ws2 $TEST_HOME
+  marcel <<EOF
+EOF
+  find $TEST_HOME > $TEST_ARTIFACTS/ws3
+}
+
 main() {
   initialize
-  test_before_install
-  test_after_install
-  test_create_workspace w
-  test_use_workspace w
-  test_delete_workspace w
+  test_ws2_to_ws3
   echo "$FAILURES failures: $0"
 }
 

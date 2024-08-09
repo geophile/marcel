@@ -18,7 +18,7 @@ import marcel.reduction
 import dill
 
 
-class Function:
+class Function(object):
 
     def __init__(self, function, source, display):
         self.function = function

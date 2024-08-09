@@ -1,0 +1,2767 @@
+2022.11.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 53 pi pi 4096 Nov  3  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 53 pi pi 4096 Nov  3  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 53 pi pi 4096 Nov  3  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 53 pi pi 4096 Nov  7  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 53 pi pi 4096 Nov  8  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.22/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.23/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.25/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.26/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.27/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.28/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.11.29/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.12.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.12.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.12.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.12.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Aug 18  2022 .
+drwxrwxr-x 54 pi pi 4096 Nov  9  2022 ..
+-rw-rw-r-- 24 pi pi 4352 Aug 18  2022 startup.py
+
+2022.12.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 10  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 10  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.13/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 10  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 10  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 10  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 10  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.17/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 10  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 17  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 17  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 17  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 20  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.22/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 21  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.23/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 22  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.24/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 23  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.25/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 23  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.26/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 23  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2022.12.27/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 26  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2023.01.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 27  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2023.01.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 10  2022 .
+drwxrwxr-x 54 pi pi 4096 Dec 27  2022 ..
+-rw-rw-r-- 21 pi pi 4518 Dec 10  2022 startup.py
+
+2023.01.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan  7  2023 .
+drwxrwxr-x 54 pi pi 4096 Jan  7  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan  7  2023 .
+drwxrwxr-x 54 pi pi 4096 Jan  7  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan  7  2023 .
+drwxrwxr-x 54 pi pi 4096 Jan  7  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 54 pi pi 4096 Jan  7  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 54 pi pi 4096 Jan  7  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.13/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 54 pi pi 4096 Jan  7  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 54 pi pi 4096 Jan 13  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 54 pi pi 4096 Jan 13  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 16  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 16  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 16  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 16  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.22/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 16  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.23/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 16  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.24/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 16  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.26/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 25  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.27/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 26  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.28/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 26  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.29/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 26  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.30/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 29  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.01.31/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 29  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.02.01/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jan 10  2023 .
+drwxrwxr-x 57 pi pi 4096 Jan 31  2023 ..
+-rw-rw-r-- 23 pi pi 4518 Jan  7  2023 startup.py
+
+2023.02.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb  1  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb  1  2023 ..
+-rw-rw-r--  7 pi pi 4532 Feb  1  2023 startup.py
+
+2023.02.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb  1  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb  8  2023 ..
+-rw-rw-r--  7 pi pi 4532 Feb  1  2023 startup.py
+
+2023.02.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb  1  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb  9  2023 ..
+-rw-rw-r--  7 pi pi 4532 Feb  1  2023 startup.py
+
+2023.02.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb  1  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb  9  2023 ..
+-rw-rw-r--  7 pi pi 4532 Feb  1  2023 startup.py
+
+2023.02.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb  1  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb 11  2023 ..
+-rw-rw-r--  7 pi pi 4532 Feb  1  2023 startup.py
+
+2023.02.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb  1  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb 13  2023 ..
+-rw-rw-r--  7 pi pi 4532 Feb  1  2023 startup.py
+
+2023.02.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb  1  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb 14  2023 ..
+-rw-rw-r--  7 pi pi 4532 Feb  1  2023 startup.py
+
+2023.02.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 15  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb 15  2023 ..
+-rw-rw-r--  7 pi pi 4548 Feb 15  2023 startup.py
+
+2023.02.17/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 15  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb 16  2023 ..
+-rw-rw-r--  7 pi pi 4548 Feb 15  2023 startup.py
+
+2023.02.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 15  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb 16  2023 ..
+-rw-rw-r--  7 pi pi 4548 Feb 15  2023 startup.py
+
+2023.02.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 15  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb 18  2023 ..
+-rw-rw-r--  7 pi pi 4548 Feb 15  2023 startup.py
+
+2023.02.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 15  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb 19  2023 ..
+-rw-rw-r--  7 pi pi 4548 Feb 15  2023 startup.py
+
+2023.02.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 15  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb 20  2023 ..
+-rw-rw-r--  7 pi pi 4548 Feb 15  2023 startup.py
+
+2023.02.22/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 15  2023 .
+drwxrwxr-x 57 pi pi 4096 Feb 21  2023 ..
+-rw-rw-r--  7 pi pi 4548 Feb 15  2023 startup.py
+
+2023.03.01/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 28  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar  1  2023 ..
+-rw-rw-r--  8 pi pi 4552 Feb 28  2023 startup.py
+
+2023.03.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 28  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar  1  2023 ..
+-rw-rw-r--  8 pi pi 4552 Feb 28  2023 startup.py
+
+2023.03.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 28  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar  2  2023 ..
+-rw-rw-r--  8 pi pi 4552 Feb 28  2023 startup.py
+
+2023.03.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 28  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar  2  2023 ..
+-rw-rw-r--  8 pi pi 4552 Feb 28  2023 startup.py
+
+2023.03.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 28  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar  2  2023 ..
+-rw-rw-r--  8 pi pi 4552 Feb 28  2023 startup.py
+
+2023.03.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 28  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar  5  2023 ..
+-rw-rw-r--  8 pi pi 4552 Feb 28  2023 startup.py
+
+2023.03.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Feb 28  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar  6  2023 ..
+-rw-rw-r--  8 pi pi 4552 Feb 28  2023 startup.py
+
+2023.03.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar  7  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar  7  2023 ..
+-rw-rw-r--  1 pi pi 4661 Mar  7  2023 startup.py
+
+2023.03.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar  7  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar  8  2023 ..
+-rw-rw-r--  2 pi pi 4715 Mar  8  2023 startup.py
+
+2023.03.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar  7  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar  9  2023 ..
+-rw-rw-r--  2 pi pi 4715 Mar  8  2023 startup.py
+
+2023.03.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar  7  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar  9  2023 ..
+-rw-rw-r--  5 pi pi 4733 Mar 10  2023 startup.py
+
+2023.03.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar  7  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 13  2023 ..
+-rw-rw-r--  5 pi pi 4733 Mar 10  2023 startup.py
+
+2023.03.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar  7  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 13  2023 ..
+-rw-rw-r--  5 pi pi 4733 Mar 10  2023 startup.py
+
+2023.03.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar  7  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 15  2023 ..
+-rw-rw-r--  5 pi pi 4733 Mar 10  2023 startup.py
+
+2023.03.17/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar  7  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 16  2023 ..
+-rw-rw-r--  5 pi pi 4733 Mar 10  2023 startup.py
+
+2023.03.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 17  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 16  2023 ..
+-rw-rw-r--  4 pi pi 4733 Mar 17  2023 startup.py
+
+2023.03.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 17  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 16  2023 ..
+-rw-rw-r--  4 pi pi 4733 Mar 17  2023 startup.py
+
+2023.03.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 17  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 19  2023 ..
+-rw-rw-r--  4 pi pi 4733 Mar 17  2023 startup.py
+
+2023.03.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 17  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 19  2023 ..
+-rw-rw-r--  4 pi pi 4733 Mar 17  2023 startup.py
+
+2023.03.22/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 21  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.03.23/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 22  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.03.24/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 22  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.03.25/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 22  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.03.26/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 22  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.03.27/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 22  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.03.28/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 22  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.03.31/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.01/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.23/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.24/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Mar 30  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.25/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Apr 24  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.04.26/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Apr 24  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.01/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Apr 24  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 Apr 24  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.13/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Mar 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 38 pi pi 4733 Mar 21  2023 startup.py
+
+2023.05.26/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 May 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  8 pi pi 4733 May 21  2023 startup.py
+
+2023.05.27/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 May 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  8 pi pi 4733 May 21  2023 startup.py
+
+2023.05.28/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 May 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  8 pi pi 4733 May 21  2023 startup.py
+
+2023.05.29/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 May 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  8 pi pi 4733 May 21  2023 startup.py
+
+2023.05.30/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 May 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  8 pi pi 4733 May 21  2023 startup.py
+
+2023.05.31/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 May 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  8 pi pi 4733 May 21  2023 startup.py
+
+2023.06.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 May 21  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  8 pi pi 4733 May 21  2023 startup.py
+
+2023.06.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.13/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.17/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun  3  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r-- 13 pi pi 4733 Jun  3  2023 startup.py
+
+2023.06.24/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun 23  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  6 pi pi 4773 Jun 23  2023 startup.py
+
+2023.06.25/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun 23  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  6 pi pi 4773 Jun 23  2023 startup.py
+
+2023.07.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun 23  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  6 pi pi 4773 Jun 23  2023 startup.py
+
+2023.07.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun 23  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  6 pi pi 4773 Jun 23  2023 startup.py
+
+2023.07.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun 23  2023 .
+drwxrwxr-x 57 pi pi 4096 May  2  2023 ..
+-rw-rw-r--  6 pi pi 4773 Jun 23  2023 startup.py
+
+2023.08.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Aug  4  2023 .
+drwxrwxr-x 59 pi pi 4096 Aug  7  2023 ..
+-rw-------  9 pi pi 3710 Aug  4  2023 startup.py
+
+2023.08.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Aug  4  2023 .
+drwxrwxr-x 59 pi pi 4096 Aug  7  2023 ..
+-rw-------  9 pi pi 3710 Aug  4  2023 startup.py
+
+2023.08.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Aug  4  2023 .
+drwxrwxr-x 59 pi pi 4096 Aug  7  2023 ..
+-rw-------  9 pi pi 3710 Aug  4  2023 startup.py
+
+2023.09.01/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Aug  4  2023 .
+drwxrwxr-x 59 pi pi 4096 Aug 21  2023 ..
+-rw-------  9 pi pi 3710 Aug  4  2023 startup.py
+
+2023.09.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Aug  4  2023 .
+drwxrwxr-x 59 pi pi 4096 Aug 21  2023 ..
+-rw-------  9 pi pi 3710 Aug  4  2023 startup.py
+
+2023.09.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Aug  4  2023 .
+drwxrwxr-x 59 pi pi 4096 Aug 21  2023 ..
+-rw-------  9 pi pi 3710 Aug  4  2023 startup.py
+
+2023.09.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Aug  4  2023 .
+drwxrwxr-x 59 pi pi 4096 Aug 21  2023 ..
+-rw-------  9 pi pi 3710 Aug  4  2023 startup.py
+
+2023.09.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep  5  2023 .
+drwxrwxr-x 59 pi pi 4096 Aug 21  2023 ..
+-rw-------  1 pi pi 3710 Sep  5  2023 startup.py
+
+2023.09.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep  5  2023 .
+drwxrwxr-x 59 pi pi 4096 Aug 21  2023 ..
+-rw-------  1 pi pi 3764 Sep  6  2023 startup.py
+
+2023.09.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep  7  2023 .
+drwxrwxr-x 59 pi pi 4096 Aug 21  2023 ..
+-rw-------  1 pi pi 3708 Sep  7  2023 startup.py
+
+2023.09.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep 10  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep  9  2023 ..
+-rw-------  8 pi pi 3634 Sep 10  2023 startup.py
+
+2023.09.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep 10  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep  9  2023 ..
+-rw-------  8 pi pi 3634 Sep 10  2023 startup.py
+
+2023.09.13/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep 10  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep  9  2023 ..
+-rw-------  8 pi pi 3634 Sep 10  2023 startup.py
+
+2023.09.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep 10  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep  9  2023 ..
+-rw-------  8 pi pi 3634 Sep 10  2023 startup.py
+
+2023.09.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep 10  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep  9  2023 ..
+-rw-------  8 pi pi 3634 Sep 10  2023 startup.py
+
+2023.09.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep 10  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep  9  2023 ..
+-rw-------  8 pi pi 3634 Sep 10  2023 startup.py
+
+2023.09.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep 10  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep  9  2023 ..
+-rw-------  8 pi pi 3634 Sep 10  2023 startup.py
+
+2023.09.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep 10  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep  9  2023 ..
+-rw-------  8 pi pi 3634 Sep 10  2023 startup.py
+
+2023.09.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Sep 20  2023 .
+drwxrwxr-x 61 pi pi 4096 Sep 20  2023 ..
+-rw-------  1 pi pi 1660 Sep 20  2023 startup.py
+
+2023.09.23/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 21  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 21  2023 ..
+-rw-------  2 pi pi 3634 Sep 10  2023 startup.py
+
+2023.09.24/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 21  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 21  2023 ..
+-rw-------  2 pi pi 3634 Sep 10  2023 startup.py
+
+2023.09.25/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 24  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 21  2023 ..
+-rw-------  1 pi pi 3634 Sep 24  2023 startup.py
+
+2023.09.26/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 25  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 21  2023 ..
+-rw-------  1 pi pi 3634 Sep 25  2023 startup.py
+
+2023.09.27/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Jun 23  2023 .
+drwxrwxr-x 57 pi pi 4096 Aug  2  2023 ..
+-rw-rw-r--  1 pi pi 4773 Jun 23  2023 startup.py
+
+2023.10.01/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 25  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 27  2023 ..
+-rw------- 10 pi pi 3634 Sep 25  2023 startup.py
+
+2023.10.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 25  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 27  2023 ..
+-rw------- 10 pi pi 3634 Sep 25  2023 startup.py
+
+2023.10.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 25  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 27  2023 ..
+-rw------- 10 pi pi 3634 Sep 25  2023 startup.py
+
+2023.10.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 25  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 27  2023 ..
+-rw------- 10 pi pi 3634 Sep 25  2023 startup.py
+
+2023.10.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 25  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 27  2023 ..
+-rw------- 10 pi pi 3634 Sep 25  2023 startup.py
+
+2023.10.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 25  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 27  2023 ..
+-rw------- 10 pi pi 3634 Sep 25  2023 startup.py
+
+2023.10.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 25  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 27  2023 ..
+-rw------- 10 pi pi 3634 Sep 25  2023 startup.py
+
+2023.10.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 25  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 27  2023 ..
+-rw------- 10 pi pi 3634 Sep 25  2023 startup.py
+
+2023.10.13/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Sep 25  2023 .
+drwxrwxr-x 60 pi pi 4096 Sep 27  2023 ..
+-rw------- 10 pi pi 3634 Sep 25  2023 startup.py
+
+2023.10.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 13  2023 .
+drwxrwxr-x 60 pi pi 4096 Oct 13  2023 ..
+-rw------- 10 pi pi 3668 Oct 13  2023 startup.py
+
+2023.10.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 13  2023 .
+drwxrwxr-x 60 pi pi 4096 Oct 13  2023 ..
+-rw------- 10 pi pi 3668 Oct 13  2023 startup.py
+
+2023.10.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 13  2023 .
+drwxrwxr-x 60 pi pi 4096 Oct 13  2023 ..
+-rw------- 10 pi pi 3668 Oct 13  2023 startup.py
+
+2023.10.17/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 13  2023 .
+drwxrwxr-x 60 pi pi 4096 Oct 13  2023 ..
+-rw------- 10 pi pi 3668 Oct 13  2023 startup.py
+
+2023.10.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 13  2023 .
+drwxrwxr-x 60 pi pi 4096 Oct 13  2023 ..
+-rw------- 10 pi pi 3668 Oct 13  2023 startup.py
+
+2023.10.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 13  2023 .
+drwxrwxr-x 60 pi pi 4096 Oct 13  2023 ..
+-rw------- 10 pi pi 3668 Oct 13  2023 startup.py
+
+2023.10.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 13  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw------- 10 pi pi 3668 Oct 13  2023 startup.py
+
+2023.10.23/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 13  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw------- 10 pi pi 3668 Oct 13  2023 startup.py
+
+2023.10.24/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 13  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw------- 10 pi pi 3668 Oct 13  2023 startup.py
+
+2023.10.25/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 13  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw------- 10 pi pi 3668 Oct 13  2023 startup.py
+
+2023.10.26/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 25  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  5 pi pi 3668 Oct 25  2023 startup.py
+
+2023.10.27/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 25  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  5 pi pi 3668 Oct 25  2023 startup.py
+
+2023.10.29/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 25  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  5 pi pi 3668 Oct 25  2023 startup.py
+
+2023.10.30/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 25  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  5 pi pi 3668 Oct 25  2023 startup.py
+
+2023.10.31/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 25  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  5 pi pi 3668 Oct 25  2023 startup.py
+
+2023.11.01/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 31  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  4 pi pi 3713 Oct 31  2023 startup.py
+
+2023.11.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 31  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  4 pi pi 3713 Oct 31  2023 startup.py
+
+2023.11.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 31  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  4 pi pi 3713 Oct 31  2023 startup.py
+
+2023.11.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 31  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  7 pi pi 3709 Nov  3  2023 startup.py
+
+2023.11.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 31  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  7 pi pi 3709 Nov  3  2023 startup.py
+
+2023.11.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 31  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  7 pi pi 3709 Nov  3  2023 startup.py
+
+2023.11.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 31  2023 .
+drwxrwxr-x 61 pi pi 4096 Oct 20  2023 ..
+-rw-------  7 pi pi 3709 Nov  3  2023 startup.py
+
+2023.11.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 31  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov  7  2023 ..
+-rw-------  7 pi pi 3709 Nov  3  2023 startup.py
+
+2023.11.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 31  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov  7  2023 ..
+-rw-------  7 pi pi 3709 Nov  3  2023 startup.py
+
+2023.11.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Oct 31  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov  7  2023 ..
+-rw-------  7 pi pi 3709 Nov  3  2023 startup.py
+
+2023.11.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 12  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov  7  2023 ..
+-rw-------  1 pi pi 3708 Nov 12  2023 startup.py
+
+2023.11.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 14  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov  7  2023 ..
+-rw-------  1 pi pi 3708 Nov 14  2023 startup.py
+
+2023.11.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 15  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov  7  2023 ..
+-rw-------  6 pi pi 3709 Nov 15  2023 startup.py
+
+2023.11.17/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 15  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+-rw-------  6 pi pi 3709 Nov 15  2023 startup.py
+
+2023.11.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 15  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+-rw-------  6 pi pi 3709 Nov 15  2023 startup.py
+
+2023.11.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 15  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+-rw-------  6 pi pi 3709 Nov 15  2023 startup.py
+
+2023.11.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 15  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+-rw-------  6 pi pi 3709 Nov 15  2023 startup.py
+
+2023.11.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 15  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+-rw-------  6 pi pi 3709 Nov 15  2023 startup.py
+
+2023.11.25/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 22  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+-rw-------  5 pi pi 3692 Nov 22  2023 startup.py
+
+2023.11.27/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 22  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+-rw-------  5 pi pi 3692 Nov 22  2023 startup.py
+
+2023.11.28/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 22  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+-rw-------  5 pi pi 3692 Nov 22  2023 startup.py
+
+2023.11.29/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 22  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+-rw-------  5 pi pi 3692 Nov 22  2023 startup.py
+
+2023.11.30/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 22  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+-rw-------  5 pi pi 3692 Nov 22  2023 startup.py
+
+2023.12.01/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Nov 30  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+-rw-------  4 pi pi 3692 Nov 30  2023 startup.py
+
+2023.12.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Dec  1  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+drwxrwxr-x  2 pi pi 4096 Dec  1  2023 hello
+-rw-------  4 pi pi 3692 Nov 30  2023 startup.py
+
+2023.12.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Dec  1  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+drwxrwxr-x  2 pi pi 4096 Dec  1  2023 hello
+-rw-------  4 pi pi 3692 Nov 30  2023 startup.py
+
+2023.12.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 Dec  1  2023 .
+drwxrwxr-x 61 pi pi 4096 Nov 16  2023 ..
+drwxrwxr-x  2 pi pi 4096 Dec  1  2023 hello
+-rw-------  2 pi pi 3692 Dec  3  2023 startup.py
+
+2023.12.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 12
+drwxrwxr-x  2 pi pi 4096 Dec  4  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+-rw-------  2 pi pi 3692 Dec  3  2023 startup.py
+
+2023.12.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec  5  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+-rw-------  1 pi pi 4376 Dec  5  2023 startup.py
+
+2023.12.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x  9 pi pi 4096 Dec  7  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+-rw-------  1 pi pi 4467 Dec  7  2023 startup.py
+drwxrwxr-x  2 pi pi 4096 Dec  7  2023 w1
+drwxrwxr-x  2 pi pi 4096 Dec  7  2023 w2
+drwxrwxr-x  2 pi pi 4096 Dec  7  2023 w3
+drwxrwxr-x  2 pi pi 4096 Dec  7  2023 w4
+drwxrwxr-x  2 pi pi 4096 Dec  7  2023 w5
+drwxrwxr-x  2 pi pi 4096 Dec  7  2023 w6
+drwxrwxr-x  2 pi pi 4096 Dec  7  2023 w7
+
+2023.12.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  3 pi pi 4096 Dec  8  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+drwxrwxr-x  2 pi pi 4096 Dec  8  2023 hello
+-rw-------  2 pi pi 4545 Dec  8  2023 startup.py
+
+2023.12.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  3 pi pi 4096 Dec  8  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+drwxrwxr-x  2 pi pi 4096 Dec  8  2023 hello
+-rw-------  2 pi pi 4545 Dec  8  2023 startup.py
+
+2023.12.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Dec 10  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+drwxrwxr-x  2 pi pi 4096 Dec 10  2023 a6
+drwxrwxr-x  2 pi pi 4096 Dec  8  2023 hello
+-rw-------  2 pi pi 4950 Dec 10  2023 startup.py
+
+2023.12.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Dec 10  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+drwxrwxr-x  2 pi pi 4096 Dec 10  2023 a6
+drwxrwxr-x  2 pi pi 4096 Dec  8  2023 hello
+-rw-------  2 pi pi 4950 Dec 10  2023 startup.py
+
+2023.12.13/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  3 pi pi 4096 Dec 12  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+drwxrwxr-x  2 pi pi 4096 Dec 10  2023 a6
+-rw-------  1 pi pi 4960 Dec 12  2023 startup.py
+
+2023.12.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  3 pi pi 4096 Dec 13  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+drwxrwxr-x  2 pi pi 4096 Dec 13  2023 hello
+-rw-------  1 pi pi 4956 Dec 13  2023 startup.py
+
+2023.12.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  3 pi pi 4096 Dec 14  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+drwxrwxr-x  2 pi pi 4096 Dec 14  2023 hello
+-rw-------  3 pi pi 4397 Dec 14  2023 startup.py
+
+2023.12.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 15  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+-rw-------  3 pi pi 4397 Dec 14  2023 startup.py
+
+2023.12.17/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 15  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+-rw-------  3 pi pi 4397 Dec 14  2023 startup.py
+
+2023.12.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  3 pi pi 4096 Dec 17  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec  4  2023 ..
+----------  1 pi pi    0 Dec 17  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Dec 17  2023 hello
+-rw-------  1 pi pi 4397 Dec 17  2023 startup.py
+
+2023.12.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  2 pi pi 4096 Dec 20  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec 20  2023 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+-rw-------  1 pi pi 4397 Dec 20  2023 startup.py
+
+2023.12.22/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Dec 21  2023 .
+drwxrwxr-x 61 pi pi 4096 Dec 20  2023 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Dec 21  2023 a6
+-rw-------  1 pi pi 4327 Dec 21  2023 startup.py
+drwxrwxr-x  2 pi pi 4096 Dec 21  2023 w1
+
+2024.01.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 28
+drwxrwxr-x  5 pi pi 4096 Jan  2 11:32 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan  1 12:42 231
+drwxrwxr-x  2 pi pi 4096 Dec 24 16:31 a6
+drwxrwxr-x  2 pi pi 4096 Jan  2 12:57 jeffrey
+-rw-------  4 pi pi 4318 Jan  2 11:32 startup.py
+
+2024.01.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 28
+drwxrwxr-x  5 pi pi 4096 Jan  2 11:32 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan  1 12:42 231
+drwxrwxr-x  2 pi pi 4096 Dec 24 16:31 a6
+drwxrwxr-x  2 pi pi 4096 Jan  2 13:34 jeffrey
+-rw-------  4 pi pi 4318 Jan  2 11:32 startup.py
+
+2024.01.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan  2 13:34 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan  3 19:40 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan  2 13:34 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan  4 16:35 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan  2 13:34 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan  5 12:56 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan  2 13:34 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan  5 12:56 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan  2 13:34 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan  7 18:57 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan  2 13:34 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan  7 18:57 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan  2 13:34 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan  7 18:57 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan  2 13:34 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan  7 18:57 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 11 13:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 11 15:49 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.13/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 12 15:25 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 12 11:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 12 15:25 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 12 11:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 12 15:25 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 12 11:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 12 15:25 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 12 11:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.17/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 12 15:25 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 12 11:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 12 15:25 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 12 11:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 12 15:25 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 12 11:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 12 15:25 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 12 11:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 12 15:25 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 20 17:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.22/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.23/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.24/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 23 21:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.25/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 23 21:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.26/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 23 21:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.27/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 23 21:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.28/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 23 21:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.29/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 23 21:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.01.30/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 29 21:33 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.01/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.13/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Jan  2 11:52 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Jan 30 10:48 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 15 23:08 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 15 23:08 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 15 23:08 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 15 23:08 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.22/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 24
+drwxrwxr-x  4 pi pi 4096 Jan  3 19:41 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 15 23:08 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.23/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 28
+drwxrwxr-x  5 pi pi 4096 Feb 22 11:20 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 23 13:31 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.24/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 28
+drwxrwxr-x  5 pi pi 4096 Feb 22 11:20 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 23 13:31 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 48 pi pi 4318 Jan  3 19:41 startup.py
+
+2024.02.25/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Feb 24 14:13 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.02.28/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Feb 27 11:58 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.02.29/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Feb 27 11:58 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.03.01/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Feb 14 16:59 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Feb 29 19:12 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.03.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Mar  2 09:19 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Mar  2 09:09 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.03.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Mar  2 09:19 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Mar  2 13:41 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.03.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Mar  2 09:19 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Mar  2 13:41 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.03.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Mar  4 18:00 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Mar  4 19:52 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.03.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Mar  5 10:37 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Mar  5 18:54 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.03.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Mar  6 21:49 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Mar  6 21:14 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.03.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Mar  6 21:49 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Mar  7 22:23 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.03.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Feb 24 20:33 .
+drwxrwxr-x 61 pi pi 4096 Mar  8 18:14 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Mar  8 13:27 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw------- 13 pi pi 4643 Feb 24 20:33 startup.py
+
+2024.03.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 32
+drwxrwxr-x  6 pi pi 4096 Mar  9 09:50 .
+drwxrwxr-x 61 pi pi 4096 Mar  8 18:14 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Jan 21 20:43 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Mar  8 13:27 pa
+drwxrwxr-x  2 pi pi 4096 Feb 23 09:38 queens
+-rw-------  1 pi pi 4641 Mar  9 09:50 startup.py
+
+2024.03.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 36
+drwxrwxr-x  7 pi pi 4096 Mar 10 16:53 .
+drwxrwxr-x 61 pi pi 4096 Mar  8 18:14 ..
+---------- 69 pi pi    0 Dec 20  2023 .WORKSPACE
+drwxrwxr-x  2 pi pi 4096 Mar 10 16:53 jeffrey
+drwxrwxr-x  2 pi pi 4096 Feb 24 20:33 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 10 15:21 pa
+drwxrwxr-x  2 pi pi 4096 Mar 10 16:52 queens
+-rw-------  1 pi pi 4641 Mar 10 16:40 startup.py
+drwxrwxr-x  2 pi pi 4096 Mar 10 16:53 test
+
+2024.04.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 52
+drwxrwxr-x 12 pi pi 4096 Apr 10 21:04 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r--------  4 pi pi    6 Apr  6 13:24 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:30 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Apr  9 08:48 h5
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr  8 23:11 queens
+drwxrwxr-x  2 pi pi 4096 Apr 10 21:10 sb
+drwxrwxr-x  2 pi pi 4096 Mar 11 13:15 test
+
+2024.04.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 52
+drwxrwxr-x 12 pi pi 4096 Apr 10 21:04 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r--------  4 pi pi    6 Apr  6 13:24 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 11 19:36 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Apr  9 08:48 h5
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr  8 23:11 queens
+drwxrwxr-x  2 pi pi 4096 Apr 11 19:46 sb
+drwxrwxr-x  2 pi pi 4096 Mar 11 13:15 test
+
+2024.04.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 52
+drwxrwxr-x 12 pi pi 4096 Apr 10 21:04 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r--------  4 pi pi    6 Apr  6 13:24 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 12 12:47 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Apr 13 11:18 h5
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr  8 23:11 queens
+drwxrwxr-x  2 pi pi 4096 Apr 11 19:46 sb
+drwxrwxr-x  2 pi pi 4096 Mar 11 13:15 test
+
+2024.04.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 52
+drwxrwxr-x 12 pi pi 4096 Apr 10 21:04 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 14 17:15 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Apr 14 10:50 h5
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr  8 23:11 queens
+drwxrwxr-x  2 pi pi 4096 Apr 11 19:46 sb
+drwxrwxr-x  2 pi pi 4096 Mar 11 13:15 test
+
+2024.04.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 52
+drwxrwxr-x 12 pi pi 4096 Apr 10 21:04 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 15 22:41 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Apr 15 20:16 h5
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr  8 23:11 queens
+drwxrwxr-x  2 pi pi 4096 Apr 11 19:46 sb
+drwxrwxr-x  2 pi pi 4096 Mar 11 13:15 test
+
+2024.04.17/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 16 11:05 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 16 14:18 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr  8 23:11 queens
+drwxrwxr-x  2 pi pi 4096 Apr 11 19:46 sb
+
+2024.04.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 17 17:29 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 17 17:51 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 17 17:26 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 18 14:10 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 18 14:40 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 18 14:10 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 18 14:40 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.21/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 18 14:10 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 18 14:40 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.22/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 21 16:17 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 21 16:15 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.23/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 21 16:17 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 21 16:15 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.24/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 23 11:14 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 21 16:15 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.25/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 23 11:14 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 21 16:15 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.26/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 23 11:14 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 21 16:15 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.27/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 26 14:05 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.28/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 27 10:44 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.29/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 27 10:44 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.04.30/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 44
+drwxrwxr-x 10 pi pi 4096 Apr 18 14:10 .
+drwxrwxr-x 62 pi pi 4096 Apr 10 23:39 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 Apr 29 10:10 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 Apr 17 20:18 sb
+
+2024.05.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 48
+drwxrwxr-x 11 pi pi 4096 Apr 30 20:47 .
+drwxrwxr-x 62 pi pi 4096 May  1 10:34 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 May  1 22:44 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 May  1 10:17 pb
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+
+2024.05.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 48
+drwxrwxr-x 11 pi pi 4096 Apr 30 20:47 .
+drwxrwxr-x 62 pi pi 4096 May  1 10:34 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 May  2 16:04 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 May  2 18:09 pb
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+
+2024.05.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 48
+drwxrwxr-x 11 pi pi 4096 Apr 30 20:47 .
+drwxrwxr-x 62 pi pi 4096 May  1 10:34 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 May  3 16:00 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 May  3 13:06 pb
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+
+2024.05.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 48
+drwxrwxr-x 11 pi pi 4096 Apr 30 20:47 .
+drwxrwxr-x 62 pi pi 4096 May  1 10:34 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 May  3 16:00 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 May  3 13:06 pb
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+
+2024.05.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 48
+drwxrwxr-x 11 pi pi 4096 Apr 30 20:47 .
+drwxrwxr-x 62 pi pi 4096 May  5 17:19 ..
+-r-------- 22 pi pi    6 Apr 14 17:04 VERSION
+drwxrwxr-x  2 pi pi 4096 May  5 18:30 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 May  5 12:54 pb
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+
+2024.05.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 48
+drwxrwxr-x 11 pi pi 4096 Apr 30 20:47 .
+drwxrwxr-x 62 pi pi 4096 May  6 18:12 ..
+-r--------  4 pi pi    6 May  6 18:12 VERSION
+drwxrwxr-x  2 pi pi 4096 May  6 18:12 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 May  5 12:54 pb
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+
+2024.05.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 48
+drwxrwxr-x 11 pi pi 4096 Apr 30 20:47 .
+drwxrwxr-x 62 pi pi 4096 May  6 18:12 ..
+-r--------  4 pi pi    6 May  6 18:12 VERSION
+drwxrwxr-x  2 pi pi 4096 May  7 18:45 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 May  5 12:54 pb
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+
+2024.05.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 48
+drwxrwxr-x 11 pi pi 4096 Apr 30 20:47 .
+drwxrwxr-x 62 pi pi 4096 May  6 18:12 ..
+-r--------  4 pi pi    6 May  6 18:12 VERSION
+drwxrwxr-x  2 pi pi 4096 May  7 18:45 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 May  5 12:54 pb
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+
+2024.05.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 48
+drwxrwxr-x 11 pi pi 4096 Apr 30 20:47 .
+drwxrwxr-x 62 pi pi 4096 May  6 18:12 ..
+-r--------  4 pi pi    6 May  6 18:12 VERSION
+drwxrwxr-x  2 pi pi 4096 May  7 18:45 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 Mar 30 11:44 h3
+drwxrwxr-x  2 pi pi 4096 Apr  5 18:44 h4
+drwxrwxr-x  2 pi pi 4096 Mar 29 22:23 jeffrey
+drwxrwxr-x  2 pi pi 4096 Apr 10 23:29 mounish
+drwxrwxr-x  2 pi pi 4096 Mar 13 09:23 pa
+drwxrwxr-x  2 pi pi 4096 May  5 12:54 pb
+drwxrwxr-x  2 pi pi 4096 Apr 26 20:14 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+
+2024.05.13/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 52
+drwxrwxr-x 12 pi pi 4096 May 13 11:19 .
+drwxrwxr-x 62 pi pi 4096 May  6 18:12 ..
+-r--------  3 pi pi    6 May 12 17:54 VERSION
+drwxrwxr-x  2 pi pi 4096 May 13 12:16 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 May 11 22:09 comp
+drwxrwxr-x  2 pi pi 4096 May 13 11:19 h4
+drwxrwxr-x  2 pi pi 4096 May 11 22:08 jeffrey
+drwxrwxr-x  2 pi pi 4096 May 11 22:08 mounish
+drwxrwxr-x  2 pi pi 4096 May 11 22:07 pa
+drwxrwxr-x  2 pi pi 4096 May 12 17:56 pb
+drwxrwxr-x  2 pi pi 4096 May 12 17:57 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+drwxrwxr-x  2 pi pi 4096 May 12 17:52 test
+
+2024.05.14/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 52
+drwxrwxr-x 12 pi pi 4096 May 13 11:19 .
+drwxrwxr-x 62 pi pi 4096 May  6 18:12 ..
+-r--------  3 pi pi    6 May 12 17:54 VERSION
+drwxrwxr-x  2 pi pi 4096 May 13 12:16 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 May 11 22:09 comp
+drwxrwxr-x  2 pi pi 4096 May 13 11:19 h4
+drwxrwxr-x  2 pi pi 4096 May 11 22:08 jeffrey
+drwxrwxr-x  2 pi pi 4096 May 11 22:08 mounish
+drwxrwxr-x  2 pi pi 4096 May 11 22:07 pa
+drwxrwxr-x  2 pi pi 4096 May 12 17:56 pb
+drwxrwxr-x  2 pi pi 4096 May 12 17:57 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+drwxrwxr-x  2 pi pi 4096 May 12 17:52 test
+
+2024.05.15/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 52
+drwxrwxr-x 12 pi pi 4096 May 13 11:19 .
+drwxrwxr-x 62 pi pi 4096 May  6 18:12 ..
+-r--------  3 pi pi    6 May 12 17:54 VERSION
+drwxrwxr-x  2 pi pi 4096 May 13 12:16 __DEFAULT_WORKSPACE__
+drwxrwxr-x  2 pi pi 4096 May 11 22:09 comp
+drwxrwxr-x  2 pi pi 4096 May 13 11:19 h4
+drwxrwxr-x  2 pi pi 4096 May 11 22:08 jeffrey
+drwxrwxr-x  2 pi pi 4096 May 11 22:08 mounish
+drwxrwxr-x  2 pi pi 4096 May 11 22:07 pa
+drwxrwxr-x  2 pi pi 4096 May 12 17:56 pb
+drwxrwxr-x  2 pi pi 4096 May 12 17:57 queens
+drwxrwxr-x  2 pi pi 4096 May  1 22:29 sb
+drwxrwxr-x  2 pi pi 4096 May 12 17:52 test
+
+2024.05.16/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 15 19:38 ..
+-r--------  7 pi pi    6 May 15 19:39 VERSION
+drwxrwxr-x  2 pi pi 4096 May 15 19:39 broken
+drwxrwxr-x  9 pi pi 4096 May 15 19:47 workspace
+
+2024.05.17/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 15 19:38 ..
+-r--------  7 pi pi    6 May 15 19:39 VERSION
+drwxrwxr-x  2 pi pi 4096 May 15 19:39 broken
+drwxrwxr-x  9 pi pi 4096 May 15 19:47 workspace
+
+2024.05.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 15 19:38 ..
+-r--------  7 pi pi    6 May 15 19:39 VERSION
+drwxrwxr-x  2 pi pi 4096 May 15 19:39 broken
+drwxrwxr-x 10 pi pi 4096 May 17 18:19 workspace
+
+2024.05.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 63 pi pi 4096 May 18 14:05 ..
+-r--------  7 pi pi    6 May 15 19:39 VERSION
+drwxrwxr-x  2 pi pi 4096 May 15 19:39 broken
+drwxrwxr-x 10 pi pi 4096 May 17 18:19 workspace
+
+2024.05.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 63 pi pi 4096 May 18 14:05 ..
+-r--------  7 pi pi    6 May 15 19:39 VERSION
+drwxrwxr-x  2 pi pi 4096 May 15 19:39 broken
+drwxrwxr-x 10 pi pi 4096 May 19 16:36 workspace
+
+2024.05.26/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 May 26 16:51 .
+drwxrwxr-x 62 pi pi 4096 May 26 16:50 ..
+-r--------  7 pi pi    6 May 15 19:39 VERSION
+drwxrwxr-x  3 pi pi 4096 May 26 16:51 broken
+
+2024.05.27/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 16
+drwxrwxr-x  3 pi pi 4096 May 26 21:57 .
+drwxrwxr-x 61 pi pi 4096 May 26 18:45 ..
+-r--------  7 pi pi    6 May 15 19:39 VERSION
+drwxrwxr-x  3 pi pi 4096 May 26 21:57 broken
+
+2024.05.28/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 27 16:41 ..
+-r--------  6 pi pi    6 May 27 19:20 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.05.29/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 28 09:56 ..
+-r--------  6 pi pi    6 May 27 19:20 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.05.30/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 28 09:56 ..
+-r--------  6 pi pi    6 May 27 19:20 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.05.31/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 30 20:15 ..
+-r--------  6 pi pi    6 May 27 19:20 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.01/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 30 20:15 ..
+-r--------  6 pi pi    6 May 27 19:20 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.02/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 30 20:15 ..
+-r--------  3 pi pi    6 Jun  1 16:27 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.03/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 30 20:15 ..
+-r--------  3 pi pi    6 Jun  1 16:27 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.04/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 30 20:15 ..
+-r--------  3 pi pi    6 Jun  1 16:27 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.05/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 30 20:15 ..
+-r--------  3 pi pi    6 Jun  4 09:46 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.06/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 30 20:15 ..
+-r--------  3 pi pi    6 Jun  4 09:46 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.07/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 May 30 20:15 ..
+-r--------  3 pi pi    6 Jun  4 09:46 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.08/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 Jun  7 14:07 ..
+-r--------  5 pi pi    6 Jun  7 17:31 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.09/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 Jun  7 14:07 ..
+-r--------  5 pi pi    6 Jun  7 17:31 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.10/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 Jun  7 14:07 ..
+-r--------  5 pi pi    6 Jun  7 17:31 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.11/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 Jun  7 14:07 ..
+-r--------  5 pi pi    6 Jun  7 17:31 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.12/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 Jun  7 14:07 ..
+-r--------  5 pi pi    6 Jun  7 17:31 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.17/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 Jun  7 14:07 ..
+-r--------  4 pi pi    6 Jun 16 14:59 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.18/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 Jun  7 14:07 ..
+-r--------  4 pi pi    6 Jun 16 14:59 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.19/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 Jun  7 14:07 ..
+-r--------  4 pi pi    6 Jun 16 14:59 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace
+
+2024.06.20/749b32dc-7234-4ed2-b18a-5dc8c8aaaf5b/home/jao/.config/marcel:
+total 20
+drwxrwxr-x  4 pi pi 4096 May 15 19:39 .
+drwxrwxr-x 62 pi pi 4096 Jun 19 20:51 ..
+-r--------  4 pi pi    6 Jun 16 14:59 VERSION
+drwxrwxr-x  3 pi pi 4096 May 27 19:05 broken
+drwxrwxr-x 10 pi pi 4096 May 27 19:05 workspace

@@ -1,0 +1,143 @@
+ORIGINAL
+
+- Original layout, < 13.6
+
+  13.0: 4/28/22
+  13.1: 4/28/22
+  13.2: 5/12/22
+  13.3: 5/28/22
+  13.4: 5/31/22
+
+    ~/
+        .marcel.py
+        .marcel_history
+
+XDG
+
+- Use XDG directories, starting in 0.13.6:
+
+    ~/
+        .config/marcel/
+            startup.py
+        .local/share/marcel/
+            history
+  
+WS1
+
+- Workspaces, 0.20
+
+    ~/
+        .config/marcel/
+            .WORKSPACE
+            startup.py
+            <workspace>/
+                .WORKSPACE
+                startup.py
+        .local/share/marcel/
+            history
+            reservoirs/
+            <workspace>/
+                env.pickle
+                properties.pickle
+                history
+                reservoirs/
+
+WS2
+
+- Default workspace in its own directory, 0.24.0
+
+    ~/
+        .config/marcel/
+            VERSION
+            __DEFAULT_WORKSPACE__/
+                .WORKSPACE
+                startup.py
+            <workspace>/
+                .WORKSPACE
+                startup.py
+        .local/share/marcel/
+            history
+            reservoirs/
+            __DEFAULT_WORKSPACE__/
+                history
+                reservoirs/
+            <workspace>/
+                env.pickle
+                properties.pickle
+                history
+                reservoirs/
+
+WS3
+
+- Directories for workspaces and broken workspaces, 0.28.0
+
+    ~/
+        .config/marcel/
+            VERSION
+            workspace/
+                __DEFAULT__/
+                    .WORKSPACE
+                    startup.py
+                <workspace>/
+                    .WORKSPACE
+                    startup.py
+            broken/
+        .local/share/marcel/
+            workspace/
+                __DEFAULT__/
+                    history
+                    reservoirs/
+                <workspace>/
+                    env.pickle
+                    properties.pickle
+                    history
+                    reservoirs/
+            broken/
+
+----------------------------------------------------------------------
+
+Marcel startup (ws3) creates stuff on disk, in
+mani.initialize_persistent_config_and_data:
+
+- ./config/marcel/workspace
+- ./config/marcel/broken
+- ./config/marcel/VERSION
+- ./local/share/marcel/workspace
+- ./local/share/marcel/broken
+- Default workspace
+
+But the existence of these is incompatible with migrating earlier
+layouts. Even detecting whether we have a fresh install, necessitating
+initialization, has this problem, (Locations.fresh_install).
+
+This isn't just a testing problem. If marcel runs and actually
+encouters these old layouts, the right thing has to happen.
+
+MainScript.__init__:
+
+    if fresh install
+        initialize storage
+    if default ws does not exist
+        create default ws
+    restore current ws state
+
+    ...
+
+    if not fresh install
+        migrate
+        validate storage
+
+This is incompatible with migration, since current layout is put in
+place before migration.
+
+......................................................................
+
+Instead:
+
+    - Migrate (detecting storage layout version. Includes storage
+      init, and default ws creation)
+
+    - validate. If current ws is not valid, change current to default
+      and print error message.
+    
+    - restore current ws state

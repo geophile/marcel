@@ -242,7 +242,7 @@ def test_workspaces_and_compilables():
 
 @timeit
 def test_workspace_validation():
-    def validation_error_handler(errors):
+    def validation_error_handler(broken_workspace_names, errors):
         pass
 
     TEST.reset_environment()
