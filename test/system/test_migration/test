@@ -98,6 +98,14 @@ initialize() {
   mkdir -p $TEST_ARTIFACTS
 }
 
+check() {
+  diff $TEST_ARTIFACTS/expected $TEST_ARTIFACTS/actual > /$TEST_ARTIFACTS/$1.diff
+  if [ $? != '0' ]; then
+    FAILURES=$(($FAILURES+1))
+    echo "Error on $1"
+  fi
+}
+
 test_ws2_to_ws3() {
   cp -rp $TEST_DIR/ws2 $TEST_HOME
   marcel <<EOF
@@ -109,15 +117,6 @@ EOF
   popd >& /dev/null
   check ws2_to_ws3
 }
-
-check() {
-  diff $TEST_ARTIFACTS/expected $TEST_ARTIFACTS/actual > /dev/null
-  if [ $? != '0' ]; then
-    FAILURES=$(($FAILURES+1))
-    echo "Error on $1"
-  fi
-}
-
 
 main() {
   initialize

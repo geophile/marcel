@@ -18,6 +18,7 @@ import shutil
 
 import marcel.exception
 import marcel.locations
+import marcel.util
 
 
 def storage_layout():
@@ -42,8 +43,8 @@ class StorageLayout(object):
         # is useful.
         locations = marcel.locations.Locations()
         self.home = locations.home
-        self.config = locations.config_base
-        self.data = locations.data_base
+        self.config = locations.config_base / 'marcel'
+        self.data = locations.data_base / 'marcel'
 
     def __repr__(self):
         return type(self).__name__
