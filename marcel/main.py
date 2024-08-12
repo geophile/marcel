@@ -160,7 +160,12 @@ class MainScript(Main):
             initialize_persistent_config_and_data(env, initial_config)
         else:
             if not testing:
-                layout.migrate()
+                while layout is not None:
+                    before = layout.layout()
+                    layout = layout.migrate()
+                    after = layout.layout() if layout else None
+                    if before == after:
+                        raise marcel.exception.KillShellException(f'Migration from {before} failed to advance.')
         self.update_version_file()
         self.workspace = workspace
         if not Workspace.default().exists(env):

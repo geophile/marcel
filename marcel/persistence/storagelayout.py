@@ -49,6 +49,9 @@ class StorageLayout(object):
     def __repr__(self):
         return type(self).__name__
 
+    def layout(self):
+        assert False, self
+
     def migrate(self):
         assert False
 
@@ -74,6 +77,9 @@ class StorageLayout(object):
 # Version < 0.13.6
 class StorageLayoutOriginal(StorageLayout):
 
+    def layout(self):
+        return 'original'
+
     def migrate(self):
         pass
 
@@ -84,6 +90,9 @@ class StorageLayoutOriginal(StorageLayout):
 
 # Version >= ~0.13.6. First use of XDG conventions.
 class StorageLayoutXDG(StorageLayout):
+
+    def layout(self):
+        return 'xdg'
 
     def migrate(self):
         pass
@@ -96,8 +105,34 @@ class StorageLayoutXDG(StorageLayout):
 # Version >= 0.20.0. First workspace layout.
 class StorageLayoutWS1(StorageLayout):
 
+    def layout(self):
+        return 'ws1'
+
     def migrate(self):
-        pass
+        def move_workspace_dirs(workspace_dirs, new_workspace_base):
+            for workspace_dir in workspace_dirs:
+                if workspace_dir.name != marcel.locations.Locations.WORKSPACE_DIR_NAME:
+                    moved_dir = shutil.move(workspace_dir, new_workspace_base)
+                    if moved_dir:
+                        self.should_exist(pathlib.Path(moved_dir), f'Tried to move workspace dir {workspace_dir}')
+                    else:
+                        raise marcel.exception.KillShellException(
+                            f'Attempt to move workspace dir {workspace_dir} failed.')
+                    self.should_not_exist(workspace_dir, f'Tried to move workspace dir {workspace_dir}')
+
+        def fix_default_workspace(base_dir, *filenames):
+            new_default_workspace_dir = base_dir / '__DEFAULT_WORKSPACE__'
+            new_default_workspace_dir.mkdir(parents=True, exist_ok=True)
+            for filename in filenames:
+                shutil.move(base_dir / filename, new_default_workspace_dir)
+
+        # Move default workspace files to __DEFAULT_WORKSPACE__ directory
+        fix_default_workspace(self.config, '.WORKSPACE', 'startup.py')
+        fix_default_workspace(self.data, 'history', 'reservoirs')
+        layout = storage_layout()
+        assert layout
+        assert layout.layout() == 'ws2'
+        return layout
 
     def match(self):
         return (self.config.exists() and
@@ -106,6 +141,9 @@ class StorageLayoutWS1(StorageLayout):
 
 # Version >= 0.24.0. Default workspace in its own directory.
 class StorageLayoutWS2(StorageLayout):
+
+    def layout(self):
+        return 'ws2'
 
     def migrate(self):
         def move_workspace_dirs(workspace_dirs, new_workspace_base):
@@ -135,10 +173,10 @@ class StorageLayoutWS2(StorageLayout):
 
         fix_dirs(self.config)
         fix_dirs(self.data)
-        migrated = storage_layout()
-        if type(migrated) is not StorageLayoutWS3:
-            raise marcel.exception.KillShellException('Migration from ws2 layout to ws3 failed.')
-        migrated.migrate()
+        layout = storage_layout()
+        assert layout
+        assert layout.layout() == 'ws3'
+        return layout
 
     def match(self):
         return (self.config.exists() and
@@ -148,8 +186,11 @@ class StorageLayoutWS2(StorageLayout):
 # Version >= 0.28.0. Separate broken and valid workspaces.
 class StorageLayoutWS3(StorageLayout):
 
+    def layout(self):
+        return 'ws3'
+
     def migrate(self):
-        pass
+        return None
 
     def match(self):
         return (self.config.exists() and
