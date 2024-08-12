@@ -942,4 +942,61 @@ z@loon ~/.config/marcel $ find .
 
 ----------------------------------------------------------------------
 
-262. 
+262. "help edit" crashes
+
+M 0.29.2 jao@loon ~$ help edit
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/marcel/helpformatter.py", line 221, in raise_invalid_markup
+    raise InvalidMarkupException(self.text)
+AttributeError: 'TextMarkup' object has no attribute 'text'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jao/git/marcel/marcel/helpformatter.py", line 280, in __init__
+    self.color, text_start = self.formatting(textp, color_scheme)
+  File "/home/jao/git/marcel/marcel/helpformatter.py", line 349, in formatting
+    self.raise_invalid_markup()
+  File "/home/jao/git/marcel/marcel/helpformatter.py", line 224, in raise_invalid_markup
+    raise InvalidMarkupException()
+marcel.helpformatter.InvalidMarkupException: None
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 557, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 550, in main
+    main_interactive_run(locations, workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 488, in main_interactive_run
+    main.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 350, in run
+    self.parse_and_run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 214, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 334, in execute_command
+    command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 231, in execute
+    self.pipeline.run(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 357, in run
+    self.ops[0].run(env)
+  File "/home/jao/git/marcel/marcel/op/help.py", line 66, in run
+    help_text = Help.op_help(env, op_module) if op_module else self.topic_help(env)
+  File "/home/jao/git/marcel/marcel/op/help.py", line 84, in op_help
+    return formatter.format(help_text)
+  File "/home/jao/git/marcel/marcel/helpformatter.py", line 494, in format
+    paragraph.remove_markup()
+  File "/home/jao/git/marcel/marcel/helpformatter.py", line 395, in remove_markup
+    markup = TextMarkup(textp, non_ws_count, self.help_formatter.color_scheme)
+  File "/home/jao/git/marcel/marcel/helpformatter.py", line 303, in __init__
+    raise InvalidMarkupException(self.markup_start.snippet(10))
+marcel.helpformatter.InvalidMarkupException: {--startup
+jao@loon:~$ 
+
+----------------------------------------------------------------------
+
+263.

@@ -42,8 +42,8 @@ import marcel.env
 import marcel.exception
 import marcel.job
 import marcel.locations
-import marcel.persistence.migration
 import marcel.persistence.persistence
+import marcel.persistence.storagelayout
 import marcel.multilinereader
 import marcel.object.workspace
 import marcel.opmodule
@@ -155,10 +155,14 @@ class MainScript(Main):
     # If a test is being run, testing is set to a directory pretending to be the user's home.
     def __init__(self, env, workspace, testing=None, initial_config=DEFAULT_CONFIG):
         super().__init__(env, testing)
-        self.workspace = workspace
-        # Ensure that on-disk state is set up and correct.
-        if env.locations.fresh_install():
+        layout = marcel.persistence.storagelayout.storage_layout()
+        if layout is None:
             initialize_persistent_config_and_data(env, initial_config)
+        else:
+            if not testing:
+                layout.migrate()
+        self.update_version_file()
+        self.workspace = workspace
         if not Workspace.default().exists(env):
             # The default workspace was found to be broken, and was removed. Create a new one.
             Workspace.default().create_on_disk(env, DEFAULT_CONFIG)
@@ -172,8 +176,6 @@ class MainScript(Main):
         startup_vars = self.read_config()
         self.env.enforce_var_immutability(startup_vars)
         self.needs_restart = False
-        if not testing and not self.env.locations.fresh_install():
-            marcel.persistence.migration.migrate()
         marcel.persistence.persistence.validate_all(env, self.handle_persistence_validation_errors)
         atexit.register(self.shutdown)
 
@@ -275,6 +277,25 @@ class MainScript(Main):
                            if self.workspace.is_default() else
                            f'Selected workspace {self.workspace.name} is damaged, starting in default workspace.')
                 marcel.util.print_to_stderr(self.env, message)
+
+    @staticmethod
+    def update_version_file():
+        def installed_version():
+            version_file_path = locations.config_version()
+            if version_file_path.exists():
+                with open(version_file_path) as version_file:
+                    installed_version = version_file.readline().strip()
+            else:
+                installed_version = '0.0.0'
+            return installed_version
+
+        locations = marcel.locations.Locations()
+        if installed_version() < marcel.version.VERSION:
+            version_file_path = locations.config_version()
+            version_file_path.touch(exist_ok=True)
+            version_file_path.chmod(0o600)
+            version_file_path.write_text(marcel.version.VERSION)
+            version_file_path.chmod(0o400)
 
 
 class MainInteractive(MainScript):
@@ -512,6 +533,9 @@ def initialize_persistent_config_and_data(env, initial_config):
     locations.data_ws()
     locations.data_bws()
     # Version
+    # touch(mode=...) does not set mode if the file already exists.
+    locations.config_version().touch()
+    locations.config_version().chmod(mode=0o600)
     locations.config_version().write_text(marcel.version.VERSION)
     locations.config_version().chmod(0o400)
     # Default workspace

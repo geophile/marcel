@@ -147,7 +147,6 @@ class TestConsole(TestBase):
         super().reset_environment()
         workspace = marcel.object.workspace.Workspace.default()
         env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
-        # os.system(f'cp {TestBase.start_dir}/{config_file} {self.locations.config_ws_startup(workspace)}')
         test_config = pathlib.Path(f'{TestBase.start_dir}/{config_file}').read_text()
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,

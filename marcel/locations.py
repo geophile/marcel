@@ -146,11 +146,6 @@ class Locations(object):
             res_dir = res_dir / filename
         return res_dir
 
-    def fresh_install(self):
-        # Don't rely on Locations.marcel_dir(self.config_base), because it will create .config/marcel if it
-        # doesn't exist. Right now, we're just trying to see if it does exist, to guide startup and migration.
-        return not (self.config_base / Locations.MARCEL_DIR_NAME).exists()
-
     @staticmethod
     def ensure_dir_exists(dir):
         if dir.exists():

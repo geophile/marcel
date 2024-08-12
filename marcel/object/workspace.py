@@ -137,7 +137,8 @@ class Workspace(marcel.object.renderable.Renderable):
             for var, reservoir in env.reservoirs():
                 assert type(reservoir) is marcel.reservoir.Reservoir
                 reservoir.close()
-            # Environment (Do this last because env.persistent_state() is destructive.)
+            # Environment (Do this last because env.persistent_state(), (called by
+            # write_environment) is destructive.)
             self.write_environment(env)
             # Mark this workspace object as closed
             self.properties = None
@@ -213,15 +214,17 @@ class Workspace(marcel.object.renderable.Renderable):
         config_file_path = locations.config_ws_startup(self)
         config_file_path.write_text(initial_config_contents)
         config_file_path.chmod(0o600)
-        self.marker.unowned(env).touch(mode=0o000, exist_ok=False)
+        self.marker.unowned(env).touch(mode=0o000, exist_ok=True)
         # data
         self.create_dir(locations.data_ws(self))
         self.create_dir(locations.data_ws_res(self))
+        # Environment (Do this last because env.persistent_state(), (called by
+        # write_environment) is destructive.)
         self.write_environment(env)
         if not self.is_default():
             self.properties = WorkspaceProperties()
             self.write_properties(env)
-        locations.data_ws_hist(self).touch(mode=0o600, exist_ok=False)
+        locations.data_ws_hist(self).touch(mode=0o600, exist_ok=True)
 
     def create_dir(self, dir):
         try:
@@ -372,7 +375,6 @@ class WorkspaceDefault(Workspace):
                 reservoir.close()
                 if not restart:
                     reservoir.ensure_deleted()
-        # Environment (Do this last because env.persistent_state() is destructive.)
         if restart:
             self.write_environment(env)
         else:
