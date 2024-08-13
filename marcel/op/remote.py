@@ -28,7 +28,7 @@ import marcel.op.forkmanager
 import marcel.util
 
 HELP = '''
-{L,wrap=F}remote CLUSTER PIPELINE
+{L,wrap=F}remote CLUSTER (| PIPELINE |)
 
 {L,indent=4:28}{r:CLUSTER}                The name of a cluster.
    

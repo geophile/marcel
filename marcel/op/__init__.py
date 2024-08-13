@@ -35,8 +35,6 @@ public = [
     'head',
     'help',
     'history',
-    'ifelse',
-    'ifthen',
     'import',
     'intersect',
     'jobs',

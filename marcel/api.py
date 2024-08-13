@@ -45,8 +45,6 @@ from marcel.op.fork import fork as _fork
 from marcel.op.gather import _gather
 from marcel.op.gen import gen as _gen
 from marcel.op.head import head as _head
-from marcel.op.ifelse import ifelse as _ifelse
-from marcel.op.ifthen import ifthen as _ifthen
 from marcel.op.intersect import intersect as _intersect
 from marcel.op.join import join as _join
 from marcel.op.load import load as _load

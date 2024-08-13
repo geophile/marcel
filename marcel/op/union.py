@@ -21,7 +21,7 @@ import marcel.object.error
 import marcel.util
 
 HELP = '''
-{L,wrap=F}union PIPELINE ...
+{L,wrap=F}union (| PIPELINE |) ...
 
 {L,indent=4:28}{r:PIPELINE}                The second input to the union.
 

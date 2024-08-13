@@ -29,7 +29,7 @@ import marcel.op.forkmanager
 import marcel.util
 
 HELP = '''
-{L,wrap=F}fork FORK_GEN PIPELINE
+{L,wrap=F}fork FORK_GEN (| PIPELINE |)
 
 {L,indent=4:28}{r:FORK_GEN}                An int or iterable used to generate forks.
    

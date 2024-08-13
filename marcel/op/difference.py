@@ -21,7 +21,7 @@ import marcel.object.error
 import marcel.util
 
 HELP = '''
-{L,wrap=F}difference PIPELINE
+{L,wrap=F}difference (| PIPELINE |)
 
 {L,indent=4:28}{r:PIPELINE}                The second input to the difference.
 
@@ -29,7 +29,7 @@ The output stream represents the difference of the tuples in the input stream an
 from the {r:PIPELINE} argument.
 
 The input stream will be referred
-to as the {i:left} input), and the stream from the {r:PIPELINE} will be
+to as the {i:left} input, and the stream from the {r:PIPELINE} will be
 referred to as the {i:right} input.
  
 A tuple is included in the output if it is present in the left input,

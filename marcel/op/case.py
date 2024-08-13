@@ -23,7 +23,7 @@ import marcel.opmodule
 
 
 HELP = '''
-{L,wrap=F}case PREDICATE PIPELINE ... [PIPELINE]
+{L,wrap=F}case PREDICATE (| PIPELINE |) ... [(| PIPELINE |)]
 
 {L,indent=4:28}{r:PREDICATE}               Used to determine if an input tuple is passed to the next PIPELINE.
 

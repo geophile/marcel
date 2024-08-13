@@ -24,7 +24,7 @@ import marcel.util
 unwrap_op_output = marcel.util.unwrap_op_output
 
 HELP = '''
-{L,wrap=F}args [-a|--all] PIPELINE
+{L,wrap=F}args [-a|--all] (| PIPELINE |)
 
 {L,indent=4:28}{r:-a}, {r:--all}               Accumulate the entire input stream into a list, and bind it to a single
 pipeline parameter. 

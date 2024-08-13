@@ -20,7 +20,7 @@ import marcel.opmodule
 import marcel.object.error
 
 HELP = '''
-{L,wrap=F}intersect PIPELINE ...
+{L,wrap=F}intersect (| PIPELINE |) ...
 
 {L,indent=4:28}{r:PIPELINE}                The second input to the intersection.
 

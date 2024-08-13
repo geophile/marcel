@@ -19,7 +19,7 @@ import marcel.exception
 
 
 HELP = '''
-{L,wrap=F}tee PIPELINE ...
+{L,wrap=F}tee (| PIPELINE |) ...
 
 {L,indent=4:28}{r:PIPELINE}                Each {r:PIPELINE} receives the contents of the input stream. 
 

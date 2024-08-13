@@ -21,7 +21,7 @@ import marcel.object.error
 import marcel.util
 
 HELP = '''
-{L,wrap=F}filter [-k|--keep] [-d|--discard] [--c|--compare COMPARE] PIPELINE
+{L,wrap=F}filter [-k|--keep] [-d|--discard] [--c|--compare COMPARE] (| PIPELINE |)
 
 {L,indent=4:28}-k, --keep              Keep input tuples that match any tuple from the PIPELINE.
 

@@ -26,7 +26,7 @@ import marcel.util
 
 
 HELP = '''
-{L,wrap=F}sudo FLAGS PIPELINE
+{L,wrap=F}sudo FLAGS (| PIPELINE |)
 
 {L,indent=4:28}{r:FLAGS}                   Flags to the host OS sudo command.
 {L,indent=4:28}{r:PIPELINE}                Command to be executed under control of sudo

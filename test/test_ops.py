@@ -1218,14 +1218,14 @@ def test_redirect_file():
                  verification=f'{testdir}/p15 <',
                  expected_out=[0, 1, 2, 100, 101, 102])
         # > file
-        TEST.run(test=f'gen 6 | ifthen (x: x % 2 == 0) (|> {testdir}/p16|) | select (x: False)',
+        TEST.run(test=f'gen 6 | case (x: x % 2 == 0) (|> {testdir}/p16|) | select (x: False)',
                  verification=f'{testdir}/p16 <',
                  expected_out=[0, 2, 4])
         # >> file
-        TEST.run(test=f'gen 6 | ifthen (x: x % 2 == 0) (|>> {testdir}/p17|) | select (x: False)',
+        TEST.run(test=f'gen 6 | case (x: x % 2 == 0) (|>> {testdir}/p17|) | select (x: False)',
                  verification=f'{testdir}/p17 <',
                  expected_out=[0, 2, 4])
-        TEST.run(test=f'gen 6 | ifthen (x: x % 2 == 1) (|>> {testdir}/p17|) | select (x: False)',
+        TEST.run(test=f'gen 6 | case (x: x % 2 == 1) (|>> {testdir}/p17|) | select (x: False)',
                  verification=f'{testdir}/p17 <',
                  expected_out=[0, 2, 4, 1, 3, 5])
         # ---------------------------------------------------------------------
@@ -1251,11 +1251,11 @@ def test_redirect_file():
                  verification=f'read {testdir}/g5',
                  expected_out=[0, 1, 2, 3, 4])
         # Store at end of pipelines arg
-        TEST.run(test=f'gen 10 | ifthen (x: x % 2 == 0) (|map (x: x * 10) > {testdir}/e10x10|)',
+        TEST.run(test=f'gen 10 | case (x: x % 2 == 0) (|map (x: x * 10) > {testdir}/e10x10|)',
                  verification=f'read {testdir}/e10x10',
                  expected_out=[0, 20, 40, 60, 80])
         # Store as the entire pipelines arg
-        TEST.run(test=f'gen 10 | ifthen (x: x % 2 == 0) (|> {testdir}/e10|)',
+        TEST.run(test=f'gen 10 | case (x: x % 2 == 0) (|> {testdir}/e10|)',
                  verification=f'read {testdir}/e10',
                  expected_out=[0, 2, 4, 6, 8])
         # Append
@@ -1347,14 +1347,14 @@ def test_redirect_var():
              verification='p15 <$',
              expected_out=[0, 1, 2, 100, 101, 102])
     # >$ var
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) (|>$ p16|) | select (x: False)',
+    TEST.run(test='gen 6 | case (x: x % 2 == 0) (|>$ p16|) | select (x: False)',
              verification='p16 <$',
              expected_out=[0, 2, 4])
     # >>$ var
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 0) (|>>$ p17|) | select (x: False)',
+    TEST.run(test='gen 6 | case (x: x % 2 == 0) (|>>$ p17|) | select (x: False)',
              verification='p17 <$',
              expected_out=[0, 2, 4])
-    TEST.run(test='gen 6 | ifthen (x: x % 2 == 1) (|>>$ p17|) | select (x: False)',
+    TEST.run(test='gen 6 | case (x: x % 2 == 1) (|>>$ p17|) | select (x: False)',
              verification='p17 <$',
              expected_out=[0, 2, 4, 1, 3, 5])
     # ---------------------------------------------------------------------
@@ -1380,11 +1380,11 @@ def test_redirect_var():
              verification='load g5',
              expected_out=[0, 1, 2, 3, 4])
     # Store at end of pipelines arg
-    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) (|map (x: x * 10) >$ e10x10|)',
+    TEST.run(test='gen 10 | case (x: x % 2 == 0) (|map (x: x * 10) >$ e10x10|)',
              verification='load e10x10',
              expected_out=[0, 20, 40, 60, 80])
     # Store as the entire pipelines arg
-    TEST.run(test='gen 10 | ifthen (x: x % 2 == 0) (|>$ e10|)',
+    TEST.run(test='gen 10 | case (x: x % 2 == 0) (|>$ e10|)',
              verification='load e10',
              expected_out=[0, 2, 4, 6, 8])
     # Append
@@ -2607,14 +2607,13 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('help edit')
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
+    main_stable()
     # main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
