@@ -28,12 +28,12 @@ import marcel.util
 HELP = '''
 {L,wrap=F}edit [-s|--startup] [COMMAND] 
 
-{L,indent=4:28}{r:-s}, {--startup}           Edit the marcel startup script.
+{L,indent=4:28}{r:-s}, {r:--startup}           Edit the marcel startup script.
 
 {L,indent=4:28}{r:COMMAND}                 The number of the command to be edited.
 
-Open an editor to edit the command identified by {r:COMMAND} in the command history,
-(obtained by running the {n:history} operator). I {r:COMMAND} is omitted, the most recently
+Open an editor to edit the command identified by {r:COMMAND} (an integer) in the command history,
+(obtained by running the {n:history} operator). If {r:COMMAND} is omitted, the most recently
 executed command will be edited. The editor is selected by the {n:EDITOR}
 environment variable. On exiting the editor, the edited command
 will be on the command line. (Hit enter to run the command, as usual.)
