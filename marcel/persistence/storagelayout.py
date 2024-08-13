@@ -77,15 +77,25 @@ class StorageLayout(object):
 # Version < 0.13.6
 class StorageLayoutOriginal(StorageLayout):
 
+    def __init__(self):
+        super().__init__()
+
     def layout(self):
         return 'original'
 
     def migrate(self):
-        pass
+        self.config.mkdir(parents=True, exist_ok=True)
+        self.data.mkdir(parents=True, exist_ok=True)
+        shutil.move(self.home / '.marcel.py', self.config / 'startup.py')
+        shutil.move(self.home / '.marcel_history', self.data / 'history')
+        layout = storage_layout()
+        assert layout
+        assert layout.layout() == 'xdg'
+        return layout
 
     def match(self):
-        return ((self.home / '.marcel').exists() and
-                (self.home / '.marcel_history').exists())
+        match = ((self.home / '.marcel.py').exists() and (self.home / '.marcel_history').exists())
+        return match
 
 
 # Version >= ~0.13.6. First use of XDG conventions.
@@ -95,7 +105,12 @@ class StorageLayoutXDG(StorageLayout):
         return 'xdg'
 
     def migrate(self):
-        pass
+        (self.config / '.WORKSPACE').touch(mode=0o000)
+        (self.data / 'reservoirs').mkdir(exist_ok=True)
+        layout = storage_layout()
+        assert layout
+        assert layout.layout() == 'ws1'
+        return layout
 
     def match(self):
         return (self.config.exists() and

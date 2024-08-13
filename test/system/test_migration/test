@@ -4,6 +4,7 @@ export NEWEST_LAYOUT=ws3
 
 export TEST_DIR=/home/jao/git/marcel/test/system/test_migration
 export TEST_HOME=/tmp/test_home
+export HOME=$TEST_HOME
 export TEST_ARTIFACTS=/tmp/test_artifacts
 export CURRENT_LAYOUT=$TEST_DIR/$NEWEST_LAYOUT
 export XDG_CONFIG_HOME=$TEST_HOME/.config
@@ -25,7 +26,7 @@ check() {
   fi
 }
 
-test_migration() {
+run_migration() {
   old_layout=$1
   sudo rm -rf $TEST_HOME >& /dev/null
   cp -rp $TEST_DIR/$old_layout $TEST_HOME
@@ -37,13 +38,40 @@ EOF
   pushd $CURRENT_LAYOUT >& /dev/null
   find . > $TEST_ARTIFACTS/expected.$old_layout
   popd >& /dev/null
-  check $old_layout
+}
+
+test_migration_ws2() {
+  run_migration ws2
+  check ws2
+}
+
+test_migration_ws1() {
+  run_migration ws1
+  check ws1
+}
+
+test_migration_xdg() {
+  run_migration xdg
+  # ws1 test data has a workspace named ws, which had no equivalent before ws1.
+  grep -v "workspace/ws" $TEST_ARTIFACTS/expected.xdg > $TEST_ARTIFACTS/edited
+  mv $TEST_ARTIFACTS/edited $TEST_ARTIFACTS/expected.xdg 
+  check xdg
+}
+
+test_migration_original() {
+  run_migration original
+  # ws1 test data has a workspace named ws, which had no equivalent before ws1.
+  grep -v "workspace/ws" $TEST_ARTIFACTS/expected.original > $TEST_ARTIFACTS/edited
+  mv $TEST_ARTIFACTS/edited $TEST_ARTIFACTS/expected.original
+  check original
 }
 
 main() {
   initialize
-  test_migration ws2
-  test_migration ws1
+  test_migration_ws2
+  test_migration_ws1
+  test_migration_xdg
+  test_migration_original
   echo "$FAILURES failures: $0"
 }
 
