@@ -88,7 +88,7 @@ def ps(user=_UNINITIALIZED, group=_UNINITIALIZED, pid=_UNINITIALIZED, command=_U
     op.group = group
     op.pid = pid
     op.command = command
-    return op
+    return op, []
 
 
 class PsArgsParser(marcel.argsparser.ArgsParser):

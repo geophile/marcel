@@ -684,23 +684,6 @@ Revisit checking of python and marcel version in farcel
 
 ----------------------------------------------------------------------
 
-python zip is useful. Add an operator. Optional padding of shorter lists.
-
-E.g.
-
-input stream:
-
-(1, 2, 3)
-(4, 5, 6)
-
-output:
-
-(1, 4)
-(2, 5)
-(3, 6)
-
-----------------------------------------------------------------------
-
 write -f: It would be nice if the format could be an expression
 referring to vars.
 
@@ -742,31 +725,7 @@ Op to write commands to script.
 
 ----------------------------------------------------------------------
 
-write op buffering is awkward for slow-running scripts generating
-output.
-
-----------------------------------------------------------------------
-
-Migration test
-
-----------------------------------------------------------------------
-
 Prettyprint pipelines. Use it for rendering pipeline code.
-
-----------------------------------------------------------------------
-
-Clean up startup and migration. 
-
-Fresh start now works (post-PREMIGRATION). Seems like cleanup is needed. 
-
-And broken installs need some attention, e.g. .WORKSPACE file is
-missing. 
-
-- Need to check structure.
-
-- Clean up files associated with non-existent pids?
-
-- If problem is found: what then?
 
 ----------------------------------------------------------------------
 
@@ -791,7 +750,7 @@ environment alive. Maybe:
 
 ----------------------------------------------------------------------
 
-If Marcel cared about portability, rm, my, etc. would have to be
+If Marcel cared about portability, rm, mv, etc. would have to be
 implemented. Couldn’t rely on host.
 
 ----------------------------------------------------------------------
@@ -831,13 +790,3 @@ EOF
 
 function_args_parser: Doesn't check that star is used only with last
 arg. Although, python parsing catches it.
-
-----------------------------------------------------------------------
-
-Use backups to get old marcel layouts:
-
-- pre-024
-- 024
-- 028
-
-System tests to make sure upgrades work.

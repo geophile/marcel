@@ -1128,3 +1128,24 @@ Buffering for constant width ls displays:
 - Another possibility: Instead of buffering, just keep track of widths
   and grow them as necessary. Will lead to some irregularities early
   in a listing, but buffering sucks.
+
+----------------------------------------------------------------------
+
+Migration test
+
+----------------------------------------------------------------------
+
+python zip is useful. Add an operator. Optional padding of shorter lists.
+
+E.g.
+
+input stream:
+
+(1, 2, 3)
+(4, 5, 6)
+
+output:
+
+(1, 4)
+(2, 5)
+(3, 6)
