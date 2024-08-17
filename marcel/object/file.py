@@ -30,7 +30,7 @@ MISSING = object()
 
 
 class MetadataCache:
-    
+
     def __init__(self):
         self.id_to_name = {}
 
@@ -69,7 +69,6 @@ class FileFormatting(object):
 
 
 class File(marcel.object.renderable.Renderable):
-
     default_formatting = FileFormatting()
 
     def __init__(self, path, base=None, metadata_cache=None):
@@ -259,12 +258,17 @@ class File(marcel.object.renderable.Renderable):
                          if type(color_scheme.file_extension) is dict else
                          None)
             if highlight is None:
-                highlight = (
-                    # Check symlink first, because is_executable (at least) follows symlinks.
-                    color_scheme.file_link if self._is_symlink() else
-                    color_scheme.file_executable if self._is_executable() else
-                    color_scheme.file_dir if self._is_dir() else
-                    color_scheme.file_file)
+                # Check symlink first, because is_executable (at least) follows symlinks.
+                if self._is_symlink():
+                    highlight = (
+                        color_scheme.file_link
+                        if self.path.readlink().exists() else
+                        color_scheme.file_link_broken)
+                else:
+                    highlight = (
+                        color_scheme.file_executable if self._is_executable() else
+                        color_scheme.file_dir if self._is_dir() else
+                        color_scheme.file_file)
         return highlight
 
     # Use stat.S_... methods instead of methods relying on pathlib. First, pathlib

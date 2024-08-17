@@ -1149,3 +1149,22 @@ output:
 (1, 4)
 (2, 5)
 (3, 6)
+
+
+----------------------------------------------------------------------
+
+Oops, [] is overloaded:
+
+M-0.9.17 jao@cheese:/tmp/csv$ ls [b-f]*.csv
+Operator ls: filenames must be a string: [runpipeline(b-f)]
+
+But escaping works:
+
+M-0.10.6 jao@cheese:~$ ls \[p-r\]*
+-rw-rw-r--   jao    jao       36883   2020 Jul 05 19:23:14   passwords.txt
+-rw-r--r--   jao    jao       13377   2019 Jan 20 12:43:37   reality_distortion_field.md
+-rw-rw-r--   jao    jao        2415   2019 Oct 06 23:13:49   reload.txt
+
+----------------------------------------------------------------------
+
+Distinct color for broken symlink.

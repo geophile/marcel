@@ -659,14 +659,6 @@ See https://github.com/geophile/marcel/issues/20
 
 ----------------------------------------------------------------------
 
-FIXED
-
-222. Stale docs: marcel.py
-
-https://github.com/geophile/marcel/issues/21
-
-----------------------------------------------------------------------
-
 223. Stale docs: Pipeline notation
 
 https://github.com/geophile/marcel/issues/17

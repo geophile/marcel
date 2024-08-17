@@ -7,18 +7,8 @@
 
 ----------------------------------------------------------------------
 
-- Organize internal ops -- Fork, LabelThread
-
-- How do exit codes fit in?
-
-----------------------------------------------------------------------
-
 Provide a way to specify farcel config path. Maybe as a property of
 the cluster.
-
-----------------------------------------------------------------------
-
-Distinct color for broken symlink.
 
 ----------------------------------------------------------------------
 
@@ -40,14 +30,6 @@ subprocess.Popen? I.e., not waiting for op to complete.
 ----------------------------------------------------------------------
 
 Should help output go through more?
-
-----------------------------------------------------------------------
-
-Configuration:
-
-- Look in ~, /etc/marcel.
-
-- Be able to specify config file (or multiple locations) in startup.
 
 ----------------------------------------------------------------------
 
@@ -86,11 +68,6 @@ first constructs an Exception out of an Error.
 Is it feasible to have Error carry the original exception, and reraise
 it, or at least an exception of the same type? What if the Error was
 remote?
-
-----------------------------------------------------------------------
-
-ls spacing is too wide. How to pick a width? Buffer results? Don't
-buffer and adapt?
 
 ----------------------------------------------------------------------
 
@@ -178,11 +155,6 @@ determine if they should really be printed.
 
 ----------------------------------------------------------------------
 
-TestBase.reset_environment does too much. Move everything but Main
-construction into subclasses.
-
-----------------------------------------------------------------------
-
 Controlling Popen processes:
 
 https://pymotw.com/2/subprocess/#process-groups-sessions
@@ -190,21 +162,6 @@ https://pymotw.com/2/subprocess/#process-groups-sessions
 ----------------------------------------------------------------------
 
 Should a var hide an op by the same name?
-
-----------------------------------------------------------------------
-
-Oops, [] is overloaded:
-
-M-0.9.17 jao@cheese:/tmp/csv$ ls [b-f]*.csv
-Operator ls: filenames must be a string: [runpipeline(b-f)]
-
-But escaping works:
-
-M-0.10.6 jao@cheese:~$ ls \[p-r\]*
--rw-rw-r--   jao    jao       36883   2020 Jul 05 19:23:14   passwords.txt
--rw-r--r--   jao    jao       13377   2019 Jan 20 12:43:37   reality_distortion_field.md
--rw-rw-r--   jao    jao        2415   2019 Oct 06 23:13:49   reload.txt
-
 
 ----------------------------------------------------------------------
 

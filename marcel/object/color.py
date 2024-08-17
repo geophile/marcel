@@ -66,6 +66,7 @@ class ColorScheme(marcel.object.renderable.Renderable):
         'file_file',
         'file_dir',
         'file_link',
+        'file_link_broken',
         'file_executable',
         'file_extension',
         'process_pid',
