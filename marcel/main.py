@@ -552,10 +552,18 @@ def main():
     multiprocessing.set_start_method(mpstart)
     workspace = Workspace.named(workspace_name)
     locations = marcel.locations.Locations()
-    if script is None:
-        main_interactive_run(locations, workspace)
-    else:
-        main_script_run(locations, workspace, script)
+    started = False
+    while not started:
+        try:
+            if script is None:
+                main_interactive_run(locations, workspace)
+            else:
+                main_script_run(locations, workspace, script)
+            started = True
+        except marcel.exception.StartupScriptException as e:
+            print(str(e), file=sys.stderr)
+        except:
+            raise
 
 
 if __name__ == '__main__':

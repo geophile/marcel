@@ -204,6 +204,13 @@ class Workspace(marcel.object.renderable.Renderable):
                         workspace.read_properties(env)  # So that home is known
                         yield workspace
 
+    @staticmethod
+    def delete_broken(env):
+        def delete_subdirs(dir):
+            pass
+        delete_subdirs(env.locations.config_bws())
+        delete_subdirs(env.locations.data_bws())
+
     # Internal
 
     def create_on_disk(self, env, initial_config_contents):

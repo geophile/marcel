@@ -112,17 +112,6 @@ No qualifying paths: ['~/git/marcel/{marcel,test}']
 
 ----------------------------------------------------------------------
 
-cat = [ map (f: (f, f.readlines())) | expand 1 ]
-(cat)
-
-prints:
-
-    pipeline(map(f: (f, f.readlines())) | expand(1))
-
-It would be nice to have the original source.
-
-----------------------------------------------------------------------
-
 These commands do different things:
 
     ls -fr **/*.py
@@ -660,18 +649,6 @@ Mention workspaces in top-level help
 
 ----------------------------------------------------------------------
 
-Does util need both of these?
-
-def is_sequence(x):
-    return type(x) is not str and isinstance(x, collections.abc.Sequence)
-
-
-def is_sequence_except_string(x):
-    t = type(x)
-    return t is tuple or t is list
-
-----------------------------------------------------------------------
-
 Should restriction on select, write etc. not being permitted as first
 in pipeline be dropped? Inside args, these can be OK. Maybe limit the
 restriction to top-level.
@@ -683,12 +660,6 @@ Op to write commands to script.
 ----------------------------------------------------------------------
 
 Prettyprint pipelines. Use it for rendering pipeline code.
-
-----------------------------------------------------------------------
-
-Need a something to completely wipe out a workspace from the command
-line. Or maybe on creation, when detecting a previously partially
-cleaned up workspace. 
 
 ----------------------------------------------------------------------
 
@@ -747,3 +718,7 @@ EOF
 
 function_args_parser: Doesn't check that star is used only with last
 arg. Although, python parsing catches it.
+
+----------------------------------------------------------------------
+
+Delete broken workspaces

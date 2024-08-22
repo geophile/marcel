@@ -448,7 +448,10 @@ class EnvironmentScript(Environment):
             # Execute the config file. Imported and newly-defined symbols go into locals, which
             # will then be added to self.namespace, for use in the execution of op functions.
             locals = dict()
-            exec(config_source, self.namespace, locals)
+            try:
+                exec(config_source, self.namespace, locals)
+            except:
+                raise marcel.exception.StartupScriptException(self.workspace)
             self.namespace.update(locals)
 
     def check_nesting(self):
