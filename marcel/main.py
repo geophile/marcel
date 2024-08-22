@@ -475,19 +475,34 @@ def main_interactive_run(locations, workspace):
     def restart_in_default_workspace():
         raise marcel.exception.ReconfigureException(Workspace.default())
 
-    main = None
-    trace = None
-    while True:
+    def env_and_main(old_env, old_main, workspace):
+        env = None
         try:
             env = marcel.env.EnvironmentInteractive.create(locations, workspace, trace)
         except Exception as e:
             # Something ws-related? Try starting in default
-            workspace = Workspace.default()
-            env = marcel.env.EnvironmentInteractive.create(locations, workspace, trace)
             marcel.util.print_to_stderr(
-                env,
+                old_env,
                 f'Caught {type(e)} during startup. Starting in default workspace. {str(e)}')
-        main = MainInteractive(main, env, workspace)
+            return env_and_main(old_main, Workspace.default())
+        assert env is not None
+        try:
+            main = MainInteractive(old_main, env, workspace)
+            return env, main
+        except marcel.exception.StartupScriptException as e:
+            if workspace.is_default():
+                marcel.util.print_to_stderr(env, 'Error in startup script for default workspace.')
+                marcel.util.print_to_stderr(env, 'Fix the startup script and try again.')
+                sys.exit(1)
+            else:
+                print(str(e), file=sys.stderr)
+                marcel.util.print_to_stderr(env, 'Trying default workspace ...')
+                return env_and_main(old_env, old_main, Workspace.default())
+
+    main = None
+    trace = None
+    while True:
+        env, main = env_and_main(None, main, workspace)
         try:
             if main.needs_restart:
                 restart_in_default_workspace()
