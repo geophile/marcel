@@ -106,8 +106,8 @@ def ws(list=False,
         args.append('--close')
     if delete:
         args.extend(['--delete', delete])
-    if delete:
-        args.extend(['--delete-broken', delete_broken])
+    if delete_broken:
+        args.append('--delete-broken')
     if home:
         args.extend(['--home', home])
     if rename:
@@ -132,14 +132,14 @@ class WsArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_one_value('open', '-o', '--open')
         self.add_flag_no_value('close', '-c', '--close')
         self.add_flag_one_value('delete', '-d', '--delete')
-        self.add_flag_one_value('delete-broken', '-b', '--delete-broken')
+        self.add_flag_no_value('delete_broken', '-b', '--delete-broken')
         self.add_flag_one_value('home', '-h', '--home')
         self.add_flag_one_value('rename', '-r', '--rename')
         self.add_flag_one_value('copy', '-2', '--copy')
         self.add_flag_one_value('export', '-e', '--export', target='exp')
         self.add_flag_one_value('import', '-i', '--import', target='imp')
         self.add_anon('name', default=None)
-        self.at_most_one('list', 'new', 'open', 'close', 'delete', 'delete-broken',
+        self.at_most_one('list', 'new', 'open', 'close', 'delete', 'delete_broken',
                          'home', 'rename', 'copy', 'export', 'import')
         self.validate()
 

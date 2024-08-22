@@ -207,7 +207,9 @@ class Workspace(marcel.object.renderable.Renderable):
     @staticmethod
     def delete_broken(env):
         def delete_subdirs(dir):
-            pass
+            for subdir in dir.iterdir():
+                marcel.util.print_to_stderr(env, f'Deleting broken workspace in {subdir}')
+                shutil.rmtree(subdir)
         delete_subdirs(env.locations.config_bws())
         delete_subdirs(env.locations.data_bws())
 

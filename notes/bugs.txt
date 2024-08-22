@@ -918,4 +918,22 @@ record history, does it?
 
 ----------------------------------------------------------------------
 
-264.
+264. There shouldn't be two non-default workspaces marked active
+
+... where active means a marker file with a pid. Switching to a
+workspace should deactivate the one we were in.
+
+M 0.30.0 jao@loon ~/.config/marcel/workspace/test$ ws -n test2
+Workspace(test2)
+M 0.30.0 test2 jao@loon /home/jao/.config/marcel/workspace/test$ cd ../test2
+M 0.30.0 test2 jao@loon /home/jao/.config/marcel/workspace/test2$ ls
+drwxrwxr-x     jao     jao    4096  2024 Aug 22 18:25:35  .
+----------     jao     jao       0  2024 Aug 22 18:25:35  .WORKSPACE.87353
+-rw-------     jao     jao    4876  2024 Aug 22 18:25:35  startup.py
+M 0.30.0 test2 jao@loon /home/jao/.config/marcel/workspace/test2$ ws
+Workspace(test2)
+M 0.30.0 test2 jao@loon /home/jao/.config/marcel/workspace/test2$ cd ../test
+M 0.30.0 test2 jao@loon /home/jao/.config/marcel/workspace/test$ ls
+drwxrwxr-x     jao     jao    4096  2024 Aug 22 17:57:20  .
+----------     jao     jao       0  2024 Aug 22 17:57:06  .WORKSPACE.78726
+-rw-------     jao     jao    4882  2024 Aug 22 17:57:12  startup.py
