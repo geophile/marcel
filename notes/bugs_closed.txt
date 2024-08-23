@@ -5461,3 +5461,63 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/object/workspace.py", line 324, in owner
     assert marker_filename is not None
 AssertionError
+
+----------------------------------------------------------------------
+
+FIXED
+
+265. Missing workspace marker file not detected or handled well
+
+A workspace was missing a .WORKSPACE file. Not reported by validation,
+and crashed on switching to it:
+
+M 0.30.0 jao@loon ~/git/marcel$ ws queens
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 586, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 574, in main
+    main_interactive_run(locations, workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 509, in main_interactive_run
+    main.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 356, in run
+    self.parse_and_run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 220, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 340, in execute_command
+    command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 231, in execute
+    self.pipeline.run(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 357, in run
+    self.ops[0].run(env)
+  File "/home/jao/git/marcel/marcel/op/ws.py", line 202, in run
+    self.impl.run(env)
+  File "/home/jao/git/marcel/marcel/op/ws.py", line 303, in run
+    workspace.open(env)
+  File "/home/jao/git/marcel/marcel/object/workspace.py", line 123, in open
+    if self.lock_workspace(env):
+  File "/home/jao/git/marcel/marcel/object/workspace.py", line 250, in lock_workspace
+    owner = self.owner(env)
+  File "/home/jao/git/marcel/marcel/object/workspace.py", line 333, in owner
+    assert marker_filename is not None
+AssertionError
+
+
+Then, on restart and switch to the ws:
+
+jao@loon:~/git/marcel$ marcel
+Damaged workspaces have been detected: ['queens']. Their contents will be moved to:
+    /home/jao/.config/marcel/broken/1724418322.6169038
+    /home/jao/.local/share/marcel/broken/1724418322.6169038
+queens: /home/jao/.config/marcel/workspace/queens/.WORKSPACE is missing
+
+So the marker was deleted on startup?!
+
+
+The first problem was that the marker was left with a pid.
+
+On startup validation: Look for marker with inactive pid and remove
+the pid.

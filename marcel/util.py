@@ -205,6 +205,8 @@ def process_exists(pid):
         return True
     except ProcessLookupError:
         return False
+    except PermissionError:
+        return True
     except Exception as e:
         assert False, e
 

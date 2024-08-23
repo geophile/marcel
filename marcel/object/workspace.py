@@ -52,6 +52,9 @@ class Marker(object):
             pid = env.locations.pid
         return env.locations.config_ws(self.workspace) / f'{Marker.FILENAME_ROOT}.{pid}'
 
+    def ensure_exists(self, env):
+        self.unowned(env).touch(mode=0o000, exist_ok=True)
+
 
 class WorkspaceProperties(object):
 
@@ -157,10 +160,10 @@ class Workspace(marcel.object.renderable.Renderable):
             if self.lock_workspace(env):
                 locations = env.locations
                 # config directory
-                # Use missing_ok = True to enable deletion of damaged workspaces, missing files.
                 owned_marker_path = self.marker.owned(env)
                 assert owned_marker_path is not None, self
                 owned_marker_path.unlink(missing_ok=False)
+                # Use missing_ok=True to enable deletion of damaged workspaces, missing files.
                 locations.config_ws_startup(self).unlink(missing_ok=True)
                 locations.config_ws(self).rmdir()
                 # data directory
@@ -223,7 +226,7 @@ class Workspace(marcel.object.renderable.Renderable):
         config_file_path = locations.config_ws_startup(self)
         config_file_path.write_text(initial_config_contents)
         config_file_path.chmod(0o600)
-        self.marker.unowned(env).touch(mode=0o000, exist_ok=True)
+        self.marker.ensure_exists(env)
         # data
         self.create_dir(locations.data_ws(self))
         self.create_dir(locations.data_ws_res(self))
@@ -314,14 +317,10 @@ class Workspace(marcel.object.renderable.Renderable):
         assert not self.is_default()
         if self.marker.unowned(env).exists():
             return None
-        # First get rid of any markers from processes that don't exist. Shouldn't happend, but still.
-        config_dir_path = env.locations.config_ws(self)
-        if not config_dir_path.exists():
+        if not env.locations.config_ws(self).exists():
             return None
-        for file in config_dir_path.iterdir():
-            if file.name.startswith(Marker.FILENAME_ROOT) and len(file.name) > len(Marker.FILENAME_ROOT):
-                if not marcel.util.process_exists(Workspace.marker_filename_pid(file.name)):
-                    file.unlink()
+        # First get rid of any markers from processes that don't exist. Shouldn't happen, but still.
+        self.delete_abandoned_markers(env)
         # Now find the marker. Something is very wrong if there is anything other than one.
         marker_filename = None
         for file in env.locations.config_ws(self).iterdir():
@@ -347,6 +346,13 @@ class Workspace(marcel.object.renderable.Renderable):
         if data_source.exists():
             data_target = locations.data_bws(self, now)
             shutil.move(data_source, data_target)
+
+    def delete_abandoned_markers(self, env):
+        for file in env.locations.config_ws(self).iterdir():
+            if file.name.startswith(Marker.FILENAME_ROOT) and len(file.name) > len(Marker.FILENAME_ROOT):
+                pid = Workspace.marker_filename_pid(file.name)
+                if not marcel.util.process_exists(pid):
+                    file.unlink()
 
     def cannot_lock_workspace(self):
         raise marcel.exception.KillCommandException(f'Workspace {self.name} is in use by another process.')
@@ -437,8 +443,12 @@ class WorkspaceValidater(object):
         # exist in this dir.
         # Config dir has marker file.
         config_dir_path = locations.config_ws(workspace)
+        # Workspace.owner() gets rid of unowned marker files.
+        self.workspace.delete_abandoned_markers(self.env)
         if not self.workspace.marker.exists(self.env):
-            self.missing(config_dir_path / Marker.FILENAME_ROOT)
+            # Could happen if Workspace.owner() deleted the marker, because it was owned by
+            # a process that no longer exists. Create a new marker.
+            self.workspace.marker.ensure_exists(self.env)
         # Config dir has startup.py.
         if not locations.config_ws_startup(workspace).exists():
             self.missing(locations.config_ws_startup(workspace))
