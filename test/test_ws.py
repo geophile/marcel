@@ -255,10 +255,8 @@ def test_workspace_validation():
     # ... and closed
     TEST.run('ws -c')
     check_validation(validate_all(TEST.env, validation_error_handler))
-    # Break the workspace by removing the marker
-    os.system(f'rm -f {TEST.test_home}/.config/marcel/workspace/w1/.WORKSPACE')
-    check_validation(validate_all(TEST.env, validation_error_handler),
-                     ValidationError('w1', '.WORKSPACE is missing'))
+    # Missing marker is no longer tested. See comment in WorkspaceValidater.validate.
+    # (Missing marker will be replaced by validate.)
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w1')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w1')
     # Remove the startup file
