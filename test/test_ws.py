@@ -1,5 +1,8 @@
 import os
+import pathlib
 import sys
+
+import psutil
 
 import marcel.exception
 import marcel.object.cluster
@@ -255,8 +258,12 @@ def test_workspace_validation():
     # ... and closed
     TEST.run('ws -c')
     check_validation(validate_all(TEST.env, validation_error_handler))
-    # Missing marker is no longer tested. See comment in WorkspaceValidater.validate.
-    # (Missing marker will be replaced by validate.)
+    # Simulate an unclean shutdown by attaching a pid to the marker's filename.
+    # Validation should fix things up.
+    unused_pid = max(psutil.pids()) + 1000
+    marker_file = pathlib.Path(f'{TEST.test_home}/.config/marcel/workspace/w1/.WORKSPACE')
+    marker_file.rename(f'{marker_file}.{unused_pid}')
+    check_validation(validate_all(TEST.env, validation_error_handler))
     os.system(f'rm -rf {TEST.test_home}/.config/marcel/workspace/w1')
     os.system(f'rm -rf {TEST.test_home}/.local/share/marcel/workspace/w1')
     # Remove the startup file
