@@ -5521,3 +5521,38 @@ The first problem was that the marker was left with a pid.
 
 On startup validation: Look for marker with inactive pid and remove
 the pid.
+
+----------------------------------------------------------------------
+
+FIXED
+
+267. Reference to MainInteractive.job_control crashes marcel
+
+M 0.30.1 jao@loon ~/nathan_reunion$ ws nathan
+Workspace(nathan @ /home/jao/nathan_reunion)
+Traceback (most recent call last):
+  File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 586, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 574, in main
+    main_interactive_run(locations, workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 505, in main_interactive_run
+    env, main = env_and_main(None, main, workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 490, in env_and_main
+    main = MainInteractive(old_main, env, workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 309, in __init__
+    super().__init__(env, workspace, testing, initial_config)
+  File "/home/jao/git/marcel/marcel/main.py", line 181, in __init__
+    startup_vars = self.read_config()
+  File "/home/jao/git/marcel/marcel/main.py", line 196, in read_config
+    self.run_startup_scripts()
+  File "/home/jao/git/marcel/marcel/main.py", line 255, in run_startup_scripts
+    self.parse_and_run_command(command)
+  File "/home/jao/git/marcel/marcel/main.py", line 220, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 342, in execute_command
+    self.job_control.create_job(command)
+AttributeError: 'MainInteractive' object has no attribute 'job_control'

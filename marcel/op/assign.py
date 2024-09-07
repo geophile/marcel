@@ -65,7 +65,17 @@ class Assign(marcel.core.Op):
             self.value.set_globals(env.vars())
 
     def run(self, env):
-        env.setvar_with_source(self.var, self.value, self.source)
+        # The fix for bug 267 is to use function.source, which may have an extra lambda added on to the
+        # front (for situations such as "inc = (lambda x: x + 1)"). But also allow for self.function to
+        # not have source, or for it to be None.
+        source = None
+        try:
+            source = self.function.source
+        except AttributeError:
+            pass
+        if source is None:
+            source = self.source
+        env.setvar_with_source(self.var, self.value, source)
 
     # Op
 
