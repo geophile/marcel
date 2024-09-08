@@ -630,9 +630,9 @@ class Trace(object):
     def write(self, op, output=None):
         assert self.tracefile
         if output is None:
-            print(f'{op}', file=self.tracefile)
+            print(f'{op}', file=self.tracefile, flush=True)
         else:
-            print(f'{op} -> {output}', file=self.tracefile)
+            print(f'{op} -> {output}', file=self.tracefile, flush=True)
 
     def print_status(self):
         if self.tracefile is None:

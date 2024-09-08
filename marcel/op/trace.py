@@ -20,41 +20,41 @@ import marcel.exception
 
 HELP = '''
 {L,wrap=F}trace
-{L,wrap=F}trace -s|--stdout
+{L,wrap=F}trace -0|--off
+{L,wrap=F}trace -1|--on
 {L,wrap=F}trace -f|--file FILE
-{L,wrap=F}trace -o|--off
 
-{L,indent=4:28}{r:-s}, {r:--stdout}            Write trace output to stdout.
+{L,indent=4:28}{r:-0}, {r:--off}               Do not produce trace output. 
 
-{L,indent=4:28}{r:-f}, {r:--file}              Write trace output to the specified FILE. 
+{L,indent=4:28}{r:-1}, {r:--on}                Write trace output to stdout.
 
-{L,indent=4:28}{r:-o}, {r:--off}               Do not product trace output. 
+{L,indent=4:28}{r:-f}, {r:--file}              Write trace output to the specified {r:FILE.} 
 
 Writes data tracing marcel execution to stdout or a file.
 
 With no arguments, {r:trace} describes whether tracing is enabled, and if so,
 where trace output is being written.
 
-{r:--stdout} causes trace output to be written to the console.
+{r:--on} causes trace output to be written to stdout.
+
+{r:--off} turns off tracing.
 
 {r:--file} causes trace output to be written to the specified {r:FILE}, appending
 if the file already exists.
-
-{r:--off} turns off tracing.
 
 These arguments are all mutually exclusive.
 '''
 
 
-def trace(stdout=False, file=None, off=False):
+def trace(off=False, on=False, file=None):
     args = []
-    if stdout:
-        args.append('--stdout')
+    if off:
+        args.append('--off')
+    if on:
+        args.append('--on')
     if file:
         args.append('--file')
         args.append(file)
-    if off:
-        args.append('--off')
     return Trace(), args
 
 
@@ -62,10 +62,10 @@ class TraceArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('trace', env)
-        self.add_flag_no_value('stdout', '-s', '--stdout')
+        self.add_flag_no_value('off', '-0', '--off')
+        self.add_flag_no_value('on', '-1', '--on')
         self.add_flag_one_value('file', '-f', '--file', target='filename')
-        self.add_flag_no_value('off', '-o', '--off')
-        self.at_most_one('stdout', 'file', 'off')
+        self.at_most_one('on', 'off', 'file')
         self.validate()
 
 
@@ -73,18 +73,18 @@ class Trace(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.stdout = False
-        self.filename = None
         self.off = False
+        self.on = False
+        self.filename = None
 
     def __repr__(self):
         buffer = ['trace(']
-        if self.stdout:
-            buffer.append('stdout')
-        if self.filename:
-            buffer.append(self.filename)
+        if self.on:
+            buffer.append('on')
         if self.off:
             buffer.append('off')
+        if self.filename:
+            buffer.append(self.filename)
         buffer.append(')')
         return ''.join(buffer)
 
@@ -93,7 +93,7 @@ class Trace(marcel.core.Op):
     def run(self, env):
         if self.off:
             env.trace.disable()
-        elif self.stdout:
+        elif self.on:
             env.trace.enable(sys.stdout)
         elif self.filename:
             env.trace.enable(self.filename)
