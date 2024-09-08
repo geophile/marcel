@@ -4852,6 +4852,33 @@ FIXED
 
 FIXED
 
+242a. Questionable usage causes crash
+
+Same var used for both load and store.
+
+M 0.21.2 (queens) jao@loon ~$ x <$ (x: x+1) >$ x
+Process Process-4:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env, True)
+  File "/home/jao/git/marcel/marcel/core.py", line 228, in execute
+    self.pipeline.setup(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 357, in setup
+    op.setup(env)
+  File "/home/jao/git/marcel/marcel/op/store.py", line 114, in setup
+    self.writer = self.reservoir.writer(append=self.append)
+  File "/home/jao/git/marcel/marcel/picklefile.py", line 57, in writer
+    assert len(self._readers) == 0 and self._writer is None, self
+AssertionError: Reservoir(/home/jao/.local/share/marcel/queens/reservoirs/x.pickle)
+
+----------------------------------------------------------------------
+
+FIXED
+
 243. List/tuple confusion causes crash
 
 This happens a lot. Revisit tuple/list usage and try to settle on one,
