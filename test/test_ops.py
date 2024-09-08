@@ -1797,11 +1797,11 @@ def test_difference():
 @timeit
 def test_args():
     TEST.reset_environment()
-    # # gen
-    # TEST.run('gen 5 1 | args (|n: gen (n)|) | map (x: -x)',
-    #          expected_out=[0, 0, -1, 0, -1, -2, 0, -1, -2, -3, 0, -1, -2, -3, -4])
-    # TEST.run('gen 6 1 | args (|count, start: gen (count) (start)|)',
-    #          expected_out=[2, 4, 5, 6, 6, 7, 8, 9, 10])
+    # gen
+    TEST.run('gen 5 1 | args (|n: gen (n)|) | map (x: -x)',
+             expected_out=[0, 0, -1, 0, -1, -2, 0, -1, -2, -3, 0, -1, -2, -3, -4])
+    TEST.run('gen 6 1 | args (|count, start: gen (count) (start)|)',
+             expected_out=[2, 4, 5, 6, 6, 7, 8, 9, 10])
     # ls
     with TestDir(TEST.env) as testdir:
         TEST.run(f'mkdir {testdir}/d1')
@@ -1811,80 +1811,78 @@ def test_args():
         TEST.run(f'touch {testdir}/d2/f2')
         TEST.run(f'touch {testdir}/d3/f3')
         TEST.run(f'cd {testdir}')
-        TEST.run(f'ls -d | args (|d: ls -f (d) |) | map (f: f.name)')
-        # TEST.run(f'ls -d | args (|d: ls -f (d) |) | map (f: f.name)',
-        #          expected_out=['f1', 'f2', 'f3'])
-
-        # TEST.run(f'touch a_file')
-        # TEST.run(f'touch "a file"')
-        # TEST.run(f'touch "a file with a \' mark"')
-        # TEST.run(f'rm -rf d')
-        # TEST.run(f'mkdir d')
-        # TEST.run(test=f'ls -f | args --all (|files: mv -t d (quote_files(*files)) |)',
-        #          verification='ls -f d | map (f: f.name)',
-        #          expected_out=['a file', "a file with a ' mark", 'a_file'])
-    # # head
-    # TEST.run('gen 4 1 | args (|n: gen 10 | head (n)|)',
-    #          expected_out=[0, 0, 1, 0, 1, 2, 0, 1, 2, 3])
-    # # tail
-    # TEST.run('gen 4 1 | args (|n: gen 10 | tail (n+1)|)',
-    #          expected_out=[8, 9, 7, 8, 9, 6, 7, 8, 9, 5, 6, 7, 8, 9])
-    # # bash
-    # # Space between Y and ] is required, otherwise ] is lexed as part of the argument to echo.
-    # TEST.run('gen 5 | args (|n: echo X(n)Y |)',
-    #          expected_out=['X0Y', 'X1Y', 'X2Y', 'X3Y', 'X4Y'])
-    # # expand
-    # TEST.run('gen 3 | args (|x: (((1, 2), (3, 4), (5, 6))) | expand (x)|)',
-    #          expected_out=[(1, (3, 4), (5, 6)), (2, (3, 4), (5, 6)),
-    #                        ((1, 2), 3, (5, 6)), ((1, 2), 4, (5, 6)),
-    #                        ((1, 2), (3, 4), 5), ((1, 2), (3, 4), 6)])
-    # # sql
-    # if SQL:
-    #     TEST.run('sql "drop table if exists t" | select (x: False)')
-    #     TEST.run('sql "create table t(x int)" | select (x: False)')
-    #     TEST.run(test='gen 5 | args (|x: sql "insert into t values(%s)" (x)|)',
-    #              verification='sql "select * from t order by x"',
-    #              expected_out=[0, 1, 2, 3, 4])
-    # # window
-    # TEST.run('gen 3 | args (|w: gen 10 | window -d (w)|)',
-    #          expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
-    #                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-    #                        (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)])
-    # # nested args
-    # TEST.run('gen 3 | args (|i: gen 3 (i+100) | args (|j: gen 3 (j+1000)|)|)',
-    #          expected_out=[1100, 1101, 1102, 1101, 1102, 1103, 1102, 1103, 1104,
-    #                        1101, 1102, 1103, 1102, 1103, 1104, 1103, 1104, 1105,
-    #                        1102, 1103, 1104, 1103, 1104, 1105, 1104, 1105, 1106])
-    # # --all
-    # TEST.run('gen 10 | args --all (|x: ("".join([str(n) for n in x]))|)',
-    #          expected_out=['0123456789'])
-    # # no input to args
-    # TEST.run('gen 3 | select (x: False) | args (|n: map (x: -x)|)',
-    #          expected_out=[])
-    # TEST.run('gen 3 | select (x: False) | args --all (|n: map (x: -x)|)',
-    #          expected_out=[])
-    # # negative testing
-    # TEST.run('gen 3 | args --all (|x, y: (123) |)',
-    #          expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
-    # TEST.run('gen 3 | args --all (| (123) |)',
-    #          expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
-    # TEST.run('gen 3 | args (| (123) |)',
-    #          expected_err="The args pipelines must be parameterized")
-    # # Bug 94
-    # TEST.run('gen 4 1 | args (|n: gen (n)|) | window (x: x == 0)',
-    #          expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
-    # # Bug 116
-    # TEST.run('g = (|n: gen (n)|)')
-    # TEST.run('gen 3 1 | args (|n: g (n)|)',
-    #          expected_out=[0, 0, 1, 0, 1, 2])
-    # # Bug 167
-    # with TestDir(TEST.env) as testdir:
-    #     os.system(f'rm -rf {testdir}/hello')
-    #     os.system(f'echo hello > {testdir}/hello')
-    #     os.system(f'echo hello >> {testdir}/hello')
-    # # Bug 237
-    # TEST.run('gen 3 | args -a (x: (x))',
-    #          expected_err='must be a Pipeline')
+        TEST.run(f'ls -d | args (|d: ls -f (d) |) | map (f: f.name)',
+                 expected_out=['f1', 'f2', 'f3'])
+        TEST.run(f'touch a_file')
+        TEST.run(f'touch "a file"')
+        TEST.run(f'touch "a file with a \' mark"')
+        TEST.run(f'rm -rf d')
+        TEST.run(f'mkdir d')
+        TEST.run(test=f'ls -f | args --all (|files: mv -t d (quote_files(*files)) |)',
+                 verification='ls -f d | map (f: f.name)',
+                 expected_out=['a file', "a file with a ' mark", 'a_file'])
+        # head
+        TEST.run('gen 4 1 | args (|n: gen 10 | head (n)|)',
+                 expected_out=[0, 0, 1, 0, 1, 2, 0, 1, 2, 3])
+        # tail
+        TEST.run('gen 4 1 | args (|n: gen 10 | tail (n+1)|)',
+                 expected_out=[8, 9, 7, 8, 9, 6, 7, 8, 9, 5, 6, 7, 8, 9])
+        # bash
+        # Space between Y and ] is required, otherwise ] is lexed as part of the argument to echo.
+        TEST.run('gen 5 | args (|n: echo X(n)Y |)',
+                 expected_out=['X0Y', 'X1Y', 'X2Y', 'X3Y', 'X4Y'])
+        # expand
+        TEST.run('gen 3 | args (|x: (((1, 2), (3, 4), (5, 6))) | expand (x)|)',
+                 expected_out=[(1, (3, 4), (5, 6)), (2, (3, 4), (5, 6)),
+                               ((1, 2), 3, (5, 6)), ((1, 2), 4, (5, 6)),
+                               ((1, 2), (3, 4), 5), ((1, 2), (3, 4), 6)])
+        # sql
+        if SQL:
+            TEST.run('sql "drop table if exists t" | select (x: False)')
+            TEST.run('sql "create table t(x int)" | select (x: False)')
+            TEST.run(test='gen 5 | args (|x: sql "insert into t values(%s)" (x)|)',
+                     verification='sql "select * from t order by x"',
+                     expected_out=[0, 1, 2, 3, 4])
+        # window
+        TEST.run('gen 3 | args (|w: gen 10 | window -d (w)|)',
+                 expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
+                               0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                               (0, 1), (2, 3), (4, 5), (6, 7), (8, 9)])
+        # nested args
+        TEST.run('gen 3 | args (|i: gen 3 (i+100) | args (|j: gen 3 (j+1000)|)|)',
+                 expected_out=[1100, 1101, 1102, 1101, 1102, 1103, 1102, 1103, 1104,
+                               1101, 1102, 1103, 1102, 1103, 1104, 1103, 1104, 1105,
+                               1102, 1103, 1104, 1103, 1104, 1105, 1104, 1105, 1106])
+        # --all
+        TEST.run('gen 10 | args --all (|x: ("".join([str(n) for n in x]))|)',
+                 expected_out=['0123456789'])
+        # no input to args
+        TEST.run('gen 3 | select (x: False) | args (|n: map (x: -x)|)',
+                 expected_out=[])
+        TEST.run('gen 3 | select (x: False) | args --all (|n: map (x: -x)|)',
+                 expected_out=[])
+        # negative testing
+        TEST.run('gen 3 | args --all (|x, y: (123) |)',
+                 expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
+        TEST.run('gen 3 | args --all (| (123) |)',
+                 expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
+        TEST.run('gen 3 | args (| (123) |)',
+                 expected_err="The args pipelines must be parameterized")
+        # Bug 94
+        TEST.run('gen 4 1 | args (|n: gen (n)|) | window (x: x == 0)',
+                 expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
+        # Bug 116
+        TEST.run('g = (|n: gen (n)|)')
+        TEST.run('gen 3 1 | args (|n: g (n)|)',
+                 expected_out=[0, 0, 1, 0, 1, 2])
+        # Bug 167
+        with TestDir(TEST.env) as testdir:
+            os.system(f'rm -rf {testdir}/hello')
+            os.system(f'echo hello > {testdir}/hello')
+            os.system(f'echo hello >> {testdir}/hello')
+        # Bug 237
+        TEST.run('gen 3 | args -a (x: (x))',
+                 expected_err='must be a Pipeline')
 
 
 @timeit
