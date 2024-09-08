@@ -4447,6 +4447,64 @@ https://github.com/geophile/marcel/issues/17
 
 FIXED
 
+224. Stale docs: Redirect syntax
+
+----------------------------------------------------------------------
+
+FIXED
+
+225. Stale docs: out -> write
+
+----------------------------------------------------------------------
+
+227. marcel fails on first startup
+
+NOT A BUG
+
+Found this while working on https://github.com/geophile/marcel/issues/22
+
+ssue22@loon:~$ . ./venv/bin/activate
+(venv) issue22@loon:~$ pip install marcel
+Collecting marcel
+  Downloading marcel-0.18.3-py3-none-any.whl (292 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 292.6/292.6 KB 862.1 kB/s eta 0:00:00
+Collecting dill
+  Downloading dill-0.3.7-py3-none-any.whl (115 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 115.3/115.3 KB 819.3 kB/s eta 0:00:00
+Collecting psutil
+  Downloading psutil-5.9.6-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (283 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 283.6/283.6 KB 1.3 MB/s eta 0:00:00
+Installing collected packages: psutil, dill, marcel
+Successfully installed dill-0.3.7 marcel-0.18.3 psutil-5.9.6
+(venv) issue22@loon:~$ marcel
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/main.py", line 317, in <module>
+    main()
+  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/main.py", line 293, in main
+    MAIN = Main(None, same_process=False, old_namespace=old_namespace)
+  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/main.py", line 96, in __init__
+    self.env = marcel.env.Environment.new(config_file, old_namespace)
+  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/env.py", line 212, in new
+    env.config_path = env.read_config(config_file)
+  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/env.py", line 326, in read_config
+    config_path = self.locations.config_path()
+  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/locations.py", line 28, in config_path
+    return self._dir('XDG_CONFIG_HOME', '.config') / 'startup.py'
+  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/locations.py", line 49, in _dir
+    dir.mkdir(exist_ok=False)
+t  File "/usr/lib/python3.10/pathlib.py", line 1175, in mkdir
+    self._accessor.mkdir(self, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/home/issue22/.config/marcel'
+(venv) issue22@loon:~$ 
+
+----------------------------------------------------------------------
+
+FIXED
+
 229. var assigned in saved pipeline can't be read
 
     M 0.18.4 jao@loon ~$ gn = (| n: gen (int(n)) >$ g |)
@@ -4933,7 +4991,7 @@ NOT A BUG
 The jobs help info says that output is written to the "output
 stream". Is this right? I think it just goes to stdout.
 
-         ----------------------------------------------------------------------
+----------------------------------------------------------------------
 
 FIXED
 

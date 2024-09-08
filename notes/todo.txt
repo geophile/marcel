@@ -718,7 +718,3 @@ EOF
 
 function_args_parser: Doesn't check that star is used only with last
 arg. Although, python parsing catches it.
-
-----------------------------------------------------------------------
-
-Delete broken workspaces

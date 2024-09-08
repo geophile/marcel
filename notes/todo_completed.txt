@@ -1197,3 +1197,7 @@ def is_sequence_except_string(x):
 Need a something to completely wipe out a workspace from the command
 line. Or maybe on creation, when detecting a previously partially
 cleaned up workspace. 
+
+----------------------------------------------------------------------
+
+Delete broken workspaces

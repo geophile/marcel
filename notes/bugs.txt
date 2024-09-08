@@ -13,29 +13,6 @@ process. Exiting marcel leaves emacs running.
 
 ----------------------------------------------------------------------
 
-48. Syntax error in .marcel.py should be handled more gracefully
-
-jao@cheese:~/git/marcel/test$ marcel
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/runpy.py", line 193, in _run_module_as_main
-    "__main__", mod_spec)
-  File "/usr/lib/python3.7/runpy.py", line 85, in _run_code
-    exec(code, run_globals)
-  File "/home/jao/git/marcel/marcel/main.py", line 211, in <module>
-    MAIN = Main()
-  File "/home/jao/git/marcel/marcel/main.py", line 90, in __init__
-    self.env = marcel.env.Environment(self.config)
-  File "/home/jao/git/marcel/marcel/env.py", line 136, in __init__
-    self.read_config(config_file)
-  File "/home/jao/git/marcel/marcel/env.py", line 201, in read_config
-    exec(config_source, self.namespace, locals)
-  File "<string>", line 64
-    cat = [ map (f: (f, f.readlines())) | expand 1 ]
-                  ^
-SyntaxError: invalid syntax
-
-----------------------------------------------------------------------
-
 58. Infinite loop in help
 
 There was a typo in the HELP for ps:
@@ -43,7 +20,7 @@ There was a typo in the HELP for ps:
 HELP = '''
 {L,wrap=F}ps [-u|--user [USER]] [-g|--group [GROUP}] [-p|--pid PID] [-c|--command STRING]
 
-Note that GROUP is followed by } instead of ]. That seemed to put 
+tNote that GROUP is followed by } instead of ]. That seemed to put 
 help into an infinite loop.
 
 ----------------------------------------------------------------------
@@ -659,23 +636,6 @@ See https://github.com/geophile/marcel/issues/20
 
 ----------------------------------------------------------------------
 
-223. Stale docs: Pipeline notation
-
-https://github.com/geophile/marcel/issues/17
-
-
-Pipeline page is missing discussion of pipeline args
-
-----------------------------------------------------------------------
-
-224. Stale docs: Redirect syntax
-
-----------------------------------------------------------------------
-
-225. Stale docs: out -> write
-
-----------------------------------------------------------------------
-
 226. args (| *x: ... |) should probably be illegal
 
 Not sure what it would mean.
@@ -683,50 +643,6 @@ Not sure what it would mean.
 M 0.18.3 jao@loon ~$ gen 100 | args (| *x: (x) |)
 Error: Running map(lambda: x): name 'x' is not defined
 Error: Running map(lambda: x): name 'x' is not defined
-
-----------------------------------------------------------------------
-
-227. marcel fails on first startup
-
-Found this while working on https://github.com/geophile/marcel/issues/22
-
-ssue22@loon:~$ . ./venv/bin/activate
-(venv) issue22@loon:~$ pip install marcel
-Collecting marcel
-  Downloading marcel-0.18.3-py3-none-any.whl (292 kB)
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 292.6/292.6 KB 862.1 kB/s eta 0:00:00
-Collecting dill
-  Downloading dill-0.3.7-py3-none-any.whl (115 kB)
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 115.3/115.3 KB 819.3 kB/s eta 0:00:00
-Collecting psutil
-  Downloading psutil-5.9.6-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (283 kB)
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 283.6/283.6 KB 1.3 MB/s eta 0:00:00
-Installing collected packages: psutil, dill, marcel
-Successfully installed dill-0.3.7 marcel-0.18.3 psutil-5.9.6
-(venv) issue22@loon:~$ marcel
-Traceback (most recent call last):
-  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
-    return _run_code(code, main_globals, None,
-  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
-    exec(code, run_globals)
-  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/main.py", line 317, in <module>
-    main()
-  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/main.py", line 293, in main
-    MAIN = Main(None, same_process=False, old_namespace=old_namespace)
-  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/main.py", line 96, in __init__
-    self.env = marcel.env.Environment.new(config_file, old_namespace)
-  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/env.py", line 212, in new
-    env.config_path = env.read_config(config_file)
-  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/env.py", line 326, in read_config
-    config_path = self.locations.config_path()
-  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/locations.py", line 28, in config_path
-    return self._dir('XDG_CONFIG_HOME', '.config') / 'startup.py'
-  File "/home/issue22/venv/lib/python3.10/site-packages/marcel/locations.py", line 49, in _dir
-    dir.mkdir(exist_ok=False)
-  File "/usr/lib/python3.10/pathlib.py", line 1175, in mkdir
-    self._accessor.mkdir(self, mode)
-FileNotFoundError: [Errno 2] No such file or directory: '/home/issue22/.config/marcel'
-(venv) issue22@loon:~$ 
 
 ----------------------------------------------------------------------
 

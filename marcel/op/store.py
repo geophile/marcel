@@ -113,7 +113,7 @@ class Store(marcel.core.Op):
                 f'{self.var} is not usable as a reservoir, it stores a value of type {type(self.reservoir)}.')
         try:
             self.writer = self.reservoir.writer(append=self.append)
-        except marcel.picklefile.PickleFileUsageError as e:
+        except marcel.picklefile.PickleFileUsageError:
             raise marcel.exception.KillCommandException(f'store {self.var}: Pickle file already in use')
 
     def receive(self, env, x):
