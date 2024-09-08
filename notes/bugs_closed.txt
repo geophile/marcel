@@ -4933,7 +4933,7 @@ NOT A BUG
 The jobs help info says that output is written to the "output
 stream". Is this right? I think it just goes to stdout.
 
-----------------------------------------------------------------------
+         ----------------------------------------------------------------------
 
 FIXED
 
