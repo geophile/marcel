@@ -5524,6 +5524,41 @@ the pid.
 
 ----------------------------------------------------------------------
 
+NOT A BUG. Probably fixed by other ws work
+
+266. Crash wiped out marker and now marcel can't start
+
+base) jao@loon:~/nathan_reunion$ marcel nathan
+Traceback (most recent call last):
+  File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/jao/miniconda3/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 586, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 574, in main
+    main_interactive_run(locations, workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 505, in main_interactive_run
+    env, main = env_and_main(None, main, workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 490, in env_and_main
+    main = MainInteractive(old_main, env, workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 309, in __init__
+    super().__init__(env, workspace, testing, initial_config)
+  File "/home/jao/git/marcel/marcel/main.py", line 176, in __init__
+    env.restore_persistent_state_from_workspace()
+  File "/home/jao/git/marcel/marcel/env.py", line 407, in restore_persistent_state_from_workspace
+    self.workspace.open(self)
+  File "/home/jao/git/marcel/marcel/object/workspace.py", line 126, in open
+    if self.lock_workspace(env):
+  File "/home/jao/git/marcel/marcel/object/workspace.py", line 253, in lock_workspace
+    owner = self.owner(env)
+  File "/home/jao/git/marcel/marcel/object/workspace.py", line 332, in owner
+    assert marker_filename is not None
+AssertionError
+
+
+----------------------------------------------------------------------
+
 FIXED
 
 267. Reference to MainInteractive.job_control crashes marcel
