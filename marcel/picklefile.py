@@ -18,7 +18,9 @@ import pathlib
 import os
 import time
 
-import marcel.util
+
+class PickleFileUsageError(BaseException):
+    pass
 
 
 class PickleFile:
@@ -51,19 +53,19 @@ class PickleFile:
         return self
 
     def reader(self):
-        assert self._writer is None, self
+        self.check_availability(self._writer is None)
         reader = Reader(self)
         self._readers[self.path] = reader
         return reader
 
     def writer(self, append):
-        assert len(self._readers) == 0 and self._writer is None, self
+        self.check_availability(len(self._readers) == 0 and self._writer is None)
         writer = Writer(self, append)
         self._writer = writer
         return writer
 
     def ensure_deleted(self):
-        assert len(self._readers) == 0 and self._writer is None, self
+        self.check_availability(len(self._readers) == 0 and self._writer is None)
         try:
             os.unlink(self.path)
         except FileNotFoundError:
@@ -84,6 +86,10 @@ class PickleFile:
         first_dot = self.path.name.find('.')
         last_dot = self.path.name.rfind('.')
         return int(self.path.name[:first_dot]) if first_dot < last_dot else None
+
+    def check_availability(self, available):
+        if not available:
+            raise PickleFileUsageError(self)
 
 
 class Access:
