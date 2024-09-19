@@ -1,0 +1,9 @@
+Handling difficult filenames
+
+This is about bug 189: Auto-complete doesn't handle whitespace
+correctly. Not concerned with 
+
+    bash "..."
+
+because auto-complete inside the quoted command seems hopeless.
+
