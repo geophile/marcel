@@ -714,3 +714,8 @@ EOF
 
 function_args_parser: Doesn't check that star is used only with last
 arg. Although, python parsing catches it.
+
+----------------------------------------------------------------------
+
+When compact_rendering a file, need to be careful of spaces, at least
+for those cases when the filename is being used in a command.

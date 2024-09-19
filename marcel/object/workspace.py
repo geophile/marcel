@@ -71,11 +71,11 @@ class WorkspaceProperties(object):
     def __repr__(self):
         buffer = ['WorkspaceProperties(']
         if self.home:
-            buffer.append(f'home = {self.home}')
-        buffer.append(f'create = {WorkspaceProperties.format_time(self.create_time)}')
-        buffer.append(f'open = {WorkspaceProperties.format_time(self.open_time)}')
+            buffer.append(f'home = {self.home}, ')
+        buffer.append(f'create = {WorkspaceProperties.format_time(self.create_time)}, ')
+        buffer.append(f'open = {WorkspaceProperties.format_time(self.open_time)}, ')
         buffer.append(f'save = {WorkspaceProperties.format_time(self.save_time)})')
-        return ', '.join(buffer)
+        return ''.join(buffer)
 
     def update_open_time(self):
         self.open_time = time.time()
