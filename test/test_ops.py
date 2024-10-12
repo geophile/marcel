@@ -2050,7 +2050,7 @@ def test_cast():
     # Errors
     # Not defined
     TEST.run('gen 1 | cast asdf',
-             expected_err='Not a valid casting function')
+             expected_err='Not a valid type name')
     # A marcel function
     TEST.run('gen 1 | cast map',
              expected_out=[Error('map')])

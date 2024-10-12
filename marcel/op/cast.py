@@ -62,11 +62,12 @@ class Cast(marcel.core.Op):
             self.functions = self.types
         else:
             self.functions = []
-            for type in self.types:
+            for typename in self.types:
                 try:
-                    self.functions.append(getattr(builtins, type))
-                except AttributeError:
-                    raise marcel.exception.KillCommandException(f'Not a valid casting function: {type}')
+                    type = getattr(builtins, typename)
+                except Exception:
+                    raise marcel.exception.KillCommandException(f'Not a valid type name: {typename}')
+                self.functions.append(type)
 
     def receive(self, env, x):
         output = []
