@@ -28,6 +28,8 @@ HELP = '''
 
 {L,indent=4:28}{r:VAR}                     The name of an environment variable.
 
+{L,indent=4:28}{r:-o}, {r:--os}                Search the host OS environment, not marcel's.
+
 {L,indent=4:28}{r:-d}, {r:--delete}            Output the named variable and its value, and remove the variable 
 from the environment.
 

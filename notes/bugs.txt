@@ -705,4 +705,21 @@ record history, does it?
 
 ----------------------------------------------------------------------
 
-268.
+268. Uncaught exception
+
+M 0.30.2 hw1 jao@loon $ read -cs jack_orenstein_supporting_data.csv | cast int int (n, r: (1, n, n)) | red + min max
+Process Process-13:
+Traceback (most recent call last):
+  File "/home/jao/miniconda3/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/jao/miniconda3/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env, True)
+  File "/home/jao/git/marcel/marcel/core.py", line 226, in execute
+    self.pipeline.setup(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 352, in setup
+    op.setup(env)
+  File "/home/jao/git/marcel/marcel/op/cast.py", line 67, in setup
+    self.functions.append(getattr(builtins, type))
+TypeError: getattr(): attribute name must be string
