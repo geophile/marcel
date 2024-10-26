@@ -1,0 +1,226 @@
+10/23/24
+
+The oldest part of marcel (going back to osh) is the structure of
+command execution.
+
+- An op has a run() or receive() method, which executes the command.
+
+- Output is sent downstream by calling Op.send() which calls
+  receive_input(), which calls receive() on the next op in the
+  pipeline.
+
+So there are a lot of send/receive_input/receive call sequences.
+
+I ran this script:
+
+    from marcel.api import *
+
+    run(gen(10000000) | select(lambda x: False))
+
+and profiled it: python -m cProfile /tmp/p.py > /tmp/p
+
+Topmost command execution (gen)
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    2.288    2.288   16.303   16.303 gen.py:92(run)
+
+Time in bottom-most command execution (select):
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+ 10000000    2.797    0.000    6.692    0.000 select.py:62(receive)
+
+So the difference between the two cumtimes (16.303 - 6.692 = 9.611) is
+the time spent:
+
+1. in gen itself, and 
+
+2. interpretation getting from gen to select.
+
+I think #1 is represented by tottime, which is 2.288, leaving 7.323
+for interpretation, or 45% of the topmost command execution time.
+
+Here are the functions called 10M times:
+
+    (base) jao@loon:~/git/marcel/notes$ grep 100000 /tmp/p
+     10000000    3.021    0.000   13.434    0.000 core.py:65(send)
+     10000000    1.934    0.000    3.895    0.000 core.py:85(call)
+     10000000    3.079    0.000    9.771    0.000 core.py:99(receive_input)
+     10000000    0.642    0.000    0.642    0.000 env.py:608(is_enabled)
+     10000000    1.517    0.000    1.960    0.000 function.py:38(__call__)
+     10000000    0.581    0.000    0.581    0.000 gen.py:109(apply_padding)
+     10000000    0.444    0.000    0.444    0.000 p.py:3(<lambda>)
+     10000000    2.797    0.000    6.692    0.000 select.py:62(receive)
+
+----------------------------------------------------------------------
+
+Is the routing necessary? We could compile marcel pipelines into
+function calls instead of interpreting them, e.g.
+
+    gen(3) | select(_: False) | write()
+
+Instead of this (interpreted)
+
+    # gen.py
+    def run(self, env):
+        for x in range(self.start, self.start + self.count):
+            self.send(env, self.apply_padding(x))
+    
+do this:
+
+   # gen.py
+   def run(self, env):
+        for x in range(self.start, self.start + self.count):
+            self.NEXT_OP.receive(env, self.apply_padding(x))
+
+where NEXT_OP is the select op.
+
+Select currently:
+
+    def receive(self, env, x):
+        fx = (self.call(env, self.function)
+              if x is None else
+              self.call(env, self.function, *x))
+        if fx:
+            self.send(env, x)
+
+Becomes:
+
+    def receive(self, env, x):
+        fx = (self.call(env, self.function)
+              if x is None else
+              self.call(env, self.function, *x))
+        if fx:
+            self.NEXT_OP.receive(env, x)
+
+
+This is still interpretation, but with less overhead for
+routing. send/receive_input/receive becomes a call to receive
+directly.
+
+True compilation would do away with op objects. E.g.
+
+     gen_start = ...
+     gen_count = ...
+     for gen_x in range(gen_start, gen_start + gen_count):
+         select_fx = (lambda _: False)(gen_x)
+         if select_fx:
+             # expand code for writing output
+
+I.e., op object state becomes variables, named to avoid collisions
+(e.g. with other instances of the same op).
+
+----------------------------------------------------------------------
+
+send, receive_input don't just pass calls along:
+
+send:
+
+- Write command trace output if tracing enabled
+- Check existence of receiver, call receiver.receive_input if it exists.
+
+receive_input:
+
+- pos() support:
+  - Set env.current_op (supports pos())
+  - Maintain op._count
+- Call receive, wrapping input into tuple if necessary.
+
+
+Without tracing and pos(), it's just forwarding the call to the receiver.
+
+----------------------------------------------------------------------
+
+10/25/24
+
+Generating code for Gen:
+
+- Call setup as usual.
+
+- Instead of calling run, call generate_code().
+
+- gen.generate_code():
+
+  gen_ID_count = <value from setup>
+  gen_ID_start = <value from setup>
+  if gen_ID_count is None or gen_ID_count == 0:
+      gen_ID_x = gen_ID_start
+      while True:
+          gen_ID_output = self.apply_padding(gen_ID_x)
+          <CODE FOR DOWNSTREAM OP>
+          gen_ID_x += 1
+  else:
+      for gen_ID_x in range(gen_ID_start, gen_ID_start + gen_ID_count):
+          gen_ID_output = self.apply_padding(gen_ID_x)
+          <CODE FOR DOWNSTREAM OP>
+  
+
+- gen_ID_: ID is a unique identifier for this op.
+
+- <CODE FOR DOWNSTREAM OP> takes gen_ID_output as input.
+
+......................................................................
+
+gen 3 | write:
+
+- write.generate_code()
+
+  write_ID = <self>
+  write_ID_writer = <value from setup>
+  try:
+      write_ID_writer.receive(env, x)
+  except marcel.exception.KillAndResumeException as e:
+      write_ID.non_fatal_error(env, input=x, message=str(e))
+  except Exception as e:  # E.g. UnicodeEncodeError
+      write_ID.non_fatal_error(env, input=x, message=str(e))
+  finally:
+      self.send(env, x)
+
+----------------------------------------------------------------------
+
+10/26/24
+
+#!/bin/bash
+
+marcel <<EOF
+date +%N
+gen 10000000 | select (_: False)
+date +%N
+EOF
+
+- %s.%N prints epoch time including nsec.
+
+- 10M iterations: 655 ns/iteration
+
+......................................................................
+
+import time
+
+N = 100000000
+start = time.time()
+for i in range(N):
+    if False:
+        pass
+stop = time.time()
+print(f'{1000000000*(stop-start)/N} nsec/iteration')
+
+- 13.5 nsec/iteration
+
+......................................................................
+
+
+def select_pred(x):
+    return False
+
+start = time.time()
+format = None
+for i in range(N):
+    x = format.format(i) if format else i
+    if select_pred(x):
+        pass
+stop = time.time()
+print(f'Compile-generated: {1000000000*(stop-start)/N} nsec/iteration')
+
+- 73 nsec/iteration
+
+Compiler-generated is about 6x slower than hand-written python, but
+10x faster than interpreted.

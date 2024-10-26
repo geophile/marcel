@@ -1,0 +1,57 @@
+Compiling Marcel to Python
+
+Marcel is interpreted. A command like this:
+
+gen 100 | map (x: (x, x**0.5)) | write
+
+gives rise to objects of type marcel.op.Gen, marcel.op.Map, and
+marcel.op.Write. Gen.run() contains a loop generating the integers 0
+through 99. For each such integer, self.send() is called, which routes
+the integer to Map.receive(). Map.receive() takes the input, x, and
+maps it to (x, X**0.5), passing that tuple to self.send(), which then
+routes the tuple to Write.receive(), which writes the tuple to stdout.
+
+Each op's send() is implemented by marcel.core.Op, which calls
+Op.receive_input() which calls Op.receive(), which is implemented by
+each operator (Gen, Map, Write, in this example). This structure goes
+back to the (obsolete) forerunner of marcel, osh.
+
+The point is that there is a lot of function calling overhead. send()
+generates trace output, and receive_input() contains logic supporting
+the pos() function, but ignoring those details, it's just passing the
+output of one operator to the input of the next one.
+
+This interpretation is expensive. I timed the execution of this
+command:
+
+gen 10000000 | select (_: False)
+
+(The select operator ensures that there is no output, so we aren't
+timing printing, that is not of concern right now).
+
+This command runs at about 650 ns/iteration.
+
+I then timed this Python code, that does the same thing:
+
+format = None
+for i in range(N):
+    x = format.format(i) if format else i
+    if select_pred(x):
+        pass
+
+This is meant to emulate what gen does, checking for formatting, and
+the reject-everything selection. This runs 9x faster, at 73
+nsec/iteration.
+
+So compilation of Marcel commands to Python code should greatly speed
+things up, or at least, commands whose pipelines are run a large
+number of times. In many situations it wont' matter:
+
+- Commands processing very little data.
+
+- Commands where the time is spent in expensive operations, such as
+  network or database access.
+
+However, it's probably the case that in these situations, the overhead
+of compilation is probably negligible. In other words, compilation
+should result in better performance when it matters the most.
