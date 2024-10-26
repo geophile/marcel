@@ -90,21 +90,17 @@ class Gen(marcel.core.Op):
             self.format = '{:>0' + str(pad) + '}'
 
     def run(self, env):
+        format = self.format
         if self.count is None or self.count == 0:
             x = self.start
             while True:
-                self.send(env, self.apply_padding(x))
+                self.send(env, format.format(x) if format else x)
                 x += 1
         else:
             for x in range(self.start, self.start + self.count):
-                self.send(env, self.apply_padding(x))
+                self.send(env, format.format(x) if format else x)
 
     # Op
 
     def must_be_first_in_pipeline(self):
         return True
-
-    # For use by this class
-
-    def apply_padding(self, x):
-        return (self.format.format(x)) if self.format else x
