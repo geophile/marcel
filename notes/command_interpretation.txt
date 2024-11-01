@@ -224,3 +224,104 @@ print(f'Compile-generated: {1000000000*(stop-start)/N} nsec/iteration')
 
 Compiler-generated is about 6x slower than hand-written python, but
 10x faster than interpreted.
+
+----------------------------------------------------------------------
+
+10/31/24
+
+Op.setup and Op.run/receive code can be interleaved. So it isn't
+sufficient to just generate setup code followed by run/receive code.
+
+E.g.
+
+    gen 2 | args (| x: gen 2 1000 | (y: (x, y, x+y)) |)
+
+With trace turned on, and run interactively:
+
+SETUP gen(count=2, start=0)
+SETUP args(x: gen 2 1000 | (y: (x, y, x+y)))
+SETUP write()
+RUN gen(count=2, start=0) -> 0
+SETUP gen(count=2, start=1000)
+SETUP map(lambda y: (x, y, x+y))
+SETUP redirect()
+RUN gen(count=2, start=1000) -> 1000
+RUN map(lambda y: (x, y, x+y)) -> (0, 1000, 1000)
+RUN args(x: gen 2 1000 | (y: (x, y, x+y))) -> (0, 1000, 1000)
+(0, 1000, 1000)
+RUN write() -> (0, 1000, 1000)
+RUN gen(count=2, start=1000) -> 1001
+RUN map(lambda y: (x, y, x+y)) -> (0, 1001, 1001)
+RUN args(x: gen 2 1000 | (y: (x, y, x+y))) -> (0, 1001, 1001)
+(0, 1001, 1001)
+RUN write() -> (0, 1001, 1001)
+RUN gen(count=2, start=0) -> 1
+SETUP gen(count=2, start=1000)
+SETUP map(lambda y: (x, y, x+y))
+SETUP redirect()
+RUN gen(count=2, start=1000) -> 1000
+RUN map(lambda y: (x, y, x+y)) -> (1, 1000, 1001)
+RUN args(x: gen 2 1000 | (y: (x, y, x+y))) -> (1, 1000, 1001)
+(1, 1000, 1001)
+RUN write() -> (1, 1000, 1001)
+RUN gen(count=2, start=1000) -> 1001
+RUN map(lambda y: (x, y, x+y)) -> (1, 1001, 1002)
+RUN args(x: gen 2 1000 | (y: (x, y, x+y))) -> (1, 1001, 1002)
+(1, 1001, 1002)
+RUN write() -> (1, 1001, 1002)
+
+Using the api: run(gen(2) | args(lambda x: gen(2, 1000) | map(lambda y: (x, y, x+y))))
+
+Trace is similar, modulo printing of functions.
+
+The interleaving occurs in this case because Args.receive calls
+pipeline.run_pipeline, which uses Command.execute, which does pipeline
+setup.
+
+Assuming this approach to Args execution remains, it means that the
+unit of code execution is the pipeline. In this case, we generate code
+for:
+
+- outer pipeline setup
+- outer pipeline run
+
+Args execution (part of the outer pipeline) invokes inner pipeline code:
+
+- inner pipeline setup
+- inner pipeline run
+
+
+
+There is ALSO run/receive code during setup. E.g.
+
+    gen 4 | intersect (| gen 4 2 |)
+
+Trace:SETUP gen(count=4, start=0)
+SETUP intersect([gen 4 2])
+SETUP gen(count=4, start=2)
+SETUP map(def count_inputs(*x):)
+RUN gen(count=4, start=2) -> 2
+RUN map(def count_inputs(*x):) -> None
+RUN gen(count=4, start=2) -> 3
+RUN map(def count_inputs(*x):) -> None
+RUN gen(count=4, start=2) -> 4
+RUN map(def count_inputs(*x):) -> None
+RUN gen(count=4, start=2) -> 5
+RUN map(def count_inputs(*x):) -> None
+SETUP write()
+RUN gen(count=4, start=0) -> 0
+RUN gen(count=4, start=0) -> 1
+RUN gen(count=4, start=0) -> 2
+RUN intersect([gen 4 2]) -> (2,)
+2
+RUN write() -> (2,)
+RUN gen(count=4, start=0) -> 3
+RUN intersect([gen 4 2]) -> (3,)
+3
+RUN write() -> (3,)
+
+This is because Intersect.setup sets up and then runs its pipeline
+arg. 
+
+*** This is kind of weird, and it should be possible to avoid run
+    during setup.

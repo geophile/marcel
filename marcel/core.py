@@ -64,7 +64,7 @@ class Op(AbstractOp):
 
     def send(self, env, x):
         if env.trace.is_enabled():
-            env.trace.write(self, x)
+            env.trace.write(self, 'RUN', str(x))
         receiver = self.receiver
         if receiver:
             receiver.receive_input(env, x)
@@ -349,6 +349,8 @@ class PipelineExecutable(AbstractOp):
                 prev_op.receiver = op
             prev_op = op
         for op in self.ops:
+            if env.trace.is_enabled():
+                env.trace.write(op, 'SETUP')
             op.setup(env)
 
     # Pipeline

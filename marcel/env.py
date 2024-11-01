@@ -627,12 +627,12 @@ class Trace(object):
         self.description = None
 
     # output argument: output from the execution of the op
-    def write(self, op, output=None):
+    def write(self, phase, op, output=None):
         assert self.tracefile
         if output is None:
-            print(f'{op}', file=self.tracefile, flush=True)
+            print(f'{op} {phase}', file=self.tracefile, flush=True)
         else:
-            print(f'{op} -> {output}', file=self.tracefile, flush=True)
+            print(f'{op} {phase} -> {output}', file=self.tracefile, flush=True)
 
     def print_status(self):
         if self.tracefile is None:
