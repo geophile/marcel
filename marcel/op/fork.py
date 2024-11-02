@@ -53,13 +53,12 @@ If {r:FORK_GEN} is an iterable, then the thread ids are the values obtained by i
 Example:
 
 {p,indent=4,wrap=F}
-fork 3 [id: gen (id+1) 100]
+fork 3 (| id: gen (id+1) 100 | (hundred: (id, hundred)) |)
 
 This command creates three threads, with ids 0, 1, 2. For id 0, the
 command executed is gen 1 100, which generates the stream [100]. For
 id 1, the stream is [100, 101], and for id 2, the stream is [100, 101,
-102]. The fork command prepends the id to each tuple of output from
-the gen operator, so the output for the command is something like
+102]. So the output for the command is something like
 this:
 
 {p,indent=4,wrap=F}
@@ -76,7 +75,7 @@ If {r:FORK_GEN} is an iterable, then the thread id is bound to each value
 returned by the iterable. So this command:
 
 {p,indent=4,wrap=F}
-fork 'abc' [id: gen 3 100]
+fork 'abc' (| id: gen 3 100 | (hundred: (id, hundred)) |)
 
 yields:
 
@@ -93,11 +92,8 @@ yields:
 
 {r:FORK_GEN} may be a {n:Cluster}, because {n:Cluster} is iterable.
 In this case, the thread ids are the {n:Host} objects comprising the named cluster.
-But it should not normally be necessary to use a {n:Cluster} in this way. Instead, consider
-using the {n:upload} or {n:download} operators, or remote execution syntax, e.g.
-
-{p,indent=4}
-@my_cluster [ps] 
+This does {i:not} result in remote execution of the pipeline on each host. For that, use
+the {n:remote} operator.
 '''
 
 
