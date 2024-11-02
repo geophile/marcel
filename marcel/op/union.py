@@ -84,7 +84,7 @@ class Union(marcel.core.Op):
     # Internal
 
     def customize_pipeline(self, env, pipeline):
-        # Union is implemented by passing the input stream along in receive(), and then having each pipelines
+        # Union is implemented by passing the input stream along in receive(), and then having each pipeline's
         # arg send its output via flush. This depends on all the pipelines args having the same receiver as the
         # union op itself. However, we only want one flush after everything is done. PropagateFlushFromLast
         # makes sure that only the last pipelines propagates the flush.
