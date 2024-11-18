@@ -221,7 +221,14 @@ class Command:
 
     def execute(self, env, remote=False):
         with env.check_nesting():
-            env.clear_changes()
+            # Clear env changes iff remote.
+            # - remote = True: This is top-level execution, on behalf of a Job.
+            # - remote = False: Either top-level and not a Job, or nested execution. Either way,
+            #       changes aren't tracked or needed.
+            # Bug 270 was occurring because execution of a command's pipeline was clearing changes
+            # relevant to the top-level command.
+            if remote:
+                env.clear_changes()
             try:
                 self.pipeline.setup(env)
             except marcel.exception.KillAndResumeException as e:

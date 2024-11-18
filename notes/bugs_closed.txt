@@ -5857,3 +5857,21 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/op/cast.py", line 67, in setup
     self.functions.append(getattr(builtins, type))
 TypeError: getattr(): attribute name must be string
+
+----------------------------------------------------------------------
+
+FIXED
+
+270. ... <$ ... >$ var not working?
+
+M 0.30.2 hw3 jao@loon $ d1 <$ intersect (| r1 <$ |) >$ x
+M 0.30.2 hw3 jao@loon $ x <$
+Variable x is undefined.
+
+Works if we use > x, x < instead.
+
+Simpler:
+
+M 0.30.2 jao@loon ~$ gen 3 | intersect (| gen 3 1 |) >$ z
+M 0.30.2 jao@loon ~$ z <$
+Variable z is undefined.
