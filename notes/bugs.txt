@@ -705,4 +705,41 @@ record history, does it?
 
 ----------------------------------------------------------------------
 
-269.
+269. Error causes exit of workspace
+
+M 0.30.2 hw3 jao@loon $ data | (*x: race(x)) | unique
+Error during execution of startup script of workspace hw3
+Trying default workspace ...
+data is not executable.
+
+Probably due to syntax error in startup.py (added function).
+
+----------------------------------------------------------------------
+
+271. Redundant imports
+
+Saw this in env.pickle, in a workspace:
+
+'imports': [import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+...
+
+----------------------------------------------------------------------
+
+272. expand op should expand sets

@@ -327,9 +327,12 @@ class EnvironmentScript(Environment):
     class Import(object):
 
         def __init__(self, module_name, symbol, name):
+            assert module_name is not None
+            assert name is not None
             self.module_name = module_name
             self.symbol = symbol
             self.name = name
+            self.id = f'{module_name}/{"" if symbol is None else symbol}/{name}'
 
         def __repr__(self):
             buffer = [f'import({self.module_name}']
@@ -339,6 +342,12 @@ class EnvironmentScript(Environment):
                 buffer.append(f' as {self.name}')
             buffer.append(')')
             return ''.join(buffer)
+
+        def __hash__(self):
+            return hash(self.id)
+
+        def __eq__(self, other):
+            return self.id == other.id
 
     def __init__(self, locations, workspace, trace=None):
         super().__init__(marcel.nestednamespace.NestedNamespace(), trace)
@@ -354,7 +363,7 @@ class EnvironmentScript(Environment):
         # have workspace defined, for use with Locations.
         self.workspace = workspace
         # Symbols imported need special handling
-        self.imports = []
+        self.imports = set()
         self.directory_state = marcel.directorystate.DirectoryState(self)
 
     # Don't pickle everything
@@ -482,7 +491,7 @@ class EnvironmentScript(Environment):
                 if name is None:
                     name = symbol
                 self.var_handler.setvar(name, value, save=False)
-            self.imports.append(EnvironmentScript.Import(module_name, symbol, name))
+            self.imports.add(EnvironmentScript.Import(module_name, symbol, name))
         except ModuleNotFoundError:
             raise marcel.exception.ImportException(f'Module {module_name} not found.')
         except KeyError:

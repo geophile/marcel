@@ -47,14 +47,6 @@ class Op(AbstractOp):
     def __repr__(self):
         assert False, self.op_name()
 
-    # Pipelineable
-
-    def create_pipeline(self, args=None):
-        assert args is None
-        pipeline = PipelineExecutable()
-        pipeline.append(self)
-        return pipeline
-
     # AbstractOp
 
     def setup(self, env):
@@ -151,6 +143,13 @@ class Op(AbstractOp):
 
     def run_in_main_process(self):
         return False
+
+    def create_pipeline(self, args=None):
+        assert args is None
+        pipeline = PipelineExecutable()
+        pipeline.append(self)
+        return pipeline
+
 
     @classmethod
     def op_name(cls):
@@ -334,15 +333,6 @@ class PipelineExecutable(AbstractOp):
         for op in self.ops:
             print(f'    {id(op)}  {op}')
 
-    # Pipelineable
-
-    def n_params(self):
-        return len(self.params) if self.params else 0
-
-    def create_pipeline(self, args=None):
-        assert args is None
-        return self
-
     # AbstractOp
 
     def setup(self, env):
@@ -360,7 +350,7 @@ class PipelineExecutable(AbstractOp):
                 env.trace.write(op, 'SETUP')
             op.setup(env)
 
-    # Pipeline
+    # PipelineExecutable (mostly like Op)
 
     def run(self, env):
         self.ops[0].run(env)
@@ -388,7 +378,7 @@ class PipelineExecutable(AbstractOp):
         return self.params
 
     def copy(self):
-        # A pipelines copy contains shallow copies of the ops. This allows an op to make a copy of the pipelines
+        # A pipeline's copy contains shallow copies of the ops. This allows an op to make a copy of the pipelines
         # and be sure that the copy doesn't share state or structure (i.e. Op.receiver) with other uses of the
         # "same" pipelines within the same command.
         copy = PipelineExecutable()
@@ -408,6 +398,13 @@ class PipelineExecutable(AbstractOp):
 
     def last_op(self):
         return self.ops[-1]
+
+    def n_params(self):
+        return len(self.params) if self.params else 0
+
+    def create_pipeline(self, args=None):
+        assert args is None
+        return self
 
 
 class PipelineIterator:

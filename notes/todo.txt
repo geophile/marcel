@@ -719,3 +719,18 @@ arg. Although, python parsing catches it.
 
 When compact_rendering a file, need to be careful of spaces, at least
 for those cases when the filename is being used in a command.
+
+----------------------------------------------------------------------
+
+filter has a handy --compare flag, to extract a comparison key. join
+could use the same.
+
+----------------------------------------------------------------------
+
+join does run_pipeline from setup, like difference used to. Move
+run_pipeline to receive.
+
+----------------------------------------------------------------------
+
+Error in ws startup script: Can't go into the ws to run edit -s, so
+fixing the problem is difficult.

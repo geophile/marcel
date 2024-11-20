@@ -325,3 +325,37 @@ arg.
 
 *** This is kind of weird, and it should be possible to avoid run
     during setup.
+
+----------------------------------------------------------------------
+
+11/2/24
+
+To limit code changes, it would be nice if the Pipeline API could be
+left alone, e.g. so that Command.execute just works. Then, after code
+generation, Pipeline.setup/execute/flush/cleanup would continue to
+work.
+
+Review of pipeline structure:
+
+Pipeline
+
+PipelineExecutable: Used for execution of pipelines. Wraps a pipeline
+                    inside a command, e.g. ... union (| ... |)
+
+- Parser: Wraps a nested pipeline
+- Pipeline.create: Wraps PE with PipelineMarcel
+
+
+Pipeline
+    - setup
+    - n_params
+    - pickle
+    - run_pipeline
+    - receive
+    - flush
+    - cleanup
+
+    PipelineMarcel
+    PipelinePython
+
+./marcel/compilable.py:class CompilablePipeline(Compilable):
