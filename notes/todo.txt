@@ -734,3 +734,22 @@ run_pipeline to receive.
 
 Error in ws startup script: Can't go into the ws to run edit -s, so
 fixing the problem is difficult.
+
+
+----------------------------------------------------------------------
+
+marcel < fec.m: fec.m specifies a workspace. If the workspace is already in use:
+
+Workspace hwg is in use by another process.
+
+The block works the other way too, if a script is running with a ws,
+an interactive session using that ws can't start.
+
+Script usage should be able to use workspaces even if there is
+interactive use, but history should not be touched.
+
+But what if the interactive user is changing the workspace in ways
+that affects the script? I guess this is a Linux problem in general.
+
+What about vars? Should changes to those persist? Probably not. So
+just go with contents of startup.py?

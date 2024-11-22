@@ -743,3 +743,27 @@ import(random as random),
 ----------------------------------------------------------------------
 
 272. expand op should expand sets
+
+----------------------------------------------------------------------
+
+273. Fix to 270 may have broken args
+
+M 0.30.2 sb jao@loon /usr/share/dict$ gen 3 | args (| x: (x) |)
+0
+1
+2
+Process Process-6:
+Traceback (most recent call last):
+  File "/home/jao/miniconda3/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/jao/miniconda3/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 147, in run_command_in_child
+    child_namespace_changes = command.execute(self.env, remote=True)
+  File "/home/jao/git/marcel/marcel/core.py", line 244, in execute
+    return env.changes() if remote else None
+  File "/home/jao/git/marcel/marcel/env.py", line 255, in changes
+    return self.var_handler.changes()
+  File "/home/jao/git/marcel/marcel/env.py", line 115, in changes
+    changes[var] = self.env.namespace[var]
+KeyError: 'x'
