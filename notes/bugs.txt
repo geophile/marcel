@@ -767,3 +767,9 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/env.py", line 115, in changes
     changes[var] = self.env.namespace[var]
 KeyError: 'x'
+
+
+
+
+While clearing env changes, vars_read has COLOR_SCHEME?!?!?!? I guess
+it makes sense, we were running interactively.

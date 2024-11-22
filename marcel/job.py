@@ -150,8 +150,10 @@ class Job:
                     debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
                     writer.send(dill.dumps(child_namespace_changes))
             except marcel.exception.KillCommandException as e:
+                debug(f'caught {e}')
                 marcel.util.print_to_stderr(self.env, e)
             except marcel.exception.KillAndResumeException as e:
+                debug(f'caught {e}')
                 # Error handler printed the error
                 pass
             writer.close()

@@ -44,6 +44,8 @@ Compilable = marcel.compilable.Compilable
 
 
 class VarHandlerStartup(object):
+
+    MISSING_VAR = object()
     
     def __init__(self, env, startup_var_handler=None):
         self.env = env
@@ -112,7 +114,14 @@ class VarHandlerStartup(object):
     def changes(self):
         changes = {}
         for var in self.vars_written:
-            changes[var] = self.env.namespace[var]
+            # Bug 273: A pipeline param could show up in vars_written. When the pipeline is exited,
+            # and the scope is popped, the namespace is maintained. But the var would still be in
+            # vars_written. If a var is in vars_written but not namespace, I'm assuming this is what happened.
+            # Another approach is to maintain vars_written on NestedNamespace.pop_scope. But vars_written
+            # isn't a nested structure. This would break if the same variable name were used in different scopes.
+            value = self.env.namespace.get(var, VarHandler.MISSING_VAR)
+            if value is not VarHandler.MISSING_VAR:
+                changes[var] = value
         return changes
 
     def clear_changes(self):
