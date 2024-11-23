@@ -1201,3 +1201,8 @@ cleaned up workspace.
 ----------------------------------------------------------------------
 
 Delete broken workspaces
+
+----------------------------------------------------------------------
+
+join does run_pipeline from setup, like difference used to. Move
+run_pipeline to receive.

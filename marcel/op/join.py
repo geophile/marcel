@@ -93,6 +93,8 @@ class Join(marcel.core.Op):
         self.pipeline_arg = None
         self.keep = None
         self.inner = None  # Map containing contents of pipelines, keyed by join value
+        self.pipeline = None
+        self.first = None
 
     def __repr__(self):
         return f'join(keep, {self.pipeline_arg})' if self.keep else f'join({self.pipeline_arg})'
@@ -100,11 +102,14 @@ class Join(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        pipeline = marcel.core.Pipeline.create(self.pipeline_arg, self.customize_pipeline)
-        pipeline.setup(env)
-        pipeline.run_pipeline(env, None)
+        self.pipeline = marcel.core.Pipeline.create(self.pipeline_arg, self.customize_pipeline)
+        self.pipeline.setup(env)
+        self.first = True
 
     def receive(self, env, x):
+        if self.first:
+            self.pipeline.run_pipeline(env, None)
+            self.first = False
         x = tuple(x)
         join_value = x[0]
         try:
