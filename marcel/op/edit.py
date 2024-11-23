@@ -26,9 +26,11 @@ import marcel.util
 
 
 HELP = '''
-{L,wrap=F}edit [-s|--startup] [COMMAND] 
+{L,wrap=F}edit [-s|--startup [WORKSPACE]] [COMMAND] 
 
-{L,indent=4:28}{r:-s}, {r:--startup}           Edit the marcel startup script.
+{L,indent=4:28}{r:-s}, {r:--startup}           Edit the marcel startup script. 
+If {r:WORKSPACE} is specified, edit that workspace's startup script, otherwise that of
+the current workspace.
 
 {L,indent=4:28}{r:COMMAND}                 The number of the command to be edited.
 

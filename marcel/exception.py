@@ -43,9 +43,9 @@ class KillCommandException(BaseException):
 
 class StartupScriptException(KillCommandException):
 
-    def __init__(self, workspace):
+    def __init__(self, workspace, startup_exception):
         description = 'default workspace' if workspace.is_default() else f'workspace {workspace.name}'
-        super().__init__(f'Error during execution of startup script of {description}')
+        super().__init__(f'Error during execution of startup script of {description}: {startup_exception}')
 
 
 # Exception for terminating command for API first().

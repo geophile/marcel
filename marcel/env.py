@@ -468,8 +468,8 @@ class EnvironmentScript(Environment):
             locals = dict()
             try:
                 exec(config_source, self.namespace, locals)
-            except:
-                raise marcel.exception.StartupScriptException(self.workspace)
+            except Exception as e:
+                raise marcel.exception.StartupScriptException(self.workspace, e)
             self.namespace.update(locals)
 
     def check_nesting(self):
