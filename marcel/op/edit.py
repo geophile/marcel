@@ -22,6 +22,7 @@ import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.main
+import marcel.object.workspace
 import marcel.util
 
 
@@ -34,11 +35,12 @@ the current workspace.
 
 {L,indent=4:28}{r:COMMAND}                 The number of the command to be edited.
 
-Open an editor to edit the command identified by {r:COMMAND} (an integer) in the command history,
-(obtained by running the {n:history} operator). If {r:COMMAND} is omitted, the most recently
-executed command will be edited. The editor is selected by the {n:EDITOR}
-environment variable. On exiting the editor, the edited command
-will be on the command line. (Hit enter to run the command, as usual.)
+If no arguments are specified, then the most recently executed command will be edited,
+in the editor identified by the {n:EDITOR} environment variable. On exiting the editor, the 
+edited command will be on the command line. (Hit enter to run the command, as usual).
+
+If an integer {r:COMMAND} is specified, then the selected command in the command history
+will be edited, and then placed on the command line.
 
 If {r:--startup} is specified, then the marcel startup script for the current workspace is edited.
 '''
@@ -57,8 +59,9 @@ class EditArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('edit', env)
-        self.add_flag_no_value('startup', '-s', '--startup')
+        self.add_flag_optional_value('startup', '-s', '--startup', default=True)
         self.add_anon('n', convert=self.str_to_int, default=None)
+        self.at_most_one('startup', 'n')
         self.validate()
 
 
@@ -78,7 +81,9 @@ class Edit(marcel.core.Op):
 
     def setup(self, env):
         editor = Edit.find_editor(env)
-        self.impl = EditStartup(self, editor) if self.startup else EditCommand(self, editor)
+        self.impl = (EditStartup(self, editor, None if self.startup is True else self.startup)
+                     if self.startup else
+                     EditCommand(self, editor))
 
     def run(self, env):
         self.impl.run(env)
@@ -157,5 +162,15 @@ class EditCommand(EditImpl):
 
 class EditStartup(EditImpl):
 
+    def __init__(self, op, editor, ws_name):
+        super().__init__(op, editor)
+        self.ws_name = ws_name
+
     def run(self, env):
-        self.edit(env.locations.config_ws_startup(env.workspace))
+        if self.ws_name is None:
+            workspace = env.workspace
+        else:
+            workspace = marcel.object.workspace.Workspace.named(self.ws_name)
+            if not workspace.exists(env):
+                raise marcel.exception.KillCommandException(f'Workspace does not exist: {self.ws_name}')
+        self.edit(env.locations.config_ws_startup(workspace))

@@ -26,8 +26,11 @@ import marcel.util
 # A marcel op has arguments. An argument is one of:
 #    - An optional flag with no value
 #    - An optional flag with one value
-#    - An optional flag with either an optional value
+#    - An optional flag with an optional value
 #    - An anonymous value: not preceded by a flag
+# If an optional flag is followed by a value that is not a flag, then the
+# value is assumed to be a value of the flag, not anonymous.
+#
 # Constraints on groups of flags:
 #     - At most one must be specified
 #     - Exactly one must be specified
@@ -146,7 +149,6 @@ class ArgsParser:
     def validate(self):
         self.check_flag_symbols_unique()
         self.check_arg_names_unique()
-        self.check_no_ambiguous_args()
         self.check_anon_order()
         self.check_anon_list_terminal()
         self.validated = True
@@ -376,14 +378,6 @@ class ArgsParser:
             names.add(anon.name)
         if self.anon_list_arg:
             assert self.anon_list_arg.name not in names
-
-    # If there is a flag with an optional value, and there are any anon args, then there is
-    # the potential for ambiguity. E.g. In '... -x a b' is a the value of -x, or an anonymous arg?
-    # If -x's value is VALUE_OPTIONAL this is ambiguous.
-    def check_no_ambiguous_args(self):
-        if len(self.anon_args) > 0 or self.anon_list_arg is not None:
-            for flag in self.flag_args:
-                assert flag.value != VALUE_OPTIONAL
 
     # Anon args have to appear in the order declared. Anons that don't have default values are mandatory
     # and must precede those that do have defaults, (which can be omitted).
