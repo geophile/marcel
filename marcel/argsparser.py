@@ -64,7 +64,9 @@ class Arg:
 
 class Flag(Arg):
 
-    def __init__(self, op_name, name, convert, short, long, value, target=None):
+    NO_DEFAULT = object()
+
+    def __init__(self, op_name, name, convert, short, long, value, target=None, default=True):
         super().__init__(op_name, name, convert, target)
         assert short is not None or long is not None
         assert short is None or len(short) == 2 and short[0] == '-' and short[1] != '-'
@@ -73,6 +75,7 @@ class Flag(Arg):
         self.short = short
         self.long = long
         self.value = value
+        self.default = default
 
     def __repr__(self):
         return (f'{self.short}|{self.long}' if self.short and self.long else
@@ -125,8 +128,8 @@ class ArgsParser:
     def add_flag_one_value(self, name, short, long, convert=None, target=None):
         self.flag_args.append(Flag(self.op_name, name, convert, short, long, VALUE_ONE, target))
 
-    def add_flag_optional_value(self, name, short, long, convert=None, target=None):
-        self.flag_args.append(Flag(self.op_name, name, convert, short, long, VALUE_OPTIONAL, target))
+    def add_flag_optional_value(self, name, short, long, default, convert=None, target=None):
+        self.flag_args.append(Flag(self.op_name, name, convert, short, long, VALUE_OPTIONAL, target, default))
 
     def add_anon(self, name, convert=None, default=NO_DEFAULT, target=None):
         self.anon_args.append(Anon(self.op_name, name, convert, default, target))
@@ -416,7 +419,7 @@ class ArgsParser:
                         # Flag
                         if flag_ok:
                             if flag_arg.name not in flags:
-                                flags[flag_arg.name] = True
+                                flags[flag_arg.name] = flag_arg.default
                                 current_flag_arg = flag_arg
                             else:
                                 raise ArgsError(self.op_name, f'{arg} specified more than once.')

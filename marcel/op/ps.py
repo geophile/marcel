@@ -62,6 +62,8 @@ arguments to obtain all {n:Process}es, and then use the {n:select} operator to s
 condition, based on the attributes of {n:Process} objects. (Run {n:help process} for more information on
 {n:Process} objects.)
 
+If {r:--pid} is specified, then the process whose pid is {r:PID} is provided.
+
 If {r:--user} is specified, and {r:USER} is omitted, then the processes owned by the current user
 are provided. Similarly, if {r:--group} is specified and {r:GROUP} is omitted, then the processes
 owned by the current user's group are provided.
@@ -95,10 +97,10 @@ class PsArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('ps', env)
-        self.add_flag_optional_value('user', '-u', '--user', convert=self.check_str, target='user_arg')
-        self.add_flag_optional_value('group', '-g', '--group', convert=self.check_str, target='group_arg')
-        self.add_flag_one_value('pid', '-p', '--pid', convert=self.check_str, target='pid_arg')
-        self.add_flag_one_value('command', '-c', '--command', convert=self.check_str, target='command_arg')
+        self.add_flag_optional_value('user', '-u', '--user', default=True)
+        self.add_flag_optional_value('group', '-g', '--group', default=True)
+        self.add_flag_one_value('pid', '-p', '--pid')
+        self.add_flag_one_value('command', '-c', '--command')
         self.at_most_one('user', 'group', 'pid', 'command')
         self.validate()
 
@@ -107,13 +109,9 @@ class Ps(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.user_arg = _UNINITIALIZED
         self.user = None
-        self.group_arg = _UNINITIALIZED
         self.group = None
-        self.pid_arg = _UNINITIALIZED
         self.pid = None
-        self.command_arg = _UNINITIALIZED
         self.command = None
         self.filter = None
 
@@ -123,30 +121,27 @@ class Ps(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.user = self.eval_function(env, 'user_arg', int, str)
-        self.group = self.eval_function(env, 'group_arg', int, str)
-        self.pid = self.eval_function(env, 'pid_arg', int)
-        self.command = self.eval_function(env, 'command_arg', str)
         # user, group can be name or id. A name can be numeric, and in that case, the name interpretation
         # takes priority. Convert name to uid, since that is a cheaper lookup on a Project.
         # If user or group is None, no user/group was specified, so use this user/group.
         # A value of type Uninitialized means it wasn't specified at all.
         #
-        # user can be True if -u is specified with no value.
+        # user and group can be True if -u or -g are specified with no value.
         self.filter = lambda p: True
-        if type(self.user) is not Uninitialized:
-            self.user = os.getuid() if self.user in (None, True) else Ps.convert_to_id(self.user, marcel.util.uid)
+        print(f'ps user: {self.user}, group: {self.group}')
+        if self.user is not None:
+            self.user = os.getuid() if self.user is True else Ps.convert_to_id(self.user, marcel.util.uid)
             self.filter = lambda p: self.user in p.uids
-        if type(self.group) is not Uninitialized:
-            self.group = os.getgid() if self.group in (None, True) else Ps.convert_to_id(self.group, marcel.util.gid)
+        if self.group is not None:
+            self.group = os.getgid() if self.group is True else Ps.convert_to_id(self.group, marcel.util.gid)
             self.filter = lambda p: self.group in p.gids
-        if type(self.pid) is not Uninitialized:
+        if self.pid:
             try:
                 self.pid = int(self.pid)
                 self.filter = lambda p: self.pid == p.pid
             except ValueError:
                 raise marcel.exception.KillCommandException(f'pid must be an int: {self.pid}')
-        if type(self.command) is not Uninitialized:
+        if self.command:
             self.filter = (lambda p: p.name is not None and self.command in p.name or
                                      p.exe is not None and self.command in p.exe or
                                      p.cmdline is not None and functools.reduce(lambda x, y: x or y,
