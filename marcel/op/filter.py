@@ -43,8 +43,8 @@ Tuples from the left input are passed to the output stream or not,
 depending on a comparison between that tuple and the tuples of the right input. For
 each left input tuple:
 
-{L,indent=0:2,wrap=T}- Compute the comparison key by applying the {r:KEY} function to the left
-tuple. If {r:KEY} is not provided, then the key is the entire tuple.
+{L,indent=0:2,wrap=T}- Compute the comparison key by applying the {r:COMPARE} function to the left
+tuple. If {r:COMPARE} is not provided, then the key is the entire tuple.
 
 {L,indent=0:2,wrap=T}- If {r:--keep} is specified, and the key matches any tuple from the right
 input stream, then write the left tuple to the output stream.

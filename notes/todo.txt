@@ -725,6 +725,9 @@ for those cases when the filename is being used in a command.
 filter has a handy --compare flag, to extract a comparison key. join
 could use the same.
 
+But it's messier for join, since a key extraction function is needed
+for each join input.
+
 ----------------------------------------------------------------------
 
 Error in ws startup script: Can't go into the ws to run edit -s, so
