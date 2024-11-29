@@ -1206,3 +1206,8 @@ Delete broken workspaces
 
 join does run_pipeline from setup, like difference used to. Move
 run_pipeline to receive.
+
+----------------------------------------------------------------------
+
+Error in ws startup script: Can't go into the ws to run edit -s, so
+fixing the problem is difficult.

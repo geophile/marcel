@@ -730,11 +730,6 @@ for each join input.
 
 ----------------------------------------------------------------------
 
-Error in ws startup script: Can't go into the ws to run edit -s, so
-fixing the problem is difficult.
-
-----------------------------------------------------------------------
-
 marcel < fec.m: fec.m specifies a workspace. If the workspace is already in use:
 
 Workspace hwg is in use by another process.
