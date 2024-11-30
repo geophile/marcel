@@ -31,7 +31,7 @@ tuple from the right input.
 Computes a database-style join between the input stream, 
 and a second stream from the given {r:PIPELINE}.
 
-The input pipelines provides one input to the join, named {i:left}.
+The input pipeline provides one input to the join, named {i:left}.
 The {r:PIPELINE} argument provides the second input, named {i:right}.
 Left and right tuples are matched by comparing their first elements. For matching
 pairs, an output tuple consists of the left tuple followed by the right tuple with the
