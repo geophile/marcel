@@ -117,6 +117,8 @@ class Expander:
         only = x[0]
         if marcel.util.is_sequence(only) or marcel.util.is_generator(only):
             return only
+        elif isinstance(only, set):
+            return list(only)
         elif isinstance(only, dict):
             return list(only.items())
         else:
@@ -147,7 +149,7 @@ class ComponentExpander(Expander):
             assert self.position < len(sequence)
             pre = sequence[:self.position]
             post = sequence[(self.position + 1):]
-            assert type(pre) == type(post)
+            assert type(pre) is type(post)
             send = self.op.send
             if type(pre) is tuple:
                 for x in Expander.expand([sequence[self.position]]):
@@ -157,6 +159,7 @@ class ComponentExpander(Expander):
                     send(env, pre + [x,] + post)
             else:
                 assert False, f'Unanticipated input type: ({type(pre)}) {pre}'
+
 
 class NotExpandableException(Exception):
     not_expandable = None

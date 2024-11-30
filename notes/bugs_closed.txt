@@ -5907,3 +5907,9 @@ KeyError: 'x'
 
 While clearing env changes, vars_read has COLOR_SCHEME?!?!?!? I guess
 it makes sense, we were running interactively.
+
+----------------------------------------------------------------------
+
+FIXED
+
+272. expand op should expand sets

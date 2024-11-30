@@ -413,6 +413,18 @@ def test_expand():
                            (200, 3, -3),
                            (100, 4, -4),
                            (200, 4, -4)])
+    # Expand set
+    TEST.run(lambda: run(gen(5) | map(lambda x: (set((100, 200)), x, -x)) | expand(0) | sort()),
+             expected_out=[(100, 0, 0),
+                           (100, 1, -1),
+                           (100, 2, -2),
+                           (100, 3, -3),
+                           (100, 4, -4),
+                           (200, 0, 0),
+                           (200, 1, -1),
+                           (200, 2, -2),
+                           (200, 3, -3),
+                           (200, 4, -4)])
     # Function-valued args
     N = 1
     TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, (x * 10, x * 10 + 1))) | expand(lambda: N)),
@@ -885,32 +897,31 @@ def test_remote():
 @timeit
 def test_fork():
     # int forkgen
-    TEST.run(lambda: run(fork(3, gen(3, 100))))
-    # TEST.run(lambda: run(fork(3, gen(3, 100)) | sort()),
-    #          expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
-    # TEST.run(lambda: run(fork(3, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-    #          expected_out=[(0, 100), (0, 101), (0, 102),
-    #                        (1, 100), (1, 101), (1, 102),
-    #                        (2, 100), (2, 101), (2, 102)])
-    # TEST.run(lambda: run(fork(3, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-    #          expected_err='Too many pipelines args')
-    # # iterable forkgen
-    # TEST.run(lambda: run(fork('abc', lambda: gen(3, 100)) | sort()),
-    #          expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
-    # TEST.run(lambda: run(fork('abc', lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-    #          expected_out=[('a', 100), ('a', 101), ('a', 102),
-    #                        ('b', 100), ('b', 101), ('b', 102),
-    #                        ('c', 100), ('c', 101), ('c', 102)])
-    # TEST.run(lambda: run(fork('abc', lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-    #          expected_err='Too many pipelines args')
-    # # Cluster forkgen
-    # localhost = marcel.object.cluster.Host('127.0.0.1', None)
-    # TEST.run(lambda: run(fork(CLUSTER1, lambda: gen(3, 100)) | sort()),
-    #          expected_out=[100, 101, 102])
-    # TEST.run(lambda: run(fork(CLUSTER1, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-    #          expected_out=[(localhost, 100), (localhost, 101), (localhost, 102)])
-    # TEST.run(lambda: run(fork(CLUSTER1, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-    #          expected_err='Too many pipelines args')
+    TEST.run(lambda: run(fork(3, gen(3, 100)) | sort()),
+             expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
+    TEST.run(lambda: run(fork(3, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_out=[(0, 100), (0, 101), (0, 102),
+                           (1, 100), (1, 101), (1, 102),
+                           (2, 100), (2, 101), (2, 102)])
+    TEST.run(lambda: run(fork(3, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_err='Too many pipelines args')
+    # iterable forkgen
+    TEST.run(lambda: run(fork('abc', lambda: gen(3, 100)) | sort()),
+             expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
+    TEST.run(lambda: run(fork('abc', lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_out=[('a', 100), ('a', 101), ('a', 102),
+                           ('b', 100), ('b', 101), ('b', 102),
+                           ('c', 100), ('c', 101), ('c', 102)])
+    TEST.run(lambda: run(fork('abc', lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_err='Too many pipelines args')
+    # Cluster forkgen
+    localhost = marcel.object.cluster.Host('127.0.0.1', None)
+    TEST.run(lambda: run(fork(CLUSTER1, lambda: gen(3, 100)) | sort()),
+             expected_out=[100, 101, 102])
+    TEST.run(lambda: run(fork(CLUSTER1, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_out=[(localhost, 100), (localhost, 101), (localhost, 102)])
+    TEST.run(lambda: run(fork(CLUSTER1, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+             expected_err='Too many pipelines args')
 
 
 @timeit
@@ -2068,15 +2079,14 @@ def main_stable():
 
 
 def main_dev():
-    test_fork()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # main_slow_tests()
+    main_stable()
+    main_slow_tests()
     TEST.report_failures('test_api')
     sys.exit(TEST.failures)
 

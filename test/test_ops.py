@@ -411,6 +411,18 @@ def test_expand():
                            (200, 3, -3),
                            (100, 4, -4),
                            (200, 4, -4)])
+    # Expand set
+    TEST.run('gen 5 | map (x: (set((100, 200)), x, -x)) | expand 0 | sort',
+             expected_out=[(100, 0, 0),
+                           (100, 1, -1),
+                           (100, 2, -2),
+                           (100, 3, -3),
+                           (100, 4, -4),
+                           (200, 0, 0),
+                           (200, 1, -1),
+                           (200, 2, -2),
+                           (200, 3, -3),
+                           (200, 4, -4)])
     # Function-valued args
     TEST.run('N = (1)')
     TEST.run('gen 3 | map (x: (x, (x * 10, x * 10 + 1))) | expand (N)',
