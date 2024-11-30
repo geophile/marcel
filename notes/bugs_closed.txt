@@ -5908,6 +5908,35 @@ KeyError: 'x'
 While clearing env changes, vars_read has COLOR_SCHEME?!?!?!? I guess
 it makes sense, we were running interactively.
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+271. Redundant imports
+
+Saw this in env.pickle, in a workspace:
+
+'imports': [import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+import(marcel.builtin * as run_on_startup), 
+import(datetime as datetime), 
+import(random as random), 
+...
+
 ----------------------------------------------------------------------
 
 FIXED

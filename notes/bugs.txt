@@ -716,30 +716,4 @@ Probably due to syntax error in startup.py (added function).
 
 ----------------------------------------------------------------------
 
-271. Redundant imports
-
-Saw this in env.pickle, in a workspace:
-
-'imports': [import(marcel.builtin * as run_on_startup), 
-import(datetime as datetime), 
-import(random as random), 
-import(marcel.builtin * as run_on_startup), 
-import(datetime as datetime), 
-import(random as random), 
-import(marcel.builtin * as run_on_startup), 
-import(datetime as datetime), 
-import(random as random), 
-import(marcel.builtin * as run_on_startup), 
-import(datetime as datetime), 
-import(random as random), 
-import(marcel.builtin * as run_on_startup), 
-import(datetime as datetime), 
-import(random as random), 
-import(marcel.builtin * as run_on_startup), 
-import(datetime as datetime), 
-import(random as random), 
-...
-
-----------------------------------------------------------------------
-
 273.
