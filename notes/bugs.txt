@@ -20,7 +20,7 @@ There was a typo in the HELP for ps:
 HELP = '''
 {L,wrap=F}ps [-u|--user [USER]] [-g|--group [GROUP}] [-p|--pid PID] [-c|--command STRING]
 
-tNote that GROUP is followed by } instead of ]. That seemed to put 
+Note that GROUP is followed by } instead of ]. That seemed to put 
 help into an infinite loop.
 
 ----------------------------------------------------------------------
@@ -652,6 +652,21 @@ If there are concurrent sessions, the LAST one to exit overwrites
 changes from the others.  bash gets it right.
 
 On exit, should reread history on disk and then append to it.
+
+......................................................................
+
+Use two history files: 
+
+- past history
+- history for this session
+
+Append to history for this session.
+
+To examine history, combine both.
+
+When closing workspace, append session history to past history.
+
+This works for default and non-default workspaces.
 
 ----------------------------------------------------------------------
 
