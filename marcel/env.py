@@ -93,6 +93,9 @@ class VarHandlerStartup(object):
         assert var is not None
         self.vars_deleted.add(var)
         self.save_vars.remove(var)
+        value = self.env.namespace.get(var, None)
+        if type(value) is marcel.reservoir.Reservoir:
+            value.ensure_deleted()
         return self.env.namespace.pop(var)
 
     def vars(self):

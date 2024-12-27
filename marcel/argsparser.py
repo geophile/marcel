@@ -177,10 +177,10 @@ class ArgsParser:
                 raise ArgsError(arg.op_name, f'{arg.name} cannot be converted to int: {x}')
         raise ArgsError(arg.op_name, f'{arg.name} must be an int: {x}')
 
-    def str_to_float(self, arg, x):
+    def to_float(self, arg, x):
         if type(x) is float or callable(x):
             return x
-        if type(x) is str:
+        if type(x) is int or str:
             try:
                 return float(x)
             except ValueError:

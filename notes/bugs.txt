@@ -36,47 +36,11 @@ Lexer.consolidate_tokens consolidates map and (...
 
 IS THIS A BUG?
 
-----------------------------------------------------------------------
+We want consolidation here:
 
-69. Shell crashes on bad first arg to loop
+   ls map(3)
 
-M-0.9.17 jao@cheese:~$ loop (10, 1) [select (x, f: x > 0) | emit | map (x, f: (x-1, f*x))]
-Traceback (most recent call last):
-  File "/usr/lib/python3.8/runpy.py", line 193, in _run_module_as_main
-    return _run_code(code, main_globals, None,
-  File "/usr/lib/python3.8/runpy.py", line 86, in _run_code
-    exec(code, run_globals)
-  File "/home/jao/git/marcel/marcel/main.py", line 271, in <module>
-    MAIN.run()
-  File "/home/jao/git/marcel/marcel/main.py", line 123, in run
-    self.run_command(line)
-  File "/home/jao/git/marcel/marcel/main.py", line 136, in run_command
-    pipeline = parser.parse()
-  File "/home/jao/git/marcel/marcel/parser.py", line 704, in parse
-    return self.command()
-  File "/home/jao/git/marcel/marcel/parser.py", line 710, in command
-    return self.pipeline(None)
-  File "/home/jao/git/marcel/marcel/parser.py", line 730, in pipeline
-    op_sequence = Parser.ensure_sequence(self.op_sequence())
-  File "/home/jao/git/marcel/marcel/parser.py", line 740, in op_sequence
-    op_args = self.op_args()
-  File "/home/jao/git/marcel/marcel/parser.py", line 761, in op_args
-    op = self.create_op(op_token, arg_tokens)
-  File "/home/jao/git/marcel/marcel/parser.py", line 824, in create_op
-    op = self.create_op_builtin(op_token, arg_tokens)
-  File "/home/jao/git/marcel/marcel/parser.py", line 852, in create_op_builtin
-    args.append(x.value(self) if isinstance(x, Token) else x)
-  File "/home/jao/git/marcel/marcel/parser.py", line 298, in value
-    self._function = marcel.functionwrapper.FunctionWrapper(function=function,
-  File "/home/jao/git/marcel/marcel/functionwrapper.py", line 56, in __init__
-    self._globals = self._function.__globals__
-AttributeError: 'tuple' object has no attribute '__globals__'
-
-----------------------------------------------------------------------
-
-85. Any env var can be deleted
-
-Even important ones, like PROMPT. Some of them need to be protected.
+which runs "ls map3"
 
 ----------------------------------------------------------------------
 
@@ -139,6 +103,24 @@ Need to review how errors and exceptions are reported from farcel.
 The env var isn't there, but the temp file is.
 
 And what about gen ... >>$ x
+
+......................................................................
+
+"env -d x": deletes the var, leaves the reservoir.
+
+......................................................................
+
+gen 3 >$ x
+gen 0 >>$ x
+<ctrl c>
+
+x still exists, but it has corrupt pickle data. The ctrl-c doesn't
+close the file.
+
+Store.cleanup not called on ctrl-c.
+
+- Track reservoirs being written
+- ctrl c handler: Close reservoirs
 
 ----------------------------------------------------------------------
 

@@ -154,5 +154,6 @@ class Writer(Access):
                 self.file.flush()
                 self.last_flush = now
         except:
+            print(f'{os.getpid()}: Closing writer')
             self.close()
             raise
