@@ -2617,7 +2617,7 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('timer 0.5')
+    main_slow_tests()
     pass
 
 
