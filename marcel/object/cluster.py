@@ -22,7 +22,7 @@ import marcel.util
 
 class Host(object):
 
-    def __init__(self, host, cluster):
+    def __init__(self, cluster, host):
         self.host = host
         self.cluster = cluster
         self._addr = None
@@ -84,7 +84,7 @@ class Cluster(object):
                 'host specification must not be single-valued. Did you mean host?')
         if host is not None:
             hosts = [host]
-        self.hosts = [Host(host, self) for host in hosts]
+        self.hosts = [Host(self, host) for host in hosts]
         self.user = user
         self.identity = identity
 

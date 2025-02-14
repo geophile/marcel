@@ -854,7 +854,7 @@ def test_dir_stack():
 
 @timeit
 def test_remote():
-    node1 = marcel.object.cluster.Host(TEST.env.getvar('NODE1'), None)
+    node1 = marcel.object.cluster.Host(None, TEST.env.getvar('NODE1'))
     TEST.run('@CLUSTER1 (| gen 3 |)',
              expected_out=[(node1, 0), (node1, 1), (node1, 2)])
     # Handling of remote error in execution
@@ -2521,7 +2521,7 @@ def test_pipeline_vars():
     TEST.run('gen 3 1 | (x: (x, x * 10)) | join x100 | join x1000',
              expected_out=[(1, 10, 100, 1000), (2, 20, 200, 2000), (3, 30, 300, 3000)])
     # remote
-    node1 = marcel.object.cluster.Host(TEST.env.getvar('NODE1'), None)
+    node1 = marcel.object.cluster.Host(None, TEST.env.getvar('NODE1'))
     TEST.run('g3 = (| gen 3 |)')
     TEST.run('@CLUSTER1 g3', expected_out=[(node1, 0), (node1, 1), (node1, 2)])
     # sudo

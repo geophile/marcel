@@ -915,7 +915,7 @@ def test_fork():
     TEST.run(lambda: run(fork('abc', lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
              expected_err='Too many pipelines args')
     # Cluster forkgen
-    localhost = marcel.object.cluster.Host('127.0.0.1', None)
+    localhost = marcel.object.cluster.Host(None, '127.0.0.1')
     TEST.run(lambda: run(fork(CLUSTER1, lambda: gen(3, 100)) | sort()),
              expected_out=[100, 101, 102])
     TEST.run(lambda: run(fork(CLUSTER1, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
