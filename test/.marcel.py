@@ -4,13 +4,9 @@ from marcel.builtin import *
 NODE1 = '127.0.0.1'
 NODE2 = 'localhost'
 
-CLUSTER1 = cluster(user='jao',
-                   identity='/home/jao/.ssh/id_rsa',
-                   host=NODE1)
+CLUSTER1 = cluster(user='jao', host=NODE1, identity='/home/jao/.ssh/id_rsa')
 
-CLUSTER2 = cluster(user='jao',
-                   identity='/home/jao/.ssh/id_rsa',
-                   hosts=[NODE1, NODE2])
+CLUSTER2 = cluster(user='jao', hosts=[NODE1, NODE2], identity='/home/jao/.ssh/id_rsa')
 
 jdb = database(driver='psycopg2',
                dbname='jao',

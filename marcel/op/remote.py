@@ -125,16 +125,7 @@ class Remote(marcel.core.Op):
 
         def run(self, env):
             # Start the remote process
-            command = ' '.join([
-                'ssh',
-                '-l',
-                self.host.user,
-                '-i',
-                self.host.cluster.identity,
-                self.host.addr,
-                'farcel.py'
-            ])
-            self.process = subprocess.Popen(command,
+            self.process = subprocess.Popen(self.farcel_invocation(),
                                             stdin=subprocess.PIPE,
                                             stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE,
@@ -172,6 +163,30 @@ class Remote(marcel.core.Op):
                 marcel.util.print_stack_of_current_exception()
                 print(e)
 
+        def farcel_invocation(self):
+            cluster = self.host.cluster
+            if cluster.identity:
+                buffer = [
+                    'ssh',
+                    '-i',
+                    self.host.cluster.identity,
+                    f'{self.host.user}@{self.host.addr}',
+                    'farcel.py'
+                ]
+            elif cluster.password:
+                buffer = [
+                    'sshpass',
+                    '-p',
+                    f'"{cluster.password}"',
+                    'ssh',
+                    f'{self.host.user}@{self.host.addr}',
+                    'farcel.py'
+                ]
+            else:
+                # Cluster creation should have ensured that exactly one of password and identity was provided.
+                assert False, cluster
+            return ' '.join(buffer)
+
         # Op
 
         def must_be_first_in_pipeline(self):
@@ -204,7 +219,7 @@ class Remote(marcel.core.Op):
     def must_be_first_in_pipeline(self):
         return True
 
-    #
+    # For use by this class
 
     def customize_pipeline(self, env, pipeline, host):
         remote = Remote.RunRemote(host, pipeline)

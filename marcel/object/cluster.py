@@ -33,9 +33,13 @@ class Host(object):
         elif type(host_spec) in (tuple, list) and len(host_spec) == 2:
             host_spec, port = host_spec
             self.parse_host_spec(host_spec)
+            self.port = port
         else:
             raise marcel.exception.KillShellException(
                 f'Invalid host specification: {host_spec}. Specify a string or 2-tuple')
+
+    def __repr__(self):
+        return self.name
 
     def parse_host_spec(self, host_spec):
         self.host = host_spec
@@ -50,9 +54,6 @@ class Host(object):
             except socket.gaierror:
                 raise marcel.exception.KillShellException(
                     f'Cannot understand {self.host} as a host name or as an IP address.')
-
-    def __repr__(self):
-        return self.name
 
     def __hash__(self):
         return hash(self.host)
@@ -77,7 +78,7 @@ class Host(object):
 # - 2-tuple: An IP address or hostname (str), and a port number (int).
 #
 # Authentication: Authentication is done by specifying:
-# - user: a string, and
+# - user (str), and
 # - Either identity (name of a file containing a public key), or password.
 # The same authentication values must be used for all nodes of the cluster.
 
@@ -88,16 +89,24 @@ class Cluster(object):
             raise marcel.exception.KillShellException(
                 'Remote configuration requires the specification of host, or hosts, but not both.')
         if host is not None and type(host) in (tuple, list):
-            raise marcel.exception.KillShellException(
-                'host specification must be single-valued. Did you mean hosts?')
+            # host=('localhost', 22) is clearly a single host with a port specified, and not a pair of hosts.
+            # Allow a (str, int) tuple to be interpreted as a single host.
+            if not (type(host[0]) is str and type(host[1] is int)):
+                raise marcel.exception.KillShellException(
+                    'host specification must be single-valued. Did you mean hosts?')
         if hosts is not None and type(hosts) not in (tuple, list):
             raise marcel.exception.KillShellException(
                 'hosts specification must not be single-valued. Did you mean host?')
+        if (identity is None) == (password is None):
+            raise marcel.exception.KillShellException(
+                'Remote configuration requires the specification of identity '
+                '(public key file), or password, but not both.')
         if host is not None:
             hosts = [host]
         self.hosts = [Host(self, host) for host in hosts]
         self.user = user
         self.identity = identity
+        self.password = password
 
     def __repr__(self):
         return f'Cluster({self.user} @ {self.hosts})'

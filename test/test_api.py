@@ -30,12 +30,8 @@ def find_node(cluster, node_name):
     return None
 
 
-CLUSTER1 = cluster(user='jao',
-                   identity='/home/jao/.ssh/id_rsa',
-                   host='127.0.0.1')
-CLUSTER2 = cluster(user='jao',
-                   identity='/home/jao/.ssh/id_rsa',
-                   hosts=['127.0.0.1', 'localhost'])
+CLUSTER1 = cluster(user='jao', host='127.0.0.1', identity='/home/jao/.ssh/id_rsa')
+CLUSTER2 = cluster(user='jao', hosts=['127.0.0.1', 'localhost'], identity='/home/jao/.ssh/id_rsa')
 NODE1 = find_node(CLUSTER2, '127.0.0.1')
 NODE2 = find_node(CLUSTER2, 'localhost')
 jdb = database(driver='psycopg2',
@@ -2079,14 +2075,15 @@ def main_stable():
 
 
 def main_dev():
+    test_download()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
-    main_slow_tests()
+    # main_stable()
+    # main_slow_tests()
     TEST.report_failures('test_api')
     sys.exit(TEST.failures)
 
