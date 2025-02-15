@@ -67,8 +67,6 @@ class UploadArgsParser(marcel.argsparser.ArgsParser):
 
 class Upload(marcel.core.Op):
 
-    SCP_COMMAND = 'scp -Cpqr -i {identity} {sources} {user}@{host}:{dest}'
-
     def __init__(self):
         super().__init__()
         self.cluster = None
@@ -109,15 +107,19 @@ class Upload(marcel.core.Op):
         self.fork_manager.run(env)
 
     @staticmethod
-    def scp_command(identity, sources, user, host, dest):
+    def scp_command(host, sources, dest):
         sources = marcel.util.quote_files(*sources)
-        return Upload.SCP_COMMAND.format(identity=identity,
-                                         sources=sources,
-                                         user=user,
-                                         host=host,
-                                         dest=dest)
+        cluster = host.cluster
+        if cluster.identity:
+            scp_command = f'scp -Cpqr -i {cluster.identity} {sources} {cluster.user}@{host.name}:{dest}'
+        elif cluster.password:
+            scp_command = f'sshpass -p "{cluster.password}" scp -Cpqr {sources} {cluster.user}@{host.name}:{dest}'
+        else:
+            # Cluster setup should have guaranteed exactly one of identity and password was set.
+            assert False, cluster
+        return scp_command
 
     def customize_pipeline(self, env, pipeline, host):
-        scp_command = Upload.scp_command(host.identity, self.filenames, host.user, host.name, self.dir)
+        scp_command = Upload.scp_command(host, self.filenames, self.dir)
         pipeline.append(marcel.opmodule.create_op(env, 'bash', scp_command))
         return pipeline

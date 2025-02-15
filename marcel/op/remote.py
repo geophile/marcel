@@ -169,8 +169,8 @@ class Remote(marcel.core.Op):
                 buffer = [
                     'ssh',
                     '-i',
-                    self.host.cluster.identity,
-                    f'{self.host.user}@{self.host.addr}',
+                    cluster.identity,
+                    f'{cluster.user}@{self.host.addr}',
                     'farcel.py'
                 ]
             elif cluster.password:
@@ -179,7 +179,7 @@ class Remote(marcel.core.Op):
                     '-p',
                     f'"{cluster.password}"',
                     'ssh',
-                    f'{self.host.user}@{self.host.addr}',
+                    f'{cluster.user}@{self.host.addr}',
                     'farcel.py'
                 ]
             else:

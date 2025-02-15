@@ -111,16 +111,28 @@ class Download(marcel.core.Op):
         self.fork_manager.run(env)
 
     @staticmethod
-    def scp_command(identity, sources, host, dest):
-        scp_command = ['scp', '-Cpqr', '-i', identity]
-        for source in sources:
-            scp_command.append(f'{host.user}@{host.name}:{marcel.util.quote_files(source)}')
-        node_dir = dest / host.name
-        scp_command.append(node_dir.as_posix())
+    def scp_command(sources, host, dest):
+        cluster = host.cluster
+        scp_command = []
+        if cluster.identity:
+            scp_command.extend(['scp', '-Cpqr', '-i', cluster.identity])
+            for source in sources:
+                scp_command.append(f'{cluster.user}@{host.name}:{marcel.util.quote_files(source)}')
+            node_dir = dest / host.name
+            scp_command.append(node_dir.as_posix())
+        elif cluster.password:
+            scp_command.extend(['sshpass', '-p', f'"{cluster.password}"', 'scp', '-Cpqr'])
+            for source in sources:
+                scp_command.append(f'{cluster.user}@{host.name}:{marcel.util.quote_files(source)}')
+            node_dir = dest / host.name
+            scp_command.append(node_dir.as_posix())
+        else:
+            # Cluster setup should guarantee that either password or identity is set.
+            assert False, cluster
         return ' '.join(scp_command)
 
     def customize_pipeline(self, env, pipeline, host):
-        scp_command = Download.scp_command(host.identity, self.filenames, host, self.dir)
+        scp_command = Download.scp_command(self.filenames, host, self.dir)
         pipeline.append(marcel.opmodule.create_op(env, 'bash', scp_command))
         return pipeline
 

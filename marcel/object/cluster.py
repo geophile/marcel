@@ -61,14 +61,6 @@ class Host(object):
     def __eq__(self, other):
         return self.host == other.host
 
-    @property
-    def user(self):
-        return self.cluster.user
-
-    @property
-    def identity(self):
-        return self.cluster.identity
-
 
 # Nodes in the cluster: A cluster can comprise either one host or multiple hosts.
 # It is invalid to specify values for both host and hosts.
