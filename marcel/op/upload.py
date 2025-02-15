@@ -111,9 +111,9 @@ class Upload(marcel.core.Op):
         sources = marcel.util.quote_files(*sources)
         cluster = host.cluster
         if cluster.identity:
-            scp_command = f'scp -Cpqr -i {cluster.identity} {sources} {cluster.user}@{host.name}:{dest}'
+            scp_command = f'scp -Cpqr -i {cluster.identity} {sources} {cluster.user}@{host.addr_port()}:{dest}'
         elif cluster.password:
-            scp_command = f'sshpass -p "{cluster.password}" scp -Cpqr {sources} {cluster.user}@{host.name}:{dest}'
+            scp_command = f'sshpass -p "{cluster.password}" scp -Cpqr {sources} {cluster.user}@{host.addr_port()}:{dest}'
         else:
             # Cluster setup should have guaranteed exactly one of identity and password was set.
             assert False, cluster

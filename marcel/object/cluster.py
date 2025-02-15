@@ -39,7 +39,10 @@ class Host(object):
                 f'Invalid host specification: {host_spec}. Specify a string or 2-tuple')
 
     def __repr__(self):
-        return self.name
+        return self.name if self.port is None else f'{self.name}:{self.port}'
+
+    def addr_port(self):
+        return self.addr if self.port is None else f'{self.name}:{self.port}'
 
     def parse_host_spec(self, host_spec):
         self.host = host_spec

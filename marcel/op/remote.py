@@ -125,7 +125,8 @@ class Remote(marcel.core.Op):
 
         def run(self, env):
             # Start the remote process
-            self.process = subprocess.Popen(self.farcel_invocation(),
+            farcel_invocation = self.farcel_invocation()
+            self.process = subprocess.Popen(farcel_invocation,
                                             stdin=subprocess.PIPE,
                                             stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE,
@@ -170,7 +171,7 @@ class Remote(marcel.core.Op):
                     'ssh',
                     '-i',
                     cluster.identity,
-                    f'{cluster.user}@{self.host.addr}',
+                    f'{cluster.user}@{self.host.addr_port()}',
                     'farcel.py'
                 ]
             elif cluster.password:
@@ -179,7 +180,7 @@ class Remote(marcel.core.Op):
                     '-p',
                     f'"{cluster.password}"',
                     'ssh',
-                    f'{cluster.user}@{self.host.addr}',
+                    f'{cluster.user}@{self.host.addr_port()}',
                     'farcel.py'
                 ]
             else:

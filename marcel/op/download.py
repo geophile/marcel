@@ -117,13 +117,13 @@ class Download(marcel.core.Op):
         if cluster.identity:
             scp_command.extend(['scp', '-Cpqr', '-i', cluster.identity])
             for source in sources:
-                scp_command.append(f'{cluster.user}@{host.name}:{marcel.util.quote_files(source)}')
+                scp_command.append(f'{cluster.user}@{host.addr_port()}:{marcel.util.quote_files(source)}')
             node_dir = dest / host.name
             scp_command.append(node_dir.as_posix())
         elif cluster.password:
             scp_command.extend(['sshpass', '-p', f'"{cluster.password}"', 'scp', '-Cpqr'])
             for source in sources:
-                scp_command.append(f'{cluster.user}@{host.name}:{marcel.util.quote_files(source)}')
+                scp_command.append(f'{cluster.user}@{host.addr_port()}:{marcel.util.quote_files(source)}')
             node_dir = dest / host.name
             scp_command.append(node_dir.as_posix())
         else:
