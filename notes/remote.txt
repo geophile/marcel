@@ -58,3 +58,16 @@ Although: Besides the memory requirement, there is the delay -- no
 output back on the client until execution is finished.
 
 See socket.makefile
+
+----------------------------------------------------------------------
+
+2/14/25
+
+Cluster/Host being modified to allow for authentication via identity
+(public key file) or password. Where is this relevant:
+
+- Download.scp_command
+
+- Upload.scp_command
+
+- Remote.run
