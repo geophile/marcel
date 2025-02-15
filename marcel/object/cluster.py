@@ -22,14 +22,37 @@ import marcel.util
 
 class Host(object):
 
-    def __init__(self, cluster, host):
-        self.host = host
+    def __init__(self, cluster, host_spec):
         self.cluster = cluster
-        self._addr = None
-        self._name = None
+        self.host = None
+        self.addr = None
+        self.name = None
+        self.port = None
+        if type(host_spec) is str:
+            self.parse_host_spec(host_spec)
+        elif type(host_spec) in (tuple, list) and len(host_spec) == 2:
+            host_spec, port = host_spec
+            self.parse_host_spec(host_spec)
+        else:
+            raise marcel.exception.KillShellException(
+                f'Invalid host specification: {host_spec}. Specify a string or 2-tuple')
+
+    def parse_host_spec(self, host_spec):
+        self.host = host_spec
+        try:
+            self.addr = str(ipaddress.ip_address(host_spec))
+            self.name = self.addr
+        except ValueError:
+            # host is not an ipv4 or ipv6 address. Proceed as if it is a host name.
+            try:
+                self.addr = str(ipaddress.ip_address(socket.gethostbyname(host_spec)))
+                self.name = host_spec
+            except socket.gaierror:
+                raise marcel.exception.KillShellException(
+                    f'Cannot understand {self.host} as a host name or as an IP address.')
 
     def __repr__(self):
-        return self.host if self._name is None else self._name
+        return self.name
 
     def __hash__(self):
         return hash(self.host)
@@ -42,37 +65,25 @@ class Host(object):
         return self.cluster.user
 
     @property
-    def addr(self):
-        self.ensure_name_and_addr()
-        return self._addr
-
-    @property
-    def name(self):
-        self.ensure_name_and_addr()
-        return self._name
-
-    @property
     def identity(self):
         return self.cluster.identity
 
-    def ensure_name_and_addr(self):
-        if self._addr is None:
-            try:
-                self._addr = str(ipaddress.ip_address(self.host))
-                self._name = self._addr
-            except ValueError:
-                # host is not an ipv4 or ipv6 address. Proceed as if it is a host name.
-                try:
-                    self._addr = str(ipaddress.ip_address(socket.gethostbyname(self.host)))
-                    self._name = self.host
-                except socket.gaierror:
-                    raise marcel.exception.KillCommandException(
-                        f'Cannot understand {self.host} as a host name or as an IP address.')
 
+# Nodes in the cluster: A cluster can comprise either one host or multiple hosts.
+# It is invalid to specify values for both host and hosts.
+#
+# Host specification: A host (or element of hosts) is one of the following:
+# - string: An IP address or hostname (str).
+# - 2-tuple: An IP address or hostname (str), and a port number (int).
+#
+# Authentication: Authentication is done by specifying:
+# - user: a string, and
+# - Either identity (name of a file containing a public key), or password.
+# The same authentication values must be used for all nodes of the cluster.
 
 class Cluster(object):
 
-    def __init__(self, user, identity=None, host=None, hosts=None):
+    def __init__(self, user, host=None, hosts=None, identity=None, password=None):
         if (host is None) == (hosts is None):
             raise marcel.exception.KillShellException(
                 'Remote configuration requires the specification of host, or hosts, but not both.')
@@ -81,7 +92,7 @@ class Cluster(object):
                 'host specification must be single-valued. Did you mean hosts?')
         if hosts is not None and type(hosts) not in (tuple, list):
             raise marcel.exception.KillShellException(
-                'host specification must not be single-valued. Did you mean host?')
+                'hosts specification must not be single-valued. Did you mean host?')
         if host is not None:
             hosts = [host]
         self.hosts = [Host(self, host) for host in hosts]

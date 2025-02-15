@@ -43,7 +43,7 @@ def days(n):
 
 
 def cluster(user, identity, host=None, hosts=None):
-    return Cluster(user, identity, host, hosts)
+    return Cluster(user, host, hosts, identity)
 
 
 def epoch(year, month, day, hour=0, minute=0, sec=0, usec=0):
