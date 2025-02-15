@@ -110,13 +110,16 @@ class Upload(marcel.core.Op):
     def scp_command(host, sources, dest):
         sources = marcel.util.quote_files(*sources)
         cluster = host.cluster
+        buffer = []
+        if cluster.password:
+            buffer.extend(['sshpass -p', cluster.password])
+        buffer.append('scp -Cpqr')
         if cluster.identity:
-            scp_command = f'scp -Cpqr -i {cluster.identity} {sources} {cluster.user}@{host.addr_port()}:{dest}'
-        elif cluster.password:
-            scp_command = f'sshpass -p "{cluster.password}" scp -Cpqr {sources} {cluster.user}@{host.addr_port()}:{dest}'
-        else:
-            # Cluster setup should have guaranteed exactly one of identity and password was set.
-            assert False, cluster
+            buffer.extend(['-i', cluster.identity])
+        if host.port is not None:
+            buffer.extend(['-P', str(host.port)])
+        buffer.extend([sources, f'{cluster.user}@{host.addr}:{dest}'])
+        scp_command = ' '.join(buffer)
         return scp_command
 
     def customize_pipeline(self, env, pipeline, host):

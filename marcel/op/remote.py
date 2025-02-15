@@ -166,26 +166,15 @@ class Remote(marcel.core.Op):
 
         def farcel_invocation(self):
             cluster = self.host.cluster
+            buffer = []
+            if cluster.password:
+                buffer.extend(['sshpass', '-p', f'"{cluster.password}"'])
+            buffer.append('ssh')
             if cluster.identity:
-                buffer = [
-                    'ssh',
-                    '-i',
-                    cluster.identity,
-                    f'{cluster.user}@{self.host.addr_port()}',
-                    'farcel.py'
-                ]
-            elif cluster.password:
-                buffer = [
-                    'sshpass',
-                    '-p',
-                    f'"{cluster.password}"',
-                    'ssh',
-                    f'{cluster.user}@{self.host.addr_port()}',
-                    'farcel.py'
-                ]
-            else:
-                # Cluster creation should have ensured that exactly one of password and identity was provided.
-                assert False, cluster
+                buffer.extend(['-i', cluster.identity])
+            if self.host.port is not None:
+                buffer.extend(['-p', str(self.host.port)])
+            buffer.extend([f'{cluster.user}@{self.host.addr}', 'farcel.py'])
             return ' '.join(buffer)
 
         # Op

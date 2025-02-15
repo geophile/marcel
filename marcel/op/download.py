@@ -113,23 +113,20 @@ class Download(marcel.core.Op):
     @staticmethod
     def scp_command(sources, host, dest):
         cluster = host.cluster
-        scp_command = []
+        buffer = []
+        if cluster.password:
+            buffer.append(f'sshpass -p "{cluster.password}"')
+        buffer.append('scp -Cpqr')
         if cluster.identity:
-            scp_command.extend(['scp', '-Cpqr', '-i', cluster.identity])
-            for source in sources:
-                scp_command.append(f'{cluster.user}@{host.addr_port()}:{marcel.util.quote_files(source)}')
-            node_dir = dest / host.name
-            scp_command.append(node_dir.as_posix())
-        elif cluster.password:
-            scp_command.extend(['sshpass', '-p', f'"{cluster.password}"', 'scp', '-Cpqr'])
-            for source in sources:
-                scp_command.append(f'{cluster.user}@{host.addr_port()}:{marcel.util.quote_files(source)}')
-            node_dir = dest / host.name
-            scp_command.append(node_dir.as_posix())
-        else:
-            # Cluster setup should guarantee that either password or identity is set.
-            assert False, cluster
-        return ' '.join(scp_command)
+            buffer.extend(['-i', cluster.identity])
+        if cluster.password:
+            buffer.append(f'-P {cluster.password}')
+        for source in sources:
+            buffer.append(f'{cluster.user}@{host.addr}:{marcel.util.quote_files(source)}')
+        node_dir = dest / host.name
+        buffer.append(node_dir.as_posix())
+        scp_command = ' '.join(buffer)
+        return scp_command
 
     def customize_pipeline(self, env, pipeline, host):
         scp_command = Download.scp_command(self.filenames, host, self.dir)
