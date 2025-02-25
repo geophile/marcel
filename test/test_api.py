@@ -2075,7 +2075,6 @@ def main_stable():
 
 
 def main_dev():
-    test_download()
     pass
 
 

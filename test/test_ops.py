@@ -2617,15 +2617,14 @@ def main_stable():
 
 
 def main_dev():
-    main_slow_tests()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # main_slow_tests()
+    main_stable()
+    main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
 

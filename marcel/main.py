@@ -370,10 +370,12 @@ class MainInteractive(MainScript):
         readline.parse_and_bind('tab: complete')
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
-        readline.set_pre_input_hook(self.insert_edited_command)
+        # TODO: pre-input hook is called before readline starts reading input. I think it's useless.
+        # readline.set_pre_input_hook(self.insert_edited_command)
         self.env.reader = Reader(self.env, self.env.locations.data_ws_hist(self.workspace))
         return self.env.reader
 
+    # TODO: If the pre-input hook (above) is not needed, then this function is unnecessary.
     def insert_edited_command(self):
         command = self.reader.take_edited_command()
         if command:

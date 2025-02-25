@@ -461,7 +461,10 @@ class String(Token):
                     raise LexerException(self, 'Malformed string')
             else:
                 chars.append(c)
-        self.string = ''.join(chars)
+        string = ''.join(chars)
+        if quote is not None:
+            raise marcel.exception.MissingQuoteException(quote, string)
+        self.string = string
 
 
 class MarcelString(String):

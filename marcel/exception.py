@@ -90,6 +90,13 @@ class ImportException(BaseException):
         self.message = message
 
 
+# Indicates a marcel command terminating with a ShellString missing a terminating quote.
+class MissingQuoteException(BaseException):
+    def __init__(self, quote, unterminated_string):
+        self.quote = quote
+        self.unterminated_string = unterminated_string
+
+
 def _format_input_for_reporting(command_input, buffer):
     if isinstance(command_input, list):
         buffer.append(str(tuple(command_input)))

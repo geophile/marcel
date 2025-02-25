@@ -24,10 +24,12 @@ import marcel.op
 import marcel.parser
 import marcel.util
 
-Parser = marcel.parser.Parser
-
-
 DEBUG = False
+
+SINGLE_QUOTE = "'"
+DOUBLE_QUOTE = '"'
+QUOTES = SINGLE_QUOTE + DOUBLE_QUOTE
+NL = '\n'
 
 
 def debug(message):
@@ -35,26 +37,130 @@ def debug(message):
         print(message, flush=True)
 
 
-class TabCompleter:
+# TODO: TabCompleter.complete(text, state) is called with state = 0, 1, 2, ... until None is returned, getting
+#       the candidates one at a time. On each call, self.candidates() parses the line.
+#       TabCompleter could keep track of the current line and the text arg. If these are the same in consecutive
+#       calls, then skip the parse.
+
+class TabCompleter(object):
 
     OPS = marcel.op.public
     HELP_TOPICS = list(marcel.doc.topics) + OPS
 
+    # In completing one line of input, readline calls complete() with state = 0, 1, ... stopping when
+    # complete returns None. So state = 0 indicates that we're starting a new line of input.
+    # A CompletionState object is created when state = 0 is encountered, and is used until
+    # complete() returns None.
+    class CompletionState(object):
+
+        def __init__(self, line):
+            self.line = line
+            self.completion_text = None
+
+        def __repr__(self):
+            return f'CompletionState(line = <{self.line}>, completion_text = <{self.completion_text}>)'
+
+        def extend_completion_text(self, candidates):
+            # Sanity check
+            if self.completion_text:
+                for candidate in candidates:
+                    assert candidate.startswith(self.completion_text), (
+                            f'completion text: {self.completion_text}, '
+                            f'candidate: {candidate}')
+            # Extend completion text
+            extended_completion_text = None
+            for candidate in candidates:
+                if extended_completion_text is None:
+                    extended_completion_text = candidate
+                else:
+                    for i in range(len(extended_completion_text)):
+                        if extended_completion_text[i] != candidate[i]:
+                            extended_completion_text = extended_completion_text[:i]
+                # Keep only the new characters, not present in the input line
+                extended_completion_text = extended_completion_text[len(self.line):]
+                assert self.completion_text is None or self.completion_text.startswith(extended_completion_text), (
+                    f'completion text: {self.completion_text}, '
+                    f'extended_completion_text: {extended_completion_text}')
+                self.completion_text = extended_completion_text
+
     def __init__(self, main):
-        self.main = main
-        self.op_name = None
-        self.op_flags = None
-        self.executables = None
-        self.homedirs = None
         readline.set_completer(self.complete)
         # Removed '-', '/', '~' from readline.get_completer_delims()
         readline.set_completer_delims(' \t\n`!@#$%^&*()=+[{]}\\|;:\'",<>?')
+        self.main = main
+        self.completion_state = None
 
+    # The readline completion method, registered by calling readline.set_completer()
     def complete(self, text, state):
-        candidates = self.candidates(readline.get_line_buffer(), text)
-        return candidates[state] if candidates else None
+        debug(f'complete: text=<{text}>, state={state} ------------------------------------------------------------')
+        if state == 0:
+            self.completion_state = TabCompleter.CompletionState(readline.get_line_buffer())
+        assert self.completion_state is not None
+        candidates = self.candidates(self.completion_state.line, text)
+        debug(f'complete, candidates = \n{NL.join(candidates)}')
+        self.completion_state.extend_completion_text(candidates)
+        candidate = candidates[state] if candidates is not None and state < len(candidates) else None
+        debug(f'complete, selected candidate = {candidate}')
+        debug(f'complete, completion state = {self.completion_state}')
+        if candidate is None:
+            completion = ''
+            debug(f'self.completion_state.completion_text: <{self.completion_state.completion_text}>')
+            debug(f'self.completion_state.completion_text is not None: <{self.completion_state.completion_text is not None}>')
+            if self.completion_state.completion_text is not None:
+                # Apply completion to the displayed line: Add the completion text from CompletionState, and
+                # append a space if there's only one candidate.
+                completion = self.completion_state.completion_text
+                debug(f'completion 1 = <{completion}>')
+            debug(f'#candidates = {len(candidates)}')
+            if len(candidates) == 1:
+                completion += '@'
+                debug(f'completion 2 = <{completion}>')
+            readline.insert_text(completion)
+            print(completion, end='', flush=True)
+            debug(f'complete: appending <{completion}> -> <{readline.get_line_buffer()}>')
+            # We're done with the current line of input
+            self.completion_state = None
+        return candidate
 
-    def complete_op(self, text):
+    def candidates(self, line, text):
+        debug(f'candidates: line=<{line}>, text=<{text}>')
+        if len(line.strip()) == 0:
+            candidates = TabCompleter.OPS
+        else:
+            # Parse the text so far, to get information needed for tab completion. It is expected that
+            # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
+            # which can be ignored. The important point is that the parse will set Parser.op.
+            parser = marcel.parser.Parser(line, self.main.env)
+            try:
+                parser.parse()
+            except marcel.exception.MissingQuoteException as e:
+                text = e.quote + e.unterminated_string
+                debug(f'Caught MissingQuoteException: <{text}>')
+            except marcel.exception.KillCommandException as e:
+                # Parse may have failed because of an unrecognized op, for example. Normal continuation should
+                # do the right thing.
+                debug(f'Caught KillCommandException: {e}')
+            except Exception as e:
+                debug(f'caught {type(e)}: {e}')
+                # Don't do tab completion
+                return
+            except BaseException as e:
+                debug(f'Something went really wrong: {e}')
+                marcel.util.print_stack_of_current_exception()
+            else:
+                debug('No exception')
+            debug(f'TabCompleter.candidates, is token op: {parser.expect_op()}')
+            if parser.expect_op():
+                op = parser.token
+                candidates = (self.complete_help(text) if op.op_name == 'help' else
+                              TabCompleter.complete_op(text))
+            else:
+                candidates = (self.complete_flag(text, parser.flags()) if text.startswith('-') else
+                              self.complete_filename(text))
+        return candidates
+
+    @staticmethod
+    def complete_op(text):
         debug(f'complete_op, text = <{text}>')
         candidates = []
         if len(text) > 0:
@@ -64,8 +170,7 @@ class TabCompleter:
                 if op.startswith(text):
                     candidates.append(op)
             if len(candidates) == 0:
-                self.ensure_executables()
-                for ex in self.executables:
+                for ex in TabCompleter.executables():
                     if ex.startswith(text):
                         candidates.append(ex)
             debug(f'complete_op candidates for {text}: {candidates}')
@@ -98,26 +203,30 @@ class TabCompleter:
         return candidates
 
     def complete_filename(self, text):
-        debug(f'complete_filenames, text = <{text}>')
+        filenames = []
+        debug(f'complete_filename, text = <{text}>')
         current_dir = self.main.env.dir_state().current_dir()
+        quote = None
         if text:
-            if text == '~/':
-                home = pathlib.Path(text).expanduser()
-                filenames = os.listdir(home.as_posix())
-            elif text.startswith('~/'):
-                base = pathlib.Path('~/').expanduser()
-                debug(f'base: {base}')
-                base_length = len(base.as_posix())
-                debug(f'base length: {base_length}')
-                pattern = text[2:] + '*'
-                filenames = ['~' + f[base_length:]
-                             for f in [p.as_posix() for p in base.glob(pattern)]]
-                debug(f'filenames: {filenames}')
-            elif text.startswith('~'):
+            # Separate quote and text if necessary
+            if text[0] in QUOTES:
+                quote = text[0]
+                text = text[1:]
+            if text.startswith('~/') and quote != DOUBLE_QUOTE:
+                if text == '~/':
+                    if quote != DOUBLE_QUOTE:
+                        home = pathlib.Path(text).expanduser()
+                        filenames = os.listdir(home.as_posix())
+                elif text.startswith('~/'):
+                    base = pathlib.Path('~/').expanduser()
+                    base_length = len(base.as_posix())
+                    pattern = text[2:] + '*'
+                    filenames = ['~' + f[base_length:]
+                                 for f in [p.as_posix() for p in base.glob(pattern)]]
+            elif text.startswith('~') and quote is None:
                 find_user = text[1:]
-                self.ensure_homedirs()
                 filenames = []
-                for username in self.homedirs.keys():
+                for username in TabCompleter.usernames():
                     if username.startswith(find_user):
                         filenames.append('~' + username)
             elif text.startswith('/'):
@@ -131,81 +240,35 @@ class TabCompleter:
                 filenames = [p.relative_to(base).as_posix()
                              for p in pathlib.Path(base).glob(pattern_prefix + '*')]
         else:
+            # All filenames in current directory
             filenames = [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
+        # Append / to dirs
         filenames = [f + '/' if pathlib.Path(f).expanduser().is_dir() else f for f in filenames]
-        if len(filenames) == 1:
-            if not filenames[0].endswith('/'):
-                filenames = [filenames[0] + ' ']
-        debug(f'complete_filename candidates for {text}: {filenames}')
         return filenames
-
-    def candidates(self, line, text):
-        candidates = None
-        debug(f'complete: line={line}, text=<{text}>')
-        if len(line.strip()) == 0:
-            candidates = TabCompleter.OPS
-        else:
-            # Parse the text so far, to get information needed for tab completion. It is expected that
-            # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
-            # which can be ignored. The important point is that the parse will set Parser.op.
-            parser = marcel.parser.Parser(line, self.main.env)
-            try:
-                parser.parse()
-            except marcel.exception.KillCommandException as e:
-                # Parse may have failed because of an unrecognized op, for example. Normal continuation should
-                # do the right thing.
-                debug(f'Caught KillCommandException: {e}')
-            except Exception as e:
-                debug(f'caught {type(e)}: {e}')
-                # Don't do tab completion
-                return
-            except BaseException as e:
-                debug(f'Something went really wrong: {e}')
-                marcel.util.print_stack_of_current_exception()
-            else:
-                debug('No exception')
-            debug(f'TabCompleter.candidates, is token op: {parser.expect_op()}')
-            if parser.expect_op():
-                op = parser.token
-                if op.op_name == 'help':
-                    candidates = self.complete_help(text)
-                else:
-                    candidates = self.complete_op(text)
-            else:
-                if len(text) == 0:
-                    candidates = self.complete_filename(text)
-                elif text[-1].isspace():
-                    text = ''
-                    candidates = self.complete_filename(text)
-                elif text.startswith('-'):
-                    candidates = self.complete_flag(text, parser.flags())
-                else:
-                    candidates = self.complete_filename(text)
-        return candidates
 
     @staticmethod
     def op_name(line):
         first = line.split()[0]
         return first if first in TabCompleter.OPS else None
 
-    def ensure_executables(self):
-        if self.executables is None:
-            self.executables = []
-            path = os.environ['PATH'].split(':')
-            for p in path:
-                for f in os.listdir(p):
-                    if marcel.util.is_executable(f) and f not in self.executables:
-                        self.executables.append(f)
+    @staticmethod
+    def executables():
+        executables = []
+        path = os.environ['PATH'].split(':')
+        for p in path:
+            for f in os.listdir(p):
+                if marcel.util.is_executable(f) and f not in executables:
+                    executables.append(f)
+        return executables
 
-    def ensure_homedirs(self):
-        if self.homedirs is None:
-            self.homedirs = {}
-            # TODO: This is a hack. Is there a better way?
-            with open('/etc/passwd', 'r') as passwds:
-                users = passwds.readlines()
-            for line in users:
-                fields = line.split(':')
-                username = fields[0]
-                homedir = fields[5]
-                self.homedirs[username] = homedir
+    @staticmethod
+    def usernames():
+        usernames = []
+        with open('/etc/passwd', 'r') as passwds:
+            users = passwds.readlines()
+        for line in users:
+            fields = line.split(':')
+            username = fields[0]
+            usernames.append(username)
+        return usernames
 

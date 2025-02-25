@@ -163,12 +163,22 @@ def main_stable():
 
 
 def main_dev():
+    with TestDir(TEST.env) as testdir:
+        os.system(f'touch "{testdir}/abc"')
+        TEST.run(f'cd {testdir}')
+        TEST.run(line='ls a',
+                 text='a',
+                 expected=['abc '])
+        print('--------------------------------------')
+        # TEST.run(line='ls "a',
+        #          text='"a',
+        #          expected=['abc '])
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_dev()
+    # main_dev()
     main_stable()
     TEST.report_failures('test_tab_completion')
 

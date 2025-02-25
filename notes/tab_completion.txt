@@ -211,3 +211,119 @@ Information needed to determine tab completion:
 - Is last char whitespace? Determines whether to complete last string
   or find candidates for empty string of next token.
 
+----------------------------------------------------------------------
+
+2/19/25:
+
+Parsing this:
+
+    ls "a
+
+ShellString is created for "a. String.scan() ends with unmatched
+quote, but doesn't indicate this in any way. Should it raise
+PrematureEndError, or something similar?
+
+PEE is currently thrown when an op or arg is expected but not found.
+
+Could throw PEE and include the incomplete string. That incomplete
+string is then the correct value of text for tab completion (as
+opposed to the value provided by readline, which is ignorant of
+quotes, and just goes by whitespace).
+
+Tab completion:
+
+    Text             unquoted                 '...                     "...
+
+    <text>           yes                      yes                      yes
+
+    ~/<text>         yes                      yes                      no
+
+    ~<text>          yes(2)                   no                       no
+
+    /<text>          yes                      yes                      yes
+
+    ./<text>         yes                      yes                      yes
+
+    ../<text>        yes                      yes                      yes
+
+    <text><space>    no(1)                    yes                      yes
+
+    <text>\<space>   yes                      no                       no
+
+1. touch "a b"; ls a<space>: Tab completion lists all files. The a (no
+space) is left as an arg to ls even though there is no such
+file. I.e., there is no quote, so the space following a is interpreted
+as an arg separator by the shell.
+
+2. Complete using usernames in /etc/passwd 
+
+
+So:
+
++ text to complete: Use what is reported by readline except if
+  MissingQuoteException occurs. In that case, use the text from the
+  exception (with the leading quote).
+
+- Do tab completion as is done right now, except for double-quoted
+  ~/...
+
+*** If text was quoted, then the selected completion should be quoted
+  too. How does this happen?
+
+- parser.String.scan needs to handle \<space>
+
+......................................................................
+
+2/20/25:
+
+touch "f 1" "f 2"
+
+Bash tab completion:
+
+- ls f<tab> ->
+
+  ls f\ 
+  f 1   f 2
+
+- ls "f<tab> ->
+  ls "f<space>
+  f 1   f 2
+
+- ls "f 1<tab> ->
+  ls "f 1"<space>
+
+......................................................................
+
+To edit the displayed line:
+
+readline.insert_text(string)
+
+    Insert text into the line buffer at the cursor position. This
+    calls rl_insert_text() in the underlying library, but ignores the
+    return value.
+
+readline.redisplay()
+
+    Change what’s displayed on the screen to reflect the current
+    contents of the line buffer. This calls rl_redisplay() in the
+    underlying library.
+
+Might be useful for inserting quotesx
+M 0.30.7 jao@loon /tmp/d$ ls acomplete: text=<a>, state=0
+candidates: line=ls a, text=<a>
+No exception
+TabCompleter.candidates, is token op: False
+complete_filenames, text = <a>
+complete_filename candidates for a: ['ab', 'ac']
+complete: text=<a>, state=1
+candidates: line=ls a, text=<a>
+No exception
+TabCompleter.candidates, is token op: False
+complete_filenames, text = <a>
+complete_filename candidates for a: ['ab', 'ac']
+complete: text=<a>, state=2
+candidates: line=ls a, text=<a>
+No exception
+TabCompleter.candidates, is token op: False
+complete_filenames, text = <a>
+complete_filename candidates for a: ['ab', 'ac']
