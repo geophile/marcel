@@ -164,22 +164,20 @@ def main_stable():
 
 def main_dev():
     with TestDir(TEST.env) as testdir:
-        os.system(f'touch "{testdir}/abc"')
+        all_files = ['a', 'b', 'c']
+        TEST.run(f'touch {testdir}/a')
+        TEST.run(f'touch {testdir}/b')
+        TEST.run(f'touch {testdir}/c')
         TEST.run(f'cd {testdir}')
-        TEST.run(line='ls a',
-                 text='a',
-                 expected=['abc '])
-        print('--------------------------------------')
-        # TEST.run(line='ls "a',
-        #          text='"a',
-        #          expected=['abc '])
+        TEST.run(line='ls --recursive ', text='--recursive ',
+                 expected=all_files)
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_dev()
-    main_stable()
+    main_dev()
+    # main_stable()
     TEST.report_failures('test_tab_completion')
 
 

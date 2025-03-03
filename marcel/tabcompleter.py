@@ -24,7 +24,7 @@ import marcel.op
 import marcel.parser
 import marcel.util
 
-DEBUG = False
+DEBUG = True
 
 SINGLE_QUOTE = "'"
 DOUBLE_QUOTE = '"'
@@ -60,9 +60,10 @@ class TabCompleter(object):
         def __repr__(self):
             return f'CompletionState(line = <{self.line}>, completion_text = <{self.completion_text}>)'
 
-        def extend_completion_text(self, candidates):
+        def extend_completion_text(self, candidates, candidate_prefix_size):
+            debug(f'extend_completion_text: candidate_prefix_size = {candidate_prefix_size}, completion_text = <{self.completion_text}>')
             # Sanity check
-            if self.completion_text:
+            if self.completion_text is not None:
                 for candidate in candidates:
                     assert candidate.startswith(self.completion_text), (
                             f'completion text: {self.completion_text}, '
@@ -76,32 +77,37 @@ class TabCompleter(object):
                     for i in range(len(extended_completion_text)):
                         if extended_completion_text[i] != candidate[i]:
                             extended_completion_text = extended_completion_text[:i]
-                # Keep only the new characters, not present in the input line
-                extended_completion_text = extended_completion_text[len(self.line):]
-                assert self.completion_text is None or self.completion_text.startswith(extended_completion_text), (
-                    f'completion text: {self.completion_text}, '
-                    f'extended_completion_text: {extended_completion_text}')
-                self.completion_text = extended_completion_text
+                debug(f'extend_completion_text: candidate=<{candidate}>, extended_completion_text = <{extended_completion_text}>')
+            # Keep only the new characters, not present in the input line.
+            extended_completion_text = extended_completion_text[candidate_prefix_size:]
+            debug(f'extend_completion_text: line = <{self.line}>, left-truncated extension: <{extended_completion_text}>')
+            assert self.completion_text is None or self.completion_text.startswith(extended_completion_text), (
+                f'completion text: {self.completion_text}, '
+                f'extended_completion_text: {extended_completion_text}')
+            self.completion_text = extended_completion_text
 
     def __init__(self, main):
         readline.set_completer(self.complete)
         # Removed '-', '/', '~' from readline.get_completer_delims()
         readline.set_completer_delims(' \t\n`!@#$%^&*()=+[{]}\\|;:\'",<>?')
         self.main = main
+        # readline calls complete with the text arg set to what readline believes to be the most recent token.
+        # Need to know this for returning candidates, but readline's notion of tokens is different from marcel's.
+        self.token_from_readline = None
         self.completion_state = None
 
     # The readline completion method, registered by calling readline.set_completer()
     def complete(self, text, state):
         debug(f'complete: text=<{text}>, state={state} ------------------------------------------------------------')
         if state == 0:
+            self.token_from_readline = text
             self.completion_state = TabCompleter.CompletionState(readline.get_line_buffer())
         assert self.completion_state is not None
         candidates = self.candidates(self.completion_state.line, text)
         debug(f'complete, candidates = \n{NL.join(candidates)}')
         self.completion_state.extend_completion_text(candidates)
         candidate = candidates[state] if candidates is not None and state < len(candidates) else None
-        debug(f'complete, selected candidate = {candidate}')
-        debug(f'complete, completion state = {self.completion_state}')
+        debug(f'complete: selected candidate=<{candidate}>')
         if candidate is None:
             completion = ''
             debug(f'self.completion_state.completion_text: <{self.completion_state.completion_text}>')
@@ -244,6 +250,10 @@ class TabCompleter(object):
             filenames = [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
         # Append / to dirs
         filenames = [f + '/' if pathlib.Path(f).expanduser().is_dir() else f for f in filenames]
+        if len(filenames) == 1:
+            if not filenames[0].endswith('/'):
+                filenames = [filenames[0] + ' ']
+        debug(f'complete_filename: candidates for {text}: {filenames}')
         return filenames
 
     @staticmethod
