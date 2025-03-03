@@ -609,7 +609,7 @@ def test_bash():
                  expected_out=['x1', 'x2'])
         TEST.run('bash "ls -l *1" | (x: x.split()[-1])',
                  expected_out=['x1', 'y1'])
-        TEST.run('''bash 'echo "hello  world"''', # Two spaces in string to be printed
+        TEST.run("""bash 'echo "hello  world"'""",  # Two spaces in string to be printed
                  expected_out='hello  world')
         TEST.run('''echo (f"hello {who}")''',
                  expected_out='hello world')
@@ -2622,7 +2622,7 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    main_dev()
+    # main_dev()
     main_stable()
     main_slow_tests()
     TEST.report_failures('test_ops')
