@@ -24,7 +24,7 @@ import marcel.op
 import marcel.parser
 import marcel.util
 
-DEBUG = True
+DEBUG = False
 
 SINGLE_QUOTE = "'"
 DOUBLE_QUOTE = '"'
@@ -161,6 +161,20 @@ class TabCompleter(object):
                 candidates = (self.complete_help(text) if op.op_name == 'help' else
                               TabCompleter.complete_op(text))
             else:
+                if len(text) == 0:
+                    candidates = self.complete_filename(text)
+                elif text[-1].isspace():
+                    # Favors filenames over flags. E.g. "ls -r <tab>". Both flags and filenames are valid
+                    # completions
+                    text = ''
+                    candidates = self.complete_filename(text)
+                elif text.startswith('-'):
+                    candidates = self.complete_flag(text, parser.flags())
+                else:
+                    candidates = self.complete_filename(text)
+
+
+
                 candidates = (self.complete_flag(text, parser.flags()) if text.startswith('-') else
                               self.complete_filename(text))
         return candidates

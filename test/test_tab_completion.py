@@ -176,8 +176,8 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    main_dev()
-    # main_stable()
+    # main_dev()
+    main_stable()
     TEST.report_failures('test_tab_completion')
 
 
