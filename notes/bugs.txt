@@ -698,4 +698,6 @@ Probably due to syntax error in startup.py (added function).
 
 ----------------------------------------------------------------------
 
-273.
+273. edit isn't working
+
+edited line not echoed
