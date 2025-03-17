@@ -16,7 +16,6 @@
 
 import collections.abc
 import grp
-import inspect
 import os
 import pathlib
 import pwd
@@ -137,6 +136,7 @@ def print_stack(file=None):
 
 
 def colorize(s, color, readline=False):
+    readline = False  # TODO: Playing with prompt_toolkit
     if color is None:
         return s
     # Those /001 and /002 codes seem to fix bug 2.

@@ -115,7 +115,7 @@ INTERACTIVE_EXECUTABLES = [
 class Reader(marcel.multilinereader.MultiLineReader):
 
     def __init__(self, env, history_file):
-        super().__init__(history_file=history_file)
+        super().__init__(history_file=history_file, env=env)
         self.env = env
 
     def take_edited_command(self):
@@ -349,8 +349,8 @@ class MainInteractive(MainScript):
             while True:
                 try:
                     if self.input is None:
-                        prompts = self.env.prompts() if interactive else (None, None)
-                        self.input = self.reader.input(*prompts)
+                        self.input = (self.reader.input(*self.env.prompts()) if interactive
+                                      else input())
                     # else: Restarted main, and self.input was from the previous incarnation.
                     self.check_for_config_update()
                     self.parse_and_run_command(self.input)
@@ -358,7 +358,7 @@ class MainInteractive(MainScript):
                     self.job_control.wait_for_idle_foreground()
                 except KeyboardInterrupt:  # ctrl-C
                     print()
-        except EOFError:
+        except EOFError:  # ctrl-d
             if interactive:
                 print()
             # else: not a tty, and we don't want an extra line at end of script execution.
@@ -370,12 +370,11 @@ class MainInteractive(MainScript):
         readline.parse_and_bind('tab: complete')
         readline.parse_and_bind('set editing-mode emacs')
         readline.parse_and_bind('set completion-query-items 50')
-        # TODO: pre-input hook is called before readline starts reading input. I think it's useless.
-        # readline.set_pre_input_hook(self.insert_edited_command)
+        readline.set_pre_input_hook(self.insert_edited_command)
         self.env.reader = Reader(self.env, self.env.locations.data_ws_hist(self.workspace))
         return self.env.reader
 
-    # TODO: If the pre-input hook (above) is not needed, then this function is unnecessary.
+    # Used by the edit op.
     def insert_edited_command(self):
         command = self.reader.take_edited_command()
         if command:
@@ -478,7 +477,6 @@ def main_interactive_run(locations, workspace):
         raise marcel.exception.ReconfigureException(Workspace.default())
 
     def env_and_main(old_env, old_main, workspace):
-        env = None
         try:
             env = marcel.env.EnvironmentInteractive.create(locations, workspace, trace)
         except Exception as e:

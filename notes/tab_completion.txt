@@ -292,38 +292,201 @@ Bash tab completion:
 - ls "f 1<tab> ->
   ls "f 1"<space>
 
-......................................................................
+----------------------------------------------------------------------
 
-To edit the displayed line:
+3/3/25:
 
-readline.insert_text(string)
+The current approach to tab completion doesn't work for filenames with
+spaces, quotes, escapes. I tried ignoring the text arg to
+TabCompleter.complete, which represents the token that readline thinks
+we're completing. With ' ' as a delimiter, this command:
 
-    Insert text into the line buffer at the cursor position. This
-    calls rl_insert_text() in the underlying library, but ignores the
-    return value.
+      ls "f<space><tab>
 
-readline.redisplay()
+resulted in text = '', since the last space is a delimiter. But
+removing ' ' from the delimiters, means that the space following ls is
+also treated as a word character.
 
-    Change what’s displayed on the screen to reflect the current
-    contents of the line buffer. This calls rl_redisplay() in the
-    underlying library.
+I think the fix is that tab completion needs to be sensitive to
+context, which must come from the parser. So if we are completing a
+filename such as 
 
-Might be useful for inserting quotesx
-M 0.30.7 jao@loon /tmp/d$ ls acomplete: text=<a>, state=0
-candidates: line=ls a, text=<a>
-No exception
-TabCompleter.candidates, is token op: False
-complete_filenames, text = <a>
-complete_filename candidates for a: ['ab', 'ac']
-complete: text=<a>, state=1
-candidates: line=ls a, text=<a>
-No exception
-TabCompleter.candidates, is token op: False
-complete_filenames, text = <a>
-complete_filename candidates for a: ['ab', 'ac']
-complete: text=<a>, state=2
-candidates: line=ls a, text=<a>
-No exception
-TabCompleter.candidates, is token op: False
-complete_filenames, text = <a>
-complete_filename candidates for a: ['ab', 'ac']
+     ls abc<tab>
+
+Then space is a delimiter. For this:
+
+    ls "abc<space><tab>
+
+space is not a delimiter. 
+
+Furthermore, context from the parser can also help in ambiguous
+cases. E.g.
+
+    ls -r<space><tab>
+
+There are two possible completions here, flags and
+filenames. Currently, we assume filenames in this case, but it might
+be nice to show both.
+
+Currently, TabCompleter uses state from the parser
+(Parser.expect_op(), Parser.flags()) to figure out what kind of
+completion is needed.
+
+Alternative approach:
+
+Parser tracks token type: 
+
+- op
+- flag
+- string
+- filename
+
+A filename is a string in the context of an op with filename args:
+
+- cd
+- download
+- ls
+- pushd
+- read
+- upload
+- write
+
+Should also handle file-handling executables that marcel doesn't
+provide:
+
+- cp
+- mv
+- rm
+- there are probably others
+
+For completing filenames, the token representing the filename has to
+convey information about quotes (which will determine whether spaces
+are delimiters.
+
+TODO:
+
+- Handle escapes, e.g. ls filename\ with\ spaces
+
+- Tab completion on empty line should list ops. Maybe? Doesn't handle
+  assignment, executables, (...)
+
+- MainInteractive.tab_completer isn't actually used.
+
+
+
+Parser:
+
+- Need to track token type during op_sequence parsing.
+
+  *** Parser.token looks like the right thing.
+
+- expect_op should be simplfiable, and is maybe not needed. 
+
+- arg_count tracking is nuts. Starts at 0, then set to -1, then it
+  counts when an arg is checked for, including the terminal case when
+  there are no more args. But doing it more rationally breaks tab
+  completion tests.
+
+----------------------------------------------------------------------
+
+3/4/25
+
+Oh cool! readline seems to provide a terminating quote.
+
+----------------------------------------------------------------------
+
+3/7/25:
+
+Realization: No need to do filename completion, handling quotes,
+escapes, etc. readline will do the right thing AS LONG AS the default
+completion handler is in place. So:
+
+           Install the tab completion handler only for op and flags.
+
+- op<tab>: op completion
+
+- op<space><tab>: arg completion*
+
+- op -<tab>: flag completion
+
+- op x<tab>: arg completion*
+
+- op "x<tab>: arg completion*
+
+* NO handler -- use readline default
+
+----------------------------------------------------------------------
+
+3/12/25:
+
+THIS JUST ISN'T WORKING!
+
+- The tab completion handler is invoked before parsing. So any
+  analysis for what kind of parsing to do -- INCLUDING WHETHER THE
+  MARCEL TAB COMPLETION HANDLER SHOULD BE INVOKED AT ALL -- comes as
+  part of tab completion inside the marcel handler.
+
+- Delegating to the builtin handler seems not to work.
+
+- So maybe using the builtin handler isn't going to work, and I have
+  to go back to the original idea, the marcel handler taking care of
+  filename completion too?
+
+Survey of behavior of different approaches:
+
+jao@loon:/tmp/d$ ls -l
+total 0
+-rw-rw-r-- 1 jao jao 0 Mar 12 11:24  abx
+-rw-rw-r-- 1 jao jao 0 Mar 12 11:24  aby
+-rw-rw-r-- 1 jao jao 0 Mar 12 11:24 'fg 1'
+-rw-rw-r-- 1 jao jao 0 Mar 12 11:24 'fg 2'
+
+Completions of ls<space>X<tab>, for different values of X:
+
+See tab_completion_survey.ods
+
+- Delegating to the builtin completer works the same as not having a
+  completer at all.
+
+- No one set of delimiters is always correct.
+
+  - To get correct results for unquoted string without embedded space: delims must include whitespace
+
+  - To get correct results for quoted string with embedded space: remove whitespace from delims
+
+  - To get correct results for unquoted string with escaped space: ???
+
+So, the new plan:
+
+- There is one tab completer, always in place. Use default delims.
+
+- op and flag completion works as is.
+
+- arg completion:
+
+    - delegate to builtin completer.
+
+    - no quote, no embedded space: default delims
+
+    - quoted: delims without whitespace
+
+    - no quote, escaped space: I think:
+
+        - Default delims? 
+
+        - Spaces in candidates need to be escaped?
+
+----------------------------------------------------------------------
+
+3/16/25
+
+Looking into prompt_toolkit as a readline replacement. Looks very
+powerful. It seems geared to building full-window console apps; doing
+several readline things, including completion, auto-suggestion,
+formatting, history.
+
+Looking into completion first. Seems more geared to
+suggestion. E.g. input is x with completions xa, xb, xc. WordCompleter
+shows those options as soon as you type x. I don't want that. I want
+suggestions when tab is pressed. pt has a zillion options, so it would
+be surprising if this were not possible.

@@ -80,7 +80,7 @@ class EmptyCommand(marcel.exception.KillCommandException):
 
 # Tokens
 
-class Source:
+class Source(object):
 
     def __init__(self, text, position=0):
         self.text = text
@@ -245,6 +245,9 @@ class Token(Source):
     def op_name(self):
         return None
 
+    def missing_quote(self):
+        return None
+
     def mark_adjacent_to_next(self):
         self.adjacent_to_next = True
 
@@ -399,6 +402,7 @@ class String(Token):
         assert position >= 0
         super().__init__(parser, text, position)
         self.string = None
+        self.unterminated_quote = None
         self.scan(scan_termination)
         # op_modules is a dict, name -> OpModule
         op_module = parser.op_modules.get(self.string, None)
@@ -418,6 +422,9 @@ class String(Token):
 
     def is_executable(self):
         return marcel.util.is_executable(self.string)
+
+    def missing_quote(self):
+        return self.unterminated_quote
 
     def scan(self, scan_termination):
         quote = None
@@ -461,10 +468,9 @@ class String(Token):
                     raise LexerException(self, 'Malformed string')
             else:
                 chars.append(c)
-        string = ''.join(chars)
+        self.string = ''.join(chars)
         if quote is not None:
-            raise marcel.exception.MissingQuoteException(quote, string)
-        self.string = string
+            self.unterminated_quote = quote
 
 
 class MarcelString(String):
@@ -644,7 +650,7 @@ class Lt(Symbol):
 class LexerFailure(Token):
 
     def __init__(self, exception):
-        super().__init__(None, None, None)
+        super().__init__(parser=None, text=None, position=None)
         self.exception = exception
 
     def is_lexer_failure(self):
@@ -672,18 +678,21 @@ class Lexer(Source):
             return token.is_string() or token.is_expr()
 
         token = self.next_unconsolidated_token()
-        adjacent_tokens = [token]
-        while token and token.adjacent_to_next and consolidatable(token):
-            # Don't consume the next token if it isn't going to be consollidated.
-            mark = self.mark()
-            token = self.next_unconsolidated_token()
-            if consolidatable(token):
-                adjacent_tokens.append(token)
-            else:
-                # token is not consolidatable, so loop condition will be false.
-                self.reset(mark)
-        n_adjacent = len(adjacent_tokens)
-        consolidated = self.consolidate(adjacent_tokens) if n_adjacent > 1 else adjacent_tokens[0]
+        if token is None:
+            consolidated = None
+        else:
+            adjacent_tokens = [token]
+            while token and token.adjacent_to_next and consolidatable(token):
+                # Don't consume the next token if it isn't going to be consollidated.
+                mark = self.mark()
+                token = self.next_unconsolidated_token()
+                if consolidatable(token):
+                    adjacent_tokens.append(token)
+                else:
+                    # token is not consolidatable, so loop condition will be false.
+                    self.reset(mark)
+            n_adjacent = len(adjacent_tokens)
+            consolidated = self.consolidate(adjacent_tokens) if n_adjacent > 1 else adjacent_tokens[0]
         return consolidated
 
     def consolidate(self, tokens):
@@ -699,7 +708,6 @@ class Lexer(Source):
                 assert False, token
         buffer.append("''')")
         token = Expression(self.parser, ''.join(buffer), 0)
-        # print(f'{tokens} -> {token}')
         return token
 
     def next_unconsolidated_token(self):
@@ -818,12 +826,12 @@ class Tokens(object):
 #
 #     command:
 #             assignment
-#             pipelines
+#             pipeline
 #    
 #     assignment:
 #             str = arg
 #    
-#     pipelines:
+#     pipeline:
 #             op_sequence [gt str]
 #             str lt gt str
 #             str lt [op_sequence [gt str]]
@@ -861,7 +869,7 @@ class Tokens(object):
 #     arg:
 #             expr
 #             str
-#             begin [vars :] pipelines end
+#             begin [vars :] pipeline end
 #
 #     vars:
 #             vars, str
@@ -891,6 +899,45 @@ class Tokens(object):
 # - str arrow1 [op_sequence [arrow str]]:
 #
 #     Equivalent to: read str | [op_sequence [| store str]]
+
+# Tracks op_args parsing, so that we know if we are currently parsing an op or arg.
+# Useful for tab completion (only, right now).
+class OpArgContext(object):
+    OTHER = 'OTHER'
+    OP = 'OP'
+    FLAG = 'FLAG'
+    ARG = 'ARG'
+
+    def __init__(self, env):
+        self.env = env
+        self.context = None
+        # Assume we start parsing an op. If we aren't, the parser will call reset().
+        self.set_op()
+
+    def __repr__(self):
+        return self.context
+
+    def is_op(self):
+        return self.context == OpArgContext.OP
+
+    def is_flag(self):
+        return self.context == OpArgContext.FLAG
+
+    def is_arg(self):
+        return self.context == OpArgContext.ARG
+
+    def reset(self):
+        self.context = OpArgContext.OTHER
+
+    def set_op(self):
+        self.context = OpArgContext.OP
+
+    def set_flag(self):
+        self.context = OpArgContext.FLAG
+
+    def set_arg(self):
+        self.context = OpArgContext.ARG
+
 
 class Parser(object):
 
@@ -925,10 +972,13 @@ class Parser(object):
             self.start_position = None
             self.arg_count = 0
             self.op_token = None
+            self.prev_op_arg_context = None
 
         def __enter__(self):
             self.parser.pipeline_stack.append(self)
             self.start_position = self._current_position()
+            self.prev_op_arg_context = self.parser.op_arg_context
+            self.parser.op_arg_context = OpArgContext(self.parser.env)
             return self
 
         def __exit__(self, ex_type, ex_value, ex_traceback):
@@ -937,6 +987,7 @@ class Parser(object):
                 self.parser.pipeline_stack.pop()
                 end_position = self._current_position()
                 self.pipeline.source = self.parser.text[self.start_position:end_position].strip()
+                self.parser.op_arg_context = self.prev_op_arg_context
             # else: Keep the stack as is, for tab completion
 
         def _current_position(self):
@@ -951,6 +1002,7 @@ class Parser(object):
         self.token = None  # The current token
         self.shell_op = False
         self.pipeline_stack = []  # Contains PipelineSourceTrackers
+        self.op_arg_context = OpArgContext(env)
 
     def __repr__(self):
         return str(self.tokens)
@@ -982,11 +1034,12 @@ class Parser(object):
         return command
 
     def assignment(self, var):
+        self.op_arg_context.reset()
         self.next_token(Assign)
         arg = self.arg()
         source = None
         if isinstance(arg, Token):
-            if type(arg) is Expression:
+            if isinstance(arg, Expression):
                 source = arg.source()
                 arg.mark_for_assignment()
             value = arg.value()
@@ -1002,6 +1055,7 @@ class Parser(object):
     
     def pipeline(self):
         def pipeline_str_lt():
+            self.op_arg_context.reset()
             source = self.token  # var or file, depending on arrow type
             found_lt = self.next_token(Lt)
             assert found_lt
@@ -1029,6 +1083,7 @@ class Parser(object):
             return op_sequence
 
         def pipeline_gt_str():
+            self.op_arg_context.reset()
             gt = self.token
             if self.next_token(String):
                 op_sequence = [self.redirect_out_op(gt, self.token)]
@@ -1051,7 +1106,7 @@ class Parser(object):
         pipeline = marcel.core.PipelineExecutable()
         with Parser.PipelineSourceTracker(self, pipeline):
             # If the next tokens are var comma, or var colon, then we have
-            # pipelines variables being declared.
+            # pipeline variables being declared.
             if self.next_token(String, Comma) or self.next_token(String, Colon):
                 parameters = self.vars()
             else:
@@ -1102,6 +1157,7 @@ class Parser(object):
         return op_token, arg_tokens
 
     def op(self):
+        self.op_arg_context.set_op()
         if self.next_token(String) or self.next_token(Remote) or self.next_token(Run):
             return self.token
         else:
@@ -1126,8 +1182,27 @@ class Parser(object):
             else:
                 return None
 
+        def set_op_arg_context():
+            next_token = self.tokens.peek()  # None or a list
+            if next_token is not None:
+                next_token = next_token[0]
+            if next_token is None:
+                if self.text[-1].isspace():
+                    self.op_arg_context.set_arg()
+                # else: No space after op. We're still in an op context
+            elif isinstance(next_token, String):
+                if next_token.value().startswith('-'):
+                    self.op_arg_context.set_flag()
+                else:
+                    self.op_arg_context.set_arg()
+            else:
+                self.op_arg_context.reset()
+
         self.count_arg()
+        set_op_arg_context()
         arg = shell_arg() if self.shell_op else marcel_arg()
+        if isinstance(arg, String) and arg.unterminated_quote:
+            raise marcel.exception.MissingQuoteException(arg.unterminated_quote, arg.value())
         return arg
 
     def vars(self):
@@ -1161,7 +1236,7 @@ class Parser(object):
         self.token = self.tokens.next_token()
         return True
 
-    # Does token t+n indicate the end of a pipelines?
+    # Does token t+n indicate the end of a pipeline?
     def pipeline_end(self, n=0):
         tokens = self.tokens.peek(n + 1)
         return tokens is None or tokens[-1].is_end()
