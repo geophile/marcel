@@ -34,11 +34,11 @@ n-tuple, n > 1.
 For example, the command {n:ls /bin/less*} produces this output, by calling {n:File.render_full()}
 
 {L,wrap=F,indent=4:4}
--rwxr-xr-x   root     root           170760   2018 May 03 10:16:28   less
--rwxr-xr-x   root     root            10256   2018 May 03 10:16:28   lessecho
+-rwxr-xr-f   root     root           170760   2018 May 03 10:16:28   less
+-rwxr-xr-f   root     root            10256   2018 May 03 10:16:28   lessecho
 lrwxrwxrwx   root     root                8   2018 May 03 10:16:28   lessfile -> lesspipe
--rwxr-xr-x   root     root            19856   2018 May 03 10:16:28   lesskey
--rwxr-xr-x   root     root             8564   2018 May 03 10:16:28   lesspipe
+-rwxr-xr-f   root     root            19856   2018 May 03 10:16:28   lesskey
+-rwxr-xr-f   root     root             8564   2018 May 03 10:16:28   lesspipe
 
 But if the tuple carrying a {n:File} to {n:out} has other values too, then
 {n:File.render_compact()} is used. So the command {n:ls /bin/less* | map (f: (f, f.size)}

@@ -251,6 +251,12 @@ class Token(Source):
     def mark_adjacent_to_next(self):
         self.adjacent_to_next = True
 
+    # The lexical end of this token matches the end of the command being parsed. I.e., no whitespace
+    # (or anything else) after the token.
+    def is_terminal(self):
+        assert self.end is not None
+        return self.end == len(self.parser.text)
+
 
 # PythonString isn't a top-level token that appears on a command line. An Expression is defined as
 # everything in between a top-level ( and the matching ). Everything delimited by those parens is
@@ -347,7 +353,7 @@ class Expression(Token):
                 source = self.source()
                 function_args_parser = FunctionArgsParser(source)
                 function_args_parser.parse()
-                # Source may need to be tweaked. E.g. for "inc = (lambda x: x + 1)", we want to return the function,
+                # Source may need to be tweaked. E.g. for "inc = (lambda f: f + 1)", we want to return the function,
                 # not the evaluation of the function, so prepend "lambda: ".
                 # The rationale and details are discussed in notes/function_notation.txt
                 if function_args_parser.explicit_lambda:
@@ -1012,6 +1018,9 @@ class Parser(object):
             raise EmptyCommand()
         return self.command()
 
+    def terminal_token_value(self):
+        return self.token.value() if self.token.is_terminal() else ''
+
     # Used by Compilable which contains function source and caches the compiled function.
     def parse_function(self):
         token = self.arg()
@@ -1094,7 +1103,7 @@ class Parser(object):
         def pipeline_op_sequence():
             op_sequence = self.op_sequence()
             if self.next_token(Gt, String):
-                # op_sequence > x
+                # op_sequence > f
                 arrow_token = self.token
                 found_string = self.next_token(String)
                 assert found_string

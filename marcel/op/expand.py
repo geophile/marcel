@@ -53,15 +53,15 @@ The types that can be expanded are sequences ({n:list}, {n:tuple}, {n:str}), {n:
 
 {b:Example}: If the input contains these sequences:
 {p,wrap=F}
-    ('a', [1, 2, 3], 'x')
+    ('a', [1, 2, 3], 'f')
     ('b', [4, 5], 'y')
     ('c', [], 'z')
 
 then {r:expand 1} generates this output:
 {p,wrap=F}
-    ('a', 1, 'x')
-    ('a', 2, 'x')
-    ('a', 3, 'x')
+    ('a', 1, 'f')
+    ('a', 2, 'f')
+    ('a', 3, 'f')
     ('b', 4, 'y')
     ('b', 5, 'y')
 

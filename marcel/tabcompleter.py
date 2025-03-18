@@ -25,7 +25,7 @@ import marcel.op
 import marcel.parser
 import marcel.util
 
-DEBUG = True
+DEBUG = False
 
 SINGLE_QUOTE = "'"
 DOUBLE_QUOTE = '"'
@@ -62,6 +62,7 @@ class TabCompleter(Completer):
         for c in completer(token):
             yield c
 
+    # Returns the last token encountered by the parse of line
     def parse(self, line):
         # Parse the text so far, to get information needed for tab completion. It is expected that
         # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
@@ -80,9 +81,10 @@ class TabCompleter(Completer):
             marcel.util.print_stack_of_current_exception()
         else:
             debug('No exception during parse')
-        token = self.parser.token.value()
+        token = self.parser.terminal_token_value()
+        # TODO: Is this logic needed? Why doesn't MissingQuoteException take care of things? Or why can't
+        # TODO: this logic be moved there?
         if (missing_quote := self.parser.token.missing_quote()) is not None:
-            print(f'missing_quote: {missing_quote}, token: {token}')
             token = missing_quote + token
         return token
 
@@ -110,49 +112,8 @@ class TabCompleter(Completer):
     def complete_arg(self, token):
         debug(f'complete_arg: token={token}')
         current_dir = self.env.dir_state().current_dir()
-        quote = None
-        if token:
-            # Separate quote and token if necessary
-            if token[0] in QUOTES:
-                quote = token[0]
-                token = token[1:]
-            if token.startswith('~/') and quote != DOUBLE_QUOTE:
-                if token == '~/':
-                    if quote != DOUBLE_QUOTE:
-                        home = pathlib.Path(token).expanduser()
-                        filenames = os.listdir(home.as_posix())
-                elif token.startswith('~/'):
-                    base = pathlib.Path('~/').expanduser()
-                    base_length = len(base.as_posix())
-                    pattern = token[2:] + '*'
-                    filenames = ['~' + f[base_length:]
-                                 for f in [p.as_posix() for p in base.glob(pattern)]]
-            elif token.startswith('~') and quote is None:
-                find_user = token[1:]
-                filenames = []
-                for username in TabCompleter.usernames():
-                    if username.startswith(find_user):
-                        filenames.append('~' + username)
-            elif token.startswith('/'):
-                base = '/'
-                pattern_prefix = token[1:]
-                filenames = [p.as_posix()
-                             for p in pathlib.Path(base).glob(pattern_prefix + '*')]
-            else:
-                base = current_dir
-                pattern_prefix = token
-                filenames = [p.relative_to(base).as_posix()
-                             for p in pathlib.Path(base).glob(pattern_prefix + '*')]
-        else:
-            # All filenames in current directory
-            filenames = [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
-        # Append / to dirs
-        filenames = [f + '/' if pathlib.Path(f).expanduser().is_dir() else f for f in filenames]
-        if len(filenames) == 1:
-            if not filenames[0].endswith('/'):
-                filenames = [filenames[0] + ' ']
-        debug(f'complete_filename: candidates for {token}: {filenames}')
-        return filenames
+        for filename in TabCompleter.complete_filename(current_dir, token):
+            yield TabCompleter.completion(token, filename)
 
     @staticmethod
     def complete_help(text):
@@ -181,8 +142,59 @@ class TabCompleter(Completer):
         return executables
 
     @staticmethod
+    def completion(token, completion):
+        return Completion(text=f'{completion[len(token):]} ',
+                          display=completion)
+
+    @staticmethod
+    def complete_filename(current_dir, token):
+        debug(f'complete_filename: current_dir=<{current_dir}>, token=<{token}>')
+        def add_slash_to_dir(f):
+            return f + '/' if pathlib.Path(f).expanduser().is_dir() else f
+
+        filenames = []
+        if token:
+            if (quote := token[0]) in '"\'':
+                unquoted = token[1:]
+                # TODO: This is too simplistic. In '~/...' and ~/... the ~ is expanded. But not in "~/...".
+                for filename in TabCompleter.complete_filename(current_dir, unquoted):
+                    filenames.append(f'{quote}{filename}{quote}')
+            if token.startswith('~/'):
+                if token == '~/':
+                    home = pathlib.Path(token).expanduser()
+                    for filename in os.listdir(home.as_posix()):
+                        filenames.append(add_slash_to_dir(filename))
+                elif token.startswith('~/'):
+                    base = pathlib.Path('~/').expanduser()
+                    base_length = len(base.as_posix())
+                    pattern = token[2:] + '*'
+                    for filename in [p.as_posix() for p in base.glob(pattern)]:
+                        filenames.append(add_slash_to_dir('~' + filename[base_length:]))
+            elif token.startswith('~'):
+                find_user = token[1:]
+                for username in TabCompleter.usernames():
+                    if username.startswith(find_user):
+                        filenames.append(add_slash_to_dir('~' + username))
+            elif token.startswith('/'):
+                base = '/'
+                pattern_prefix = token[1:]
+                for path in pathlib.Path(base).glob(pattern_prefix + '*'):
+                    filenames.append(add_slash_to_dir(path.as_posix()))
+            else:
+                base = current_dir
+                pattern_prefix = token
+                for path in pathlib.Path(base).glob(pattern_prefix + '*'):
+                    filenames.append(add_slash_to_dir(path.relative_to(base).as_posix()))
+        else:
+            # All filenames in current directory
+            for path in current_dir.iterdir():
+                filenames.append(add_slash_to_dir(path.relative_to(current_dir).as_posix()))
+        return sorted(filenames)
+
+    @staticmethod
     def usernames():
         usernames = []
+        # TODO: Is this portable, even across UNIXes?
         with open('/etc/passwd', 'r') as passwds:
             users = passwds.readlines()
         for line in users:
@@ -190,8 +202,3 @@ class TabCompleter(Completer):
             username = fields[0]
             usernames.append(username)
         return usernames
-
-    @staticmethod
-    def completion(token, completion):
-        return Completion(text=f'{completion[len(token):]} ',
-                          display=completion)

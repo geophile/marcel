@@ -43,14 +43,14 @@ previously been assigned tuples from a stream.)
 There is special syntax for the {r:store} operator: {r:store VAR} can be written as {r:>$ VAR}. 
 With this alternative syntax, the {r:>$} acts as a pipe ({r:|}). So, for example, the following command:
 
-{L,wrap=F}gen 5 | store x
+{L,wrap=F}gen 5 | store f
 
-stores the stream carrying {r:0, 1, 2, 3, 4} in variable {r:x}. This can also be written as:
+stores the stream carrying {r:0, 1, 2, 3, 4} in variable {r:f}. This can also be written as:
 
-{L,wrap=F}gen 5 >$ x
+{L,wrap=F}gen 5 >$ f
 
 The symbol {r:>>$} is used to append to the contents of the {r:VAR}, instead of
-replacing the value, e.g. {r:gen 5 >>$ x}. 
+replacing the value, e.g. {r:gen 5 >>$ f}. 
 '''
 
 

@@ -124,17 +124,17 @@ loc = (| ls -0 ~/git/marcel/marcel ~/git/marcel/test \
 ft = (|sort (f: f.mtime)|)
 
 import random
-rand = (|range, n: gen (int(n)) | (x: random.randint(0, int(range)-1))|)
+rand = (|range, n: gen (int(n)) | (f: random.randint(0, int(range)-1))|)
 types = (| head 1 | \
-           args (| x: \
-               ((x,) if type(x) is not tuple else x) | \
-               (*x: tuple([type(y) for y in x])) \
+           args (| f: \
+               ((f,) if type(f) is not tuple else f) | \
+               (*f: tuple([type(y) for y in f])) \
            |) \
         |)
 
-concat = (| args --all (| x: (x) |) |)
+concat = (| args --all (| f: (f) |) |)
 
-quiet = (| select (*x: False) |)
+quiet = (| select (*f: False) |)
 '''
 
 

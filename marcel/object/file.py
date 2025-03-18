@@ -285,4 +285,4 @@ class File(marcel.object.renderable.Renderable):
     def _rwx(m):
         return (('r' if (m & 0o4) != 0 else '-') +
                 ('w' if (m & 0o2) != 0 else '-') +
-                ('x' if (m & 0o1) != 0 else '-'))
+                ('f' if (m & 0o1) != 0 else '-'))

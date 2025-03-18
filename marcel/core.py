@@ -89,8 +89,8 @@ class Op(AbstractOp):
     # This function is performance-critical, so assertions are commented out,
     # and util.wrap_op_input is inlined.
     def receive_input(self, env, x):
-        # assert x is not None
-        # assert not isinstance(x, Error)
+        # assert f is not None
+        # assert not isinstance(f, Error)
         try:
             env.current_op = self
             self._count += 1

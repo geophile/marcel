@@ -66,7 +66,7 @@ class Assign(marcel.core.Op):
 
     def run(self, env):
         # The fix for bug 267 is to use function.source, which may have an extra lambda added on to the
-        # front (for situations such as "inc = (lambda x: x + 1)"). But also allow for self.function to
+        # front (for situations such as "inc = (lambda f: f + 1)"). But also allow for self.function to
         # not have source, or for it to be None.
         source = None
         try:

@@ -25,7 +25,7 @@ Write the currently running jobs to the output stream. This includes jobs that a
 
 The jobs listed may be running, denoted as {n:(+)}; or paused, denoted as {n:(-)}.
 While it is extremely unlikely, a job that is no longer running may be displayed
-also, denoted as {n:(x)}. 
+also, denoted as {n:(f)}. 
     
 Every job includes a job number and a process id. Note that job numbers may change over time,
 as a job number simply reflects the job's position in the list of jobs. Process ids never change.

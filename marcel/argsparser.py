@@ -248,7 +248,7 @@ class ArgsParser:
                 raise ArgsError(arg.op_name, f'{x} is not a Cluster')
 
     # An ArgsParser subclass uses this function as the value of convert, to validate
-    # Python expressions, (parser.Expression). x is function source for console usage,
+    # Python expressions, (parser.Expression). f is function source for console usage,
     # a callable for API usage.
     def function(self, arg, x):
         f = None
@@ -338,7 +338,7 @@ class ArgsParser:
         assert len(names) == len(name_set)
         return name_set
 
-    # Can expand -xyz to -x -y -z when -x, -y, and -z are all no-value flags.
+    # Can expand -xyz to -f -y -z when -f, -y, and -z are all no-value flags.
     def expand_arg(self, arg):
         if type(arg) is str and len(arg) > 2 and arg[0] == '-' and arg[1] != '-':
             args = []

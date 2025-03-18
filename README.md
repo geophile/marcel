@@ -15,7 +15,7 @@ to assign to `inc` a function that adds 1 to its input,
 you would have to do something like this:
 
 ```shell
-inc = (lambda: lambda x: x + 1)
+inc = (lambda: lambda f: f + 1)
 ```
 
 Evaluating `(lambda: lambda x: x + 1)` yields the function `lambda x: x + 1` which is assigned to
@@ -26,7 +26,7 @@ message because `(lambda x: x + 1)` cannot be evaluated without binding a value 
 In this release, the less clunky, less consistent syntax is permitted. If you write:
 
 ```shell
-inc = (lambda x: x + 1)
+inc = (lambda f: f + 1)
 ```
 
 then `inc` will be assigned `lambda x: x + 1`. I.e., it will be understood that you really

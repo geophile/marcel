@@ -45,7 +45,7 @@ yields {r:(6,)}. For input elements with more than a single value, multiple func
 For example, to find the sum of 0 ... 9, the sum of their squares, and the sum of their cubes:
 
 {p,wrap=F}
-    gen 10 | map (x: (x, x**2, x**3)) | red + + +
+    gen 10 | map (f: (f, f**2, f**3)) | red + + +
 
 which yields the output {n:(45, 285, 2025)}.
 

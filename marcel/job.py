@@ -66,8 +66,8 @@ class Job:
     RUNNING_FOREGROUND = 0  # (*)
     RUNNING_BACKGROUND = 1  # (+)
     RUNNING_PAUSED = 2      # (-)
-    DEAD = 3                # (x)
-    JOB_STATE_SYMBOLS = ('*', '+', '-', 'x')
+    DEAD = 3                # (f)
+    JOB_STATE_SYMBOLS = ('*', '+', '-', 'f')
 
     # Params
     JOIN_DELAY_SEC = 0.2

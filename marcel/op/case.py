@@ -46,10 +46,10 @@ All {r:PIPELINE} outputs feed into the output for this operator.
 Example:
 
 {L,indent=4,wrap=F}gen 100 1 | case \\\\
-                 (x: x % 15 == 0) (| (x: (x, 'FizzBuzz')) |) \\\\
-                 (x: x % 3 == 0)  (| (x: (x, 'Fizz')) |) \\\\
-                 (x: x % 5 == 0)  (| (x: (x, 'Buzz')) |) \\\\
-                                  (| (x: (x, x)) |)
+                 (f: f % 15 == 0) (| (f: (f, 'FizzBuzz')) |) \\\\
+                 (f: f % 3 == 0)  (| (f: (f, 'Fizz')) |) \\\\
+                 (f: f % 5 == 0)  (| (f: (f, 'Buzz')) |) \\\\
+                                  (| (f: (f, f)) |)
 
 This implements FizzBuzz. The integers 1 .. 100 are piped to the case
 operator. The predicates test for divisibility by 15, 3, and 5. It is

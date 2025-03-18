@@ -102,7 +102,7 @@ def test_gen():
     TEST.run('gen -p 4 3 -10 | write',
              expected_err='Padding incompatible with start < 0')
     # Error along with output
-    TEST.run('gen 3 -1 | map (x: 5 / x)',
+    TEST.run('gen 3 -1 | map (f: 5 / f)',
              expected_out=[-5.0, Error('division by zero'), 5.0])
     # # Function-valued args
     # TEST.run('N = (7)')
@@ -120,54 +120,54 @@ def test_gen():
 @timeit
 def test_write():
     # Write to stdout
-    TEST.run('gen 3 | (x: (x, -x))',
+    TEST.run('gen 3 | (f: (f, -f))',
              expected_out=[(0, 0), (1, -1), (2, -2)])
-    TEST.run('gen 3 | (x: (x, -x)) | write --format "{}~{}"',
+    TEST.run('gen 3 | (f: (f, -f)) | write --format "{}~{}"',
              expected_out=['0~0', '1~-1', '2~-2'])
-    TEST.run('gen 3 | (x: (x, -x)) | write -f "{}~{}"',
+    TEST.run('gen 3 | (f: (f, -f)) | write -f "{}~{}"',
              expected_out=['0~0', '1~-1', '2~-2'])
-    TEST.run('gen 3 | (x: (x, -x)) | write --csv',
+    TEST.run('gen 3 | (f: (f, -f)) | write --csv',
              expected_out=['0,0', '1,-1', '2,-2'])
-    TEST.run('gen 3 | (x: (x, -x)) | write -c',
+    TEST.run('gen 3 | (f: (f, -f)) | write -c',
              expected_out=['0,0', '1,-1', '2,-2'])
-    TEST.run('gen 3 | (x: (x, -x)) | write --tsv',
+    TEST.run('gen 3 | (f: (f, -f)) | write --tsv',
              expected_out=['0\t0', '1\t-1', '2\t-2'])
-    TEST.run('gen 3 | (x: (x, -x)) | write -t',
+    TEST.run('gen 3 | (f: (f, -f)) | write -t',
              expected_out=['0\t0', '1\t-1', '2\t-2'])
-    TEST.run('gen 3 | (x: (x, -x)) | write --pickle',
+    TEST.run('gen 3 | (f: (f, -f)) | write --pickle',
              expected_err='--pickle incompatible with stdout')
-    TEST.run('gen 3 | (x: (x, -x)) | write -p',
+    TEST.run('gen 3 | (f: (f, -f)) | write -p',
              expected_err='--pickle incompatible with stdout')
-    TEST.run('gen 3 | (x: (x, -x)) | write --csv --tsv',
+    TEST.run('gen 3 | (f: (f, -f)) | write --csv --tsv',
              expected_err='Cannot specify more than one of')
     # Write to file
     with TestDir(TEST.env) as testdir:
         output_filename = f'{testdir}/out.txt'
-        TEST.run('gen 3 | (x: (x, -x)) | write ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write ' + output_filename,
                  expected_out=[(0, 0), (1, -1), (2, -2)],
                  file=output_filename)
-        TEST.run('gen 3 | (x: (x, -x)) | write --format "{}~{}" ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write --format "{}~{}" ' + output_filename,
                  expected_out=['0~0', '1~-1', '2~-2'],
                  file=output_filename)
-        TEST.run('gen 3 | (x: (x, -x)) | write -f "{}~{}" ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write -f "{}~{}" ' + output_filename,
                  expected_out=['0~0', '1~-1', '2~-2'],
                  file=output_filename)
-        TEST.run('gen 3 | (x: (x, -x)) | write --csv ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write --csv ' + output_filename,
                  expected_out=['0,0', '1,-1', '2,-2'],
                  file=output_filename)
-        TEST.run('gen 3 | (x: (x, -x)) | write -c ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write -c ' + output_filename,
                  expected_out=['0,0', '1,-1', '2,-2'],
                  file=output_filename)
-        TEST.run('gen 3 | (x: (x, -x)) | write --tsv ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write --tsv ' + output_filename,
                  expected_out=['0\t0', '1\t-1', '2\t-2'],
                  file=output_filename)
-        TEST.run('gen 3 | (x: (x, -x)) | write -t ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write -t ' + output_filename,
                  expected_out=['0\t0', '1\t-1', '2\t-2'],
                  file=output_filename)
-        TEST.run('gen 3 | (x: (x, -x)) | write --pickle ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write --pickle ' + output_filename,
                  verification=f'read --pickle {output_filename}',
                  expected_out=[(0, 0), (1, -1), (2, -2)])
-        TEST.run('gen 3 | (x: (x, -x)) | write -p ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write -p ' + output_filename,
                  verification=f'read --pickle {output_filename}',
                  expected_out=[(0, 0), (1, -1), (2, -2)])
         # Append
@@ -183,23 +183,23 @@ def test_write():
                  verification='read ' + output_filename,
                  expected_out=[0, 1, 2, 3, 4, 5])
         TEST.delete_files(output_filename)
-        TEST.run('gen 3 | (x: (x, -x)) | write --csv --append ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write --csv --append ' + output_filename,
                  expected_out=['0,0', '1,-1', '2,-2'],
                  file=output_filename)
-        TEST.run('gen 3 | (x: (x, -x)) | write --tsv --append ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write --tsv --append ' + output_filename,
                  expected_out=['0,0', '1,-1', '2,-2',
                                '0\t0', '1\t-1', '2\t-2'],
                  file=output_filename)
-        TEST.run('gen 3 | (x: (x, -x)) | write --append ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write --append ' + output_filename,
                  expected_out=['0,0', '1,-1', '2,-2',
                                '0\t0', '1\t-1', '2\t-2',
                                (0, 0), (1, -1), (2, -2)],
                  file=output_filename)
         TEST.delete_files(output_filename)
-        TEST.run('gen 3 | (x: (x, -x)) | write --pickle --append ' + output_filename,
+        TEST.run('gen 3 | (f: (f, -f)) | write --pickle --append ' + output_filename,
                  verification='read --pickle ' + output_filename,
                  expected_out=[(0, 0), (1, -1), (2, -2)])
-        TEST.run('gen 3 3 | (x: (x, -x)) | write --pickle --append ' + output_filename,
+        TEST.run('gen 3 3 | (f: (f, -f)) | write --pickle --append ' + output_filename,
                  verification='read --pickle ' + output_filename,
                  expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4), (5, -5)])
         # Function-valued filename
@@ -212,9 +212,9 @@ def test_write():
 def test_sort():
     TEST.run('gen 5 | sort',
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run('gen 5 | sort (lambda x: -x)',
+    TEST.run('gen 5 | sort (lambda f: -f)',
              expected_out=[4, 3, 2, 1, 0])
-    TEST.run('gen 5 | map (x: (-x, x)) | sort',
+    TEST.run('gen 5 | map (f: (-f, f)) | sort',
              expected_out=[(-4, 4), (-3, 3), (-2, 2), (-1, 1), (0, 0)])
     TEST.run('((1, "a", 2, "b")) | expand | sort',
              expected_err="'<' not supported between instances of 'str' and 'int'")
@@ -224,9 +224,9 @@ def test_sort():
 
 @timeit
 def test_map():
-    TEST.run('gen 5 | map (x: -x)',
+    TEST.run('gen 5 | map (f: -f)',
              expected_out=[0, -1, -2, -3, -4])
-    TEST.run('gen 5 | map (lambda x: -x)',
+    TEST.run('gen 5 | map (lambda f: -f)',
              expected_out=[0, -1, -2, -3, -4])
     TEST.run('map (3)',
              expected_out=[3])
@@ -243,17 +243,17 @@ def test_map():
     TEST.run('gen 3 | map ()',
              expected_err='invalid syntax')
     # Mix of output and error
-    TEST.run('gen 3 | (x: 1 / (1 - x))',
+    TEST.run('gen 3 | (f: 1 / (1 - f))',
              expected_out=[1.0, Error('division by zero'), -1.0])
 
 
 @timeit
 def test_select():
-    TEST.run('gen 5 | select (x: True)',
+    TEST.run('gen 5 | select (f: True)',
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run('gen 5 | select (x: False)',
+    TEST.run('gen 5 | select (f: False)',
              expected_out=[])
-    TEST.run('gen 5 | select (x: x % 2 == 1)',
+    TEST.run('gen 5 | select (f: f % 2 == 1)',
              expected_out=[1, 3])
 
 
@@ -266,13 +266,13 @@ def test_red():
              expected_out=[120])
     TEST.run('gen 5 1 | red ^',
              expected_out=[1])
-    TEST.run('gen 20 1 | select (x: x in (3, 7, 15)) | red &',
+    TEST.run('gen 20 1 | select (f: f in (3, 7, 15)) | red &',
              expected_out=[3])
-    TEST.run('gen 75 | select (x: x in (18, 36, 73)) | red \\|',
+    TEST.run('gen 75 | select (f: f in (18, 36, 73)) | red \\|',
              expected_out=[127])
-    TEST.run('gen 3 | map (x: x == 1) | red and',
+    TEST.run('gen 3 | map (f: f == 1) | red and',
              expected_out=[False])
-    TEST.run('gen 3 | map (x: x == 1) | red or',
+    TEST.run('gen 3 | map (f: f == 1) | red or',
              expected_out=[True])
     TEST.run('gen 5 | red max',
              expected_out=[4])
@@ -288,27 +288,27 @@ def test_red():
     TEST.run('gen 5 1 | red --incremental +',
              expected_out=[(1, 1), (2, 3), (3, 6), (4, 10), (5, 15)])
     # Test multiple reduction
-    TEST.run('gen 5 1 | map (x: (x, x)) | red + *',
+    TEST.run('gen 5 1 | map (f: (f, f)) | red + *',
              expected_out=[(15, 120)])
     # Test lambdas
-    TEST.run('gen 5 1 | map (x: (x, x)) | red (x, y: y if x is None else x + y) (x, y: y if x is None else x * y)',
+    TEST.run('gen 5 1 | map (f: (f, f)) | red (f, y: y if f is None else f + y) (f, y: y if f is None else f * y)',
              expected_out=[(15, 120)])
     # Test multiple incremental reduction
-    TEST.run('gen 5 1 | map (x: (x, x)) | red -i + *',
+    TEST.run('gen 5 1 | map (f: (f, f)) | red -i + *',
              expected_out=[(1, 1, 1, 1),
                            (2, 2, 3, 2),
                            (3, 3, 6, 6),
                            (4, 4, 10, 24),
                            (5, 5, 15, 120)])
     # Test grouping
-    TEST.run('gen 9 1 | map (x: (x, x // 2, x * 100, x // 2)) | red + . + .',
+    TEST.run('gen 9 1 | map (f: (f, f // 2, f * 100, f // 2)) | red + . + .',
              expected_out=[(1, 0, 100, 0),
                            (5, 1, 500, 1),
                            (9, 2, 900, 2),
                            (13, 3, 1300, 3),
                            (17, 4, 1700, 4)])
     # Test incremental grouping
-    TEST.run('gen 9 1 | map (x: (x, x // 2, x * 100, x // 2)) | red -i + . + .',
+    TEST.run('gen 9 1 | map (f: (f, f // 2, f * 100, f // 2)) | red -i + . + .',
              expected_out=[(1, 0, 100, 0, 1, 100),
                            (2, 1, 200, 1, 2, 200),
                            (3, 1, 300, 1, 5, 500),
@@ -319,18 +319,18 @@ def test_red():
                            (8, 4, 800, 4, 8, 800),
                            (9, 4, 900, 4, 17, 1700)])
     # Test short input
-    TEST.run('gen 4 | map (x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x)) | red + + +',
+    TEST.run('gen 4 | map (f: (f, 10*f) if f%2 == 0 else (f, 10*f, 100*f)) | red + + +',
              expected_out=[Error('too short'), Error('too short'), (4, 40, 400)])
-    TEST.run('gen 4 | map (x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x)) | red . + +',
+    TEST.run('gen 4 | map (f: (f, 10*f) if f%2 == 0 else (f, 10*f, 100*f)) | red . + +',
              expected_out=[Error('too short'), Error('too short'), (1, 10, 100), (3, 30, 300)])
-    TEST.run('gen 4 | map (x: (x, 10*x) if x%2 == 0 else (x, 10*x, 100*x)) | red -i . + +',
+    TEST.run('gen 4 | map (f: (f, 10*f) if f%2 == 0 else (f, 10*f, 100*f)) | red -i . + +',
              expected_out=[Error('too short'), (1, 10, 100, 10, 100), Error('too short'), (3, 30, 300, 30, 300)])
     # Bug 153
-    TEST.run('gen 3 | select (x: False) | red count',
+    TEST.run('gen 3 | select (f: False) | red count',
              expected_out=[0])
     TEST.run('gen 3 | red -i count',
              expected_out=[(0, 1), (1, 2), (2, 3)])
-    TEST.run('gen 5 | (x: (x // 2, None)) | red . count | sort',
+    TEST.run('gen 5 | (f: (f // 2, None)) | red . count | sort',
              expected_out=[(0, 2), (1, 2), (2, 1)])
     # Bug 242
     TEST.run('gen 3 | red growset',
@@ -342,25 +342,25 @@ def test_expand():
     # Test singletons
     TEST.run('gen 5 | expand',
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run('gen 5 | map (x: ([x, x],)) | expand',
+    TEST.run('gen 5 | map (f: ([f, f],)) | expand',
              expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
-    TEST.run('gen 5 | map (x: ((x, x),)) | expand',
+    TEST.run('gen 5 | map (f: ((f, f),)) | expand',
              expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
     TEST.run('gen 5 | expand 0',
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run('gen 5 | map (x: ([x, x],)) | expand 0',
+    TEST.run('gen 5 | map (f: ([f, f],)) | expand 0',
              expected_out=[0, 0, 1, 1, 2, 2, 3, 3, 4, 4])
     # Test non-singletons
-    TEST.run('gen 5 | map (x: (x, -x)) | expand',
+    TEST.run('gen 5 | map (f: (f, -f)) | expand',
              expected_out=[0, 0, 1, -1, 2, -2, 3, -3, 4, -4])
-    TEST.run('gen 5 | map (x: (x, -x)) | expand 0',
+    TEST.run('gen 5 | map (f: (f, -f)) | expand 0',
              expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
-    TEST.run('gen 5 | map (x: (x, -x)) | expand 1',
+    TEST.run('gen 5 | map (f: (f, -f)) | expand 1',
              expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
-    TEST.run('gen 5 | map (x: (x, -x)) | expand 2',
+    TEST.run('gen 5 | map (f: (f, -f)) | expand 2',
              expected_out=[(0, 0), (1, -1), (2, -2), (3, -3), (4, -4)])
     # Expand list
-    TEST.run('gen 5 | map (x: ([100, 200], x, -x)) | expand 0',
+    TEST.run('gen 5 | map (f: ([100, 200], f, -f)) | expand 0',
              expected_out=[(100, 0, 0),
                            (200, 0, 0),
                            (100, 1, -1),
@@ -371,7 +371,7 @@ def test_expand():
                            (200, 3, -3),
                            (100, 4, -4),
                            (200, 4, -4)])
-    TEST.run('gen 5 | map (x: (x, [100, 200], -x)) | expand 1',
+    TEST.run('gen 5 | map (f: (f, [100, 200], -f)) | expand 1',
              expected_out=[(0, 100, 0),
                            (0, 200, 0),
                            (1, 100, -1),
@@ -382,7 +382,7 @@ def test_expand():
                            (3, 200, -3),
                            (4, 100, -4),
                            (4, 200, -4)])
-    TEST.run('gen 5 | map (x: (x, -x, [100, 200])) | expand 2',
+    TEST.run('gen 5 | map (f: (f, -f, [100, 200])) | expand 2',
              expected_out=[(0, 0, 100),
                            (0, 0, 200),
                            (1, -1, 100),
@@ -393,14 +393,14 @@ def test_expand():
                            (3, -3, 200),
                            (4, -4, 100),
                            (4, -4, 200)])
-    TEST.run('gen 5 | map (x: (x, -x, [100, 200])) | expand 3',
+    TEST.run('gen 5 | map (f: (f, -f, [100, 200])) | expand 3',
              expected_out=[(0, 0, [100, 200]),
                            (1, -1, [100, 200]),
                            (2, -2, [100, 200]),
                            (3, -3, [100, 200]),
                            (4, -4, [100, 200])])
     # Expand tuple
-    TEST.run('gen 5 | map (x: ((100, 200), x, -x)) | expand 0',
+    TEST.run('gen 5 | map (f: ((100, 200), f, -f)) | expand 0',
              expected_out=[(100, 0, 0),
                            (200, 0, 0),
                            (100, 1, -1),
@@ -412,7 +412,7 @@ def test_expand():
                            (100, 4, -4),
                            (200, 4, -4)])
     # Expand set
-    TEST.run('gen 5 | map (x: (set((100, 200)), x, -x)) | expand 0 | sort',
+    TEST.run('gen 5 | map (f: (set((100, 200)), f, -f)) | expand 0 | sort',
              expected_out=[(100, 0, 0),
                            (100, 1, -1),
                            (100, 2, -2),
@@ -425,10 +425,10 @@ def test_expand():
                            (200, 4, -4)])
     # Function-valued args
     TEST.run('N = (1)')
-    TEST.run('gen 3 | map (x: (x, (x * 10, x * 10 + 1))) | expand (N)',
+    TEST.run('gen 3 | map (f: (f, (f * 10, f * 10 + 1))) | expand (N)',
              expected_out=[(0, 0), (0, 1), (1, 10), (1, 11), (2, 20), (2, 21)])
     # Bug 158
-    TEST.run('gen 3 1 | (x: [str(x * 111)] * x) | expand',
+    TEST.run('gen 3 1 | (f: [str(f * 111)] * f) | expand',
              expected_out=[111, 222, 222, 333, 333, 333])
     # Expand generator-like objects (having __next__)
     TEST.run('(zip([1, 2, 3], [4, 5, 6])) | expand',
@@ -493,7 +493,7 @@ def test_tail():
 
 @timeit
 def test_reverse():
-    TEST.run('gen 5 | select (x: False) | reverse',
+    TEST.run('gen 5 | select (f: False) | reverse',
              expected_out=[])
     TEST.run('gen 5 | reverse',
              expected_out=[4, 3, 2, 1, 0])
@@ -505,17 +505,17 @@ def test_squish():
              expected_out=[0, 1, 2, 3, 4])
     TEST.run('gen 5 | squish +',
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run('gen 5 | map (x: (x, -x)) | squish',
+    TEST.run('gen 5 | map (f: (f, -f)) | squish',
              expected_out=[0, 0, 0, 0, 0])
-    TEST.run('gen 5 | map (x: (x, -x)) | squish +',
+    TEST.run('gen 5 | map (f: (f, -f)) | squish +',
              expected_out=[0, 0, 0, 0, 0])
-    TEST.run('gen 5 | map (x: (x, -x)) | squish min',
+    TEST.run('gen 5 | map (f: (f, -f)) | squish min',
              expected_out=[0, -1, -2, -3, -4])
-    TEST.run('gen 5 | map (x: (x, -x)) | squish max',
+    TEST.run('gen 5 | map (f: (f, -f)) | squish max',
              expected_out=[0, 1, 2, 3, 4])
-    TEST.run('gen 5 | map (x: (x, -x)) | squish count',
+    TEST.run('gen 5 | map (f: (f, -f)) | squish count',
              expected_out=[2, 2, 2, 2, 2])
-    TEST.run('gen 5 | map (x: ([-x, x], [-x, x])) | squish +',
+    TEST.run('gen 5 | map (f: ([-f, f], [-f, f])) | squish +',
              expected_out=[[0, 0, 0, 0],
                            [-1, 1, -1, 1],
                            [-2, 2, -2, 2],
@@ -527,29 +527,29 @@ def test_squish():
 def test_unique():
     TEST.run('gen 10 | unique',
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-    TEST.run('gen 10 | select (x: False) | unique',
+    TEST.run('gen 10 | select (f: False) | unique',
              expected_out=[])
     TEST.run('gen 10 | unique -c',
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-    TEST.run('gen 10 | select (x: False) | unique -c',
+    TEST.run('gen 10 | select (f: False) | unique -c',
              expected_out=[])
-    TEST.run('gen 10 | map (x: x // 3) | unique',
+    TEST.run('gen 10 | map (f: f // 3) | unique',
              expected_out=[0, 1, 2, 3])
-    TEST.run('gen 10 | map (x: x // 3) | unique -c',
+    TEST.run('gen 10 | map (f: f // 3) | unique -c',
              expected_out=[0, 1, 2, 3])
-    TEST.run('gen 10 | map (x: x // 3) | unique --consecutive',
+    TEST.run('gen 10 | map (f: f // 3) | unique --consecutive',
              expected_out=[0, 1, 2, 3])
-    TEST.run('gen 10 | map (x: x % 3) | unique',
+    TEST.run('gen 10 | map (f: f % 3) | unique',
              expected_out=[0, 1, 2])
-    TEST.run('gen 3 | (x: (x//2, [x//2])) | unique',
+    TEST.run('gen 3 | (f: (f//2, [f//2])) | unique',
              expected_err='not hashable')
 
 
 @timeit
 def test_window():
-    TEST.run('gen 10 | window (x: False)',
+    TEST.run('gen 10 | window (f: False)',
              expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)])
-    TEST.run('gen 10 | window (x: True)',
+    TEST.run('gen 10 | window (f: True)',
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     TEST.run('gen 10 | window -o 1',
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -576,7 +576,7 @@ def test_window():
              expected_err='Must specify exactly one')
     TEST.run('gen 10 | window',
              expected_err='Must specify exactly one')
-    TEST.run('gen 10 | window -o 3 (x: True)',
+    TEST.run('gen 10 | window -o 3 (f: True)',
              expected_err='Must specify exactly one')
     # Function-valued args
     TEST.run('THREE = (3)')
@@ -605,9 +605,9 @@ def test_bash():
         TEST.run('who = world')
         # Test command string
         TEST.run(f'cd {testdir}')
-        TEST.run('bash "ls x*"',
+        TEST.run('bash "ls f*"',
                  expected_out=['x1', 'x2'])
-        TEST.run('bash "ls -l *1" | (x: x.split()[-1])',
+        TEST.run('bash "ls -l *1" | (f: f.split()[-1])',
                  expected_out=['x1', 'y1'])
         TEST.run("""bash 'echo "hello  world"'""",  # Two spaces in string to be printed
                  expected_out='hello  world')
@@ -625,7 +625,7 @@ def test_namespace():
     TEST.run(test='ws -n namespace_test',
              verification='ws | (w: str(w))',
              expected_out=['Workspace(namespace_test)'])
-    TEST.run('map (list(globals().keys())) | expand | select (x: x == "USER")',
+    TEST.run('map (list(globals().keys())) | expand | select (f: f == "USER")',
              expected_out=['USER'])
     # Try to use an undefined symbol
     TEST.run('map (pi)',
@@ -669,10 +669,10 @@ def test_source_filenames():
         TEST.run('ls -0 *f s* | map (f: f.render_compact())',
                  expected_out=sorted(['f', 'sd', 'sf', 'lf']))
         # No such file
-        TEST.run('ls -0 x | map (f: f.render_compact())',
+        TEST.run('ls -0 f | map (f: f.render_compact())',
                  expected_err='No qualifying paths')
         # No such file via glob
-        TEST.run('ls -0 x* | map (f: f.render_compact())',
+        TEST.run('ls -0 f* | map (f: f.render_compact())',
                  expected_err='No qualifying paths')
         # ~ expansion
         TEST.run('ls -0 ~root | map (f: f.path)',
@@ -840,12 +840,12 @@ def test_dir_stack():
         TEST.run(test='pwd | (f: str(f))',
                  expected_out=f'{testdir}')
         # popd: Arrange for a deleted dir on the stack and try popding into it.
-        TEST.run('rm -rf x y')
-        TEST.run('mkdir x y')
-        TEST.run('cd x')
+        TEST.run('rm -rf f y')
+        TEST.run('mkdir f y')
+        TEST.run('cd f')
         TEST.run('pushd ../y | (f: str(f))',
-                 expected_out=[f'{testdir}/y', f'{testdir}/x'])
-        TEST.run(f'rm -rf {testdir}/x')
+                 expected_out=[f'{testdir}/y', f'{testdir}/f'])
+        TEST.run(f'rm -rf {testdir}/f')
         TEST.run('popd',
                  expected_err='directories have been removed')
         TEST.run('dirs | (f: str(f))',
@@ -858,7 +858,7 @@ def test_remote():
     TEST.run('@CLUSTER1 (| gen 3 |)',
              expected_out=[(node1, 0), (node1, 1), (node1, 2)])
     # Handling of remote error in execution
-    TEST.run('@CLUSTER1 (| gen 3 -1 | map (x: 5 / x) |)',
+    TEST.run('@CLUSTER1 (| gen 3 -1 | map (f: 5 / f) |)',
              expected_out=[(node1, -5.0), Error('division by zero'), (node1, 5.0)])
     # Handling of remote error in setup
     TEST.run('@CLUSTER1 (| ls /nosuchfile |)',
@@ -866,7 +866,7 @@ def test_remote():
     # Bug 4
     TEST.run('@CLUSTER1 (| gen 3 |) | red . +',
              expected_out=[(node1, 3)])
-    TEST.run('@CLUSTER1 (| gen 10 | map (x: (x%2, x)) | red . + |)',
+    TEST.run('@CLUSTER1 (| gen 10 | map (f: (f%2, f)) | red . + |)',
              expected_out=[(node1, 0, 20), (node1, 1, 25)])
     # Implied map
     TEST.run('@CLUSTER1(|(419)|)',
@@ -884,27 +884,27 @@ def test_fork():
     # int forkgen
     TEST.run('fork 3 (|gen 3 100|) | sort',
              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
-    TEST.run('fork 3 (|t: gen 3 100 | (x: (t, x))|) | sort',
+    TEST.run('fork 3 (|t: gen 3 100 | (f: (t, f))|) | sort',
              expected_out=[(0, 100), (0, 101), (0, 102),
                            (1, 100), (1, 101), (1, 102),
                            (2, 100), (2, 101), (2, 102)])
-    TEST.run('fork 3 (|t, u: gen 3 100 | (x: (t, x))|) | sort',
+    TEST.run('fork 3 (|t, u: gen 3 100 | (f: (t, f))|) | sort',
              expected_err='Too many pipelines args')
     # iterable forkgen
     TEST.run('fork "abc" (|gen 3 100|) | sort',
              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
-    TEST.run('fork "abc" (|t: gen 3 100 | (x: (t, x))|) | sort',
+    TEST.run('fork "abc" (|t: gen 3 100 | (f: (t, f))|) | sort',
              expected_out=[('a', 100), ('a', 101), ('a', 102),
                            ('b', 100), ('b', 101), ('b', 102),
                            ('c', 100), ('c', 101), ('c', 102)])
-    TEST.run('fork "abc" (|t, u: gen 3 100 | (x: (t, x))|) | sort',
+    TEST.run('fork "abc" (|t, u: gen 3 100 | (f: (t, f))|) | sort',
              expected_err='Too many pipelines args')
     # Cluster forkgen
     TEST.run('fork CLUSTER1 (|gen 3 100|)',
              expected_out=[100, 101, 102])
-    TEST.run('fork CLUSTER1 (|t: gen 3 100 | (x: (str(t), x))|)',
+    TEST.run('fork CLUSTER1 (|t: gen 3 100 | (f: (str(t), f))|)',
              expected_out=[('127.0.0.1', 100), ('127.0.0.1', 101), ('127.0.0.1', 102)])
-    TEST.run('fork CLUSTER1 (|t, u: gen 3 100 | (x: (str(t), x))|)',
+    TEST.run('fork CLUSTER1 (|t, u: gen 3 100 | (f: (str(t), f))|)',
              expected_err='Too many pipelines args')
 
 
@@ -937,7 +937,7 @@ def test_assign():
     TEST.run(test='a = (|(419)|)',
              verification='a',
              expected_out=[419])
-    TEST.run(test='a = (| map (x: (x, -x)) |)',
+    TEST.run(test='a = (| map (f: (f, -f)) |)',
              verification='gen 3 | a',
              expected_out=[(0, 0), (1, -1), (2, -2)])
     # Bug 61
@@ -948,8 +948,8 @@ def test_assign():
     TEST.run(test='b',
              expected_out=[0, 1, 2])
     # Bug 65
-    TEST.run('x = (|(5)|)')
-    TEST.run(test='x',
+    TEST.run('f = (|(5)|)')
+    TEST.run(test='f',
              expected_out=[5])
     # Bug 165
     TEST.run('ls = abc')
@@ -970,13 +970,13 @@ def test_assign():
              verification='(a)',
              expected_out=[11])
     # Evaluate -> function
-    TEST.run(test='b = (lambda: lambda x: 5+6+x)',
+    TEST.run(test='b = (lambda: lambda f: 5+6+f)',
              verification='(b(7))',
              expected_out=[18])
-    TEST.run(test='b = (lambda x: 5+6+x)',
+    TEST.run(test='b = (lambda f: 5+6+f)',
              verification='(b(7))',
              expected_out=[18])
-    TEST.run(test='b = (x: 5+6+x)',
+    TEST.run(test='b = (f: 5+6+f)',
              verification='(b(7))',
              expected_out=[18])
 
@@ -984,45 +984,45 @@ def test_assign():
 @timeit
 def test_join():
     # Join losing right inputs
-    TEST.run(test='gen 4 | map (x: (x, -x)) | join (|gen 3 | map (x: (x, x * 100))|)',
+    TEST.run(test='gen 4 | map (f: (f, -f)) | join (|gen 3 | map (f: (f, f * 100))|)',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
     # Left join
-    TEST.run(test='gen 4 | map (x: (x, -x)) | join -k (|gen 3 | map (x: (x, x * 100))|)',
+    TEST.run(test='gen 4 | map (f: (f, -f)) | join -k (|gen 3 | map (f: (f, f * 100))|)',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200), (3, -3)])
-    TEST.run(test='gen 4 | map (x: (x, -x)) | join --keep (|gen 3 | map (x: (x, x * 100))|)',
+    TEST.run(test='gen 4 | map (f: (f, -f)) | join --keep (|gen 3 | map (f: (f, f * 100))|)',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200), (3, -3)])
     # Compound key
-    TEST.run(test='gen 4 | map (x: ((x, x + 1), -x)) | join (|gen 3 | map (x: ((x, x + 1), x * 100))|)',
+    TEST.run(test='gen 4 | map (f: ((f, f + 1), -f)) | join (|gen 3 | map (f: ((f, f + 1), f * 100))|)',
              expected_out=[((0, 1), 0, 0), ((1, 2), -1, 100), ((2, 3), -2, 200)])
     # Multiple matches on the right
     TEST.run(test='gen 4 '
-                  '| map (x: (x, -x)) '
+                  '| map (f: (f, -f)) '
                   '| join (|gen 3 '
-                  '        | map (x: (x, (x * 100, x * 100 + 1))) '
+                  '        | map (f: (f, (f * 100, f * 100 + 1))) '
                   '        | expand 1|)',
              expected_out=[(0, 0, 0), (0, 0, 1), (1, -1, 100), (1, -1, 101), (2, -2, 200), (2, -2, 201)])
     # Right argument in variable
-    TEST.run('x100 = (|gen 3 | map (x: (x, x * 100))|)')
-    TEST.run(test='gen 4 | map (x: (x, -x)) | join x100',
+    TEST.run('x100 = (|gen 3 | map (f: (f, f * 100))|)')
+    TEST.run(test='gen 4 | map (f: (f, -f)) | join x100',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
-    TEST.run(test='gen 4 | map (x: (x, -x)) | join (|x100|)',
+    TEST.run(test='gen 4 | map (f: (f, -f)) | join (|x100|)',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
     # Join with pipelines var taking arg
-    TEST.run('xn = (|n: gen 3 | map (x: (x, x * n))|)')
-    TEST.run(test='gen 4 | map (x: (x, -x)) | join (|xn (100)|)',
+    TEST.run('xn = (|n: gen 3 | map (f: (f, f * n))|)')
+    TEST.run(test='gen 4 | map (f: (f, -f)) | join (|xn (100)|)',
              expected_out=[(0, 0, 0), (1, -1, 100), (2, -2, 200)])
     with TestDir(TEST.env) as testdir:
-        TEST.run(f'gen 3 | map (x: (x, x*10)) | write {testdir}/a.csv')
-        TEST.run(f'gen 3 | map (x: (x, x*100)) | write {testdir}/b.csv')
-        TEST.run(f'get = (|f: (File(f).readlines()) | expand | map (x: eval(x))|)')
+        TEST.run(f'gen 3 | map (f: (f, f*10)) | write {testdir}/a.csv')
+        TEST.run(f'gen 3 | map (f: (f, f*100)) | write {testdir}/b.csv')
+        TEST.run(f'get = (|f: (File(f).readlines()) | expand | map (f: eval(f))|)')
         TEST.run(f'get {testdir}/a.csv | join (|get {testdir}/b.csv|)',
                  expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200)])
     # Handle non-hashable join keys
-    TEST.run('gen 3 | (x: ((x,), x)) | join (|gen 3 | (x: ((x,), x*100))|)',
+    TEST.run('gen 3 | (f: ((f,), f)) | join (|gen 3 | (f: ((f,), f*100))|)',
              expected_out=[((0,), 0, 0), ((1,), 1, 100), ((2,), 2, 200)])
-    TEST.run('gen 3 | (x: ([x], x)) | join (|gen 3 | (x: ((x,), x*100))|)',
+    TEST.run('gen 3 | (f: ([f], f)) | join (|gen 3 | (f: ((f,), f*100))|)',
              expected_err='not hashable')
-    TEST.run('gen 3 | (x: ((x,), x)) | join (|gen 3 | (x: ([x], x*100))|)',
+    TEST.run('gen 3 | (f: ((f,), f)) | join (|gen 3 | (f: ([f], f*100))|)',
              expected_err='not hashable')
 
 
@@ -1034,29 +1034,29 @@ def test_comment():
              expected_out=[])
     TEST.run('gen 3 # comment',
              expected_out=[0, 1, 2])
-    TEST.run('gen 3 | map (x: -x) # comment',
+    TEST.run('gen 3 | map (f: -f) # comment',
              expected_out=[0, -1, -2])
 
 
 @timeit
 def test_pipeline_args():
-    TEST.run('add = (|a: map (x: (x, x + a))|)')
+    TEST.run('add = (|a: map (f: (f, f + a))|)')
     TEST.run('gen 3 | add (100)',
              expected_out=[(0, 100), (1, 101), (2, 102)])
     # Multiple functions
-    TEST.run('add = (|a: map (x: (x, x + a)) | map (x, y: (x + a, y - a))|)')
+    TEST.run('add = (|a: map (f: (f, f + a)) | map (f, y: (f + a, y - a))|)')
     TEST.run('gen 3 | add (100)',
              expected_out=[(100, 0), (101, 1), (102, 2)])
     # Flag instead of anon arg
-    TEST.run('add = (|a: map (x: (x, x + a))|)')
+    TEST.run('add = (|a: map (f: (f, f + a))|)')
     TEST.run('gen 3 | add -a (100)',
              expected_out=[(0, 100), (1, 101), (2, 102)])
     # Multiple anon args
-    TEST.run('f = (|a, b: map (x: (x, x * a + b))|)')
+    TEST.run('f = (|a, b: map (f: (f, f * a + b))|)')
     TEST.run('gen 3 | f (100) (10)',
              expected_out=[(0, 10), (1, 110), (2, 210)])
     # Multiple flag args
-    TEST.run('f = (|a, b: map (x: (x, x * a + b))|)')
+    TEST.run('f = (|a, b: map (f: (f, f * a + b))|)')
     TEST.run('gen 3 | f -a (100) -b (10)',
              expected_out=[(0, 10), (1, 110), (2, 210)])
     TEST.run('gen 3 | f -b (10) -a (100)',
@@ -1066,7 +1066,7 @@ def test_pipeline_args():
     TEST.run('gen 3 | f -b (10)',
              expected_out=[Error("unsupported operand type(s) for *: 'int' and 'NoneType'")]*3)
     # Long flags
-    TEST.run('foobar = (|foo, bar: map (x: x * foo) | select (x: x < bar)|)')
+    TEST.run('foobar = (|foo, bar: map (f: f * foo) | select (f: f < bar)|)')
     TEST.run('gen 10 | foobar --foo (10) --bar (45)',
              expected_out=[0, 10, 20, 30, 40])
     TEST.run('gen 10 | foobar --bar (73) --foo (10)',
@@ -1096,7 +1096,7 @@ def test_sql():
              expected_out=[])
     TEST.run('''sql "select * from t order by id"''',
              expected_out=[(1, 'xyz'), (2, 'xyz')])
-    TEST.run('''gen 3 1000 | map (x: (x, 'aaa')) | sql -u "insert into t values(%s, %s)"''',
+    TEST.run('''gen 3 1000 | map (f: (f, 'aaa')) | sql -u "insert into t values(%s, %s)"''',
              expected_out=[1, 1, 1])
     TEST.run('''sql "select * from t order by id"''',
              expected_out=[(1, 'xyz'), (2, 'xyz'), (1000, 'aaa'), (1001, 'aaa'), (1002, 'aaa')])
@@ -1147,30 +1147,30 @@ def test_import():
 def test_store_load():
     TEST.reset_environment()
     # Basics
-    TEST.run(test='gen 3 | store x',
-             verification='load x',
+    TEST.run(test='gen 3 | store f',
+             verification='load f',
              expected_out=[0, 1, 2])
-    TEST.run('env | map (k, v: k) | select (k: k == "x")',
-             expected_out=['x'])
+    TEST.run('env | map (k, v: k) | select (k: k == "f")',
+             expected_out=['f'])
     # Overwrite
-    TEST.run(test='gen 3 100 | store x',
-             verification='load x',
+    TEST.run(test='gen 3 100 | store f',
+             verification='load f',
              expected_out=[100, 101, 102])
     # Append
-    TEST.run(test='gen 3 200 | store -a x',
-             verification='load x',
+    TEST.run(test='gen 3 200 | store -a f',
+             verification='load f',
              expected_out=[100, 101, 102, 200, 201, 202])
     # Append to undefined var
     TEST.run(test='gen 3 300 | store -a y',
              verification='load y',
              expected_out=[300, 301, 302])
     # Target is bound to something other than a reservoir
-    TEST.run('x = 1')
-    TEST.run(test='gen 3 | store x',
-             verification='load x',
+    TEST.run('f = 1')
+    TEST.run(test='gen 3 | store f',
+             verification='load f',
              expected_out=[0, 1, 2])
-    TEST.run('x = 1')
-    TEST.run(test='gen 3 | store -a x',
+    TEST.run('f = 1')
+    TEST.run(test='gen 3 | store -a f',
              expected_err='A stream cannot be appended')
     # Bad variable name
     TEST.run('gen 3 | store /tmp/storeload.test',
@@ -1192,7 +1192,7 @@ def test_redirect_file():
                  expected_out=[0, 1, 2])
         # file < >> file
         TEST.run(f'gen 3 | write {testdir}/p5')
-        TEST.run(f'gen 3 | map (x: x + 100) | write {testdir}/p6')
+        TEST.run(f'gen 3 | map (f: f + 100) | write {testdir}/p6')
         TEST.run(test=f'{testdir}/p5 < >> {testdir}/p7',
                  verification=f'{testdir}/p7 <',
                  expected_out=[0, 1, 2])
@@ -1201,19 +1201,19 @@ def test_redirect_file():
                  expected_out=[0, 1, 2, 100, 101, 102])
         # file < op_sequence
         TEST.run(f'gen 3 | write {testdir}/p8')
-        TEST.run(test=f'{testdir}/p8 < map (x: int(x) + 100)',
+        TEST.run(test=f'{testdir}/p8 < map (f: int(f) + 100)',
                  expected_out=[100, 101, 102])
         # file < op_sequence > file
         TEST.run(f'gen 3 | write {testdir}/p10')
-        TEST.run(test=f'{testdir}/p10 < map (x: int(x) + 100) > {testdir}/p11',
+        TEST.run(test=f'{testdir}/p10 < map (f: int(f) + 100) > {testdir}/p11',
                  verification=f'{testdir}/p11 <',
                  expected_out=[100, 101, 102])
         # file < op_sequence >> file
         TEST.run(f'gen 3 | write {testdir}/p12')
-        TEST.run(test=f'{testdir}/p12 < map (x: int(x) + 100) >> {testdir}/p13',
+        TEST.run(test=f'{testdir}/p12 < map (f: int(f) + 100) >> {testdir}/p13',
                  verification=f'{testdir}/p13 <',
                  expected_out=[100, 101, 102])
-        TEST.run(test=f'{testdir}/p12 < map (x: int(x) + 1000) >> {testdir}/p13',
+        TEST.run(test=f'{testdir}/p12 < map (f: int(f) + 1000) >> {testdir}/p13',
                  verification=f'{testdir}/p13 <',
                  expected_out=[100, 101, 102, 1000, 1001, 1002])
         # op_sequence -- tested adequately elsewhere
@@ -1226,18 +1226,18 @@ def test_redirect_file():
         TEST.run(test=f'gen 3 >> {testdir}/p15',
                  verification=f'{testdir}/p15 <',
                  expected_out=[0, 1, 2])
-        TEST.run(test=f'gen 3 | map (x: int(x) + 100) >> {testdir}/p15',
+        TEST.run(test=f'gen 3 | map (f: int(f) + 100) >> {testdir}/p15',
                  verification=f'{testdir}/p15 <',
                  expected_out=[0, 1, 2, 100, 101, 102])
         # > file
-        TEST.run(test=f'gen 6 | case (x: x % 2 == 0) (|> {testdir}/p16|) | select (x: False)',
+        TEST.run(test=f'gen 6 | case (f: f % 2 == 0) (|> {testdir}/p16|) | select (f: False)',
                  verification=f'{testdir}/p16 <',
                  expected_out=[0, 2, 4])
         # >> file
-        TEST.run(test=f'gen 6 | case (x: x % 2 == 0) (|>> {testdir}/p17|) | select (x: False)',
+        TEST.run(test=f'gen 6 | case (f: f % 2 == 0) (|>> {testdir}/p17|) | select (f: False)',
                  verification=f'{testdir}/p17 <',
                  expected_out=[0, 2, 4])
-        TEST.run(test=f'gen 6 | case (x: x % 2 == 1) (|>> {testdir}/p17|) | select (x: False)',
+        TEST.run(test=f'gen 6 | case (f: f % 2 == 1) (|>> {testdir}/p17|) | select (f: False)',
                  verification=f'{testdir}/p17 <',
                  expected_out=[0, 2, 4, 1, 3, 5])
         # ---------------------------------------------------------------------
@@ -1263,11 +1263,11 @@ def test_redirect_file():
                  verification=f'read {testdir}/g5',
                  expected_out=[0, 1, 2, 3, 4])
         # Store at end of pipelines arg
-        TEST.run(test=f'gen 10 | case (x: x % 2 == 0) (|map (x: x * 10) > {testdir}/e10x10|)',
+        TEST.run(test=f'gen 10 | case (f: f % 2 == 0) (|map (f: f * 10) > {testdir}/e10x10|)',
                  verification=f'read {testdir}/e10x10',
                  expected_out=[0, 20, 40, 60, 80])
         # Store as the entire pipelines arg
-        TEST.run(test=f'gen 10 | case (x: x % 2 == 0) (|> {testdir}/e10|)',
+        TEST.run(test=f'gen 10 | case (f: f % 2 == 0) (|> {testdir}/e10|)',
                  verification=f'read {testdir}/e10',
                  expected_out=[0, 2, 4, 6, 8])
         # Append
@@ -1279,32 +1279,32 @@ def test_redirect_file():
                  expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
         # Load at beginning of top-level pipelines
         TEST.run(test=f'gen 4 > {testdir}/g4',
-                 verification=f'{testdir}/g4 < map (x: -int(x))',
+                 verification=f'{testdir}/g4 < map (f: -int(f))',
                  expected_out=[0, -1, -2, -3])
         # Load in pipelines arg
-        TEST.run(f'gen 4 | map (x: (x, x * 10)) > {testdir}/x10')
-        TEST.run(f'gen 4 | map (x: (x, x * 100)) > {testdir}/x100')
-        TEST.run(f'{testdir}/x10 < map (x: eval(x)) | join (|{testdir}/x100 < map (x: eval(x))|)',
+        TEST.run(f'gen 4 | map (f: (f, f * 10)) > {testdir}/x10')
+        TEST.run(f'gen 4 | map (f: (f, f * 100)) > {testdir}/x100')
+        TEST.run(f'{testdir}/x10 < map (f: eval(f)) | join (|{testdir}/x100 < map (f: eval(f))|)',
                  expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
         # Bug 73
-        TEST.run(f'gen 3 | map (x: (x, x*10)) > {testdir}/a')
-        TEST.run(f'gen 3 | map (x: (x, x*100)) > {testdir}/b')
-        TEST.run(f'gen 3 | map (x: (x, x*1000)) > {testdir}/c')
-        TEST.run(f'{testdir}/a < (x: eval(x)) | join (|{testdir}/b < (x: eval(x))|) | join (|{testdir}/c < (x: eval(x))|)',
+        TEST.run(f'gen 3 | map (f: (f, f*10)) > {testdir}/a')
+        TEST.run(f'gen 3 | map (f: (f, f*100)) > {testdir}/b')
+        TEST.run(f'gen 3 | map (f: (f, f*1000)) > {testdir}/c')
+        TEST.run(f'{testdir}/a < (f: eval(f)) | join (|{testdir}/b < (f: eval(f))|) | join (|{testdir}/c < (f: eval(f))|)',
                  expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
         # Bug 74
         TEST.delete_files(f'{testdir}/a', f'{testdir}/b', f'{testdir}/c', f'{testdir}/d')
-        TEST.run(f'gen 3 | map (x: (x, x*10)) > {testdir}/a')
-        TEST.run(f'gen 3 | map (x: (x, x*100)) > {testdir}/b')
-        TEST.run(f'gen 3 | map (x: (x, x*1000)) > {testdir}/c')
-        TEST.run(f'{testdir}/a < (x: eval(x)) | join (|{testdir}/b < (x: eval(x))|) | join (|{testdir}/c < (x: eval(x))|) > {testdir}/d')
+        TEST.run(f'gen 3 | map (f: (f, f*10)) > {testdir}/a')
+        TEST.run(f'gen 3 | map (f: (f, f*100)) > {testdir}/b')
+        TEST.run(f'gen 3 | map (f: (f, f*1000)) > {testdir}/c')
+        TEST.run(f'{testdir}/a < (f: eval(f)) | join (|{testdir}/b < (f: eval(f))|) | join (|{testdir}/c < (f: eval(f))|) > {testdir}/d')
         TEST.run(f'{testdir}/d <',
                  expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
         # ---------------------------------------------------------------------
         # Erroneous syntax
         TEST.run(f'{testdir}/a >',
                  expected_err='excess tokens')
-        TEST.run('gen 3 < (x: x)',
+        TEST.run('gen 3 < (f: f)',
                  expected_err='excess tokens')
 
 
@@ -1322,7 +1322,7 @@ def test_redirect_var():
              expected_out=[0, 1, 2])
     # var <$ >>$ var
     TEST.run('gen 3 | store p5')
-    TEST.run('gen 3 | (x: x + 100) | store p6')
+    TEST.run('gen 3 | (f: f + 100) | store p6')
     TEST.run('p5 <$ >>$ p7',
              verification='p7 <$',
              expected_out=[0, 1, 2])
@@ -1331,19 +1331,19 @@ def test_redirect_var():
              expected_out=[0, 1, 2, 100, 101, 102])
     # var <$ op_sequence
     TEST.run('gen 3 | store p8')
-    TEST.run(test='p8 <$ map (x: x + 100)',
+    TEST.run(test='p8 <$ map (f: f + 100)',
              expected_out=[100, 101, 102])
     # var <$ op_sequence >$ var
     TEST.run('gen 3 | store p10')
-    TEST.run(test='p10 <$ map (x: x + 100) >$ p11',
+    TEST.run(test='p10 <$ map (f: f + 100) >$ p11',
              verification='p11 <$',
              expected_out=[100, 101, 102])
     # var <$ op_sequence >>$ var
     TEST.run('gen 3 | store p12')
-    TEST.run(test='p12 <$ map (x: x + 100) >>$ p13',
+    TEST.run(test='p12 <$ map (f: f + 100) >>$ p13',
              verification='p13 <$',
              expected_out=[100, 101, 102])
-    TEST.run(test='p12 <$ map (x: x + 1000) >>$ p13',
+    TEST.run(test='p12 <$ map (f: f + 1000) >>$ p13',
              verification='p13 <$',
              expected_out=[100, 101, 102, 1000, 1001, 1002])
     # op_sequence -- tested adequately elsewhere
@@ -1355,18 +1355,18 @@ def test_redirect_var():
     TEST.run(test='gen 3 >>$ p15',
              verification='p15 <$',
              expected_out=[0, 1, 2])
-    TEST.run(test='gen 3 | map (x: x + 100) >>$ p15',
+    TEST.run(test='gen 3 | map (f: f + 100) >>$ p15',
              verification='p15 <$',
              expected_out=[0, 1, 2, 100, 101, 102])
     # >$ var
-    TEST.run(test='gen 6 | case (x: x % 2 == 0) (|>$ p16|) | select (x: False)',
+    TEST.run(test='gen 6 | case (f: f % 2 == 0) (|>$ p16|) | select (f: False)',
              verification='p16 <$',
              expected_out=[0, 2, 4])
     # >>$ var
-    TEST.run(test='gen 6 | case (x: x % 2 == 0) (|>>$ p17|) | select (x: False)',
+    TEST.run(test='gen 6 | case (f: f % 2 == 0) (|>>$ p17|) | select (f: False)',
              verification='p17 <$',
              expected_out=[0, 2, 4])
-    TEST.run(test='gen 6 | case (x: x % 2 == 1) (|>>$ p17|) | select (x: False)',
+    TEST.run(test='gen 6 | case (f: f % 2 == 1) (|>>$ p17|) | select (f: False)',
              verification='p17 <$',
              expected_out=[0, 2, 4, 1, 3, 5])
     # ---------------------------------------------------------------------
@@ -1392,11 +1392,11 @@ def test_redirect_var():
              verification='load g5',
              expected_out=[0, 1, 2, 3, 4])
     # Store at end of pipelines arg
-    TEST.run(test='gen 10 | case (x: x % 2 == 0) (|map (x: x * 10) >$ e10x10|)',
+    TEST.run(test='gen 10 | case (f: f % 2 == 0) (|map (f: f * 10) >$ e10x10|)',
              verification='load e10x10',
              expected_out=[0, 20, 40, 60, 80])
     # Store as the entire pipelines arg
-    TEST.run(test='gen 10 | case (x: x % 2 == 0) (|>$ e10|)',
+    TEST.run(test='gen 10 | case (f: f % 2 == 0) (|>$ e10|)',
              verification='load e10',
              expected_out=[0, 2, 4, 6, 8])
     # Append
@@ -1408,23 +1408,23 @@ def test_redirect_var():
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     # Load at beginning of top-level pipelines
     TEST.run(test='gen 4 >$ g4',
-             verification='g4 <$ map (x: -x)',
+             verification='g4 <$ map (f: -f)',
              expected_out=[0, -1, -2, -3])
     # Load in pipelines arg
-    TEST.run('gen 4 | map (x: (x, x * 10)) >$ x10')
-    TEST.run('gen 4 | map (x: (x, x * 100)) >$ x100')
+    TEST.run('gen 4 | map (f: (f, f * 10)) >$ x10')
+    TEST.run('gen 4 | map (f: (f, f * 100)) >$ x100')
     TEST.run('x10 <$ join (|x100 <$|)',
              expected_out=[(0, 0, 0), (1, 10, 100), (2, 20, 200), (3, 30, 300)])
     # Bug 73
-    TEST.run('gen 3 | map (x: (x, x*10)) >$ a')
-    TEST.run('gen 3 | map (x: (x, x*100)) >$ b')
-    TEST.run('gen 3 | map (x: (x, x*1000)) >$ c')
+    TEST.run('gen 3 | map (f: (f, f*10)) >$ a')
+    TEST.run('gen 3 | map (f: (f, f*100)) >$ b')
+    TEST.run('gen 3 | map (f: (f, f*1000)) >$ c')
     TEST.run('a <$ join (|b <$|) | join (|c <$|)',
              expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
     # Bug 74
-    TEST.run('gen 3 | map (x: (x, x*10)) >$ a')
-    TEST.run('gen 3 | map (x: (x, x*100)) >$ b')
-    TEST.run('gen 3 | map (x: (x, x*1000)) >$ c')
+    TEST.run('gen 3 | map (f: (f, f*10)) >$ a')
+    TEST.run('gen 3 | map (f: (f, f*100)) >$ b')
+    TEST.run('gen 3 | map (f: (f, f*1000)) >$ c')
     TEST.run('a <$ join (|b <$|) | join (|c <$|) >$ d')
     TEST.run('d <$',
              expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
@@ -1437,15 +1437,15 @@ def test_redirect_var():
     TEST.run('z = (| gen 3 |)')
     TEST.run('z >$',
              expected_err='followed by excess tokens')
-    TEST.run('gen 3 < (x: x)',
+    TEST.run('gen 3 < (f: f)',
              expected_err='excess tokens')
 
 
 @timeit
 def test_loop():
-    TEST.run('loop (0) [select (x: x < 3) | emit | map (x: x + 1)]',
+    TEST.run('loop (0) [select (f: f < 3) | emit | map (f: f + 1)]',
              expected_out=[0, 1, 2])
-    TEST.run('loop ((0, 1)) [select (x, y: x < 1000000) | emit | map (x, y: (y, x + y))] | map (x, y: x)',
+    TEST.run('loop ((0, 1)) [select (f, y: f < 1000000) | emit | map (f, y: (y, f + y))] | map (f, y: f)',
              expected_out=[0, 1, 1, 2, 3, 5, 8, 13, 21,
                            34, 55, 89, 144, 233, 377, 610,
                            987, 1597, 2584, 4181, 6765, 10946,
@@ -1455,29 +1455,29 @@ def test_loop():
     TEST.run('gen 3 | loop [select (n: n >= 0) | emit | map (n: n - 1)]',
              expected_out=[0, 1, 0, 2, 1, 0])
     # Bug 70
-    TEST.run('p = [loop (0) [select (x: x < 5) | emit | map (x: x+1)]')
+    TEST.run('p = [loop (0) [select (f: f < 5) | emit | map (f: f+1)]')
     TEST.run('p',
              expected_out=[0, 1, 2, 3, 4])
 
 
 @timeit
 def test_case():
-    TEST.run(test='gen 5 1 | case (x: x < 3) (| (x: (100 * x)) |) '
-                  '               (x: x > 3) (| (x: (1000 * x)) |)',
+    TEST.run(test='gen 5 1 | case (f: f < 3) (| (f: (100 * f)) |) '
+                  '               (f: f > 3) (| (f: (1000 * f)) |)',
              expected_out=[100, 200, 4000, 5000])
-    TEST.run(test='gen 5 1 | case (x: x < 3) (| (x: (100 * x)) |) (| (x: (-x)) |)',
+    TEST.run(test='gen 5 1 | case (f: f < 3) (| (f: (100 * f)) |) (| (f: (-f)) |)',
              expected_out=[100, 200, -3, -4, -5])
-    TEST.run(test='gen 5 1 | case (x: x == 1) (| (x: "one") |) '
-                  '               (x: x == 2) (| (x: "two") |) '
-                  '               (x: x == 3) (| (x: "three") |) ',
+    TEST.run(test='gen 5 1 | case (f: f == 1) (| (f: "one") |) '
+                  '               (f: f == 2) (| (f: "two") |) '
+                  '               (f: f == 3) (| (f: "three") |) ',
              expected_out=['one', 'two', 'three'])
     # Just the default branch isn't allowed
-    TEST.run(test='gen 5 1 | case (| (x: (100 * x)) |)',
+    TEST.run(test='gen 5 1 | case (| (f: (100 * f)) |)',
              expected_err='case requires at least 2 arguments')
     # Function/pipeline confusion
-    TEST.run(test='gen 5 1 | case (| (x: (100 * x)) |) (| (x: (-x)) |) (x: x < 3)',
+    TEST.run(test='gen 5 1 | case (| (f: (100 * f)) |) (| (f: (-f)) |) (f: f < 3)',
              expected_err='Expected function')
-    TEST.run(test='gen 5 1 | case (x: x < 3) (123)',
+    TEST.run(test='gen 5 1 | case (f: f < 3) (123)',
              expected_err='Expected pipeline')
 
 @timeit
@@ -1546,7 +1546,7 @@ def test_read():
                                ('3', '4.5', 'm,n')])
         # CSV with labels
         TEST.run(f'cd {testdir}')
-        TEST.run('ls f1.csv | read -cl | map (f, x, y, z: (str(f), x, y, z))',
+        TEST.run('ls f1.csv | read -cl | map (f, f, y, z: (str(f), f, y, z))',
                  expected_out=[('f1.csv', '1', '2.3', 'ab'),
                                ('f1.csv', '2', '3.4', 'xy'),
                                ('f1.csv', '3', '4.5', 'm,n')])
@@ -1557,7 +1557,7 @@ def test_read():
                                ('2', '3.4', 'xy')])
         # TSV with labels
         TEST.run(f'cd {testdir}')
-        TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: (str(f), x, y, z))',
+        TEST.run('ls f2.tsv | read -tl | map (f, f, y, z: (str(f), f, y, z))',
                  expected_out=[('f2.tsv', '1', '2.3', 'ab'),
                                ('f2.tsv', '2', '3.4', 'xy')])
         # --pickle testing is done in test_write()
@@ -1653,7 +1653,7 @@ def test_read():
 def test_intersect():
     TEST.reset_environment()
     # Empty inputs
-    TEST.run('gen 1 | select (*x: False) >$ empty')
+    TEST.run('gen 1 | select (*f: False) >$ empty')
     TEST.run('gen 3 | intersect (|empty <$|)',
              expected_out=[])
     TEST.run('empty <$ intersect (|empty <$|)',
@@ -1666,27 +1666,27 @@ def test_intersect():
     TEST.run('gen 3 | intersect (|gen 1 1|)',
              expected_out=[1])
     # Duplicates
-    TEST.run('gen 5 | map (x: [x] * x) | expand >$ a')
-    TEST.run('gen 5 | map (x: [x] * 2) | expand >$ b')
+    TEST.run('gen 5 | map (f: [f] * f) | expand >$ a')
+    TEST.run('gen 5 | map (f: [f] * 2) | expand >$ b')
     TEST.run('a <$ intersect (|b <$|) | sort',
              expected_out=[1, 2, 2, 3, 3, 4, 4])
     # Composite elements
     TEST.run('gen 3 2 | '
-             'map (x: [(x, x * 100)] * x) | '
+             'map (f: [(f, f * 100)] * f) | '
              'expand | '
              'intersect (|gen 3 2 | '
-             '           map (x: [(x, x * 100)] * 3) | '
+             '           map (f: [(f, f * 100)] * 3) | '
              '           expand|) |'
              'sort',
              expected_out=[(2, 200), (2, 200),
                            (3, 300), (3, 300), (3, 300),
                            (4, 400), (4, 400), (4, 400)])
     # Lists cannot be hashed
-    TEST.run('gen 2 | (x: (x, (x, x))) | intersect (|gen 2 1 | (x: (x, (x, x)))|)',
+    TEST.run('gen 2 | (f: (f, (f, f))) | intersect (|gen 2 1 | (f: (f, (f, f)))|)',
              expected_out=[(1, (1, 1))])
-    TEST.run('gen 2 | (x: (x, [x, x])) | intersect (|gen 2 1 | (x: (x, (x, x)))|)',
+    TEST.run('gen 2 | (f: (f, [f, f])) | intersect (|gen 2 1 | (f: (f, (f, f)))|)',
              expected_err='not hashable')
-    TEST.run('gen 2 | (x: (x, (x, x))) | intersect (|gen 2 1 | (x: (x, [x, x]))|)',
+    TEST.run('gen 2 | (f: (f, (f, f))) | intersect (|gen 2 1 | (f: (f, [f, f]))|)',
              expected_err='not hashable')
     # Multiple pipelines
     TEST.run('g41 = (| gen 4 1 |)')
@@ -1699,22 +1699,22 @@ def test_intersect():
     TEST.run('g43 | intersect g41 g42', expected_out=[3, 4])
     TEST.run('g43 | intersect g42 g41', expected_out=[3, 4])
     # Test duplicate handling
-    TEST.run('x0 = (| (["x"] * 0) | expand |)')
-    TEST.run('x1 = (| (["x"] * 1) | expand |)')
-    TEST.run('x2 = (| (["x"] * 2) | expand |)')
-    TEST.run('x3 = (| (["x"] * 3) | expand |)')
-    TEST.run('x1 | intersect x2', expected_out=['x'])
-    TEST.run('x2 | intersect x1', expected_out=['x'])
-    TEST.run('x1 | intersect x3', expected_out=['x'])
-    TEST.run('x3 | intersect x1', expected_out=['x'])
-    TEST.run('x2 | intersect x3', expected_out=['x', 'x'])
-    TEST.run('x3 | intersect x2', expected_out=['x', 'x'])
-    TEST.run('x1 | intersect x2 x3', expected_out=['x'])
-    TEST.run('x1 | intersect x3 x2', expected_out=['x'])
-    TEST.run('x2 | intersect x1 x3', expected_out=['x'])
-    TEST.run('x2 | intersect x3 x1', expected_out=['x'])
-    TEST.run('x3 | intersect x1 x2', expected_out=['x'])
-    TEST.run('x3 | intersect x2 x1', expected_out=['x'])
+    TEST.run('x0 = (| (["f"] * 0) | expand |)')
+    TEST.run('x1 = (| (["f"] * 1) | expand |)')
+    TEST.run('x2 = (| (["f"] * 2) | expand |)')
+    TEST.run('x3 = (| (["f"] * 3) | expand |)')
+    TEST.run('x1 | intersect x2', expected_out=['f'])
+    TEST.run('x2 | intersect x1', expected_out=['f'])
+    TEST.run('x1 | intersect x3', expected_out=['f'])
+    TEST.run('x3 | intersect x1', expected_out=['f'])
+    TEST.run('x2 | intersect x3', expected_out=['f', 'f'])
+    TEST.run('x3 | intersect x2', expected_out=['f', 'f'])
+    TEST.run('x1 | intersect x2 x3', expected_out=['f'])
+    TEST.run('x1 | intersect x3 x2', expected_out=['f'])
+    TEST.run('x2 | intersect x1 x3', expected_out=['f'])
+    TEST.run('x2 | intersect x3 x1', expected_out=['f'])
+    TEST.run('x3 | intersect x1 x2', expected_out=['f'])
+    TEST.run('x3 | intersect x2 x1', expected_out=['f'])
     TEST.run('x0 | intersect x2 x3', expected_out=[])
     TEST.run('x2 | intersect x3 x0', expected_out=[])
 
@@ -1723,7 +1723,7 @@ def test_intersect():
 def test_union():
     TEST.reset_environment()
     # Empty inputs
-    TEST.run('gen 1 | select (*x: False) >$ empty')
+    TEST.run('gen 1 | select (*f: False) >$ empty')
     TEST.run('empty <$ union (|empty <$|)',
              expected_out=[])
     TEST.run('gen 3 | union (|empty <$|) | sort',
@@ -1737,7 +1737,7 @@ def test_union():
     TEST.run('gen 3 | union (|gen 3|) | sort',
              expected_out=[0, 0, 1, 1, 2, 2])
     # Composite elements
-    TEST.run('gen 4 | map (x: (x, x*100)) | union (|gen 4 2 | map (x: (x, x*100))|) | sort',
+    TEST.run('gen 4 | map (f: (f, f*100)) | union (|gen 4 2 | map (f: (f, f*100))|) | sort',
              expected_out=[(0, 0), (1, 100), (2, 200), (2, 200), (3, 300), (3, 300), (4, 400), (5, 500)])
     # Multiple inputs
     TEST.run('gen 3 100 | union (|gen 3 200|) | sort',
@@ -1748,21 +1748,21 @@ def test_union():
 
 @timeit
 def test_filter():
-    TEST.run('gen 6 | (x: (x, x)) | expand | filter (| gen 3|)',
+    TEST.run('gen 6 | (f: (f, f)) | expand | filter (| gen 3|)',
              expected_out=[0, 0, 1, 1, 2, 2])
-    TEST.run('gen 6 | (x: (x, x)) | expand | filter -k (| gen 3|)',
+    TEST.run('gen 6 | (f: (f, f)) | expand | filter -k (| gen 3|)',
              expected_out=[0, 0, 1, 1, 2, 2])
-    TEST.run('gen 6 | (x: (x, x)) | expand | filter --keep (| gen 3|)',
+    TEST.run('gen 6 | (f: (f, f)) | expand | filter --keep (| gen 3|)',
              expected_out=[0, 0, 1, 1, 2, 2])
-    TEST.run('gen 6 | (x: (x, x)) | expand | filter -d (| gen 3|)',
+    TEST.run('gen 6 | (f: (f, f)) | expand | filter -d (| gen 3|)',
              expected_out=[3, 3, 4, 4, 5, 5])
-    TEST.run('gen 6 | (x: (x, x)) | expand | filter --discard (| gen 3|)',
+    TEST.run('gen 6 | (f: (f, f)) | expand | filter --discard (| gen 3|)',
              expected_out=[3, 3, 4, 4, 5, 5])
-    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) (| gen 3 |)',
+    TEST.run('gen 6 | (f: (f, f)) | filter -c (f, y: f) (| gen 3 |)',
              expected_out=[(0, 0), (1, 1), (2, 2)])
-    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) -k (| gen 3 |)',
+    TEST.run('gen 6 | (f: (f, f)) | filter -c (f, y: f) -k (| gen 3 |)',
              expected_out=[(0, 0), (1, 1), (2, 2)])
-    TEST.run('gen 6 | (x: (x, x)) | filter -c (x, y: x) -d (| gen 3 |)',
+    TEST.run('gen 6 | (f: (f, f)) | filter -c (f, y: f) -d (| gen 3 |)',
              expected_out=[(3, 3), (4, 4), (5, 5)])
     TEST.run('gen 6 | filter -d -k (| gen 3 |)',
              expected_err='Cannot specify more than one')
@@ -1772,7 +1772,7 @@ def test_filter():
 def test_difference():
     TEST.reset_environment()
     # Empty inputs
-    TEST.run('gen 1 | select (*x: False) >$ empty')
+    TEST.run('gen 1 | select (*f: False) >$ empty')
     TEST.run('empty <$ difference (|empty <$|)',
              expected_out=[])
     TEST.run('gen 3 | difference (|empty <$|) | sort',
@@ -1787,22 +1787,22 @@ def test_difference():
     TEST.run('gen 6 | difference (|gen 6 3|) | sort',
              expected_out=[0, 1, 2])
     # Duplicates
-    TEST.run('gen 5 | map (x: [x] * x) | expand | difference (|gen 5 | map (x: [x] * 2) | expand|) | sort',
+    TEST.run('gen 5 | map (f: [f] * f) | expand | difference (|gen 5 | map (f: [f] * 2) | expand|) | sort',
              expected_out=[3, 4, 4])
     # Composite elements
     TEST.run('gen 5 2 | '
-             'map (x: [(x, x*100)] * x) | '
+             'map (f: [(f, f*100)] * f) | '
              'expand | difference (|gen 5 2 | '
-             '                     map (x: [(x, x*100)] * 3) | '
+             '                     map (f: [(f, f*100)] * 3) | '
              '                     expand|) | '
              'sort',
              expected_out=[(4, 400), (5, 500), (5, 500), (6, 600), (6, 600), (6, 600)])
     # Lists aren't hashable
-    TEST.run('gen 3 | (x: (x, (x, x))) | difference (|gen 2 | (x: (x, (x, x)))|)',
+    TEST.run('gen 3 | (f: (f, (f, f))) | difference (|gen 2 | (f: (f, (f, f)))|)',
              expected_out=[(2, (2, 2))])
-    TEST.run('gen 3 | (x: (x, [x, x])) | difference (|gen 2 | (x: (x, (x, x)))|)',
+    TEST.run('gen 3 | (f: (f, [f, f])) | difference (|gen 2 | (f: (f, (f, f)))|)',
              expected_err='not hashable')
-    TEST.run('gen 3 | (x: (x, (x, x))) | difference (|gen 2 | (x: (x, [x, x]))|)',
+    TEST.run('gen 3 | (f: (f, (f, f))) | difference (|gen 2 | (f: (f, [f, f]))|)',
              expected_err='not hashable')
 
 
@@ -1810,7 +1810,7 @@ def test_difference():
 def test_args():
     TEST.reset_environment()
     # gen
-    TEST.run('gen 5 1 | args (|n: gen (n)|) | map (x: -x)',
+    TEST.run('gen 5 1 | args (|n: gen (n)|) | map (f: -f)',
              expected_out=[0, 0, -1, 0, -1, -2, 0, -1, -2, -3, 0, -1, -2, -3, -4])
     TEST.run('gen 6 1 | args (|count, start: gen (count) (start)|)',
              expected_out=[2, 4, 5, 6, 6, 7, 8, 9, 10])
@@ -1844,16 +1844,16 @@ def test_args():
         TEST.run('gen 5 | args (|n: echo X(n)Y |)',
                  expected_out=['X0Y', 'X1Y', 'X2Y', 'X3Y', 'X4Y'])
         # expand
-        TEST.run('gen 3 | args (|x: (((1, 2), (3, 4), (5, 6))) | expand (x)|)',
+        TEST.run('gen 3 | args (|f: (((1, 2), (3, 4), (5, 6))) | expand (f)|)',
                  expected_out=[(1, (3, 4), (5, 6)), (2, (3, 4), (5, 6)),
                                ((1, 2), 3, (5, 6)), ((1, 2), 4, (5, 6)),
                                ((1, 2), (3, 4), 5), ((1, 2), (3, 4), 6)])
         # sql
         if SQL:
-            TEST.run('sql "drop table if exists t" | select (x: False)')
-            TEST.run('sql "create table t(x int)" | select (x: False)')
-            TEST.run(test='gen 5 | args (|x: sql "insert into t values(%s)" (x)|)',
-                     verification='sql "select * from t order by x"',
+            TEST.run('sql "drop table if exists t" | select (f: False)')
+            TEST.run('sql "create table t(f int)" | select (f: False)')
+            TEST.run(test='gen 5 | args (|f: sql "insert into t values(%s)" (f)|)',
+                     verification='sql "select * from t order by f"',
                      expected_out=[0, 1, 2, 3, 4])
         # window
         TEST.run('gen 3 | args (|w: gen 10 | window -d (w)|)',
@@ -1866,22 +1866,22 @@ def test_args():
                                1101, 1102, 1103, 1102, 1103, 1104, 1103, 1104, 1105,
                                1102, 1103, 1104, 1103, 1104, 1105, 1104, 1105, 1106])
         # --all
-        TEST.run('gen 10 | args --all (|x: ("".join([str(n) for n in x]))|)',
+        TEST.run('gen 10 | args --all (|f: ("".join([str(n) for n in f]))|)',
                  expected_out=['0123456789'])
         # no input to args
-        TEST.run('gen 3 | select (x: False) | args (|n: map (x: -x)|)',
+        TEST.run('gen 3 | select (f: False) | args (|n: map (f: -f)|)',
                  expected_out=[])
-        TEST.run('gen 3 | select (x: False) | args --all (|n: map (x: -x)|)',
+        TEST.run('gen 3 | select (f: False) | args --all (|n: map (f: -f)|)',
                  expected_out=[])
         # negative testing
-        TEST.run('gen 3 | args --all (|x, y: (123) |)',
+        TEST.run('gen 3 | args --all (|f, y: (123) |)',
                  expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
         TEST.run('gen 3 | args --all (| (123) |)',
                  expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
         TEST.run('gen 3 | args (| (123) |)',
                  expected_err="The args pipelines must be parameterized")
         # Bug 94
-        TEST.run('gen 4 1 | args (|n: gen (n)|) | window (x: x == 0)',
+        TEST.run('gen 4 1 | args (|n: gen (n)|) | window (f: f == 0)',
                  expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])
         # Bug 116
         TEST.run('g = (|n: gen (n)|)')
@@ -1893,7 +1893,7 @@ def test_args():
             os.system(f'echo hello > {testdir}/hello')
             os.system(f'echo hello >> {testdir}/hello')
         # Bug 237
-        TEST.run('gen 3 | args -a (x: (x))',
+        TEST.run('gen 3 | args -a (f: (f))',
                  expected_err='must be a Pipeline')
 
 
@@ -1943,7 +1943,7 @@ def test_env():
 
 @timeit
 def test_pos():
-    TEST.run('gen 5 | (x: (x, pos())) | select (x, p1: x % 2 == 0) | (x, p1: (x, p1, pos()))',
+    TEST.run('gen 5 | (f: (f, pos())) | select (f, p1: f % 2 == 0) | (f, p1: (f, p1, pos()))',
              expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
 
 @timeit
@@ -2039,7 +2039,7 @@ def test_json():
 
 @timeit
 def test_struct():
-    TEST.run('gen 3 | (x: o(x=x, y=x+1)) | (o: o.x + o.y)',
+    TEST.run('gen 3 | (f: o(f=f, y=f+1)) | (o: o.f + o.y)',
              expected_out=[1, 3, 5])
 
 
@@ -2051,11 +2051,11 @@ def test_cast():
              expected_out=[0.0, 1.0, 2.0])
     TEST.run('gen 3 | cast float float',
              expected_out=[0.0, 1.0, 2.0])
-    TEST.run('gen 3 | (x: (x, x, x)) | cast float str',
+    TEST.run('gen 3 | (f: (f, f, f)) | cast float str',
              expected_out=[(0.0, '0', 0),
                            (1.0, '1', 1),
                            (2.0, '2', 2)])
-    TEST.run('gen 1 | (x: (x, x, x)) | cast float str | (a, b, c: (type(a), type(b), type(c)))',
+    TEST.run('gen 1 | (f: (f, f, f)) | cast float str | (a, b, c: (type(a), type(b), type(c)))',
              expected_out=[(float, str, int)])
     TEST.run('((None, None, None)) | cast str float',
              expected_out=[(None, None, None)])
@@ -2172,7 +2172,7 @@ def test_download():
 
 @timeit
 def test_bug_126():
-    TEST.run('fact = (|x: gen (x) 1 | args (|n: gen (n) 1 | red * | map (f: (n, f))|)|)')
+    TEST.run('fact = (|f: gen (f) 1 | args (|n: gen (n) 1 | red * | map (f: (n, f))|)|)')
     TEST.run(test='fact (5) >$ f',
              verification='f <$',
              expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
@@ -2180,7 +2180,7 @@ def test_bug_126():
 
 @timeit
 def test_bug_136():
-    TEST.run('gen 3 1 | args (|n: gen 2 100 | (x: x+n)|) | red +',
+    TEST.run('gen 3 1 | args (|n: gen 2 100 | (f: f+n)|) | red +',
              expected_out=[615])
 
 
@@ -2207,14 +2207,14 @@ def test_bug_10():
     TEST.run('unique', expected_err='cannot be the first operator in a pipeline')
     TEST.run('window -o 2', expected_err='cannot be the first operator in a pipeline')
     TEST.run('map (3)', expected_out=[3])
-    TEST.run('args(|x: gen(3)|)', expected_err='cannot be the first operator in a pipeline')
+    TEST.run('args(|f: gen(3)|)', expected_err='cannot be the first operator in a pipeline')
 
 
 @timeit
 def test_bug_154():
     TEST.reset_environment()
-    TEST.run('gen 3 >$ x')
-    TEST.run('x <$ (y: -y)', expected_out=[0, -1, -2])
+    TEST.run('gen 3 >$ f')
+    TEST.run('f <$ (y: -y)', expected_out=[0, -1, -2])
 
 
 @timeit
@@ -2248,26 +2248,26 @@ def test_bug_190():
         os.system(f'echo xb2 > {testdir}/b2')
         TEST.run(f'cd {testdir}')
         # Test globbing for native executables
-        TEST.run('grep x [ab]2 | sort',
+        TEST.run('grep f [ab]2 | sort',
                  expected_out=['a2:xa2', 'b2:xb2'])
-        TEST.run('grep x a[1-2] | sort',
+        TEST.run('grep f a[1-2] | sort',
                  expected_out=['a1:xa1', 'a2:xa2'])
-        TEST.run('grep x [ab][1-2] | sort',
+        TEST.run('grep f [ab][1-2] | sort',
                  expected_out=['a1:xa1', 'a2:xa2', 'b1:xb1', 'b2:xb2'])
-        TEST.run('grep x a* | sort',
+        TEST.run('grep f a* | sort',
                  expected_out=['a1:xa1', 'a2:xa2'])
-        TEST.run('grep x *2 | sort',
+        TEST.run('grep f *2 | sort',
                  expected_out=['a2:xa2', 'b2:xb2'])
-        TEST.run('grep x a? | sort',
+        TEST.run('grep f a? | sort',
                  expected_out=['a1:xa1', 'a2:xa2'])
-        TEST.run('grep x ?2 | sort',
+        TEST.run('grep f ?2 | sort',
                  expected_out=['a2:xa2', 'b2:xb2'])
         # Test globbing for native executables run via explicit invocation of bash (which is a marcel op)
-        TEST.run('bash grep x [ab]2 | sort',
+        TEST.run('bash grep f [ab]2 | sort',
                  expected_out=['a2:xa2', 'b2:xb2'])
-        TEST.run('bash grep x a[1-2] | sort',
+        TEST.run('bash grep f a[1-2] | sort',
                  expected_out=['a1:xa1', 'a2:xa2'])
-        TEST.run('bash grep x [ab][1-2] | sort',
+        TEST.run('bash grep f [ab][1-2] | sort',
                  expected_out=['a1:xa1', 'a2:xa2', 'b1:xb1', 'b2:xb2'])
         # Test globbing for ops that take shell args
         TEST.run('ls [ab]2 | (f: f.name) | sort',
@@ -2353,15 +2353,15 @@ def test_bug_200():
 
 @timeit
 def test_bug_202():
-    TEST.run('env -d x | select (*x: False)')
-    TEST.run('p = (| x |)')
+    TEST.run('env -d f | select (*f: False)')
+    TEST.run('p = (| f |)')
     TEST.run('p', expected_err="not executable")
     TEST.run('p 4', expected_err='Too many arguments')
-    TEST.run('x = (| gen 3 |)')
+    TEST.run('f = (| gen 3 |)')
     TEST.run('p 4', expected_err='Too many arguments')
     TEST.run('p', expected_out=[0, 1, 2])
-    TEST.run('p = (| x 4 |)')
-    TEST.run('x = (| n: gen (int(n)) |)')
+    TEST.run('p = (| f 4 |)')
+    TEST.run('f = (| n: gen (int(n)) |)')
     TEST.run('p', expected_out=[0, 1, 2, 3])
     TEST.run('p 6', expected_err='Too many arguments')
 
@@ -2406,11 +2406,11 @@ def test_bug_206():
              verification='pwd | (d: str(d))',
              expected_out=base)
     # Errors
-    TEST.run('cd x*',
+    TEST.run('cd f*',
              expected_err='Too many paths')
     TEST.run("pwd | (d: str(d))",
              expected_out=base)
-    TEST.run('pushd x*',
+    TEST.run('pushd f*',
              expected_err='Too many paths')
     TEST.run("pwd | (d: str(d))",
              expected_out=base)
@@ -2436,9 +2436,9 @@ def test_bug_206():
 
 @timeit
 def test_bug_212():
-    TEST.run('gen 3 | args (| x: ((x, -x)) |)',
+    TEST.run('gen 3 | args (| f: ((f, -f)) |)',
              expected_out=[(0, 0), (1, -1), (2, -2)])
-    TEST.run('sudo (| gen 3 | args (| x: ((x, -x)) |) |)',
+    TEST.run('sudo (| gen 3 | args (| f: ((f, -f)) |) |)',
              expected_out=[(0, 0), (1, -1), (2, -2)])
 
 
@@ -2455,19 +2455,19 @@ def test_bug_230():
     with TestDir(TEST.env) as testdir:
         TEST.cd(testdir)
         os.system('touch a1 a2')
-        TEST.run('bash ls -l a? | (x: (x[-2:]))',
+        TEST.run('bash ls -l a? | (f: (f[-2:]))',
                  expected_out=['a1', 'a2'])
-        TEST.run('bash "ls -i ??" | (x: (x[-2:]))',
+        TEST.run('bash "ls -i ??" | (f: (f[-2:]))',
                  expected_out=['a1', 'a2'])
 
 
 @timeit
 def test_bug_247():
-    TEST.run('gen 3 | (x: x / (1-x))',
+    TEST.run('gen 3 | (f: f / (1-f))',
              expected_out=[0.0, Error('division by zero'), -2.0])
-    TEST.run('gen 3 | args (| x: (x / (1-x)) |)',
+    TEST.run('gen 3 | args (| f: (f / (1-f)) |)',
              expected_out=[0.0, Error('division by zero'), -2.0])
-    TEST.run('gen 6 | case (x: x%2==0) (| (x: x // (x-2)) |) (| (x: x * 100) |)',
+    TEST.run('gen 6 | case (f: f%2==0) (| (f: f // (f-2)) |) (| (f: f * 100) |)',
              expected_out=[0, 100, Error('by zero'), 300, 2, 500])
 
 
@@ -2508,17 +2508,17 @@ def test_pipeline_vars():
     TEST.run('g64 = (| gen 6 4 |)')
     TEST.run('g61 | difference g64', expected_out=[1, 2, 3])
     # args
-    TEST.run('p = (| args (| n: gen 3 100 | (x: (n, x)) |) |)')
+    TEST.run('p = (| args (| n: gen 3 100 | (f: (n, f)) |) |)')
     TEST.run('gen 3 1 | p',
              expected_out=[(1, 100), (1, 101), (1, 102),
                            (2, 100), (2, 101), (2, 102),
                            (3, 100), (3, 101), (3, 102)])
-    TEST.run('q = (| args (| x, y: (x + y) |) |)')
+    TEST.run('q = (| args (| f, y: (f + y) |) |)')
     TEST.run('gen 10 | q', expected_out=[1, 5, 9, 13, 17])
     # join
-    TEST.run('x100 = (| gen 3 1 | (x: (x, x * 100)) |)')
-    TEST.run('x1000 = (| gen 3 1 | (x: (x, x * 1000)) |)')
-    TEST.run('gen 3 1 | (x: (x, x * 10)) | join x100 | join x1000',
+    TEST.run('x100 = (| gen 3 1 | (f: (f, f * 100)) |)')
+    TEST.run('x1000 = (| gen 3 1 | (f: (f, f * 1000)) |)')
+    TEST.run('gen 3 1 | (f: (f, f * 10)) | join x100 | join x1000',
              expected_out=[(1, 10, 100, 1000), (2, 20, 200, 2000), (3, 30, 300, 3000)])
     # remote
     node1 = marcel.object.cluster.Host(None, TEST.env.getvar('NODE1'))

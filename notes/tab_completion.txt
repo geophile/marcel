@@ -490,3 +490,21 @@ suggestion. E.g. input is x with completions xa, xb, xc. WordCompleter
 shows those options as soon as you type x. I don't want that. I want
 suggestions when tab is pressed. pt has a zillion options, so it would
 be surprising if this were not possible.
+
+Things that must be replaced by prompt_toolkit:
+
+- tab completion
+
+- history
+
+- edit command
+
+Things that might be replaced by prompt_toolkit:
+
+- multilinereader
+
+- prompt/continuation prompt
+
+Fix:
+
+- help completion
