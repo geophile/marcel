@@ -610,7 +610,7 @@ def test_bash():
         who = 'world'
         # Test command string
         TEST.run(lambda: run(cd(testdir)))
-        TEST.run(lambda: run(bash('ls f*')),
+        TEST.run(lambda: run(bash('ls x*')),
                  expected_out=['x1', 'x2'])
         TEST.run(lambda: run(bash('ls -l *1') | map(lambda x: x.split()[-1])),
                  expected_out=['x1', 'y1'])
@@ -854,11 +854,11 @@ def test_dir_stack():
         TEST.run(test=lambda: run(pwd() | map(lambda f: str(f))),
                  expected_out=f'{testdir}')
         # popd: Arrange for a deleted dir on the stack and try popding into it.
-        os.system('rm -rf f y')
-        os.system('mkdir f y')
-        TEST.run(test=lambda: run(cd('f')))
+        os.system('rm -rf x y')
+        os.system('mkdir x y')
+        TEST.run(test=lambda: run(cd('x')))
         TEST.run(test=lambda: run(pushd('../y') | map(lambda f: str(f))),
-                 expected_out=[f'{testdir}/y', f'{testdir}/f'])
+                 expected_out=[f'{testdir}/y', f'{testdir}/x'])
         os.system(f'rm -rf {testdir}/x')
         TEST.run(test=lambda: run(popd()),
                  expected_err='directories have been removed')
@@ -1917,11 +1917,11 @@ def test_bug_206():
                  verification=lambda: run(pwd() | map(lambda d: str(d))),
                  expected_out=testdir)
         # Errors
-        TEST.run(test=lambda: run(cd('f*')),
+        TEST.run(test=lambda: run(cd('x*')),
                  expected_err='Too many paths')
         TEST.run(test=lambda: run(pwd() | map(lambda d: str(d))),
                  expected_out=testdir)
-        TEST.run(test=lambda: run(pushd('f*')),
+        TEST.run(test=lambda: run(pushd('x*')),
                  expected_err='Too many paths')
         TEST.run(test=lambda: run(pwd() | map(lambda d: str(d))),
                  expected_out=testdir)

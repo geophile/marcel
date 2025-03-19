@@ -307,7 +307,7 @@ class MainInteractive(MainScript):
 
     def __init__(self, old_main, env, workspace, testing=None, initial_config=DEFAULT_CONFIG):
         super().__init__(env, workspace, testing, initial_config)
-        self.tab_completer = marcel.tabcompleter.TabCompleter(self)
+        self.tab_completer = marcel.tabcompleter.TabCompleter(env)
         try:
             self.reader = self.initialize_reader()
         except FileNotFoundError:

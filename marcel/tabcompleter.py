@@ -16,7 +16,8 @@
 import os
 import pathlib
 
-from prompt_toolkit.completion import Completer, Completion
+from prompt_toolkit.completion import Completer, Completion, CompleteEvent
+from prompt_toolkit.document import Document
 
 import marcel.core
 import marcel.doc
@@ -26,12 +27,6 @@ import marcel.parser
 import marcel.util
 
 DEBUG = False
-
-SINGLE_QUOTE = "'"
-DOUBLE_QUOTE = '"'
-QUOTES = SINGLE_QUOTE + DOUBLE_QUOTE
-NL = '\n'
-
 
 def debug(message):
     if DEBUG:
@@ -46,6 +41,7 @@ class TabCompleter(Completer):
     def __init__(self, env):
         self.env = env
         self.parser = None
+        self.line = None
 
     def get_completions(self, document, complete_event):
         debug(f'get_completions: doc=<{document}> ------------------------------------------------------------')
@@ -58,12 +54,16 @@ class TabCompleter(Completer):
         elif last_token_context.is_arg():
             completer = self.complete_arg
         else:
-            assert False, last_token_context
+            completer = self.noop
         for c in completer(token):
             yield c
 
+    def __repr__(self):
+        return f'TabCompleter({self.line})'
+
     # Returns the last token encountered by the parse of line
     def parse(self, line):
+        self.line = line
         # Parse the text so far, to get information needed for tab completion. It is expected that
         # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
         # which can be ignored. The important point is that the parse will set Parser.op.
@@ -89,31 +89,48 @@ class TabCompleter(Completer):
         return token
 
     def complete_op(self, token):
+        def pipeline_syntax(token):
+            return (
+                # Example: "ls |"
+                token == '|' or
+                # Example: "ls | args (|"
+                token == '(|' or
+                # Example: "ls | args (| f:"
+                token.endswith(':'))
+
         debug(f'complete_op: token={token}')
+        # We could be in op format but the token is either | or (|....
+        if pipeline_syntax(token):
+            token = ''
         # Include marcel ops.
         # Include executables only if there are no qualifying ops.
         found_op = False
         for op in TabCompleter.OPS:
             if len(token) == 0 or op.startswith(token):
-                yield TabCompleter.completion(token, op)
+                yield TabCompleter.string_completion(token, op)
                 found_op = True
         if not found_op:
             for exe in TabCompleter.executables():
                 if exe.startswith(token):
-                    yield TabCompleter.completion(token, exe)
+                    yield TabCompleter.string_completion(token, exe)
 
     def complete_flag(self, token):
         debug(f'complete_flag: token={token}')
-        for flag in self.parser.flags():
+        for flag in sorted(self.parser.flags()):
             if flag.startswith(token):
-                yield TabCompleter.completion(token, flag)
+                yield TabCompleter.string_completion(token, flag)
 
     # Arg completion assumes we're looking for filenames. (bash does this too.)
     def complete_arg(self, token):
-        debug(f'complete_arg: token={token}')
-        current_dir = self.env.dir_state().current_dir()
-        for filename in TabCompleter.complete_filename(current_dir, token):
-            yield TabCompleter.completion(token, filename)
+        filename_handler = ArgHandler.select(token)
+        for filename in filename_handler.complete_filename():
+            yield filename_handler.completion(filename)
+
+    def noop(self, token):
+        # There needs to be a yield statement so that this function is recognized as a generator.
+        if self is None:
+            yield None
+        pass
 
     @staticmethod
     def complete_help(text):
@@ -125,11 +142,12 @@ class TabCompleter(Completer):
         debug(f'complete_help candidates for <{text}>: {candidates}')
         return candidates
 
-
     @staticmethod
-    def op_name(line):
-        first = line.split()[0]
-        return first if first in TabCompleter.OPS else None
+    def string_completion(token, completion):
+        # text: of the completion; what gets appended.
+        # display: appears in list of candidate completions.
+        return Completion(text=f'{completion[len(token):]} ',
+                          display=completion)
 
     @staticmethod
     def executables():
@@ -141,55 +159,50 @@ class TabCompleter(Completer):
                     executables.append(f)
         return executables
 
-    @staticmethod
-    def completion(token, completion):
-        return Completion(text=f'{completion[len(token):]} ',
-                          display=completion)
+    # For use in testing
+    def candidates(self, line):
+        document = Document(line)
+        event = CompleteEvent(text_inserted=False, completion_requested=True)
+        candidates = []
+        for candidate in self.get_completions(document, event):
+            candidates.append(candidate)
+        return [candidate.display_text for candidate in candidates]
+
+
+class ArgHandler(object):
+
+    def complete_filename(self):
+        assert False
+
+    def completion(self, filename):
+        assert False
 
     @staticmethod
-    def complete_filename(current_dir, token):
-        debug(f'complete_filename: current_dir=<{current_dir}>, token=<{token}>')
-        def add_slash_to_dir(f):
-            return f + '/' if pathlib.Path(f).expanduser().is_dir() else f
+    def select(token):
+        return (HomeDirHandler(token) if token.startswith('~/') else
+                UsernameHandler(token) if token.startswith('~') else
+                AbsDirHandler(token) if token.startswith('/') else
+                LocalDirHandler(token))
 
-        filenames = []
-        if token:
-            if (quote := token[0]) in '"\'':
-                unquoted = token[1:]
-                # TODO: This is too simplistic. In '~/...' and ~/... the ~ is expanded. But not in "~/...".
-                for filename in TabCompleter.complete_filename(current_dir, unquoted):
-                    filenames.append(f'{quote}{filename}{quote}')
-            if token.startswith('~/'):
-                if token == '~/':
-                    home = pathlib.Path(token).expanduser()
-                    for filename in os.listdir(home.as_posix()):
-                        filenames.append(add_slash_to_dir(filename))
-                elif token.startswith('~/'):
-                    base = pathlib.Path('~/').expanduser()
-                    base_length = len(base.as_posix())
-                    pattern = token[2:] + '*'
-                    for filename in [p.as_posix() for p in base.glob(pattern)]:
-                        filenames.append(add_slash_to_dir('~' + filename[base_length:]))
-            elif token.startswith('~'):
-                find_user = token[1:]
-                for username in TabCompleter.usernames():
-                    if username.startswith(find_user):
-                        filenames.append(add_slash_to_dir('~' + username))
-            elif token.startswith('/'):
-                base = '/'
-                pattern_prefix = token[1:]
-                for path in pathlib.Path(base).glob(pattern_prefix + '*'):
-                    filenames.append(add_slash_to_dir(path.as_posix()))
-            else:
-                base = current_dir
-                pattern_prefix = token
-                for path in pathlib.Path(base).glob(pattern_prefix + '*'):
-                    filenames.append(add_slash_to_dir(path.relative_to(base).as_posix()))
-        else:
-            # All filenames in current directory
-            for path in current_dir.iterdir():
-                filenames.append(add_slash_to_dir(path.relative_to(current_dir).as_posix()))
-        return sorted(filenames)
+    @staticmethod
+    def matching_elements(candidates, prefix):
+        return [f for f in candidates if f.startswith(prefix)]
+
+class UsernameHandler(ArgHandler):
+
+    def __init__(self, token):
+        assert len(token) >= 1 and token[0] == '~', token
+        self.prefix = token[1:]
+
+    def complete_filename(self):
+        return ArgHandler.matching_elements(UsernameHandler.usernames(), self.prefix)
+
+    def completion(self, filename):
+        # text: The completion. What gets appended to what the user typed.
+        # display: Appears in list of candidate completions.
+        text = filename[len(self.prefix) - 1:]
+        display = f'~{filename}'
+        return Completion(text=text, display=display)
 
     @staticmethod
     def usernames():
@@ -202,3 +215,51 @@ class TabCompleter(Completer):
             username = fields[0]
             usernames.append(username)
         return usernames
+
+class FilenameHandler(ArgHandler):
+
+    def __init__(self, token):
+        try:
+            last_slash = token.rindex('/')
+            self.basedir = pathlib.Path(token[:last_slash]).expanduser().as_posix()
+            self.prefix = token[last_slash + 1:]
+        except ValueError:
+            self.basedir = None
+            self.prefix = token
+        debug(f'{self.__class__.__name__}: basedir={self.basedir}, prefix={self.prefix}')
+
+    def complete_filename(self):
+        filenames = ArgHandler.matching_elements(sorted(os.listdir(self.basedir)), self.prefix)
+        return [(f'{filename}/' if pathlib.Path(f'{self.basedir}/{filename}').expanduser().is_dir() else filename)
+                for filename in filenames]
+
+class HomeDirHandler(FilenameHandler):
+
+    def completion(self, filename):
+        # text: The completion. What gets appended to what the user typed.
+        # display: Appears in list of candidate completions.
+        text = filename[len(self.prefix)]
+        display = f'{self.basedir}/{filename}'
+        return Completion(text=text, display=display)
+
+class AbsDirHandler(FilenameHandler):
+
+    def completion(self, filename):
+        # text: The completion. What gets appended to what the user typed.
+        # display: Appears in list of candidate completions.
+        if self.basedir == '/':
+            text = filename
+            display = f'/{filename}'
+        else:
+            text = filename[len(self.prefix):]
+            display = f'{self.basedir}/{filename}'
+        return Completion(text=text, display=display)
+
+class LocalDirHandler(FilenameHandler):
+
+    def completion(self, filename):
+        # text: The completion. What gets appended to what the user typed.
+        # display: Appears in list of candidate completions.
+        text = filename[len(self.prefix):]
+        display = filename
+        return Completion(text=text, display=display)

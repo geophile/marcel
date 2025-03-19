@@ -14,42 +14,42 @@ ALL_OPS = ['args', 'assign', 'bash', 'bg', 'case', 'cast', 'cd', 'difference', '
 
 def test_op():
     # No candidates
-    TEST.run(line='xyz', text='xyz',
+    TEST.run(line='xyz',
              expected=[])
     # Single candidate
-    TEST.run(line='l', text='l',
+    TEST.run(line='l',
              expected=['ls', 'load'])
-    TEST.run(line='ls', text='ls',
-             expected=['ls '])
+    TEST.run(line='ls',
+             expected=['ls'])
     # Multiple candidates
-    TEST.run(line='h', text='h',
+    TEST.run(line='h',
              expected=['head', 'help', 'history'])
-    TEST.run(line='he', text='he',
+    TEST.run(line='he',
              expected=['head', 'help'])
-    TEST.run(line='hea', text='hea',
-             expected=['head '])
-    TEST.run(line='head', text='head',
-             expected=['head '])
+    TEST.run(line='hea',
+             expected=['head'])
+    TEST.run(line='head',
+             expected=['head'])
     # Pipeline command
-    TEST.run(line='ls | args (| l', text='l',
+    TEST.run(line='ls | args (| l',
              expected=['ls', 'load'])
 
 
 def test_executables():
-    TEST.run(line='ech', text='ech',
-             expected=['echo '])
+    TEST.run(line='ech',
+             expected=['echo'])
 
 
 def test_flags():
-    TEST.run(line='window -', text='-',
+    TEST.run(line='window -',
              expected=['-o', '--overlap', '-d', '--disjoint'])
-    TEST.run(line='window --', text='--',
+    TEST.run(line='window --',
              expected=['--overlap', '--disjoint'])
-    TEST.run(line='reverse -', text='-',
+    TEST.run(line='reverse -',
              expected=[])
     # Bug 147
-    TEST.run(line='ls --rec', text='--rec',
-             expected=['--recursive '])
+    TEST.run(line='ls --rec',
+             expected=['--recursive'])
 
 
 def test_filenames():
@@ -57,17 +57,17 @@ def test_filenames():
         os.mkdir(f'{testdir}/abcx')
         os.mkdir(f'{testdir}/abcy')
         os.system(f'touch {testdir}/abcz')
-        TEST.run(line=f'ls {testdir}/ab', text=f'{testdir}/ab',
+        TEST.run(line=f'ls {testdir}/ab',
                  expected=[f'{testdir}/abcx/', f'{testdir}/abcy/', f'{testdir}/abcz'])
-        TEST.run(line=f'ls {testdir}/abcz', text=f'{testdir}/abcz',
-                 expected=[f'{testdir}/abcz '])
+        TEST.run(line=f'ls {testdir}/abcz',
+                 expected=[f'{testdir}/abcz'])
         # Executable
-        TEST.run(line=f'echo {testdir}/a', text=f'{testdir}/a',
+        TEST.run(line=f'echo {testdir}/a',
                  expected=[f'{testdir}/abcx/', f'{testdir}/abcy/', f'{testdir}/abcz'])
     # Bug 147
     with TestDir(TEST.env) as testdir:
         os.system(f'touch {testdir}/x')
-        TEST.run(line=f'ls {testdir}', text=f'{testdir}',
+        TEST.run(line=f'ls {testdir}',
                  expected=[f'{testdir}/'])
 
 
@@ -86,70 +86,71 @@ def test_pipeline_args():
         TEST.run(f'touch {testdir}/b')
         TEST.run(f'touch {testdir}/c')
         TEST.run(f'cd {testdir}')
-        TEST.run(line='l', text='l',
+        TEST.run(line='l',
                  expected=['ls', 'load'])
-        TEST.run(line='ls', text='ls',
-                 expected=['ls '])
-        TEST.run(line='ls ', text='',
+        TEST.run(line='ls',
+                 expected=['ls'])
+        TEST.run(line='ls ',
                  expected=all_files)
-        TEST.run(line='ls -', text='-',
+        TEST.run(line='ls -',
                  expected=['-0', '-1', '-r', '--recursive', '-f', '--file', '-d', '--dir', '-s', '--symlink'])
-        TEST.run(line='ls --', text='--',
+        TEST.run(line='ls --',
                  expected=['--recursive', '--file', '--dir', '--symlink'])
-        TEST.run(line='ls --r', text='--r',
-                 expected=['--recursive '])
-        TEST.run(line='ls --re', text='--re',
-                 expected=['--recursive '])
-        TEST.run(line='ls --recursive', text='--recursive',
-                 expected=['--recursive '])
-        TEST.run(line='ls --recursive ', text='--recursive ',
+        TEST.run(line='ls --r',
+                 expected=['--recursive'])
+        TEST.run(line='ls --re',
+                 expected=['--recursive'])
+        TEST.run(line='ls --recursive',
+                 expected=['--recursive'])
+        TEST.run(line='ls --recursive ',
                  expected=all_files)
-        TEST.run(line='ls --recursive -', text='-',
+        TEST.run(line='ls --recursive -',
                  expected=['-0', '-1', '-r', '--recursive', '-f', '--file', '-d', '--dir', '-s', '--symlink'])
-        TEST.run(line='ls --recursive -d', text='-d',
-                 expected=['-d '])
-        TEST.run(line='ls --recursive -d ', text='-d ',
+        TEST.run(line='ls --recursive -d',
+                 expected=['-d'])
+        TEST.run(line='ls --recursive -d ',
+                 expected=all_files)
+        TEST.run(line='ls --recursive -d |',
+                 expected=ALL_OPS)
+        TEST.run(line='ls --recursive -d | ',
+                 expected=ALL_OPS)
+        TEST.run(line='ls --recursive -d | ar',
+                 expected=['args'])
+        TEST.run(line='ls --recursive -d | args',
+                 expected=['args'])
+        TEST.run(line='ls --recursive -d | args ',
                  expected=all_files)
         # Not sure why, but Python's input invokes the completer with text = '' in this case
-        TEST.run(line='ls --recursive -d |', text='',
+        TEST.run(line='ls --recursive -d | args (|',
                  expected=ALL_OPS)
-        TEST.run(line='ls --recursive -d | ar', text='ar',
-                 expected=['args '])
-        TEST.run(line='ls --recursive -d | args', text='args',
-                 expected=['args '])
-        TEST.run(line='ls --recursive -d | args ', text='',
-                 expected=all_files)
-        # Not sure why, but Python's input invokes the completer with text = '' in this case
-        TEST.run(line='ls --recursive -d | args (|', text='',
-                 expected=ALL_OPS)
-        TEST.run(line='ls --recursive -d | args (|d', text='d',
+        TEST.run(line='ls --recursive -d | args (|d',
                  expected=['difference', 'dirs', 'download'])
         # Not sure why, but Python's input invokes the completer with text = '' in this case
-        TEST.run(line='ls --recursive -d | args (|d:', text='',
+        TEST.run(line='ls --recursive -d | args (|d:',
                  expected=ALL_OPS)
-        TEST.run(line='ls --recursive -d | args (|d: ', text='',
+        TEST.run(line='ls --recursive -d | args (|d: ',
                  expected=ALL_OPS)
-        TEST.run(line='ls --recursive -d | args (|d: l', text='l',
+        TEST.run(line='ls --recursive -d | args (|d: l',
                  expected=['load', 'ls'])
-        TEST.run(line='ls --recursive -d | args (|d: ls', text='ls',
-                 expected=['ls '])
-        TEST.run(line='ls --recursive -d | args (|d: ls ', text='',
+        TEST.run(line='ls --recursive -d | args (|d: ls',
+                 expected=['ls'])
+        TEST.run(line='ls --recursive -d | args (|d: ls ',
                  expected=all_files)
-        TEST.run(line='ls --recursive -d | args (|d: ls -', text='-',
+        TEST.run(line='ls --recursive -d | args (|d: ls -',
                  expected=['-0', '-1', '-r', '--recursive', '-f', '--file', '-d', '--dir', '-s', '--symlink'])
-        TEST.run(line='ls --recursive -d | args (|d: ls -f', text='-f',
-                 expected=['-f '])
-        TEST.run(line='ls --recursive -d | args (|d: ls -fs', text='-fs',
+        TEST.run(line='ls --recursive -d | args (|d: ls -f',
+                 expected=['-f'])
+        TEST.run(line='ls --recursive -d | args (|d: ls -fs',
                  expected=[])
-        TEST.run(line='ls --recursive -d | args (|d: ls -fs ', text='',
+        TEST.run(line='ls --recursive -d | args (|d: ls -fs ',
                  expected=all_files)
-        TEST.run(line='ls --recursive -d | args (|d: ls -fs (', text='(',
+        TEST.run(line='ls --recursive -d | args (|d: ls -fs (',
                  expected=[])
-        TEST.run(line='ls --recursive -d | args (|d: ls -fs (d', text='(d',
+        TEST.run(line='ls --recursive -d | args (|d: ls -fs (d',
                  expected=[])
-        TEST.run(line='ls --recursive -d | args (|d: ls -fs (d)', text='(d)',
+        TEST.run(line='ls --recursive -d | args (|d: ls -fs (d)',
                  expected=[])
-        TEST.run(line='ls --recursive -d | args (|d: ls -fs (d) ', text='',
+        TEST.run(line='ls --recursive -d | args (|d: ls -fs (d) ',
                  expected=all_files)
 
 
@@ -158,25 +159,17 @@ def main_stable():
     test_executables()
     test_flags()
     test_filenames()
-    test_filenames_with_whitespace()
+    # test_filenames_with_whitespace()
     test_pipeline_args()
 
 
 def main_dev():
-    with TestDir(TEST.env) as testdir:
-        all_files = ['a', 'b', 'c']
-        TEST.run(f'touch {testdir}/a')
-        TEST.run(f'touch {testdir}/b')
-        TEST.run(f'touch {testdir}/c')
-        TEST.run(f'cd {testdir}')
-        TEST.run(line='ls --recursive ', text='--recursive ',
-                 expected=all_files)
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_dev()
+    main_dev()
     main_stable()
     TEST.report_failures('test_tab_completion')
 

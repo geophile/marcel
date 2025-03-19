@@ -605,9 +605,9 @@ def test_bash():
         TEST.run('who = world')
         # Test command string
         TEST.run(f'cd {testdir}')
-        TEST.run('bash "ls f*"',
+        TEST.run('bash "ls x*"',
                  expected_out=['x1', 'x2'])
-        TEST.run('bash "ls -l *1" | (f: f.split()[-1])',
+        TEST.run('bash "ls -l *1" | (x: x.split()[-1])',
                  expected_out=['x1', 'y1'])
         TEST.run("""bash 'echo "hello  world"'""",  # Two spaces in string to be printed
                  expected_out='hello  world')
@@ -669,10 +669,10 @@ def test_source_filenames():
         TEST.run('ls -0 *f s* | map (f: f.render_compact())',
                  expected_out=sorted(['f', 'sd', 'sf', 'lf']))
         # No such file
-        TEST.run('ls -0 f | map (f: f.render_compact())',
+        TEST.run('ls -0 x | map (f: f.render_compact())',
                  expected_err='No qualifying paths')
         # No such file via glob
-        TEST.run('ls -0 f* | map (f: f.render_compact())',
+        TEST.run('ls -0 x* | map (f: f.render_compact())',
                  expected_err='No qualifying paths')
         # ~ expansion
         TEST.run('ls -0 ~root | map (f: f.path)',
@@ -1546,7 +1546,7 @@ def test_read():
                                ('3', '4.5', 'm,n')])
         # CSV with labels
         TEST.run(f'cd {testdir}')
-        TEST.run('ls f1.csv | read -cl | map (f, f, y, z: (str(f), f, y, z))',
+        TEST.run('ls f1.csv | read -cl | map (f, x, y, z: (str(f), x, y, z))',
                  expected_out=[('f1.csv', '1', '2.3', 'ab'),
                                ('f1.csv', '2', '3.4', 'xy'),
                                ('f1.csv', '3', '4.5', 'm,n')])
@@ -1557,7 +1557,7 @@ def test_read():
                                ('2', '3.4', 'xy')])
         # TSV with labels
         TEST.run(f'cd {testdir}')
-        TEST.run('ls f2.tsv | read -tl | map (f, f, y, z: (str(f), f, y, z))',
+        TEST.run('ls f2.tsv | read -tl | map (f, x, y, z: (str(f), x, y, z))',
                  expected_out=[('f2.tsv', '1', '2.3', 'ab'),
                                ('f2.tsv', '2', '3.4', 'xy')])
         # --pickle testing is done in test_write()
@@ -2172,7 +2172,7 @@ def test_download():
 
 @timeit
 def test_bug_126():
-    TEST.run('fact = (|f: gen (f) 1 | args (|n: gen (n) 1 | red * | map (f: (n, f))|)|)')
+    TEST.run('fact = (|x: gen (x) 1 | args (|n: gen (n) 1 | red * | map (f: (n, f))|)|)')
     TEST.run(test='fact (5) >$ f',
              verification='f <$',
              expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
@@ -2248,26 +2248,26 @@ def test_bug_190():
         os.system(f'echo xb2 > {testdir}/b2')
         TEST.run(f'cd {testdir}')
         # Test globbing for native executables
-        TEST.run('grep f [ab]2 | sort',
+        TEST.run('grep x [ab]2 | sort',
                  expected_out=['a2:xa2', 'b2:xb2'])
-        TEST.run('grep f a[1-2] | sort',
+        TEST.run('grep x a[1-2] | sort',
                  expected_out=['a1:xa1', 'a2:xa2'])
-        TEST.run('grep f [ab][1-2] | sort',
+        TEST.run('grep x [ab][1-2] | sort',
                  expected_out=['a1:xa1', 'a2:xa2', 'b1:xb1', 'b2:xb2'])
-        TEST.run('grep f a* | sort',
+        TEST.run('grep x a* | sort',
                  expected_out=['a1:xa1', 'a2:xa2'])
-        TEST.run('grep f *2 | sort',
+        TEST.run('grep x *2 | sort',
                  expected_out=['a2:xa2', 'b2:xb2'])
-        TEST.run('grep f a? | sort',
+        TEST.run('grep x a? | sort',
                  expected_out=['a1:xa1', 'a2:xa2'])
-        TEST.run('grep f ?2 | sort',
+        TEST.run('grep x ?2 | sort',
                  expected_out=['a2:xa2', 'b2:xb2'])
         # Test globbing for native executables run via explicit invocation of bash (which is a marcel op)
-        TEST.run('bash grep f [ab]2 | sort',
+        TEST.run('bash grep x [ab]2 | sort',
                  expected_out=['a2:xa2', 'b2:xb2'])
-        TEST.run('bash grep f a[1-2] | sort',
+        TEST.run('bash grep x a[1-2] | sort',
                  expected_out=['a1:xa1', 'a2:xa2'])
-        TEST.run('bash grep f [ab][1-2] | sort',
+        TEST.run('bash grep x [ab][1-2] | sort',
                  expected_out=['a1:xa1', 'a2:xa2', 'b1:xb1', 'b2:xb2'])
         # Test globbing for ops that take shell args
         TEST.run('ls [ab]2 | (f: f.name) | sort',
@@ -2406,11 +2406,11 @@ def test_bug_206():
              verification='pwd | (d: str(d))',
              expected_out=base)
     # Errors
-    TEST.run('cd f*',
+    TEST.run('cd x*',
              expected_err='Too many paths')
     TEST.run("pwd | (d: str(d))",
              expected_out=base)
-    TEST.run('pushd f*',
+    TEST.run('pushd x*',
              expected_err='Too many paths')
     TEST.run("pwd | (d: str(d))",
              expected_out=base)

@@ -365,12 +365,12 @@ class TestTabCompletion(TestBase):
         self.env.dir_state().change_current_dir(TestBase.start_dir)
         os.system(f'cp {config_file} {self.locations.config_ws_startup(workspace)}')
 
-    def run(self, line, text=None, expected=None):
-        if text is None:
+    def run(self, line, expected=None):
+        if expected is None:
             self.main.parse_and_run_command(line)
         else:
-            print(f'TESTING: line="{line}", text="{text}"')
-            actual = self.main.tab_completer.candidates(line, text)
+            print(f'TESTING: line="{line}"')
+            actual = self.main.tab_completer.candidates(line)
             if actual is None:
                 actual = []
             if sorted(expected) != sorted(actual):

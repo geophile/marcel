@@ -508,3 +508,18 @@ Things that might be replaced by prompt_toolkit:
 Fix:
 
 - help completion
+
+- Filename completion of dir. 
+
+  - If quoted, the end quote is placed before the directory is
+  explored.
+
+  - If not quoted, a space is appended, which doesn't allow for
+    exploration.
+
+- MultiColumnCompletionsMenu for long list of candidates?
+
+- Tab completion of ls ./test_ops.py -> ./tesops.py. Seems to set
+  cursor to a position assuming the ./ wasn't there?
+
+- Test Username completion, homedir, abs, local.
