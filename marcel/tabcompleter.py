@@ -229,9 +229,14 @@ class FilenameHandler(ArgHandler):
         debug(f'{self.__class__.__name__}: basedir={self.basedir}, prefix={self.prefix}')
 
     def complete_filename(self):
-        filenames = ArgHandler.matching_elements(sorted(os.listdir(self.basedir)), self.prefix)
-        return [(f'{filename}/' if pathlib.Path(f'{self.basedir}/{filename}').expanduser().is_dir() else filename)
-                for filename in filenames]
+        if self.basedir:
+            filenames = ArgHandler.matching_elements(sorted(os.listdir(self.basedir)), self.prefix)
+            return [(f'{filename}/' if pathlib.Path(f'{self.basedir}/{filename}').expanduser().is_dir() else filename)
+                    for filename in filenames]
+        else:
+            filenames = ArgHandler.matching_elements(sorted(os.listdir()), self.prefix)
+            return [(f'{filename}/' if pathlib.Path(filename).expanduser().is_dir() else filename)
+                    for filename in filenames]
 
 class HomeDirHandler(FilenameHandler):
 
