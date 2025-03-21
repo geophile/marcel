@@ -188,11 +188,41 @@ def test_arg_local_path():
         TEST.run(line='echo ./a',
                  expected=['abcx/', 'abcy/', 'abcz'])
 
+def test_arg_quoted():
+    with TestDir(TEST.env) as testdir:
+        TEST.run(f'cd {testdir}')
+        os.system('touch ab1')
+        os.system('touch ab2')
+        os.system('touch "fg 1"')
+        os.system('touch "fg 2"')
+        # local path
+        TEST.run(line='ls a',
+                 expected=['ab1', 'ab2'])
+        TEST.run(line='ls "a',
+                 expected=['"ab1"', '"ab2"'])
+        TEST.run(line="ls 'a",
+                 expected=["'ab1'", "'ab2'"])
+        TEST.run(line='ls "f',
+                 expected=['"fg 1"', '"fg 2"'])
+        TEST.run(line="ls 'f",
+                 expected=["'fg 1'", "'fg 2'"])
+        # absolute path
+        TEST.run(line=f'ls {testdir}/a',
+                 expected=[f'{testdir}/ab1', f'{testdir}/ab2'])
+        TEST.run(line=f'ls "{testdir}/a',
+                 expected=[f'"{testdir}/ab1"', f'"{testdir}/ab2"'])
+        TEST.run(line=f"ls '{testdir}/a",
+                 expected=[f"'{testdir}/ab1'", f"'{testdir}/ab2'"])
+        TEST.run(line=f'ls "{testdir}/f',
+                 expected=[f'"{testdir}/fg 1"', f'"{testdir}/fg 2"'])
+        TEST.run(line=f"ls '{testdir}/f",
+                 expected=[f"'{testdir}/fg 1'", f"'{testdir}/fg 2'"])
+
 def test_arg():
     test_arg_username()
     test_arg_absolute_path()
     test_arg_local_path()
-    # test_quoted()
+    test_arg_quoted()
     # test_escaped()
 
 
@@ -206,13 +236,14 @@ def main_stable():
 
 
 def main_dev():
+    test_arg_quoted()
     pass
 
 
 def main():
     TEST.reset_environment()
-    # main_dev()
-    main_stable()
+    main_dev()
+    # main_stable()
     TEST.report_failures('test_tab_completion')
 
 

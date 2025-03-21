@@ -369,7 +369,7 @@ class TestTabCompletion(TestBase):
         if expected is None:
             self.main.parse_and_run_command(line)
         else:
-            print(f'TESTING: line="{line}"')
+            print(f'TESTING: line=<<<{line}>>>')
             actual = self.main.tab_completer.candidates(line)
             if actual is None:
                 actual = []

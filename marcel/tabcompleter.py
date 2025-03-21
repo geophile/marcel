@@ -33,6 +33,25 @@ def debug(message):
         print(message, flush=True)
 
 
+class Quote(object):
+
+    SINGLE = "'"
+    DOUBLE = '"'
+    ALL = SINGLE + DOUBLE
+
+    @staticmethod
+    def split_leading_quote(x):
+        return (x[0], x[1:]) if x[0] in Quote.ALL else (None, x)
+
+    @staticmethod
+    def unquote(x):
+        if x[0] in Quote.ALL:
+            x = x[1:]
+        if x[-1] in Quote.ALL:
+            x = x[:-1]
+        return x
+
+
 class TabCompleter(Completer):
 
     OPS = marcel.op.public
@@ -63,6 +82,7 @@ class TabCompleter(Completer):
 
     # Returns the last token encountered by the parse of line
     def parse(self, line):
+        token = None
         self.line = line
         # Parse the text so far, to get information needed for tab completion. It is expected that
         # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
@@ -71,7 +91,8 @@ class TabCompleter(Completer):
         try:
             self.parser.parse()
         except marcel.exception.MissingQuoteException as e:
-            debug(f'Caught MissingQuoteException: <{e.quote}{e.unterminated_string}>')
+            token = f'{e.quote}{e.unterminated_string}'
+            debug(f'Caught MissingQuoteException: <{token}>')
         except marcel.exception.KillCommandException as e:
             # Parse may have failed because of an unrecognized op, for example. Normal continuation should
             # do the right thing.
@@ -81,11 +102,8 @@ class TabCompleter(Completer):
             marcel.util.print_stack_of_current_exception()
         else:
             debug('No exception during parse')
-        token = self.parser.terminal_token_value()
-        # TODO: Is this logic needed? Why doesn't MissingQuoteException take care of things? Or why can't
-        # TODO: this logic be moved there?
-        if (missing_quote := self.parser.token.missing_quote()) is not None:
-            token = missing_quote + token
+        if token is None:
+            token = self.parser.terminal_token_value()
         return token
 
     def complete_op(self, token):
@@ -185,8 +203,9 @@ class ArgHandler(object):
 
     @staticmethod
     def select(token):
-        return (UsernameHandler(token) if token.startswith('~') and '/' not in token else
-                AbsDirHandler(token) if token.startswith('/') or token.startswith('~') else
+        unquoted_token = Quote.unquote(token)
+        return (UsernameHandler(token) if unquoted_token.startswith('~') and '/' not in unquoted_token else
+                AbsDirHandler(token) if unquoted_token.startswith('/') or unquoted_token.startswith('~') else
                 LocalDirHandler(token))
 
 class UsernameHandler(ArgHandler):
@@ -222,6 +241,8 @@ class FilenameHandler(ArgHandler):
     def __init__(self, token):
         # basedir and prefix are strings, resulting from splitting the token on the last slash, if there is one.
         # Either may include ~ which would need to be expanded later.
+        t = token
+        self.quote, token = Quote.split_leading_quote(token)
         try:
             last_slash = token.rindex('/')
             self.basedir = token[:last_slash]
@@ -241,6 +262,14 @@ class FilenameHandler(ArgHandler):
             filenames = self.elements_matching_prefix(sorted(os.listdir()))
             return [FilenameHandler.add_slash_to_dir(filename) for filename in filenames]
 
+    def quote_completion(self, completion):
+        x = completion if self.quote is None else f'{completion}{self.quote}'
+        return x
+
+    def quote_display(self, filename):
+        x = filename if self.quote is None else f'{self.quote}{filename}{self.quote}'
+        return x
+
     @staticmethod
     def add_slash_to_dir(path):
         if not isinstance(path, pathlib.Path):
@@ -258,13 +287,14 @@ class AbsDirHandler(FilenameHandler):
         else:
             text = filename[len(self.prefix):]
             display = f'{self.basedir}/{filename}'
-        return Completion(text=text, display=display)
+        return Completion(text=self.quote_completion(text),
+                          display=self.quote_display(display))
 
 class LocalDirHandler(FilenameHandler):
 
     def completion(self, filename):
         # text: The completion. What gets appended to what the user typed.
         # display: Appears in list of candidate completions.
-        text = filename[len(self.prefix):]
-        display = filename
+        text = self.quote_completion(filename[len(self.prefix):])
+        display = self.quote_display(filename)
         return Completion(text=text, display=display)
