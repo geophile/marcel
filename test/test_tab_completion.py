@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 import test_base
 
@@ -33,9 +34,6 @@ def test_op():
     # Pipeline command
     TEST.run(line='ls | args (| l',
              expected=['ls', 'load'])
-
-
-def test_executables():
     TEST.run(line='ech',
              expected=['echo'])
 
@@ -50,32 +48,6 @@ def test_flags():
     # Bug 147
     TEST.run(line='ls --rec',
              expected=['--recursive'])
-
-
-def test_filenames():
-    with TestDir(TEST.env) as testdir:
-        os.mkdir(f'{testdir}/abcx')
-        os.mkdir(f'{testdir}/abcy')
-        os.system(f'touch {testdir}/abcz')
-        TEST.run(line=f'ls {testdir}/ab',
-                 expected=[f'{testdir}/abcx/', f'{testdir}/abcy/', f'{testdir}/abcz'])
-        TEST.run(line=f'ls {testdir}/abcz',
-                 expected=[f'{testdir}/abcz'])
-        # Executable
-        TEST.run(line=f'echo {testdir}/a',
-                 expected=[f'{testdir}/abcx/', f'{testdir}/abcy/', f'{testdir}/abcz'])
-    # Bug 147
-    with TestDir(TEST.env) as testdir:
-        os.system(f'touch {testdir}/x')
-        TEST.run(line=f'ls {testdir}',
-                 expected=[f'{testdir}/'])
-
-
-# Inspired by bug 189
-def test_filenames_with_whitespace():
-    with TestDir(TEST.env) as testdir:
-        os.system(f'touch "{testdir}/space xx"')
-        os.system(f'touch "{testdir}/tab\txx"')
 
 
 def test_pipeline_args():
@@ -153,13 +125,83 @@ def test_pipeline_args():
         TEST.run(line='ls --recursive -d | args (|d: ls -fs (d) ',
                  expected=all_files)
 
+def test_arg_username():
+    TEST.run(line='ls ~ro',
+             expected=['~root/'])
+    TEST.run(line='ls ~9',
+             expected=[])
+
+
+def test_arg_absolute_path():
+    with TestDir(TEST.env) as testdir:
+        os.mkdir(f'{testdir}/abcx')
+        os.mkdir(f'{testdir}/abcy')
+        os.system(f'touch {testdir}/abcz')
+        TEST.run(line=f'ls {testdir}/ab',
+                 expected=[f'{testdir}/abcx/', f'{testdir}/abcy/', f'{testdir}/abcz'])
+        TEST.run(line=f'ls {testdir}/abcx',
+                 expected=[f'{testdir}/abcx/'])
+        TEST.run(line=f'ls {testdir}/abcz',
+                 expected=[f'{testdir}/abcz'])
+        # Executable
+        TEST.run(line=f'echo {testdir}/a',
+                 expected=[f'{testdir}/abcx/', f'{testdir}/abcy/', f'{testdir}/abcz'])
+    # Bug 147
+    with TestDir(TEST.env) as testdir:
+        os.system(f'touch {testdir}/x')
+        TEST.run(line=f'ls {testdir}',
+                 expected=[f'{testdir}/'])
+    # Homedir is a special case of absolute
+    # Whoever is running this test should have ~/.bash_history
+    user = os.getlogin()
+    # test harness resets the HOME env var, but we want a real one for this test
+    os.environ['HOME'] = pathlib.Path(f'~{user}').expanduser().as_posix()
+    TEST.run(line=f'ls ~/.bash_h',
+             expected=['~/.bash_history'])
+    TEST.run(line=f'ls ~{user}/.bash_h',
+             expected=[f'~{user}/.bash_history'])
+    # Restore HOME var for testing
+    TEST.reset_environment()
+
+def test_arg_local_path():
+    with TestDir(TEST.env) as testdir:
+        TEST.run(f'cd {testdir}')
+        os.mkdir('abcx')
+        os.mkdir('abcy')
+        os.system('touch abcz')
+        TEST.run(line=f'ls ab',
+                 expected=['abcx/', 'abcy/', 'abcz'])
+        TEST.run(line='ls abcx',
+                 expected=['abcx/'])
+        TEST.run(line='ls abcz',
+                 expected=['abcz'])
+        # Executable
+        TEST.run(line='echo ./a',
+                 expected=['abcx/', 'abcy/', 'abcz'])
+        # Same tests, but using ./
+        TEST.run(line=f'ls ./ab',
+                 expected=['abcx/', 'abcy/', 'abcz'])
+        TEST.run(line='ls ./abcx',
+                 expected=['abcx/'])
+        TEST.run(line='ls ./abcz',
+                 expected=['abcz'])
+        TEST.run(line='echo ./a',
+                 expected=['abcx/', 'abcy/', 'abcz'])
+
+def test_arg():
+    test_arg_username()
+    test_arg_absolute_path()
+    test_arg_local_path()
+    # test_quoted()
+    # test_escaped()
+
 
 def main_stable():
+    # In the parlance of tabcompleter.py, completion applies to ops, flags, and args.
+    # Filenames count as args.
     test_op()
-    test_executables()
     test_flags()
-    test_filenames()
-    # test_filenames_with_whitespace()
+    test_arg()
     test_pipeline_args()
 
 
@@ -169,7 +211,7 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    main_dev()
+    # main_dev()
     main_stable()
     TEST.report_failures('test_tab_completion')
 

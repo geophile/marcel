@@ -171,37 +171,38 @@ class TabCompleter(Completer):
 
 class ArgHandler(object):
 
+    def __init__(self, prefix):
+        self.prefix = prefix
+
     def complete_filename(self):
         assert False
 
     def completion(self, filename):
         assert False
 
-    @staticmethod
-    def select(token):
-        return (HomeDirHandler(token) if token.startswith('~/') else
-                UsernameHandler(token) if token.startswith('~') else
-                AbsDirHandler(token) if token.startswith('/') else
-                LocalDirHandler(token))
+    def elements_matching_prefix(self, candidates):
+        return [f for f in candidates if f.startswith(self.prefix)]
 
     @staticmethod
-    def matching_elements(candidates, prefix):
-        return [f for f in candidates if f.startswith(prefix)]
+    def select(token):
+        return (UsernameHandler(token) if token.startswith('~') and '/' not in token else
+                AbsDirHandler(token) if token.startswith('/') or token.startswith('~') else
+                LocalDirHandler(token))
 
 class UsernameHandler(ArgHandler):
 
     def __init__(self, token):
-        assert len(token) >= 1 and token[0] == '~', token
-        self.prefix = token[1:]
+        super().__init__(prefix=token[1:])  # Everything after ~
+        debug(f'{self.__class__.__name__}: prefix={self.prefix}')
 
     def complete_filename(self):
-        return ArgHandler.matching_elements(UsernameHandler.usernames(), self.prefix)
+        return self.elements_matching_prefix(sorted(UsernameHandler.usernames()))
 
     def completion(self, filename):
         # text: The completion. What gets appended to what the user typed.
         # display: Appears in list of candidate completions.
-        text = filename[len(self.prefix) - 1:]
-        display = f'~{filename}'
+        text = filename[len(self.prefix):] + '/'
+        display = FilenameHandler.add_slash_to_dir(f'~{filename}')
         return Completion(text=text, display=display)
 
     @staticmethod
@@ -219,33 +220,32 @@ class UsernameHandler(ArgHandler):
 class FilenameHandler(ArgHandler):
 
     def __init__(self, token):
+        # basedir and prefix are strings, resulting from splitting the token on the last slash, if there is one.
+        # Either may include ~ which would need to be expanded later.
         try:
             last_slash = token.rindex('/')
-            self.basedir = pathlib.Path(token[:last_slash]).expanduser().as_posix()
-            self.prefix = token[last_slash + 1:]
+            self.basedir = token[:last_slash]
+            prefix = token[last_slash + 1:]
         except ValueError:
             self.basedir = None
-            self.prefix = token
+            prefix = token
+        super().__init__(prefix=prefix)
         debug(f'{self.__class__.__name__}: basedir={self.basedir}, prefix={self.prefix}')
 
     def complete_filename(self):
         if self.basedir:
-            filenames = ArgHandler.matching_elements(sorted(os.listdir(self.basedir)), self.prefix)
+            filenames = self.elements_matching_prefix(sorted(os.listdir(pathlib.Path(self.basedir).expanduser())))
             return [(f'{filename}/' if pathlib.Path(f'{self.basedir}/{filename}').expanduser().is_dir() else filename)
                     for filename in filenames]
         else:
-            filenames = ArgHandler.matching_elements(sorted(os.listdir()), self.prefix)
-            return [(f'{filename}/' if pathlib.Path(filename).expanduser().is_dir() else filename)
-                    for filename in filenames]
+            filenames = self.elements_matching_prefix(sorted(os.listdir()))
+            return [FilenameHandler.add_slash_to_dir(filename) for filename in filenames]
 
-class HomeDirHandler(FilenameHandler):
-
-    def completion(self, filename):
-        # text: The completion. What gets appended to what the user typed.
-        # display: Appears in list of candidate completions.
-        text = filename[len(self.prefix)]
-        display = f'{self.basedir}/{filename}'
-        return Completion(text=text, display=display)
+    @staticmethod
+    def add_slash_to_dir(path):
+        if not isinstance(path, pathlib.Path):
+            path = pathlib.Path(path)
+        return path.as_posix() + '/' if path.expanduser().is_dir() else path.as_posix()
 
 class AbsDirHandler(FilenameHandler):
 
