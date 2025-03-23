@@ -41,14 +41,15 @@ class Quote(object):
 
     @staticmethod
     def split_leading_quote(x):
-        return (x[0], x[1:]) if x[0] in Quote.ALL else (None, x)
+        return (x[0], x[1:]) if len(x) > 0 and x[0] in Quote.ALL else (None, x)
 
     @staticmethod
     def unquote(x):
-        if x[0] in Quote.ALL:
-            x = x[1:]
-        if x[-1] in Quote.ALL:
-            x = x[:-1]
+        if x:
+            if x[0] in Quote.ALL:
+                x = x[1:]
+            if x[-1] in Quote.ALL:
+                x = x[:-1]
         return x
 
 

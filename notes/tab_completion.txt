@@ -514,6 +514,25 @@ Cases (xyz is result of completion):
 
 - "...xyz/         No quote, no space
 
+......................................................................
+
+Bash behavior for ls "...":
+
+- Quoted stuff is not interpreted. So inside quotes, *, .., ~ don't
+  have their normal meaning, they are just literals.
+
+- Can mix/match quoted and unquoted. So 
+ 
+    ls 'ab'*
+
+  is equivalent to
+
+    ls ab*
+
+  This already works in marcel, surprisingly.
+
+So I still need to suppress special handling of * etc when quoted.
+
 ======================================================================
 
 TO DO:
@@ -543,3 +562,4 @@ Fix:
     exploration.
 
 - MultiColumnCompletionsMenu for long list of candidates?
+
