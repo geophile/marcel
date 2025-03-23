@@ -491,9 +491,34 @@ shows those options as soon as you type x. I don't want that. I want
 suggestions when tab is pressed. pt has a zillion options, so it would
 be surprising if this were not possible.
 
-Things that must be replaced by prompt_toolkit:
+----------------------------------------------------------------------
 
-- tab completion
+3/23/25
+
+Things are mostly working with prompt_toolkit. But the end of the
+completion is complicated. If we are doing tab completion on a quote
+directory:
+
+- DON'T place a terminal quote since the directory could be explored
+  by tab completion.
+
+- DON't place a space after /, same reason.
+
+Cases (xyz is result of completion):
+
+- ...xyz           Space 
+
+- "...xyz          Quote then space
+
+- ...xyz/          No space
+
+- "...xyz/         No quote, no space
+
+======================================================================
+
+TO DO:
+
+Things that must be replaced by prompt_toolkit:
 
 - history
 
@@ -518,8 +543,3 @@ Fix:
     exploration.
 
 - MultiColumnCompletionsMenu for long list of candidates?
-
-- Tab completion of ls ./test_ops.py -> ./tesops.py. Seems to set
-  cursor to a position assuming the ./ wasn't there?
-
-- Test Username completion, homedir, abs, local.

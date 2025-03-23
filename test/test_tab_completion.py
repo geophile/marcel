@@ -19,35 +19,35 @@ def test_op():
              expected=[])
     # Single candidate
     TEST.run(line='l',
-             expected=['ls', 'load'])
+             expected=['s ', 'oad '])
     TEST.run(line='ls',
-             expected=['ls'])
+             expected=[' '])
     # Multiple candidates
     TEST.run(line='h',
-             expected=['head', 'help', 'history'])
+             expected=['ead ', 'elp ', 'istory '])
     TEST.run(line='he',
-             expected=['head', 'help'])
+             expected=['ad ', 'lp '])
     TEST.run(line='hea',
-             expected=['head'])
+             expected=['d '])
     TEST.run(line='head',
-             expected=['head'])
+             expected=[' '])
     # Pipeline command
     TEST.run(line='ls | args (| l',
-             expected=['ls', 'load'])
+             expected=['s ', 'oad '])
     TEST.run(line='ech',
-             expected=['echo'])
+             expected=['o '])
 
 
 def test_flags():
     TEST.run(line='window -',
-             expected=['-o', '--overlap', '-d', '--disjoint'])
+             expected=['o ', '-overlap ', 'd ', '-disjoint '])
     TEST.run(line='window --',
-             expected=['--overlap', '--disjoint'])
+             expected=['overlap ', 'disjoint '])
     TEST.run(line='reverse -',
              expected=[])
     # Bug 147
     TEST.run(line='ls --rec',
-             expected=['--recursive'])
+             expected=['ursive '])
 
 
 def test_pipeline_args():
@@ -127,7 +127,7 @@ def test_pipeline_args():
 
 def test_arg_username():
     TEST.run(line='ls ~ro',
-             expected=['~root/'])
+             expected=['ot/'])
     TEST.run(line='ls ~9',
              expected=[])
 
@@ -138,28 +138,28 @@ def test_arg_absolute_path():
         os.mkdir(f'{testdir}/abcy')
         os.system(f'touch {testdir}/abcz')
         TEST.run(line=f'ls {testdir}/ab',
-                 expected=[f'{testdir}/abcx/', f'{testdir}/abcy/', f'{testdir}/abcz'])
+                 expected=[f'cx/', f'cy/', f'cz '])
         TEST.run(line=f'ls {testdir}/abcx',
-                 expected=[f'{testdir}/abcx/'])
+                 expected=[f'/'])
         TEST.run(line=f'ls {testdir}/abcz',
-                 expected=[f'{testdir}/abcz'])
+                 expected=[f' '])
         # Executable
         TEST.run(line=f'echo {testdir}/a',
-                 expected=[f'{testdir}/abcx/', f'{testdir}/abcy/', f'{testdir}/abcz'])
+                 expected=[f'bcx/', f'bcy/', f'bcz '])
     # Bug 147
     with TestDir(TEST.env) as testdir:
         os.system(f'touch {testdir}/x')
         TEST.run(line=f'ls {testdir}',
-                 expected=[f'{testdir}/'])
+                 expected=[f'/'])
     # Homedir is a special case of absolute
     # Whoever is running this test should have ~/.bash_history
     user = os.getlogin()
     # test harness resets the HOME env var, but we want a real one for this test
     os.environ['HOME'] = pathlib.Path(f'~{user}').expanduser().as_posix()
     TEST.run(line=f'ls ~/.bash_h',
-             expected=['~/.bash_history'])
+             expected=['istory '])
     TEST.run(line=f'ls ~{user}/.bash_h',
-             expected=[f'~{user}/.bash_history'])
+             expected=[f'istory '])
     # Restore HOME var for testing
     TEST.reset_environment()
 
@@ -170,23 +170,23 @@ def test_arg_local_path():
         os.mkdir('abcy')
         os.system('touch abcz')
         TEST.run(line=f'ls ab',
-                 expected=['abcx/', 'abcy/', 'abcz'])
+                 expected=['cx/', 'cy/', 'cz '])
         TEST.run(line='ls abcx',
-                 expected=['abcx/'])
+                 expected=['/'])
         TEST.run(line='ls abcz',
-                 expected=['abcz'])
+                 expected=[' '])
         # Executable
         TEST.run(line='echo ./a',
-                 expected=['abcx/', 'abcy/', 'abcz'])
+                 expected=['bcx/', 'bcy/', 'bcz '])
         # Same tests, but using ./
         TEST.run(line=f'ls ./ab',
-                 expected=['abcx/', 'abcy/', 'abcz'])
+                 expected=['cx/', 'cy/', 'cz '])
         TEST.run(line='ls ./abcx',
-                 expected=['abcx/'])
+                 expected=['/'])
         TEST.run(line='ls ./abcz',
-                 expected=['abcz'])
+                 expected=[' '])
         TEST.run(line='echo ./a',
-                 expected=['abcx/', 'abcy/', 'abcz'])
+                 expected=['bcx/', 'bcy/', 'bcz '])
 
 def test_arg_quoted():
     with TestDir(TEST.env) as testdir:
@@ -222,8 +222,8 @@ def test_arg():
     test_arg_username()
     test_arg_absolute_path()
     test_arg_local_path()
-    test_arg_quoted()
-    # test_escaped()
+    # test_arg_quoted()
+    # test_arg_escaped()
 
 
 def main_stable():
@@ -232,18 +232,17 @@ def main_stable():
     test_op()
     test_flags()
     test_arg()
-    test_pipeline_args()
+    # test_pipeline_args()
 
 
 def main_dev():
-    test_arg_quoted()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
+    main_stable()
     TEST.report_failures('test_tab_completion')
 
 

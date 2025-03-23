@@ -184,7 +184,7 @@ class TabCompleter(Completer):
         candidates = []
         for candidate in self.get_completions(document, event):
             candidates.append(candidate)
-        return [candidate.display_text for candidate in candidates]
+        return [candidate.text for candidate in candidates]
 
 
 class ArgHandler(object):
@@ -220,9 +220,8 @@ class UsernameHandler(ArgHandler):
     def completion(self, filename):
         # text: The completion. What gets appended to what the user typed.
         # display: Appears in list of candidate completions.
-        text = filename[len(self.prefix):] + '/'
-        display = FilenameHandler.add_slash_to_dir(f'~{filename}')
-        return Completion(text=text, display=display)
+        return Completion(text=(filename[len(self.prefix):] + '/'),
+                          display=f'~{filename}')
 
     @staticmethod
     def usernames():
@@ -254,47 +253,47 @@ class FilenameHandler(ArgHandler):
         debug(f'{self.__class__.__name__}: basedir={self.basedir}, prefix={self.prefix}')
 
     def complete_filename(self):
-        if self.basedir:
-            filenames = self.elements_matching_prefix(sorted(os.listdir(pathlib.Path(self.basedir).expanduser())))
-            return [(f'{filename}/' if pathlib.Path(f'{self.basedir}/{filename}').expanduser().is_dir() else filename)
-                    for filename in filenames]
-        else:
-            filenames = self.elements_matching_prefix(sorted(os.listdir()))
-            return [FilenameHandler.add_slash_to_dir(filename) for filename in filenames]
+        dir_contents = (os.listdir(FilenameHandler.pathlib_path(self.basedir).expanduser())
+                        if self.basedir else
+                        os.listdir())
+        return sorted(self.elements_matching_prefix(dir_contents))
 
-    def quote_completion(self, completion):
-        x = completion if self.quote is None else f'{completion}{self.quote}'
-        return x
-
-    def quote_display(self, filename):
-        x = filename if self.quote is None else f'{self.quote}{filename}{self.quote}'
-        return x
+    # Work out the completion's end characters for dir/filename. (The completion contains just filename so far.)
+    # - Add a slash if path is a dir.
+    # - Add a quote if the token started with a quote, and not a dir
+    # - Add a space if not a dir
+    def completion_endchars(self, filename):
+        path = (FilenameHandler.pathlib_path(filename) if self.basedir is None else
+                FilenameHandler.pathlib_path(self.basedir) / filename)
+        return ('/' if path.is_dir() else
+                (self.quote + ' ') if self.quote else
+                ' ')
 
     @staticmethod
-    def add_slash_to_dir(path):
-        if not isinstance(path, pathlib.Path):
-            path = pathlib.Path(path)
-        return path.as_posix() + '/' if path.expanduser().is_dir() else path.as_posix()
+    def pathlib_path(x):
+        if type(x) is str:
+            path = pathlib.Path(x)
+        elif isinstance(x, pathlib.Path):
+            path = x
+        else:
+            assert False, f'({type(x)}) {x}'
+        return path
 
 class AbsDirHandler(FilenameHandler):
 
     def completion(self, filename):
         # text: The completion. What gets appended to what the user typed.
         # display: Appears in list of candidate completions.
-        if self.basedir == '/':
-            text = filename
-            display = f'/{filename}'
-        else:
-            text = filename[len(self.prefix):]
-            display = f'{self.basedir}/{filename}'
-        return Completion(text=self.quote_completion(text),
-                          display=self.quote_display(display))
+        return (Completion(text=filename + self.completion_endchars(filename),
+                           display=f'/{filename}')
+                if self.basedir == '/' else
+                Completion(text=filename[len(self.prefix):] + self.completion_endchars(filename),
+                           display=f'{self.basedir}/{filename}'))
 
 class LocalDirHandler(FilenameHandler):
 
     def completion(self, filename):
         # text: The completion. What gets appended to what the user typed.
         # display: Appears in list of candidate completions.
-        text = self.quote_completion(filename[len(self.prefix):])
-        display = self.quote_display(filename)
-        return Completion(text=text, display=display)
+        return Completion(text=filename[len(self.prefix):] + self.completion_endchars(filename),
+                          display=filename)
