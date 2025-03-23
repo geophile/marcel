@@ -197,32 +197,32 @@ def test_arg_quoted():
         os.system('touch "fg 2"')
         # local path
         TEST.run(line='ls a',
-                 expected=['ab1', 'ab2'])
+                 expected=['b1 ', 'b2 '])
         TEST.run(line='ls "a',
-                 expected=['"ab1"', '"ab2"'])
+                 expected=['b1" ', 'b2" '])
         TEST.run(line="ls 'a",
-                 expected=["'ab1'", "'ab2'"])
+                 expected=["b1' ", "b2' "])
         TEST.run(line='ls "f',
-                 expected=['"fg 1"', '"fg 2"'])
+                 expected=['g 1" ', 'g 2" '])
         TEST.run(line="ls 'f",
-                 expected=["'fg 1'", "'fg 2'"])
+                 expected=["g 1' ", "g 2' "])
         # absolute path
         TEST.run(line=f'ls {testdir}/a',
-                 expected=[f'{testdir}/ab1', f'{testdir}/ab2'])
+                 expected=[f'b1 ', f'b2 '])
         TEST.run(line=f'ls "{testdir}/a',
-                 expected=[f'"{testdir}/ab1"', f'"{testdir}/ab2"'])
+                 expected=[f'b1" ', f'b2" '])
         TEST.run(line=f"ls '{testdir}/a",
-                 expected=[f"'{testdir}/ab1'", f"'{testdir}/ab2'"])
+                 expected=[f"b1' ", f"b2' "])
         TEST.run(line=f'ls "{testdir}/f',
-                 expected=[f'"{testdir}/fg 1"', f'"{testdir}/fg 2"'])
+                 expected=[f'g 1" ', f'g 2" '])
         TEST.run(line=f"ls '{testdir}/f",
-                 expected=[f"'{testdir}/fg 1'", f"'{testdir}/fg 2'"])
+                 expected=[f"g 1' ", f"g 2' "])
 
 def test_arg():
     test_arg_username()
     test_arg_absolute_path()
     test_arg_local_path()
-    # test_arg_quoted()
+    test_arg_quoted()
     # test_arg_escaped()
 
 
