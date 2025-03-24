@@ -254,10 +254,18 @@ class FilenameHandler(ArgHandler):
         debug(f'{self.__class__.__name__}: basedir={self.basedir}, prefix={self.prefix}')
 
     def complete_filename(self):
-        dir_contents = (os.listdir(FilenameHandler.pathlib_path(self.basedir).expanduser())
-                        if self.basedir else
-                        os.listdir())
-        return sorted(self.elements_matching_prefix(dir_contents))
+        try:
+            dir_contents = (os.listdir(self.expanduser(FilenameHandler.pathlib_path(self.basedir)))
+                            if self.basedir else
+                            os.listdir())
+            return sorted(self.elements_matching_prefix(dir_contents))
+        except FileNotFoundError:
+            return []
+
+    def expanduser(self, path):
+        # Emulate bash behavior for expansion of ~ in a quoted string.
+        assert isinstance(path, pathlib.Path), f'({type(path)}) {path}'
+        return path.expanduser() if self.quote != Quote.DOUBLE else path
 
     # Work out the completion's end characters for dir/filename. (The completion contains just filename so far.)
     # - Add a slash if path is a dir.

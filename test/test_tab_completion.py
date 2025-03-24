@@ -217,6 +217,17 @@ def test_arg_quoted():
                  expected=[f'g 1" ', f'g 2" '])
         TEST.run(line=f"ls '{testdir}/f",
                  expected=[f"g 1' ", f"g 2' "])
+    # Special case: ~ inside quoted string
+    user = os.getlogin()
+    os.environ['HOME'] = pathlib.Path(f'~{user}').expanduser().as_posix()
+    TEST.run(line='ls ~/.bash_h',
+             expected=['istory '])
+    TEST.run(line="ls '~/.bash_h",
+             expected=["istory' "])
+    TEST.run(line='ls "~/.bash_h',
+             expected=[])
+    # Restore HOME var for testing
+    TEST.reset_environment()
 
 def test_arg():
     test_arg_username()

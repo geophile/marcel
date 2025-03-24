@@ -514,24 +514,21 @@ Cases (xyz is result of completion):
 
 - "...xyz/         No quote, no space
 
-......................................................................
+----------------------------------------------------------------------
 
-Bash behavior for ls "...":
+3/24/25
 
-- Quoted stuff is not interpreted. So inside quotes, *, .., ~ don't
-  have their normal meaning, they are just literals.
+In bash:
 
-- Can mix/match quoted and unquoted. So 
- 
-    ls 'ab'*
+    ls "~/t<tab>
 
-  is equivalent to
+does NOT complete from home directory. But this does:
 
-    ls ab*
+    ls '~/t
 
-  This already works in marcel, surprisingly.
+Marcel currently expands in both cases.
 
-So I still need to suppress special handling of * etc when quoted.
+Easy fix! Just wrap expanduser, test for quote.
 
 ======================================================================
 
