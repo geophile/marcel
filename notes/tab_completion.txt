@@ -579,32 +579,3 @@ $
 
 <space> is weird. If typed, it is assumed to be a separator, not part
 of a filename needing an escape, EVEN IF there is such a filename.
-
-======================================================================
-
-TO DO:
-
-Things that must be replaced by prompt_toolkit:
-
-- history
-
-- edit command
-
-Things that might be replaced by prompt_toolkit:
-
-- multilinereader
-
-- prompt/continuation prompt
-
-Fix:
-
-- help completion
-
-- MultiColumnCompletionsMenu for long list of candidates?
-
-- Escaped strings
-
-- Completion of /, /xyz do not work. /: shows local files. /xyz: Shows nothing.
-
-- There's a bug in ls: ls c\*d: looks for c*d not literally "c*d". The
-  escaping isn't visible to ls. Same for single and double quoting.

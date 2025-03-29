@@ -756,3 +756,36 @@ SHOULD script usage be allowed to use a non-default workspace?
 - What about dbs and clusters?
 
 - Maybe allow script invocation to specify a startup file?
+
+----------------------------------------------------------------------
+
+From tab completion work:
+
+Things that must be replaced by prompt_toolkit:
+
+- history
+
+- edit command
+
+Things that might be replaced by prompt_toolkit:
+
+- multilinereader
+
+- prompt/continuation prompt
+
+Fix:
+
+- help completion
+
+- MultiColumnCompletionsMenu for long list of candidates?
+
+- Escaped strings
+
+- Completion of /, /xyz do not work. /: shows local files. /xyz: Shows nothing.
+
+- There's a bug in ls: ls c\*d: looks for c*d not literally "c*d". The
+  escaping isn't visible to ls. Same for single and double quoting.
+
+- What about completion of single quote: ls "
+
+----------------------------------------------------------------------
