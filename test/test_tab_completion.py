@@ -229,12 +229,32 @@ def test_arg_quoted():
     # Restore HOME var for testing
     TEST.reset_environment()
 
+def test_arg_escaped():
+    with TestDir(TEST.env) as testdir:
+        TEST.run(f'cd {testdir}')
+        os.system('touch "a b"')
+        os.system('touch "a!b"')
+        os.system('touch "c  d"')
+        os.system('touch "c= d"')
+        TEST.run(line='ls a',
+                 expected=['\\ b ', '\\!b '])
+        TEST.run(line='ls a\\ ',
+                 expected=['b '])
+        TEST.run(line='ls a\\!',
+                 expected=['b '])
+        TEST.run(line='ls c',
+                 expected=['\\ \\ d ', '=\ d '])
+        TEST.run(line='ls c\\ ',
+                 expected=['\\ d '])
+        TEST.run(line='ls c=',
+                 expected=['\\ d '])
+
 def test_arg():
     test_arg_username()
     test_arg_absolute_path()
     test_arg_local_path()
     test_arg_quoted()
-    # test_arg_escaped()
+    test_arg_escaped()
 
 
 def main_stable():

@@ -530,6 +530,56 @@ Marcel currently expands in both cases.
 
 Easy fix! Just wrap expanduser, test for quote.
 
+......................................................................
+
+Escapes:
+
+Completing a filename with spaces: bash adds escapes.
+
+Tricky case: "ij * kl". Bash behavior:
+
+    ls ij\ *<tab>
+
+->  ls ij\ \* kl
+
+I.e. bash REPLACES * with \*. But it's inconsistent. 
+
+    # Filename with two embedded spaces
+    touch 'st  uv'
+    ls st\<space><space><tab>
+
+Does NOT escape the second space.
+
+----------------------------------------------------------------------
+
+3/25/25
+
+Characters that need escaping (checking bash)
+
+$
+!
+"
+&
+'
+(  because of marcel's interpretation
+)
+*
+:
+;
+<  because of marcel's interpretation. Bash does weird things with it on tab completion
+>  same
+=  Bash does weird things with it on tab completion
+?
+@  because of marcel's interpretation
+[
+\
+`
+{
+|
+
+<space> is weird. If typed, it is assumed to be a separator, not part
+of a filename needing an escape, EVEN IF there is such a filename.
+
 ======================================================================
 
 TO DO:
@@ -550,13 +600,11 @@ Fix:
 
 - help completion
 
-- Filename completion of dir. 
-
-  - If quoted, the end quote is placed before the directory is
-  explored.
-
-  - If not quoted, a space is appended, which doesn't allow for
-    exploration.
-
 - MultiColumnCompletionsMenu for long list of candidates?
 
+- Escaped strings
+
+- Completion of /, /xyz do not work. /: shows local files. /xyz: Shows nothing.
+
+- There's a bug in ls: ls c\*d: looks for c*d not literally "c*d". The
+  escaping isn't visible to ls. Same for single and double quoting.

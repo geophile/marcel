@@ -222,6 +222,24 @@ def accessible(dir):
         os.chdir(current_dir)
         return accessible
 
+def unescape(x):
+    if '\\' in x:
+        unescaped = ''
+        i = 0
+        n = len(x)
+        while i < n:
+            c = x[i]
+            i += 1
+            if c == '\\':
+                if i < n:
+                    c = x[i]
+                    i += 1
+                    unescaped += c
+    else:
+        unescaped = x
+    return unescaped
+
+
 
 class Trace:
 

@@ -257,6 +257,7 @@ class ArgsParser:
         elif callable(x):
             f = marcel.function.NativeFunction(function=x)
         elif type(x) is str:
+            x = marcel.util.unescape(x)
             try:
                 f = marcel.function.SymbolFunction(x)
             except KeyError:

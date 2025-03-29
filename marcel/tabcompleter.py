@@ -15,6 +15,7 @@
 
 import os
 import pathlib
+import string
 
 from prompt_toolkit.completion import Completer, Completion, CompleteEvent
 from prompt_toolkit.document import Document
@@ -28,13 +29,17 @@ import marcel.util
 
 DEBUG = False
 
+# See discussion in notes/tab_completion.txt, 3/15/25.
+NEEDS_ESCAPE = string.whitespace + '''$!"&'()*:;<>?@[\`{|'''
+ESCAPE = '\\'
+
+
 def debug(message):
     if DEBUG:
         print(message, flush=True)
 
 
 class Quote(object):
-
     SINGLE = "'"
     DOUBLE = '"'
     ALL = SINGLE + DOUBLE
@@ -54,7 +59,6 @@ class Quote(object):
 
 
 class TabCompleter(Completer):
-
     OPS = marcel.op.public
     HELP_TOPICS = list(marcel.doc.topics) + OPS
 
@@ -64,8 +68,9 @@ class TabCompleter(Completer):
         self.line = None
 
     def get_completions(self, document, complete_event):
-        debug(f'get_completions: doc=<{document}> ------------------------------------------------------------')
         token = self.parse(document.text)
+        debug(f'get_completions: doc=<{document}> '
+              '-----------------------------------------------------------------------------')
         last_token_context = self.parser.op_arg_context
         if last_token_context.is_op():
             completer = self.complete_op
@@ -111,11 +116,11 @@ class TabCompleter(Completer):
         def pipeline_syntax(token):
             return (
                 # Example: "ls |"
-                token == '|' or
-                # Example: "ls | args (|"
-                token == '(|' or
-                # Example: "ls | args (| f:"
-                token.endswith(':'))
+                    token == '|' or
+                    # Example: "ls | args (|"
+                    token == '(|' or
+                    # Example: "ls | args (| f:"
+                    token.endswith(':'))
 
         debug(f'complete_op: token={token}')
         # We could be in op format but the token is either | or (|....
@@ -184,30 +189,54 @@ class TabCompleter(Completer):
         event = CompleteEvent(text_inserted=False, completion_requested=True)
         candidates = []
         for candidate in self.get_completions(document, event):
-            candidates.append(candidate)
-        return [candidate.text for candidate in candidates]
+            candidates.append(candidate.text)
+        debug(f'candidates({line}): {candidates}')
+        return candidates
 
 
 class ArgHandler(object):
 
     def __init__(self, prefix):
         self.prefix = prefix
+        # For purposes of matching filenames to prefix, we need th prefix with escapes resolved.
+        self.unescaped_prefix = ArgHandler.resolve_escapes(prefix)
 
+    # Returns a list of the filenames that can complete the last typed token.
     def complete_filename(self):
         assert False
 
+    # Returns a Completion for the given filename (what gets appended,
+    # and how it is displayed as a completion option).
     def completion(self, filename):
         assert False
 
+    # For use by subclasses
+
     def elements_matching_prefix(self, candidates):
-        return [f for f in candidates if f.startswith(self.prefix)]
+        return [f for f in candidates if f.startswith(self.unescaped_prefix)]
 
     @staticmethod
     def select(token):
         unquoted_token = Quote.unquote(token)
-        return (UsernameHandler(token) if unquoted_token.startswith('~') and '/' not in unquoted_token else
-                AbsDirHandler(token) if unquoted_token.startswith('/') or unquoted_token.startswith('~') else
-                LocalDirHandler(token))
+        return (UsernameHandler(token)
+                if unquoted_token.startswith('~') and '/' not in unquoted_token else
+                FilenameHandler(token))
+
+    @staticmethod
+    def resolve_escapes(x):
+        resolved = ''
+        i = 0
+        while i < len(x):
+            c = x[i]
+            i += 1
+            if c == ESCAPE:
+                if i < len(x):
+                    c = x[i]
+                    i += 1
+                    resolved += c
+            else:
+                resolved += c
+        return resolved
 
 class UsernameHandler(ArgHandler):
 
@@ -221,7 +250,7 @@ class UsernameHandler(ArgHandler):
     def completion(self, filename):
         # text: The completion. What gets appended to what the user typed.
         # display: Appears in list of candidate completions.
-        return Completion(text=(filename[len(self.prefix):] + '/'),
+        return Completion(text=(filename[len(self.unescaped_prefix):] + '/'),
                           display=f'~{filename}')
 
     @staticmethod
@@ -236,22 +265,31 @@ class UsernameHandler(ArgHandler):
             usernames.append(username)
         return usernames
 
+
 class FilenameHandler(ArgHandler):
 
     def __init__(self, token):
         # basedir and prefix are strings, resulting from splitting the token on the last slash, if there is one.
         # Either may include ~ which would need to be expanded later.
-        t = token
-        self.quote, token = Quote.split_leading_quote(token)
+        self.token = token
+        self.quote, unquoted_token = Quote.split_leading_quote(token)
         try:
-            last_slash = token.rindex('/')
-            self.basedir = token[:last_slash]
-            prefix = token[last_slash + 1:]
+            last_slash = unquoted_token.rindex('/')
+            if last_slash == 0:
+                # token is of the form /xyz
+                self.basedir = '/'
+                prefix = unquoted_token[1:]
+            else:
+                self.basedir = unquoted_token[:last_slash]
+                prefix = unquoted_token[last_slash + 1:]
         except ValueError:
             self.basedir = None
-            prefix = token
+            prefix = unquoted_token
         super().__init__(prefix=prefix)
-        debug(f'{self.__class__.__name__}: basedir={self.basedir}, prefix={self.prefix}')
+        self.last_char_replacement_text = None  # The last character of the token may need to be escaped.
+        self.cursor_adjustment = 0
+        self.compute_token_escaping(unquoted_token)
+        debug(f'{self.__class__.__name__}: basedir=<{self.basedir}>, prefix=<{self.prefix}>')
 
     def complete_filename(self):
         try:
@@ -262,22 +300,61 @@ class FilenameHandler(ArgHandler):
         except FileNotFoundError:
             return []
 
+    def completion(self, filename):
+        # text: The completion. What gets appended to what the user typed.
+        # display: Appears in list of candidate completions.
+        prefix = filename[:len(self.unescaped_prefix)]
+        suffix = filename[len(self.unescaped_prefix):]
+        return Completion(text=self.completion_text(prefix, suffix),
+                          display=f'{filename}',
+                          start_position=self.cursor_adjustment)
+    # The completion text is passed in as:
+    #   - prefix (stuff typed already), and
+    #   - suffix (stuff ot be appended).
+    # Escape NEEDS_ESCAPE characters in the suffix if the filename is not quoted.
+    # Also, check the last prefix character and escape that if needs to be escaped and isn't already
+    # escaped.
+    # Also work out what needs to be appended:
+    #     - Add a slash if path is a dir.
+    #     - Add a quote if the token started with a quote, and not a dir
+    #     - Add a space if not a dir
+    def completion_text(self, prefix, suffix):
+        if self.quote is None:
+            completion_text = ''
+            # Add escapes
+            # - Handle escaping of the last typed character
+            if self.last_char_replacement_text is not None:
+                completion_text = self.last_char_replacement_text
+                self.cursor_adjustment = -1
+            # - Fix the suffix
+            for c in suffix:
+                if c in NEEDS_ESCAPE:
+                    completion_text += ESCAPE
+                completion_text += c
+        else:
+            completion_text = suffix
+        filename = prefix + suffix
+        path = (FilenameHandler.pathlib_path(filename) if self.basedir is None else
+                FilenameHandler.pathlib_path(self.basedir) / filename)
+        completion_text += ('/' if path.is_dir() else
+                            (self.quote + ' ') if self.quote else
+                            ' ')
+        debug(f'completion_text(<{prefix}>, <{suffix}>): quote=<{self.quote}> -> <{completion_text}>')
+        return completion_text
+
+
     def expanduser(self, path):
         # Emulate bash behavior for expansion of ~ in a quoted string.
         assert isinstance(path, pathlib.Path), f'({type(path)}) {path}'
         return path.expanduser() if self.quote != Quote.DOUBLE else path
 
-    # Work out the completion's end characters for dir/filename. (The completion contains just filename so far.)
-    # - Add a slash if path is a dir.
-    # - Add a quote if the token started with a quote, and not a dir
-    # - Add a space if not a dir
-    def completion_endchars(self, filename):
-        path = (FilenameHandler.pathlib_path(filename) if self.basedir is None else
-                FilenameHandler.pathlib_path(self.basedir) / filename)
-        return ('/' if path.is_dir() else
-                (self.quote + ' ') if self.quote else
-                ' ')
-
+    def compute_token_escaping(self, unquoted_token):
+        if len(unquoted_token) > 0:
+            c = unquoted_token[-1]
+            if c in NEEDS_ESCAPE:
+                d = None if len(unquoted_token) == 1 else unquoted_token[-2]
+                if d != ESCAPE:
+                    self.last_char_replacement_text = f'{ESCAPE}{c}'
     @staticmethod
     def pathlib_path(x):
         if type(x) is str:
@@ -287,22 +364,3 @@ class FilenameHandler(ArgHandler):
         else:
             assert False, f'({type(x)}) {x}'
         return path
-
-class AbsDirHandler(FilenameHandler):
-
-    def completion(self, filename):
-        # text: The completion. What gets appended to what the user typed.
-        # display: Appears in list of candidate completions.
-        return (Completion(text=filename + self.completion_endchars(filename),
-                           display=f'/{filename}')
-                if self.basedir == '/' else
-                Completion(text=filename[len(self.prefix):] + self.completion_endchars(filename),
-                           display=f'{self.basedir}/{filename}'))
-
-class LocalDirHandler(FilenameHandler):
-
-    def completion(self, filename):
-        # text: The completion. What gets appended to what the user typed.
-        # display: Appears in list of candidate completions.
-        return Completion(text=filename[len(self.prefix):] + self.completion_endchars(filename),
-                          display=filename)

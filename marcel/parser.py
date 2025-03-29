@@ -457,7 +457,10 @@ class String(Token):
             elif c == Token.ESCAPE_CHAR:
                 if quote is None:
                     # TODO: ESCAPE at end of line
+                    chars.append(c)
                     c = self.next_char()
+                    if c is None:
+                        break
                     chars.append(c)
                 elif quote == Token.SINGLE_QUOTE:
                     chars.append(c)
