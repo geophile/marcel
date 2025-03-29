@@ -235,6 +235,8 @@ def unescape(x):
                     c = x[i]
                     i += 1
                     unescaped += c
+            else:
+                unescaped += c
     else:
         unescaped = x
     return unescaped

@@ -701,3 +701,24 @@ Probably due to syntax error in startup.py (added function).
 273. edit isn't working
 
 edited line not echoed
+
+----------------------------------------------------------------------
+
+274. Tab completion of directory not working
+
+cd ~/Music
+ls iT<tab>
+
+->
+
+ls iTunes/
+
+ls iTunes/<tab>
+
+select iTunes Music ->
+
+ls iTunes/iTunes\ Music/
+
+-> error message:
+
+No qualifying paths, (possibly due to permission errors): ['iTunes/iTunes\\ Music/']
