@@ -250,7 +250,7 @@ class MainScript(Main):
     def run_startup_scripts(self):
         startup_scripts = self.env.getvar('STARTUP_SCRIPTS')
         for script in startup_scripts:
-            if type(script) is str:
+            if isinstance(script, str):
                 for command in commands_in_script(script):
                     self.parse_and_run_command(command)
 

@@ -357,7 +357,7 @@ class FilenameHandler(ArgHandler):
                     self.last_char_replacement_text = f'{ESCAPE}{c}'
     @staticmethod
     def pathlib_path(x):
-        if type(x) is str:
+        if isinstance(x, str):
             path = pathlib.Path(x)
         elif isinstance(x, pathlib.Path):
             path = x

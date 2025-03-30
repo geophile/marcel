@@ -58,8 +58,7 @@ class Cd(marcel.core.Op):
     def setup(self, env):
         dir_arg = pathlib.Path(self.eval_function(env,
                                                   'directory_arg',
-                                                  str,
-                                                  pathlib.Path, pathlib.PosixPath, marcel.object.file.File))
+                                                  str, pathlib.Path, pathlib.PosixPath, marcel.object.file.File))
         try:
             dirs = marcel.op.filenames.Filenames(env, [dir_arg]).normalize()
         except Exception as e:

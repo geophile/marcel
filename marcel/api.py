@@ -308,7 +308,7 @@ def first(x, unwrap_singleton=True, errors=None):
 
 
 def reservoir(name):
-    assert type(name) is str
+    assert isinstance(name, str)
     assert name.isidentifier()
     reservoir = _reservoir.Reservoir(name, tempfile.mkstemp()[1])
     _RESERVOIRS.append(reservoir)

@@ -81,8 +81,7 @@ class Download(marcel.core.Op):
     def setup(self, env):
         self.dir = self.eval_function(env,
                                       'dir_arg',
-                                      str,
-                                      pathlib.Path, pathlib.PosixPath, File)
+                                      str, pathlib.Path, pathlib.PosixPath, File)
         self.dir = pathlib.Path(self.dir)
         self.dir = marcel.op.filenames.Filenames(env, [self.dir]).normalize()
         if len(self.dir) == 0:

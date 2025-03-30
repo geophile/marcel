@@ -28,7 +28,7 @@ class Host(object):
         self.addr = None
         self.name = None
         self.port = None
-        if type(host_spec) is str:
+        if isinstance(host_spec, str):
             self.parse_host_spec(host_spec)
         elif type(host_spec) in (tuple, list) and len(host_spec) == 2:
             host_spec, port = host_spec
@@ -83,7 +83,7 @@ class Cluster(object):
         if host is not None and type(host) in (tuple, list):
             # host=('localhost', 22) is clearly a single host with a port specified, and not a pair of hosts.
             # Allow a (str, int) tuple to be interpreted as a single host.
-            if not (type(host[0]) is str and type(host[1] is int)):
+            if not (isinstance(host[0], str) and type(host[1] is int)):
                 raise marcel.exception.KillShellException(
                     'host specification must be single-valued. Did you mean hosts?')
         if hosts is not None and type(hosts) not in (tuple, list):

@@ -87,7 +87,7 @@ class Flag(Arg):
 
     @staticmethod
     def plausible(x):
-        if type(x) is not str:
+        if not isinstance(x, str):
             return False
         if len(x) < 2:
             return False
@@ -170,7 +170,7 @@ class ArgsParser:
     def str_to_int(self, arg, x):
         if type(x) is int or callable(x):
             return x
-        if type(x) is str:
+        if isinstance(x, str):
             try:
                 return int(x)
             except ValueError:
@@ -190,19 +190,20 @@ class ArgsParser:
     def str_to_bool(self, arg, x):
         if type(x) is bool or callable(x):
             return x
-        if type(x) is str:
+        if isinstance(x, str):
             return x in ('T', 't', 'True', 'true')
         raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
 
     def check_str(self, arg, x):
-        if type(x) is str or callable(x):
+        if isinstance(x, str) or callable(x):
             return x
         raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
 
     def check_str_or_file(self, arg, x):
-        if (type(x) in (str, marcel.object.file.File) or
-                isinstance(x, pathlib.Path) or
-                callable(x)):
+        if (isinstance(x, str) or
+            isinstance(x, marcel.object.file.File) or
+            isinstance(x, pathlib.Path) or
+            callable(x)):
             return x
         raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
 
@@ -210,9 +211,8 @@ class ArgsParser:
         if self.env.api_usage() and (callable(x) or type(x) is marcel.core.OpList):
             # There should be more checking later, regarding the number of args
             return x
-        if not self.env.api_usage() and type(x) in (str,
-                                                    marcel.core.PipelineExecutable,
-                                                    marcel.core.PipelineFunction):
+        if ((not self.env.api_usage()) and
+            marcel.util.one_of(x, (str, marcel.core.PipelineExecutable, marcel.core.PipelineFunction))):
             # str: Presumably the name of a variable bound to a pipelines
             return x
         raise marcel.argsparser.ArgsError(self.op_name,
@@ -223,7 +223,7 @@ class ArgsParser:
             return x
         elif type(x) is marcel.object.cluster.Cluster:
             return x
-        elif type(x) is str:
+        elif isinstance(x, str):
             try:
                 return int(x)
             except ValueError:
@@ -240,7 +240,7 @@ class ArgsParser:
     def cluster(self, arg, x):
         if type(x) is marcel.object.cluster.Cluster:
             return x
-        elif type(x) is str:
+        elif isinstance(x, str):
             cluster = self.env.cluster(x)
             if cluster:
                 return cluster
@@ -256,7 +256,7 @@ class ArgsParser:
             f = x
         elif callable(x):
             f = marcel.function.NativeFunction(function=x)
-        elif type(x) is str:
+        elif isinstance(x, str):
             x = marcel.util.unescape(x)
             try:
                 f = marcel.function.SymbolFunction(x)
@@ -313,7 +313,7 @@ class ArgsParser:
     # Utilities
 
     def find_flag(self, x):
-        if type(x) is str:
+        if isinstance(x, str):
             for flag in self.flag_args:
                 if flag.short == x or flag.long == x:
                     return flag
@@ -341,7 +341,7 @@ class ArgsParser:
 
     # Can expand -xyz to -f -y -z when -f, -y, and -z are all no-value flags.
     def expand_arg(self, arg):
-        if type(arg) is str and len(arg) > 2 and arg[0] == '-' and arg[1] != '-':
+        if isinstance(arg, str) and len(arg) > 2 and arg[0] == '-' and arg[1] != '-':
             args = []
             for x in arg[1:]:
                 flag = '-' + x
@@ -521,7 +521,7 @@ class PipelineArgsParser:
 
     @staticmethod
     def flag_name(arg):
-        name = (None if type(arg) is not str else
+        name = (None if not isinstance(arg, str) else
                 arg[2:] if arg.startswith('--') else
                 arg[1:] if arg.startswith('-') else
                 None)

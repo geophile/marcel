@@ -1,0 +1,96 @@
+
+
+Your submission has been automatically removed because it appears to be missing one or more of the required sections:
+
+    What My Project Does
+
+    Target Audience (e.g., Is it meant for production, just a toy project, etc.)
+
+    Comparison (A brief comparison explaining how it differs from existing alternatives.)
+
+Please repost, ensuring your post includes these sections to inform and engage the community effectively. Browse other 'Showcase' flaired posts for guidance. Thank you for contributing to r/Python!
+
+I am a bot, and this action was performed automatically. Please contact the moderators of this subreddit if you have any questions or concerns.
+
+
+----------------------------------------------------------------------
+
+What My Project Does:
+
+Hello, I am the author of marcel (homepage, github), a bash-like shell
+that pipes Python data instead of strings, between operators. For
+example, here is a command to search a directory recursively, and find
+the five file types taking the most space.
+
+ls -fr \
+| map (f: (f.suffix, f.size)) \
+| select (ext, size: ext != '') \
+| red . + \
+| sort (ext, size: size) \
+| tail 5
+
+    ls -fr: List the files (-f) recursively (-r) in the current directory.
+
+    |: Pipe result to the next operator.
+
+    map (...): Given a file piped in from the ls command, return a tuple containing the file's extension (suffix) and size.
+
+    select (...): Pass downstream files for which the extension is not empty.
+
+    red . +: Group by the first element (extension) and sum (i.e. reduce) by the second one (file sizes).
+
+    sort (...): Given a set of (extension, size) tuples, sort by size.
+
+    tail 5: Keep the last five tuples from the input stream.
+
+Marcel also has commands for remote execution (to a single host or all
+nodes in a cluster), and database access. And there's an API in the
+form of a Python module, so you can use marcel capabilities from
+within Python programs.
+
+Target Audience:
+
+Marcel is aimed at developers who use a shell like bash and are
+comfortable using Python. Marcel allows such users to apply their
+Python knowledge to complex shell commands without having to use
+arcane sublanguages (e.g. as for sed and awk). Instead, you write bits
+of Python directly in the command line.
+
+Marcel also greatly simplifies a number of Python development
+problems, such as "shelling out" to use the host OS, doing database
+access, and doing remote access to a single host or nodes of a
+cluster.
+
+Marcel may also be of interest to Python developers who would like to
+become contributors to an open source project. I am looking for
+collaborators to help with:
+
+    Porting to Mac and Windows (marcel is Linux-only right now).
+
+    Adding modularity: Allowing users to add their own operators.
+
+    System testing.
+
+    Documentation.
+
+If you're interested in getting involved in an open source project,
+please take a look at marcel.
+
+
+Comparisons:
+
+There are many pipe-objects-instead-of-strings shells that have been
+developed in the last 20 years. Some notable ones:
+
+- Powershell https://learn.microsoft.com/en-us/powershell/: Based on many of the same ideas as marcel. Developed for
+  the Windows platform. Available on other platforms, but uptake seems
+  to have been minimal.
+
+- Nushell https://www.nushell.sh/: Very similar goals to marcel, but relies more on defining a
+  completely new shell language, whereas marcel seeks to exploit
+  Python instead of inventing a new language.
+
+- Xonsh https://xon.sh/: An interesting shell which encourages the use of Python
+  directly in commands. It aims to be an almost seamless blend of
+  shell and Python language features. This is in contrast to marcel in
+  which the Python bits are strictly delimited.

@@ -20,6 +20,7 @@ import marcel.function
 import marcel.opmodule
 import marcel.util
 from marcel.function_args_parser import FunctionArgsParser
+from marcel.stringliteral import StringLiteral
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -477,7 +478,7 @@ class String(Token):
                     raise LexerException(self, 'Malformed string')
             else:
                 chars.append(c)
-        self.string = ''.join(chars)
+        self.string = StringLiteral(''.join(chars))
         if quote is not None:
             self.unterminated_quote = quote
 

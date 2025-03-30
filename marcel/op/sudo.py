@@ -62,7 +62,7 @@ class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def check_str_and_pipeline(self, arg, x):
         # This isn't really accurate. The last arg must be a pipelines. The preceding ones must be str.
-        if type(x) not in (str, marcel.core.PipelineExecutable, marcel.core.OpList):
+        if not marcel.util.one_of(x, (str, marcel.core.PipelineExecutable, marcel.core.OpList)):
             raise marcel.argsparser.ArgsError(self.op_name,
                                               f'Arguments must be strings (flags to sudo) followed by a pipelines: {x}')
         return x

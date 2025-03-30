@@ -422,8 +422,8 @@ class WorkspaceValidater(object):
     class Error(object):
 
         def __init__(self, workspace_name, message):
-            assert type(workspace_name) is str
-            assert type(message) is str
+            assert isinstance(workspace_name, str)
+            assert isinstance(message, str)
             self.workspace_name = workspace_name
             self.message = message
 

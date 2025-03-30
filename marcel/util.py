@@ -241,6 +241,12 @@ def unescape(x):
         unescaped = x
     return unescaped
 
+def one_of(x, types):
+    for t in types:
+        if isinstance(x, t):
+            return True
+    return False
+
 
 
 class Trace:

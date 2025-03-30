@@ -82,8 +82,7 @@ class Upload(marcel.core.Op):
     def setup(self, env):
         self.dir = self.eval_function(env,
                                       'dir_arg',
-                                      str,
-                                      pathlib.Path, pathlib.PosixPath, File)
+                                      str, pathlib.Path, pathlib.PosixPath, File)
         self.dir = pathlib.Path(self.dir)
         if not self.dir.is_absolute():
             raise marcel.exception.KillCommandException(f'Target directory must be absolute: {self.dir}')

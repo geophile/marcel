@@ -33,7 +33,7 @@ class DirectoryState:
         return pathlib.Path(self.env.getvar('PWD'))
 
     def change_current_dir(self, directory):
-        if type(directory) is str:
+        if isinstance(directory, str):
             directory = pathlib.Path(directory)
         isinstance(directory, pathlib.Path), directory
         # current_dir() calls _clean_dir_stack(),

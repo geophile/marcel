@@ -164,7 +164,7 @@ class TextPointer:
         return self.nonws
 
     def advance_past(self, c):
-        assert TextPointer.is_markup_boundary(c) or (type(c) is str and len(c) == 1), c
+        assert TextPointer.is_markup_boundary(c) or (isinstance(c, str) and len(c) == 1), c
         next = self.next()
         while next != c and next != TEXTP_END:
             next = self.next()
@@ -290,7 +290,7 @@ class TextMarkup(Markup):
                 elif c == MARKUP_OPEN or c == TEXTP_END:
                     self.raise_invalid_markup()
                 else:
-                    assert type(c) is str, c
+                    assert isinstance(c, str), c
                     self.content += c
                     if not c.isspace():
                         self.non_ws_count += 1
@@ -400,7 +400,7 @@ class Paragraph:
             elif c == MARKUP_CLOSE or c == TEXTP_END:
                 pass
             else:
-                assert type(c) is str
+                assert isinstance(c, str)
                 if not c.isspace():
                     non_ws_count += 1
                 self.plaintext += c
@@ -513,7 +513,7 @@ class HelpFormatter:
                 # Skip whitespace after close, up to and including the first \n
                 textp = close
                 c = textp.next()
-                while type(c) is str and c.isspace() and c != '\n':
+                while isinstance(c, str) and c.isspace() and c != '\n':
                     c = textp.next()
                 if c != '\n':
                     textp.backup()

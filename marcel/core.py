@@ -168,7 +168,7 @@ class Op(AbstractOp):
             except Exception as e:
                 # We are doing setup. Resuming isn't a possibility
                 raise marcel.exception.KillCommandException(e)
-            if len(types) > 0 and type(x) not in types:
+            if len(types) > 0 and not marcel.util.one_of(x, types):
                 raise marcel.exception.KillCommandException(
                     f'Type of {self.op_name()}.{field} is {type(x)}, but must be one of {types}')
             return x
@@ -468,7 +468,7 @@ class Pipeline(object):
 
     @staticmethod
     def create(pipeline, customize_pipeline=lambda env, pipeline: pipeline):
-        if type(pipeline) in (str, PipelineExecutable):
+        if marcel.util.one_of(pipeline, (str, PipelineExecutable)):
             # str: Presumably the name of a variable bound to a PipelineExecutable
             return PipelineMarcel(pipeline, customize_pipeline)
         if callable(pipeline) or type(pipeline) is OpList:
@@ -499,7 +499,7 @@ class PipelineMarcel(Pipeline):
     # Pipeline
 
     def setup(self, env):
-        if type(self.pipeline_arg) is str:
+        if isinstance(self.pipeline_arg, str):
             executable = env.getvar(self.pipeline_arg)
             if type(executable) is not marcel.core.PipelineExecutable:
                 raise marcel.exception.KillCommandException(
@@ -536,7 +536,7 @@ class PipelineMarcel(Pipeline):
     # Internal
 
     def create_executable(self, env):
-        if type(self.pipeline_arg) is str:
+        if isinstance(self.pipeline_arg, str):
             # Presumably a var
             self.pipeline = env.getvar(self.pipeline_arg)
             if type(self.pipeline) is not marcel.core.PipelineExecutable:

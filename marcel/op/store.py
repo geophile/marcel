@@ -20,6 +20,7 @@ import marcel.core
 import marcel.exception
 import marcel.picklefile
 import marcel.reservoir
+import marcel.util
 
 Reservoir = marcel.reservoir.Reservoir
 
@@ -59,7 +60,7 @@ def store(var, append=False):
     args = []
     if append:
         args.append('--append')
-    if type(var) in (str, Reservoir):
+    if marcel.util.one_of(var, (str, Reservoir)):
         args.append(var)
     else:
         raise marcel.exception.KillCommandException(f'{var} is not a Reservoir: {type(var)}')
@@ -93,7 +94,7 @@ class Store(marcel.core.Op):
         if type(self.var) is Reservoir:
             # API
             self.reservoir = self.var
-        elif type(self.var) is str:
+        elif isinstance(self.var, str):
             # Interactive
             if self.var.isidentifier():
                 value = env.getvar(self.var)
