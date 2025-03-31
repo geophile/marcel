@@ -92,8 +92,7 @@ class ImportException(BaseException):
 
 # Indicates a marcel command terminating with a ShellString missing a terminating quote.
 class MissingQuoteException(BaseException):
-    def __init__(self, quote, unterminated_string):
-        self.quote = quote
+    def __init__(self, unterminated_string):
         self.unterminated_string = unterminated_string
 
 

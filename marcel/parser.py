@@ -409,7 +409,6 @@ class String(Token):
         assert position >= 0
         super().__init__(parser, text, position)
         self.string = None
-        self.unterminated_quote = None
         self.scan(scan_termination)
         # op_modules is a dict, name -> OpModule
         op_module = parser.op_modules.get(self.string, None)
@@ -431,7 +430,7 @@ class String(Token):
         return marcel.util.is_executable(self.string)
 
     def missing_quote(self):
-        return self.unterminated_quote
+        return self.string.missing_quote()
 
     def scan(self, scan_termination):
         quote = None
@@ -449,12 +448,11 @@ class String(Token):
                     # quoted whitespace or character that would otherwise terminate the string
                     chars.append(c)
             elif c in Token.QUOTES:
+                chars.append(c)
                 if quote is None:
                     quote = c
                 elif c == quote:
                     quote = None
-                else:
-                    chars.append(c)
             elif c == Token.ESCAPE_CHAR:
                 if quote is None:
                     # TODO: ESCAPE at end of line
@@ -479,8 +477,6 @@ class String(Token):
             else:
                 chars.append(c)
         self.string = StringLiteral(''.join(chars))
-        if quote is not None:
-            self.unterminated_quote = quote
 
 
 class MarcelString(String):
@@ -1214,8 +1210,8 @@ class Parser(object):
         self.count_arg()
         set_op_arg_context()
         arg = shell_arg() if self.shell_op else marcel_arg()
-        if isinstance(arg, String) and arg.unterminated_quote:
-            raise marcel.exception.MissingQuoteException(arg.unterminated_quote, arg.value())
+        if isinstance(arg, String) and arg.missing_quote():
+            raise marcel.exception.MissingQuoteException(arg.value())
         return arg
 
     def vars(self):

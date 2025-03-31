@@ -21,6 +21,7 @@ import marcel.function
 import marcel.object.cluster
 import marcel.object.file
 import marcel.reservoir
+import marcel.stringliteral
 import marcel.util
 
 # A marcel op has arguments. An argument is one of:
@@ -59,10 +60,14 @@ class Arg:
         self.op_name = op_name
         self.name = name
         self.target = target if target else name
-        self.convert = (lambda arg, x: x) if convert is None else convert
+        self.convert = convert if convert else Arg.eval_if_string_listeral
 
     def __repr__(self):
         return self.name
+
+    @staticmethod
+    def eval_if_string_listeral(_, x):
+        return marcel.util.string_value(x) if type(x) is marcel.stringliteral.StringLiteral else x
 
 
 class Flag(Arg):
@@ -195,17 +200,24 @@ class ArgsParser:
         raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
 
     def check_str(self, arg, x):
-        if isinstance(x, str) or callable(x):
-            return x
-        raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
+        if isinstance(x, str):
+            x = marcel.util.string_value(x)
+        elif callable(x):
+            pass
+        else:
+            raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
+        return x
 
     def check_str_or_file(self, arg, x):
-        if (isinstance(x, str) or
-            isinstance(x, marcel.object.file.File) or
-            isinstance(x, pathlib.Path) or
-            callable(x)):
-            return x
-        raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
+        if isinstance(x, str):
+            x = marcel.util.string_value(x)
+        elif(isinstance(x, marcel.object.file.File) or
+             isinstance(x, pathlib.Path) or
+             callable(x)):
+            pass
+        else:
+            raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
+        return x
 
     def check_pipeline(self, arg, x):
         if self.env.api_usage() and (callable(x) or type(x) is marcel.core.OpList):
@@ -229,23 +241,22 @@ class ArgsParser:
             except ValueError:
                 # Could be a cluster name
                 cluster = self.env.cluster(x)
-                if cluster:
-                    return cluster
-                else:
-                    return x
+                return cluster if cluster else marcel.util.string_value(x)
         elif marcel.util.iterable(x):
             return x
         raise ArgsError(arg.op_name, f'{x} must be an int, iterable, or Cluster')
 
     def cluster(self, arg, x):
+        cluster = None
         if type(x) is marcel.object.cluster.Cluster:
-            return x
+            cluster = x
         elif isinstance(x, str):
-            cluster = self.env.cluster(x)
-            if cluster:
-                return cluster
-            else:
-                raise ArgsError(arg.op_name, f'{x} is not a Cluster')
+            cluster = self.env.cluster(marcel.util.string_value(x))
+        else:
+            pass
+        if cluster is None:
+            raise ArgsError(arg.op_name, f'{x} is not a Cluster')
+        return cluster
 
     # An ArgsParser subclass uses this function as the value of convert, to validate
     # Python expressions, (parser.Expression). f is function source for console usage,

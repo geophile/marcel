@@ -23,9 +23,9 @@ class StringLiteral(str):
 
     def __init__(self, literal=None):
         self.original = literal
-        self.escaped = None
+        self.escape = None
         self.quote = None
-        self.missing_quote = None
+        self.unterminated_quote = None
         self.string = None
         self.compute_unadorned()
 
@@ -34,21 +34,30 @@ class StringLiteral(str):
 
     def description(self):
         return (f'{self.original} -> {self.string}, '
-                f'escaped={self.escaped}, '
+                f'escaped={self.escape}, '
                 f'quote={self.quote}, '
                 f'missing_quote={self.missing_quote}')
+
+    def escaped(self):
+        return self.escape
+
+    def quoted(self):
+        return self.quote
+
+    def missing_quote(self):
+        return self.quote if self.unterminated_quote else None
 
     # Internal
 
     def compute_unadorned(self):
         if self.original is not None:
-            self.escaped = False
-            self.missing_quote = False
+            self.escape = False
+            self.unterminated_quote = False
             if self[0] in StringLiteral.QUOTES:
                 # Remove quotes
                 self.quote = self[0]
-                self.missing_quote = self[-1] != self.quote
-                self.string = self[1:] if self.missing_quote else self[1:-1]
+                self.unterminated_quote = self[-1] != self.quote
+                self.string = self[1:] if self.unterminated_quote else self[1:-1]
             else:
                 # Remove escapes if any
                 self.string = ''
@@ -58,7 +67,7 @@ class StringLiteral(str):
                     c = self[i]
                     i += 1
                     if c == '\\':
-                        self.escaped = True
+                        self.escape = True
                         if i < n:
                             c = self[i]
                             i += 1

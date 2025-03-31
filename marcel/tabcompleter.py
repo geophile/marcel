@@ -97,7 +97,7 @@ class TabCompleter(Completer):
         try:
             self.parser.parse()
         except marcel.exception.MissingQuoteException as e:
-            token = f'{e.quote}{e.unterminated_string}'
+            token = e.unterminated_string
             debug(f'Caught MissingQuoteException: <{token}>')
         except marcel.exception.KillCommandException as e:
             # Parse may have failed because of an unrecognized op, for example. Normal continuation should

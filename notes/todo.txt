@@ -788,4 +788,9 @@ Fix:
 
 - What about completion of single quote: ls "
 
+Test:
+
+- arg parsing: check_str handling when we don't expect a filename,
+  check_filename when we do.
+
 ----------------------------------------------------------------------

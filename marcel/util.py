@@ -28,6 +28,8 @@ import traceback
 
 import dill
 
+from marcel.stringliteral import StringLiteral
+
 
 def python_version():
     return sys.version_info.major, sys.version_info.minor
@@ -246,6 +248,13 @@ def one_of(x, types):
         if isinstance(x, t):
             return True
     return False
+
+
+def string_value(x):
+    assert isinstance(x, str)
+    if type(x) is StringLiteral:
+        x = x.value()
+    return x
 
 
 
