@@ -5995,6 +5995,8 @@ FIXED
 
 ----------------------------------------------------------------------
 
+FIXED
+
 274. Tab completion of ~/... doesn't work
 
     ls ~/Mu<tab>
@@ -6014,6 +6016,8 @@ But:
 Second is correct, first is not.
 
 ----------------------------------------------------------------------
+
+FIXED
 
 275. Tab completion of "filename doesn't work
 
@@ -6052,3 +6056,15 @@ Traceback (most recent call last):
 marcel.exception.MissingQuoteException: ('"', 'wallpaper/')
 jao@loon:~$ 
 
+
+----------------------------------------------------------------------
+
+FIXED
+
+276. Tab completion sometimes coming up empty
+
+In ~/Music/ITunes/iTunes Music
+
+ls The\ Zombies/<tab>
+
+-> no candidates

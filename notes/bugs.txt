@@ -701,13 +701,3 @@ Probably due to syntax error in startup.py (added function).
 273. edit isn't working
 
 edited line not echoed
-
-----------------------------------------------------------------------
-
-276. Tab completion sometimes coming up empty
-
-In ~/Music/ITunes/iTunes Music
-
-ls The\ Zombies/<tab>
-
--> no candidates

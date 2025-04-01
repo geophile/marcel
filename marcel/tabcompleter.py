@@ -293,8 +293,9 @@ class FilenameHandler(ArgHandler):
 
     def complete_filename(self):
         try:
-            dir_contents = (os.listdir(self.expanduser(FilenameHandler.pathlib_path(self.basedir)))
-                            if self.basedir else
+            basedir = marcel.util.unescape(self.basedir)
+            dir_contents = (os.listdir(self.expanduser(FilenameHandler.pathlib_path(basedir)))
+                            if basedir else
                             os.listdir())
             return sorted(self.elements_matching_prefix(dir_contents))
         except FileNotFoundError:

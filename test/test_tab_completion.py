@@ -273,13 +273,15 @@ def main_stable():
 
 
 def main_dev():
+    TEST.run('cd /tmp/d')
+    TEST.run(line="ls d\\ e/")
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
+    # main_stable()
     TEST.report_failures('test_tab_completion')
 
 

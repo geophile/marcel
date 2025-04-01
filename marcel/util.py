@@ -225,6 +225,8 @@ def accessible(dir):
         return accessible
 
 def unescape(x):
+    if x is None:
+        return None
     if '\\' in x:
         unescaped = ''
         i = 0
@@ -251,6 +253,8 @@ def one_of(x, types):
 
 
 def string_value(x):
+    if x is None:
+        return None
     assert isinstance(x, str)
     if type(x) is StringLiteral:
         x = x.value()
