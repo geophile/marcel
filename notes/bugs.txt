@@ -762,3 +762,33 @@ Traceback (most recent call last):
 marcel.exception.MissingQuoteException: ('"', 'wallpaper/')
 jao@loon:~$ 
 
+
+----------------------------------------------------------------------
+
+276. Tab completion of ~/... doesn't work
+
+    ls ~/Mu<tab>
+
+->
+
+    ls ~/Music<space>
+
+But:
+
+    ls Mu<tab>
+
+->
+
+    ls Music/
+
+Second is correct, first is not.
+
+----------------------------------------------------------------------
+
+277. Tab completion sometimes coming up empty
+
+In ~/Music/ITunes/iTunes Music
+
+ls The\ Zombies/<tab>
+
+-> no candidates
