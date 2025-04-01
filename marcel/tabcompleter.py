@@ -336,6 +336,7 @@ class FilenameHandler(ArgHandler):
         filename = prefix + suffix
         path = (FilenameHandler.pathlib_path(filename) if self.basedir is None else
                 FilenameHandler.pathlib_path(self.basedir) / filename)
+        path = path.expanduser()
         completion_text += ('/' if path.is_dir() else
                             (self.quote + ' ') if self.quote else
                             ' ')

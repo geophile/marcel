@@ -132,6 +132,11 @@ def test_arg_username():
              expected=[])
 
 
+def test_arg_homedir():
+    TEST.run(line='ls ~/.',
+             expected=['config/', 'local/'])
+
+
 def test_arg_absolute_path():
     with TestDir(TEST.env) as testdir:
         os.mkdir(f'{testdir}/abcx')
@@ -251,6 +256,7 @@ def test_arg_escaped():
 
 def test_arg():
     test_arg_username()
+    test_arg_homedir()
     test_arg_absolute_path()
     test_arg_local_path()
     test_arg_quoted()

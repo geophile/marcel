@@ -5992,3 +5992,63 @@ import(random as random),
 FIXED
 
 272. expand op should expand sets
+
+----------------------------------------------------------------------
+
+274. Tab completion of ~/... doesn't work
+
+    ls ~/Mu<tab>
+
+->
+
+    ls ~/Music<space>
+
+But:
+
+    ls Mu<tab>
+
+->
+
+    ls Music/
+
+Second is correct, first is not.
+
+----------------------------------------------------------------------
+
+275. Tab completion of "filename doesn't work
+
+E.g.
+
+M 0.31.1 jao@loon ~$ ls "wallpaper/
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 586, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 574, in main
+    main_interactive_run(locations, workspace)
+  File "/home/jao/git/marcel/marcel/main.py", line 509, in main_interactive_run
+    main.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 356, in run
+    self.parse_and_run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 216, in parse_and_run_command
+    pipeline = parser.parse()
+  File "/home/jao/git/marcel/marcel/parser.py", line 1022, in parse
+    return self.command()
+  File "/home/jao/git/marcel/marcel/parser.py", line 1043, in command
+    command = self.pipeline()
+  File "/home/jao/git/marcel/marcel/parser.py", line 1129, in pipeline
+    pipeline_op_sequence())
+  File "/home/jao/git/marcel/marcel/parser.py", line 1107, in pipeline_op_sequence
+    op_sequence = self.op_sequence()
+  File "/home/jao/git/marcel/marcel/parser.py", line 1146, in op_sequence
+    op_args = [self.op_args()]
+  File "/home/jao/git/marcel/marcel/parser.py", line 1164, in op_args
+    arg_token = self.arg()
+  File "/home/jao/git/marcel/marcel/parser.py", line 1217, in arg
+    raise marcel.exception.MissingQuoteException(arg.unterminated_quote, arg.value())
+marcel.exception.MissingQuoteException: ('"', 'wallpaper/')
+jao@loon:~$ 
+
