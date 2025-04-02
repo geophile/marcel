@@ -115,7 +115,7 @@ INTERACTIVE_EXECUTABLES = [
 class Reader(marcel.multilinereader.MultiLineReader):
 
     def __init__(self, env, history_file):
-        super().__init__(history_file=history_file)
+        super().__init__(history_file=history_file, env=env)
         self.env = env
 
     def take_edited_command(self):
@@ -250,7 +250,7 @@ class MainScript(Main):
     def run_startup_scripts(self):
         startup_scripts = self.env.getvar('STARTUP_SCRIPTS')
         for script in startup_scripts:
-            if type(script) is str:
+            if isinstance(script, str):
                 for command in commands_in_script(script):
                     self.parse_and_run_command(command)
 
@@ -307,7 +307,7 @@ class MainInteractive(MainScript):
 
     def __init__(self, old_main, env, workspace, testing=None, initial_config=DEFAULT_CONFIG):
         super().__init__(env, workspace, testing, initial_config)
-        self.tab_completer = marcel.tabcompleter.TabCompleter(self)
+        self.tab_completer = marcel.tabcompleter.TabCompleter(env)
         try:
             self.reader = self.initialize_reader()
         except FileNotFoundError:
@@ -349,8 +349,8 @@ class MainInteractive(MainScript):
             while True:
                 try:
                     if self.input is None:
-                        prompts = self.env.prompts() if interactive else (None, None)
-                        self.input = self.reader.input(*prompts)
+                        self.input = (self.reader.input(*self.env.prompts()) if interactive
+                                      else input())
                     # else: Restarted main, and self.input was from the previous incarnation.
                     self.check_for_config_update()
                     self.parse_and_run_command(self.input)
@@ -358,7 +358,7 @@ class MainInteractive(MainScript):
                     self.job_control.wait_for_idle_foreground()
                 except KeyboardInterrupt:  # ctrl-C
                     print()
-        except EOFError:
+        except EOFError:  # ctrl-d
             if interactive:
                 print()
             # else: not a tty, and we don't want an extra line at end of script execution.
@@ -374,6 +374,7 @@ class MainInteractive(MainScript):
         self.env.reader = Reader(self.env, self.env.locations.data_ws_hist(self.workspace))
         return self.env.reader
 
+    # Used by the edit op.
     def insert_edited_command(self):
         command = self.reader.take_edited_command()
         if command:
@@ -476,7 +477,6 @@ def main_interactive_run(locations, workspace):
         raise marcel.exception.ReconfigureException(Workspace.default())
 
     def env_and_main(old_env, old_main, workspace):
-        env = None
         try:
             env = marcel.env.EnvironmentInteractive.create(locations, workspace, trace)
         except Exception as e:

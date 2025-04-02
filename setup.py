@@ -16,7 +16,7 @@ setuptools.setup(
     url='https://www.marceltheshell.org',
     packages=setuptools.find_packages('.'),
     scripts=['bin/marcel', 'bin/farcel.py'],
-    install_requires=['dill', 'psutil'],
+    install_requires=['dill', 'psutil', 'prompt_toolkit'],
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',

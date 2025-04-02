@@ -30,12 +30,8 @@ def find_node(cluster, node_name):
     return None
 
 
-CLUSTER1 = cluster(user='jao',
-                   identity='/home/jao/.ssh/id_rsa',
-                   host='127.0.0.1')
-CLUSTER2 = cluster(user='jao',
-                   identity='/home/jao/.ssh/id_rsa',
-                   hosts=['127.0.0.1', 'localhost'])
+CLUSTER1 = cluster(user='jao', host='127.0.0.1', identity='/home/jao/.ssh/id_rsa')
+CLUSTER2 = cluster(user='jao', hosts=['127.0.0.1', 'localhost'], identity='/home/jao/.ssh/id_rsa')
 NODE1 = find_node(CLUSTER2, '127.0.0.1')
 NODE2 = find_node(CLUSTER2, 'localhost')
 jdb = database(driver='psycopg2',
@@ -915,7 +911,7 @@ def test_fork():
     TEST.run(lambda: run(fork('abc', lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
              expected_err='Too many pipelines args')
     # Cluster forkgen
-    localhost = marcel.object.cluster.Host('127.0.0.1', None)
+    localhost = marcel.object.cluster.Host(None, '127.0.0.1')
     TEST.run(lambda: run(fork(CLUSTER1, lambda: gen(3, 100)) | sort()),
              expected_out=[100, 101, 102])
     TEST.run(lambda: run(fork(CLUSTER1, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
@@ -1075,7 +1071,7 @@ def test_sql():
 @timeit
 def test_store_load():
     # Load
-    x = reservoir('x')
+    x = reservoir('f')
     TEST.run(test=lambda: run(gen(3, 1) | map(lambda x: x * 10) | store(x)),
              verification=lambda: run(load(x)),
              expected_out=[10, 20, 30])
@@ -1471,9 +1467,9 @@ def test_args():
     # sql
     if SQL:
         TEST.run(test=lambda: run(sql("drop table if exists t") | select(lambda x: False)))
-        TEST.run(test=lambda: run(sql("create table t(x int)") | select(lambda x: False)))
+        TEST.run(test=lambda: run(sql("create table t(f int)") | select(lambda x: False)))
         TEST.run(test=lambda: run(gen(5) | args(lambda x: sql("insert into t values(%s)", x))),
-                 verification=lambda: run(sql("select * from t order by x")),
+                 verification=lambda: run(sql("select * from t order by f")),
                  expected_out=[0, 1, 2, 3, 4])
     # window
     TEST.run(test=lambda: run(gen(3) | args(lambda w: gen(10) | window(disjoint=w))),

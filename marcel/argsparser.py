@@ -21,6 +21,7 @@ import marcel.function
 import marcel.object.cluster
 import marcel.object.file
 import marcel.reservoir
+import marcel.stringliteral
 import marcel.util
 
 # A marcel op has arguments. An argument is one of:
@@ -59,10 +60,14 @@ class Arg:
         self.op_name = op_name
         self.name = name
         self.target = target if target else name
-        self.convert = (lambda arg, x: x) if convert is None else convert
+        self.convert = convert if convert else Arg.eval_if_string_listeral
 
     def __repr__(self):
         return self.name
+
+    @staticmethod
+    def eval_if_string_listeral(_, x):
+        return marcel.util.string_value(x) if type(x) is marcel.stringliteral.StringLiteral else x
 
 
 class Flag(Arg):
@@ -87,7 +92,7 @@ class Flag(Arg):
 
     @staticmethod
     def plausible(x):
-        if type(x) is not str:
+        if not isinstance(x, str):
             return False
         if len(x) < 2:
             return False
@@ -170,17 +175,17 @@ class ArgsParser:
     def str_to_int(self, arg, x):
         if type(x) is int or callable(x):
             return x
-        if type(x) is str:
+        if isinstance(x, str):
             try:
                 return int(x)
             except ValueError:
                 raise ArgsError(arg.op_name, f'{arg.name} cannot be converted to int: {x}')
         raise ArgsError(arg.op_name, f'{arg.name} must be an int: {x}')
 
-    def str_to_float(self, arg, x):
+    def to_float(self, arg, x):
         if type(x) is float or callable(x):
             return x
-        if type(x) is str:
+        if type(x) is int or str:
             try:
                 return float(x)
             except ValueError:
@@ -190,29 +195,36 @@ class ArgsParser:
     def str_to_bool(self, arg, x):
         if type(x) is bool or callable(x):
             return x
-        if type(x) is str:
+        if isinstance(x, str):
             return x in ('T', 't', 'True', 'true')
         raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
 
     def check_str(self, arg, x):
-        if type(x) is str or callable(x):
-            return x
-        raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
+        if isinstance(x, str):
+            x = marcel.util.string_value(x)
+        elif callable(x):
+            pass
+        else:
+            raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
+        return x
 
     def check_str_or_file(self, arg, x):
-        if (type(x) in (str, marcel.object.file.File) or
-                isinstance(x, pathlib.Path) or
-                callable(x)):
-            return x
-        raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
+        if isinstance(x, str):
+            x = marcel.util.string_value(x)
+        elif(isinstance(x, marcel.object.file.File) or
+             isinstance(x, pathlib.Path) or
+             callable(x)):
+            pass
+        else:
+            raise ArgsError(arg.op_name, f'{arg.name} must be a string: {x}')
+        return x
 
     def check_pipeline(self, arg, x):
         if self.env.api_usage() and (callable(x) or type(x) is marcel.core.OpList):
             # There should be more checking later, regarding the number of args
             return x
-        if not self.env.api_usage() and type(x) in (str,
-                                                    marcel.core.PipelineExecutable,
-                                                    marcel.core.PipelineFunction):
+        if ((not self.env.api_usage()) and
+            marcel.util.one_of(x, (str, marcel.core.PipelineExecutable, marcel.core.PipelineFunction))):
             # str: Presumably the name of a variable bound to a pipelines
             return x
         raise marcel.argsparser.ArgsError(self.op_name,
@@ -223,32 +235,31 @@ class ArgsParser:
             return x
         elif type(x) is marcel.object.cluster.Cluster:
             return x
-        elif type(x) is str:
+        elif isinstance(x, str):
             try:
                 return int(x)
             except ValueError:
                 # Could be a cluster name
                 cluster = self.env.cluster(x)
-                if cluster:
-                    return cluster
-                else:
-                    return x
+                return cluster if cluster else marcel.util.string_value(x)
         elif marcel.util.iterable(x):
             return x
         raise ArgsError(arg.op_name, f'{x} must be an int, iterable, or Cluster')
 
     def cluster(self, arg, x):
+        cluster = None
         if type(x) is marcel.object.cluster.Cluster:
-            return x
-        elif type(x) is str:
-            cluster = self.env.cluster(x)
-            if cluster:
-                return cluster
-            else:
-                raise ArgsError(arg.op_name, f'{x} is not a Cluster')
+            cluster = x
+        elif isinstance(x, str):
+            cluster = self.env.cluster(marcel.util.string_value(x))
+        else:
+            pass
+        if cluster is None:
+            raise ArgsError(arg.op_name, f'{x} is not a Cluster')
+        return cluster
 
     # An ArgsParser subclass uses this function as the value of convert, to validate
-    # Python expressions, (parser.Expression). x is function source for console usage,
+    # Python expressions, (parser.Expression). f is function source for console usage,
     # a callable for API usage.
     def function(self, arg, x):
         f = None
@@ -256,7 +267,8 @@ class ArgsParser:
             f = x
         elif callable(x):
             f = marcel.function.NativeFunction(function=x)
-        elif type(x) is str:
+        elif isinstance(x, str):
+            x = marcel.util.unescape(x)
             try:
                 f = marcel.function.SymbolFunction(x)
             except KeyError:
@@ -312,7 +324,7 @@ class ArgsParser:
     # Utilities
 
     def find_flag(self, x):
-        if type(x) is str:
+        if isinstance(x, str):
             for flag in self.flag_args:
                 if flag.short == x or flag.long == x:
                     return flag
@@ -338,9 +350,9 @@ class ArgsParser:
         assert len(names) == len(name_set)
         return name_set
 
-    # Can expand -xyz to -x -y -z when -x, -y, and -z are all no-value flags.
+    # Can expand -xyz to -f -y -z when -f, -y, and -z are all no-value flags.
     def expand_arg(self, arg):
-        if type(arg) is str and len(arg) > 2 and arg[0] == '-' and arg[1] != '-':
+        if isinstance(arg, str) and len(arg) > 2 and arg[0] == '-' and arg[1] != '-':
             args = []
             for x in arg[1:]:
                 flag = '-' + x
@@ -520,7 +532,7 @@ class PipelineArgsParser:
 
     @staticmethod
     def flag_name(arg):
-        name = (None if type(arg) is not str else
+        name = (None if not isinstance(arg, str) else
                 arg[2:] if arg.startswith('--') else
                 arg[1:] if arg.startswith('-') else
                 None)

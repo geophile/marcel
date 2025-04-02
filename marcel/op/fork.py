@@ -13,13 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import multiprocessing as mp
-import subprocess
-import io
-import sys
-
-import dill
-
 import marcel.argsparser
 import marcel.core
 import marcel.exception

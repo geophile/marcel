@@ -18,6 +18,7 @@ import marcel.core
 import marcel.exception
 import marcel.picklefile
 import marcel.reservoir
+import marcel.util
 
 
 HELP = '''
@@ -31,11 +32,11 @@ Write the contents of the environment variable {r:VAR} to the output stream.
 There is special optional syntax for the {r:load} operator: {r:load VAR} can be written as {r:VAR <$}. 
 With this alternative syntax, the {r:<} acts as a pipe ({r:|}). So, for example, the following command:
 
-{L,wrap=F}load foobar | map (x, y: (y, x))  
+{L,wrap=F}load foobar | map (f, y: (y, f))  
 
 is equivalent to:
 
-{L,wrap=F}foobar <$ map (x, y: (y, x))
+{L,wrap=F}foobar <$ map (f, y: (y, f))
 
 {r:foobar <$} is valid at the beginning of a pipelines since it produces a stream of tuples, just like
 any other pipelines. So, for example the command line {r:foobar <$} prints the contents of foobar,
@@ -52,7 +53,7 @@ input to {r:join} comes from loading {r:def}.
 
 def load(target):
     load = Load()
-    if type(target) not in (str, marcel.reservoir.Reservoir):
+    if not marcel.util.one_of(target, (str, marcel.reservoir.Reservoir)):
         raise marcel.exception.KillCommandException(f'{target} is not a Reservoir: {type(target)}')
     return load, [target]
 
@@ -82,7 +83,7 @@ class Load(marcel.core.Op):
         if type(self.var) is marcel.reservoir.Reservoir:
             # API
             self.picklefile = self.var
-        elif type(self.var) is str:
+        elif isinstance(self.var, str):
             # Interactive
             if self.var.isidentifier():
                 self.picklefile = env.getvar(self.var)

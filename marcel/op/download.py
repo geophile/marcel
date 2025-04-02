@@ -81,8 +81,7 @@ class Download(marcel.core.Op):
     def setup(self, env):
         self.dir = self.eval_function(env,
                                       'dir_arg',
-                                      str,
-                                      pathlib.Path, pathlib.PosixPath, File)
+                                      str, pathlib.Path, pathlib.PosixPath, File)
         self.dir = pathlib.Path(self.dir)
         self.dir = marcel.op.filenames.Filenames(env, [self.dir]).normalize()
         if len(self.dir) == 0:
@@ -111,16 +110,25 @@ class Download(marcel.core.Op):
         self.fork_manager.run(env)
 
     @staticmethod
-    def scp_command(identity, sources, host, dest):
-        scp_command = ['scp', '-Cpqr', '-i', identity]
+    def scp_command(sources, host, dest):
+        cluster = host.cluster
+        buffer = []
+        if cluster.password:
+            buffer.append(f'sshpass -p "{cluster.password}"')
+        buffer.append('scp -Cpqr')
+        if cluster.identity:
+            buffer.extend(['-i', cluster.identity])
+        if cluster.password:
+            buffer.append(f'-P {cluster.password}')
         for source in sources:
-            scp_command.append(f'{host.user}@{host.name}:{marcel.util.quote_files(source)}')
+            buffer.append(f'{cluster.user}@{host.addr}:{marcel.util.quote_files(source)}')
         node_dir = dest / host.name
-        scp_command.append(node_dir.as_posix())
-        return ' '.join(scp_command)
+        buffer.append(node_dir.as_posix())
+        scp_command = ' '.join(buffer)
+        return scp_command
 
     def customize_pipeline(self, env, pipeline, host):
-        scp_command = Download.scp_command(host.identity, self.filenames, host, self.dir)
+        scp_command = Download.scp_command(self.filenames, host, self.dir)
         pipeline.append(marcel.opmodule.create_op(env, 'bash', scp_command))
         return pipeline
 

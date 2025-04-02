@@ -24,6 +24,7 @@ import dill
 
 import marcel.exception
 import marcel.object.error
+import marcel.reservoir
 import marcel.util
 
 # The code for processing child input from multiple processes is adapted from here:
@@ -35,7 +36,7 @@ import marcel.util
 # Signal handling:
 # When a process receives a signal, that signal is propagated to its children, (created by mp.Process().start())
 # The main (console-handling) process can issue additional signals, aimed at specific children, but otherwise,
-# signal processing is all-or-none. I.e., the handling of a signal is the same across all of the children.
+# signal processing is all-or-none. I.e., the handling of a signal is the same across all the children.
 #
 # - Ctrl-C: When typed on the console, this generates SIGINT. We want to kill the foreground process, only, if there
 #   is one. We don't want the signal reaching all children, as they will all die. And if they all ignore the signal,
@@ -65,8 +66,8 @@ class Job:
     RUNNING_FOREGROUND = 0  # (*)
     RUNNING_BACKGROUND = 1  # (+)
     RUNNING_PAUSED = 2      # (-)
-    DEAD = 3                # (x)
-    JOB_STATE_SYMBOLS = ('*', '+', '-', 'x')
+    DEAD = 3                # (f)
+    JOB_STATE_SYMBOLS = ('*', '+', '-', 'f')
 
     # Params
     JOIN_DELAY_SEC = 0.2
@@ -143,12 +144,10 @@ class Job:
     def start_process(self):
         def run_command_in_child(command, writer):
             debug(f'running: {command.source}')
+            child_namespace_changes = None
             try:
                 child_namespace_changes = command.execute(self.env, remote=True)
                 debug('execution complete')
-                if child_namespace_changes is not None:
-                    debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
-                    writer.send(dill.dumps(child_namespace_changes))
             except marcel.exception.KillCommandException as e:
                 debug(f'caught {e}')
                 marcel.util.print_to_stderr(self.env, e)
@@ -156,19 +155,27 @@ class Job:
                 debug(f'caught {e}')
                 # Error handler printed the error
                 pass
-            writer.close()
+            except KeyboardInterrupt as e:
+                debug(f'caught {e}')
+                raise
+            finally:
+                if child_namespace_changes is not None:
+                    debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
+                    writer.send(dill.dumps(child_namespace_changes))
+                writer.close()
 
         # duplex=False: child writes to parent when function completes execution. No need to communicate in the
         # other direction
         debug(f'About to spawn process for {self.command.source}')
         reader, writer = mp.Pipe(duplex=False)
         JobControl.only.child_listener.add_listener(reader)
-        debug(f'Job.start_process: env {id(self.env)}')
+        debug('Job.start_process')
         self.process = mp.Process(target=run_command_in_child, args=(self.command, writer))
         self.process.daemon = False
         try:
-            # Set up process handling as it should exist in the child process. Ignore ctrl-c (since that
-            # should only kill the foreground process), and default handling for ctrl-z (pause).
+            # Set up process handling as it should exist in the child process.
+            # - ctrl-c / SIGINT: Ignore, since this should only kill the foreground process.
+            # - ctrl-z / SIGTSTP: Default handling (pause).
             signal.signal(signal.SIGINT, signal.SIG_IGN)
             signal.signal(signal.SIGTSTP, signal.SIG_DFL)
             self.process.start()

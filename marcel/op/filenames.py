@@ -21,6 +21,7 @@ import marcel.core
 import marcel.exception
 import marcel.object.error
 import marcel.object.file
+import marcel.util
 
 File = marcel.object.file.File
 
@@ -63,6 +64,7 @@ class Filenames(object):
         return roots
 
     def _normalize_paths(self):
+        # Unescape escaped chars
         # Resolve ~
         # Resolve . and ..
         # Convert to Path
@@ -70,6 +72,9 @@ class Filenames(object):
         for filename in self.filenames:
             if type(filename) is File:
                 filename = filename.path
+            filename = str(filename)
+            # Unescape escaped chars
+            filename = marcel.util.unescape(filename)
             # Resolve . and ..
             filename = os.path.normpath(filename)
             # Convert to Path and resolve ~

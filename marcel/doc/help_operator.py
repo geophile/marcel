@@ -111,21 +111,21 @@ For example, suppose directory {n:/tmp/d} contains three directories:
 
 {p,wrap=F,indent=4}
 M jao@cheese:/tmp/d$ ls
-rwxr-xr-x jao      jao              4096 /tmp/d/hi
+rwxr-xr-f jao      jao              4096 /tmp/d/hi
 r-------- root     root             4096 /tmp/d/nope
-rwxr-xr-x jao      jao              4096 /tmp/d/welcome
+rwxr-xr-f jao      jao              4096 /tmp/d/welcome
 
 The {r:nope} directory cannot be visited, due to permissions. If we try
 to list all files and directories recursively:
 
 {p,wrap=F,indent=4}
 M jao@cheese:/tmp/d$ ls -r
-drwxr-xr-x jao      jao              4096 /tmp/d/hi
+drwxr-xr-f jao      jao              4096 /tmp/d/hi
 -rw-r--r-- jao      jao                 0 /tmp/d/hi/a.txt
 -rw-r--r-- jao      jao                 0 /tmp/d/hi/b.txt
 dr-------- root     root             4096 /tmp/d/nope
 {c550:Error(Cannot explore /tmp/d/nope: permission denied)}
-drwxr-xr-x jao      jao              4096 /tmp/d/welcome
+drwxr-xr-f jao      jao              4096 /tmp/d/welcome
 -rw-r--r-- jao      jao                 0 /tmp/d/welcome/c.txt
 -rw-r--r-- jao      jao                 0 /tmp/d/welcome/d.txt
 

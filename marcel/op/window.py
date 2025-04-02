@@ -43,7 +43,7 @@ A new group is started on the first input object, and for any
 subsequent object for which {r:PREDICATE} returns true. For example, if
 the input stream contains the integers {n:1, 2, 3, ...}, then:
 {p,wrap=F}
-    window (x: x % 3 == 2)
+    window (f: f % 3 == 2)
 
 yields as output:
 {p,wrap=F}

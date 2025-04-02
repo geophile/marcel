@@ -95,7 +95,7 @@ class TestBase:
         return self.main.tab_completer.candidates(line, text)
 
     def description(self, x):
-        return x if type(x) is str else dill.source.getsource(x).split('\n')[0]
+        return x if isinstance(x, str) else dill.source.getsource(x).split('\n')[0]
 
     def check_ok(self, command, expected, actual):
         expected = self.remove_empty_line_at_end(expected.split('\n'))
@@ -227,7 +227,7 @@ class TestConsole(TestBase):
                 message = list(message)
             if type(message) is list:
                 message = '\n'.join([str(m) for m in message])
-            elif type(message) is not str:
+            elif not isinstance(message, str):
                 message = str(message)
             print(message, file=sys.__stdout__)
 
@@ -365,12 +365,12 @@ class TestTabCompletion(TestBase):
         self.env.dir_state().change_current_dir(TestBase.start_dir)
         os.system(f'cp {config_file} {self.locations.config_ws_startup(workspace)}')
 
-    def run(self, line, text=None, expected=None):
-        if text is None:
+    def run(self, line, expected=None):
+        if expected is None:
             self.main.parse_and_run_command(line)
         else:
-            print(f'TESTING: line="{line}", text="{text}"')
-            actual = self.main.tab_completer.candidates(line, text)
+            print(f'TESTING: line=<<<{line}>>>')
+            actual = self.main.tab_completer.candidates(line)
             if actual is None:
                 actual = []
             if sorted(expected) != sorted(actual):

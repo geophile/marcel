@@ -15,7 +15,10 @@
 
 import os
 import pathlib
-import readline
+import string
+
+from prompt_toolkit.completion import Completer, Completion, CompleteEvent
+from prompt_toolkit.document import Document
 
 import marcel.core
 import marcel.doc
@@ -24,10 +27,11 @@ import marcel.op
 import marcel.parser
 import marcel.util
 
-Parser = marcel.parser.Parser
-
-
 DEBUG = False
+
+# See discussion in notes/tab_completion.txt, 3/15/25.
+NEEDS_ESCAPE = string.whitespace + '''$!"&'()*:;<>?@[\`{|'''
+ESCAPE = '\\'
 
 
 def debug(message):
@@ -35,46 +39,122 @@ def debug(message):
         print(message, flush=True)
 
 
-class TabCompleter:
+class Quote(object):
+    SINGLE = "'"
+    DOUBLE = '"'
+    ALL = SINGLE + DOUBLE
 
+    @staticmethod
+    def split_leading_quote(x):
+        return (x[0], x[1:]) if len(x) > 0 and x[0] in Quote.ALL else (None, x)
+
+    @staticmethod
+    def unquote(x):
+        if x:
+            if x[0] in Quote.ALL:
+                x = x[1:]
+            if x[-1] in Quote.ALL:
+                x = x[:-1]
+        return x
+
+
+class TabCompleter(Completer):
     OPS = marcel.op.public
     HELP_TOPICS = list(marcel.doc.topics) + OPS
 
-    def __init__(self, main):
-        self.main = main
-        self.op_name = None
-        self.op_flags = None
-        self.executables = None
-        self.homedirs = None
-        readline.set_completer(self.complete)
-        # Removed '-', '/', '~' from readline.get_completer_delims()
-        readline.set_completer_delims(' \t\n`!@#$%^&*()=+[{]}\\|;:\'",<>?')
+    def __init__(self, env):
+        self.env = env
+        self.parser = None
+        self.line = None
 
-    def complete(self, text, state):
-        candidates = self.candidates(readline.get_line_buffer(), text)
-        return candidates[state] if candidates else None
-
-    def complete_op(self, text):
-        debug(f'complete_op, text = <{text}>')
-        candidates = []
-        if len(text) > 0:
-            # Display marcel ops.
-            # Display executables only if there are no qualifying ops.
-            for op in TabCompleter.OPS:
-                if op.startswith(text):
-                    candidates.append(op)
-            if len(candidates) == 0:
-                self.ensure_executables()
-                for ex in self.executables:
-                    if ex.startswith(text):
-                        candidates.append(ex)
-            debug(f'complete_op candidates for {text}: {candidates}')
+    def get_completions(self, document, complete_event):
+        token = self.parse(document.text)
+        debug(f'get_completions: doc=<{document}> '
+              '-----------------------------------------------------------------------------')
+        last_token_context = self.parser.op_arg_context
+        if last_token_context.is_op():
+            completer = self.complete_op
+        elif last_token_context.is_flag():
+            completer = self.complete_flag
+        elif last_token_context.is_arg():
+            completer = self.complete_arg
         else:
-            candidates = TabCompleter.OPS
-        # Append a space if there is only one candidate
-        if len(candidates) == 1:
-            candidates = [candidates[0] + ' ']
-        return candidates
+            completer = self.noop
+        for c in completer(token):
+            yield c
+
+    def __repr__(self):
+        return f'TabCompleter({self.line})'
+
+    # Returns the last token encountered by the parse of line
+    def parse(self, line):
+        token = None
+        self.line = line
+        # Parse the text so far, to get information needed for tab completion. It is expected that
+        # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
+        # which can be ignored. The important point is that the parse will set Parser.op.
+        self.parser = marcel.parser.Parser(line, self.env)
+        try:
+            self.parser.parse()
+        except marcel.exception.MissingQuoteException as e:
+            token = e.unterminated_string
+            debug(f'Caught MissingQuoteException: <{token}>')
+        except marcel.exception.KillCommandException as e:
+            # Parse may have failed because of an unrecognized op, for example. Normal continuation should
+            # do the right thing.
+            debug(f'Caught KillCommandException: {e}')
+        except BaseException as e:
+            debug(f'Something went wrong: {e}')
+            marcel.util.print_stack_of_current_exception()
+        else:
+            debug('No exception during parse')
+        if token is None:
+            token = self.parser.terminal_token_value()
+        return token
+
+    def complete_op(self, token):
+        def pipeline_syntax(token):
+            return (
+                # Example: "ls |"
+                    token == '|' or
+                    # Example: "ls | args (|"
+                    token == '(|' or
+                    # Example: "ls | args (| f:"
+                    token.endswith(':'))
+
+        debug(f'complete_op: token={token}')
+        # We could be in op format but the token is either | or (|....
+        if pipeline_syntax(token):
+            token = ''
+        # Include marcel ops.
+        # Include executables only if there are no qualifying ops.
+        found_op = False
+        for op in TabCompleter.OPS:
+            if len(token) == 0 or op.startswith(token):
+                yield TabCompleter.string_completion(token, op)
+                found_op = True
+        if not found_op:
+            for exe in TabCompleter.executables():
+                if exe.startswith(token):
+                    yield TabCompleter.string_completion(token, exe)
+
+    def complete_flag(self, token):
+        debug(f'complete_flag: token={token}')
+        for flag in sorted(self.parser.flags()):
+            if flag.startswith(token):
+                yield TabCompleter.string_completion(token, flag)
+
+    # Arg completion assumes we're looking for filenames. (bash does this too.)
+    def complete_arg(self, token):
+        filename_handler = ArgHandler.select(token)
+        for filename in filename_handler.complete_filename():
+            yield filename_handler.completion(filename)
+
+    def noop(self, token):
+        # There needs to be a yield statement so that this function is recognized as a generator.
+        if self is None:
+            yield None
+        pass
 
     @staticmethod
     def complete_help(text):
@@ -87,125 +167,202 @@ class TabCompleter:
         return candidates
 
     @staticmethod
-    def complete_flag(text, flags):
-        candidates = []
-        for f in flags:
-            if f.startswith(text):
-                candidates.append(f)
-        debug(f'complete_flag candidates for <{text}>: {candidates}')
-        if len(candidates) == 1:
-            candidates = [candidates[0] + ' ']
-        return candidates
-
-    def complete_filename(self, text):
-        debug(f'complete_filenames, text = <{text}>')
-        current_dir = self.main.env.dir_state().current_dir()
-        if text:
-            if text == '~/':
-                home = pathlib.Path(text).expanduser()
-                filenames = os.listdir(home.as_posix())
-            elif text.startswith('~/'):
-                base = pathlib.Path('~/').expanduser()
-                debug(f'base: {base}')
-                base_length = len(base.as_posix())
-                debug(f'base length: {base_length}')
-                pattern = text[2:] + '*'
-                filenames = ['~' + f[base_length:]
-                             for f in [p.as_posix() for p in base.glob(pattern)]]
-                debug(f'filenames: {filenames}')
-            elif text.startswith('~'):
-                find_user = text[1:]
-                self.ensure_homedirs()
-                filenames = []
-                for username in self.homedirs.keys():
-                    if username.startswith(find_user):
-                        filenames.append('~' + username)
-            elif text.startswith('/'):
-                base = '/'
-                pattern_prefix = text[1:]
-                filenames = [p.as_posix()
-                             for p in pathlib.Path(base).glob(pattern_prefix + '*')]
-            else:
-                base = current_dir
-                pattern_prefix = text
-                filenames = [p.relative_to(base).as_posix()
-                             for p in pathlib.Path(base).glob(pattern_prefix + '*')]
-        else:
-            filenames = [p.relative_to(current_dir).as_posix() for p in current_dir.iterdir()]
-        filenames = [f + '/' if pathlib.Path(f).expanduser().is_dir() else f for f in filenames]
-        if len(filenames) == 1:
-            if not filenames[0].endswith('/'):
-                filenames = [filenames[0] + ' ']
-        debug(f'complete_filename candidates for {text}: {filenames}')
-        return filenames
-
-    def candidates(self, line, text):
-        candidates = None
-        debug(f'complete: line={line}, text=<{text}>')
-        if len(line.strip()) == 0:
-            candidates = TabCompleter.OPS
-        else:
-            # Parse the text so far, to get information needed for tab completion. It is expected that
-            # the text will end early, since we are doing tab completion here. This results in a PrematureEndError
-            # which can be ignored. The important point is that the parse will set Parser.op.
-            parser = marcel.parser.Parser(line, self.main.env)
-            try:
-                parser.parse()
-            except marcel.exception.KillCommandException as e:
-                # Parse may have failed because of an unrecognized op, for example. Normal continuation should
-                # do the right thing.
-                debug(f'Caught KillCommandException: {e}')
-            except Exception as e:
-                debug(f'caught {type(e)}: {e}')
-                # Don't do tab completion
-                return
-            except BaseException as e:
-                debug(f'Something went really wrong: {e}')
-                marcel.util.print_stack_of_current_exception()
-            else:
-                debug('No exception')
-            debug(f'TabCompleter.candidates, is token op: {parser.expect_op()}')
-            if parser.expect_op():
-                op = parser.token
-                if op.op_name == 'help':
-                    candidates = self.complete_help(text)
-                else:
-                    candidates = self.complete_op(text)
-            else:
-                if len(text) == 0:
-                    candidates = self.complete_filename(text)
-                elif text[-1].isspace():
-                    text = ''
-                    candidates = self.complete_filename(text)
-                elif text.startswith('-'):
-                    candidates = self.complete_flag(text, parser.flags())
-                else:
-                    candidates = self.complete_filename(text)
-        return candidates
+    def string_completion(token, completion):
+        # text: of the completion; what gets appended.
+        # display: appears in list of candidate completions.
+        return Completion(text=f'{completion[len(token):]} ',
+                          display=completion)
 
     @staticmethod
-    def op_name(line):
-        first = line.split()[0]
-        return first if first in TabCompleter.OPS else None
+    def executables():
+        executables = []
+        path = os.environ['PATH'].split(':')
+        for p in path:
+            for f in os.listdir(p):
+                if marcel.util.is_executable(f) and f not in executables:
+                    executables.append(f)
+        return executables
 
-    def ensure_executables(self):
-        if self.executables is None:
-            self.executables = []
-            path = os.environ['PATH'].split(':')
-            for p in path:
-                for f in os.listdir(p):
-                    if marcel.util.is_executable(f) and f not in self.executables:
-                        self.executables.append(f)
+    # For use in testing
+    def candidates(self, line):
+        document = Document(line)
+        event = CompleteEvent(text_inserted=False, completion_requested=True)
+        candidates = []
+        for candidate in self.get_completions(document, event):
+            candidates.append(candidate.text)
+        debug(f'candidates({line}): {candidates}')
+        return candidates
 
-    def ensure_homedirs(self):
-        if self.homedirs is None:
-            self.homedirs = {}
-            # TODO: This is a hack. Is there a better way?
-            with open('/etc/passwd', 'r') as passwds:
-                users = passwds.readlines()
-            for line in users:
-                fields = line.split(':')
-                username = fields[0]
-                homedir = fields[5]
-                self.homedirs[username] = homedir
 
+class ArgHandler(object):
+
+    def __init__(self, prefix):
+        self.prefix = prefix
+        # For purposes of matching filenames to prefix, we need th prefix with escapes resolved.
+        self.unescaped_prefix = ArgHandler.resolve_escapes(prefix)
+
+    # Returns a list of the filenames that can complete the last typed token.
+    def complete_filename(self):
+        assert False
+
+    # Returns a Completion for the given filename (what gets appended,
+    # and how it is displayed as a completion option).
+    def completion(self, filename):
+        assert False
+
+    # For use by subclasses
+
+    def elements_matching_prefix(self, candidates):
+        return [f for f in candidates if f.startswith(self.unescaped_prefix)]
+
+    @staticmethod
+    def select(token):
+        unquoted_token = Quote.unquote(token)
+        return (UsernameHandler(token)
+                if unquoted_token.startswith('~') and '/' not in unquoted_token else
+                FilenameHandler(token))
+
+    @staticmethod
+    def resolve_escapes(x):
+        resolved = ''
+        i = 0
+        while i < len(x):
+            c = x[i]
+            i += 1
+            if c == ESCAPE:
+                if i < len(x):
+                    c = x[i]
+                    i += 1
+                    resolved += c
+            else:
+                resolved += c
+        return resolved
+
+class UsernameHandler(ArgHandler):
+
+    def __init__(self, token):
+        super().__init__(prefix=token[1:])  # Everything after ~
+        debug(f'{self.__class__.__name__}: prefix={self.prefix}')
+
+    def complete_filename(self):
+        return self.elements_matching_prefix(sorted(UsernameHandler.usernames()))
+
+    def completion(self, filename):
+        # text: The completion. What gets appended to what the user typed.
+        # display: Appears in list of candidate completions.
+        return Completion(text=(filename[len(self.unescaped_prefix):] + '/'),
+                          display=f'~{filename}')
+
+    @staticmethod
+    def usernames():
+        usernames = []
+        # TODO: Is this portable, even across UNIXes?
+        with open('/etc/passwd', 'r') as passwds:
+            users = passwds.readlines()
+        for line in users:
+            fields = line.split(':')
+            username = fields[0]
+            usernames.append(username)
+        return usernames
+
+
+class FilenameHandler(ArgHandler):
+
+    def __init__(self, token):
+        # basedir and prefix are strings, resulting from splitting the token on the last slash, if there is one.
+        # Either may include ~ which would need to be expanded later.
+        self.token = token
+        self.quote, unquoted_token = Quote.split_leading_quote(token)
+        try:
+            last_slash = unquoted_token.rindex('/')
+            if last_slash == 0:
+                # token is of the form /xyz
+                self.basedir = '/'
+                prefix = unquoted_token[1:]
+            else:
+                self.basedir = unquoted_token[:last_slash]
+                prefix = unquoted_token[last_slash + 1:]
+        except ValueError:
+            self.basedir = None
+            prefix = unquoted_token
+        super().__init__(prefix=prefix)
+        self.last_char_replacement_text = None  # The last character of the token may need to be escaped.
+        self.cursor_adjustment = 0
+        self.compute_token_escaping(unquoted_token)
+        debug(f'{self.__class__.__name__}: basedir=<{self.basedir}>, prefix=<{self.prefix}>')
+
+    def complete_filename(self):
+        try:
+            basedir = marcel.util.unescape(self.basedir)
+            dir_contents = (os.listdir(self.expanduser(FilenameHandler.pathlib_path(basedir)))
+                            if basedir else
+                            os.listdir())
+            return sorted(self.elements_matching_prefix(dir_contents))
+        except FileNotFoundError:
+            return []
+
+    def completion(self, filename):
+        # text: The completion. What gets appended to what the user typed.
+        # display: Appears in list of candidate completions.
+        prefix = filename[:len(self.unescaped_prefix)]
+        suffix = filename[len(self.unescaped_prefix):]
+        return Completion(text=self.completion_text(prefix, suffix),
+                          display=f'{filename}',
+                          start_position=self.cursor_adjustment)
+    # The completion text is passed in as:
+    #   - prefix (stuff typed already), and
+    #   - suffix (stuff ot be appended).
+    # Escape NEEDS_ESCAPE characters in the suffix if the filename is not quoted.
+    # Also, check the last prefix character and escape that if needs to be escaped and isn't already
+    # escaped.
+    # Also work out what needs to be appended:
+    #     - Add a slash if path is a dir.
+    #     - Add a quote if the token started with a quote, and not a dir
+    #     - Add a space if not a dir
+    def completion_text(self, prefix, suffix):
+        if self.quote is None:
+            completion_text = ''
+            # Add escapes
+            # - Handle escaping of the last typed character
+            if self.last_char_replacement_text is not None:
+                completion_text = self.last_char_replacement_text
+                self.cursor_adjustment = -1
+            # - Fix the suffix
+            for c in suffix:
+                if c in NEEDS_ESCAPE:
+                    completion_text += ESCAPE
+                completion_text += c
+        else:
+            completion_text = suffix
+        filename = prefix + suffix
+        path = (FilenameHandler.pathlib_path(filename) if self.basedir is None else
+                FilenameHandler.pathlib_path(self.basedir) / filename)
+        path = path.expanduser()
+        completion_text += ('/' if path.is_dir() else
+                            (self.quote + ' ') if self.quote else
+                            ' ')
+        debug(f'completion_text(<{prefix}>, <{suffix}>): quote=<{self.quote}> -> <{completion_text}>')
+        return completion_text
+
+
+    def expanduser(self, path):
+        # Emulate bash behavior for expansion of ~ in a quoted string.
+        assert isinstance(path, pathlib.Path), f'({type(path)}) {path}'
+        return path.expanduser() if self.quote != Quote.DOUBLE else path
+
+    def compute_token_escaping(self, unquoted_token):
+        if len(unquoted_token) > 0:
+            c = unquoted_token[-1]
+            if c in NEEDS_ESCAPE:
+                d = None if len(unquoted_token) == 1 else unquoted_token[-2]
+                if d != ESCAPE:
+                    self.last_char_replacement_text = f'{ESCAPE}{c}'
+    @staticmethod
+    def pathlib_path(x):
+        if isinstance(x, str):
+            path = pathlib.Path(x)
+        elif isinstance(x, pathlib.Path):
+            path = x
+        else:
+            assert False, f'({type(x)}) {x}'
+        return path

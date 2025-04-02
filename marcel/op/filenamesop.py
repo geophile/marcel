@@ -60,7 +60,7 @@ class FilenamesOp(marcel.core.Op):
         self.roots = None
         self.base = None
         # emitted_paths is maintained to avoid visiting the same path repeatedly, as might happen
-        # with roots containing wildcards. E.g., a? and ?x would both identify a file names ax.
+        # with roots containing wildcards. E.g., a? and ?f would both identify a file names ax.
         self.emitted_paths = None
         # Set of visited directories, used to avoid revisiting directories via symlinks. Directories
         # are identified by (stat.st_dev, stat.st_ino).

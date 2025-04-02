@@ -1,39 +1,34 @@
 What's New
 ----------
 
-You can assign the value of a Python expression to a variable, e.g.
+Tab completion of filenames has not worked well from the beginning. Completing a 
+filename with whitespace would fail to add escapes, which meant that the user had
+to carefully fix the command, or add quotes. And tab completion with quoted
+filenames was also broken.
 
-```shell
-x = (5 + 6)
-```
+This all works now, and the fix was much more involved than it should have been.
+Completion from bash (which uses readline, apparently) works nicely. Trying
+to reproduce that behavior using the Python wrapper of readline defeated me.
+The delimiters used to delmit tokens depend on context (for marcel). So depending
+on context, I either wanted the default completer (which works great for filenames)
+or a custom one (for op names and marcel flags). But with the default completer,
+I found it impossible to successfully use the hooks needed to display the 
+candidates and then place the selected candidate on the line being typed.
 
-assigns 11 to the variable `x`. The RHS, `(5 + 6)` is shorthand for `(lambda: 5 + 6)`. In other words,
-the function inside the parens is invoked, and the resulting value is assigned.
+After bashing (hah!) my head against this problem
+for a few weeks, I looked for an alternative
+and found [prompt_toolkit](https://python-prompt-toolkit.readthedocs.io). 
+This is a very rich toolkit for doing command-line things from Python.
+I'll be adding more
+of its capabilities into marcel in future releases.
 
-Sometimes you want to assign a function to a variable. Following the previous example, 
-to assign to `inc` a function that adds 1 to its input,
-you would have to do something like this:
+On one hand, marcel now has a new dependency, on prompt_toolkit. You shouldn't
+have to do anything because of this, but marcel installation will install
+prompt_toolkit, (similar to what already happens with psutil and dill).
 
-```shell
-inc = (lambda: lambda x: x + 1)
-```
-
-Evaluating `(lambda: lambda x: x + 1)` yields the function `lambda x: x + 1` which is assigned to
-`inc`. That is kind of clunky, and while obviously correct and consistent, it isn't what you
-normally think of first. Or at least I didn't, I tried `inc = (lambda x: x + 1)` and got an error
-message because `(lambda x: x + 1)` cannot be evaluated without binding a value to `x`.
-
-In this release, the less clunky, less consistent syntax is permitted. If you write:
-
-```shell
-inc = (lambda x: x + 1)
-```
-
-then `inc` will be assigned `lambda x: x + 1`. I.e., it will be understood that you really
-meant `inc = (lambda: lambda x: x + 1)`. This only happens when assigning expressions
-to variables, and the parenthesized function has more than zero arguments.
-In other contexts, (e.g. the function used with `map` or `select`), there
-is no similar tweaking of the expression.
+On the other hand, the dependency on readline is removed! (Almost, upcoming dot
+releases will eliminate it completely). That removes a major impediment for
+porting to Mac and Windows. (I'm looking for volunteers to help with porting.)
 
 Marcel
 ======

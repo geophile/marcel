@@ -75,6 +75,9 @@ def test_cp():
         TEST.run(test='cp a\\ b c\\ d',
                  verification='ls -f | map (f: (f.name, f.size))',
                  expected_out=[('a b', 5), ('c d', 5)])
+        TEST.run(test='cp "c d" \'e f\'',
+                 verification='ls -f | map (f: (f.name, f.size))',
+                 expected_out = [('a b', 5), ('c d', 5), ('e f', 5)])
 
 
 def main():

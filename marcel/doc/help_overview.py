@@ -30,9 +30,9 @@ a sequence of 100 integers, 0 through 99, and, outputs the each number
 along with its square root:
 
 {p,wrap=F}
-    gen 100 | map (lambda x: (x, x**0.5))
+    gen 100 | map (lambda f: (f, f**0.5))
 
-Note that the Python function, mapping {r:x} to the tuple {r:(x, x**0.5)}
+Note that the Python function, mapping {r:f} to the tuple {r:(f, f**0.5)}
 is enclosed in parentheses, as is the case whenever a function is
 required. Marcel permits the {n:lambda} keyword to be omitted.
 

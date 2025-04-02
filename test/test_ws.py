@@ -212,7 +212,7 @@ def test_workspaces_and_compilables():
     TEST.run(test='ws -n w',
              verification='ws | (w: str(w))',
              expected_out=['Workspace(w)'])
-    TEST.run(test='f = (lambda: lambda x: x + 1)',
+    TEST.run(test='f = (lambda: lambda f: f + 1)',
              verification='(f(4))',
              expected_out=[5])
     TEST.run(test='g3 = (| gen 3 |)',

@@ -42,8 +42,8 @@ def days(n):
     return 24 * 3600 * n
 
 
-def cluster(user, identity, host=None, hosts=None):
-    return Cluster(user, identity, host, hosts)
+def cluster(user, host=None, hosts=None, identity=None, password=None):
+    return Cluster(user=user, host=host, hosts=hosts, identity=identity, password=password)
 
 
 def epoch(year, month, day, hour=0, minute=0, sec=0, usec=0):

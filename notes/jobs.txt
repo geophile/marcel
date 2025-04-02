@@ -79,3 +79,291 @@ problem is unfixable. And capturing environment changes is another bag
 of heuristics.
 
 Idea: Use threading instead of multiprocessing.
+
+----------------------------------------------------------------------
+
+12/20/24
+
+Working on bug 114. Part of that is inconsistent handling of
+reservoir-valued env var:
+
+    - gen 10000000 >$ x
+    - ctrl-c while it's running
+
+    The env var isn't there, but the temp file is.
+
+......................................................................
+
+Job.start is called by MainInteractive.__init__, passing in
+self.update_namespace. Refactor:
+
+- Move update_namespace into Job.
+
+HOW TO TEST THIS? There is no unit testing of jobs.
+
+......................................................................
+
+Communication:
+
+- ForkManager uses Pipes. Queues might be easier.
+
+- ForkManager uses dill to encode/decode stuff being sent through
+  pipes. Seems redundant, but on the other hand, dill is better than
+  pickling.
+
+......................................................................
+
+Testing:
+
+- Use a multiprocessing.Process to run the commands being
+  tested. Start it as "spawn", which uses a new Python interpreter
+  (don't share with the testing process). (See set_start_method.)
+
+----------------------------------------------------------------------
+
+12/25/24
+
+See experiments/signalhandling.py.
+
+The article cited in the code
+(https://www.titonbarua.com/posts/2014-10-29-safe-use-of-unix-signals-with-multiprocessing-modules-in-python)
+skips a crucial point. 
+
+- mp.set_start_method('fork'): Because the new Process is forked, the
+  parent's state, including the signal handler, is inherited by the
+  child.
+
+- mp.set_start_method('spawn'): Because the new Process is spawned,
+  the parent's state is NOT inherited, so the child gets the default
+  signal handler.
+
+Start method considerations:
+
+- fork seems better for marcel jobs, while spawn seems better for
+  testing. 
+
+- But if marcel is ever going to be multi-platform, it seems best to
+  assume NO sharing of state, i.e., some platform might require spawn.
+
+- But if jobs uses spawn, and child does not inherit parent's state,
+  then won't things break? E.g., need the parent's env.
+
+- But hold on! farcel has exactly the same problem, and it works. So
+  spawning should be possible.
+
+----------------------------------------------------------------------
+
+12/27/24
+
+JobTestInteractive:
+- parent handles SIGINT with ctrl_c_handler
+- child has default SIGINT handler
+
+Parent starts
+
+    3594: JobTest.__init__
+    3594: JobTest.run start
+
+Parent spawns child
+
+    3617: storing (1735304046.4329975,)
+    3617: storing (1735304046.9336164,)
+    3617: storing (1735304047.4343348,)
+    3617: storing (1735304047.9351246,)
+    3617: storing (1735304048.437845,)
+    3617: storing (1735304048.9405468,)
+
+Parent sends SIGINT to child
+
+    3594: JobTest.run about to signal child
+    Process Process-1:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/experiments/signalhandling.py", line 135, in command_runner
+        run(timer(0.5) | store(x))
+      File "/home/jao/git/marcel/marcel/api.py", line 277, in run
+        _run_pipeline(pipeline)
+      File "/home/jao/git/marcel/marcel/api.py", line 257, in _run_pipeline
+        command.execute(_ENV)
+      File "/home/jao/git/marcel/marcel/core.py", line 237, in execute
+        self.pipeline.run(env)
+      File "/home/jao/git/marcel/marcel/core.py", line 357, in run
+        self.ops[0].run(env)
+      File "/home/jao/git/marcel/marcel/op/timer.py", line 81, in run
+        self.lock.wait(1.0)
+      File "/usr/lib/python3.10/threading.py", line 324, in wait
+        gotit = waiter.acquire(True, timeout)
+    KeyboardInterrupt
+
+Child cleanup by Command.execute finally block
+
+    3617: Command.execute flush and cleanup for (| timer(0.5) | store(Reservoir(/tmp/tmpj85qbess)) | write() |)
+    3617: store cleanup x: Reservoir(/tmp/tmpj85qbess)
+
+Child command_runner catches KeyboardInterrupt
+
+    3617: command_runner caught KeyboardInterrupt
+
+Join child
+
+    3594: JobTest.run end
+
+......................................................................
+
+JobTestInteractive:
+- parent has default SIGINT
+- child has default SIGINT handler
+
+Parent starts
+
+    3911: JobTest.__init__
+    3911: JobTest.run start
+
+Parent spawns child
+
+    3928: storing (1735305044.0166993,)
+    3928: storing (1735305044.5173762,)
+    3928: storing (1735305045.018155,)
+    3928: storing (1735305045.5189347,)
+    3928: storing (1735305046.0217197,)
+    3928: storing (1735305046.5245092,)
+
+Parent sends SIGINT to child
+
+    3911: JobTest.run about to signal child
+    Process Process-1:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+        self.run()
+      File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+        self._target(*self._args, **self._kwargs)
+      File "/home/jao/git/marcel/experiments/signalhandling.py", line 135, in command_runner
+        run(timer(0.5) | store(x))
+      File "/home/jao/git/marcel/marcel/api.py", line 277, in run
+        _run_pipeline(pipeline)
+      File "/home/jao/git/marcel/marcel/api.py", line 257, in _run_pipeline
+        command.execute(_ENV)
+      File "/home/jao/git/marcel/marcel/core.py", line 237, in execute
+        self.pipeline.run(env)
+      File "/home/jao/git/marcel/marcel/core.py", line 357, in run
+        self.ops[0].run(env)
+      File "/home/jao/git/marcel/marcel/op/timer.py", line 81, in run
+        self.lock.wait(1.0)
+      File "/usr/lib/python3.10/threading.py", line 324, in wait
+        gotit = waiter.acquire(True, timeout)
+    KeyboardInterrupt
+
+Child cleanup by Command.execute finally block
+
+    3928: Command.execute flush and cleanup for (| timer(0.5) | store(Reservoir(/tmp/tmpw96tqvof)) | write() |)
+    3928: store cleanup x: Reservoir(/tmp/tmpw96tqvof)
+
+Child command_runner caught KeyboardInterrupt
+
+    3928: command_runner caught KeyboardInterrupt
+
+Join child
+
+    3911: JobTest.run end
+
+......................................................................
+
+Above two sequnces are the same.
+
+- Child doesn't need handler
+
+- Parent doesn't either (for this test).
+
+......................................................................
+
+SIGINT handlers reconsidered:
+
+- Default signal handling propagates to children. 
+
+- That works for cleanup.
+
+- It is the WRONG thing for background jobs. Ctrl-c should kill the
+  foreground job only, leave background jobs alone.
+
+So: 
+
+- Children need to ignore SIGINT
+
+- Parent handles SIGINT.
+
+- Parent proagates SIGTERM, and then SIGKILL if SIGTERM doesn't work,
+  to child foreground process.
+
+Which is what is already implemented!
+
+BUT:
+
+- Job.start_process establishes signal handling assuming a fork
+  model. It should work for spawn also.
+
+- So have run_command_in_child set its own handlers.
+
+......................................................................
+
+JobTestAPI
+
+Parent starts
+
+    6002: JobTestAPI.__init__
+    6002: JobTestAPI.run start
+
+Parent spawns child
+
+    /usr/bin/bash: line 3: warning: here-document at line 1 delimited by end-of-file (wanted `EOF')
+    6021: Command.execute flush and cleanup for (| import(marcel.builtin, *) | write() |)
+    6021: Command.execute flush and cleanup for (| import(datetime) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(recent, d: select (f: now() - f.mtime < days(float(d)))) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(ext, e: select (f: f.suffix[1:] == e)) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(loc, ls -0 ~/git/marcel/marcel ~/git/marcel/test        | args (| d: ls -fr (d)                   | ext py                   | (f: f.read().count('\n'))                   | red +                   | (n: (d, n)) |)) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(ft, sort (f: f.mtime)) | write() |)
+    6021: Command.execute flush and cleanup for (| import(random) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(rand, range, n: gen (int(n)) | (x: random.randint(0, int(range)-1))) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(types, head 1 |            args (| x:                ((x,) if type(x) is not tuple else x) |                (*x: tuple([type(y) for y in x]))            |)) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(concat, args --all (| x: (x) |)) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(quiet, select (*x: False)) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(graph, title, xlabel, ylabel, filename:            red concat concat          | map (x, y: _graph(title, xlabel, ylabel, filename, x, y))) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(scatter, title, xlabel, ylabel, filename:              red concat concat            | map (x, y: _scatter(title, xlabel, ylabel, filename, x, y))) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(scatterc, title, xlabel, ylabel, filename:               red concat concat concat             | map (x, y, color: _scatter(title, xlabel, ylabel, filename, x, y, color))) | write() |)
+    6021: Command.execute flush and cleanup for (| assign(transpose, args -a (| x: (list(zip(*x))) |) | expand) | write() |)
+    6021: starting job control
+    6021: About to spawn process for                                           timer 0.5
+    6021: Job.start_process
+    6021: Started process 6040
+    6040: running:                                           timer 0.5
+    1735320778.6774526
+    1735320779.1782212
+    1735320779.6788864
+    1735320780.1796544
+    1735320780.6824253
+    1735320781.185195
+    6002: JobTestAPI.run about to signal child
+    6002: JobTestAPI.run end
+
+......................................................................
+
+Jobs & testing
+
+TestConsole.run_and_capture_output ->
+    self.main.parse_and_run_command ->
+        self.main.parse_and_run_command ->
+            self.execute_command (MainInteractive)
+                self.testing: command.execute
+                else: self.job_control.create_job(command)
+
+So jobs are usually created in normal operation, but this capability is disabled for testing!
+
+So getting job control in testing is actually easy!
+
+- Test uses something like a TestJob object.
+
+- TestJob.run() waits for the job to end.
+
+- Some other api (or optional args to run()) allows for job pause/kill.

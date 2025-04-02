@@ -33,7 +33,7 @@ class Bug29(test_base.Test):
 
 def main():
     bug = Bug29()
-    localhost = marcel.object.host.Host('localhost', None)
+    localhost = marcel.object.host.Host(None, 'localhost')
     bug.run(test='ls | map (f: f.render_compact())',
             expected_out=['.', 'd', 'f'])
     bug.run(test='@1 [ ls ]',

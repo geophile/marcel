@@ -31,7 +31,7 @@ The output timestamp is time in seconds since 1/1/1970.
 '''
 
 
-def timer(interval, components=False):
+def timer(interval):
     return Timer(), [interval]
 
 
@@ -39,7 +39,7 @@ class TimerArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('timer', env)
-        self.add_anon('interval', convert=self.str_to_float)
+        self.add_anon('interval', convert=self.to_float)
         self.validate()
 
 

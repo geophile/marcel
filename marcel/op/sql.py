@@ -135,7 +135,7 @@ class Sql(marcel.core.Op):
         self.total_update_count = 0
         if self.dbvar is None:
             self.db = env.getvar('DB_DEFAULT')
-        elif type(self.dbvar) is str:
+        elif isinstance(self.dbvar, str):
             # Interactive usage
             self.db = env.db(self.dbvar)
         elif type(self.dbvar) is marcel.object.db.Database:

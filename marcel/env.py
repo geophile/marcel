@@ -93,6 +93,9 @@ class VarHandlerStartup(object):
         assert var is not None
         self.vars_deleted.add(var)
         self.save_vars.remove(var)
+        value = self.env.namespace.get(var, None)
+        if type(value) is marcel.reservoir.Reservoir:
+            value.ensure_deleted()
         return self.env.namespace.pop(var)
 
     def vars(self):
@@ -251,7 +254,7 @@ class Environment(object):
 
     def cluster(self, name):
         cluster = None
-        if type(name) is str:
+        if isinstance(name, str):
             x = self.getvar(name)
             if type(x) is marcel.object.cluster.Cluster:
                 cluster = x
@@ -533,7 +536,12 @@ class EnvironmentScript(Environment):
 
     @staticmethod
     def is_immutable(x):
-        return callable(x) or type(x) in (int, float, str, bool, tuple, marcel.core.PipelineExecutable)
+        return callable(x) or marcel.util.one_of(x, (int,
+                                                     float,
+                                                     str,
+                                                     bool,
+                                                     tuple,
+                                                     marcel.core.PipelineExecutable))
 
 
 class EnvironmentInteractive(EnvironmentScript):

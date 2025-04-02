@@ -25,7 +25,7 @@ class Bug38(test_base.Test):
 
 def main():
     bug = Bug38()
-    bug.run(test='bash ls /var/log/syslog* | wc -l | map (x: int(x) > 0)',
+    bug.run(test='bash ls /var/log/syslog* | wc -l | map (f: int(f) > 0)',
             expected_out=[True])
     print(f'Test failures: {bug.failures}')
 

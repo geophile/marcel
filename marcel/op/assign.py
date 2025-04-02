@@ -53,7 +53,7 @@ class Assign(marcel.core.Op):
 
     def setup(self, env):
         if self.string is not None:
-            assert type(self.string) is str, type(self.string)
+            assert isinstance(self.string, str), type(self.string)
             self.value = self.string
         if self.pipeline is not None:
             assert type(self.pipeline) is marcel.core.PipelineExecutable, type(self.pipeline)
@@ -66,7 +66,7 @@ class Assign(marcel.core.Op):
 
     def run(self, env):
         # The fix for bug 267 is to use function.source, which may have an extra lambda added on to the
-        # front (for situations such as "inc = (lambda x: x + 1)"). But also allow for self.function to
+        # front (for situations such as "inc = (lambda f: f + 1)"). But also allow for self.function to
         # not have source, or for it to be None.
         source = None
         try:
@@ -96,7 +96,7 @@ class Assign(marcel.core.Op):
             self.function = value
         elif type(value) is marcel.core.PipelineExecutable:
             self.pipeline = value
-        elif type(value) is str:
+        elif isinstance(value, str):
             self.string = value
         else:
             assert False, value

@@ -31,10 +31,14 @@ originally: multiple lines, with all but the last ending in the continuation str
 
 import readline
 
+import prompt_toolkit as pt
+
+import marcel.tabcompleter
+
 
 class MultiLineReader:
 
-    def __init__(self, continuation='\\', history_file=None):
+    def __init__(self, env, continuation='\\', history_file=None):
         """continuation is the string which is used to denote that an input line is going to be
         continued. It is typically \\, which is the default. If the history file is not specified,
         then multiline items in the history file will not be recalled correctly across process
@@ -43,6 +47,7 @@ class MultiLineReader:
         self.continuation = continuation
         self.history_file = history_file
         self._fix_history()
+        self.tab_completer = marcel.tabcompleter.TabCompleter(env)
 
     def __getstate__(self):
         assert False, "Don't pickle multilinereader"
@@ -56,8 +61,10 @@ class MultiLineReader:
         then additional lines are requested, using the continuation prompt."""
         lines = []
         while True:
-            line = (input() if prompt is None and continuation_prompt is None else
-                    input(prompt if len(lines) == 0 else continuation_prompt))
+            assert prompt is not None and continuation_prompt is not None
+            line = pt.prompt(message=pt.ANSI(prompt if len(lines) == 0 else continuation_prompt),
+                             complete_while_typing=False,
+                             completer=self.tab_completer)
             # The len(lines) > 0 check is needed to fix bug 41.
             if len(line) > 0 or len(lines) > 0:
                 history_length = readline.get_current_history_length()
@@ -130,28 +137,3 @@ class MultiLineReader:
         readline.clear_history()
         for item in history:
             readline.add_history(item)
-
-
-def main():
-    history_file = '/tmp/history'
-    readline.read_history_file(history_file)
-    readline.parse_and_bind('set editing-mode emacs')
-    m = MultiLineReader(history_file=history_file)
-    multilines = []
-    try:
-        while True:
-            multilines.append(m.input('> ', '+ '))
-    except EOFError:
-        pass
-    print('MULTILINES:')
-    for x in multilines:
-        print(x)
-    print('HISTORY:')
-    for i in range(readline.get_current_history_length()):
-        item = readline.get_history_item(i + 1)  # 1-based
-        print(item)
-    readline.write_history_file(history_file)
-
-
-if __name__ == '__main__':
-    main()

@@ -16,7 +16,6 @@
 
 import collections.abc
 import grp
-import inspect
 import os
 import pathlib
 import pwd
@@ -28,6 +27,8 @@ import time
 import traceback
 
 import dill
+
+from marcel.stringliteral import StringLiteral
 
 
 def python_version():
@@ -137,6 +138,7 @@ def print_stack(file=None):
 
 
 def colorize(s, color, readline=False):
+    readline = False  # TODO: Playing with prompt_toolkit
     if color is None:
         return s
     # Those /001 and /002 codes seem to fix bug 2.
@@ -221,6 +223,43 @@ def accessible(dir):
     finally:
         os.chdir(current_dir)
         return accessible
+
+def unescape(x):
+    if x is None:
+        return None
+    if '\\' in x:
+        unescaped = ''
+        i = 0
+        n = len(x)
+        while i < n:
+            c = x[i]
+            i += 1
+            if c == '\\':
+                if i < n:
+                    c = x[i]
+                    i += 1
+                    unescaped += c
+            else:
+                unescaped += c
+    else:
+        unescaped = x
+    return unescaped
+
+def one_of(x, types):
+    for t in types:
+        if isinstance(x, t):
+            return True
+    return False
+
+
+def string_value(x):
+    if x is None:
+        return None
+    assert isinstance(x, str)
+    if type(x) is StringLiteral:
+        x = x.value()
+    return x
+
 
 
 class Trace:

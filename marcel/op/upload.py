@@ -67,8 +67,6 @@ class UploadArgsParser(marcel.argsparser.ArgsParser):
 
 class Upload(marcel.core.Op):
 
-    SCP_COMMAND = 'scp -Cpqr -i {identity} {sources} {user}@{host}:{dest}'
-
     def __init__(self):
         super().__init__()
         self.cluster = None
@@ -84,8 +82,7 @@ class Upload(marcel.core.Op):
     def setup(self, env):
         self.dir = self.eval_function(env,
                                       'dir_arg',
-                                      str,
-                                      pathlib.Path, pathlib.PosixPath, File)
+                                      str, pathlib.Path, pathlib.PosixPath, File)
         self.dir = pathlib.Path(self.dir)
         if not self.dir.is_absolute():
             raise marcel.exception.KillCommandException(f'Target directory must be absolute: {self.dir}')
@@ -109,15 +106,22 @@ class Upload(marcel.core.Op):
         self.fork_manager.run(env)
 
     @staticmethod
-    def scp_command(identity, sources, user, host, dest):
+    def scp_command(host, sources, dest):
         sources = marcel.util.quote_files(*sources)
-        return Upload.SCP_COMMAND.format(identity=identity,
-                                         sources=sources,
-                                         user=user,
-                                         host=host,
-                                         dest=dest)
+        cluster = host.cluster
+        buffer = []
+        if cluster.password:
+            buffer.extend(['sshpass -p', cluster.password])
+        buffer.append('scp -Cpqr')
+        if cluster.identity:
+            buffer.extend(['-i', cluster.identity])
+        if host.port is not None:
+            buffer.extend(['-P', str(host.port)])
+        buffer.extend([sources, f'{cluster.user}@{host.addr}:{dest}'])
+        scp_command = ' '.join(buffer)
+        return scp_command
 
     def customize_pipeline(self, env, pipeline, host):
-        scp_command = Upload.scp_command(host.identity, self.filenames, host.user, host.name, self.dir)
+        scp_command = Upload.scp_command(host, self.filenames, self.dir)
         pipeline.append(marcel.opmodule.create_op(env, 'bash', scp_command))
         return pipeline

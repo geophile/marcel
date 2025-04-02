@@ -211,3 +211,371 @@ Information needed to determine tab completion:
 - Is last char whitespace? Determines whether to complete last string
   or find candidates for empty string of next token.
 
+----------------------------------------------------------------------
+
+2/19/25:
+
+Parsing this:
+
+    ls "a
+
+ShellString is created for "a. String.scan() ends with unmatched
+quote, but doesn't indicate this in any way. Should it raise
+PrematureEndError, or something similar?
+
+PEE is currently thrown when an op or arg is expected but not found.
+
+Could throw PEE and include the incomplete string. That incomplete
+string is then the correct value of text for tab completion (as
+opposed to the value provided by readline, which is ignorant of
+quotes, and just goes by whitespace).
+
+Tab completion:
+
+    Text             unquoted                 '...                     "...
+
+    <text>           yes                      yes                      yes
+
+    ~/<text>         yes                      yes                      no
+
+    ~<text>          yes(2)                   no                       no
+
+    /<text>          yes                      yes                      yes
+
+    ./<text>         yes                      yes                      yes
+
+    ../<text>        yes                      yes                      yes
+
+    <text><space>    no(1)                    yes                      yes
+
+    <text>\<space>   yes                      no                       no
+
+1. touch "a b"; ls a<space>: Tab completion lists all files. The a (no
+space) is left as an arg to ls even though there is no such
+file. I.e., there is no quote, so the space following a is interpreted
+as an arg separator by the shell.
+
+2. Complete using usernames in /etc/passwd 
+
+
+So:
+
++ text to complete: Use what is reported by readline except if
+  MissingQuoteException occurs. In that case, use the text from the
+  exception (with the leading quote).
+
+- Do tab completion as is done right now, except for double-quoted
+  ~/...
+
+*** If text was quoted, then the selected completion should be quoted
+  too. How does this happen?
+
+- parser.String.scan needs to handle \<space>
+
+......................................................................
+
+2/20/25:
+
+touch "f 1" "f 2"
+
+Bash tab completion:
+
+- ls f<tab> ->
+
+  ls f\ 
+  f 1   f 2
+
+- ls "f<tab> ->
+  ls "f<space>
+  f 1   f 2
+
+- ls "f 1<tab> ->
+  ls "f 1"<space>
+
+----------------------------------------------------------------------
+
+3/3/25:
+
+The current approach to tab completion doesn't work for filenames with
+spaces, quotes, escapes. I tried ignoring the text arg to
+TabCompleter.complete, which represents the token that readline thinks
+we're completing. With ' ' as a delimiter, this command:
+
+      ls "f<space><tab>
+
+resulted in text = '', since the last space is a delimiter. But
+removing ' ' from the delimiters, means that the space following ls is
+also treated as a word character.
+
+I think the fix is that tab completion needs to be sensitive to
+context, which must come from the parser. So if we are completing a
+filename such as 
+
+     ls abc<tab>
+
+Then space is a delimiter. For this:
+
+    ls "abc<space><tab>
+
+space is not a delimiter. 
+
+Furthermore, context from the parser can also help in ambiguous
+cases. E.g.
+
+    ls -r<space><tab>
+
+There are two possible completions here, flags and
+filenames. Currently, we assume filenames in this case, but it might
+be nice to show both.
+
+Currently, TabCompleter uses state from the parser
+(Parser.expect_op(), Parser.flags()) to figure out what kind of
+completion is needed.
+
+Alternative approach:
+
+Parser tracks token type: 
+
+- op
+- flag
+- string
+- filename
+
+A filename is a string in the context of an op with filename args:
+
+- cd
+- download
+- ls
+- pushd
+- read
+- upload
+- write
+
+Should also handle file-handling executables that marcel doesn't
+provide:
+
+- cp
+- mv
+- rm
+- there are probably others
+
+For completing filenames, the token representing the filename has to
+convey information about quotes (which will determine whether spaces
+are delimiters.
+
+TODO:
+
+- Handle escapes, e.g. ls filename\ with\ spaces
+
+- Tab completion on empty line should list ops. Maybe? Doesn't handle
+  assignment, executables, (...)
+
+- MainInteractive.tab_completer isn't actually used.
+
+
+
+Parser:
+
+- Need to track token type during op_sequence parsing.
+
+  *** Parser.token looks like the right thing.
+
+- expect_op should be simplfiable, and is maybe not needed. 
+
+- arg_count tracking is nuts. Starts at 0, then set to -1, then it
+  counts when an arg is checked for, including the terminal case when
+  there are no more args. But doing it more rationally breaks tab
+  completion tests.
+
+----------------------------------------------------------------------
+
+3/4/25
+
+Oh cool! readline seems to provide a terminating quote.
+
+----------------------------------------------------------------------
+
+3/7/25:
+
+Realization: No need to do filename completion, handling quotes,
+escapes, etc. readline will do the right thing AS LONG AS the default
+completion handler is in place. So:
+
+           Install the tab completion handler only for op and flags.
+
+- op<tab>: op completion
+
+- op<space><tab>: arg completion*
+
+- op -<tab>: flag completion
+
+- op x<tab>: arg completion*
+
+- op "x<tab>: arg completion*
+
+* NO handler -- use readline default
+
+----------------------------------------------------------------------
+
+3/12/25:
+
+THIS JUST ISN'T WORKING!
+
+- The tab completion handler is invoked before parsing. So any
+  analysis for what kind of parsing to do -- INCLUDING WHETHER THE
+  MARCEL TAB COMPLETION HANDLER SHOULD BE INVOKED AT ALL -- comes as
+  part of tab completion inside the marcel handler.
+
+- Delegating to the builtin handler seems not to work.
+
+- So maybe using the builtin handler isn't going to work, and I have
+  to go back to the original idea, the marcel handler taking care of
+  filename completion too?
+
+Survey of behavior of different approaches:
+
+jao@loon:/tmp/d$ ls -l
+total 0
+-rw-rw-r-- 1 jao jao 0 Mar 12 11:24  abx
+-rw-rw-r-- 1 jao jao 0 Mar 12 11:24  aby
+-rw-rw-r-- 1 jao jao 0 Mar 12 11:24 'fg 1'
+-rw-rw-r-- 1 jao jao 0 Mar 12 11:24 'fg 2'
+
+Completions of ls<space>X<tab>, for different values of X:
+
+See tab_completion_survey.ods
+
+- Delegating to the builtin completer works the same as not having a
+  completer at all.
+
+- No one set of delimiters is always correct.
+
+  - To get correct results for unquoted string without embedded space: delims must include whitespace
+
+  - To get correct results for quoted string with embedded space: remove whitespace from delims
+
+  - To get correct results for unquoted string with escaped space: ???
+
+So, the new plan:
+
+- There is one tab completer, always in place. Use default delims.
+
+- op and flag completion works as is.
+
+- arg completion:
+
+    - delegate to builtin completer.
+
+    - no quote, no embedded space: default delims
+
+    - quoted: delims without whitespace
+
+    - no quote, escaped space: I think:
+
+        - Default delims? 
+
+        - Spaces in candidates need to be escaped?
+
+----------------------------------------------------------------------
+
+3/16/25
+
+Looking into prompt_toolkit as a readline replacement. Looks very
+powerful. It seems geared to building full-window console apps; doing
+several readline things, including completion, auto-suggestion,
+formatting, history.
+
+Looking into completion first. Seems more geared to
+suggestion. E.g. input is x with completions xa, xb, xc. WordCompleter
+shows those options as soon as you type x. I don't want that. I want
+suggestions when tab is pressed. pt has a zillion options, so it would
+be surprising if this were not possible.
+
+----------------------------------------------------------------------
+
+3/23/25
+
+Things are mostly working with prompt_toolkit. But the end of the
+completion is complicated. If we are doing tab completion on a quote
+directory:
+
+- DON'T place a terminal quote since the directory could be explored
+  by tab completion.
+
+- DON't place a space after /, same reason.
+
+Cases (xyz is result of completion):
+
+- ...xyz           Space 
+
+- "...xyz          Quote then space
+
+- ...xyz/          No space
+
+- "...xyz/         No quote, no space
+
+----------------------------------------------------------------------
+
+3/24/25
+
+In bash:
+
+    ls "~/t<tab>
+
+does NOT complete from home directory. But this does:
+
+    ls '~/t
+
+Marcel currently expands in both cases.
+
+Easy fix! Just wrap expanduser, test for quote.
+
+......................................................................
+
+Escapes:
+
+Completing a filename with spaces: bash adds escapes.
+
+Tricky case: "ij * kl". Bash behavior:
+
+    ls ij\ *<tab>
+
+->  ls ij\ \* kl
+
+I.e. bash REPLACES * with \*. But it's inconsistent. 
+
+    # Filename with two embedded spaces
+    touch 'st  uv'
+    ls st\<space><space><tab>
+
+Does NOT escape the second space.
+
+----------------------------------------------------------------------
+
+3/25/25
+
+Characters that need escaping (checking bash)
+
+$
+!
+"
+&
+'
+(  because of marcel's interpretation
+)
+*
+:
+;
+<  because of marcel's interpretation. Bash does weird things with it on tab completion
+>  same
+=  Bash does weird things with it on tab completion
+?
+@  because of marcel's interpretation
+[
+\
+`
+{
+|
+
+<space> is weird. If typed, it is assumed to be a separator, not part
+of a filename needing an escape, EVEN IF there is such a filename.

@@ -51,9 +51,9 @@ class RunPipeline(marcel.core.Op):
             raise marcel.exception.KillCommandException(
                 f'Too many arguments for pipeline {self.var} = {self.pipeline}')
         # Why copy: A pipelines can be used twice in a command, e.g.
-        #    x = (| a: ... |)
-        #    x (1) | join (| x (2) |)
-        # Without copying the identical ops comprising x would be used twice in the same
+        #    f = (| a: ... |)
+        #    f (1) | join (| f (2) |)
+        # Without copying the identical ops comprising f would be used twice in the same
         # command. This potentially breaks the use of Op state during execution, and also
         # breaks the structure of the pipelines, e.g. Op.receiver.
         self.pipeline = self.pipeline.copy()
