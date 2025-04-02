@@ -779,15 +779,13 @@ Fix:
 
 - MultiColumnCompletionsMenu for long list of candidates?
 
-- Escaped strings
-
-- Completion of /, /xyz do not work. /: shows local files. /xyz: Shows nothing.
-
 - There's a bug in ls: ls c\*d: looks for c*d not literally "c*d". The
   escaping isn't visible to ls. Same for single and double quoting.
 
 - What about completion of single quote: ls "
 
 - Correct use of stringliterals for native filename ops, such as rm. E.g., does rm "a b" work?
+
+- tab branch has useful stuff? But doesn't appear to be merged to master?
 
 ----------------------------------------------------------------------
