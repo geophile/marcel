@@ -63,6 +63,7 @@ class TabCompleter(Completer):
     HELP_TOPICS = list(marcel.doc.topics) + OPS
 
     def __init__(self, env):
+        super().__init__()
         self.env = env
         self.parser = None
         self.line = None

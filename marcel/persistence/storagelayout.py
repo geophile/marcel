@@ -12,7 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
-
+import datetime
 import pathlib
 import shutil
 
@@ -24,7 +24,8 @@ import marcel.util
 def storage_layout():
     # Check newest first. It is possible that old migrations didn't clean up properly,
     # e.g. original to xdg.
-    for layout_class in (StorageLayoutWS3,
+    for layout_class in (StorageLayoutPromptToolkit,
+                         StorageLayoutWS3,
                          StorageLayoutWS2,
                          StorageLayoutWS1,
                          StorageLayoutXDG,
@@ -124,17 +125,6 @@ class StorageLayoutWS1(StorageLayout):
         return 'ws1'
 
     def migrate(self):
-        def move_workspace_dirs(workspace_dirs, new_workspace_base):
-            for workspace_dir in workspace_dirs:
-                if workspace_dir.name != marcel.locations.Locations.WORKSPACE_DIR_NAME:
-                    moved_dir = shutil.move(workspace_dir, new_workspace_base)
-                    if moved_dir:
-                        self.should_exist(pathlib.Path(moved_dir), f'Tried to move workspace dir {workspace_dir}')
-                    else:
-                        raise marcel.exception.KillShellException(
-                            f'Attempt to move workspace dir {workspace_dir} failed.')
-                    self.should_not_exist(workspace_dir, f'Tried to move workspace dir {workspace_dir}')
-
         def fix_default_workspace(base_dir, *filenames):
             new_default_workspace_dir = base_dir / '__DEFAULT_WORKSPACE__'
             new_default_workspace_dir.mkdir(parents=True, exist_ok=True)
@@ -205,9 +195,59 @@ class StorageLayoutWS3(StorageLayout):
         return 'ws3'
 
     def migrate(self):
-        return None
+        # Just trash old histories.
+        layout = None
+        for workspace_dir in StorageLayout.subdirs(self.data / 'workspace'):
+            history_file = workspace_dir / 'history'
+            history_file.unlink()
+            # Write something that looks like a prompt_toolkit history file
+            with open(history_file, 'w') as f:
+                f.write('\n')
+                f.write(datetime.datetime.now().strftime('# %Y-%m-%d %H:%M:%S.%f\n'))
+                f.write('+("History from before marcel version 0.32.0 has been deleted, '
+                        'due to a change in history file format.")\n')
+        layout = storage_layout()
+        assert layout
+        assert layout.layout() == 'pt'
+        return layout
 
     def match(self):
         return (self.config.exists() and
                 (self.config / 'workspace').exists() and
                 (self.config / 'workspace' / '__DEFAULT__').exists())
+
+# Version >= 0.32.0. Switch from readline history format to that of prompt_toolkit.
+class StorageLayoutPromptToolkit(StorageLayout):
+
+    def layout(self):
+        return 'pt'
+
+    def migrate(self):
+        return None
+
+    def match(self):
+        # Same layout as ws3, but the top of this history file looks like this:
+        #
+        #     # 2025-04-02 16:54:22.895547
+        # Look for a blank line followed by "# 2...-..-.. ..:  :  ."
+        #    positions:                      0  3  6  9  12 15 18 21
+        # where . is any character
+        if not (self.config.exists() and
+                (self.config / 'workspace').exists() and
+                (self.config / 'workspace' / '__DEFAULT__').exists()):
+            return False
+        history_file = self.data / 'workspace' / '__DEFAULT__' / 'history'
+        if history_file.exists():
+            with open(history_file) as f:
+                l1 = f.readline().strip()
+                l2 = f.readline().strip()
+                if (len(l1) == 0 and len(l2) > 0 and
+                    l2[:3] == '# 2' and
+                    l2[6] == '-' and
+                    l2[9] == '-' and
+                    l2[12] == ' ' and
+                    l2[15] == ':' and
+                    l2[18] == ':' and
+                    l2[21] == '.'):
+                    return True
+        return False

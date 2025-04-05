@@ -44,17 +44,16 @@ import marcel.job
 import marcel.locations
 import marcel.persistence.persistence
 import marcel.persistence.storagelayout
-import marcel.multilinereader
 import marcel.object.workspace
 import marcel.opmodule
 import marcel.parser
+import marcel.reader
 import marcel.reservoir
 import marcel.tabcompleter
 import marcel.util
 import marcel.version
 
 Workspace = marcel.object.workspace.Workspace
-HISTORY_LENGTH = 1000
 
 DEFAULT_CONFIG = '''from marcel.builtin import *
 
@@ -97,7 +96,6 @@ DEFAULT_CONFIG = '''from marcel.builtin import *
 # COLOR_SCHEME.color_scheme_value = Color(0, 3, 4)
 
 PROMPT = [lambda: PWD, ' $ ']
-PROMPT_CONTINUATION = [lambda: PWD, ' + ']
 
 INTERACTIVE_EXECUTABLES = [
     'emacs',
@@ -110,18 +108,6 @@ INTERACTIVE_EXECUTABLES = [
     'vim'
 ]
 '''
-
-
-class Reader(marcel.multilinereader.MultiLineReader):
-
-    def __init__(self, env, history_file):
-        super().__init__(history_file=history_file, env=env)
-        self.env = env
-
-    def take_edited_command(self):
-        edited_command = self.env.edited_command
-        self.env.edited_command = None
-        return edited_command
 
 
 class Main(object):
@@ -299,7 +285,7 @@ class MainScript(Main):
             version_file_path = locations.config_version()
             version_file_path.touch(exist_ok=True)
             version_file_path.chmod(0o600)
-            version_file_path.write_text(marcel.version.VERSION)
+            version_file_path.write_text(f'{marcel.version.VERSION}\n')
             version_file_path.chmod(0o400)
 
 
@@ -309,7 +295,8 @@ class MainInteractive(MainScript):
         super().__init__(env, workspace, testing, initial_config)
         self.tab_completer = marcel.tabcompleter.TabCompleter(env)
         try:
-            self.reader = self.initialize_reader()
+            self.reader = marcel.reader.Reader(self.env)
+            self.env.reader = self.reader  # So that ops, specifically edit, has access to the reader.
         except FileNotFoundError:
             # Probably a damaged workspace. Restart in default workspace.
             self.needs_restart = True
@@ -323,10 +310,6 @@ class MainInteractive(MainScript):
     # Main
 
     def shutdown(self, restart=False):
-        try:
-            self.reader.close()
-        except:
-            pass
         try:
             self.job_control.shutdown()
         except:
@@ -349,7 +332,7 @@ class MainInteractive(MainScript):
             while True:
                 try:
                     if self.input is None:
-                        self.input = (self.reader.input(*self.env.prompts()) if interactive
+                        self.input = (self.reader.input() if interactive
                                       else input())
                     # else: Restarted main, and self.input was from the previous incarnation.
                     self.check_for_config_update()
@@ -364,15 +347,6 @@ class MainInteractive(MainScript):
             # else: not a tty, and we don't want an extra line at end of script execution.
 
     # Internal
-
-    def initialize_reader(self):
-        readline.set_history_length(HISTORY_LENGTH)
-        readline.parse_and_bind('tab: complete')
-        readline.parse_and_bind('set editing-mode emacs')
-        readline.parse_and_bind('set completion-query-items 50')
-        readline.set_pre_input_hook(self.insert_edited_command)
-        self.env.reader = Reader(self.env, self.env.locations.data_ws_hist(self.workspace))
-        return self.env.reader
 
     # Used by the edit op.
     def insert_edited_command(self):
@@ -521,12 +495,7 @@ def main_interactive_run(locations, workspace):
                 main.input = None
 
 
-def main_script_run(locations, workspace, script_path):
-    try:
-        with open(script_path, 'r') as script_file:
-            script = script_file.read()
-    except FileNotFoundError:
-        fail(f'File not found: {script_path}')
+def main_script_run(locations, workspace, script):
     commands = commands_in_script(script)
     env = marcel.env.EnvironmentScript.create(locations, workspace)
     main = MainScript(env, workspace)
@@ -541,6 +510,21 @@ def main_script_run(locations, workspace, script_path):
             workspace = e.workspace_to_open
             env = marcel.env.EnvironmentScript.create(locations, workspace, main.env.trace)
             main = MainScript(env, workspace)
+
+
+def read_heredoc():
+    lines = []
+    while len(line := sys.stdin.readline().strip()) != 0:
+        lines.append(line)
+    return '\n'.join(lines)
+
+def read_script(script_path):
+    try:
+        with open(script_path, 'r') as script_file:
+            script = script_file.read()
+    except FileNotFoundError:
+        fail(f'File not found: {script_path}')
+    return script
 
 
 def initialize_persistent_config_and_data(env, initial_config):
@@ -570,10 +554,12 @@ def main():
     started = False
     while not started:
         try:
-            if script is None:
+            if script:
+                main_script_run(locations, workspace, read_script(script))
+            elif sys.stdin.isatty():
                 main_interactive_run(locations, workspace)
             else:
-                main_script_run(locations, workspace, script)
+                main_script_run(locations, workspace, read_heredoc())
             started = True
         except marcel.exception.StartupScriptException as e:
             print(str(e), file=sys.stderr)

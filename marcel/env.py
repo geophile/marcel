@@ -385,7 +385,6 @@ class EnvironmentScript(Environment):
         self.namespace.update({
             'WORKSPACE': self.workspace.name,
             'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
-            'PROMPT_CONTINUATION': [EnvironmentInteractive.DEFAULT_PROMPT_CONTINUATION],
             'BOLD': marcel.object.color.Color.BOLD,
             'ITALIC': marcel.object.color.Color.ITALIC,
             'COLOR_SCHEME': marcel.object.color.ColorScheme(),
@@ -547,7 +546,6 @@ class EnvironmentScript(Environment):
 class EnvironmentInteractive(EnvironmentScript):
 
     DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
-    DEFAULT_PROMPT_CONTINUATION = '+$    '
 
     def __init__(self, locations, workspace, trace=None):
         super().__init__(locations, workspace, trace)
@@ -559,13 +557,12 @@ class EnvironmentInteractive(EnvironmentScript):
         self.reader = None
         #
         self.var_handler.add_immutable_vars('PROMPT',
-                                            'PROMPT_CONTINUATION',
                                             'BOLD',
                                             'ITALIC',
                                             'COLOR_SCHEME',
                                             'Color')
 
-    def prompts(self):
+    def prompt(self):
         def prompt_dir():
             dir = self.getvar('PWD')
             home = self.getvar('HOME')
@@ -587,10 +584,9 @@ class EnvironmentInteractive(EnvironmentScript):
                     # dir is not under home
                     return dir
 
-        # Set PROMPT_DIR in case PROMPT or PROMPT_CONTINUATION uses it.
+        # Set PROMPT_DIR in case PROMPT uses it.
         self.setvar('PROMPT_DIR', prompt_dir())
-        return (self.prompt_string(self.getvar('PROMPT')),
-                self.prompt_string(self.getvar('PROMPT_CONTINUATION')))
+        return self.prompt_string(self.getvar('PROMPT'))
 
     def prompt_string(self, prompt_pieces):
         try:
