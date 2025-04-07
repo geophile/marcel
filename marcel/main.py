@@ -330,6 +330,7 @@ class MainInteractive(MainScript):
         try:
             while True:
                 try:
+                    self.input = self.reader.take_selected_command()
                     if self.input is None:
                         self.input = (self.reader.input() if interactive
                                       else input())
@@ -346,13 +347,6 @@ class MainInteractive(MainScript):
             # else: not a tty, and we don't want an extra line at end of script execution.
 
     # Internal
-
-    # Used by the edit op.
-    def insert_edited_command(self):
-        command = self.reader.take_edited_command()
-        if command:
-            readline.insert_text(command)
-            readline.redisplay()
 
     def update_namespace(self, child_namespace_changes):
         # pwd requires special handling

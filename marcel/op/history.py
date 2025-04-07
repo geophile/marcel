@@ -91,15 +91,18 @@ class History(marcel.core.Op):
         assert (not self.all and type(self.n) is int) or (self.all and self.n is None), self
 
     def run(self, env):
-        history = []
-        for command in env.reader.history():
+        history = env.reader.history()
+        selected = []
+        n_history = len(history)
+        for i in range(n_history):  # History is newest-to-oldest
+            command = history[i]
             if self.pattern is None or self.pattern in command:
-                history.append(command)
-                if len(history) == self.n:
+                selected.append(marcel.object.historyrecord.HistoryRecord(n_history - 1 - i, command))
+                if len(selected) == self.n:
                     break
-        history.reverse()
-        for i, command in enumerate(history):
-                self.send(env, marcel.object.historyrecord.HistoryRecord(i, command))
+        selected.reverse()
+        for history_record in selected:
+                self.send(env, history_record)
 
     # Op
 

@@ -773,6 +773,8 @@ Things that might be replaced by prompt_toolkit:
 
 - prompt/continuation prompt
 
+- Try PromptSession.complete_style
+
 Fix:
 
 - help completion
@@ -787,5 +789,7 @@ Fix:
 - Correct use of stringliterals for native filename ops, such as rm. E.g., does rm "a b" work?
 
 - tab branch has useful stuff? But doesn't appear to be merged to master?
+
+- run and !: Replace in history by selected command.
 
 ----------------------------------------------------------------------

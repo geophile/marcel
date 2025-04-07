@@ -48,7 +48,7 @@ class RunArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('run', env)
-        self.add_anon('n', convert=self.str_to_int, default=None)
+        self.add_anon('id', convert=self.str_to_int, default=None)
         self.validate()
 
 
@@ -57,27 +57,23 @@ class Run(marcel.core.Op):
     def __init__(self):
         super().__init__()
         self.expected_args = None  # Set during parse. ! -> 1, !! -> 0
-        self.n = None
+        self.id = None
         self.editor = None
         self.tmp_file = None
 
     def __repr__(self):
-        return 'run()' if self.n is None else f'run({self.n})'
+        return 'run()' if self.id is None else f'run({self.id})'
 
     # AbstractOp
 
     def setup(self, env):
-        if self.expected_args == 1 and self.n is None:
+        if self.expected_args == 1 and self.id is None:
             raise marcel.exception.KillCommandException('History command number required following !')
-        elif self.expected_args == 0 and self.n is not None:
+        elif self.expected_args == 0 and self.id is not None:
             raise marcel.exception.KillCommandException('No arguments permitted after !!')
 
     def run(self, env):
-        # Remove the run command from history
-        readline.remove_history_item(readline.get_current_history_length() - 1)
-        if self.n is None:
-            self.n = readline.get_current_history_length() - 1
-        env.edited_command = readline.get_history_item(self.n + 1)  # 1-based
+        env.reader.select_command_by_id(self.id)
 
     # Op
 

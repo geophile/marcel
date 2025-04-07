@@ -32,6 +32,7 @@ import prompt_toolkit
 import prompt_toolkit.history
 import prompt_toolkit.key_binding
 
+import marcel.exception
 import marcel.tabcompleter
 
 
@@ -42,6 +43,8 @@ class Reader(object):
         history_file = env.locations.data_ws_hist(env.workspace)
         key_bindings = Reader.setup_key_bindings()
         self._history = prompt_toolkit.history.FileHistory(history_file)
+        self._command_history = []
+        self._selected_command_id = None
         self._session = prompt_toolkit.PromptSession(
             complete_while_typing=False,
             completer=marcel.tabcompleter.TabCompleter(env),
@@ -53,13 +56,30 @@ class Reader(object):
     def input(self):
         return self._session.prompt(prompt_toolkit.ANSI(self._env.prompt()))
 
+    # Returns list of commands, newest-to-oldest.
     def history(self):
-        return self._history.load_history_strings()
+        history = list(self._history.load_history_strings())
+        if len(self._command_history) < len(history):
+            self._command_history = history
+        return self._command_history
 
-    def take_edited_command(self):
-        edited_command = self._env.edited_command
-        self._env.edited_command = None
-        return edited_command
+    def select_command_by_id(self, id):
+        self._selected_command_id = id
+
+    def take_selected_command(self):
+        selected_command = None
+        id = self._selected_command_id
+        if id is not None:
+            history = self.history()
+            if type(id) is not int or id < 0:
+                raise marcel.exception.KillCommandException(
+                    f'Command id must be a non-negative integer: {id}')
+            if id >= len(history):
+                raise marcel.exception.KillCommandException(
+                    f'Command id exceeds that of most recent command: {id} > {len(history) - 1}')
+            selected_command =  self.history()[len(history) - 1 - id]
+            self._selected_command_id = None
+        return selected_command
 
     # Set up key bindings:
     # - Enter terminates the text of a command.

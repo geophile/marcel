@@ -551,8 +551,6 @@ class EnvironmentInteractive(EnvironmentScript):
         super().__init__(locations, workspace, trace)
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
-        # Used during readline editing
-        self.edited_command = None
         # readline wrapper
         self.reader = None
         #
