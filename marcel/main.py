@@ -32,7 +32,6 @@ import atexit
 import multiprocessing
 import os
 import pathlib
-import readline
 import sys
 import time
 

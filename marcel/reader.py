@@ -38,23 +38,27 @@ import marcel.tabcompleter
 class Reader(object):
 
     def __init__(self, env):
-        self.env = env
+        self._env = env
         history_file = env.locations.data_ws_hist(env.workspace)
         key_bindings = Reader.setup_key_bindings()
-        self.session = prompt_toolkit.PromptSession(
+        self._history = prompt_toolkit.history.FileHistory(history_file)
+        self._session = prompt_toolkit.PromptSession(
             complete_while_typing=False,
             completer=marcel.tabcompleter.TabCompleter(env),
-            history=prompt_toolkit.history.FileHistory(history_file),
+            history=self._history,
             multiline=True,
             key_bindings=key_bindings)
 
     # Returns a command input by the user.
     def input(self):
-        return self.session.prompt(prompt_toolkit.ANSI(self.env.prompt()))
+        return self._session.prompt(prompt_toolkit.ANSI(self._env.prompt()))
+
+    def history(self):
+        return self._history.load_history_strings()
 
     def take_edited_command(self):
-        edited_command = self.env.edited_command
-        self.env.edited_command = None
+        edited_command = self._env.edited_command
+        self._env.edited_command = None
         return edited_command
 
     # Set up key bindings:

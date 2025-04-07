@@ -40,7 +40,7 @@ Runs a bash command, which may be given as a single string ({r:COMMAND}), or as 
 
 The bash command to be executed can receive stdin from a marcel pipelines, e.g.
 
-{p,indent=4}gen 20 | map (f: (f, f)) | bash "grep 2"
+{p,indent=4}gen 20 | map (x: (x, x)) | bash "grep 2"
 
 yields:
 

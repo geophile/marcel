@@ -20,7 +20,7 @@ import marcel.object.historyrecord
 
 
 HELP = '''
-{L,wrap=F}history [-c|--command STRING] [N]
+{L,wrap=F}history [-c|--command STRING] [-a|--all] [N]
 
 {L,indent=4:28}{r:-c}, {r:--command}           Report only the commands containing the specified STRING.
 
@@ -33,9 +33,14 @@ and {r:!} operators.
 If {r:--command} is specified, then only the commands containing the specified {r:STRING} will be
 selected. 
 
+If {r:--all} is specified, then all qualifying commands will be output.
+
 If {r:N} is provided, it must be a positive integer. The most recent {r:N} qualifying commands will be output.
 (I.e., If {r:--command} is specified, than that filter is applied first, and then the last {r:N} items
 are selected.)
+
+If neither {r:N} nor {r:--all} are specified, then the last 20 qualifying commands will be output. 
+{r:N} and {r:--all} are mutually exclusive.
 '''
 
 
@@ -47,45 +52,54 @@ class HistoryArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('history', env)
-        self.add_flag_one_value('command', '-c', '--command')
+        self.add_flag_one_value('pattern', '-c', '--command')
+        self.add_flag_no_value('all', '-a', '--all')
         self.add_anon('n', convert=self.str_to_int, default=None)
+        self.at_most_one('all', 'n')
         self.validate()
 
 
 class History(marcel.core.Op):
 
+    N_DEFAULT = 20
+
     def __init__(self):
         super().__init__()
-        self.command = None
+        self.pattern = None
+        self.all = None
         self.n = None
 
     def __repr__(self):
         args = []
-        if self.command:
-            args.append(f"command='{self.command}'")
+        if self.pattern:
+            args.append(f"command='{self.pattern}'")
+        if self.all:
+            args.append('all')
         if self.n is not None:
             args.append(f'n={self.n}')
-        args_description = '\n'.join(args)
+        args_description = ', '.join(args)
         return f'history({args_description})'
 
     # AbstractOp
 
     def setup(self, env):
         self.n = self.eval_function(env, 'n', int)
+        if not self.all and self.n is None:
+            self.n = History.N_DEFAULT
         if self.n is not None and self.n < 1:
             raise marcel.exception.KillCommandException('n must be a posiive integer')
+        assert (not self.all and type(self.n) is int) or (self.all and self.n is None), self
 
     def run(self, env):
-        history = env.reader.history()
-        selected = []
-        for i in range(len(history)):
-            if self.command is None or self.command in history[i]:
-                selected.append(marcel.object.historyrecord.HistoryRecord(i, history[i]))
-        output = (selected
-                  if self.n is None else
-                  selected[-self.n:])
-        for record in output:
-            self.send(env, record)
+        history = []
+        for command in env.reader.history():
+            if self.pattern is None or self.pattern in command:
+                history.append(command)
+                if len(history) == self.n:
+                    break
+        history.reverse()
+        for i, command in enumerate(history):
+                self.send(env, marcel.object.historyrecord.HistoryRecord(i, command))
 
     # Op
 
