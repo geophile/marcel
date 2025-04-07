@@ -73,7 +73,7 @@ class Run(marcel.core.Op):
             raise marcel.exception.KillCommandException('No arguments permitted after !!')
 
     def run(self, env):
-        env.reader.select_command_by_id(self.id)
+        env.next_command = env.reader.command_by_id(self.id)
 
     # Op
 

@@ -330,7 +330,7 @@ class MainInteractive(MainScript):
         try:
             while True:
                 try:
-                    self.input = self.reader.take_selected_command()
+                    self.input = self.env.take_next_command()
                     if self.input is None:
                         self.input = (self.reader.input() if interactive
                                       else input())

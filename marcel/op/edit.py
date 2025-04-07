@@ -14,7 +14,6 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import readline
 import subprocess
 import tempfile
 
@@ -136,27 +135,14 @@ class EditCommand(EditImpl):
         _, self.tmp_file = tempfile.mkstemp(text=True)
 
     def run(self, env):
-        # Remove the edit command from history
-        readline.remove_history_item(readline.get_current_history_length() - 1)
-        if self.op.n is None:
-            self.op.n = readline.get_current_history_length() - 1
-        command = readline.get_history_item(self.op.n + 1)  # 1-based
+        command = env.reader.command_by_id(self.op.n)
         assert command is not None
         with open(self.tmp_file, 'w') as output:
             output.write(command)
         self.edit(self.tmp_file)
         with open(self.tmp_file, 'r') as input:
             command_lines = input.readlines()
-        # Make sure that each new line after the first is preceded by a continuation string.
-        continued_correctly = []
-        correct_termination = env.reader.continuation + '\n'
-        for line in command_lines[:-1]:
-            if not line.endswith(correct_termination):
-                assert line[-1] == '\n', line
-                line = line[:-1] + correct_termination
-            continued_correctly.append(line)
-        continued_correctly.append(command_lines[-1])
-        env.edited_command = ''.join(continued_correctly)
+        env.next_command = '\n'.join(command_lines)
         os.remove(self.tmp_file)
 
 

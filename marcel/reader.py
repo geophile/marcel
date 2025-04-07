@@ -63,23 +63,16 @@ class Reader(object):
             self._command_history = history
         return self._command_history
 
-    def select_command_by_id(self, id):
-        self._selected_command_id = id
+    def command_by_id(self, id):
+        history = self.history()
+        if type(id) is not int or id < 0:
+            raise marcel.exception.KillCommandException(
+                f'Command id must be a non-negative integer: {id}')
+        if id >= len(history):
+            raise marcel.exception.KillCommandException(
+                f'Command id exceeds that of most recent command: {id} > {len(history) - 1}')
+        return self.history()[len(history) - 1 - id]
 
-    def take_selected_command(self):
-        selected_command = None
-        id = self._selected_command_id
-        if id is not None:
-            history = self.history()
-            if type(id) is not int or id < 0:
-                raise marcel.exception.KillCommandException(
-                    f'Command id must be a non-negative integer: {id}')
-            if id >= len(history):
-                raise marcel.exception.KillCommandException(
-                    f'Command id exceeds that of most recent command: {id} > {len(history) - 1}')
-            selected_command =  self.history()[len(history) - 1 - id]
-            self._selected_command_id = None
-        return selected_command
 
     # Set up key bindings:
     # - Enter terminates the text of a command.

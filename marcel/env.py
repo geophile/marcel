@@ -551,9 +551,8 @@ class EnvironmentInteractive(EnvironmentScript):
         super().__init__(locations, workspace, trace)
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
-        # readline wrapper
         self.reader = None
-        #
+        self.next_command = None
         self.var_handler.add_immutable_vars('PROMPT',
                                             'BOLD',
                                             'ITALIC',
@@ -611,6 +610,11 @@ class EnvironmentInteractive(EnvironmentScript):
         except Exception as e:
             print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)
             return EnvironmentInteractive.DEFAULT_PROMPT
+
+    def take_next_command(self):
+        command = self.next_command
+        self.next_command = None
+        return command
 
     @staticmethod
     def create(locations, workspace, trace=None):
