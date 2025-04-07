@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import readline
-
 import marcel.argsparser
 import marcel.core
 import marcel.exception
@@ -74,6 +72,7 @@ class Run(marcel.core.Op):
 
     def run(self, env):
         env.next_command = env.reader.command_by_id(self.id)
+        env.reader.replace_input('YOUR COMMAND HERE')
 
     # Op
 

@@ -138,12 +138,8 @@ def print_stack(file=None):
 
 
 def colorize(s, color):
-    readline = False  # TODO: Playing with prompt_toolkit
     if color is None:
         return s
-    # Those /001 and /002 codes seem to fix bug 2.
-    # https://stackoverflow.com/questions/9468435/how-to-fix-column-calculation-in-python-readline-if-using-color-prompt
-    # Bug 2 is readline-specific, as are the /001 and /002 codes. So only use them if readline is True.
     bold = color.bold()
     italic = color.italic()
     style = ('\033[1m\033[3m' if bold and italic else

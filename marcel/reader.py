@@ -50,7 +50,8 @@ class Reader(object):
             completer=marcel.tabcompleter.TabCompleter(env),
             history=self._history,
             multiline=True,
-            key_bindings=key_bindings)
+            key_bindings=key_bindings,
+            enable_open_in_editor=True)
 
     # Returns a command input by the user.
     def input(self):
