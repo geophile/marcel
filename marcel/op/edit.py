@@ -22,6 +22,7 @@ import marcel.core
 import marcel.exception
 import marcel.main
 import marcel.object.workspace
+import marcel.runeditor
 import marcel.util
 
 
@@ -95,18 +96,6 @@ class Edit(marcel.core.Op):
     def run_in_main_process(self):
         return True
 
-    # Internal
-
-    @staticmethod
-    def find_editor(env):
-        editor = env.getvar('EDITOR')
-        if editor is None:
-            editor = os.getenv('EDITOR')
-            if editor is None:
-                raise marcel.exception.KillCommandException(
-                    "Neither the host OS environment, nor marcel's defines EDITOR")
-        return editor
-
 
 class EditImpl(object):
 
@@ -117,16 +106,6 @@ class EditImpl(object):
     def run(self, env):
         assert False
 
-    # For use by subclasses
-
-    def edit(self, file):
-        edit_command = f'{self.editor} {file}'
-        process = subprocess.Popen(edit_command,
-                                   shell=True,
-                                   executable=marcel.util.bash_executable(),
-                                   universal_newlines=True)
-        process.wait()
-
 
 class EditCommand(EditImpl):
 
@@ -136,14 +115,7 @@ class EditCommand(EditImpl):
 
     def run(self, env):
         command = env.reader.command_by_id(self.op.n)
-        assert command is not None
-        with open(self.tmp_file, 'w') as output:
-            output.write(command)
-        self.edit(self.tmp_file)
-        with open(self.tmp_file, 'r') as input:
-            command_lines = input.readlines()
-        env.next_command = '\n'.join(command_lines)
-        os.remove(self.tmp_file)
+        env.next_command = marcel.runeditor.edit_text(env, command)
 
 
 class EditStartup(EditImpl):
@@ -159,4 +131,4 @@ class EditStartup(EditImpl):
             workspace = marcel.object.workspace.Workspace.named(self.ws_name)
             if not workspace.exists(env):
                 raise marcel.exception.KillCommandException(f'Workspace does not exist: {self.ws_name}')
-        self.edit(env.locations.config_ws_startup(workspace))
+        marcel.runeditor.edit_file(env, env.locations.config_ws_startup(workspace))

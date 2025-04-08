@@ -790,6 +790,4 @@ Fix:
 
 - tab branch has useful stuff? But doesn't appear to be merged to master?
 
-- run and !: Replace in history by selected command.
-
 ----------------------------------------------------------------------

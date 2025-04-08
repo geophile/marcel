@@ -33,6 +33,7 @@ import prompt_toolkit.history
 import prompt_toolkit.key_binding
 
 import marcel.exception
+import marcel.runeditor
 import marcel.tabcompleter
 
 
@@ -72,6 +73,52 @@ class Reader(object):
                 f'Command id exceeds that of most recent command: {id} > {len(history) - 1}')
         return self.history()[len(history) - 1 - id]
 
+    # Handle !, !!, and edit ops. For edit, only edit N is handled here. edit -s is left to normal
+    # command processing.
+    def handle_edit_and_run(self, command):
+        def parse(command):
+            command = command.strip()
+            return (['!!'] + command[2:].split() if command.startswith('!!') else
+                    ['!'] + command[1:].split() if command.startswith('!') else
+                    ['edit'] + command[4:].split() if command.startswith('edit') else
+                    None)
+
+        def selected_command(token):
+            assert token is not None
+            try:
+                command_id = int(token)
+                return self.command_by_id(command_id)
+            except ValueError:
+                raise marcel.exception.KillCommandException(f'Command must be identifed by an integer: {t1}')
+
+        new_command = None
+        tokens = parse(command)
+        if tokens is not None:
+            t0 = tokens[0]
+            t1 = tokens[1] if len(tokens) > 1 else None
+            if t0 == '!':
+                if len(tokens) == 0:
+                    raise marcel.exception.KillCommandException('History command number required following !')
+                elif len(tokens) > 2:
+                    raise marcel.exception.KillCommandException('Too many arguments after !')
+                new_command = selected_command(t1)
+            elif t0 == '!!':
+                if len(tokens) > 1:
+                    raise marcel.exception.KillCommandException('No arguments permitted after !!')
+                command_id = len(self.history()) - 1
+                new_command = self.command_by_id(command_id)
+            elif t0 == 'edit':
+                if t1 is None:
+                    raise marcel.exception.KillCommandException('Missing command number')
+                elif t1 in ('-s', '--startup'):
+                    # Return None, which will leave the command as is. Normal command processing should then
+                    # operate, editing the selected workspace's startup script.
+                    pass
+                else:
+                    command = selected_command(t1)
+                    new_command = marcel.runeditor.edit_text(self._env, command)
+        return new_command
+
 
     # Set up key bindings:
     # - Enter terminates the text of a command.
@@ -85,6 +132,12 @@ class Reader(object):
 
         @kb.add('enter')
         def _(event):
-            event.current_buffer.validate_and_handle()
+            buffer = event.current_buffer
+            replacement = self.handle_edit_and_run(buffer.document.text)
+            if replacement:
+                original = buffer.document.text
+                buffer.delete_before_cursor(len(original))
+                buffer.insert_text(replacement)
+            buffer.validate_and_handle()
 
         return kb

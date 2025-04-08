@@ -72,7 +72,6 @@ class Run(marcel.core.Op):
 
     def run(self, env):
         env.next_command = env.reader.command_by_id(self.id)
-        env.reader.replace_input('YOUR COMMAND HERE')
 
     # Op
 
