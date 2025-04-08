@@ -60,8 +60,8 @@ class EditArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('edit', env)
         self.add_flag_optional_value('startup', '-s', '--startup', default=True)
-        self.add_anon('n', convert=self.str_to_int, default=None)
-        self.at_most_one('startup', 'n')
+        self.add_anon('command', convert=self.str_to_int, default=None)
+        self.at_most_one('startup', 'command')
         self.validate()
 
 
@@ -69,10 +69,10 @@ class Edit(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.n = None
+        self.command = None
         self.startup = None
         self.editor = None
-        self.impl = None
+        self.ws_name = None
 
     def __repr__(self):
         return 'edit()'
@@ -80,49 +80,8 @@ class Edit(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        editor = Edit.find_editor(env)
-        self.impl = (EditStartup(self, editor, None if self.startup is True else self.startup)
-                     if self.startup else
-                     EditCommand(self, editor))
-
-    def run(self, env):
-        self.impl.run(env)
-
-    # Op
-
-    def must_be_first_in_pipeline(self):
-        return True
-
-    def run_in_main_process(self):
-        return True
-
-
-class EditImpl(object):
-
-    def __init__(self, op, editor):
-        self.op = op
-        self.editor = editor
-
-    def run(self, env):
-        assert False
-
-
-class EditCommand(EditImpl):
-
-    def __init__(self, op, editor):
-        super().__init__(op, editor)
-        _, self.tmp_file = tempfile.mkstemp(text=True)
-
-    def run(self, env):
-        command = env.reader.command_by_id(self.op.n)
-        env.next_command = marcel.runeditor.edit_text(env, command)
-
-
-class EditStartup(EditImpl):
-
-    def __init__(self, op, editor, ws_name):
-        super().__init__(op, editor)
-        self.ws_name = ws_name
+        assert self.command is None  # edit COMMAND should be handled by Reader, shouldn't get here.
+        self.ws_name = None if self.startup is True else self.startup
 
     def run(self, env):
         if self.ws_name is None:
@@ -132,3 +91,11 @@ class EditStartup(EditImpl):
             if not workspace.exists(env):
                 raise marcel.exception.KillCommandException(f'Workspace does not exist: {self.ws_name}')
         marcel.runeditor.edit_file(env, env.locations.config_ws_startup(workspace))
+
+    # Op
+
+    def must_be_first_in_pipeline(self):
+        return True
+
+    def run_in_main_process(self):
+        return True
