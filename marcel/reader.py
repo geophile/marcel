@@ -40,9 +40,7 @@ class Reader(object):
 
     def __init__(self, env):
         self._env = env
-        history_file = env.locations.data_ws_hist(env.workspace)
-        key_bindings = Reader.setup_key_bindings()
-        self._history = prompt_toolkit.history.FileHistory(history_file)
+        self._history = prompt_toolkit.history.FileHistory(env.locations.data_ws_hist(env.workspace))
         self._command_history = []
         self._selected_command_id = None
         self._session = prompt_toolkit.PromptSession(
@@ -50,7 +48,7 @@ class Reader(object):
             completer=marcel.tabcompleter.TabCompleter(env),
             history=self._history,
             multiline=True,
-            key_bindings=key_bindings,
+            key_bindings=self.setup_key_bindings(),
             enable_open_in_editor=True)
 
     # Returns a command input by the user.
@@ -78,8 +76,7 @@ class Reader(object):
     # Set up key bindings:
     # - Enter terminates the text of a command.
     # - Alt-Enter terminates a line of text but continues the command.
-    @staticmethod
-    def setup_key_bindings():
+    def setup_key_bindings(self):
         kb = prompt_toolkit.key_binding.KeyBindings()
 
         @kb.add('escape', 'enter')
