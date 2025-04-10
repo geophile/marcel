@@ -5997,6 +5997,14 @@ FIXED
 
 FIXED
 
+273. edit isn't working
+
+edited line not echoed
+
+----------------------------------------------------------------------
+
+FIXED
+
 274. Tab completion of ~/... doesn't work
 
     ls ~/Mu<tab>

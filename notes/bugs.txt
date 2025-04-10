@@ -710,9 +710,3 @@ Trying default workspace ...
 data is not executable.
 
 Probably due to syntax error in startup.py (added function).
-
-----------------------------------------------------------------------
-
-273. edit isn't working
-
-edited line not echoed
