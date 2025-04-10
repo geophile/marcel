@@ -48,9 +48,10 @@ as in other shells.
     - {n:help}        - {n:history}     - {n:import}      - {n:intersect}
     - {n:jobs}        - {n:join}        - {n:load}        - {n:ls}
     - {n:map}         - {n:popd}        - {n:ps}          - {n:pushd}
-    - {n:pwd}         - {n:red}         - {n:remote}      - {n:reverse}
-    - {n:run}         - {n:select}      - {n:sort}        - {n:sql}
-    - {n:squish}      - {n:store}       - {n:sudo}        - {n:tail}
-    - {n:timer}       - {n:trace}       - {n:unique}      - {n:union}
-    - {n:version}     - {n:window}      - {n:write}       - {n:ws}
+    - {n:pwd}         - {n:read}        - {n:red}         - {n:remote}
+    - {n:reverse}     - {n:run}         - {n:select}      - {n:sort}
+    - {n:sql}         - {n:squish}      - {n:store}       - {n:sudo} 
+    - {n:tail}        - {n:timer}       - {n:trace}       - {n:unique}
+    - {n:union}       - {n:version}     - {n:window}      - {n:write}
+    - {n:ws}
 '''

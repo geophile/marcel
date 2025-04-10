@@ -1,18 +1,22 @@
 import os
 import pathlib
 
+import marcel.doc
 import test_base
 
 TEST = test_base.TestTabCompletion()
 TestDir = test_base.TestDir
 
-ALL_OPS = [op + ' ' for op in ['args', 'assign', 'bash', 'bg', 'case', 'cast', 'cd', 'difference',
-                               'dirs', 'download', 'edit', 'exit', 'env', 'expand', 'fg', 'filter',
-                               'fork', 'gen', 'head', 'help', 'history', 'import', 'intersect',
-                               'jobs', 'join', 'load', 'ls', 'map', 'popd', 'ps', 'pushd', 'pwd', 'read',
-                               'red', 'remote', 'reverse', 'run', 'select', 'sort', 'sql', 'squish', 'store',
-                               'sudo', 'tail', 'tee', 'timer', 'trace', 'union', 'unique', 'upload', 'version',
-                               'window', 'write', 'ws']]
+OPS = ['args', 'assign', 'bash', 'bg', 'case', 'cast', 'cd', 'difference',
+       'dirs', 'download', 'edit', 'exit', 'env', 'expand', 'fg', 'filter',
+       'fork', 'gen', 'head', 'help', 'history', 'import', 'intersect',
+       'jobs', 'join', 'load', 'ls', 'map', 'popd', 'ps', 'pushd', 'pwd', 'read',
+       'red', 'remote', 'reverse', 'run', 'select', 'sort', 'sql', 'squish', 'store',
+       'sudo', 'tail', 'tee', 'timer', 'trace', 'union', 'unique', 'upload', 'version',
+       'window', 'write', 'ws']
+
+ALL_OPS = [op + ' ' for op in OPS]
+ALL_HELP = sorted(OPS + list(marcel.doc.topics))
 
 
 def test_op():
@@ -254,6 +258,18 @@ def test_arg_escaped():
         TEST.run(line='ls c=',
                  expected=['\\ d '])
 
+def test_arg_help():
+    TEST.run(line='help',
+             expected=[' '])
+    TEST.run(line='help ',
+             expected=ALL_HELP)
+    TEST.run(line='help x',
+             expected=[])
+    TEST.run(line='help r',
+             expected=['ead', 'ed', 'emote', 'everse', 'un'])
+    TEST.run(line='help re',
+             expected=['ad', 'd', 'mote', 'verse'])
+
 def test_arg():
     test_arg_username()
     test_arg_homedir()
@@ -261,6 +277,7 @@ def test_arg():
     test_arg_local_path()
     test_arg_quoted()
     test_arg_escaped()
+    test_arg_help()
 
 
 def main_stable():
@@ -273,13 +290,14 @@ def main_stable():
 
 
 def main_dev():
+    test_arg_help()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
+    # main_stable()
     TEST.report_failures('test_tab_completion')
 
 

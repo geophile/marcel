@@ -60,7 +60,6 @@ class Quote(object):
 
 class TabCompleter(Completer):
     OPS = marcel.op.public
-    HELP_TOPICS = list(marcel.doc.topics) + OPS
 
     def __init__(self, env):
         super().__init__()
@@ -147,8 +146,8 @@ class TabCompleter(Completer):
 
     # Arg completion assumes we're looking for filenames. (bash does this too.)
     def complete_arg(self, token):
-        filename_handler = ArgHandler.select(token)
-        for filename in filename_handler.complete_filename():
+        filename_handler = self.select(token)
+        for filename in filename_handler.complete_arg():
             yield filename_handler.completion(filename)
 
     def noop(self, token):
@@ -157,15 +156,14 @@ class TabCompleter(Completer):
             yield None
         pass
 
-    @staticmethod
-    def complete_help(text):
-        debug(f'complete_help, text = <{text}>')
-        candidates = []
-        for topic in TabCompleter.HELP_TOPICS:
-            if topic.startswith(text):
-                candidates.append(topic)
-        debug(f'complete_help candidates for <{text}>: {candidates}')
-        return candidates
+    def select(self, token):
+        unquoted_token = Quote.unquote(token)
+        return (HelpTopicHandler(token) if self.help_command() else
+                UsernameHandler(token) if unquoted_token.startswith('~') and '/' not in unquoted_token else
+                FilenameHandler(token))
+
+    def help_command(self):
+        return self.parser.text.strip().startswith('help')
 
     @staticmethod
     def string_completion(token, completion):
@@ -203,25 +201,18 @@ class ArgHandler(object):
         self.unescaped_prefix = ArgHandler.resolve_escapes(prefix)
 
     # Returns a list of the filenames that can complete the last typed token.
-    def complete_filename(self):
+    def complete_arg(self):
         assert False
 
     # Returns a Completion for the given filename (what gets appended,
     # and how it is displayed as a completion option).
-    def completion(self, filename):
+    def completion(self, arg):
         assert False
 
     # For use by subclasses
 
     def elements_matching_prefix(self, candidates):
         return [f for f in candidates if f.startswith(self.unescaped_prefix)]
-
-    @staticmethod
-    def select(token):
-        unquoted_token = Quote.unquote(token)
-        return (UsernameHandler(token)
-                if unquoted_token.startswith('~') and '/' not in unquoted_token else
-                FilenameHandler(token))
 
     @staticmethod
     def resolve_escapes(x):
@@ -239,20 +230,48 @@ class ArgHandler(object):
                 resolved += c
         return resolved
 
+class HelpTopicHandler(ArgHandler):
+
+    HELP_TOPICS = sorted(list(marcel.doc.topics) + TabCompleter.OPS)
+
+    def __init__(self, token):
+        super().__init__(prefix=token)
+        debug(f'{self.__class__.__name__}: prefix={self.prefix}')
+
+    def complete_arg(self):
+        return self.elements_matching_prefix(HelpTopicHandler.HELP_TOPICS)
+
+    def completion(self, arg):
+        # text: The completion. What gets appended to what the user typed.
+        # display: Appears in list of candidate completions.
+        return Completion(text=(arg[len(self.prefix):]),
+                          display=arg)
+
+    @staticmethod
+    def complete_help(text):
+        debug(f'complete_help, text = <{text}>')
+        candidates = []
+        for topic in TabCompleter.HELP_TOPICS:
+            if topic.startswith(text):
+                candidates.append(topic)
+        debug(f'complete_help candidates for <{text}>: {candidates}')
+        return candidates
+
+
 class UsernameHandler(ArgHandler):
 
     def __init__(self, token):
         super().__init__(prefix=token[1:])  # Everything after ~
         debug(f'{self.__class__.__name__}: prefix={self.prefix}')
 
-    def complete_filename(self):
+    def complete_arg(self):
         return self.elements_matching_prefix(sorted(UsernameHandler.usernames()))
 
-    def completion(self, filename):
+    def completion(self, arg):
         # text: The completion. What gets appended to what the user typed.
         # display: Appears in list of candidate completions.
-        return Completion(text=(filename[len(self.unescaped_prefix):] + '/'),
-                          display=f'~{filename}')
+        return Completion(text=(arg[len(self.unescaped_prefix):] + '/'),
+                          display=f'~{arg}')
 
     @staticmethod
     def usernames():
@@ -292,7 +311,7 @@ class FilenameHandler(ArgHandler):
         self.compute_token_escaping(unquoted_token)
         debug(f'{self.__class__.__name__}: basedir=<{self.basedir}>, prefix=<{self.prefix}>')
 
-    def complete_filename(self):
+    def complete_arg(self):
         try:
             basedir = marcel.util.unescape(self.basedir)
             dir_contents = (os.listdir(self.expanduser(FilenameHandler.pathlib_path(basedir)))
@@ -302,13 +321,13 @@ class FilenameHandler(ArgHandler):
         except FileNotFoundError:
             return []
 
-    def completion(self, filename):
+    def completion(self, arg):
         # text: The completion. What gets appended to what the user typed.
         # display: Appears in list of candidate completions.
-        prefix = filename[:len(self.unescaped_prefix)]
-        suffix = filename[len(self.unescaped_prefix):]
+        prefix = arg[:len(self.unescaped_prefix)]
+        suffix = arg[len(self.unescaped_prefix):]
         return Completion(text=self.completion_text(prefix, suffix),
-                          display=f'{filename}',
+                          display=f'{arg}',
                           start_position=self.cursor_adjustment)
     # The completion text is passed in as:
     #   - prefix (stuff typed already), and
