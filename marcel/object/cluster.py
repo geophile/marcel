@@ -22,44 +22,63 @@ import marcel.util
 
 class Host(object):
 
-    def __init__(self, cluster, host_spec):
+    def __init__(self, cluster, host):
         self.cluster = cluster
-        self.host = None
-        self.addr = None
-        self.name = None
-        self.port = None
-        if isinstance(host_spec, str):
-            self.parse_host_spec(host_spec)
-        elif type(host_spec) in (tuple, list) and len(host_spec) == 2:
-            host_spec, port = host_spec
-            self.parse_host_spec(host_spec)
-            self.port = port
-        else:
-            raise marcel.exception.KillShellException(
-                f'Invalid host specification: {host_spec}. Specify a string or 2-tuple')
+        self._host = host
+        self._addr = None
+        self._name = None
+        self._port = None
 
     def __repr__(self):
-        return self.name if self.port is None else f'{self.name}:{self.port}'
-
-    def parse_host_spec(self, host_spec):
-        self.host = host_spec
-        try:
-            self.addr = str(ipaddress.ip_address(host_spec))
-            self.name = self.addr
-        except ValueError:
-            # host is not an ipv4 or ipv6 address. Proceed as if it is a host name.
-            try:
-                self.addr = str(ipaddress.ip_address(socket.gethostbyname(host_spec)))
-                self.name = host_spec
-            except socket.gaierror:
-                raise marcel.exception.KillShellException(
-                    f'Cannot understand {self.host} as a host name or as an IP address.')
+        self.ensure_initialized()
+        return self._name if self._port is None else f'{self._name}:{self._port}'
 
     def __hash__(self):
-        return hash(self.host)
+        return hash(self._host)
 
     def __eq__(self, other):
-        return self.host == other.host
+        return self._host == other._host
+
+    @property
+    def host(self):
+        return self._host
+
+    @property
+    def addr(self):
+        self.ensure_initialized()
+        return self._addr
+
+    @property
+    def name(self):
+        self.ensure_initialized()
+        return self._name
+
+    @property
+    def port(self):
+        self.ensure_initialized()
+        return self._port
+    
+    # Internal
+    
+    def ensure_initialized(self):
+        if self._addr is None:
+            if type(self._host) in (tuple, list) and len(self._host) == 2:
+                self._host, self._port = self._host
+            if not isinstance(self._host, str):
+                raise marcel.exception.KillShellException(
+                    f'Invalid host specification: {self._host}. Specify a string or 2-tuple')
+            try:
+                self._addr = str(ipaddress.ip_address(self._host))
+                self._name = self._addr
+            except ValueError:
+                # self._host is not an ipv4 or ipv6 address. Proceed as if it is a host name.
+                try:
+                    self._addr = str(ipaddress.ip_address(socket.gethostbyname(self._host)))
+                    self._name = self._host
+                except socket.gaierror:
+                    raise marcel.exception.KillShellException(
+                        f'Cannot understand {self._host} as a host name or as an IP address.')
+
 
 
 # Nodes in the cluster: A cluster can comprise either one host or multiple hosts.

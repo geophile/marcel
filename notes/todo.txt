@@ -761,23 +761,13 @@ SHOULD script usage be allowed to use a non-default workspace?
 
 From tab completion work:
 
-Things that must be replaced by prompt_toolkit:
-
-- history
-
-- edit command
-
 Things that might be replaced by prompt_toolkit:
 
 - multilinereader
 
-- prompt/continuation prompt
-
 - Try PromptSession.complete_style
 
 Fix:
-
-- help completion
 
 - MultiColumnCompletionsMenu for long list of candidates?
 
@@ -787,7 +777,3 @@ Fix:
 - What about completion of single quote: ls "
 
 - Correct use of stringliterals for native filename ops, such as rm. E.g., does rm "a b" work?
-
-- tab branch has useful stuff? But doesn't appear to be merged to master?
-
-----------------------------------------------------------------------

@@ -6076,3 +6076,13 @@ In ~/Music/ITunes/iTunes Music
 ls The\ Zombies/<tab>
 
 -> no candidates
+
+----------------------------------------------------------------------
+
+277. Can't start without network connection
+
+Shouldn't need to be on the network to start:
+
+jao@loon:~$ marcel
+Cannot understand geophile.com as a host name or as an IP address.
+jao@loon:~$ 
