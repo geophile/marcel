@@ -1,17 +1,16 @@
 What's New
 ----------
 
-This release makes use of more features 
-from [prompt_toolkit](https://python-prompt-toolkit.readthedocs.io). 
-In particular, command history is now handled by prompt_toolkit
-(instead of readline). This means that the format of history files has changed,
-and that means that this is a major release. The upgrade is handled automatically,
-however, old history of existing workspaces *will be deleted*. (I don't
-think there is enough marcel usage for this to upset anyone. I am
-certainly the major, and perhaps only user, and even I don't mind.)
+As major releases go, this is pretty minor. To use this release, you need to modify
+your startup.py scripts, for the default workspace and for any
+workspaces you have created. (The default startup file is most likely location
+is `~/.config/marcel/workspace/__DEFAULT__/startup.py`. For a workspace named `foobar`, it's
+`~/.config/marcel/workspace/foobar/startup.py`).
 
-Marcel now has no dependencies on the readline module. Let the porting begin.
+In your startup scripts make the following changes:
 
+1. Change `PROMPT = (...)` or `PROMPT=[...]` to `set_prompt(...)`.
+2. Delete the `PROMPT_CONTINUATION` assignment statement.
 
 Marcel
 ======

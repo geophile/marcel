@@ -28,6 +28,7 @@ from marcel.util import username, groupname, quote_files
 from marcel.jsonutil import JSONUtil as _JSONUtil
 _JSON_UTIL = _JSONUtil()
 STARTUP_SCRIPTS = []
+PROMPT = '$ '
 
 
 def minutes(n):
@@ -65,3 +66,7 @@ def json_format(x):
 def run_on_startup(script):
     global STARTUP_SCRIPTS
     STARTUP_SCRIPTS.append(script)
+
+def set_prompt(*prompt):
+    global PROMPT
+    PROMPT = prompt

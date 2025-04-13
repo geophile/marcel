@@ -639,8 +639,6 @@ Ideas about startup:
 
 - Replace USER, BOLD, MARCEL_VERSION etc. by functions.
 
-- Replace RUN_ON_STARTUP by run(...)
-
 ----------------------------------------------------------------------
 
 help_workspace.py
@@ -765,5 +763,3 @@ Fix:
 
 - There's a bug in ls: ls c\*d: looks for c*d not literally "c*d". The
   escaping isn't visible to ls. Same for single and double quoting.
-
-- What about completion of single quote: ls "

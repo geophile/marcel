@@ -60,15 +60,4 @@ but is instead turned into a function, through the use of {r:lambda}.
 Because {r:PWD} likely changes over time, (as the user executes
 {n:cd}, {n:pushd}, and {n:popd} operations), the expression needs to
 be evaluated each time the prompt is displayed.
-
-For multi-line commands, a second prompt, specified in the variable {r:PROMPT_CONTINUATION}
-is used, e.g.
-
-{p,wrap=F,indent=4}
-PROMPT_CONTINUATION = [
-    Color(5, 0, 0, BOLD),
-    'M ',
-    Color(3, 4, 0, BOLD),
-    '+$    '
-]
 '''
