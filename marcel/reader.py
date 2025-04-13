@@ -31,6 +31,7 @@
 import prompt_toolkit
 import prompt_toolkit.history
 import prompt_toolkit.key_binding
+from prompt_toolkit.shortcuts import CompleteStyle
 
 import marcel.exception
 import marcel.runeditor
@@ -46,6 +47,7 @@ class Reader(object):
         self._selected_command_id = None
         self._session = prompt_toolkit.PromptSession(
             complete_while_typing=False,
+            complete_style=CompleteStyle.MULTI_COLUMN,
             completer=marcel.tabcompleter.TabCompleter(env),
             history=self._history,
             multiline=True,

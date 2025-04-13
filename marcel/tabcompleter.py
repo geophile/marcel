@@ -53,7 +53,7 @@ class Quote(object):
         if x:
             if x[0] in Quote.ALL:
                 x = x[1:]
-            if x[-1] in Quote.ALL:
+            if len(x) > 0 and x[-1] in Quote.ALL:
                 x = x[:-1]
         return x
 

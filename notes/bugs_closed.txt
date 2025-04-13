@@ -6086,3 +6086,31 @@ Shouldn't need to be on the network to start:
 jao@loon:~$ marcel
 Cannot understand geophile.com as a host name or as an IP address.
 jao@loon:~$ 
+
+----------------------------------------------------------------------
+
+FIXED
+
+278. ls "<tab> crashes
+
+
+Unhandled exception in event loop:
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/buffer.py", line 1923, in new_coroutine
+    await coroutine(*a, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/buffer.py", line 1740, in async_completer
+    async for completion in async_generator:
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/completion/base.py", line 310, in get_completions_async
+    async for completion in completer.get_completions_async(
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/completion/base.py", line 186, in get_completions_async
+    for item in self.get_completions(document, complete_event):
+  File "/home/jao/git/marcel/marcel/tabcompleter.py", line 83, in get_completions
+    for c in completer(token):
+  File "/home/jao/git/marcel/marcel/tabcompleter.py", line 149, in complete_arg
+    filename_handler = self.select(token)
+  File "/home/jao/git/marcel/marcel/tabcompleter.py", line 160, in select
+    unquoted_token = Quote.unquote(token)
+  File "/home/jao/git/marcel/marcel/tabcompleter.py", line 56, in unquote
+    if x[-1] in Quote.ALL:
+
+Exception string index out of range
+Press ENTER to continue...
