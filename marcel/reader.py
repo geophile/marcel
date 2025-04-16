@@ -97,7 +97,7 @@ class Reader(object):
         tokens = parse(command)
         if tokens is not None:
             t0 = tokens[0]
-            t1 = tokens[1] if len(tokens) > 1 else None
+            t1 = tokens[1] if len(tokens) > 1 else len(self.history()) - 1
             if t0 == '!':
                 if len(tokens) == 0:
                     raise marcel.exception.KillCommandException('History command number required following !')
