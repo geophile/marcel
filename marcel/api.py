@@ -150,12 +150,6 @@ def gen(*args, **kwargs): return _generate_op(_gen, *args, **kwargs)
 def head(*args, **kwargs): return _generate_op(_head, *args, **kwargs)
 
 
-def ifelse(*args, **kwargs): return _generate_op(_ifelse, *args, **kwargs)
-
-
-def ifthen(*args, **kwargs): return _generate_op(_ifthen, *args, **kwargs)
-
-
 def intersect(*args, **kwargs): return _generate_op(_intersect, *args, **kwargs)
 
 

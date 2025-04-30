@@ -763,3 +763,13 @@ Fix:
 
 - There's a bug in ls: ls c\*d: looks for c*d not literally "c*d". The
   escaping isn't visible to ls. Same for single and double quoting.
+
+----------------------------------------------------------------------
+
+Improve API
+
+- Doc, including epydoc or something similar
+
+- Examples, tutorials
+
+- Blog post
