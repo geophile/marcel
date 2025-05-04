@@ -37,3 +37,39 @@ What's needed:
 ----------------------------------------------------------------------
 
 5/4/25
+
+Current marcel invocation:
+
+    marcel [WORKSPACE] [-e|--execute SCRIPT] [--mpstart fork|spawn|forkserver]
+    marcel [-h|--help]
+    
+    Run marcel, interactively unless a SCRIPT is provided.
+    
+    if WORKSPACE is specified, then marcel will open the named WORKSPACE before 
+    executing commands interactively or commands from the SCRIPT.
+    
+    This usage message is obtained by running marcel with the -h or --help
+    flag. For more detailed help, run marcel interactively and use the "help" command.
+    
+    Leave out --mpstart unless you really know what you're doing, or you're desperate. 
+    It defaults to fork.
+
+
+
+https://superuser.com/questions/195826/bash-shebang-for-dummies:
+
+    If a script /path/to/foo begins with #!/bin/bash, then executing
+    /path/to/foo arg1 arg2 is equivalent to executing /bin/bash
+    /path/too/foo arg1 arg2
+
+So:
+
+- "marcel x" should execute the script x. Get rid of -e|--execute.
+
+- Need a different way to specify a workspace. Can't be an anonymous
+  arg, or specified via flag, as these would interfere with script
+  usage. Just get rid of the command-line option? 
+
+- Get rid of mpstart arg. Hard code, or test platform to determine
+  mpstart value.
+

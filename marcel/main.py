@@ -407,10 +407,9 @@ def usage(exit_code=1):
     sys.exit(exit_code)
 
 
-# --mpstart: fork/spawn/forkserver. Use fork if not specified
 def args():
     workspace= None
-    flags = ('-e', '--execute', '-h', '--help', '--mpstart',)
+    flags = ('-e', '--execute', '-h', '--help')
     mpstart = 'fork'
     script = None
     flag = None
@@ -429,14 +428,9 @@ def args():
             assert flag is not None
             if flag in ('-e', '--execute'):
                 script = arg
-            elif flag == '--mpstart':
-                if arg in ('fork', 'spawn', 'forkserver'):
-                    mpstart = arg
-                else:
-                    usage()
             flag = None
         first_arg = False
-    return workspace, script, mpstart
+    return workspace, script
 
 
 def main_interactive_run(locations, workspace):
@@ -540,8 +534,8 @@ def initialize_persistent_config_and_data(env, initial_config):
 
 
 def main():
-    workspace_name, script, mpstart = args()
-    multiprocessing.set_start_method(mpstart)
+    multiprocessing.set_start_method('fork')  # Maybe spawn or forkserver for plaforms other than Linux
+    workspace_name, script = args()
     workspace = Workspace.named(workspace_name)
     locations = marcel.locations.Locations()
     started = False
