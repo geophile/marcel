@@ -1,0 +1,43 @@
+4/30/25
+
+The API is undocumented, need to fix that. Parts
+
+1. Give the API functions real signatures, e.g. 
+
+    gen(count=0, start=0, pad=None)
+
+  instead of 
+
+    gen(*args, **kwargs):
+
+  (Compare gen.py/gen to api.py/gen)
+
+2. docstrings
+
+3. Generate doc package, as osh did with epydoc.
+
+#1 is just a lot of typing.
+
+#2 is more complicated. It would be nice to keep the docstrings
+consistent with the command docstrings. Could play games with
+assigning api/gen.__doc__, for example, but that won't work with IDEs.
+
+What about this (in api.py):
+
+- Write a tool to MODIFY api.py. It would look for
+  marcel.marcel.__init__.public, for example, to find the functions
+  needing docstrings.
+
+- The tool would get the marcel/cli module-level docstring, and
+  generate the api docstring. Add docstring if it isn't there, replace
+  it otherwise.
+
+- Don't update API doc if CLI doc hasn't changed.
+
+Run this tool as first step in packaging so that a release gets
+up-to-date API docstrings.
+
+*** Problem: Can't do this as part of packaging. Needs to be a
+    separate step so that the changes can be committed to git.
+
+#3: After API docstrings updated, generate doc package.

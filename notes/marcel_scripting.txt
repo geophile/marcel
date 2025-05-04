@@ -1,0 +1,39 @@
+5/2/25
+
+Marcel emphasizes powerful pipelines.
+
+It's not so great as a general purpose shell. It should be possible to do this:
+
+    #!/usr/local/bin/marcel
+
+    WHO = ('world')
+    (f'Hello {WHO}')
+
+But if this is stored in x.m, then
+
+    ./x.m
+
+produces this output:
+
+    There is no workspaced named ./x.m.
+
+The reason is that "marcel xyz" starts marcel with workspace xyz. To
+run a script, it's "marcel -e ./x.m". This would have to change.
+
+Also how would a command line arg be passed to x.m?
+
+......................................................................
+
+What's needed:
+
+- Change invocation of marcel so that "./x.m" works.
+
+- Be able to pass args, e.g. so that "./x.m foobar" prints "Hello
+  foobar".
+
+- Commands should yield return codes. Subsequent commands should be
+  able to test and act on them.
+
+----------------------------------------------------------------------
+
+5/4/25

@@ -1,0 +1,27 @@
+tl;dr: This is mostly doable in straight Python.
+
+There are two ways to use marcel:
+
+1) In a console. In a bash console, type "marcel", enter, and then you would see a marcel prompt and be able to enter marcel commands.
+
+2) From a Python script. "from marcel.api import *" gets what you need, and then you can use marcel symbols, e.g. "ls()" would produce a stream of File objects that you could iterate over.
+
+The script you sent me is kind of odd. It creates a venv, installs software (presumably dbt and dependencies), runs some dbt commands, and then exits, not cleaning up the venv. (Or does "dbt clean" do that?)
+
+From what you said previously, I think you would prefer to write Python than bash.  Step 3 runs source, which is a bash builtin. I'm not sure what the Python equivalent would be, I'd have to research how to simulate "source .../activate" in Python.
+
+Ignoring that point, your script takes some command line arguments, runs some commands, sometimes conditionally to set up the venv, and then runs dbt with various options. In Python:
+
+- Process command line args: I'd use the getopt module for this.
+
+- Running OS commands: Python has a few ways of doing this, such as os.system() and Popen. os.system() has problems, and Popen is kind of a pain. In marcel, I'd use bash(), e.g.
+
+      bash('pip install -r requirements-dev.txt')
+
+- The conditions can be tested using Python facilities for checking file existence: os.path, or pathlib (more modern). Marcel also has File(), which you can treat pretty much as a pathlib.Path.
+
+All of which is to say: marcel isn't going to help much here, you could do the whole thing in straight Python just as easily (once you figure out the "source" equivalent).
+
+The "sweet spot" for marcel is replacing bash commands that rely on piping data from one command to another, something that your script doesn't rely on.
+
+Jack
