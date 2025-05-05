@@ -74,6 +74,7 @@ test_use_workspace() {
   ws $1 | select (x: False)
   bash "find $TEST_HOME" \
   | case (f: '.WORKSPACE.' in f) (| (f: f[:f.rfind('/')] + '/.WORKSPACE.<pid>') |) \
+         (f: '.env.pickle' in f) (| (f: f[:f.rfind('/')] + '/.<pid>.env.pickle') |) \
                                  (| (f: f) |) \
   > $ACTUAL/ws_use_w 
 EOF

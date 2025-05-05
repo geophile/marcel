@@ -15,6 +15,7 @@
 .local/share/marcel/broken
 .local/share/marcel/workspace
 .local/share/marcel/workspace/__DEFAULT__
+.local/share/marcel/workspace/__DEFAULT__/.<pid>.env.pickle
 .local/share/marcel/workspace/__DEFAULT__/history
 .local/share/marcel/workspace/__DEFAULT__/reservoirs
 .local/share/marcel/workspace/w
