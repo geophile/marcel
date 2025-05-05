@@ -70,7 +70,8 @@ EOF
 
 test_use_workspace() {
   echo $FUNCNAME
-  marcel $1 <<EOF
+  marcel <<EOF
+  ws $1 | select (x: False)
   bash "find $TEST_HOME" \
   | case (f: '.WORKSPACE.' in f) (| (f: f[:f.rfind('/')] + '/.WORKSPACE.<pid>') |) \
                                  (| (f: f) |) \

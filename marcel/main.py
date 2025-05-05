@@ -387,52 +387,6 @@ def fail(message):
     exit(1)
 
 
-def usage(exit_code=1):
-    usage = '''
-    marcel [WORKSPACE] [-e|--execute SCRIPT] [--mpstart fork|spawn|forkserver]
-    marcel [-h|--help]
-    
-    Run marcel, interactively unless a SCRIPT is provided.
-    
-    if WORKSPACE is specified, then marcel will open the named WORKSPACE before 
-    executing commands interactively or commands from the SCRIPT.
-    
-    This usage message is obtained by running marcel with the -h or --help
-    flag. For more detailed help, run marcel interactively and use the "help" command.
-    
-    Leave out --mpstart unless you really know what you're doing, or you're desperate. 
-    It defaults to fork.
-'''
-    print(usage, file=sys.stderr)
-    sys.exit(exit_code)
-
-
-def args():
-    workspace= None
-    flags = ('-e', '--execute', '-h', '--help')
-    mpstart = 'fork'
-    script = None
-    flag = None
-    first_arg = True
-    for arg in sys.argv[1:]:
-        if first_arg and not arg.startswith('-'):
-            workspace = arg
-        elif arg in flags:
-            flag = arg
-            if flag in ('-h', '--help'):
-                usage(0)
-        elif arg.startswith('-'):
-            usage()
-        else:
-            # arg is a flag value
-            assert flag is not None
-            if flag in ('-e', '--execute'):
-                script = arg
-            flag = None
-        first_arg = False
-    return workspace, script
-
-
 def main_interactive_run(locations, workspace):
     def restart_in_default_workspace():
         raise marcel.exception.ReconfigureException(Workspace.default())
@@ -535,15 +489,12 @@ def initialize_persistent_config_and_data(env, initial_config):
 
 def main():
     multiprocessing.set_start_method('fork')  # Maybe spawn or forkserver for plaforms other than Linux
-    workspace_name, script = args()
-    workspace = Workspace.named(workspace_name)
+    workspace = Workspace.default()
     locations = marcel.locations.Locations()
     started = False
     while not started:
         try:
-            if script:
-                main_script_run(locations, workspace, read_script(script))
-            elif sys.stdin.isatty():
+            if sys.stdin.isatty():
                 main_interactive_run(locations, workspace)
             else:
                 main_script_run(locations, workspace, read_heredoc())
