@@ -21,6 +21,7 @@ import socket
 import sys
 
 import marcel.builtin
+import marcel.cliargs
 import marcel.compilable
 import marcel.core
 import marcel.directorystate
@@ -207,7 +208,8 @@ class Environment(object):
             'PWD': current_dir,
             'DIRS': [current_dir],
             'USER': getpass.getuser(),
-            'HOST': socket.gethostname()
+            'HOST': socket.gethostname(),
+            'parse_args': lambda **kwargs: marcel.cliargs.parse_args(self, **kwargs)
         })
         self.dir_state().change_current_dir(self.pwd_or_alternative())
 

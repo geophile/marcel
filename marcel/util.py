@@ -22,6 +22,7 @@ import pwd
 import shlex
 import shutil
 import subprocess
+import stat
 import sys
 import time
 import traceback
@@ -255,8 +256,29 @@ def string_value(x):
     return x
 
 
+class InputSource(object):
 
-class Trace:
+    def __init__(self):
+        self.mode = os.fstat(sys.stdin.fileno()).st_mode
+
+    def __repr__(self):
+        source = ('interactive' if self.interactive() else
+                  'script' if self.script() else
+                  'heredoc' if self.heredoc() else
+                  'UNKNOWN')
+        return f'InputSource({source})'
+
+    def interactive(self):
+        return sys.stdin.isatty() and stat.S_ISCHR(self.mode) and len(sys.argv) == 1
+
+    def heredoc(self):
+        return stat.S_ISFIFO(self.mode)
+
+    def script(self):
+        return stat.S_ISCHR(self.mode)
+
+
+class Trace(object):
 
     def __init__(self, tracefile, replace=False):
         self.path = pathlib.Path(tracefile)

@@ -73,3 +73,131 @@ So:
 - Get rid of mpstart arg. Hard code, or test platform to determine
   mpstart value.
 
+----------------------------------------------------------------------
+
+5/5/25
+
+Script args need to be accessible to marcel. Would like to support
+plain args, and short and long flags, with or without values
+
+- Anon only:
+
+    marcel /foo/bar/some_script.m a b c
+      
+- Anon after short and long:
+
+    marcel /foo/bar/some_script.m -s a --long b c d e
+
+- Short and long with no values:
+
+    marcel /foo/bar/some_script.m -s --long
+
+Ideas:
+
+- Put all args in env var ARGV
+
+- Allow marcel script to declare args sort of like getopt. E.g.
+
+  parseargs ({'abc': arg('-a', '--abc'), 'def': flag('-d'), 'ghi': arg('--ghi'), x: other()})
+
+  - arg: Expects a single value, can have short and long names.
+
+  - flag: No value expected, if specified, value is True, else False
+
+  - other(): other args
+
+----------------------------------------------------------------------
+
+5/7/25
+
+Terminology:
+
+        /x/y/foobar a -b c -d --efg h i j
+
+- arg: Tokens on the command line, so /x/y/foobar, a, -b, c, ...
+
+- argv: A vector of all args. 
+
+- /x/y/foobar: script (available in argv[0])
+
+- a, i, j: anonymous args: Anon
+
+- -b c: short flag and its value: Flag
+
+- -d: short flag, no value: BooleanFlag
+
+- --efg h: Long flag and its value
+
+----------------------------------------------------------------------
+
+5/11/25
+
+Distinguishing heredoc from script
+
+https://chatgpt.com/c/6820de7b-7e1c-8003-8ef2-064fbd623109
+
+import sys
+import os
+import stat
+
+def stdin_source():
+    mode = os.fstat(sys.stdin.fileno()).st_mode
+    if stat.S_ISREG(mode):
+        return "file"
+    elif stat.S_ISFIFO(mode):
+        return "heredoc_or_pipe"
+    elif stat.S_ISCHR(mode):
+        return "terminal"
+    else:
+        return "unknown"
+
+print(f"stdin is from: {stdin_source()}")
+
+
+......................................................................
+
+x.p:
+
+#!/usr/bin/python3
+
+import os
+import sys
+import stat
+
+print(f'argv: {sys.argv}')
+print(f'orig_argv: {sys.orig_argv}')
+print(f'stdin fileno: {sys.stdin.fileno()}')
+mode = os.fstat(sys.stdin.fileno()).st_mode
+print(f'isreg: {stat.S_ISREG(mode)}')
+print(f'isfifo: {stat.S_ISFIFO(mode)}')
+print(f'ischr: {stat.S_ISCHR(mode)}')
+
+......................................................................
+
+jao@loon:/tmp$ /tmp/x.p
+argv: ['/tmp/x.p']
+orig_argv: ['/usr/bin/python3', '/tmp/x.p']
+stdin fileno: 0
+isreg: False
+isreg: False
+isfifo: False
+ischr: True
+jao@loon:/tmp$ /tmp/x.p
+argv: ['/tmp/x.p']
+orig_argv: ['/usr/bin/python3', '/tmp/x.p']
+stdin fileno: 0
+isreg: False
+isfifo: False
+ischr: True
+jao@loon:/tmp$ python3 <<EOF
+> import os
+> import sys
+> import stat
+> mode = os.fstat(sys.stdin.fileno()).st_mode
+> print(stat.S_ISREG(mode))
+> print(stat.S_ISFIFO(mode))
+> print(stat.S_ISCHR(mode))
+> EOF
+False
+True
+False

@@ -387,7 +387,7 @@ def fail(message):
     exit(1)
 
 
-def main_interactive_run(locations, workspace):
+def main_interactive_run(locations):
     def restart_in_default_workspace():
         raise marcel.exception.ReconfigureException(Workspace.default())
 
@@ -399,7 +399,7 @@ def main_interactive_run(locations, workspace):
             marcel.util.print_to_stderr(
                 old_env,
                 f'Caught {type(e)} during startup. Starting in default workspace. {str(e)}')
-            return env_and_main(old_main, Workspace.default())
+            return env_and_main(old_env, old_main, Workspace.default())
         assert env is not None
         try:
             main = MainInteractive(old_main, env, workspace)
@@ -416,6 +416,7 @@ def main_interactive_run(locations, workspace):
 
     main = None
     trace = None
+    workspace = Workspace.default()
     while True:
         env, main = env_and_main(None, main, workspace)
         try:
@@ -436,8 +437,9 @@ def main_interactive_run(locations, workspace):
                 main.input = None
 
 
-def main_script_run(locations, workspace, script):
+def main_script_run(locations, script):
     commands = commands_in_script(script)
+    workspace = Workspace.default()
     env = marcel.env.EnvironmentScript.create(locations, workspace)
     main = MainScript(env, workspace)
     for command in commands:
@@ -489,15 +491,19 @@ def initialize_persistent_config_and_data(env, initial_config):
 
 def main():
     multiprocessing.set_start_method('fork')  # Maybe spawn or forkserver for plaforms other than Linux
-    workspace = Workspace.default()
     locations = marcel.locations.Locations()
+    input_source = marcel.util.InputSource()
     started = False
     while not started:
         try:
-            if sys.stdin.isatty():
-                main_interactive_run(locations, workspace)
+            if input_source.interactive():
+                main_interactive_run(locations)
+            elif input_source.script():
+                main_script_run(locations, read_script(sys.argv[1]))
+            elif input_source.heredoc():
+                main_script_run(locations, read_heredoc())
             else:
-                main_script_run(locations, workspace, read_heredoc())
+                raise marcel.exception.KillShellException('Unable to determine input source!')
             started = True
         except marcel.exception.StartupScriptException as e:
             print(str(e), file=sys.stderr)

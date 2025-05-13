@@ -713,4 +713,39 @@ Probably due to syntax error in startup.py (added function).
 
 ----------------------------------------------------------------------
 
-279. 
+279. Crash on "edit words"
+
+where words is an envvar. 
+
+
+Unhandled exception in event loop:
+  File "/usr/lib/python3.10/asyncio/events.py", line 80, in _run
+    self._context.run(self._callback, *self._args)
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/input/vt100.py", line 162, in callback_wrapper
+    callback()
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/application/application.py", line 714, in read_from_input_in_context
+    context.copy().run(read_from_input)
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/application/application.py", line 694, in read_from_input
+    self.key_processor.process_keys()
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/key_binding/key_processor.py", line 273, in process_keys
+    self._process_coroutine.send(key_press)
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/key_binding/key_processor.py", line 188, in _process
+    self._call_handler(matches[-1], key_sequence=buffer[:])
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/key_binding/key_processor.py", line 323, in _call_handler
+    handler.call(event)
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/key_binding/key_bindings.py", line 127, in call
+    result = self.handler(event)
+  File "/home/jao/git/marcel/marcel/reader.py", line 138, in _
+    replacement = self.handle_edit_and_run(buffer.document.text)
+  File "/home/jao/git/marcel/marcel/reader.py", line 120, in handle_edit_and_run
+    command = selected_command(t1)
+  File "/home/jao/git/marcel/marcel/reader.py", line 94, in selected_command
+    raise marcel.exception.KillCommandException(f'Command must be identifed by an integer: {t1}')
+
+Exception Command must be identifed by an integer: words
+
+Unhandled exception in event loop:
+
+Exception coroutine raised StopIteration
+Press ENTER to continue...
+Press ENTER to continue...

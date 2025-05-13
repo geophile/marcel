@@ -1,16 +1,7 @@
 What's New
 ----------
 
-As major releases go, this is pretty minor. To use this release, you need to modify
-your startup.py scripts, for the default workspace and for any
-workspaces you have created. (The default startup file is most likely location
-is `~/.config/marcel/workspace/__DEFAULT__/startup.py`. For a workspace named `foobar`, it's
-`~/.config/marcel/workspace/foobar/startup.py`).
 
-In your startup scripts make the following changes:
-
-1. Change `PROMPT = (...)` or `PROMPT=[...]` to `set_prompt(...)`.
-2. Delete the `PROMPT_CONTINUATION` assignment statement.
 
 Marcel
 ======
