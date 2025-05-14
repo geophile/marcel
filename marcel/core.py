@@ -102,7 +102,8 @@ class Op(AbstractOp):
         return self._count
 
     def run(self, env):
-        raise marcel.exception.KillCommandException(f'{self.op_name()} cannot be the first operator in a pipeline')
+        # raise marcel.exception.KillCommandException(f'{self.op_name()} cannot be the first operator in a pipeline')
+        pass
 
     def receive(self, env, x):
         pass

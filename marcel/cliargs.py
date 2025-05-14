@@ -43,6 +43,7 @@ class AnonArg(Arg):
     def __init__(self, default):
         super().__init__()
         self.default = default
+        self.required=False
 
     def __repr__(self):
         return 'AnonArg()'
@@ -226,7 +227,8 @@ class CommandLine(object):
             else:
                 values[arg.envvar] = value
         if anon_arg():
-            values[anon_arg().envvar] = anon
+            # Skip marcel invocation and script name
+            values[anon_arg().envvar] = anon[2:]
         # Check that required values were provided
         for arg in self.var_arg.values():
             if arg.required and arg.envvar not in values:
@@ -237,8 +239,9 @@ def parse_args(env, usage, **kwargs):
     var_val = CommandLine(usage, **kwargs).parse(sys.argv)
     for k, v in var_val.items():
         env.setvar(k, v)
-    env.setvar('ARGV', sys.argv)
-    return sys.argv
+    argv = sys.argv[1:]
+    env.setvar('ARGV', argv)
+    return argv
 
 def flag(f1, f2=None, default=None, required=False):
     return FlagArg(f1, f2, default=default, required=required)

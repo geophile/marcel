@@ -38,7 +38,7 @@ class FilenamesOpArgsParser(marcel.argsparser.ArgsParser):
         self.at_most_one('d0', 'd1', 'dr')
 
 
-class FilenamesOp(marcel.core.Op):
+class  FilenamesOp(marcel.core.Op):
 
     def __init__(self, action):
         super().__init__()
