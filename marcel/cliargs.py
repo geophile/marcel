@@ -40,6 +40,10 @@ class Arg(object):
 
 class AnonArg(Arg):
 
+    def __init__(self, default):
+        super().__init__()
+        self.default = default
+
     def __repr__(self):
         return 'AnonArg()'
 
@@ -58,8 +62,9 @@ class AnonArg(Arg):
 
 class FlagArg(AnonArg):
 
-    def __init__(self, f1, f2):
-        super().__init__()
+    def __init__(self, f1, f2, default, required):
+        super().__init__(default)
+        self.required = required
         assert f1 is not None
         self.short = None
         self.long = None
@@ -128,8 +133,8 @@ class FlagArg(AnonArg):
 
 class BooleanFlagArg(FlagArg):
 
-    def __init__(self, short, long):
-        super().__init__(short, long)
+    def __init__(self, short, long, default, required):
+        super().__init__(short, long, default, required)
         self.boolean = True
 
     def __repr__(self):
@@ -210,8 +215,11 @@ class CommandLine(object):
 
         values = {}  # envvar -> value (from command line)
         anon = []
-        for var, arg in self.var_arg.items():
-            values[var] = False if arg.is_boolean() else None
+        # Fill in defaults
+        for arg in self.var_arg.values():
+            if not arg.required:
+                values[arg.envvar] = arg.default
+        # Fill in supplied values
         for arg, value in token_scan():
             if arg is None:
                 anon.append(value)
@@ -219,6 +227,10 @@ class CommandLine(object):
                 values[arg.envvar] = value
         if anon_arg():
             values[anon_arg().envvar] = anon
+        # Check that required values were provided
+        for arg in self.var_arg.values():
+            if arg.required and arg.envvar not in values:
+                _report_error(f'No value specified for required flag: {arg}')
         return values
 
 def parse_args(env, usage, **kwargs):
@@ -228,13 +240,13 @@ def parse_args(env, usage, **kwargs):
     env.setvar('ARGV', sys.argv)
     return sys.argv
 
-def flag(f1, f2=None):
-    return FlagArg(f1, f2)
+def flag(f1, f2=None, default=None, required=False):
+    return FlagArg(f1, f2, default=default, required=required)
 
 
-def boolean_flag(f1, f2=None):
-    return BooleanFlagArg(f1, f2)
+def boolean_flag(f1, f2=None, default=False):
+    return BooleanFlagArg(f1, f2, default=default, required=False)
 
 
 def anon():
-    return AnonArg()
+    return AnonArg(default=list())
