@@ -20,8 +20,9 @@ from marcel.exception import KillShellException
 _USAGE = None
 
 
-def _report_error(self, message):
-    print(_USAGE, file=sys.stderr)
+def _report_error(message):
+    if _USAGE:
+        print(_USAGE, file=sys.stderr)
     raise KillShellException(message)
 
 
@@ -106,11 +107,13 @@ class FlagArg(AnonArg):
         FlagArg.check_valid_flag(f)
         return f[0] == '-' and f[1] != '-'
 
+    @staticmethod
     def long(f):
         FlagArg.check_valid_flag(f)
         return f[0] == '-' and f[1] == '-'
 
-    def check_valid_flag(self, f):
+    @staticmethod
+    def check_valid_flag(f):
         # Long enough
         if len(f) < 2:
             _report_error(f'Invalid flag: {f}')
@@ -214,10 +217,11 @@ class CommandLine(object):
                 anon.append(value)
             else:
                 values[arg.envvar] = value
-        values[anon_arg().envvar] = anon
+        if anon_arg():
+            values[anon_arg().envvar] = anon
         return values
 
-def parse_args(env, usage=None, **kwargs):
+def parse_args(env, usage, **kwargs):
     var_val = CommandLine(usage, **kwargs).parse(sys.argv)
     for k, v in var_val.items():
         env.setvar(k, v)

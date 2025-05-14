@@ -209,7 +209,7 @@ class Environment(object):
             'DIRS': [current_dir],
             'USER': getpass.getuser(),
             'HOST': socket.gethostname(),
-            'parse_args': lambda **kwargs: marcel.cliargs.parse_args(self, **kwargs)
+            'parse_args': lambda usage=None, **kwargs: marcel.cliargs.parse_args(self, usage, **kwargs)
         })
         self.dir_state().change_current_dir(self.pwd_or_alternative())
 

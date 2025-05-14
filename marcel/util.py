@@ -259,23 +259,32 @@ def string_value(x):
 class InputSource(object):
 
     def __init__(self):
-        self.mode = os.fstat(sys.stdin.fileno()).st_mode
+        mode = os.fstat(sys.stdin.fileno()).st_mode
+        self._heredoc = False
+        self._interactive = False
+        self._script = False
+        if stat.S_ISFIFO(mode):
+            self._heredoc = True
+        elif len(sys.argv) == 1:
+            self._interactive = True
+        else:
+            self._script = True
 
     def __repr__(self):
-        source = ('interactive' if self.interactive() else
-                  'script' if self.script() else
-                  'heredoc' if self.heredoc() else
+        source = ('interactive' if self._interactive else
+                  'script' if self._script else
+                  'heredoc' if self._heredoc else
                   'UNKNOWN')
         return f'InputSource({source})'
 
     def interactive(self):
-        return sys.stdin.isatty() and stat.S_ISCHR(self.mode) and len(sys.argv) == 1
+        return self._interactive
 
     def heredoc(self):
-        return stat.S_ISFIFO(self.mode)
+        return self._heredoc
 
     def script(self):
-        return stat.S_ISCHR(self.mode)
+        return self._script
 
 
 class Trace(object):

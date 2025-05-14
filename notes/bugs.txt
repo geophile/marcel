@@ -749,3 +749,26 @@ Unhandled exception in event loop:
 Exception coroutine raised StopIteration
 Press ENTER to continue...
 Press ENTER to continue...
+
+----------------------------------------------------------------------
+
+280. Tripled-quoted strings in python exprs don't work
+
+#!/usr/local/bin/marcel
+
+USAGE = ('''\
+abc\
+def\
+''')
+
+(USAGE)
+
+->
+
+abcdef
+
+----------------------------------------------------------------------
+
+281. Running marcel script from emacs shell mode doesn't work
+
+util.InputSource thinks we have a heredoc (S_ISFIFO -> True).
