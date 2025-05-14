@@ -201,3 +201,31 @@ jao@loon:/tmp$ python3 <<EOF
 False
 True
 False
+
+----------------------------------------------------------------------
+
+5/14/25
+
+case or args not working?
+
+#!/usr/local/bin/marcel
+
+(parse_args(ext=flag('-e', '--ext'), \
+            recursive=boolean_flag('-r', '--recursive'), \
+            dirs=anon()))
+
+(f'recursive: {recursive}')
+(f'ext: {ext}')
+(f'dirs: {dirs}')
+
+(recursive) | args (| recursive: \
+    case (_: recursive) (| ls -fr |) \
+                        (| ls -f |) \
+|)
+
+# | write \
+# | case (_: ext is None) (| (f: f) |) \
+#                         (| select (f: f.suffix[1:] == ext) |) \
+# | map (f: (1, f.size)) \
+# | red + + \
+# |)
