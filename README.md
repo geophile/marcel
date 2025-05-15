@@ -1,6 +1,77 @@
 What's New
 ----------
 
+This major version greatly simplifies the parsing of command-line arguments by 
+marcel scripts.
+First, you can use a "shebang" to run a marcel script, e.g.
+```aiignore
+#!/usr/local/bin/marcel
+```
+Next, suppose you want to write a script, `filestats`, to do the following:
+
+- Find all the files either immediately inside a directory, or inside the directory recursively.
+
+- Optionally, filter the files by extension (e.g. py to find all python source files).
+
+- Count the files and find the total size of those files.
+
+So the script has some optional arguments:
+
+* -r or --recursive to specify whether you want recursion.
+
+* -e or --ext to specify the extension of interest.
+
+* An argument to specify a directory. If omitted, the current directory is used.
+
+So to find the count and size of all files in the current directory:
+
+```
+filestats
+```
+To find the count and size of all jpg files recursively under /foo/bar:
+
+```
+filestats -r -e jpg /foo/bar
+```
+or equivalently:
+```
+filestats --recursive --ext jpg /foo/bar
+```
+Command-line parsing is donw as follow. 
+```
+(parse_args(ext=flag('-e', '--ext'), \
+            recursive=boolean_flag('-r', '--recursive'), \
+            dir=anon()))
+```
+* `parse_args` is the function that parses the command line arguments.
+
+* It assigns three environment variables, `ext`, `recursive`, and `dir`.
+The command line arguments will be parsed and assigned to these variables for use later in the marcel script.
+
+* `ext=flag('-e', '--ext')`: This says that the value following a command-line flag `-e` or 
+`--ext` will be assigned to the environment variable `ext`.
+
+* `recursive=boolean_flag('-r', '--recursive')`: This says that `-r`
+or `--recursive` is a boolean flag. No value is specified. 
+The value of the environment variable `recursive` will be `True` if `-r` 
+or `--recursive` is specified, `False` otherwise.
+
+* `dir=anon()`: This says all other command-line arguments (i.e., not flagged) 
+will be assigned to the environment variable `dir`.
+
+* In addition, the unparsed command line will be assigned to the environment variable `ARGV`.
+
+So if your command line is:
+```
+filestats --recursive --ext jpg /foo/bar
+```
+then these environment variables are set:
+
+* `recursive`: `True`
+* `ext`: `"jpg"`
+* `dir`: `"/foo/bar"`
+* `ARGV`: `["filestats", "--recursive", "--ext", "jpg", "/foo/bar"]`
+
 
 
 Marcel
