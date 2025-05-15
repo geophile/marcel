@@ -1,0 +1,17 @@
+#!/usr/local/bin/marcel
+
+(parse_args(ext=flag('-e', '--ext'), \
+            recursive=boolean_flag('-r', '--recursive'), \
+            dir=anon()))
+
+dir = ('.' if len(dir) == 0 else dir[0])
+
+case (recursive) \
+    (| ls -fr (dir) |) \
+    (| ls -f (dir) |) \
+| case (f: ext is None) \
+    (| select (f: True) |) \
+    (| select (f: f.suffix[1:] == ext) |) \
+| map (f: (1, f.size)) \
+| red + +
+ 

@@ -95,6 +95,12 @@ class  FilenamesOp(marcel.core.Op):
 
     # Op
 
+    # receive could get called, e.g. if ls is first in a pipeline, as in
+    # case (...) ... (| ls ... |)
+    def receive(self, env, x):
+        assert type(x) in (tuple, list) and len(x) == 0
+        self.run(env)
+
     def run(self, env):
         for root in self.roots:
             try:

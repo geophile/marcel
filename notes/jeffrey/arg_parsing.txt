@@ -1,0 +1,97 @@
+Hi Jeffrey, two pieces of marcel news:
+
+1) I just got a Mac Mini, and have verified that marcel actually mostly works in MacOS. I'm going to fix the few incompatibilites shortly.
+
+2) The script that you sent me a few days ago got me thinking about handling command-line arguments in marcel. I've modified marcel to make argument parsing much simpler than it is in bash, I think.
+
+(I'm going to turn this note into a blog post at marceltheshell.org.)
+
+Suppose you want to write a script, filestats, to do the following:
+
+- Find all the files either immediately inside a directory, or inside the directory recursively.
+
+- Optionally, filter the files by extension (e.g. py to find all python source files).
+
+- Count the files and find the total size of those files.
+
+So the script has some optional arguments:
+
+*  -r or --recursive to specify whether you want recursion.
+
+*  -e or --ext to specify the extension of interest.
+
+* An argument to specify a directory. If omitted, the current directory is used.
+
+So to find the count and size of all files in the current directory:
+
+    filestats
+
+To find the count and size of all jpg files recursively under /foo/bar:
+
+    filestats -r -e jpg /foo/bar
+
+or equivalently:
+
+    filestats --recursive --ext jpg /foo/bar
+
+Here is the implementation in marcel, with annotations. (The full script is attached.)
+
+    #!/usr/local/bin/marcel
+    
+This specifies that the script will be executed by marcel.
+
+    (parse_args(ext=flag('-e', '--ext'), \
+                recursive=boolean_flag('-r', '--recursive'), \
+                dir=anon()))
+
+* parse_args is the function that parses the command line arguments.
+
+* It assigns three environment variables, ext, recursive, and dir. The command line arguments will be parsed and assigned to these variables for use later in the marcel script.
+
+* ext=flag('-e', '--ext'): This says that the value following a command-line flag -e or --ext will be assigned to the environment variable ext.
+
+* recursive=boolean_flag('-r', '--recursive'): This says that -r or --recursive is a boolean flag. No value is specified. The value of the environment variable recursive will be True if -r or --recursive is specified, False otherwise.
+
+* dir=anon(): This says all other command-line arguments (i.e., not flagged) will be assigned to the environment variable dir.
+
+* In addition, the unparsed command line will be assigned to the environment variable ARGV.
+
+So if your command line is:
+
+    filestats --recursive --ext jpg /foo/bar
+
+then these environment variables are set:
+
+* recursive: True
+
+* ext: "jpg"
+
+* dir: "/foo/bar"
+
+* ARGV: ["filestats", "--recursive", "--ext", "jpg", "/foo/bar"]
+
+*** To understand how the rest of the script, after parse_args works, you need to have some understanding of marcel.
+    
+    dir = ('.' if len(dir) == 0 else dir[0])
+
+If the dir argument was not specified, assign '.' to dir, otherwise take the only value from the list.
+    
+    case (recursive) \
+        (| ls -fr (dir) |) \
+        (| ls -f (dir) |) \
+
+If recursive is True, then list all files (-f) recursively (-r) under dir. Otherwise, list the files non-recursively.
+
+    | case (f: ext is None) \
+        (| select (f: True) |) \
+        (| select (f: f.suffix[1:] == ext) |) \
+
+If we're filtering by an extension, then check that the filename's suffix (e.g. ".jpg") matches the ext value from the command line. Keep only those that match. Otherwise, keep all the files.
+
+    | map (f: (1, f.size)) \
+
+Map a file, f, to a pair of numbers, 1 and the file size.
+
+    | red + +
+ 
+Reduce the file counts and sizes by adding up both columns.
