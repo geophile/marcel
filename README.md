@@ -15,7 +15,7 @@ Next, suppose you want to write a script, `filestats`, to do the following:
 
 - Count the files and find the total size of those files.
 
-So the script has some optional arguments:
+To do this, the script has some optional arguments:
 
 * -r or --recursive to specify whether you want recursion.
 
@@ -37,7 +37,7 @@ or equivalently:
 ```
 filestats --recursive --ext jpg /foo/bar
 ```
-Command-line parsing is donw as follow. 
+Command-line parsing is done as follow. 
 ```
 (parse_args(ext=flag('-e', '--ext'), \
             recursive=boolean_flag('-r', '--recursive'), \

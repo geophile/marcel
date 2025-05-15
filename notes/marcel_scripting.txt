@@ -237,3 +237,18 @@ case or args not working?
 case wasn't designed to be first in pipeline. run() doesn't do
 anything.  Need to rethink how run() can work for ops that don't
 normally appear first in a pipeline.
+
+What should be possible:
+
+    case (VAR) (| ... if pipeline ... |)
+               (| ... else pipeline ... |)
+
+Current workaround:
+
+    (VAR) | case (var: var)
+               (| ... if pipeline ... |)
+               (| ... else pipeline ... |)
+
+- if/else pipelines with functions will need to take an arg (value of
+VAR).
+
