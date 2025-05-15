@@ -53,6 +53,7 @@ test_before_install() {
 test_after_install() {
   echo $FUNCNAME
   marcel <<EOF
+  exit
 EOF
   list_config_and_data after_install
   check after_install

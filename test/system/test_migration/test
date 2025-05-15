@@ -31,6 +31,7 @@ run_migration() {
   sudo rm -rf $TEST_HOME >& /dev/null
   cp -rp $TEST_DIR/$old_layout $TEST_HOME
   marcel <<EOF
+  exit
 EOF
   pushd $TEST_HOME >& /dev/null
   find . > $TEST_ARTIFACTS/actual.$old_layout
