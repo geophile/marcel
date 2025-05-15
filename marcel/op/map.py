@@ -60,9 +60,6 @@ class Map(marcel.core.Op):
     def setup(self, env):
         env.set_function_globals(self.function)
 
-    def run(self, env):
-        self.send(env, self.call(env, self.function))
-    
     def receive(self, env, x):
         self.send(env, self.call(env, self.function, *x))
 

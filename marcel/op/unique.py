@@ -56,7 +56,7 @@ class Unique(marcel.core.Op):
     def __repr__(self):
         return 'unique()'
 
-    # AbstractOp
+    # Op
 
     def setup(self, env):
         self.uniquer = ConsecutiveUniquer(self) if self.consecutive else GeneralUniquer(self)
@@ -64,6 +64,8 @@ class Unique(marcel.core.Op):
     def receive(self, env, x):
         self.uniquer.receive(env, x)
 
+    def must_not_be_first_in_pipeline(self):
+        return True
 
 class Uniquer:
 

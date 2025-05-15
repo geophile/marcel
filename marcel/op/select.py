@@ -60,8 +60,6 @@ class Select(marcel.core.Op):
     # Op
 
     def receive(self, env, x):
-        fx = (self.call(env, self.function)
-              if x is None else
-              self.call(env, self.function, *x))
+        fx = self.call(env, self.function, *x)
         if fx:
             self.send(env, x)

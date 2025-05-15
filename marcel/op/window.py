@@ -169,6 +169,9 @@ class Window(marcel.core.Op):
         if self.window_generator is not None:
             self.window_generator.flush(env)
 
+    def must_not_be_first_in_pipeline(self):
+        return True
+
 
 class WindowBase:
 

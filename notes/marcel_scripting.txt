@@ -229,3 +229,11 @@ case or args not working?
 # | map (f: (1, f.size)) \
 # | red + + \
 # |)
+
+----------------------------------------------------------------------
+
+5/15/25
+
+case wasn't designed to be first in pipeline. run() doesn't do
+anything.  Need to rethink how run() can work for ops that don't
+normally appear first in a pipeline.

@@ -64,6 +64,9 @@ class Sort(marcel.core.Op):
 
     # Op
 
+    def run(self, env):
+        raise marcel.exception.KillCommandException(f'{self.op_name()} cannot be the first operator in a pipeline')
+
     def receive(self, env, x):
         if self.contents is not None:
             self.contents.append(x)
@@ -83,3 +86,6 @@ class Sort(marcel.core.Op):
             except TypeError as e:
                 raise marcel.exception.KillCommandException(e)
         self.propagate_flush(env)
+
+    def must_not_be_first_in_pipeline(self):
+        return True

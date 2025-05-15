@@ -111,6 +111,11 @@ class Args(marcel.core.Op):
         # flush a second time should be a noop.
         self.propagate_flush(env)
 
+    def must_not_be_first_in_pipeline(self):
+        return True
+
+    # Internal
+
     def check_args(self):
         error = None
         if self.all and self.n_params != 1:
@@ -123,4 +128,3 @@ class Args(marcel.core.Op):
     def customize_pipeline(self, env, pipeline):
         pipeline.append(marcel.op.redirect.Redirect(self))
         return pipeline
-

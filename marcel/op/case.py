@@ -120,9 +120,7 @@ class Case(marcel.core.Op):
     def receive(self, env, x):
         pipeline = self.default_pipeline
         for branch in self.branches:
-            px = (self.call(env, branch.predicate)
-                  if x is None else
-                  self.call(env, branch.predicate, *x))
+            px = self.call(env, branch.predicate, *x)
             if px:
                 pipeline = branch.pipeline
                 break
