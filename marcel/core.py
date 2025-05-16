@@ -108,7 +108,9 @@ class Op(AbstractOp):
             self.receive(env, [])
 
     def receive(self, env, x):
-        pass
+        # This op has no receive, so run must be what's needed, e.g. gen in:
+        #     case (...) (| gen ... |) (| ... |)
+        self.run(env)
 
     def receive_error(self, env, error):
         assert isinstance(error, Error)
