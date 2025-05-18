@@ -1,0 +1,30 @@
+5/17/25
+
+I just added parse_args, which takes a usage argument. But multiline
+strings (i.e., triple-quoted) don't work in scripts, so currently
+usage is limited to a single line, which is useless.
+
+This works interactively:
+
+   ('''abc
+   def''')
+
+producting this output:
+
+   abc
+   def
+
+But from a script:
+
+    '''abc: Not a python string
+    def''') is not executable.
+
+And if an escape is added to the end of the first line:
+
+    abcdef
+
+This needs to be fixed in PythonString. Triple-quotes are already
+detected. Could modify the isspace() handler, but the problem is that
+self.next_char() is terminated by the end of the current line, as
+detected by input(). I.e., input() doesn't realize that the terminal
+\n should be part of a triple-quoted string.
