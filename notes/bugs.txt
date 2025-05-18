@@ -772,3 +772,8 @@ abcdef
 281. Running marcel script from emacs shell mode doesn't work
 
 util.InputSource thinks we have a heredoc (S_ISFIFO -> True).
+
+----------------------------------------------------------------------
+
+283.
+

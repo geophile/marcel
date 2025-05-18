@@ -12,6 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
+import sys
 
 # This file is part of Marcel.
 #
@@ -66,14 +67,19 @@ class Reader(object):
         return self._command_history
 
     def command_by_id(self, id):
-        history = self.history()
-        if type(id) is not int or id < 0:
-            raise marcel.exception.KillCommandException(
-                f'Command id must be a non-negative integer: {id}')
-        if id >= len(history):
-            raise marcel.exception.KillCommandException(
-                f'Command id exceeds that of most recent command: {id} > {len(history) - 1}')
-        return self.history()[len(history) - 1 - id]
+        command = ''
+        try:
+            history = self.history()
+            if type(id) is not int or id < 0:
+                raise marcel.exception.KillCommandException(
+                    f'Command id must be a non-negative integer: {id}')
+            if id >= len(history):
+                raise marcel.exception.KillCommandException(
+                    f'Command id exceeds that of most recent command: {id} > {len(history) - 1}')
+            command = self.history()[len(history) - 1 - id]
+        except marcel.exception.KillCommandException as e:
+            Reader.report_error(e.cause)
+        return command
 
     # Handle !, !!, and edit ops. For edit, only edit N is handled here. edit -s is left to normal
     # command processing.
@@ -94,31 +100,34 @@ class Reader(object):
                 raise marcel.exception.KillCommandException(f'Command must be identifed by an integer: {t1}')
 
         new_command = None
-        tokens = parse(command)
-        if tokens is not None:
-            t0 = tokens[0]
-            t1 = tokens[1] if len(tokens) > 1 else len(self.history()) - 1
-            if t0 == '!':
-                if len(tokens) == 0:
-                    raise marcel.exception.KillCommandException('History command number required following !')
-                elif len(tokens) > 2:
-                    raise marcel.exception.KillCommandException('Too many arguments after !')
-                new_command = selected_command(t1)
-            elif t0 == '!!':
-                if len(tokens) > 1:
-                    raise marcel.exception.KillCommandException('No arguments permitted after !!')
-                command_id = len(self.history()) - 1
-                new_command = self.command_by_id(command_id)
-            elif t0 == 'edit':
-                if t1 is None:
-                    raise marcel.exception.KillCommandException('Missing command number')
-                elif t1 in ('-s', '--startup'):
-                    # Return None, which will leave the command as is. Normal command processing should then
-                    # operate, editing the selected workspace's startup script.
-                    pass
-                else:
-                    command = selected_command(t1)
-                    new_command = marcel.runeditor.edit_text(self._env, command)
+        try:
+            tokens = parse(command)
+            if tokens is not None:
+                t0 = tokens[0]
+                t1 = tokens[1] if len(tokens) > 1 else len(self.history()) - 1
+                if t0 == '!':
+                    if len(tokens) == 0:
+                        raise marcel.exception.KillCommandException('History command number required following !')
+                    elif len(tokens) > 2:
+                        raise marcel.exception.KillCommandException('Too many arguments after !')
+                    new_command = selected_command(t1)
+                elif t0 == '!!':
+                    if len(tokens) > 1:
+                        raise marcel.exception.KillCommandException('No arguments permitted after !!')
+                    command_id = len(self.history()) - 1
+                    new_command = self.command_by_id(command_id)
+                elif t0 == 'edit':
+                    if t1 is None:
+                        raise marcel.exception.KillCommandException('Missing command number')
+                    elif t1 in ('-s', '--startup'):
+                        # Return None, which will leave the command as is. Normal command processing should then
+                        # operate, editing the selected workspace's startup script.
+                        pass
+                    else:
+                        command = selected_command(t1)
+                        new_command = marcel.runeditor.edit_text(self._env, command)
+        except marcel.exception.KillCommandException as e:
+            Reader.report_error(e.cause)
         return new_command
 
 
@@ -143,3 +152,9 @@ class Reader(object):
             buffer.validate_and_handle()
 
         return kb
+
+    # Can't throw an exception, because code from this class runs inside prompt_toolkit, which doesn't
+    # know from marcel exceptions.
+    @staticmethod
+    def report_error(message):
+        print(message, file=sys.stderr, flush=True)

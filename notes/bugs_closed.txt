@@ -6114,3 +6114,41 @@ Unhandled exception in event loop:
 
 Exception string index out of range
 Press ENTER to continue...
+
+----------------------------------------------------------------------
+
+FIXED
+
+282. "edit" crashes if EDITOR is not set
+
+
+Unhandled exception in event loop:
+  File "/usr/lib/python3.10/asyncio/events.py", line 80, in _run
+    self._context.run(self._callback, *self._args)
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/input/vt100.py", line 162, in callback_wrapper
+    callback()
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/application/application.py", line 714, in read_from_input_in_context
+    context.copy().run(read_from_input)
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/application/application.py", line 694, in read_from_input
+    self.key_processor.process_keys()
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/key_binding/key_processor.py", line 273, in process_keys
+    self._process_coroutine.send(key_press)
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/key_binding/key_processor.py", line 188, in _process
+    self._call_handler(matches[-1], key_sequence=buffer[:])
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/key_binding/key_processor.py", line 323, in _call_handler
+    handler.call(event)
+  File "/usr/local/lib/python3.10/dist-packages/prompt_toolkit/key_binding/key_bindings.py", line 127, in call
+    result = self.handler(event)
+  File "/home/jao/git/marcel/marcel/reader.py", line 138, in _
+    replacement = self.handle_edit_and_run(buffer.document.text)
+  File "/home/jao/git/marcel/marcel/reader.py", line 121, in handle_edit_and_run
+    new_command = marcel.runeditor.edit_text(self._env, command)
+  File "/home/jao/git/marcel/marcel/runeditor.py", line 46, in edit_text
+    run_editor(env, tmp_file)
+  File "/home/jao/git/marcel/marcel/runeditor.py", line 33, in run_editor
+    editor = find_editor(env)
+  File "/home/jao/git/marcel/marcel/runeditor.py", line 28, in find_editor
+    raise marcel.exception.KillCommandException(
+
+Exception Neither the host OS environment, nor marcel's defines EDITOR
+
