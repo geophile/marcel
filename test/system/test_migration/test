@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export NEWEST_LAYOUT=ws3
+export NEWEST_LAYOUT=pt
 
 export TEST_DIR=/home/jao/git/marcel/test/system/test_migration
 export TEST_HOME=/tmp/test_home
@@ -41,6 +41,11 @@ EOF
   popd >& /dev/null
 }
 
+test_migration_ws3() {
+  run_migration ws3
+  check ws3
+}
+
 test_migration_ws2() {
   run_migration ws2
   check ws2
@@ -69,6 +74,7 @@ test_migration_original() {
 
 main() {
   initialize
+  test_migration_ws3
   test_migration_ws2
   test_migration_ws1
   test_migration_xdg

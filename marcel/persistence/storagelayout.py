@@ -232,6 +232,7 @@ class StorageLayoutPromptToolkit(StorageLayout):
         # Look for a blank line followed by "# 2...-..-.. ..:  :  ."
         #    positions:                      0  3  6  9  12 15 18 21
         # where . is any character
+
         if not (self.config.exists() and
                 (self.config / 'workspace').exists() and
                 (self.config / 'workspace' / '__DEFAULT__').exists()):

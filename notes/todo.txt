@@ -773,3 +773,12 @@ Improve API
 - Examples, tutorials
 
 - Blog post
+
+----------------------------------------------------------------------
+
+New workspace should have a history recognizable as corresponding to
+at least v0.32.0 (new format using prompt_toolkit). E.g.
+
+
+# 2025-04-02 16:54:22.895547
+# Workspace created
