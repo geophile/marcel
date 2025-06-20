@@ -1,0 +1,553 @@
+5/20/25
+
+multiprocessing uses start method "fork" on Linux (the default), which
+has been working. The default on MacOS is "spawn".
+
+But the world is moving away from fork
+(https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods):
+
+    The parent process uses os.fork() to fork the Python
+    interpreter. The child process, when it begins, is effectively
+    identical to the parent process. All resources of the parent are
+    inherited by the child process. Note that safely forking a
+    multithreaded process is problematic.
+
+    Available on POSIX systems. Currently the default on POSIX except macOS.
+
+    Note
+
+    The default start method will change away from fork in Python
+    3.14. Code that requires fork should explicitly specify that via
+    get_context() or set_start_method().
+
+    Changed in version 3.12: If Python is able to detect that your
+    process has multiple threads, the os.fork() function that this
+    start method calls internally will raise a DeprecationWarning. Use
+    a different start method. See the os.fork() documentation for
+    further explanation.
+
+This gives one reason why fork is not preferred on MacOS:
+https://forums.macrumors.com/threads/python-m1-and-multiprocessing.2292927/
+
+So:
+
+- I've been developing on Python 3.10 lately.
+
+- 3.13 is out, and 3.14 is in pre-release.
+
+- The multiprocessing default start method will be spawn. It is pretty
+  much required on Mac now.
+
+*** Need to get spawn working.
+
+But spawn doesn't just work:
+
+M 0.34.2 jao@loon ~/git/marcel/notes$ gen 3
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 517, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 501, in main
+    main_interactive_run(locations)
+  File "/home/jao/git/marcel/marcel/main.py", line 425, in main_interactive_run
+    main.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 339, in run
+    self.parse_and_run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 205, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 324, in execute_command
+    self.job_control.create_job(command)
+  File "/home/jao/git/marcel/marcel/job.py", line 251, in create_job
+    job = Job(self.env, command)
+  File "/home/jao/git/marcel/marcel/job.py", line 80, in __init__
+    self.start_process()
+  File "/home/jao/git/marcel/marcel/job.py", line 181, in start_process
+    self.process.start()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 121, in start
+    self._popen = self._Popen(self)
+  File "/usr/lib/python3.10/multiprocessing/context.py", line 224, in _Popen
+    return _default_context.get_context().Process._Popen(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/context.py", line 288, in _Popen
+    return Popen(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/popen_spawn_posix.py", line 32, in __init__
+    super().__init__(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/popen_fork.py", line 19, in __init__
+    self._launch(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/popen_spawn_posix.py", line 47, in _launch
+    reduction.dump(process_obj, fp)
+  File "/usr/lib/python3.10/multiprocessing/reduction.py", line 60, in dump
+    ForkingPickler(file, protocol).dump(obj)
+AttributeError: Can't pickle local object 'Job.start_process.<locals>.run_command_in_child'
+
+
+A Job's work is done by the run_command_in_child function inside
+Job.start_process. A multiprocessing.Process receives its state via
+pickling, and a non-top-level function can't be pickled.
+
+Making run_command_in_child top-level is easy.
+
+But then:
+
+M 0.34.2 jao@loon ~/git/marcel/notes$ gen 3
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 517, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 501, in main
+    main_interactive_run(locations)
+  File "/home/jao/git/marcel/marcel/main.py", line 425, in main_interactive_run
+    main.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 339, in run
+    self.parse_and_run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 205, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 324, in execute_command
+    self.job_control.create_job(command)
+  File "/home/jao/git/marcel/marcel/job.py", line 230, in create_job
+    job = Job(self.env, command)
+  File "/home/jao/git/marcel/marcel/job.py", line 80, in __init__
+    self.start_process()
+  File "/home/jao/git/marcel/marcel/job.py", line 160, in start_process
+    self.process.start()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 121, in start
+    self._popen = self._Popen(self)
+  File "/usr/lib/python3.10/multiprocessing/context.py", line 224, in _Popen
+    return _default_context.get_context().Process._Popen(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/context.py", line 288, in _Popen
+    return Popen(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/popen_spawn_posix.py", line 32, in __init__
+    super().__init__(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/popen_fork.py", line 19, in __init__
+    self._launch(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/popen_spawn_posix.py", line 47, in _launch
+    reduction.dump(process_obj, fp)
+  File "/usr/lib/python3.10/multiprocessing/reduction.py", line 60, in dump
+    ForkingPickler(file, protocol).dump(obj)
+AttributeError: Can't pickle local object 'Environment.initialize_namespace.<locals>.<lambda>'
+
+The job is being pickled, and Job.env (an Environment) isn't easily
+serialized.
+
+This is NOT EASY TO FIX because run_command_in_child calls
+command.execute(job.env, ...). Command execution cannot be done
+without an env.
+
+So one of the following need to happen:
+
+1. Make Environment pickleable.
+
+2. Somehow get the spawned process to create its own Environment. 
+
+These actually aren't all that different. The spawned command may need
+something unpickleable in the Environment. So what has to be done is
+to make the default Environment stuff (placed there my marcel, not a
+user) pickleable.
+
+......................................................................
+
+So why does remote execution work? Remote uses farcel, run by
+subprocess.Popen. An Environment is NOT sent, farcel constructs its
+own environment. Remote execution CANNOT rely on things like env
+vars. Seems to be OK. But locally, most things are done via Jobs,
+which will need access to env vars, for example.
+
+......................................................................
+
+The Environment.initialize_namespace problem is due to the lambda,
+associated with "parse_args". Is that the only problem? Commenting it
+out.
+
+M 0.34.2 jao@loon ~/git/marcel/notes$ gen 3
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 517, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 501, in main
+    main_interactive_run(locations)
+  File "/home/jao/git/marcel/marcel/main.py", line 425, in main_interactive_run
+    main.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 339, in run
+    self.parse_and_run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 205, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 324, in execute_command
+    self.job_control.create_job(command)
+  File "/home/jao/git/marcel/marcel/job.py", line 230, in create_job
+    job = Job(self.env, command)
+  File "/home/jao/git/marcel/marcel/job.py", line 80, in __init__
+    self.start_process()
+  File "/home/jao/git/marcel/marcel/job.py", line 160, in start_process
+    self.process.start()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 121, in start
+    self._popen = self._Popen(self)
+  File "/usr/lib/python3.10/multiprocessing/context.py", line 224, in _Popen
+    return _default_context.get_context().Process._Popen(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/context.py", line 288, in _Popen
+    return Popen(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/popen_spawn_posix.py", line 32, in __init__
+    super().__init__(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/popen_fork.py", line 19, in __init__
+    self._launch(process_obj)
+  File "/usr/lib/python3.10/multiprocessing/popen_spawn_posix.py", line 47, in _launch
+    reduction.dump(process_obj, fp)
+  File "/usr/lib/python3.10/multiprocessing/reduction.py", line 60, in dump
+    ForkingPickler(file, protocol).dump(obj)
+_pickle.PicklingError: Can't pickle <function <lambda> at 0x78f5e1826830>: attribute lookup <lambda> on __main__ failed
+
+
+Why is __main__ being pickled?!
+
+
+*** pathos.multiprocess (https://github.com/uqfoundation/multiprocess)
+    replaces pickling in multiprocessing with dill.
+
+It is not at all clear how to use pathos. Seems to not duplicate the
+entire multiprocessing API, so you need to use
+multiprocessing.set_start_method, for example. Then, it isn't clear
+how to get Pipes and Processes.
+
+----------------------------------------------------------------------
+
+5/21/25
+
+marcel.util.PickleDebugger is really good at finding pickling errors!
+Lots of problems turning up in Environment and subclasses. Need to
+better organize keys from initalize_namespace methods.
+
+Environment:
+
+    MARCEL_VERSION
+    HOME
+    PWD
+    DIRS
+    USER
+    HOST
+    parse_args
+
+EnvironmentScript:
+
+    WORKSPACE
+    PROMPT
+    BOLD
+    ITALIC
+    COLOR_SCHEME
+    Color
+    pos
+    o
+
+EnvironmentAPI, EnvironmentInteractive: initialize_namespace not
+overridden.
+
+- Move parse_args to EnvironmentScript
+
+- Move PROMPT, BOLD, ITALIC, COLOR_SCHEME, Color to
+  EnvironmentInteractive
+
+- __getstate__: Clear parse_args, PROMPT, BOLD, ITALIC, COLOR_SCHEME, Color
+
+More troublemakers in Environment.namespace:
+
+- o: function
+- builtin functions: Added by EnvironmentScript.initialize_namespace
+- __builtins__: Added when startup script is execed.
+- Stuff from startup.py
+
+Fix:
+
+- __getstate__ removes o, builtins, __builtins__.
+
+- Track the vars introduced by startup.py and remove those.
+
+- __setstate__ needs to restore everything.
+
+----------------------------------------------------------------------
+
+5/23/25
+
+EnvironmentInteractive setup:
+
+main_interactive_run
+
+    EnvironmentInteractive.create(locations, workspace, trace)
+
+        env = EnvironmentInteractive.__init__(...)
+            EnvironmentScript.__init__(...)
+                Environment.__init__(NestedNamespace())
+
+        env.initialize_namespace
+            EnvironmentScript.initialize_namespace()
+                Environment.initialize()
+                    add MARCEL_VERSION, HOME, PWD, DIRS, USER, HOST, parse_args
+                add WORKSPACE, pos, o
+                add symbols from marcel.builtin
+            add PROMPT, BOLD, ITALIC, COLOR_SCHEME, Color
+
+startup file read after Env has been created
+
+----------------------------------------------------------------------
+
+5/25/25
+
+Before spawning a job's process, the Env needs to be stripped down,
+and then put back together.
+
+Inputs to an Env (from above):
+
+- Execing the startup script.
+
+- Symbols added by Env*.initialize_namespace().
+
+- __builtins__: Added on exec of startup script
+
+- marcel.builtin symbols
+
+- Side effects of marcel commands. THESE HAVE TO BE SERIALIZED across
+  spawning process.
+
+----------------------------------------------------------------------
+
+5/26/25
+
+Current order of building Environment namespace:
+
+1. Environment.initialize_namespace
+
+     MARCEL_VERSION: str
+     HOME: str
+     PWD: str
+     DIRS: [str]
+     USER: str
+     HOST: str
+     parse_args: function
+
+2. EnvironmentScript.initialize_namespace
+
+     WORKSPACE: str
+     pos: function
+     o: function
+     <contents of marcel.builtin>: functions
+
+3. EnvironmentInteractive.initialize_namespace
+
+     PROMPT: [including functions]
+     BOLD: int
+     ITALIC: int
+     COLOR_SCHEME: ColorScheme, {str: int}
+     Color: ints
+
+4. MainScript.read_config
+
+     __builtins__
+     <runs startup.py>
+
+5. <run_on_startup calls in startup.py>
+
+6. Side effects of marcel commands
+
+----------------------------------------------------------------------
+
+5/31/25
+
+Env __getstate__
+
+- Environment: del parse_args, pos
+
+- EnvironmentScript: not present
+
+- EnvironmentInteractive: del PROMPT, BOLD, COLOR_SCHEME, Color
+
+Fixes:
+
+- Add ES.__getstate__, del pos, o. (pos is currently taken care of by
+  Environment.)
+
+- Add __setstate__
+
+----------------------------------------------------------------------
+
+6/6/25
+
+Imports show up in two ways:
+
+1) Python import in startup.py
+
+2) import op
+
+- Env.imports saved as part of workspace (in env.pickle. Keys are
+  namespace, imports, compilables)
+
+- Env.imports populated by Env.import_module, which is used by env op.
+
+- Env.compilables: list of var names whose values are compilable (can
+  be regenerated).
+
+Generalization:
+
+- Unify all env values: class EnvValue.
+
+- EnvValues has save/restore methods. Different handling based on value type:
+
+  - Simple types: save/restore preserve the value.
+
+  - module: Use Import
+
+  - function: Use Compilable
+
+  - Should handle reservoirs/picklefiles too.
+
+- Once this is done, env.pickle can be simplified:
+
+  - Drop imports and compilables
+
+  - Just store namespaces directly, (don't need a namespaces key).
+
+  - env setvar save arg no longer needed (set to False for imports)
+
+- THIS IS A MIGRATION! On-disk workspace format is changing.
+
+----------------------------------------------------------------------
+
+6/7/25
+
+Imports don't fit this model well. The problem is that "import math *"
+imports all the symbols from the math module, with each symbol
+becoming an env var, e.g. math.pi. math also brings in functions, and
+those would get handled individually by this EnvValue mechanism. That
+won't work because such functions don't necessarily have source, and
+so can't be Compilables.
+
+*** Imports still need special handling by Env. Track what comes in
+    with an import, and remove it when pickling.
+
+It gets messy, since math.pi could overwrite a var created by the
+user. So it's order dependent. Yech.
+
+So the EnvValue (or whatever is tracking env values) needs to know if
+the symbol came from an import. Messy.
+
+----------------------------------------------------------------------
+
+6/8/25
+
+Idea:
+
+- The EnvValue idea is still workable.
+
+- But there are now more special cases:
+
+  - simple type like int str, [int].
+
+  - Compilable (marcel-defined function, pipeline)
+
+  - Python function (which comes from a module)
+
+  - Python module
+
+  - Reservoir
+
+Repeated imports of the same module (e.g. due to multiple Python
+functions from the same module) should be harmless. The importlib doc
+sounds like modules are cached once imported.
+
+----------------------------------------------------------------------
+
+6/9/25
+
+Okay, it's start to work (with an empty startup script)! Getting a
+prompt!
+
+But: Env __getstate__, which is called when starting a job's process,
+IS DESTRUCTIVE. Need to apply destruction to a copy of the Env. I
+believe that has proven problematic before.
+
+----------------------------------------------------------------------
+
+6/16/25
+
+__getstate__ now returns a copy.
+
+New problem: namespace using EnvValue wrappers is too finicky. Need to
+wrap/unwrap the values sometimes. E.g.
+
+- wrap them for ordinary usage
+- unwrap them before execing startup script
+- But also when set_prompt runs
+
+It's too messy and error-prone. Seems unworkable.
+
+Alternative: Overhaul NestedNamespace
+
+- Fixing the transmission problem in Environment isn't adequate. There
+  are values in outer scopes of the NestedNamespace that need the same
+  treatment. Env just addresses the innermost scope.
+
+- NestedNamespace is extremely unintuitive. I don't understand it
+  every time I look at it.
+
+......................................................................
+
+NestedNamespace overhaul:
+
+Still needs to be a subclass of dict, for use in evaling functions.
+
+The use of NestedNamespace copies stored in scopes is what is so
+confusing. Instead:
+
+- NestedNamespace manages Scopes.
+
+- Each scope has a set of params (pipeline args) and a dict of EnvValues.
+
+- NN.__setitem__ maintains the parent dict and the dict of EnvValues.
+
+--------------------------------------------------------------------------------
+
+6/20/26
+
+CHANGES STASHED while migration work is in progress.
+
+----------------------------------------------------------------------
+
+TODO:
+
+Migration
+
+- EnvironmentScript.restore_persistent_state_from_workspace is failing on reading an old environment
+
+    /home/jao/git/marcel/venv3.10/bin/python /home/jao/git/marcel/test/test_namespace.py 
+    Traceback (most recent call last):
+      File "/home/jao/git/marcel/test/test_namespace.py", line 19, in <module>
+        TEST = test_base.TestConsole()
+      File "/home/jao/git/marcel/test/test_base.py", line 144, in __init__
+        super().__init__(config_file)
+      File "/home/jao/git/marcel/test/test_base.py", line 45, in __init__
+        self.reset_environment()
+      File "/home/jao/git/marcel/test/test_base.py", line 151, in reset_environment
+        self.main = marcel.main.MainInteractive(old_main=None,
+      File "/home/jao/git/marcel/marcel/main.py", line 294, in __init__
+        super().__init__(env, workspace, testing, initial_config)
+      File "/home/jao/git/marcel/marcel/main.py", line 161, in __init__
+        env.restore_persistent_state_from_workspace()
+      File "/home/jao/git/marcel/marcel/env.py", line 427, in restore_persistent_state_from_workspace
+        self.workspace.open(self)
+      File "/home/jao/git/marcel/marcel/object/workspace.py", line 383, in open
+        self.read_environment(env)
+      File "/home/jao/git/marcel/marcel/object/workspace.py", line 411, in read_environment
+        super().read_environment(env)
+      File "/home/jao/git/marcel/marcel/object/workspace.py", line 307, in read_environment
+        self.persistent_state = unpickler.load()
+      File "/home/jao/git/marcel/venv3.10/lib/python3.10/site-packages/dill/_dill.py", line 452, in load
+        obj = StockUnpickler.load(self)
+      File "/home/jao/git/marcel/marcel/nestednamespace.py", line 253, in __new__
+        env = args[0]
+    IndexError: tuple index out of range
+
+----------------------------------------------------------------------
