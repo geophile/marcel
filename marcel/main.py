@@ -152,15 +152,14 @@ class MainScript(Main):
                     if before == after:
                         raise marcel.exception.KillShellException(f'Migration from {before} failed to advance.')
         self.update_version_file()
-        self.workspace = env.workspace
         if not Workspace.default().exists(env):
             # The default workspace was found to be broken, and was removed. Create a new one.
             Workspace.default().create_on_disk(env, DEFAULT_CONFIG)
         # Restore workspace state
-        if self.workspace.exists(env):
+        if self.env.workspace.exists(env):
             env.restore_persistent_state_from_workspace()
         else:
-            self.workspace.does_not_exist()
+            self.env.workspace.does_not_exist()
         self.testing = testing
         self.config_time = time.time()
         startup_vars = self.read_config()
@@ -213,7 +212,7 @@ class MainScript(Main):
 
     def shutdown(self, restart=False):
         try:
-            self.workspace.close(self.env, restart)
+            self.env.workspace.close(self.env, restart)
         except:
             pass
         # If we're shutting down for real (not restarting) then the default workspace needs to be closed too.
@@ -264,8 +263,8 @@ class MainScript(Main):
                 # is messy, since we're then shutting down an incompletely initialized main.
                 self.needs_restart = True
                 message = ('Default workspace was damaged. Starting in a recreated default workspace.'
-                           if self.workspace.is_default() else
-                           f'Selected workspace {self.workspace.name} is damaged, starting in default workspace.')
+                           if self.env.workspace.is_default() else
+                           f'Selected workspace {self.env.workspace.name} is damaged, starting in default workspace.')
                 marcel.util.print_to_stderr(self.env, message)
 
     @staticmethod
@@ -360,7 +359,7 @@ class MainInteractive(MainScript):
             self.env.setvar(var, value)
 
     def check_for_config_update(self):
-        config_path = self.env.locations.config_ws_startup(self.workspace)
+        config_path = self.env.locations.config_ws_startup(self.env.workspace)
         config_mtime = config_path.stat().st_mtime if config_path.exists() else 0
         if self.config_time and config_mtime > self.config_time:
             # The workspace argument is used to open a new workspace, different from the previous one, e.g.
