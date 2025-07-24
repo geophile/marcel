@@ -516,38 +516,228 @@ CHANGES STASHED while migration work is in progress.
 
 ----------------------------------------------------------------------
 
-TODO:
+6/29/25
 
-Migration
+Environment state needs to be reduced on __getstate__, reconstructed in __setstate__.
 
-- EnvironmentScript.restore_persistent_state_from_workspace is failing on reading an old environment
+What's in Environment:
 
-    /home/jao/git/marcel/venv3.10/bin/python /home/jao/git/marcel/test/test_namespace.py 
-    Traceback (most recent call last):
-      File "/home/jao/git/marcel/test/test_namespace.py", line 19, in <module>
-        TEST = test_base.TestConsole()
-      File "/home/jao/git/marcel/test/test_base.py", line 144, in __init__
-        super().__init__(config_file)
-      File "/home/jao/git/marcel/test/test_base.py", line 45, in __init__
-        self.reset_environment()
-      File "/home/jao/git/marcel/test/test_base.py", line 151, in reset_environment
-        self.main = marcel.main.MainInteractive(old_main=None,
-      File "/home/jao/git/marcel/marcel/main.py", line 294, in __init__
-        super().__init__(env, workspace, testing, initial_config)
-      File "/home/jao/git/marcel/marcel/main.py", line 161, in __init__
-        env.restore_persistent_state_from_workspace()
-      File "/home/jao/git/marcel/marcel/env.py", line 427, in restore_persistent_state_from_workspace
-        self.workspace.open(self)
-      File "/home/jao/git/marcel/marcel/object/workspace.py", line 383, in open
-        self.read_environment(env)
-      File "/home/jao/git/marcel/marcel/object/workspace.py", line 411, in read_environment
-        super().read_environment(env)
-      File "/home/jao/git/marcel/marcel/object/workspace.py", line 307, in read_environment
-        self.persistent_state = unpickler.load()
-      File "/home/jao/git/marcel/venv3.10/lib/python3.10/site-packages/dill/_dill.py", line 452, in load
-        obj = StockUnpickler.load(self)
-      File "/home/jao/git/marcel/marcel/nestednamespace.py", line 253, in __new__
-        env = args[0]
-    IndexError: tuple index out of range
+    Environment:
+    
+        Fields:
+            - namespace
+            - directory_state
+            - _op_modules
+            - var_handler
+            - trace
+    
+        Namespace contents (set in initialize_namespace):
+            - MARCEL_VERSION
+            - HOME
+            - PWD
+            - DIRS
+            - USER
+            - HOST
+            - parse_args
+    
+        Other:
+            - dir_state: change current dir
+    
+    EnvironmentScript:
+    
+        Fields:
+            - locations
+            - startup_vars
+            - current_op
+            - workspace
+            - imports
+            - directory_state
+    
+        Namespace contents:
+            - WORKSPACE
+            - pos
+            - o
+            - run_on_startup
+            - STARTUP_SCRIPTS
+    
+        Other:
+            - dir_state: change current dir
+    
+    EnvironmentInteractive:
+    
+        Fields:
+            - config_path
+            - reader
+            - next_command
+    
+        Namespace:
+            - PROMPT
+            - set_prompt
+            - BOLD
+            - ITALIC
+            - COLOR_SCHEME
+            - Color
+
+    EnvironmentAPI:
+
+        Fields:
+            - directory_state
+
+
+Handling across serialization:
+
+    Fields:
+        - E     namespace: transmit
+        - E     directory_state: clear/recreate
+        - E     _op_modules: clear
+        - E     var_handler: clear/recreate
+        - E     trace: clear/recreate
+        - E     locations: clear/recreate
+        - E     current_op: clear
+        - E     workspace: clear/reopen
+        - imports: Should be handled via namespace
+        - EI       reader: clear
+        - EI       next_command: clear
 
 ----------------------------------------------------------------------
+
+7/2/25
+
+Env/NN serialization is still confused. They point at each other,
+which is a problem: If Env cleanup (removing non-serializable stuff in
+__getstate__) happens after NN.__getstate__, then because NN points to
+Env, the entire Env is serialized. Need to break the cycle.
+
+Scopes also point to Env, that has to be cleared up too.
+
+----------------------------------------------------------------------
+
+7/8/25
+
+Imports
+
+......................................................................
+
+Import statement -> module_name, symbol, name
+
+"import foo *" -> 
+    - module_name foo
+    - symbol *
+    - name None
+
+Turn this into multiple imports, one for each imported symbol
+(filtering out symbol names starting with _ I think).
+
+......................................................................
+
+startup.py
+
+For each symbol defined after execution of startup.py:
+
+- If it came from an import, create an Import for it. 
+
+- Need to research how to distinguish imported symbols from those
+  defined in startup.py. I think the latter have __module__ = None.
+
+----------------------------------------------------------------------
+
+7/9/25
+
+Import metadata:
+
+Functions and modules need to be re-imported when an Env is
+reconstructed (in __setstate__, following transmission).
+
+- Function: Compilable functions (from marcel source) are already
+  taken care of. Imported functions need to record enough info to
+  re-import.
+
+- Module: Note the module, re-import.
+
+----------------------------------------------------------------------
+
+7/10/25
+
+Survey of import-related code:
+
+- EnvironmentScript.Import and .imports: used to track what is
+  imported via the import op. The contents of ES.imports is stored in
+  env.pickle.
+
+- nestednamespace.Function: A function from an imported module, or a
+  Python builtin function.
+
+- nestednamespace.Module: A module.
+
+- ES.import_module(): Called from Import.run (import op)
+
+----------------------------------------------------------------------
+
+7/24/25
+
+
+Env lifecycle:
+
+- Marcel startup
+
+  main()
+      main_interactive_run()
+          env_and_main()
+              EnvironmentInteractive.create()
+                  EI.__init__()
+                      NestedNamespace(self)
+                  env.initialize_namespace()
+              MainInteractive(..., env, ...)
+                  MainScript(..., env, ...)
+                      if workspace exists: env.restore_persistent_state_from_workspace()
+                      self.read_startup()
+
+- Marcel restart (startup.py edit, ws open)
+
+- Pickling (for job execution, sudo, remote, ws persistence)
+
+- Unpickling
+
+Things to pickle (see EnvValue.wrap):
+
+- Python function
+
+- Module
+
+- Marcel function (Compilable)
+
+- Pipeline (Compilable)
+
+- other (Simple)
+
+Sources:
+
+- startup.py python
+
+- startup.py run_on_startup()
+
+- marcel builtin
+
+- Hardwired in env.py
+
+- User actions
+
+  - assign op
+  - store
+  - enter/exit args scope
+  - enter/exit pipeline
+  - commands that change current dir
+  - import op
+
+......................................................................
+
+Main & Env
+
+- Why does env_and_main exist? The creation of Environment and Main
+are interleaved, e.g. due to
+env.restore_persistent_state_from_workspace(), and read_startup().
+(Main.read_startup uses self ONLY to refer to self.env.)
+
+- Why is main.workspace needed? Could get it from env.
+
+*** It should be possible to untangle Main and Env setup.
