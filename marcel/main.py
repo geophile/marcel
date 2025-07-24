@@ -138,7 +138,7 @@ class MainAPI(Main):
 class MainScript(Main):
 
     # If a test is being run, testing is set to a directory pretending to be the user's home.
-    def __init__(self, env, workspace, testing=None, initial_config=DEFAULT_CONFIG):
+    def __init__(self, env, testing=None, initial_config=DEFAULT_CONFIG):
         super().__init__(env, testing)
         layout = marcel.persistence.storagelayout.storage_layout()
         if layout is None:
@@ -152,7 +152,7 @@ class MainScript(Main):
                     if before == after:
                         raise marcel.exception.KillShellException(f'Migration from {before} failed to advance.')
         self.update_version_file()
-        self.workspace = workspace
+        self.workspace = env.workspace
         if not Workspace.default().exists(env):
             # The default workspace was found to be broken, and was removed. Create a new one.
             Workspace.default().create_on_disk(env, DEFAULT_CONFIG)
@@ -290,8 +290,8 @@ class MainScript(Main):
 
 class MainInteractive(MainScript):
 
-    def __init__(self, old_main, env, workspace, testing=None, initial_config=DEFAULT_CONFIG):
-        super().__init__(env, workspace, testing, initial_config)
+    def __init__(self, old_main, env, testing=None, initial_config=DEFAULT_CONFIG):
+        super().__init__(env, testing, initial_config)
         self.tab_completer = marcel.tabcompleter.TabCompleter(env)
         try:
             self.reader = marcel.reader.Reader(self.env)
@@ -402,7 +402,7 @@ def main_interactive_run(locations):
             return env_and_main(old_env, old_main, Workspace.default())
         assert env is not None
         try:
-            main = MainInteractive(old_main, env, workspace)
+            main = MainInteractive(old_main, env)
             return env, main
         except marcel.exception.StartupScriptException as e:
             if workspace.is_default():
@@ -441,7 +441,7 @@ def main_script_run(locations, script):
     commands = commands_in_script(script)
     workspace = Workspace.default()
     env = marcel.env.EnvironmentScript.create(locations, workspace)
-    main = MainScript(env, workspace)
+    main = MainScript(env)
     for command in commands:
         try:
             main.parse_and_run_command(command)
@@ -452,7 +452,7 @@ def main_script_run(locations, script):
             assert e.workspace_to_open is not None
             workspace = e.workspace_to_open
             env = marcel.env.EnvironmentScript.create(locations, workspace, main.env.trace)
-            main = MainScript(env, workspace)
+            main = MainScript(env)
 
 
 def read_heredoc():

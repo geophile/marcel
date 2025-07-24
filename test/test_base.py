@@ -150,7 +150,6 @@ class TestConsole(TestBase):
         test_config = pathlib.Path(f'{TestBase.start_dir}/{config_file}').read_text()
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
-                                                workspace=workspace,
                                                 testing=True,
                                                 initial_config=test_config)
         self.env = env
@@ -216,7 +215,6 @@ class TestConsole(TestBase):
             self.env = marcel.env.EnvironmentInteractive.create(self.main.env.locations, e.workspace_to_open)
             self.main = marcel.main.MainInteractive(self.main,
                                                     self.env,
-                                                    e.workspace_to_open,
                                                     testing=True)
             return None, None
 
@@ -359,7 +357,6 @@ class TestTabCompletion(TestBase):
         env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
-                                                workspace=workspace,
                                                 testing=True)
         self.env = env
         self.env.dir_state().change_current_dir(TestBase.start_dir)
