@@ -54,60 +54,6 @@ import marcel.version
 
 Workspace = marcel.object.workspace.Workspace
 
-DEFAULT_CONFIG = '''from marcel.builtin import *
-
-# COLOR_EXT_IMAGE = Color(3, 0, 2, BOLD)
-# COLOR_EXT_SOURCE = Color(0, 3, 4, BOLD)
-# 
-# COLOR_SCHEME.file_file = Color(5, 5, 5, BOLD)
-# COLOR_SCHEME.file_dir = Color(0, 2, 3, BOLD)
-# COLOR_SCHEME.file_link = Color(4, 2, 0, BOLD)
-# COLOR_SCHEME.file_executable = Color(0, 4, 0, BOLD)
-# COLOR_SCHEME.file_extension = {
-#     'jpg': COLOR_EXT_IMAGE,
-#     'jpeg': COLOR_EXT_IMAGE,
-#     'png': COLOR_EXT_IMAGE,
-#     'mov': COLOR_EXT_IMAGE,
-#     'avi': COLOR_EXT_IMAGE,
-#     'gif': COLOR_EXT_IMAGE,
-#     'py': COLOR_EXT_SOURCE,
-#     'c': COLOR_EXT_SOURCE,
-#     'c++': COLOR_EXT_SOURCE,
-#     'cpp': COLOR_EXT_SOURCE,
-#     'cxx': COLOR_EXT_SOURCE,
-#     'h': COLOR_EXT_SOURCE,
-#     'java': COLOR_EXT_SOURCE,
-#     'php': COLOR_EXT_SOURCE
-# }
-# COLOR_SCHEME.error = Color(5, 5, 0)
-# COLOR_SCHEME.process_pid = Color(0, 3, 5, BOLD)
-# COLOR_SCHEME.process_ppid = Color(0, 2, 4, BOLD)
-# COLOR_SCHEME.process_status = Color(3, 1, 0, BOLD)
-# COLOR_SCHEME.process_user = Color(0, 2, 2, BOLD)
-# COLOR_SCHEME.process_command = Color(3, 2, 0, BOLD)
-# COLOR_SCHEME.help_reference = Color(5, 3, 0)
-# COLOR_SCHEME.help_bold = Color(5, 4, 1, BOLD)
-# COLOR_SCHEME.help_italic = Color(5, 5, 2, ITALIC)
-# COLOR_SCHEME.help_name = Color(4, 1, 0)
-# COLOR_SCHEME.history_id = Color(0, 3, 5, BOLD)
-# COLOR_SCHEME.history_command = Color(4, 3, 0, BOLD)
-# COLOR_SCHEME.color_scheme_key = Color(2, 4, 0)
-# COLOR_SCHEME.color_scheme_value = Color(0, 3, 4)
-
-PROMPT = [lambda: PWD, ' $ ']
-
-INTERACTIVE_EXECUTABLES = [
-    'emacs',
-    'less',
-    'man',
-    'more',
-    'psql',
-    'top',
-    'vi',
-    'vim'
-]
-'''
-
 
 class Main(object):
 
@@ -138,25 +84,10 @@ class MainAPI(Main):
 class MainScript(Main):
 
     # If a test is being run, testing is set to a directory pretending to be the user's home.
-    def __init__(self, env, testing=None, initial_config=DEFAULT_CONFIG):
+    def __init__(self, env, testing=None):
         super().__init__(env, testing)
-        layout = marcel.persistence.storagelayout.storage_layout()
-        if layout is None:
-            initialize_persistent_config_and_data(env, initial_config)
-        else:
-            if not testing:
-                while layout is not None:
-                    before = layout.layout()
-                    layout = layout.migrate()
-                    after = layout.layout() if layout else None
-                    if before == after:
-                        raise marcel.exception.KillShellException(f'Migration from {before} failed to advance.')
-        self.update_version_file()
-        if not Workspace.default().exists(env):
-            # The default workspace was found to be broken, and was removed. Create a new one.
-            Workspace.default().create_on_disk(env, DEFAULT_CONFIG)
         # Restore workspace state
-        if self.env.workspace.exists(env):
+        if env.workspace.exists():
             env.restore_persistent_state_from_workspace()
         else:
             self.env.workspace.does_not_exist()
@@ -289,8 +220,8 @@ class MainScript(Main):
 
 class MainInteractive(MainScript):
 
-    def __init__(self, old_main, env, testing=None, initial_config=DEFAULT_CONFIG):
-        super().__init__(env, testing, initial_config)
+    def __init__(self, old_main, env, testing=None):
+        super().__init__(env, testing)
         self.tab_completer = marcel.tabcompleter.TabCompleter(env)
         try:
             self.reader = marcel.reader.Reader(self.env)
@@ -469,27 +400,9 @@ def read_script(script_path):
     return script
 
 
-def initialize_persistent_config_and_data(env, initial_config):
-    locations = env.locations
-    # These calls ensure the config and data directories exist.
-    locations.config()
-    locations.config_ws()
-    locations.config_bws()
-    locations.data()
-    locations.data_ws()
-    locations.data_bws()
-    # Version
-    # touch(mode=...) does not set mode if the file already exists.
-    locations.config_version().touch()
-    locations.config_version().chmod(mode=0o600)
-    locations.config_version().write_text(marcel.version.VERSION)
-    locations.config_version().chmod(0o400)
-    # Default workspace
-    Workspace.default().create_on_disk(env, initial_config)
-
-
 def main():
     multiprocessing.set_start_method('fork')  # Maybe spawn or forkserver for plaforms other than Linux
+    marcel.persistence.storagelayout.ensure_current(testing=False)
     locations = marcel.locations.Locations()
     input_source = marcel.util.InputSource()
     started = False

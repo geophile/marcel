@@ -19,6 +19,17 @@ import shutil
 import marcel.exception
 import marcel.locations
 import marcel.util
+import marcel.version
+
+from marcel.object.workspace import Workspace
+
+
+DEFAULT_INITIAL_CONFIG_FILENAME = 'default_initial_config.txt'
+
+
+def default_initial_config():
+    startup_file = pathlib.Path(marcel.persistence.__file__).parent / DEFAULT_INITIAL_CONFIG_FILENAME
+    return startup_file.read_text()
 
 
 def storage_layout():
@@ -34,6 +45,55 @@ def storage_layout():
         if layout.match():
             return layout
     return None
+
+
+def ensure_current(testing=False, initial_config=None):
+    def write_version(version_id):
+        version_file_path = locations.config_version()
+        version_file_path.touch(exist_ok=True)
+        version_file_path.chmod(0o600)
+        version_file_path.write_text(f'{version_id}', newline='\n')
+        version_file_path.chmod(0o400)
+
+    def installed_version():
+        version_file_path = locations.config_version()
+        if version_file_path.exists():
+            with open(version_file_path) as version_file:
+                installed_version = version_file.readline().strip()
+        else:
+            installed_version = '0.0.0'
+        return installed_version
+
+    def initialize_persistent_config_and_data(initial_config):
+        # These calls ensure the config and data directories exist.
+        locations.config()
+        locations.config_ws()
+        locations.config_bws()
+        locations.data()
+        locations.data_ws()
+        locations.data_bws()
+        # Version
+        write_version(marcel.version.VERSION)
+        # Default workspace
+        Workspace.default().create_on_disk(initial_config)
+
+    locations = marcel.locations.Locations()
+    layout = storage_layout()
+    if layout is None:
+        if initial_config is None:
+            initial_config = default_initial_config()
+        initialize_persistent_config_and_data(initial_config)
+    else:
+        if not testing:
+            while layout is not None:
+                before = layout.layout()
+                layout = layout.migrate()
+                after = layout.layout() if layout else None
+                if before == after:
+                    raise marcel.exception.KillShellException(f'Migration from {before} failed to advance.')
+    # Write version file
+    if installed_version() < marcel.version.VERSION:
+        write_version(marcel.version.VERSION)
 
 
 class StorageLayout(object):

@@ -401,8 +401,6 @@ class EnvironmentScript(Environment):
     def pid(self):
         return self.locations.pid
 
-    # This is destructive. Should be called only as the current workspace is being closed, and this Environment
-    # is being saved.
     def persistent_state(self):
         # Things to persist:
         # - vars mentioned in save_vars
@@ -426,7 +424,7 @@ class EnvironmentScript(Environment):
                 'compilables': self.compilables}
 
     def restore_persistent_state_from_workspace(self):
-        self.workspace.open(self)
+        self.workspace.open()
         persistent_state = self.workspace.persistent_state
         # Do the imports before compilation, which may depend on the imports.
         imports = persistent_state['imports']

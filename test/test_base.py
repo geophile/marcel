@@ -14,8 +14,8 @@ import marcel.locations
 import marcel.main
 import marcel.object.error
 import marcel.object.workspace
+import marcel.persistence.storagelayout
 import marcel.util
-
 
 TEST_TIMING = False
 
@@ -148,10 +148,10 @@ class TestConsole(TestBase):
         workspace = marcel.object.workspace.Workspace.default()
         env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
         test_config = pathlib.Path(f'{TestBase.start_dir}/{config_file}').read_text()
+        marcel.persistence.storagelayout.ensure_current(testing=True, initial_config=test_config)
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
-                                                testing=True,
-                                                initial_config=test_config)
+                                                testing=True)
         self.env = env
         # marcel.main.initialize_persistent_config_and_data(env)
         self.env.dir_state().change_current_dir(TestBase.start_dir)
@@ -355,6 +355,8 @@ class TestTabCompletion(TestBase):
         super().reset_environment()
         workspace = marcel.object.workspace.Workspace.default()
         env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
+        test_config = pathlib.Path(f'{TestBase.start_dir}/{config_file}').read_text()
+        marcel.persistence.storagelayout.ensure_current(testing=True, initial_config=test_config)
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
                                                 testing=True)
