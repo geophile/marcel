@@ -189,11 +189,11 @@ class Environment(object):
         self.op_modules = marcel.opmodule.import_op_modules()
         # Lax var handling for now. Check immutability after startup is complete.
         self.var_handler = VarHandlerStartup(self)
-        self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
-        self.var_handler.add_save_vars('PWD', 'DIRS')
         self.trace = trace if trace else Trace()
 
     def initialize_namespace(self):
+        self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
+        self.var_handler.add_save_vars('PWD', 'DIRS')
         try:
             homedir = pathlib.Path.home().resolve().as_posix()
         except FileNotFoundError:
@@ -372,7 +372,6 @@ class EnvironmentScript(Environment):
         self.startup_vars = None
         # Support for pos()
         self.current_op = None
-        self.var_handler.add_immutable_vars('pos')
         # Symbols imported need special handling
         self.imports = set()
         self.directory_state = marcel.directorystate.DirectoryState(self)
@@ -381,6 +380,7 @@ class EnvironmentScript(Environment):
 
     def initialize_namespace(self):
         super().initialize_namespace()
+        self.var_handler.add_immutable_vars('pos')
         self.namespace.update({
             'WORKSPACE': self.workspace.name,
             'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
@@ -551,6 +551,9 @@ class EnvironmentInteractive(EnvironmentScript):
         self.config_path = None
         self.reader = None
         self.next_command = None
+
+    def initialize_namespace(self):
+        super().initialize_namespace()
         self.var_handler.add_immutable_vars('PROMPT',
                                             'BOLD',
                                             'ITALIC',

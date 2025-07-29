@@ -826,6 +826,11 @@ If namespace is moving to env:
 
   - convenience functions (e.g. db, cluster)
 
+  - Marcel-specified env vars, the stuff in initialize_namespace.
+  
+  *** Env still sets these up, creates the NestedNamespace, passes it to
+  Workspace.open()
+
 - Workspace owns:
 
   - namespace
@@ -835,6 +840,9 @@ If namespace is moving to env:
   - trace?
 
   - read_config() (since that is per-workspace)
+
+*** Workspace is currently a field of EnvironmentScript. Promote to
+    Environment.
 
 ----------------------------------------------------------------------
 
