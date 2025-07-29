@@ -86,17 +86,12 @@ class MainScript(Main):
     # If a test is being run, testing is set to a directory pretending to be the user's home.
     def __init__(self, env, testing=None):
         super().__init__(env, testing)
-        # Restore workspace state
-        if env.workspace.exists():
-            env.restore_persistent_state_from_workspace()
-        else:
-            self.env.workspace.does_not_exist()
         self.testing = testing
         self.config_time = time.time()
         startup_vars = self.read_config()
         self.env.enforce_var_immutability(startup_vars)
         self.needs_restart = False
-        marcel.persistence.persistence.validate_all(env, self.handle_persistence_validation_errors)
+        marcel.persistence.persistence.validate_all(self.handle_persistence_validation_errors)
         atexit.register(self.shutdown)
 
     def read_config(self):
@@ -187,7 +182,7 @@ class MainScript(Main):
                 ws_name = validation_error.workspace_name
                 broken_ws = Workspace (ws_name)
                 started_in_broken_ws = started_in_broken_ws or (self.env.workspace.name == ws_name)
-                broken_ws.mark_broken(self.env, now)
+                broken_ws.mark_broken(now)
             if started_in_broken_ws:
                 # This marks this MainScript object as needing a restart. Don't want to continue with a broken
                 # workspace, but throwing a ReconfigureException right now (during MainScript.__init__)
@@ -403,6 +398,9 @@ def read_script(script_path):
 def main():
     multiprocessing.set_start_method('fork')  # Maybe spawn or forkserver for plaforms other than Linux
     marcel.persistence.storagelayout.ensure_current(testing=False)
+    # Check that default workspace exists
+    if not Workspace.default().exists():
+        Workspace.default().does_not_exist()
     locations = marcel.locations.Locations()
     input_source = marcel.util.InputSource()
     started = False

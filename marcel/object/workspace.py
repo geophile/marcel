@@ -329,10 +329,10 @@ class Workspace(marcel.object.renderable.Renderable):
         assert marker_filename is not None
         return Workspace.marker_filename_pid(marker_filename)
 
-    def validate(self, env):
-        return WorkspaceValidater(env, self).validate()
+    def validate(self):
+        return WorkspaceValidater(self).validate()
 
-    def mark_broken(self, env, now):
+    def mark_broken(self, now):
         # TODO: Probably not OK to do the following to an open workspace. The marker file indicates in-use.
         locations = self.locations
         config_source = locations.config_ws(self)
@@ -398,8 +398,8 @@ class WorkspaceDefault(Workspace):
     def delete(self, env):
         assert False
 
-    def validate(self, env):
-        return WorkspaceDefaultValidater(env, self).validate()
+    def validate(self):
+        return WorkspaceDefaultValidater(self).validate()
 
     # Internal
 
@@ -429,13 +429,13 @@ class WorkspaceValidater(object):
             name = '<default workspace>' if self.workspace_name == '' else self.workspace_name
             return f'{name}: {self.message}'
 
-    def __init__(self, env, workspace):
-        self.env = env
+    def __init__(self, workspace):
+        self.locations = marcel.locations.Locations()
         self.workspace = workspace
         self.errors = []
 
     def validate(self):
-        locations = self.env.locations
+        locations = self.locations
         workspace = self.workspace
         # Don't need to check existence of config dir. The persistence.validate_all loop checks workspaces that
         # exist in this dir.
@@ -479,13 +479,13 @@ class WorkspaceValidater(object):
         return self.errors
 
     def validate_env_file(self):
-        locations = self.env.locations
+        locations = self.locations
         workspace = self.workspace
         if not locations.data_ws_env(workspace).exists():
             self.missing(locations.data_ws_env(workspace))
 
     def validate_properties_file(self):
-        locations = self.env.locations
+        locations = self.locations
         workspace = self.workspace
         if not workspace.is_default() and not locations.data_ws_prop(workspace).exists():
             self.missing(locations.data_ws_prop(workspace))
@@ -517,7 +517,7 @@ class WorkspaceDefaultValidater(WorkspaceValidater):
                                                      f'Unexpected workspace filename in {dir}: {file}'))
 
         # Delete abandoned files: associated with processes no longer running.
-        locations = self.env.locations
+        locations = self.locations
         workspace = self.workspace
         pids = set(psutil.pids())
         delete_abandoned(locations.data_ws(workspace), '.env.pickle')

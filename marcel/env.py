@@ -364,18 +364,16 @@ class EnvironmentScript(Environment):
             return self.id == other.id
 
     def __init__(self, locations, workspace, trace=None):
-        super().__init__(marcel.nestednamespace.NestedNamespace(), trace)
         assert workspace is not None
+        super().__init__(marcel.nestednamespace.NestedNamespace(), trace)
         # Standard locations of files important to marcel: config, history
         self.locations = locations
+        self.workspace = workspace
         # Vars defined during startup
         self.startup_vars = None
         # Support for pos()
         self.current_op = None
         self.var_handler.add_immutable_vars('pos')
-        # Marcel used with a script does not manipulate workspaces, but it is convenient to
-        # have workspace defined, for use with Locations.
-        self.workspace = workspace
         # Symbols imported need special handling
         self.imports = set()
         self.directory_state = marcel.directorystate.DirectoryState(self)
@@ -396,6 +394,7 @@ class EnvironmentScript(Environment):
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 self.namespace[key] = value
+        self.restore_persistent_state_from_workspace(self.workspace)
         self.dir_state().change_current_dir(self.pwd_or_alternative())
 
     def pid(self):
@@ -423,9 +422,9 @@ class EnvironmentScript(Environment):
                 'imports': self.imports,
                 'compilables': self.compilables}
 
-    def restore_persistent_state_from_workspace(self):
-        self.workspace.open()
-        persistent_state = self.workspace.persistent_state
+    def restore_persistent_state_from_workspace(self, workspace):
+        workspace.open()
+        persistent_state = workspace.persistent_state
         # Do the imports before compilation, which may depend on the imports.
         imports = persistent_state['imports']
         for i in imports:

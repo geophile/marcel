@@ -741,3 +741,38 @@ env.restore_persistent_state_from_workspace(), and read_startup().
 - Why is main.workspace needed? Could get it from env.
 
 *** It should be possible to untangle Main and Env setup.
+
+----------------------------------------------------------------------
+
+7/27/25
+
+The handling of Workspace.persistent_state is fussy and
+fragile. Playing with this, I wondered: Why does Environment own the
+namespace? Environment is an older concept, Workspaces were added
+recently, so NestedNamespace stayed in Environment. But Workspace owns
+env.pickle which, when unpickled, goes to the namespace, owned by
+Environment.
+
+*** Idea: 
+
+- Move NestedNamespace to Workspace. 
+
+- save/restore env state now belongs to Workspace entirely.
+
+----------------------------------------------------------------------
+
+TODO
+
+Move out of MainScript init
+
+        # Restore workspace state
+        if env.workspace.exists():
+            env.restore_persistent_state_from_workspace()
+        else:
+            self.env.workspace.does_not_exist()
+
+And this, can it be moved to main, right after migration?
+
+        marcel.persistence.persistence.validate_all(self.handle_persistence_validation_errors)
+
+Should be possible to simplify since we no longer start in a workspace.

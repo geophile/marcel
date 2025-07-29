@@ -21,7 +21,7 @@ Workspace = marcel.object.workspace.Workspace
 WorkspaceValidater = marcel.object.workspace.WorkspaceValidater
 
 
-def validate_all(env, error_handler):
+def validate_all(error_handler):
     def check_dir_exists(path, description):
         if not path.exists():
             raise marcel.exception.KillShellException(
@@ -40,10 +40,9 @@ def validate_all(env, error_handler):
 
     def workspace_named(name):
         return (Workspace.default()
-                if name == env.locations.DEFAULT_WORKSPACE_DIR_NAME else
-                Workspace(name))
+                if name == locations.DEFAULT_WORKSPACE_DIR_NAME else Workspace(name))
 
-    locations = env.locations
+    locations = marcel.locations.Locations()
     errors = []
     # Version
     check_file_exists(locations.config_version(), 'VERSION')
@@ -70,7 +69,7 @@ def validate_all(env, error_handler):
     for dir in locations.config_ws().iterdir():
         if dir.name in data_workspace_names:
             workspace = workspace_named(dir.name)
-            ws_errors = workspace.validate(env)
+            ws_errors = workspace.validate()
             if len(ws_errors) > 0:
                 broken_workspace_names.add(dir.name)
                 errors.extend(ws_errors)
