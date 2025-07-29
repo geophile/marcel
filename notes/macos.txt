@@ -759,6 +759,83 @@ Environment.
 
 - save/restore env state now belongs to Workspace entirely.
 
+......................................................................
+
+Before that, need to fix save/restore persistent state to get things
+working.
+
+- Workspace has persistent_state field
+
+- Workspace.close saves env.persistent_state() which computes
+  {namespace:, imports:, compilables:}
+
+- Workspace.read_environment loads env.pickle and assigns
+  self.persistent_state.
+
+- ES.restore_persistent_state_from_workspace() uses
+  Workspace.persistent_state to restore namespace (saved_vars),
+  compilables, imports.
+
+----------------------------------------------------------------------
+
+7/29/25
+
+Workspace open, restore are a mess and failing. Survey:
+
+- ES.restore_persistent_state_from_workspace called from:
+
+  - WsOpen.run
+  - ES.__init__
+
+- Workspace.open called from:
+
+  - WsNew.run
+  - WsOpen.run
+  - WsClose.run (calls Workspace.default().open())
+  - ES.restore_persistent_state_from_workspace
+
+- ES.restore_persistent_state_from_workspace:
+
+  - Assumes workspace.persistent_state has been set (done by
+    Workspace.open())
+
+  - Initializes env with imports, compilables, namespace from ws
+    persistent_state.
+
+  - Set current dir
+
+*** Move call of ES.restore... from __init__ to initialize_namespace.
+
+......................................................................
+
+Okay, test are running again.
+
+If namespace is moving to env:
+
+- Env is still the one object made available everywhere, e.g. to
+  pipelines and ops. So just as a practical matter, workspaces cannot
+  completely replace env.
+
+- Env owns:
+
+  - var API and VarHandler, var tracking
+
+  - locations
+
+  - prompts
+
+  - convenience functions (e.g. db, cluster)
+
+- Workspace owns:
+
+  - namespace
+
+  - dir_state?
+
+  - trace?
+
+  - read_config() (since that is per-workspace)
+
 ----------------------------------------------------------------------
 
 TODO

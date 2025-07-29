@@ -177,8 +177,9 @@ class Environment(object):
         def __exit__(self, exc_type, exc_val, exc_tb):
             pass
 
-    def __init__(self, namespace, trace):
-        # Where environment variables live.
+    def __init__(self, workspace, namespace, trace):
+        assert workspace is not None
+        self.workspace = workspace
         self.namespace = namespace
         # Directory stack, including current directory.
         self.directory_state = None
@@ -303,7 +304,7 @@ class EnvironmentAPI(Environment):
 
     # globals: From the module in which marcel.api is imported.
     def __init__(self, globals, trace=None):
-        super().__init__(globals, trace)
+        super().__init__(marcel.object.workspace.Workspace.default(), globals, trace)
         self.directory_state = marcel.directorystate.DirectoryState(self)
 
     def clear_changes(self):
@@ -364,11 +365,9 @@ class EnvironmentScript(Environment):
             return self.id == other.id
 
     def __init__(self, locations, workspace, trace=None):
-        assert workspace is not None
-        super().__init__(marcel.nestednamespace.NestedNamespace(), trace)
+        super().__init__(workspace, marcel.nestednamespace.NestedNamespace(), trace)
         # Standard locations of files important to marcel: config, history
         self.locations = locations
-        self.workspace = workspace
         # Vars defined during startup
         self.startup_vars = None
         # Support for pos()
