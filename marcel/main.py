@@ -318,7 +318,7 @@ def main_interactive_run():
 
     def env_and_main(old_env, old_main, workspace):
         try:
-            env = marcel.env.EnvironmentInteractive.create(workspace, trace)
+            env = marcel.env.EnvironmentInteractive.create(workspace=workspace, trace=trace)
         except Exception as e:
             # Something ws-related? Try starting in default
             marcel.util.print_to_stderr(
@@ -365,7 +365,7 @@ def main_interactive_run():
 def main_script_run(script):
     commands = commands_in_script(script)
     workspace = Workspace.default()
-    env = marcel.env.EnvironmentScript.create(workspace)
+    env = marcel.env.EnvironmentScript.create(workspace=workspace)
     main = MainScript(env)
     for command in commands:
         try:
@@ -376,7 +376,7 @@ def main_script_run(script):
             # while running a script.
             assert e.workspace_to_open is not None
             workspace = e.workspace_to_open
-            env = marcel.env.EnvironmentScript.create(workspace, main.env.trace)
+            env = marcel.env.EnvironmentScript.create(workspace=workspace, trace=main.env.trace)
             main = MainScript(env)
 
 

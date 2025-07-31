@@ -144,7 +144,7 @@ class TestConsole(TestBase):
     def reset_environment(self, config_file='./.marcel.py'):
         super().reset_environment()
         workspace = marcel.object.workspace.Workspace.default()
-        env = marcel.env.EnvironmentInteractive.create(workspace)
+        env = marcel.env.EnvironmentInteractive.create(workspace=workspace)
         test_config = pathlib.Path(f'{TestBase.start_dir}/{config_file}').read_text()
         marcel.persistence.storagelayout.ensure_current(testing=True, initial_config=test_config)
         self.main = marcel.main.MainInteractive(old_main=None,
@@ -210,7 +210,7 @@ class TestConsole(TestBase):
             return action()
         except marcel.exception.ReconfigureException as e:
             self.main.shutdown(restart=True)
-            self.env = marcel.env.EnvironmentInteractive.create(e.workspace_to_open)
+            self.env = marcel.env.EnvironmentInteractive.create(workspace=e.workspace_to_open)
             self.main = marcel.main.MainInteractive(self.main,
                                                     self.env,
                                                     testing=True)
@@ -352,7 +352,7 @@ class TestTabCompletion(TestBase):
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
         super().reset_environment()
         workspace = marcel.object.workspace.Workspace.default()
-        env = marcel.env.EnvironmentInteractive.create(workspace)
+        env = marcel.env.EnvironmentInteractive.create(workspace=workspace)
         test_config = pathlib.Path(f'{TestBase.start_dir}/{config_file}').read_text()
         marcel.persistence.storagelayout.ensure_current(testing=True, initial_config=test_config)
         self.main = marcel.main.MainInteractive(old_main=None,

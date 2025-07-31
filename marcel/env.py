@@ -301,25 +301,25 @@ class Environment(object):
             dir = self.getvar('HOME')
         return dir
 
-    # TODO: Replaces create methods on subclasses of Environment
-    @staticmethod
-    def create(env_class,
-               workspace=None,
-               globals=None,
-               trace=None):
-        # Don't use a default value for workspace. Default value expressions are evaluted
-        # on import, which may be too early. Discovered this gotcha on a unit test. Unit tests
-        # set HOME (in os.environ). But Workspace.default() creates a Locations object which
-        # depends on HOME. So Locations were wrong because HOME had not yet been reset for the test.
-        if workspace is None:
-            workspace = Workspace.default()
-        env = env_class(workspace, trace)
-        namespace = env.initial_namespace()
-        # CLI, script usage: namespace is created by initial_namespace, globals is None
-        # API: initial_namespace returns None, globals is provided by caller.
-        assert (namespace is None) != (globals is None)
-        namespace = namespace if namespace else globals
-        env.namespace = namespace  # TODO: namespace is moving to workspace
+    # # TODO: Replaces create methods on subclasses of Environment
+    # @classmethod
+    # def create(cls,
+    #            workspace=None,
+    #            globals=None,
+    #            trace=None):
+    #     # Don't use a default value for workspace. Default value expressions are evaluted
+    #     # on import, which may be too early. Discovered this gotcha on a unit test. Unit tests
+    #     # set HOME (in os.environ). But Workspace.default() creates a Locations object which
+    #     # depends on HOME. So Locations were wrong because HOME had not yet been reset for the test.
+    #     if workspace is None:
+    #         workspace = Workspace.default()
+    #     env = cls(workspace, trace)
+    #     namespace = env.initial_namespace()
+    #     # CLI, script usage: namespace is created by initial_namespace, globals is None
+    #     # API: initial_namespace returns None, globals is provided by caller.
+    #     assert (namespace is None) != (globals is None)
+    #     namespace = namespace if namespace else globals
+    #     env.namespace = namespace  # TODO: namespace is moving to workspace
 
 
 class EnvironmentAPI(Environment):
@@ -335,8 +335,8 @@ class EnvironmentAPI(Environment):
     def marcel_usage(self):
         return 'api'
 
-    @staticmethod
-    def create(globals):
+    @classmethod
+    def create(cls, workspace=None, globals=None, trace=None):
         env = EnvironmentAPI()
         env.namespace = globals
         env.initialize_namespace()
@@ -546,8 +546,8 @@ class EnvironmentScript(Environment):
                 type(interactive_executables) in (tuple, list) and
                 x in interactive_executables)
 
-    @staticmethod
-    def create(workspace, trace=None):
+    @classmethod
+    def create(cls, workspace=None, globals=None, trace=None):
         env = EnvironmentScript(workspace, trace)
         env.namespace = marcel.nestednamespace.NestedNamespace()
         env.initialize_namespace()
@@ -639,8 +639,8 @@ class EnvironmentInteractive(EnvironmentScript):
         self.next_command = None
         return command
 
-    @staticmethod
-    def create(workspace, trace=None):
+    @classmethod
+    def create(cls, workspace=None, globals=None, trace=None):
         env = EnvironmentInteractive(workspace, trace)
         env.namespace = marcel.nestednamespace.NestedNamespace()
         env.initialize_namespace()

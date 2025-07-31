@@ -98,7 +98,7 @@ _RESERVOIRS = []
 PWD = None
 DIRS = [_pathlib.Path(_os.getcwd())]
 DB_DEFAULT = None
-_ENV = _env_.EnvironmentAPI.create(globals())
+_ENV = _env_.EnvironmentAPI.create(globals=globals())
 _MAIN = _main.MainAPI(_ENV)
 SHUTDOWN_HOOK = _ShutdownHook()
 
