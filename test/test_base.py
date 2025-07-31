@@ -39,7 +39,6 @@ class TestBase:
     def __init__(self, config_file='./.marcel.py', main=None):
         self.config_file = config_file
         self.main = main
-        self.locations = None
         self.env = None
         self.failures = 0
         self.reset_environment()
@@ -50,7 +49,6 @@ class TestBase:
         if self.main is not None:
             self.main.shutdown()
         os.environ['HOME'] = TestBase.test_home
-        self.locations = marcel.locations.Locations()
         shutil.rmtree(TestBase.test_home, ignore_errors=True)
 
     def new_file(self, filename):
@@ -146,7 +144,7 @@ class TestConsole(TestBase):
     def reset_environment(self, config_file='./.marcel.py'):
         super().reset_environment()
         workspace = marcel.object.workspace.Workspace.default()
-        env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
+        env = marcel.env.EnvironmentInteractive.create(workspace)
         test_config = pathlib.Path(f'{TestBase.start_dir}/{config_file}').read_text()
         marcel.persistence.storagelayout.ensure_current(testing=True, initial_config=test_config)
         self.main = marcel.main.MainInteractive(old_main=None,
@@ -212,7 +210,7 @@ class TestConsole(TestBase):
             return action()
         except marcel.exception.ReconfigureException as e:
             self.main.shutdown(restart=True)
-            self.env = marcel.env.EnvironmentInteractive.create(self.main.env.locations, e.workspace_to_open)
+            self.env = marcel.env.EnvironmentInteractive.create(e.workspace_to_open)
             self.main = marcel.main.MainInteractive(self.main,
                                                     self.env,
                                                     testing=True)
@@ -354,7 +352,7 @@ class TestTabCompletion(TestBase):
     def reset_environment(self, config_file='./.marcel.py', new_main=False):
         super().reset_environment()
         workspace = marcel.object.workspace.Workspace.default()
-        env = marcel.env.EnvironmentInteractive.create(self.locations, workspace)
+        env = marcel.env.EnvironmentInteractive.create(workspace)
         test_config = pathlib.Path(f'{TestBase.start_dir}/{config_file}').read_text()
         marcel.persistence.storagelayout.ensure_current(testing=True, initial_config=test_config)
         self.main = marcel.main.MainInteractive(old_main=None,
@@ -362,7 +360,7 @@ class TestTabCompletion(TestBase):
                                                 testing=True)
         self.env = env
         self.env.dir_state().change_current_dir(TestBase.start_dir)
-        os.system(f'cp {config_file} {self.locations.config_ws_startup(workspace)}')
+        os.system(f'cp {config_file} {env.locations.config_ws_startup(workspace)}')
 
     def run(self, line, expected=None):
         if expected is None:

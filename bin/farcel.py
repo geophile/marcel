@@ -27,7 +27,6 @@ import psutil
 import marcel.core
 import marcel.env
 import marcel.exception
-import marcel.locations
 import marcel.object.error
 import marcel.object.workspace
 import marcel.opmodule
@@ -160,8 +159,7 @@ def main():
         if marcel_usage == 'api':
             env = marcel.env.EnvironmentAPI.create(dict())
         elif marcel_usage == 'script':
-            env = marcel.env.EnvironmentScript.create(marcel.locations.Locations(),
-                                                      marcel.object.workspace.Workspace.default())
+            env = marcel.env.EnvironmentScript.create(marcel.object.workspace.Workspace.default())
         else:
             assert False, marcel_usage
         version = env.getvar('MARCEL_VERSION')

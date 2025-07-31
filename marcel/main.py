@@ -312,13 +312,13 @@ def fail(message):
     exit(1)
 
 
-def main_interactive_run(locations):
+def main_interactive_run():
     def restart_in_default_workspace():
         raise marcel.exception.ReconfigureException(Workspace.default())
 
     def env_and_main(old_env, old_main, workspace):
         try:
-            env = marcel.env.EnvironmentInteractive.create(locations, workspace, trace)
+            env = marcel.env.EnvironmentInteractive.create(workspace, trace)
         except Exception as e:
             # Something ws-related? Try starting in default
             marcel.util.print_to_stderr(
@@ -354,7 +354,7 @@ def main_interactive_run(locations):
             main.shutdown(restart=True)
             if e.workspace_to_open is None:
                 # Reconfiguration is due to modified startup script. Same workspace, keep main.input so it is rerun.
-                workspace = main.workspace
+                workspace = env.workspace
             else:
                 # Reconfiguration is due to change of workspace. main.input was the workspace command
                 # that caused the reconfiguration, so don't rerun it.
@@ -362,10 +362,10 @@ def main_interactive_run(locations):
                 main.input = None
 
 
-def main_script_run(locations, script):
+def main_script_run(script):
     commands = commands_in_script(script)
     workspace = Workspace.default()
-    env = marcel.env.EnvironmentScript.create(locations, workspace)
+    env = marcel.env.EnvironmentScript.create(workspace)
     main = MainScript(env)
     for command in commands:
         try:
@@ -376,7 +376,7 @@ def main_script_run(locations, script):
             # while running a script.
             assert e.workspace_to_open is not None
             workspace = e.workspace_to_open
-            env = marcel.env.EnvironmentScript.create(locations, workspace, main.env.trace)
+            env = marcel.env.EnvironmentScript.create(workspace, main.env.trace)
             main = MainScript(env)
 
 
@@ -401,17 +401,16 @@ def main():
     # Check that default workspace exists
     if not Workspace.default().exists():
         Workspace.default().does_not_exist()
-    locations = marcel.locations.Locations()
     input_source = marcel.util.InputSource()
     started = False
     while not started:
         try:
             if input_source.interactive():
-                main_interactive_run(locations)
+                main_interactive_run()
             elif input_source.script():
-                main_script_run(locations, read_script(sys.argv[1]))
+                main_script_run(read_script(sys.argv[1]))
             elif input_source.heredoc():
-                main_script_run(locations, read_heredoc())
+                main_script_run(read_heredoc())
             else:
                 raise marcel.exception.KillShellException('Unable to determine input source!')
             started = True

@@ -181,6 +181,7 @@ class Environment(object):
         assert workspace is not None
         self.workspace = workspace
         self.namespace = namespace
+        self.locations = marcel.locations.Locations()
         # Directory stack, including current directory.
         self.directory_state = None
         # Compilables need to be compiled in order of creation. (Locating them in namespace does not preserve order.)
@@ -364,10 +365,8 @@ class EnvironmentScript(Environment):
         def __eq__(self, other):
             return self.id == other.id
 
-    def __init__(self, locations, workspace, trace=None):
+    def __init__(self, workspace, trace=None):
         super().__init__(workspace, marcel.nestednamespace.NestedNamespace(), trace)
-        # Standard locations of files important to marcel: config, history
-        self.locations = locations
         # Vars defined during startup
         self.startup_vars = None
         # Support for pos()
@@ -526,8 +525,8 @@ class EnvironmentScript(Environment):
                 x in interactive_executables)
 
     @staticmethod
-    def create(locations, workspace, trace=None):
-        env = EnvironmentScript(locations, workspace, trace)
+    def create(workspace, trace=None):
+        env = EnvironmentScript(workspace, trace)
         env.initialize_namespace()
         return env
 
@@ -545,8 +544,8 @@ class EnvironmentInteractive(EnvironmentScript):
 
     DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
 
-    def __init__(self, locations, workspace, trace=None):
-        super().__init__(locations, workspace, trace)
+    def __init__(self, workspace, trace=None):
+        super().__init__(workspace, trace)
         # Actual config path. Needed to reread config file in case of modification.
         self.config_path = None
         self.reader = None
@@ -618,8 +617,8 @@ class EnvironmentInteractive(EnvironmentScript):
         return command
 
     @staticmethod
-    def create(locations, workspace, trace=None):
-        env = EnvironmentInteractive(locations, workspace, trace)
+    def create(workspace, trace=None):
+        env = EnvironmentInteractive(workspace, trace)
         env.initialize_namespace()
         return env
 

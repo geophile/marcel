@@ -846,6 +846,34 @@ If namespace is moving to env:
 
 ----------------------------------------------------------------------
 
+EI
+
+    @staticmethod
+    def create(locations, workspace, trace=None):
+        env = EnvironmentInteractive(locations, workspace, trace)
+        env.initialize_namespace()
+        return env
+
+ES
+
+    @staticmethod
+    def create(locations, workspace, trace=None):
+        env = EnvironmentScript(locations, workspace, trace)
+        env.initialize_namespace()
+        return env
+
+
+EA
+    @staticmethod
+    def create(globals):
+        env = EnvironmentAPI(globals)
+        env.initialize_namespace()
+        return env
+
+
+
+----------------------------------------------------------------------
+
 TODO
 
 Move out of MainScript init
