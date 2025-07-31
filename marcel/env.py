@@ -43,6 +43,7 @@ import marcel.object.workspace
 
 Compilable = marcel.compilable.Compilable
 Workspace = marcel.object.workspace.Workspace
+NestedNamespace = marcel.nestednamespace.NestedNamespace
 
 
 class VarHandlerStartup(object):
@@ -184,7 +185,7 @@ class Environment(object):
         self.namespace = None  # Set in create(). Will move to workspace
         self.locations = marcel.locations.Locations()
         # Directory stack, including current directory.
-        self.directory_state = None
+        self.directory_state = marcel.directorystate.DirectoryState(self)
         # Compilables need to be compiled in order of creation. (Locating them in namespace does not preserve order.)
         self.compilables = []  # list of var names
         # Source of ops and arg parsers.
@@ -194,6 +195,8 @@ class Environment(object):
         self.trace = trace if trace else Trace()
 
     def initialize_namespace(self):
+        namespace = NestedNamespace()
+        self.namespace = namespace  # Should go away when namespace moves to Workspace
         self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
         self.var_handler.add_save_vars('PWD', 'DIRS')
         try:
@@ -205,7 +208,7 @@ class Environment(object):
             current_dir = pathlib.Path.cwd().resolve().as_posix()
         except FileNotFoundError:
             current_dir = homedir
-        self.namespace.update({
+        namespace.update({
             'MARCEL_VERSION': marcel.version.VERSION,
             'HOME': homedir,
             'PWD': current_dir,
@@ -215,6 +218,7 @@ class Environment(object):
             'parse_args': lambda usage=None, **kwargs: marcel.cliargs.parse_args(self, usage, **kwargs)
         })
         self.dir_state().change_current_dir(self.pwd_or_alternative())
+        return namespace
 
     def dir_state(self):
         return self.directory_state
@@ -301,33 +305,33 @@ class Environment(object):
             dir = self.getvar('HOME')
         return dir
 
-    # # TODO: Replaces create methods on subclasses of Environment
-    # @classmethod
-    # def create(cls,
-    #            workspace=None,
-    #            globals=None,
-    #            trace=None):
-    #     # Don't use a default value for workspace. Default value expressions are evaluted
-    #     # on import, which may be too early. Discovered this gotcha on a unit test. Unit tests
-    #     # set HOME (in os.environ). But Workspace.default() creates a Locations object which
-    #     # depends on HOME. So Locations were wrong because HOME had not yet been reset for the test.
-    #     if workspace is None:
-    #         workspace = Workspace.default()
-    #     env = cls(workspace, trace)
-    #     namespace = env.initial_namespace()
-    #     # CLI, script usage: namespace is created by initial_namespace, globals is None
-    #     # API: initial_namespace returns None, globals is provided by caller.
-    #     assert (namespace is None) != (globals is None)
-    #     namespace = namespace if namespace else globals
-    #     env.namespace = namespace  # TODO: namespace is moving to workspace
+    # TODO: Replaces create methods on subclasses of Environment
+    @classmethod
+    def create(cls,
+               workspace=None,
+               globals=None,
+               trace=None):
+        # Don't use a default value for workspace. Default value expressions are evaluted
+        # on import, which may be too early. Discovered this gotcha on a unit test. Unit tests
+        # set HOME (in os.environ). But Workspace.default() creates a Locations object which
+        # depends on HOME. So Locations were wrong because HOME had not yet been reset for the test.
+        if workspace is None:
+            workspace = Workspace.default()
+        env = cls(workspace=workspace, trace=trace)
+        namespace = env.initialize_namespace()
+        assert (cls is EnvironmentAPI) == (globals is not None)
+        if globals is not None:
+            namespace.update(globals)
+        env.namespace = namespace  # TODO: namespace is moving to workspace
+        return env
 
 
 class EnvironmentAPI(Environment):
 
     # globals: From the module in which marcel.api is imported.
-    def __init__(self, trace=None):
-        super().__init__(Workspace.default(), trace)
-        self.directory_state = marcel.directorystate.DirectoryState(self)
+    def __init__(self, workspace=None, trace=None):
+        workspace = Workspace.default() if workspace is None else workspace
+        super().__init__(workspace, trace)
 
     def clear_changes(self):
         self.var_handler.clear_changes()
@@ -335,12 +339,12 @@ class EnvironmentAPI(Environment):
     def marcel_usage(self):
         return 'api'
 
-    @classmethod
-    def create(cls, workspace=None, globals=None, trace=None):
-        env = EnvironmentAPI()
-        env.namespace = globals
-        env.initialize_namespace()
-        return env
+    # @classmethod
+    # def create(cls, workspace=None, globals=None, trace=None):
+    #     env = EnvironmentAPI()
+    #     env.namespace = globals
+    #     env.initialize_namespace()
+    #     return env
 
 
 class EnvironmentScript(Environment):
@@ -395,14 +399,13 @@ class EnvironmentScript(Environment):
         self.current_op = None
         # Symbols imported need special handling
         self.imports = set()
-        self.directory_state = marcel.directorystate.DirectoryState(self)
 
     # Don't pickle everything
 
     def initialize_namespace(self):
-        super().initialize_namespace()
+        namespace = super().initialize_namespace()
         self.var_handler.add_immutable_vars('pos')
-        self.namespace.update({
+        namespace.update({
             'WORKSPACE': self.workspace.name,
             'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
             'BOLD': marcel.object.color.Color.BOLD,
@@ -413,9 +416,10 @@ class EnvironmentScript(Environment):
             'o': marcel.structish.o})
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
-                self.namespace[key] = value
+                namespace[key] = value
         self.restore_persistent_state_from_workspace(self.workspace)
         self.dir_state().change_current_dir(self.pwd_or_alternative())
+        return namespace
 
     def pid(self):
         return self.locations.pid
@@ -546,12 +550,12 @@ class EnvironmentScript(Environment):
                 type(interactive_executables) in (tuple, list) and
                 x in interactive_executables)
 
-    @classmethod
-    def create(cls, workspace=None, globals=None, trace=None):
-        env = EnvironmentScript(workspace, trace)
-        env.namespace = marcel.nestednamespace.NestedNamespace()
-        env.initialize_namespace()
-        return env
+    # @classmethod
+    # def create(cls, workspace=None, globals=None, trace=None):
+    #     env = EnvironmentScript(workspace, trace)
+    #     env.namespace = marcel.nestednamespace.NestedNamespace()
+    #     env.initialize_namespace()
+    #     return env
 
     @staticmethod
     def is_immutable(x):
@@ -575,12 +579,13 @@ class EnvironmentInteractive(EnvironmentScript):
         self.next_command = None
 
     def initialize_namespace(self):
-        super().initialize_namespace()
+        namespace = super().initialize_namespace()
         self.var_handler.add_immutable_vars('PROMPT',
                                             'BOLD',
                                             'ITALIC',
                                             'COLOR_SCHEME',
                                             'Color')
+        return namespace
 
     def prompt(self):
         def prompt_dir():
@@ -639,12 +644,12 @@ class EnvironmentInteractive(EnvironmentScript):
         self.next_command = None
         return command
 
-    @classmethod
-    def create(cls, workspace=None, globals=None, trace=None):
-        env = EnvironmentInteractive(workspace, trace)
-        env.namespace = marcel.nestednamespace.NestedNamespace()
-        env.initialize_namespace()
-        return env
+    # @classmethod
+    # def create(cls, workspace=None, globals=None, trace=None):
+    #     env = EnvironmentInteractive(workspace, trace)
+    #     env.namespace = marcel.nestednamespace.NestedNamespace()
+    #     env.initialize_namespace()
+    #     return env
 
 
 class Trace(object):

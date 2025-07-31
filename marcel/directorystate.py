@@ -35,7 +35,7 @@ class DirectoryState:
     def change_current_dir(self, directory):
         if isinstance(directory, str):
             directory = pathlib.Path(directory)
-        isinstance(directory, pathlib.Path), directory
+        assert isinstance(directory, pathlib.Path), directory
         # current_dir() calls _clean_dir_stack(),
         new_dir = (self.current_dir() / directory.expanduser()).resolve(False)  # False: due to bug 27
         dir_stack = self._dir_stack()
