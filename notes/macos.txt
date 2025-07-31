@@ -846,24 +846,29 @@ If namespace is moving to env:
 
 ----------------------------------------------------------------------
 
+7/30/25
+
+Unify env create functions
+
 EI
 
     @staticmethod
-    def create(locations, workspace, trace=None):
-        env = EnvironmentInteractive(locations, workspace, trace)
+    def create(workspace, trace=None):
+        env = EnvironmentInteractive(workspace, trace)
         env.initialize_namespace()
         return env
 
 ES
 
     @staticmethod
-    def create(locations, workspace, trace=None):
-        env = EnvironmentScript(locations, workspace, trace)
+    def create(workspace, trace=None):
+        env = EnvironmentScript(workspace, trace)
         env.initialize_namespace()
         return env
 
 
 EA
+
     @staticmethod
     def create(globals):
         env = EnvironmentAPI(globals)
@@ -871,6 +876,20 @@ EA
         return env
 
 
+Combine:
+
+    @staticmethod
+    def create(env_class,
+               workspace=Workspace.default(), 
+               globals=None, 
+               trace=None):
+        env = env_class(workspace, trace)
+        namespace = env.initial_namespace()
+        # CLI, script usage: namespace is created by initial_namespace, globals is None
+        # API: initial_namespace returns None, globals is provided by caller.
+        assert (namespace is None) != (globals is None)
+        namespace = namespace if namespace else globals
+        env.namespace = namespace  # TODO: namespace is moving to workspace
 
 ----------------------------------------------------------------------
 

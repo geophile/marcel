@@ -42,6 +42,7 @@ import marcel.version
 import marcel.object.workspace
 
 Compilable = marcel.compilable.Compilable
+Workspace = marcel.object.workspace.Workspace
 
 
 class VarHandlerStartup(object):
@@ -177,10 +178,10 @@ class Environment(object):
         def __exit__(self, exc_type, exc_val, exc_tb):
             pass
 
-    def __init__(self, workspace, namespace, trace):
+    def __init__(self, workspace, trace):
         assert workspace is not None
         self.workspace = workspace
-        self.namespace = namespace
+        self.namespace = None  # Set in create(). Will move to workspace
         self.locations = marcel.locations.Locations()
         # Directory stack, including current directory.
         self.directory_state = None
@@ -300,12 +301,32 @@ class Environment(object):
             dir = self.getvar('HOME')
         return dir
 
+    # TODO: Replaces create methods on subclasses of Environment
+    @staticmethod
+    def create(env_class,
+               workspace=None,
+               globals=None,
+               trace=None):
+        # Don't use a default value for workspace. Default value expressions are evaluted
+        # on import, which may be too early. Discovered this gotcha on a unit test. Unit tests
+        # set HOME (in os.environ). But Workspace.default() creates a Locations object which
+        # depends on HOME. So Locations were wrong because HOME had not yet been reset for the test.
+        if workspace is None:
+            workspace = Workspace.default()
+        env = env_class(workspace, trace)
+        namespace = env.initial_namespace()
+        # CLI, script usage: namespace is created by initial_namespace, globals is None
+        # API: initial_namespace returns None, globals is provided by caller.
+        assert (namespace is None) != (globals is None)
+        namespace = namespace if namespace else globals
+        env.namespace = namespace  # TODO: namespace is moving to workspace
+
 
 class EnvironmentAPI(Environment):
 
     # globals: From the module in which marcel.api is imported.
-    def __init__(self, globals, trace=None):
-        super().__init__(marcel.object.workspace.Workspace.default(), globals, trace)
+    def __init__(self, trace=None):
+        super().__init__(Workspace.default(), trace)
         self.directory_state = marcel.directorystate.DirectoryState(self)
 
     def clear_changes(self):
@@ -316,7 +337,8 @@ class EnvironmentAPI(Environment):
 
     @staticmethod
     def create(globals):
-        env = EnvironmentAPI(globals)
+        env = EnvironmentAPI()
+        env.namespace = globals
         env.initialize_namespace()
         return env
 
@@ -366,7 +388,7 @@ class EnvironmentScript(Environment):
             return self.id == other.id
 
     def __init__(self, workspace, trace=None):
-        super().__init__(workspace, marcel.nestednamespace.NestedNamespace(), trace)
+        super().__init__(workspace, trace)
         # Vars defined during startup
         self.startup_vars = None
         # Support for pos()
@@ -527,6 +549,7 @@ class EnvironmentScript(Environment):
     @staticmethod
     def create(workspace, trace=None):
         env = EnvironmentScript(workspace, trace)
+        env.namespace = marcel.nestednamespace.NestedNamespace()
         env.initialize_namespace()
         return env
 
@@ -619,6 +642,7 @@ class EnvironmentInteractive(EnvironmentScript):
     @staticmethod
     def create(workspace, trace=None):
         env = EnvironmentInteractive(workspace, trace)
+        env.namespace = marcel.nestednamespace.NestedNamespace()
         env.initialize_namespace()
         return env
 
