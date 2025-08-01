@@ -194,7 +194,7 @@ class Environment(object):
         self.var_handler = VarHandlerStartup(self)
         self.trace = trace if trace else Trace()
 
-    def initialize_namespace(self):
+    def initial_namespace(self):
         namespace = NestedNamespace()
         self.namespace = namespace  # Should go away when namespace moves to Workspace
         self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
@@ -305,7 +305,6 @@ class Environment(object):
             dir = self.getvar('HOME')
         return dir
 
-    # TODO: Replaces create methods on subclasses of Environment
     @classmethod
     def create(cls,
                workspace=None,
@@ -318,7 +317,7 @@ class Environment(object):
         if workspace is None:
             workspace = Workspace.default()
         env = cls(workspace=workspace, trace=trace)
-        namespace = env.initialize_namespace()
+        namespace = env.initial_namespace()
         assert (cls is EnvironmentAPI) == (globals is not None)
         if globals is not None:
             namespace.update(globals)
@@ -338,13 +337,6 @@ class EnvironmentAPI(Environment):
 
     def marcel_usage(self):
         return 'api'
-
-    # @classmethod
-    # def create(cls, workspace=None, globals=None, trace=None):
-    #     env = EnvironmentAPI()
-    #     env.namespace = globals
-    #     env.initialize_namespace()
-    #     return env
 
 
 class EnvironmentScript(Environment):
@@ -402,8 +394,8 @@ class EnvironmentScript(Environment):
 
     # Don't pickle everything
 
-    def initialize_namespace(self):
-        namespace = super().initialize_namespace()
+    def initial_namespace(self):
+        namespace = super().initial_namespace()
         self.var_handler.add_immutable_vars('pos')
         namespace.update({
             'WORKSPACE': self.workspace.name,
@@ -550,13 +542,6 @@ class EnvironmentScript(Environment):
                 type(interactive_executables) in (tuple, list) and
                 x in interactive_executables)
 
-    # @classmethod
-    # def create(cls, workspace=None, globals=None, trace=None):
-    #     env = EnvironmentScript(workspace, trace)
-    #     env.namespace = marcel.nestednamespace.NestedNamespace()
-    #     env.initialize_namespace()
-    #     return env
-
     @staticmethod
     def is_immutable(x):
         return callable(x) or marcel.util.one_of(x, (int,
@@ -578,8 +563,8 @@ class EnvironmentInteractive(EnvironmentScript):
         self.reader = None
         self.next_command = None
 
-    def initialize_namespace(self):
-        namespace = super().initialize_namespace()
+    def initial_namespace(self):
+        namespace = super().initial_namespace()
         self.var_handler.add_immutable_vars('PROMPT',
                                             'BOLD',
                                             'ITALIC',
@@ -643,13 +628,6 @@ class EnvironmentInteractive(EnvironmentScript):
         command = self.next_command
         self.next_command = None
         return command
-
-    # @classmethod
-    # def create(cls, workspace=None, globals=None, trace=None):
-    #     env = EnvironmentInteractive(workspace, trace)
-    #     env.namespace = marcel.nestednamespace.NestedNamespace()
-    #     env.initialize_namespace()
-    #     return env
 
 
 class Trace(object):
