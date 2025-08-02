@@ -22,6 +22,7 @@ import psutil
 
 import marcel.exception
 import marcel.locations
+import marcel.nestednamespace
 import marcel.object.renderable
 import marcel.reservoir
 import marcel.util
@@ -92,6 +93,7 @@ class Workspace(marcel.object.renderable.Renderable):
     def __init__(self, name):
         assert name is not None
         self.name = name
+        self.namespace = marcel.nestednamespace.NestedNamespace()
         self.properties = None
         self.persistent_state = None
         self.locations = marcel.locations.Locations()
@@ -123,6 +125,7 @@ class Workspace(marcel.object.renderable.Renderable):
     def open(self):
         if self.exists():
             if self.lock_workspace():
+                self.namespace = marcel.nestednamespace.NestedNamespace()
                 self.read_properties()
                 self.read_environment()
             else:
@@ -143,6 +146,8 @@ class Workspace(marcel.object.renderable.Renderable):
             self.write_environment(env.persistent_state())
             # Mark this workspace object as closed
             self.properties = None
+            # Discard workspace
+            self.namespace = None
             # Unlock
             self.unlock_workspace()
         else:
@@ -380,6 +385,7 @@ class WorkspaceDefault(Workspace):
         self.read_environment()
 
     def close(self, env, restart):
+        self.namespace.clear()
         # Reservoirs
         for var, reservoir in env.reservoirs():
             assert type(reservoir) is marcel.reservoir.Reservoir

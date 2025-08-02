@@ -893,9 +893,50 @@ Combine:
 
 ----------------------------------------------------------------------
 
+8/1/25
+
+Env, env.pickle, Workspace.persistent_state
+
+
+Create Workspace.persistent_state
+    WsNew
+        Workspace.create
+            Workspace.create_on_disk
+                *** write persistent state to dist with empty namespace
+
+
+Write Workspace.persistent_state
+
+    WsClose.run
+        raises ReconfigureException
+
+    main_interactive_run catches ReconfigureException
+        main.shutdown(restart=True)
+            MainScript.shutdown()
+                self.env.workspace.close(restart)
+                    write properties
+                    self.write_environment(env.persistent_state())
+                    clear namespace
+
+
+Read Workspace.persistent_state
+
+    WsOpen.run
+        workspace.open()
+        env.restore_persistent_state_from_workspace(workspace)
+            workspace.open()
+                self.namespace.clear()
+                read properties
+                read env, sets Workspace.persistent_state
+            persistent_state = workspace.persistent_state
+            process persistent_state imports, compilables, namespace
+
+
+----------------------------------------------------------------------
+
 TODO
 
-Move out of MainScript init
+- Move out of MainScript init
 
         # Restore workspace state
         if env.workspace.exists():
@@ -903,8 +944,10 @@ Move out of MainScript init
         else:
             self.env.workspace.does_not_exist()
 
-And this, can it be moved to main, right after migration?
+- And this, can it be moved to main, right after migration?
 
         marcel.persistence.persistence.validate_all(self.handle_persistence_validation_errors)
 
-Should be possible to simplify since we no longer start in a workspace.
+  Should be possible to simplify since we no longer start in a workspace.
+
+- Get rid of MARCEL_VERSION in env

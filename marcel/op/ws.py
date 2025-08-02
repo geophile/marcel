@@ -318,7 +318,7 @@ class WsClose(WsImpl):
         self.check_anon_arg_absent()
 
     def run(self, env):
-        # DON'T close the workspace. That will happend following the ReconfigureException.
+        # DON'T close the workspace. That will happen following the ReconfigureException.
         if not env.workspace.is_default():
             Workspace.default().open()
             self.op.send(env, Workspace.default())

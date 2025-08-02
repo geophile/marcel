@@ -251,6 +251,7 @@ class MainInteractive(MainScript):
     # MainInteractive
 
     def run(self):
+        self.env.go_to_current_dir()
         interactive = sys.stdin.isatty()
         try:
             while True:

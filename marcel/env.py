@@ -28,7 +28,6 @@ import marcel.directorystate
 import marcel.exception
 import marcel.function
 import marcel.locations
-import marcel.nestednamespace
 import marcel.object.cluster
 import marcel.object.db
 import marcel.object.color
@@ -182,7 +181,6 @@ class Environment(object):
     def __init__(self, workspace, trace):
         assert workspace is not None
         self.workspace = workspace
-        self.namespace = None  # Set in create(). Will move to workspace
         self.locations = marcel.locations.Locations()
         # Directory stack, including current directory.
         self.directory_state = marcel.directorystate.DirectoryState(self)
@@ -193,12 +191,14 @@ class Environment(object):
         # Lax var handling for now. Check immutability after startup is complete.
         self.var_handler = VarHandlerStartup(self)
         self.trace = trace if trace else Trace()
-
-    def initial_namespace(self):
-        namespace = NestedNamespace()
-        self.namespace = namespace  # Should go away when namespace moves to Workspace
         self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
         self.var_handler.add_save_vars('PWD', 'DIRS')
+
+    @property  # TODO: Scaffolding during move of namespace to Workspace
+    def namespace(self):
+        return self.workspace.namespace
+
+    def initialize_namespace(self):
         try:
             homedir = pathlib.Path.home().resolve().as_posix()
         except FileNotFoundError:
@@ -208,7 +208,7 @@ class Environment(object):
             current_dir = pathlib.Path.cwd().resolve().as_posix()
         except FileNotFoundError:
             current_dir = homedir
-        namespace.update({
+        self.workspace.namespace.update({
             'MARCEL_VERSION': marcel.version.VERSION,
             'HOME': homedir,
             'PWD': current_dir,
@@ -217,8 +217,6 @@ class Environment(object):
             'HOST': socket.gethostname(),
             'parse_args': lambda usage=None, **kwargs: marcel.cliargs.parse_args(self, usage, **kwargs)
         })
-        self.dir_state().change_current_dir(self.pwd_or_alternative())
-        return namespace
 
     def dir_state(self):
         return self.directory_state
@@ -279,7 +277,7 @@ class Environment(object):
         self.var_handler.clear_changes()
 
     def set_function_globals(self, function):
-        function.set_globals(self.namespace)
+        function.set_globals(self.workspace.namespace)
 
     def color_scheme(self):
         return None
@@ -294,16 +292,17 @@ class Environment(object):
     def api_usage(self):
         return self.marcel_usage() == 'api'
 
-    # The directory named by PWD can disappear, and going to it will fail.
-    # Use HOME as an alternative.
-    def pwd_or_alternative(self):
-        dir = self.getvar('PWD')
-        if dir:  # False for '',  None
-            if not (os.path.exists(dir) and os.path.isdir(dir)):
-                dir = None
-        if not dir:
-            dir = self.getvar('HOME')
-        return dir
+    def go_to_current_dir(self):
+        # The directory named by PWD can disappear, and going to it will fail.
+        # Use HOME as an alternative.
+        current_dir = self.getvar('PWD')
+        if current_dir:  # False for '',  None
+            if not (os.path.exists(current_dir) and os.path.isdir(current_dir)):
+                current_dir = None
+        if not current_dir:
+            current_dir = self.getvar('HOME')
+        os.chdir(current_dir)
+        self.dir_state().change_current_dir(current_dir)
 
     @classmethod
     def create(cls,
@@ -317,11 +316,10 @@ class Environment(object):
         if workspace is None:
             workspace = Workspace.default()
         env = cls(workspace=workspace, trace=trace)
-        namespace = env.initial_namespace()
         assert (cls is EnvironmentAPI) == (globals is not None)
         if globals is not None:
-            namespace.update(globals)
-        env.namespace = namespace  # TODO: namespace is moving to workspace
+            workspace.namespace.update(globals)
+        env.initialize_namespace()
         return env
 
 
@@ -391,13 +389,13 @@ class EnvironmentScript(Environment):
         self.current_op = None
         # Symbols imported need special handling
         self.imports = set()
+        self.var_handler.add_immutable_vars('pos')
 
     # Don't pickle everything
 
-    def initial_namespace(self):
-        namespace = super().initial_namespace()
-        self.var_handler.add_immutable_vars('pos')
-        namespace.update({
+    def initialize_namespace(self):
+        super().initialize_namespace()
+        self.workspace.namespace.update({
             'WORKSPACE': self.workspace.name,
             'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
             'BOLD': marcel.object.color.Color.BOLD,
@@ -408,10 +406,8 @@ class EnvironmentScript(Environment):
             'o': marcel.structish.o})
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
-                namespace[key] = value
+                self.workspace.namespace[key] = value
         self.restore_persistent_state_from_workspace(self.workspace)
-        self.dir_state().change_current_dir(self.pwd_or_alternative())
-        return namespace
 
     def pid(self):
         return self.locations.pid
@@ -424,7 +420,7 @@ class EnvironmentScript(Environment):
         save = dict()
         save_vars = self.var_handler.save_vars
         compilable_vars = []
-        for var, value in self.namespace.items():
+        for var, value in self.workspace.namespace.items():
             if var in save_vars:
                 save[var] = value
                 if isinstance(value, Compilable):
@@ -433,7 +429,7 @@ class EnvironmentScript(Environment):
         # Now that we know what to save, remove the compilables. Otherwise, shutdown, which examines the environment,
         # and does getvars, will fail when getvar is applied to a Compilable.
         for var in compilable_vars:
-            del self.namespace[var]
+            del self.workspace.namespace[var]
         return {'namespace': save,
                 'imports': self.imports,
                 'compilables': self.compilables}
@@ -450,7 +446,7 @@ class EnvironmentScript(Environment):
                 print(f'Unable to import {i.module_name}: e.message', file=sys.stderr)
         # Restore vars.
         saved_vars = persistent_state['namespace']
-        self.namespace.update(saved_vars)
+        self.workspace.namespace.update(saved_vars)
         self.var_handler.add_save_vars(*saved_vars)
         # Recompile compilables. Tracking of compilables in persistent state is new as of 0.26.0, so
         # allow for them to be missing. (We are then subject to bug 254, which is why self.compilables
@@ -466,9 +462,6 @@ class EnvironmentScript(Environment):
             # This assigns env to the var's value, which should be a compilable. This will allow compilation
             # to occur when needed.
             self.getvar(var)
-        # Reflect current dir in OS. I think this fixes bug 257.
-        dir = self.pwd_or_alternative()
-        os.chdir(dir)
 
     def never_mutable(self):
         vars = set(super().never_mutable())
@@ -484,10 +477,10 @@ class EnvironmentScript(Environment):
             # will then be added to self.namespace, for use in the execution of op functions.
             locals = dict()
             try:
-                exec(config_source, self.namespace, locals)
+                exec(config_source, self.workspace.namespace, locals)
             except Exception as e:
                 raise marcel.exception.StartupScriptException(self.workspace, e)
-            self.namespace.update(locals)
+            self.workspace.namespace.update(locals)
 
     def check_nesting(self):
         return EnvironmentScript.CheckNesting(self)
@@ -563,14 +556,13 @@ class EnvironmentInteractive(EnvironmentScript):
         self.reader = None
         self.next_command = None
 
-    def initial_namespace(self):
-        namespace = super().initial_namespace()
+    def initialize_namespace(self):
+        super().initialize_namespace()
         self.var_handler.add_immutable_vars('PROMPT',
                                             'BOLD',
                                             'ITALIC',
                                             'COLOR_SCHEME',
                                             'Color')
-        return namespace
 
     def prompt(self):
         def prompt_dir():
@@ -612,7 +604,7 @@ class EnvironmentInteractive(EnvironmentScript):
                     pass
                 elif callable(x):
                     # Set up the namespace for calling the function
-                    x.__globals__.update(self.namespace)
+                    x.__globals__.update(self.workspace.namespace)
                     x = x()
                 else:
                     raise marcel.exception.KillShellException(f'Invalid prompt component: {x}')

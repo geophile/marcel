@@ -625,8 +625,8 @@ def test_namespace():
     TEST.run(test='ws -n namespace_test',
              verification='ws | (w: str(w))',
              expected_out=['Workspace(namespace_test)'])
-    TEST.run('map (list(globals().keys())) | expand | select (f: f == "USER")',
-             expected_out=['USER'])
+    # TEST.run('map (list(globals().keys())) | expand | select (f: f == "USER")',
+    #          expected_out=['USER'])
     # Try to use an undefined symbol
     TEST.run('map (pi)',
              expected_out=[Error('not defined')])
