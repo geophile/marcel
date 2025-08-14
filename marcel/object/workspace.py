@@ -93,7 +93,7 @@ class Workspace(marcel.object.renderable.Renderable):
     def __init__(self, name):
         assert name is not None
         self.name = name
-        self.namespace = marcel.nestednamespace.NestedNamespace()
+        self.namespace = None
         self.properties = None
         self.persistent_state = None
         self.locations = marcel.locations.Locations()
@@ -122,12 +122,18 @@ class Workspace(marcel.object.renderable.Renderable):
         initial_config_contents = self.locations.config_ws_startup(Workspace.default()).read_text()
         self.create_on_disk(initial_config_contents)
 
-    def open(self):
+    def open(self, env, initial_namespace=None):
         if self.exists():
             if self.lock_workspace():
-                self.namespace = marcel.nestednamespace.NestedNamespace()
+                self.namespace = marcel.nestednamespace.NestedNamespace(env)
+                if initial_namespace:
+                    assert type(initial_namespace) is dict
+                    self.namespace.update(initial_namespace)
                 self.read_properties()
+                # read_environment reads env.pickle into self.persistent_state
+                # Then restore-persistent_state_from_workspace uses self.persistent_state
                 self.read_environment()
+                env.restore_persistent_state_from_workspace(self)
             else:
                 self.cannot_lock_workspace()
         else:
@@ -381,8 +387,15 @@ class WorkspaceDefault(Workspace):
     def is_default(self):
         return True
 
-    def open(self):
+    def open(self, env, initial_namespace=None):
+        self.namespace = marcel.nestednamespace.NestedNamespace(env)
+        if initial_namespace:
+            assert type(initial_namespace) is dict
+            self.namespace.update(initial_namespace)
+        # read_environment reads env.pickle into self.persistent_state
+        # Then restore-persistent_state_from_workspace uses self.persistent_state
         self.read_environment()
+        env.restore_persistent_state_from_workspace(self)
 
     def close(self, env, restart):
         self.namespace.clear()

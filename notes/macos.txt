@@ -931,6 +931,17 @@ Read Workspace.persistent_state
             persistent_state = workspace.persistent_state
             process persistent_state imports, compilables, namespace
 
+----------------------------------------------------------------------
+
+8/14/25
+
+Bug:
+
+- Create a new workspace. Default workspace env is saved in <pid>.env.pickle.
+
+- Shutdown
+
+*** <pid>.env.pickle is not deleted on shutdown, it should be.
 
 ----------------------------------------------------------------------
 

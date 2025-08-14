@@ -38,11 +38,8 @@ import marcel.reservoir
 import marcel.structish
 import marcel.util
 import marcel.version
-import marcel.object.workspace
 
 Compilable = marcel.compilable.Compilable
-Workspace = marcel.object.workspace.Workspace
-NestedNamespace = marcel.nestednamespace.NestedNamespace
 
 
 class VarHandlerStartup(object):
@@ -193,12 +190,14 @@ class Environment(object):
         self.trace = trace if trace else Trace()
         self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
         self.var_handler.add_save_vars('PWD', 'DIRS')
+        self.imports = set()
 
     @property  # TODO: Scaffolding during move of namespace to Workspace
     def namespace(self):
         return self.workspace.namespace
 
-    def initialize_namespace(self):
+    def initial_namespace(self):
+        initial_namespace = dict()
         try:
             homedir = pathlib.Path.home().resolve().as_posix()
         except FileNotFoundError:
@@ -208,7 +207,7 @@ class Environment(object):
             current_dir = pathlib.Path.cwd().resolve().as_posix()
         except FileNotFoundError:
             current_dir = homedir
-        self.workspace.namespace.update({
+        initial_namespace.update({
             'MARCEL_VERSION': marcel.version.VERSION,
             'HOME': homedir,
             'PWD': current_dir,
@@ -217,9 +216,60 @@ class Environment(object):
             'HOST': socket.gethostname(),
             'parse_args': lambda usage=None, **kwargs: marcel.cliargs.parse_args(self, usage, **kwargs)
         })
+        return initial_namespace
 
     def dir_state(self):
         return self.directory_state
+
+    def persistent_state(self):
+        # Things to persist:
+        # - vars mentioned in save_vars
+        # - imports
+        # - compilables
+        save = dict()
+        save_vars = self.var_handler.save_vars
+        compilable_vars = []
+        for var, value in self.workspace.namespace.items():
+            if var in save_vars:
+                save[var] = value
+                if isinstance(value, Compilable):
+                    compilable_vars.append(var)
+                    value.purge()
+        # Now that we know what to save, remove the compilables. Otherwise, shutdown, which examines the environment,
+        # and does getvars, will fail when getvar is applied to a Compilable.
+        for var in compilable_vars:
+            del self.workspace.namespace[var]
+        return {'namespace': save,
+                'imports': self.imports,
+                'compilables': self.compilables}
+
+    def restore_persistent_state_from_workspace(self, workspace):
+        persistent_state = workspace.persistent_state
+        # Do the imports before compilation, which may depend on the imports.
+        imports = persistent_state['imports']
+        for i in imports:
+            try:
+                self.import_module(i.module_name, i.symbol, i.name)
+            except marcel.exception.ImportException as e:
+                print(f'Unable to import {i.module_name}: e.message', file=sys.stderr)
+        # Restore vars.
+        saved_vars = persistent_state['namespace']
+        self.workspace.namespace.update(saved_vars)
+        self.var_handler.add_save_vars(*saved_vars)
+        # Recompile compilables. Tracking of compilables in persistent state is new as of 0.26.0, so
+        # allow for them to be missing. (We are then subject to bug 254, which is why self.compilables
+        # was introduced.)
+        try:
+            compilables = persistent_state['compilables']
+        except KeyError:
+            compilables = []
+            for var, value in saved_vars.items():
+                if isinstance(value, Compilable):
+                    compilables.append(var)
+        for var in compilables:
+            # This assigns env to the var's value, which should be a compilable. This will allow compilation
+            # to occur when needed.
+            self.getvar(var)
 
     # Vars that are not mutable even during startup. I.e., startup script can't modify them.
     def never_mutable(self):
@@ -314,12 +364,14 @@ class Environment(object):
         # set HOME (in os.environ). But Workspace.default() creates a Locations object which
         # depends on HOME. So Locations were wrong because HOME had not yet been reset for the test.
         if workspace is None:
-            workspace = Workspace.default()
+            import marcel.object.workspace
+            workspace = marcel.object.workspace.Workspace.default()
         env = cls(workspace=workspace, trace=trace)
+        initial_namespace = env.initial_namespace()
+        workspace.open(env, initial_namespace)
         assert (cls is EnvironmentAPI) == (globals is not None)
         if globals is not None:
             workspace.namespace.update(globals)
-        env.initialize_namespace()
         return env
 
 
@@ -388,14 +440,13 @@ class EnvironmentScript(Environment):
         # Support for pos()
         self.current_op = None
         # Symbols imported need special handling
-        self.imports = set()
         self.var_handler.add_immutable_vars('pos')
 
     # Don't pickle everything
 
-    def initialize_namespace(self):
-        super().initialize_namespace()
-        self.workspace.namespace.update({
+    def initial_namespace(self):
+        initial_namespace = super().initial_namespace()
+        initial_namespace.update({
             'WORKSPACE': self.workspace.name,
             'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
             'BOLD': marcel.object.color.Color.BOLD,
@@ -406,62 +457,11 @@ class EnvironmentScript(Environment):
             'o': marcel.structish.o})
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
-                self.workspace.namespace[key] = value
-        self.restore_persistent_state_from_workspace(self.workspace)
+                initial_namespace[key] = value
+        return initial_namespace
 
     def pid(self):
         return self.locations.pid
-
-    def persistent_state(self):
-        # Things to persist:
-        # - vars mentioned in save_vars
-        # - imports
-        # - compilables
-        save = dict()
-        save_vars = self.var_handler.save_vars
-        compilable_vars = []
-        for var, value in self.workspace.namespace.items():
-            if var in save_vars:
-                save[var] = value
-                if isinstance(value, Compilable):
-                    compilable_vars.append(var)
-                    value.purge()
-        # Now that we know what to save, remove the compilables. Otherwise, shutdown, which examines the environment,
-        # and does getvars, will fail when getvar is applied to a Compilable.
-        for var in compilable_vars:
-            del self.workspace.namespace[var]
-        return {'namespace': save,
-                'imports': self.imports,
-                'compilables': self.compilables}
-
-    def restore_persistent_state_from_workspace(self, workspace):
-        workspace.open()
-        persistent_state = workspace.persistent_state
-        # Do the imports before compilation, which may depend on the imports.
-        imports = persistent_state['imports']
-        for i in imports:
-            try:
-                self.import_module(i.module_name, i.symbol, i.name)
-            except marcel.exception.ImportException as e:
-                print(f'Unable to import {i.module_name}: e.message', file=sys.stderr)
-        # Restore vars.
-        saved_vars = persistent_state['namespace']
-        self.workspace.namespace.update(saved_vars)
-        self.var_handler.add_save_vars(*saved_vars)
-        # Recompile compilables. Tracking of compilables in persistent state is new as of 0.26.0, so
-        # allow for them to be missing. (We are then subject to bug 254, which is why self.compilables
-        # was introduced.)
-        try:
-            compilables = persistent_state['compilables']
-        except KeyError:
-            compilables = []
-            for var, value in saved_vars.items():
-                if isinstance(value, Compilable):
-                    compilables.append(var)
-        for var in compilables:
-            # This assigns env to the var's value, which should be a compilable. This will allow compilation
-            # to occur when needed.
-            self.getvar(var)
 
     def never_mutable(self):
         vars = set(super().never_mutable())
@@ -555,9 +555,6 @@ class EnvironmentInteractive(EnvironmentScript):
         self.config_path = None
         self.reader = None
         self.next_command = None
-
-    def initialize_namespace(self):
-        super().initialize_namespace()
         self.var_handler.add_immutable_vars('PROMPT',
                                             'BOLD',
                                             'ITALIC',
@@ -603,8 +600,10 @@ class EnvironmentInteractive(EnvironmentScript):
                 elif isinstance(x, str):
                     pass
                 elif callable(x):
-                    # Set up the namespace for calling the function
-                    x.__globals__.update(self.workspace.namespace)
+                    # Set up the namespace for calling the function. Updating __globals__ with a NestedNamespace
+                    # seems to break things so that the invocation (x()) raises an AssertionError. Need a genuine
+                    # dict for the update.
+                    x.__globals__.update(dict(self.workspace.namespace))
                     x = x()
                 else:
                     raise marcel.exception.KillShellException(f'Invalid prompt component: {x}')
@@ -613,7 +612,7 @@ class EnvironmentInteractive(EnvironmentScript):
                     buffer.append(marcel.util.colorize(x, color) if color else x)
             return ''.join(buffer)
         except Exception as e:
-            print(f'Bad prompt definition in {prompt_pieces}: {e}', file=sys.stderr)
+            print(f'Bad prompt definition in {prompt_pieces}: ({type(e)}) {e}', file=sys.stderr)
             return EnvironmentInteractive.DEFAULT_PROMPT
 
     def take_next_command(self):

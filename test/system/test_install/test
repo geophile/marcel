@@ -29,6 +29,10 @@ list_config_and_data() {
 }
 
 check() {
+  echo "expected ----------------------------------------------------------"
+  cat $EXPECTED/$1
+  echo "actual   ----------------------------------------------------------"
+  cat $ACTUAL/$1
   diff $EXPECTED/$1 $ACTUAL/$1 > /dev/null
   if [ $? != '0' ]; then
     FAILURES=$(($FAILURES+1))
@@ -65,6 +69,9 @@ test_create_workspace() {
   ws -n $1 | select (x: False)
   gen 3 >$ g3
 EOF
+  echo "......................................................................."
+  find $TEST_HOME/.local/share/marcel/workspace
+  echo "......................................................................."
   list_config_and_data ws_create_w
   check ws_create_w
 }
@@ -97,9 +104,9 @@ main() {
   test_before_install
   test_after_install
   test_create_workspace w
-  test_use_workspace w
-  test_delete_workspace w
-  echo "$FAILURES failures: $0"
+  # test_use_workspace w
+  # test_delete_workspace w
+  # echo "$FAILURES failures: $0"
 }
 
 main

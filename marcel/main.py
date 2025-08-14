@@ -64,7 +64,11 @@ class Main(object):
     # Main
 
     def shutdown(self, restart=False):
-        assert False
+        print('Main.shutdown')
+        # The current main is about to be obsolete, but it still exists, and is registered with atexit,
+        # keeping it alive, I think. So its shutdown handler gets run on shutdown. atexit.unregister
+        # prevents this, and only the current Main's shutdown will run, on shutdown.
+        atexit.unregister(self.shutdown)
 
 
 class MainAPI(Main):
@@ -73,12 +77,6 @@ class MainAPI(Main):
         super().__init__(env)
         self.env.enforce_var_immutability()
         atexit.register(self.shutdown)
-
-    # Main
-
-    def shutdown(self, restart=False):
-        namespace = self.env.namespace
-        return namespace
 
 
 class MainScript(Main):
@@ -147,10 +145,7 @@ class MainScript(Main):
                 Workspace.default().close(self.env, restart)
             except:
                 pass
-        # The current main is about to be obsolete, but it still exists, and is registered with atexit,
-        # keeping it alive, I think. So it's shutdown handler gets run on shutdown. atexit.unregister
-        # prevents this, and only the current Main's shutdown will run, on shutdown.
-        atexit.unregister(self.shutdown)
+        super().shutdown(restart)
 
     # MainScript
 
@@ -238,7 +233,7 @@ class MainInteractive(MainScript):
             self.job_control.shutdown()
         except:
             pass
-        return super().shutdown(restart)
+        super().shutdown(restart)
 
     # MainScript
 
@@ -432,4 +427,5 @@ if __name__ == '__main__':
         # raise KSE instead for switching to a workspace from a marcel commandd.
         print(str(e), file=sys.stderr)
     except marcel.exception.ExitException:
-        sys.exit(0)
+        # sys.exit(0)
+        pass

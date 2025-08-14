@@ -529,9 +529,11 @@ class PipelineMarcel(Pipeline):
         return self.pipeline.n_params()
 
     def run_pipeline(self, env, args):
-        env.vars().push_scope(self.scope)
-        for i in range(len(self.params)):
-            env.setvar(self.params[i], args[i])
+        scope = dict()
+        if args:
+            for i in range(len(self.params)):
+                scope[self.params[i]] = args[i]
+        env.vars().push_scope(scope)
         try:
             marcel.core.Command(None, self.pipeline).execute(env)
         finally:

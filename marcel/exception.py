@@ -25,7 +25,6 @@ An C{exception_handler} is a function with these arguments:
 
 import sys
 
-import marcel.object.workspace
 import marcel.util
 
 
@@ -44,8 +43,7 @@ class KillCommandException(BaseException):
 class StartupScriptException(KillCommandException):
 
     def __init__(self, workspace, startup_exception):
-        description = 'default workspace' if workspace.is_default() else f'workspace {workspace.name}'
-        super().__init__(f'Error during execution of startup script of {description}: {startup_exception}')
+        super().__init__(f'Error during execution of startup script of {workspace}: {startup_exception}')
 
 
 # Exception for terminating command for API first().
