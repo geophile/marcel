@@ -60,11 +60,27 @@ class Main(object):
     def __init__(self, env, testing=None):
         self.main_pid = os.getpid()
         self.env = env
+        self.job_control = None
+        atexit.register(self.shutdown)
 
     # Main
 
     def shutdown(self, restart=False):
-        print('Main.shutdown')
+        if self.job_control:
+            try:
+                self.job_control.shutdown()
+            except:
+                pass
+        try:
+            self.env.workspace.close(self.env, restart)
+        except:
+            pass
+        # If we're shutting down for real (not restarting) then the default workspace needs to be closed too.
+        if not restart:
+            try:
+                Workspace.default().close(self.env, restart)
+            except:
+                pass
         # The current main is about to be obsolete, but it still exists, and is registered with atexit,
         # keeping it alive, I think. So its shutdown handler gets run on shutdown. atexit.unregister
         # prevents this, and only the current Main's shutdown will run, on shutdown.
@@ -76,7 +92,6 @@ class MainAPI(Main):
     def __init__(self, env):
         super().__init__(env)
         self.env.enforce_var_immutability()
-        atexit.register(self.shutdown)
 
 
 class MainScript(Main):
@@ -90,7 +105,6 @@ class MainScript(Main):
         self.env.enforce_var_immutability(startup_vars)
         self.needs_restart = False
         marcel.persistence.persistence.validate_all(self.handle_persistence_validation_errors)
-        atexit.register(self.shutdown)
 
     def read_config(self):
         # Comparing keys_before/after tells us what vars were defined by the startup script.
@@ -133,19 +147,6 @@ class MainScript(Main):
             except marcel.exception.KillAndResumeException:
                 # Error handler printed the error
                 pass
-
-    def shutdown(self, restart=False):
-        try:
-            self.env.workspace.close(self.env, restart)
-        except:
-            pass
-        # If we're shutting down for real (not restarting) then the default workspace needs to be closed too.
-        if not restart:
-            try:
-                Workspace.default().close(self.env, restart)
-            except:
-                pass
-        super().shutdown(restart)
 
     # MainScript
 
@@ -225,15 +226,6 @@ class MainInteractive(MainScript):
             # input records the current line of input. If a ReconfigureException is thrown, the old Main's input field
             # carries the input to the new Main, allowing the command to execute.
             self.input = old_main.input
-
-    # Main
-
-    def shutdown(self, restart=False):
-        try:
-            self.job_control.shutdown()
-        except:
-            pass
-        super().shutdown(restart)
 
     # MainScript
 

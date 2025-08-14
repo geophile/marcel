@@ -398,7 +398,6 @@ class WorkspaceDefault(Workspace):
         env.restore_persistent_state_from_workspace(self)
 
     def close(self, env, restart):
-        self.namespace.clear()
         # Reservoirs
         for var, reservoir in env.reservoirs():
             assert type(reservoir) is marcel.reservoir.Reservoir

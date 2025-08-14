@@ -943,6 +943,40 @@ Bug:
 
 *** <pid>.env.pickle is not deleted on shutdown, it should be.
 
+Main.shutdown: assert False
+
+MainAPI.shutdown: 
+
+    - return namespace
+
+    *** WHY? Not used.
+
+MainScript.shutdown:
+
+    - close workspace
+
+    - If not restart, close default workspace
+
+    *** WHY ISN'T DEFAULT WS CLOSE NOT WORKING?
+
+MainInteractive.shutdown
+
+    - Job control shutdown
+
+    - super shutdown
+
+
+......................................................................
+
+- Use macos branch model of VarHandlers (no VarHandlerStartup class)
+
+- Move VarHandler to workspace
+
+- env var api delegates to workspace
+
+- But keep immutability control in env, since it applies to VHs for
+  all workspaces.
+
 ----------------------------------------------------------------------
 
 TODO

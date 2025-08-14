@@ -140,7 +140,6 @@ class VarHandlerStartup(object):
                 reservoirs.append((var, value))
         return reservoirs
 
-
 class VarHandler(VarHandlerStartup):
     
     def __init__(self, startup_var_handler):
