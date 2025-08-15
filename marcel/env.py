@@ -42,121 +42,6 @@ import marcel.version
 Compilable = marcel.compilable.Compilable
 
 
-class VarHandler(object):
-
-    MISSING_VAR = object()
-    
-    def __init__(self, env):
-        assert isinstance(env, Environment)
-        self.env = env
-        # Immutability isn't enforced by this var hander. But the set is populated during startup,
-        # before VarHandler, which enforces immutability, is in place. Similarly, startup vars are discovered
-        # during startup (duh!) and then transferred to VarHandler for use during post-startup operation.
-        self.immutable_vars = set()
-        self.startup_vars = None
-        self.save_vars = set()
-        self.vars_read = set()
-        self.vars_written = set()
-        self.vars_deleted = set()
-        # Immutability of immutable_vars is enforced during normal operation.
-        # Marcel startup/shutdown is permitted to change these vars by turning off
-        # enforcement.
-        self._enforce_immutability = False
-
-    def hasvar(self, var):
-        assert var is not None
-        return var in self.env.namespace
-
-    def getvar(self, var):
-        assert var is not None
-        try:
-            value = self.env.namespace[var]
-            self.vars_read.add(var)
-            if isinstance(value, marcel.compilable.Compilable):
-                value.setenv(self.env)  # Needed for compilatoin
-                value = value.value()
-        except KeyError:
-            value = None
-        return value
-
-    def setvar(self, var, value, source=None, save=True):
-        assert var is not None
-        self.check_mutability(var)
-        current_value = self.env.namespace.get(var, None)
-        self.vars_written.add(var)
-        if type(current_value) is marcel.reservoir.Reservoir and value != current_value:
-            current_value.ensure_deleted()
-        if save:
-            self.save_vars.add(var)
-        self.env.namespace.assign(var, value, source)
-
-    def delvar(self, var):
-        assert var is not None
-        self.check_mutability(var)
-        self.vars_deleted.add(var)
-        self.save_vars.remove(var)
-        value = self.env.namespace.get(var, None)
-        if type(value) is marcel.reservoir.Reservoir:
-            value.ensure_deleted()
-        return self.env.namespace.pop(var)
-
-    def vars(self):
-        return self.env.namespace
-
-    def add_immutable_vars(self, *vars):
-        self.immutable_vars.update(vars)
-
-    def add_startup_vars(self, *vars):
-        self.immutable_vars.update(vars)
-        self.startup_vars = vars
-
-    def add_save_vars(self, *vars):
-        self.save_vars.update(vars)
-
-    def add_changed_var(self, var):
-        self.vars_written.add(var)
-
-    def changes(self):
-        changes = {}
-        for var in self.vars_written:
-            # Bug 273: A pipeline param could show up in vars_written. When the pipeline is exited,
-            # and the scope is popped, the namespace is maintained. But the var would still be in
-            # vars_written. If a var is in vars_written but not namespace, I'm assuming this is what happened.
-            # Another approach is to maintain vars_written on NestedNamespace.pop_scope. But vars_written
-            # isn't a nested structure. This would break if the same variable name were used in different scopes.
-            value = self.env.namespace.get(var, VarHandler.MISSING_VAR)
-            if value is not VarHandler.MISSING_VAR:
-                changes[var] = value
-        return changes
-
-    def clear_changes(self):
-        self.vars_read.clear()
-        self.vars_written.clear()
-        self.vars_deleted.clear()
-
-    def add_written(self, var):
-        self.vars_written.add(var)
-
-    def enforce_immutability(self, enforce):
-        self._enforce_immutability = enforce
-
-    def check_mutability(self, var):
-        if self._enforce_immutability and var in self.immutable_vars:
-            raise marcel.exception.KillCommandException(
-                f'{var} was defined by marcel, or in your startup script, '
-                f'so it cannot be modified or deleted programmatically. '
-                f'Edit the startup script instead.')
-
-    # Returns (var, value), where type(value) is Reservoir.
-    def reservoirs(self):
-        reservoirs = []
-        for var in self.save_vars:
-            value = self.getvar(var)
-            if type(value) is marcel.reservoir.Reservoir:
-                reservoirs.append((var, value))
-        return reservoirs
-
-
 class Environment(object):
 
     class CheckNestingNoop(object):
@@ -178,15 +63,20 @@ class Environment(object):
         # Source of ops and arg parsers.
         self.op_modules = marcel.opmodule.import_op_modules()
         # Lax var handling for now. Check immutability after startup is complete.
-        self.var_handler = VarHandler(self)
         self.trace = trace if trace else Trace()
         self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
         self.var_handler.add_save_vars('PWD', 'DIRS')
         self.imports = set()
 
-    @property  # TODO: Scaffolding during move of namespace to Workspace
+    # TODO: These properties are scaffolding during move of namespace to Workspace
+
+    @property
     def namespace(self):
         return self.workspace.namespace
+
+    @property
+    def var_handler(self):
+        return self.workspace.var_handler
 
     def initial_namespace(self):
         initial_namespace = dict()

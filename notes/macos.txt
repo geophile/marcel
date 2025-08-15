@@ -970,7 +970,7 @@ MainInteractive.shutdown
 
 8/15/25
 
-- Use macos branch model of VarHandlers (no VarHandlerStartup class)
++ Use macos branch model of VarHandlers (no VarHandlerStartup class)
 
 - Move VarHandler to workspace
 
