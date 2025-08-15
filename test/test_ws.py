@@ -337,32 +337,13 @@ def main_stable():
 
 
 def main_dev():
-    TEST.reset_environment()
-    ws_default = Workspace.default()
-    ws_restest = Workspace('restest')
-    # Default reservoir including its location
-    TEST.run(test='gen 3 >$ g3_default',
-             verification='g3_default <$',
-             expected_out=[0, 1, 2])
-    TEST.run(test=f'ls -f {TEST.env.locations.data_ws_res(ws_default, "g3_default")} | red count',
-             expected_out=[1])
-    # Leave the default workspace and check that the reservoir disappears
-    TEST.run(test='ws -n restest',
-             verification='ws',
-             expected_out=['Workspace(restest)'])
-    # Create a reservoir in the restest workspace
-    TEST.run(test='gen 3 >$ g3_restest',
-             verification='g3_restest <$',
-             expected_out=[0, 1, 2])
-    TEST.run(test=f'ls {TEST.env.locations.data_ws_res(ws_restest, "g3_restest")} | (f: f.as_posix())',
-             expected_out=[f'{TEST.env.locations.data_ws_res(ws_restest, "g3_restest")}'])
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
+    main_stable()
     TEST.report_failures('test_ws')
     sys.exit(TEST.failures)
 
