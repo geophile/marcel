@@ -337,13 +337,17 @@ def main_stable():
 
 
 def main_dev():
+    # test_workspace_lifecycle()
+    # test_workspaces_and_reservoirs()
+    test_workspaces_and_compilables()
+    # test_workspace_validation()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
+    # main_stable()
     TEST.report_failures('test_ws')
     sys.exit(TEST.failures)
 

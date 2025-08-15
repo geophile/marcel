@@ -16,6 +16,7 @@
 
 import collections.abc
 import grp
+import importlib
 import os
 import pathlib
 import pwd
@@ -254,6 +255,27 @@ def string_value(x):
     if type(x) is StringLiteral:
         x = x.value()
     return x
+
+# Returns the named module.
+# Raises ModuleNotFoundError if there is no module with the given name.
+def import_module(module_name):
+    return importlib.import_module(module_name)
+
+
+# Returns the symbol from within the named module.
+# Raises ModuleNotFoundError if there is no module with the given name.
+# Raises KeyError if the module was imported but the module does not contain the given symbol.
+def import_symbol(module_name, symbol):
+    module = importlib.import_module(module_name)
+    return module.__dict__[symbol]
+
+
+# Generates (symbol, value) pairs from within the named module.
+# Raises ModuleNotFoundError if there is no module with the given name.
+def import_symbols(module_name):
+    module = importlib.import_module(module_name)
+    for symbol, value in module.__dict__.items():
+        yield symbol, value
 
 
 class InputSource(object):

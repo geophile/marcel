@@ -183,7 +183,7 @@ class TestConsole(TestBase):
                     self.check_substring(test, expected_err, actual_err)
             except Exception as e:
                 print(f'{self.description(test)}: Terminated by uncaught exception: {e}', file=sys.__stdout__)
-                marcel.util.print_stack_of_current_exception()
+                marcel.util.print_stack_of_current_exception(file=sys.__stdout__)
                 self.failures += 1
             except marcel.exception.KillCommandException as e:
                 print(f'{self.description(test)}: Terminated by KillCommandException: {e}', file=sys.__stderr__)

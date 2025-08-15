@@ -103,56 +103,6 @@ class Environment(object):
     def dir_state(self):
         return self.directory_state
 
-    def persistent_state(self):
-        # Things to persist:
-        # - vars mentioned in save_vars
-        # - imports
-        # - compilables
-        save = dict()
-        save_vars = self.var_handler.save_vars
-        compilable_vars = []
-        for var, value in self.workspace.namespace.items():
-            if var in save_vars:
-                save[var] = value
-                if isinstance(value, Compilable):
-                    compilable_vars.append(var)
-                    value.purge()
-        # Now that we know what to save, remove the compilables. Otherwise, shutdown, which examines the environment,
-        # and does getvars, will fail when getvar is applied to a Compilable.
-        for var in compilable_vars:
-            del self.workspace.namespace[var]
-        return {'namespace': save,
-                'imports': self.imports,
-                'compilables': self.compilables}
-
-    def restore_persistent_state_from_workspace(self, workspace):
-        persistent_state = workspace.persistent_state
-        # Do the imports before compilation, which may depend on the imports.
-        imports = persistent_state['imports']
-        for i in imports:
-            try:
-                self.import_module(i.module_name, i.symbol, i.name)
-            except marcel.exception.ImportException as e:
-                print(f'Unable to import {i.module_name}: e.message', file=sys.stderr)
-        # Restore vars.
-        saved_vars = persistent_state['namespace']
-        self.workspace.namespace.update(saved_vars)
-        self.var_handler.add_save_vars(*saved_vars)
-        # Recompile compilables. Tracking of compilables in persistent state is new as of 0.26.0, so
-        # allow for them to be missing. (We are then subject to bug 254, which is why self.compilables
-        # was introduced.)
-        try:
-            compilables = persistent_state['compilables']
-        except KeyError:
-            compilables = []
-            for var, value in saved_vars.items():
-                if isinstance(value, Compilable):
-                    compilables.append(var)
-        for var in compilables:
-            # This assigns env to the var's value, which should be a compilable. This will allow compilation
-            # to occur when needed.
-            self.getvar(var)
-
     # Vars that are not mutable even during startup. I.e., startup script can't modify them.
     def never_mutable(self):
         return {'MARCEL_VERSION', 'HOME', 'USER', 'HOST'}
@@ -286,35 +236,6 @@ class EnvironmentScript(Environment):
             assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
             self.depth = None
 
-    # Script and interactive usage rely on the import op to do imports. We don't want to pickle these symbols
-    # in the environment because there is no point in persisting them with a workspace, and the contents of
-    # modules are sometimes not serializable. So the env will store Import objects which can be persisted,
-    # and handle reimportation.
-    class Import(object):
-
-        def __init__(self, module_name, symbol, name):
-            assert module_name is not None
-            assert name is not None
-            self.module_name = module_name
-            self.symbol = symbol
-            self.name = name
-            self.id = f'{module_name}/{"" if symbol is None else symbol}/{name}'
-
-        def __repr__(self):
-            buffer = [f'import({self.module_name}']
-            if self.symbol is not None:
-                buffer.append(f' {self.symbol}')
-            if self.name is not None:
-                buffer.append(f' as {self.name}')
-            buffer.append(')')
-            return ''.join(buffer)
-
-        def __hash__(self):
-            return hash(self.id)
-
-        def __eq__(self, other):
-            return self.id == other.id
-
     def __init__(self, workspace, trace=None):
         super().__init__(workspace, trace)
         # Vars defined during startup
@@ -377,26 +298,7 @@ class EnvironmentScript(Environment):
         self.var_handler.add_changed_var(var)
 
     def import_module(self, module_name, symbol, name):
-        try:
-            module = importlib.import_module(module_name)
-            if symbol is None:
-                if name is None:
-                    name = module_name
-                self.var_handler.setvar(name, module, save=False)
-            elif symbol == '*':
-                for name, value in module.__dict__.items():
-                    if not name.startswith('_'):
-                        self.var_handler.setvar(name, value, save=False)
-            else:
-                value = module.__dict__[symbol]
-                if name is None:
-                    name = symbol
-                self.var_handler.setvar(name, value, save=False)
-            self.imports.add(EnvironmentScript.Import(module_name, symbol, name))
-        except ModuleNotFoundError:
-            raise marcel.exception.ImportException(f'Module {module_name} not found.')
-        except KeyError:
-            raise marcel.exception.ImportException(f'{symbol} is not defined in {module_name}')
+        self.workspace.import_module(module_name, symbol, name)
 
     def db(self, name):
         db = None

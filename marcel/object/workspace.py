@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import importlib
 import shutil
 import pathlib
 import time
@@ -200,6 +201,36 @@ class VarHandler(object):
         return reservoirs
 
 
+# Script and interactive usage rely on the import op to do imports. We don't want to pickle these symbols
+# in the environment because there is no point in persisting them with a workspace, and the contents of
+# modules are sometimes not serializable. So the env will store Import objects which can be persisted,
+# and handle reimportation.
+class Import(object):
+
+    def __init__(self, module_name, symbol, name):
+        assert module_name is not None
+        assert name is not None
+        self.module_name = module_name
+        self.symbol = symbol
+        self.name = name
+        self.id = f'{module_name}/{"" if symbol is None else symbol}/{name}'
+
+    def __repr__(self):
+        buffer = [f'import({self.module_name}']
+        if self.symbol is not None:
+            buffer.append(f' {self.symbol}')
+        if self.name is not None:
+            buffer.append(f' as {self.name}')
+        buffer.append(')')
+        return ''.join(buffer)
+
+    def __hash__(self):
+        return hash(self.id)
+
+    def __eq__(self, other):
+        return self.id == other.id
+
+
 class Workspace(marcel.object.renderable.Renderable):
     DEFAULT = None
 
@@ -209,9 +240,9 @@ class Workspace(marcel.object.renderable.Renderable):
         self.namespace = None
         self.var_handler = VarHandler(self)
         self.properties = None
-        self.persistent_state = None
         self.locations = marcel.locations.Locations()
         self.marker = Marker(self)
+        self.imports = set()
 
     # Renderable
 
@@ -244,10 +275,7 @@ class Workspace(marcel.object.renderable.Renderable):
                     assert type(initial_namespace) is dict
                     self.namespace.update(initial_namespace)
                 self.read_properties()
-                # read_environment reads env.pickle into self.persistent_state
-                # Then restore-persistent_state_from_workspace uses self.persistent_state
-                self.read_environment()
-                env.restore_persistent_state_from_workspace(self)
+                self.restore_persistent_state_from_workspace()
             else:
                 self.cannot_lock_workspace()
         else:
@@ -263,7 +291,7 @@ class Workspace(marcel.object.renderable.Renderable):
                 assert type(reservoir) is marcel.reservoir.Reservoir
                 reservoir.close()
             # Environment
-            self.write_environment(env.persistent_state())
+            self.write_environment(self.persistent_state())
             # Mark this workspace object as closed
             self.properties = None
             # Discard workspace
@@ -307,6 +335,78 @@ class Workspace(marcel.object.renderable.Renderable):
     def home(self):
         # Older workspaces won't have a home property
         return None if self.is_default() or not hasattr(self.properties, 'home') else self.properties.home
+
+    def persistent_state(self):
+        # Things to persist:
+        # - vars mentioned in save_vars
+        # - imports
+        # - compilables
+        save = dict()
+        save_vars = self.var_handler.save_vars
+        compilable_vars = []
+        for var, value in self.namespace.items():
+            if var in save_vars:
+                save[var] = value
+                if isinstance(value, marcel.nestednamespace.Compilable):
+                    compilable_vars.append(var)
+                    value.purge()
+        # Now that we know what to save, remove the compilables. Otherwise, shutdown, which examines the environment,
+        # and does getvars, will fail when getvar is applied to a Compilable.
+        for var in compilable_vars:
+            del self.namespace[var]
+        return {'namespace': save,
+                'imports': self.imports}  # ,
+                # 'compilables': self.env.compilables}
+
+    def restore_persistent_state_from_workspace(self):
+        persistent_state = self.read_environment()
+        # Do the imports before compilation, which may depend on the imports.
+        imports = persistent_state['imports']
+        for i in imports:
+            try:
+                self.import_module(i.module_name, i.symbol, i.name)
+            except marcel.exception.ImportException as e:
+                print(f'Unable to import {i.module_name}: e.message', file=sys.stderr)
+        # Restore vars.
+        saved_vars = persistent_state['namespace']
+        self.namespace.update(saved_vars)
+        self.var_handler.add_save_vars(*saved_vars)
+        # # Recompile compilables. Tracking of compilables in persistent state is new as of 0.26.0, so
+        # # allow for them to be missing. (We are then subject to bug 254, which is why self.compilables
+        # # was introduced.)
+        # try:
+        #     compilables = persistent_state['compilables']
+        # except KeyError:
+        #     compilables = []
+        #     for var, value in saved_vars.items():
+        #         if isinstance(value, Compilable):
+        #             compilables.append(var)
+        # for var in compilables:
+        #     # This assigns env to the var's value, which should be a compilable. This will allow compilation
+        #     # to occur when needed.
+        #     self.getvar(var)
+
+    def import_module(self, module_name, symbol, name):
+        try:
+            module = importlib.import_module(module_name)
+            if symbol is None:
+                if name is None:
+                    name = module_name
+                self.var_handler.setvar(name, module, save=False)
+            elif symbol == '*':
+                for name, value in module.__dict__.items():
+                    if not name.startswith('_'):
+                        self.var_handler.setvar(name, value, save=False)
+            else:
+                value = module.__dict__[symbol]
+                if name is None:
+                    name = symbol
+                self.var_handler.setvar(name, value, save=False)
+            self.imports.add(Import(module_name, symbol, name))
+        except ModuleNotFoundError:
+            raise marcel.exception.ImportException(f'Module {module_name} not found.')
+        except KeyError:
+            raise marcel.exception.ImportException(f'{symbol} is not defined in {module_name}')
 
     @staticmethod
     def named(name=None):
@@ -424,15 +524,17 @@ class Workspace(marcel.object.renderable.Renderable):
             pickler.dump(self.properties)
 
     def read_environment(self):
-        with open(self.locations.data_ws_env(self), 'rb') as environment_file:
-            unpickler = dill.Unpickler(environment_file)
-            self.persistent_state = unpickler.load()
+            with open(self.locations.data_ws_env(self), 'rb') as environment_file:
+                unpickler = dill.Unpickler(environment_file)
+                return unpickler.load()
 
     # env_state: dict with keys namespace, imports, compilables.
-    def write_environment(self, env_state):
+    def write_environment(self, persistent_state=None):
+        if persistent_state is None:
+            persistent_state = self.persistent_state()
         with open(self.locations.data_ws_env(self), 'wb') as environment_file:
             pickler = dill.Pickler(environment_file)
-            pickler.dump(env_state)
+            pickler.dump(persistent_state)
 
     # Return pid of owning process, or None if unowned.
     def owner(self):
@@ -509,8 +611,7 @@ class WorkspaceDefault(Workspace):
             self.namespace.update(initial_namespace)
         # read_environment reads env.pickle into self.persistent_state
         # Then restore-persistent_state_from_workspace uses self.persistent_state
-        self.read_environment()
-        env.restore_persistent_state_from_workspace(self)
+        self.restore_persistent_state_from_workspace()
 
     def close(self, env, restart):
         # Reservoirs
@@ -521,7 +622,7 @@ class WorkspaceDefault(Workspace):
                 if not restart:
                     reservoir.ensure_deleted()
         if restart:
-            self.write_environment(env.persistent_state())
+            self.write_environment(self.persistent_state())
         else:
             self.locations.data_ws_env(self).unlink(missing_ok=True)
 
@@ -538,15 +639,16 @@ class WorkspaceDefault(Workspace):
 
     def read_environment(self):
         try:
-            super().read_environment()
+            persistent_state = super().read_environment()
         except FileNotFoundError:
             # This can happen on startup when the default workspace for this process hasn't been saved yet.
             # EnvironmentScript.restore_persistent_state_from_workspace defines what keys should be in persistent_state.
-            self.persistent_state = {
+            persistent_state = {
                 'namespace': {},
                 'imports': [],
                 'compilables': []
             }
+        return persistent_state
 
 
 class WorkspaceValidater(object):

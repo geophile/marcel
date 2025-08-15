@@ -170,15 +170,13 @@ class Function(EnvValue):
         super().__init__(env, function)
         self.module_name = function.__module__
         self.function_name = function.__name__
+        assert self.function_name.isidentifier(), self.function_name
 
     def __repr__(self):
         return f'{self.module_name}.{self.function_name}'
 
     def reconstitute(self):
-        print(f'reconstitute {self.module_name} {self.function_name}')
-        symbol = marcel.util.import_symbol(self.module_name, self.function_name)
-        print(f'reconstituted {self.module_name} {self.function_name} -> {symbol}')
-        return symbol
+        return marcel.util.import_symbol(self.module_name, self.function_name)
 
 
 #------------------------------------------------------------------------------------------------------------

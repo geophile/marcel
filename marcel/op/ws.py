@@ -301,7 +301,7 @@ class WsOpen(WsImpl):
         if workspace.exists():
             if env.workspace.name != name:
                 workspace.open(env)
-                env.restore_persistent_state_from_workspace(workspace)
+                workspace.restore_persistent_state_from_workspace()
                 self.op.send(env, workspace)
                 self.reconfigure(workspace)
                 # The workspace will be opened in the handling of the ReconfigurationException
