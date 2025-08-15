@@ -782,3 +782,7 @@ at least v0.32.0 (new format using prompt_toolkit). E.g.
 
 # 2025-04-02 16:54:22.895547
 # Workspace created
+
+----------------------------------------------------------------------
+
+ws -l should sort by name

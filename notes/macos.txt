@@ -976,6 +976,10 @@ MainInteractive.shutdown
 
 + env var api delegates to workspace
 
+Okay, shutdown and VH have been cleaned up, back to the
+<pid>.env.pickle bug.
+
+
 
 ----------------------------------------------------------------------
 
