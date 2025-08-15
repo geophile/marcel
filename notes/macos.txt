@@ -972,13 +972,9 @@ MainInteractive.shutdown
 
 + Use macos branch model of VarHandlers (no VarHandlerStartup class)
 
-- Move VarHandler to workspace
++ Move VarHandler to workspace
 
-- env var api delegates to workspace
-
-- But keep immutability control in env, since it applies to VHs for
-  all workspaces.
-
++ env var api delegates to workspace
 
 
 ----------------------------------------------------------------------
