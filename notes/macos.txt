@@ -966,7 +966,9 @@ MainInteractive.shutdown
     - super shutdown
 
 
-......................................................................
+----------------------------------------------------------------------
+
+8/15/25
 
 - Use macos branch model of VarHandlers (no VarHandlerStartup class)
 
@@ -976,6 +978,8 @@ MainInteractive.shutdown
 
 - But keep immutability control in env, since it applies to VHs for
   all workspaces.
+
+
 
 ----------------------------------------------------------------------
 

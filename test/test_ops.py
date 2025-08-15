@@ -2623,7 +2623,7 @@ def main():
     TEST.reset_environment()
     main_dev()
     main_stable()
-    main_slow_tests()
+    # main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
 

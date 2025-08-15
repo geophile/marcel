@@ -42,28 +42,29 @@ import marcel.version
 Compilable = marcel.compilable.Compilable
 
 
-class VarHandlerStartup(object):
+class VarHandler(object):
 
     MISSING_VAR = object()
     
-    def __init__(self, env, startup_var_handler=None):
+    def __init__(self, env):
+        assert isinstance(env, Environment)
         self.env = env
         # Immutability isn't enforced by this var hander. But the set is populated during startup,
         # before VarHandler, which enforces immutability, is in place. Similarly, startup vars are discovered
         # during startup (duh!) and then transferred to VarHandler for use during post-startup operation.
-        if startup_var_handler:
-            self.immutable_vars = startup_var_handler.immutable_vars
-            self.startup_vars = startup_var_handler.startup_vars
-            self.save_vars = startup_var_handler.save_vars
-        else:
-            self.immutable_vars = set()
-            self.startup_vars = None
-            self.save_vars = set()
+        self.immutable_vars = set()
+        self.startup_vars = None
+        self.save_vars = set()
         self.vars_read = set()
         self.vars_written = set()
         self.vars_deleted = set()
+        # Immutability of immutable_vars is enforced during normal operation.
+        # Marcel startup/shutdown is permitted to change these vars by turning off
+        # enforcement.
+        self._enforce_immutability = False
 
     def hasvar(self, var):
+        assert var is not None
         return var in self.env.namespace
 
     def getvar(self, var):
@@ -78,18 +79,20 @@ class VarHandlerStartup(object):
             value = None
         return value
 
-    def setvar(self, var, value, save=True):
+    def setvar(self, var, value, source=None, save=True):
         assert var is not None
+        self.check_mutability(var)
         current_value = self.env.namespace.get(var, None)
         self.vars_written.add(var)
         if type(current_value) is marcel.reservoir.Reservoir and value != current_value:
             current_value.ensure_deleted()
         if save:
             self.save_vars.add(var)
-        self.env.namespace[var] = value
+        self.env.namespace.assign(var, value, source)
 
     def delvar(self, var):
         assert var is not None
+        self.check_mutability(var)
         self.vars_deleted.add(var)
         self.save_vars.remove(var)
         value = self.env.namespace.get(var, None)
@@ -131,6 +134,19 @@ class VarHandlerStartup(object):
         self.vars_written.clear()
         self.vars_deleted.clear()
 
+    def add_written(self, var):
+        self.vars_written.add(var)
+
+    def enforce_immutability(self, enforce):
+        self._enforce_immutability = enforce
+
+    def check_mutability(self, var):
+        if self._enforce_immutability and var in self.immutable_vars:
+            raise marcel.exception.KillCommandException(
+                f'{var} was defined by marcel, or in your startup script, '
+                f'so it cannot be modified or deleted programmatically. '
+                f'Edit the startup script instead.')
+
     # Returns (var, value), where type(value) is Reservoir.
     def reservoirs(self):
         reservoirs = []
@@ -139,29 +155,6 @@ class VarHandlerStartup(object):
             if type(value) is marcel.reservoir.Reservoir:
                 reservoirs.append((var, value))
         return reservoirs
-
-class VarHandler(VarHandlerStartup):
-    
-    def __init__(self, startup_var_handler):
-        super().__init__(startup_var_handler.env, startup_var_handler)
-
-    def setvar(self, var, value, save=True):
-        self.check_mutability(var)
-        super().setvar(var, value, save)
-
-    def delvar(self, var):
-        self.check_mutability(var)
-        return super().delvar(var)
-
-    def add_written(self, var):
-        self.vars_written.add(var)
-
-    def check_mutability(self, var):
-        if var in self.immutable_vars:
-            raise marcel.exception.KillCommandException(
-                f'{var} was defined by marcel, or in your startup script, '
-                f'so it cannot be modified or deleted programmatically. '
-                f'Edit the startup script instead.')
 
 
 class Environment(object):
@@ -185,7 +178,7 @@ class Environment(object):
         # Source of ops and arg parsers.
         self.op_modules = marcel.opmodule.import_op_modules()
         # Lax var handling for now. Check immutability after startup is complete.
-        self.var_handler = VarHandlerStartup(self)
+        self.var_handler = VarHandler(self)
         self.trace = trace if trace else Trace()
         self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
         self.var_handler.add_save_vars('PWD', 'DIRS')
@@ -277,7 +270,7 @@ class Environment(object):
     def enforce_var_immutability(self, startup_vars=None):
         if startup_vars:
             self.var_handler.add_startup_vars(*startup_vars)
-        self.var_handler = VarHandler(self.var_handler)
+        self.var_handler.enforce_immutability(True)
 
     def hasvar(self, var):
         return self.var_handler.hasvar(var)
