@@ -97,6 +97,17 @@ class Environment(object):
         builtins['USER'] = lambda env: getpass.getuser()
         builtins['HOST'] = lambda env: socket.gethostname()
         builtins['parse_args'] = lambda env: lambda usage=None, **kwargs: marcel.cliargs.parse_args(env, usage, **kwargs)
+        builtins['WORKSPACE'] = lambda env: self.workspace.name
+        builtins['pos'] = lambda env: lambda: self.current_op.pos()
+        builtins['o'] = lambda env: marcel.structish.o
+        builtins['PROMPT'] = lambda env: [EnvironmentInteractive.DEFAULT_PROMPT]
+        builtins['BOLD'] = lambda env: marcel.object.color.Color.BOLD
+        builtins['ITALIC'] = lambda env: marcel.object.color.Color.ITALIC
+        builtins['COLOR_SCHEME'] = lambda env: marcel.object.color.ColorScheme()
+        builtins['Color'] = lambda env: marcel.object.color.Color
+        for key, value in marcel.builtin.__dict__.items():
+            if not key.startswith('_'):
+                builtins[key] = lambda env: value
         return builtins
 
     def dir_state(self):
@@ -246,16 +257,6 @@ class EnvironmentScript(Environment):
         # Symbols imported need special handling
         self.var_handler.add_immutable_vars(('pos',))
 
-    def initial_namespace(self):
-        builtins = super().initial_namespace()
-        builtins['WORKSPACE'] = lambda env: self.workspace.name
-        builtins['pos'] = lambda env: lambda: self.current_op.pos()
-        builtins['o'] = lambda env: marcel.structish.o
-        for key, value in marcel.builtin.__dict__.items():
-            if not key.startswith('_'):
-                builtins[key] = lambda env: value
-        return builtins
-
     def pid(self):
         return self.locations.pid
 
@@ -323,15 +324,6 @@ class EnvironmentInteractive(EnvironmentScript):
                                              'ITALIC',
                                              'COLOR_SCHEME',
                                              'Color'))
-
-    def initial_namespace(self):
-        builtins = super().initial_namespace()
-        builtins['PROMPT'] = lambda env: [EnvironmentInteractive.DEFAULT_PROMPT]
-        builtins['BOLD'] = lambda env: marcel.object.color.Color.BOLD
-        builtins['ITALIC'] = lambda env: marcel.object.color.Color.ITALIC
-        builtins['COLOR_SCHEME'] = lambda env: marcel.object.color.ColorScheme()
-        builtins['Color'] = lambda env: marcel.object.color.Color
-        return builtins
 
     def prompt(self):
         def prompt_dir():
