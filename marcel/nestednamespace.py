@@ -289,6 +289,8 @@ class NestedNamespace(dict):
         super().__delitem__(key)
 
     def __getstate__(self):
+        # Don't store the dict itself, which contains unpickleable stuff. The scopes contain everything that
+        # need to persist, and is pickleable.
         self.clear()
         return self.__dict__
 
@@ -299,7 +301,7 @@ class NestedNamespace(dict):
             self[var] = wrapper.unwrap()
 
     def update(self, d):
-        assert type(d) is dict
+        assert isinstance(d, dict)
         super().update(d)
         scope = self.current_scope()
         for key, value in d.items():
@@ -308,6 +310,11 @@ class NestedNamespace(dict):
     def assign(self, key, value, source=None):
         super().__setitem__(key, value)
         self.current_scope().assign(key, value, source)
+
+    # Builtins don't need to be persisted, and exist at top-level. So they aren't stored in scopes.
+    def assign_builtin(self, key, value):
+        assert len(self.scopes) == 1
+        super().__setitem__(key, value)
 
     def n_scopes(self):
         return len(self.scopes)
@@ -320,19 +327,17 @@ class NestedNamespace(dict):
                 self[var] = value
 
     def pop_scope(self):
-        def rebuild_namespace(scope):
-            # Recurse before modifying namespace. We want to process outer scopes before inner ones.
-            if scope.parent:
-                rebuild_namespace(scope.parent)
-            for var, wrapper in scope.items():
-                self[var] = wrapper.unwrap()
-
         assert len(self.scopes) > 0
         # There are other ways to restore the namespace resulting from exiting the current scope.
-        # This is simplest and not obviously too slow.
-        self.scopes.pop()
-        self.clear()
-        rebuild_namespace(self.current_scope())
+        # This is simplest and not obviously too slow:
+        # - Remove (var, value) entries for vars in the scope being popped.
+        # - Insert (var, value) entries for remaining scopes, outermost first.
+        popped_scope = self.scopes.pop()
+        for var in popped_scope.keys():
+            super().__delitem__(var)
+        for scope in self.scopes:
+            for var, value in scope.items():
+                super().__setitem__(var, value.unwrap())
 
     def current_scope(self):
         return self.scopes[-1]

@@ -16,11 +16,14 @@
 import importlib
 import shutil
 import pathlib
+import sys
 import time
 
 import dill
 import psutil
 
+import marcel.builtins
+import marcel.configscript
 import marcel.exception
 import marcel.locations
 import marcel.nestednamespace
@@ -93,15 +96,11 @@ class VarHandler(object):
 
     def __init__(self, workspace):
         self.workspace = workspace
-        # Immutability isn't enforced by this var hander. But the set is populated during startup,
-        # before VarHandler, which enforces immutability, is in place. Similarly, startup vars are discovered
-        # during startup (duh!) and then transferred to VarHandler for use during post-startup operation.
+        # Vars that must not be modified after marcel initialization.
         self.immutable_vars = set()
-        self.startup_vars = None
-        self.save_vars = set()
-        self.vars_read = set()
+        # Vars that have changed during execution of a command. Returned from Job execution
+        # So that changes can be applied in the main process's namespace.
         self.vars_written = set()
-        self.vars_deleted = set()
         # Immutability of immutable_vars is enforced during normal operation.
         # Marcel startup/shutdown is permitted to change these vars by turning off
         # enforcement.
@@ -115,7 +114,6 @@ class VarHandler(object):
         assert var is not None
         try:
             value = self.workspace.namespace[var]
-            self.vars_read.add(var)
             if isinstance(value, marcel.compilable.Compilable):
                 value.setenv(self.workspace.namespace.env)  # Needed for compilation
                 value = value.value()
@@ -130,32 +128,25 @@ class VarHandler(object):
         self.vars_written.add(var)
         if type(current_value) is marcel.reservoir.Reservoir and value != current_value:
             current_value.ensure_deleted()
-        if save:
-            self.save_vars.add(var)
         self.workspace.namespace.assign(var, value, source)
 
     def delvar(self, var):
         assert var is not None
         self.check_mutability(var)
-        self.vars_deleted.add(var)
-        self.save_vars.remove(var)
-        value = self.workspace.namespace.get(var, None)
-        if type(value) is marcel.reservoir.Reservoir:
-            value.ensure_deleted()
-        return self.workspace.namespace.pop(var)
+        if var in self.workspace.namespace:
+            self.vars_written.discard(var)
+            value = self.workspace.namespace.pop(var)
+            if type(value) is marcel.reservoir.Reservoir:
+                value.ensure_deleted()
+            return value
+        else:
+            raise KeyError(var)
 
     def vars(self):
         return self.workspace.namespace
 
-    def add_immutable_vars(self, *vars):
+    def add_immutable_vars(self, vars):
         self.immutable_vars.update(vars)
-
-    def add_startup_vars(self, *vars):
-        self.immutable_vars.update(vars)
-        self.startup_vars = vars
-
-    def add_save_vars(self, *vars):
-        self.save_vars.update(vars)
 
     def add_changed_var(self, var):
         self.vars_written.add(var)
@@ -174,9 +165,7 @@ class VarHandler(object):
         return changes
 
     def clear_changes(self):
-        self.vars_read.clear()
         self.vars_written.clear()
-        self.vars_deleted.clear()
 
     def add_written(self, var):
         self.vars_written.add(var)
@@ -194,7 +183,7 @@ class VarHandler(object):
     # Returns (var, value), where type(value) is Reservoir.
     def reservoirs(self):
         reservoirs = []
-        for var in self.save_vars:
+        for var in self.workspace.namespace.keys():
             value = self.getvar(var)
             if type(value) is marcel.reservoir.Reservoir:
                 reservoirs.append((var, value))
@@ -237,6 +226,7 @@ class Workspace(marcel.object.renderable.Renderable):
     def __init__(self, name):
         assert name is not None
         self.name = name
+        self.config_script = marcel.configscript.ConfigScript(self)
         self.namespace = None
         self.var_handler = VarHandler(self)
         self.properties = None
@@ -269,12 +259,16 @@ class Workspace(marcel.object.renderable.Renderable):
 
     def open(self, env, initial_namespace=None):
         if self.exists():
-            if self.lock_workspace():
+            if self.lock_workspace():  # Always granted for default workspace
+                self.read_properties()  # Noop for default workspace
                 self.namespace = marcel.nestednamespace.NestedNamespace(env)
                 if initial_namespace:
-                    assert type(initial_namespace) is dict
-                    self.namespace.update(initial_namespace)
-                self.read_properties()
+                    assert type(initial_namespace) is marcel.builtins.Builtins
+                    initial_namespace.add_to_namespace(self.namespace, env)
+                config_dict = self.config_script.run()
+                for var, value in config_dict.items():
+                    self.namespace.assign_builtin(var, value)
+                self.var_handler.add_immutable_vars(config_dict.keys())
                 self.restore_persistent_state_from_workspace()
             else:
                 self.cannot_lock_workspace()
@@ -358,6 +352,9 @@ class Workspace(marcel.object.renderable.Renderable):
                 'imports': self.imports}  # ,
                 # 'compilables': self.env.compilables}
 
+    def enforce_immutability(self):
+        self.var_handler.enforce_immutability(True)
+
     def restore_persistent_state_from_workspace(self):
         persistent_state = self.read_environment()
         # Do the imports before compilation, which may depend on the imports.
@@ -368,9 +365,7 @@ class Workspace(marcel.object.renderable.Renderable):
             except marcel.exception.ImportException as e:
                 print(f'Unable to import {i.module_name}: e.message', file=sys.stderr)
         # Restore vars.
-        saved_vars = persistent_state['namespace']
-        self.namespace.update(saved_vars)
-        self.var_handler.add_save_vars(*saved_vars)
+        self.namespace.update(persistent_state['namespace'])
         # # Recompile compilables. Tracking of compilables in persistent state is new as of 0.26.0, so
         # # allow for them to be missing. (We are then subject to bug 254, which is why self.compilables
         # # was introduced.)
@@ -510,7 +505,6 @@ class Workspace(marcel.object.renderable.Renderable):
             assert False, self
 
     def read_properties(self):
-        assert not self.is_default()
         with open(self.locations.data_ws_prop(self), 'rb') as properties_file:
             unpickler = dill.Unpickler(properties_file)
             self.properties = unpickler.load()
@@ -604,14 +598,11 @@ class WorkspaceDefault(Workspace):
     def is_default(self):
         return True
 
-    def open(self, env, initial_namespace=None):
-        self.namespace = marcel.nestednamespace.NestedNamespace(env)
-        if initial_namespace:
-            assert type(initial_namespace) is dict
-            self.namespace.update(initial_namespace)
-        # read_environment reads env.pickle into self.persistent_state
-        # Then restore-persistent_state_from_workspace uses self.persistent_state
-        self.restore_persistent_state_from_workspace()
+    def exists(self):
+        return True
+
+    def read_properties(self):
+        pass
 
     def close(self, env, restart):
         # Reservoirs
@@ -649,6 +640,9 @@ class WorkspaceDefault(Workspace):
                 'compilables': []
             }
         return persistent_state
+
+    def lock_workspace(self):
+        return True
 
 
 class WorkspaceValidater(object):

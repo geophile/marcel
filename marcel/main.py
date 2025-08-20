@@ -101,33 +101,8 @@ class MainScript(Main):
         super().__init__(env, testing)
         self.testing = testing
         self.config_time = time.time()
-        startup_vars = self.read_config()
-        self.env.enforce_var_immutability(startup_vars)
         self.needs_restart = False
         marcel.persistence.persistence.validate_all(self.handle_persistence_validation_errors)
-
-    def read_config(self):
-        # Comparing keys_before/after tells us what vars were defined by the startup script.
-        keys_before = set(self.env.namespace.keys())
-        # Make sure that never mutable vars aren't modified during startup.
-        never_mutable_vars = self.env.never_mutable()
-        never_mutable_before = {var: value for (var, value) in self.env.vars().items()
-                                if var in never_mutable_vars}
-        # Read the startup script, and then any marcel code contained in it.
-        self.env.read_config()
-        self.run_startup_scripts()
-        # Find the vars defined during startup
-        keys_after = set(self.env.namespace.keys())
-        startup_vars = keys_after - keys_before
-        # Check that never mutable vars didn't change.
-        never_mutable_after = {var: value for (var, value) in self.env.vars().items()
-                               if var in never_mutable_vars}
-        for var in never_mutable_before.keys():
-            before_value = never_mutable_before.get(var, None)
-            after_value = never_mutable_after.get(var, None)
-            if before_value != after_value:
-                raise marcel.exception.KillShellException(f'Startup script must not modify the value of {var}.')
-        return startup_vars
 
     # Main
 
@@ -152,13 +127,6 @@ class MainScript(Main):
 
     def execute_command(self, command, pipeline):
         command.execute(self.env)
-
-    def run_startup_scripts(self):
-        startup_scripts = self.env.getvar('STARTUP_SCRIPTS')
-        for script in startup_scripts:
-            if isinstance(script, str):
-                for command in commands_in_script(script):
-                    self.parse_and_run_command(command)
 
     # Internal
 
@@ -188,6 +156,15 @@ class MainScript(Main):
                            if self.env.workspace.is_default() else
                            f'Selected workspace {self.env.workspace.name} is damaged, starting in default workspace.')
                 marcel.util.print_to_stderr(self.env, message)
+
+    def run_startup_scripts(self):
+        startup_scripts = self.env.getvar('STARTUP_SCRIPTS')
+        for script in startup_scripts:
+            if type(script) is not str:
+                raise marcel.exception.KillCommandException(
+                    'Startup scripts, specified by run_on_startup(), must be strings')
+            for command in commands_in_script(script):
+                self.parse_and_run_command(command)
 
     @staticmethod
     def update_version_file():
@@ -280,7 +257,6 @@ class MainInteractive(MainScript):
             # on ws -c, or ws -o. We aren't changing the workspace here, so pass None.
             raise marcel.exception.ReconfigureException(workspace=None)
 
-
 def commands_in_script(script):
     command = ''
     for line in script.split('\n'):
@@ -316,6 +292,7 @@ def main_interactive_run():
         assert env is not None
         try:
             main = MainInteractive(old_main, env)
+            main.run_startup_scripts()
             return env, main
         except marcel.exception.StartupScriptException as e:
             if workspace.is_default():
@@ -355,6 +332,7 @@ def main_script_run(script):
     workspace = Workspace.default()
     env = marcel.env.EnvironmentScript.create(workspace=workspace)
     main = MainScript(env)
+    main.run_startup_scripts()
     for command in commands:
         try:
             main.parse_and_run_command(command)

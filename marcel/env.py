@@ -14,13 +14,13 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import getpass
-import importlib
 import os
 import pathlib
 import socket
 import sys
 
 import marcel.builtin
+import marcel.builtins
 import marcel.cliargs
 import marcel.compilable
 import marcel.core
@@ -64,8 +64,7 @@ class Environment(object):
         self.op_modules = marcel.opmodule.import_op_modules()
         # Lax var handling for now. Check immutability after startup is complete.
         self.trace = trace if trace else Trace()
-        self.var_handler.add_immutable_vars('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST')
-        self.var_handler.add_save_vars('PWD', 'DIRS')
+        self.var_handler.add_immutable_vars(('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST'))
         self.imports = set()
 
     # TODO: These properties are scaffolding during move of namespace to Workspace
@@ -79,33 +78,29 @@ class Environment(object):
         return self.workspace.var_handler
 
     def initial_namespace(self):
-        initial_namespace = dict()
-        try:
-            homedir = pathlib.Path.home().resolve().as_posix()
-        except FileNotFoundError:
-            raise marcel.exception.KillShellException(
-                'Home directory does not exist!')
-        try:
-            current_dir = pathlib.Path.cwd().resolve().as_posix()
-        except FileNotFoundError:
-            current_dir = homedir
-        initial_namespace.update({
-            'MARCEL_VERSION': marcel.version.VERSION,
-            'HOME': homedir,
-            'PWD': current_dir,
-            'DIRS': [current_dir],
-            'USER': getpass.getuser(),
-            'HOST': socket.gethostname(),
-            'parse_args': lambda usage=None, **kwargs: marcel.cliargs.parse_args(self, usage, **kwargs)
-        })
-        return initial_namespace
+        def home_dir():
+            try:
+                return pathlib.Path.home().resolve().as_posix()
+            except FileNotFoundError:
+                raise marcel.exception.KillShellException(
+                    'Home directory does not exist!')
+        def current_dir():
+            try:
+                return pathlib.Path.cwd().resolve().as_posix()
+            except FileNotFoundError:
+                return home_dir()
+        builtins = marcel.builtins.Builtins()
+        builtins['MARCEL_VERSION'] = lambda env: marcel.version.VERSION
+        builtins['HOME'] = lambda env: home_dir()
+        builtins['PWD'] = lambda env: current_dir()
+        builtins['DIRS'] = lambda env: [current_dir()]
+        builtins['USER'] = lambda env: getpass.getuser()
+        builtins['HOST'] = lambda env: socket.gethostname()
+        builtins['parse_args'] = lambda env: lambda usage=None, **kwargs: marcel.cliargs.parse_args(env, usage, **kwargs)
+        return builtins
 
     def dir_state(self):
         return self.directory_state
-
-    # Vars that are not mutable even during startup. I.e., startup script can't modify them.
-    def never_mutable(self):
-        return {'MARCEL_VERSION', 'HOME', 'USER', 'HOST'}
 
     def enforce_var_immutability(self, startup_vars=None):
         if startup_vars:
@@ -205,13 +200,21 @@ class Environment(object):
         if globals is not None:
             workspace.namespace.update(globals)
         return env
+    # Vars that are not mutable even during startup. I.e., startup script can't modify them.
+
+    @staticmethod
+    def never_mutable():
+        return {'MARCEL_VERSION', 'HOME', 'USER', 'HOST', 'WORKSPACE'}
+
 
 
 class EnvironmentAPI(Environment):
 
     # globals: From the module in which marcel.api is imported.
     def __init__(self, workspace=None, trace=None):
-        workspace = Workspace.default() if workspace is None else workspace
+        if workspace is None:
+            from marcel.object.workspace import Workspace
+            workspace = Workspace.default()
         super().__init__(workspace, trace)
 
     def clear_changes(self):
@@ -238,38 +241,23 @@ class EnvironmentScript(Environment):
 
     def __init__(self, workspace, trace=None):
         super().__init__(workspace, trace)
-        # Vars defined during startup
-        self.startup_vars = None
         # Support for pos()
         self.current_op = None
         # Symbols imported need special handling
-        self.var_handler.add_immutable_vars('pos')
-
-    # Don't pickle everything
+        self.var_handler.add_immutable_vars(('pos',))
 
     def initial_namespace(self):
-        initial_namespace = super().initial_namespace()
-        initial_namespace.update({
-            'WORKSPACE': self.workspace.name,
-            'PROMPT': [EnvironmentInteractive.DEFAULT_PROMPT],
-            'BOLD': marcel.object.color.Color.BOLD,
-            'ITALIC': marcel.object.color.Color.ITALIC,
-            'COLOR_SCHEME': marcel.object.color.ColorScheme(),
-            'Color': marcel.object.color.Color,
-            'pos': lambda: self.current_op.pos(),
-            'o': marcel.structish.o})
+        builtins = super().initial_namespace()
+        builtins['WORKSPACE'] = lambda env: self.workspace.name
+        builtins['pos'] = lambda env: lambda: self.current_op.pos()
+        builtins['o'] = lambda env: marcel.structish.o
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
-                initial_namespace[key] = value
-        return initial_namespace
+                builtins[key] = lambda env: value
+        return builtins
 
     def pid(self):
         return self.locations.pid
-
-    def never_mutable(self):
-        vars = set(super().never_mutable())
-        vars.update({'MARCEL_VERSION', 'HOME', 'USER', 'HOST', 'WORKSPACE'})
-        return vars
 
     def read_config(self):
         config_path = self.locations.config_ws_startup(self.workspace)
@@ -319,15 +307,6 @@ class EnvironmentScript(Environment):
                 type(interactive_executables) in (tuple, list) and
                 x in interactive_executables)
 
-    @staticmethod
-    def is_immutable(x):
-        return callable(x) or marcel.util.one_of(x, (int,
-                                                     float,
-                                                     str,
-                                                     bool,
-                                                     tuple,
-                                                     marcel.core.PipelineExecutable))
-
 
 class EnvironmentInteractive(EnvironmentScript):
 
@@ -339,11 +318,20 @@ class EnvironmentInteractive(EnvironmentScript):
         self.config_path = None
         self.reader = None
         self.next_command = None
-        self.var_handler.add_immutable_vars('PROMPT',
-                                            'BOLD',
-                                            'ITALIC',
-                                            'COLOR_SCHEME',
-                                            'Color')
+        self.var_handler.add_immutable_vars(('PROMPT',
+                                             'BOLD',
+                                             'ITALIC',
+                                             'COLOR_SCHEME',
+                                             'Color'))
+
+    def initial_namespace(self):
+        builtins = super().initial_namespace()
+        builtins['PROMPT'] = lambda env: [EnvironmentInteractive.DEFAULT_PROMPT]
+        builtins['BOLD'] = lambda env: marcel.object.color.Color.BOLD
+        builtins['ITALIC'] = lambda env: marcel.object.color.Color.ITALIC
+        builtins['COLOR_SCHEME'] = lambda env: marcel.object.color.ColorScheme()
+        builtins['Color'] = lambda env: marcel.object.color.Color
+        return builtins
 
     def prompt(self):
         def prompt_dir():
@@ -387,7 +375,7 @@ class EnvironmentInteractive(EnvironmentScript):
                     # Set up the namespace for calling the function. Updating __globals__ with a NestedNamespace
                     # seems to break things so that the invocation (x()) raises an AssertionError. Need a genuine
                     # dict for the update.
-                    x.__globals__.update(dict(self.workspace.namespace))
+                    # x.__globals__.update(dict(self.workspace.namespace))
                     x = x()
                 else:
                     raise marcel.exception.KillShellException(f'Invalid prompt component: {x}')
@@ -397,6 +385,7 @@ class EnvironmentInteractive(EnvironmentScript):
             return ''.join(buffer)
         except Exception as e:
             print(f'Bad prompt definition in {prompt_pieces}: ({type(e)}) {e}', file=sys.stderr)
+            marcel.util.print_stack_of_current_exception()
             return EnvironmentInteractive.DEFAULT_PROMPT
 
     def take_next_command(self):

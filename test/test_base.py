@@ -143,16 +143,16 @@ class TestConsole(TestBase):
 
     def reset_environment(self, config_file='./.marcel.py'):
         super().reset_environment()
-        workspace = marcel.object.workspace.Workspace.default()
-        env = marcel.env.EnvironmentInteractive.create(workspace=workspace)
         test_config = pathlib.Path(f'{TestBase.start_dir}/{config_file}').read_text()
         marcel.persistence.storagelayout.ensure_current(testing=True, initial_config=test_config)
+        workspace = marcel.object.workspace.Workspace.default()
+        env = marcel.env.EnvironmentInteractive.create(workspace=workspace)
         self.main = marcel.main.MainInteractive(old_main=None,
                                                 env=env,
                                                 testing=True)
         self.env = env
-        # marcel.main.initialize_persistent_config_and_data(env)
         self.env.dir_state().change_current_dir(TestBase.start_dir)
+        self.env.enforce_var_immutability()
         os.system('sudo rm -f /tmp/farcel*.log')
 
     def run(self,

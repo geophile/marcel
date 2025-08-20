@@ -979,6 +979,78 @@ MainInteractive.shutdown
 Okay, shutdown and VH have been cleaned up, back to the
 <pid>.env.pickle bug.
 
+----------------------------------------------------------------------
+
+8/17/25
+
+read_config() occurs in main, after env has been created. Delegates to
+Environment.read_config(). Updates namespace.
+
+Modifications:
+
+- Add ReadConfig object. 
+
+  - read()
+  - run_startup()
+
+- Run from Env.create instead, or Workspace.open 
+
+  - AFTER adding builtins.
+  - BEFORE restoring workspace state
+
+- Instead of updating namespace, update a dict arg. That arg will be
+  builtins from Env.create.
+
+*** THIS AVOIDS PUTTING RANDOM SYMBOLS FROM STARTUP.PY INTO namespace
+    scopes.
+
+- Run startup scripts from main.
+
+----------------------------------------------------------------------
+
+8/18/25
+
+VarHandler var tracking:
+
+- immutable_vars: Cannot be modified after startup
+
+- startup_vars: Obsolete
+
+- save_vars: Vars that have been assigned, tracked if save=True on
+  setvar call. False on calls from import_module. Used by
+  VH.reservoirs(). Seems like overkill. Could find reservoirs another
+  way.
+
+- vars_read: Obsolete
+
+- vars_written: Used to identify changed vars, transmit changes from Job.
+
+- vars_deleted: Obsolete
+
+add_save_vars
+
+----------------------------------------------------------------------
+
+8/19/25
+
+VarHandler has been moved to workspace.py, var tracking has been
+cleaned up. Somewhere along the way, default workspace creation has
+been lost (or being done later than needed).
+
+Running test_ops:
+
+TEST = test_base.TestConsole()
+    TestConsole.__init__
+        TestBase.__init__
+            TestConsole.reset_environment
+                EnvironmentInteractive.create
+                    workspace.open
+                        ConfigScript.run
+                            self.read_config
+                                open(config_path)
+
+Config path points to __DEFAULT__.startup.py which hasn't been
+created.
 
 
 ----------------------------------------------------------------------
