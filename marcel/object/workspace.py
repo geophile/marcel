@@ -332,7 +332,7 @@ class Workspace(marcel.object.renderable.Renderable):
 
     def persistent_state(self):
         # Things to persist:
-        # - vars mentioned in save_vars
+        # - namespace (except for builtins)
         # - imports
         # - compilables
         persist = dict()
