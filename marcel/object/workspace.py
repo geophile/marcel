@@ -335,12 +335,10 @@ class Workspace(marcel.object.renderable.Renderable):
         # - vars mentioned in save_vars
         # - imports
         # - compilables
-        save = dict()
-        save_vars = self.var_handler.save_vars
+        persist = dict()
         compilable_vars = []
-        for var, value in self.namespace.items():
-            if var in save_vars:
-                save[var] = value
+        for var, value in self.namespace.persistible():
+                persist[var] = value
                 if isinstance(value, marcel.nestednamespace.Compilable):
                     compilable_vars.append(var)
                     value.purge()
@@ -348,7 +346,7 @@ class Workspace(marcel.object.renderable.Renderable):
         # and does getvars, will fail when getvar is applied to a Compilable.
         for var in compilable_vars:
             del self.namespace[var]
-        return {'namespace': save,
+        return {'namespace': persist,
                 'imports': self.imports}  # ,
                 # 'compilables': self.env.compilables}
 

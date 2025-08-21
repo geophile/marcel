@@ -342,6 +342,11 @@ class NestedNamespace(dict):
     def current_scope(self):
         return self.scopes[-1]
 
+    def persistible(self):
+        assert len(self.scopes) == 1, len(self.scopes)
+        for var, value_wrapper in self.scopes[0].items():
+            yield var, value_wrapper.unwrap()
+
     # The NN dict maps environment variables to values. That mapping is the combined set of variable
     # assignments from the scopes, with an inner scope taking precedence over an outer scope (relevant
     # when the same var appears in two scopes.
