@@ -269,7 +269,7 @@ class Workspace(marcel.object.renderable.Renderable):
                 for var, value in config_dict.items():
                     self.namespace.assign_builtin(var, value)
                 self.var_handler.add_immutable_vars(config_dict.keys())
-                self.restore_persistent_state_from_workspace()
+                self.restore_persistent_state_from_workspace(env)
             else:
                 self.cannot_lock_workspace()
         else:
@@ -338,10 +338,10 @@ class Workspace(marcel.object.renderable.Renderable):
         persist = dict()
         compilable_vars = []
         for var, value in self.namespace.persistible():
-                persist[var] = value
-                if isinstance(value, marcel.nestednamespace.Compilable):
-                    compilable_vars.append(var)
-                    value.purge()
+            persist[var] = value
+            if isinstance(value, marcel.nestednamespace.Compilable):
+                compilable_vars.append(var)
+                value.purge()
         # Now that we know what to save, remove the compilables. Otherwise, shutdown, which examines the environment,
         # and does getvars, will fail when getvar is applied to a Compilable.
         for var in compilable_vars:
@@ -353,7 +353,7 @@ class Workspace(marcel.object.renderable.Renderable):
     def enforce_immutability(self):
         self.var_handler.enforce_immutability(True)
 
-    def restore_persistent_state_from_workspace(self):
+    def restore_persistent_state_from_workspace(self, env):
         persistent_state = self.read_environment()
         # Do the imports before compilation, which may depend on the imports.
         imports = persistent_state['imports']
@@ -363,7 +363,7 @@ class Workspace(marcel.object.renderable.Renderable):
             except marcel.exception.ImportException as e:
                 print(f'Unable to import {i.module_name}: e.message', file=sys.stderr)
         # Restore vars.
-        self.namespace.update(persistent_state['namespace'])
+        self.namespace.reconstitute(persistent_state['namespace'], env)
         # # Recompile compilables. Tracking of compilables in persistent state is new as of 0.26.0, so
         # # allow for them to be missing. (We are then subject to bug 254, which is why self.compilables
         # # was introduced.)

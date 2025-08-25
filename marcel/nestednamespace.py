@@ -46,7 +46,9 @@ import marcel.util
 # is a valid value for a variable, we could be reconstituting it repeatedly.
 
 class Empty(object):
-    pass
+
+    def __repr__(self):
+        return 'EMPTY'
 
 EMPTY = Empty()
 
@@ -69,6 +71,9 @@ class EnvValue(object):
         self.env = None
         self.cached = EMPTY
         return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
     def unwrap(self):
         if isempty(self.cached):
@@ -298,7 +303,7 @@ class NestedNamespace(dict):
         self.__dict__.update(state)
         assert len(self.scopes) == 1
         for var, wrapper in self.scopes[0].items():
-            self[var] = wrapper.unwrap()
+            self.__setstate__(var, wrapper.unwrap())
 
     def update(self, d):
         assert isinstance(d, dict)
@@ -345,7 +350,18 @@ class NestedNamespace(dict):
     def persistible(self):
         assert len(self.scopes) == 1, len(self.scopes)
         for var, value_wrapper in self.scopes[0].items():
-            yield var, value_wrapper.unwrap()
+            yield var, value_wrapper
+
+    def reconstitute(self, persisted, env):
+        assert len(self.scopes) == 1, len(self.scopes)
+        assert len(self.scopes[0]) == 0, self.scopes[0]
+        scope = self.scopes[0]
+        for var, value_wrapper in persisted.items():
+            value_wrapper.env = env
+            value_wrapper.reconstitute()
+            super().__setitem__(var, value_wrapper.unwrap())
+            scope.__setitem__(var, value_wrapper)
+
 
     # The NN dict maps environment variables to values. That mapping is the combined set of variable
     # assignments from the scopes, with an inner scope taking precedence over an outer scope (relevant
