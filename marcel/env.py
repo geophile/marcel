@@ -65,7 +65,6 @@ class Environment(object):
         # Lax var handling for now. Check immutability after startup is complete.
         self.trace = trace if trace else Trace()
         self.var_handler.add_immutable_vars(('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST'))
-        self.imports = set()
 
     # TODO: These properties are scaffolding during move of namespace to Workspace
 
@@ -285,9 +284,6 @@ class EnvironmentScript(Environment):
 
     def mark_possibly_changed(self, var):
         self.var_handler.add_changed_var(var)
-
-    def import_module(self, module_name, symbol, name):
-        self.workspace.import_module(module_name, symbol, name)
 
     def db(self, name):
         db = None

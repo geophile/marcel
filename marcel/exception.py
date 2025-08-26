@@ -81,13 +81,6 @@ class ExitException(BaseException):
     pass
 
 
-class ImportException(BaseException):
-
-    def __init__(self, message):
-        super().__init__(message)
-        self.message = message
-
-
 # Indicates a marcel command terminating with a ShellString missing a terminating quote.
 class MissingQuoteException(KillCommandException):
     def __init__(self, unterminated_string):

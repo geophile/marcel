@@ -1052,6 +1052,24 @@ TEST = test_base.TestConsole()
 Config path points to __DEFAULT__.startup.py which hasn't been
 created.
 
+----------------------------------------------------------------------
+
+8/25/25
+
+- Due to special handling of "builtins" (marcel symbols like PROMPT,
+  symbols from startup script), the only imports to worry about are
+  those from the marcel import op.
+
+- Need to unify import handling with EnvValue.
+
+Idea:
+
+- Import object becomes a subclass of EnvValue.
+
+- Each imported symbol -> (var, Import), where var is the Import's
+  name. The cached value is the imported object.
+
+- reconstitute does the import.
 
 ----------------------------------------------------------------------
 
@@ -1072,3 +1090,5 @@ TODO
   Should be possible to simplify since we no longer start in a workspace.
 
 - Get rid of MARCEL_VERSION in env
+
+- Are EnvValue.wrap of module, and the Module subclass needed?

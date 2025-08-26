@@ -16,7 +16,7 @@
 import marcel.argsparser
 import marcel.core
 import marcel.exception
-
+import marcel.util
 
 HELP = '''
 {L,wrap=F}import [-a|--as NAME] MODULE 
@@ -77,7 +77,7 @@ class Import(marcel.core.Op):
         return ''.join(buffer)
 
     # AbstractOp
-    
+
     def setup(self, env):
         wildcard = self.symbol == '*'
         if self.symbol and not (wildcard or self.symbol.isidentifier()):
@@ -88,10 +88,34 @@ class Import(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'Cannot specify --as value when importing *.')
 
     def run(self, env):
+        workspace = env.workspace
         try:
-            env.import_module(self.module, self.symbol, self.name)
-        except marcel.exception.ImportException as e:
-            raise marcel.exception.KillCommandException(e.message)
+            module = marcel.util.import_module(self.module)
+            if self.symbol is None:
+                name = self.module if self.name is None else self.name
+                workspace.var_handler.setvar_import(var=name,
+                                                    module=self.module,
+                                                    symbol=None,
+                                                    value=module)
+            elif self.symbol == '*':
+                for name, value in module.__dict__.items():
+                    if not name.startswith('_'):
+                        workspace.var_handler.setvar_import(var=name,
+                                                            module=self.module,
+                                                            symbol=name,
+                                                            value=value)
+            else:
+                assert self.symbol.isidentifier(), self.symbol
+                value = module.__dict__[self.symbol]
+                name = self.symbol if self.name is None else self.name
+                workspace.var_handler.setvar_import(var=name,
+                                                    module=self.module,
+                                                    symbol=self.symbol,
+                                                    value=value)
+        except ModuleNotFoundError:
+            raise marcel.exception.KillCommandException(f'Module {self.module} not found.')
+        except KeyError:
+            raise marcel.exception.KillCommandException(f'{self.symbol} is not defined in {self.module}')
 
     def must_be_first_in_pipeline(self):
         return True

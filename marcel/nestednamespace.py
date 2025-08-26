@@ -169,6 +169,27 @@ class Module(EnvValue):
         return marcel.util.import_module(self.module_name)
 
 
+class Import(EnvValue):
+
+    def __init__(self, env, module, symbol, name, value):
+        assert type(module) is str, module
+        assert (symbol is None) or (type(symbol) is str), symbol
+        assert name is None or type(name) is str
+        super().__init__(env, value)
+        self.module = module
+        self.symbol = symbol
+        self.name = name if name else symbol
+
+    def __repr__(self):
+        return (f'import({self.module}.{self.symbol})'
+                if self.name == self.symbol else
+                f'import({self.module}.{self.symbol} -> {self.name})')
+
+    def reconstitute(self):
+        return (marcel.util.import_module(self.module)
+                if self.symbol is None else
+                marcel.util.import_symbol(self.module, self.symbol))
+
 class Function(EnvValue):
 
     def __init__(self, env, function):
@@ -246,6 +267,9 @@ class Scope(dict):
         else:
             self.parent._assign(var, value)
 
+    def assign_import(self, var, module, symbol, value):
+        self._assign(var, Import(self.env, module, symbol, var, value))
+
     def copy_for_pickling(self):
         copy = Scope(None)
         copy.update(self)
@@ -320,6 +344,10 @@ class NestedNamespace(dict):
     def assign_builtin(self, key, value):
         assert len(self.scopes) == 1
         super().__setitem__(key, value)
+
+    def assign_import(self, var, module, symbol, value):
+        super().__setitem__(var, value)
+        self.current_scope().assign_import(var, module, symbol, value)
 
     def n_scopes(self):
         return len(self.scopes)
