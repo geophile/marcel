@@ -22,7 +22,6 @@ import sys
 import marcel.builtin
 import marcel.builtins
 import marcel.cliargs
-import marcel.compilable
 import marcel.core
 import marcel.directorystate
 import marcel.exception
@@ -38,8 +37,6 @@ import marcel.reservoir
 import marcel.structish
 import marcel.util
 import marcel.version
-
-Compilable = marcel.compilable.Compilable
 
 
 class Environment(object):
@@ -58,8 +55,6 @@ class Environment(object):
         self.locations = marcel.locations.Locations()
         # Directory stack, including current directory.
         self.directory_state = marcel.directorystate.DirectoryState(self)
-        # Compilables need to be compiled in order of creation. (Locating them in namespace does not preserve order.)
-        self.compilables = []  # list of var names
         # Source of ops and arg parsers.
         self.op_modules = marcel.opmodule.import_op_modules()
         # Lax var handling for now. Check immutability after startup is complete.
@@ -126,16 +121,8 @@ class Environment(object):
     def setvar(self, var, value):
         self.var_handler.setvar(var, value)
 
-    # Should only call this from the assign op, when assigning something that is compilable,
-    # i.e., something with source.
     def setvar_with_source(self, var, value, source):
-        if callable(value):
-            value = Compilable.for_function(self, f'({source})', value)
-            self.compilables.append(var)
-        elif type(value) is marcel.core.PipelineExecutable:
-            value = Compilable.for_pipeline(self, source, value)
-            self.compilables.append(var)
-        self.setvar(var, value)
+        self.var_handler.setvar(var, value, source=source)
 
     def delvar(self, var):
         return self.var_handler.delvar(var)

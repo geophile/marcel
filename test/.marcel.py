@@ -26,3 +26,6 @@ def growset(acc, x):
         acc = set()
     acc.add(x)
     return acc
+
+def dec(x):
+    return x - 1

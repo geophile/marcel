@@ -928,12 +928,42 @@ def test_version():
 
 @timeit
 def test_assign():
+    # Assign symbol
     TEST.run(test='a = 3',
+             verification='((a, type(a) is str))',
+             expected_out=[('3', True)])
+    TEST.run(test='a = asdf',
+             verification='((a, type(a) is str))',
+             expected_out=[('asdf', True)])
+    # Assign Python primitive (implied function)
+    TEST.run(test='a = (123)',
+             verification='((a, type(a) is int))',
+             expected_out=[(123, True)])
+    # Assign builtin function
+    TEST.run(test='a = (hex))',
+             verification='(hex(10))',
+             expected_out=['0xa'])
+    # Explicit int-valued function
+    TEST.run(test='a = (lambda: 123)',
+             verification='((a, type(a) is int))',
+             expected_out=[(123, True)])
+    # Explicit function-valued function
+    TEST.run(test='a = (lambda: lambda: 123)',
+             verification='((a(), type(a()) is int))',
+             expected_out=[(123, True)])
+    # Function from startup (dec)
+    TEST.run(test='a = (dec(1000))',
              verification='(a)',
-             expected_out=[3])
+             expected_out=[999])
+    # Function relying on function from startup
+    TEST.run(test='a = (dec(1000) + 2)',
+             verification='(a)',
+             expected_out=[1001])
+    # Function evaluation
     TEST.run(test='a = (5+6)',
              verification='(a)',
              expected_out=[11])
+    # Pipelines
     TEST.run(test='a = (|(419)|)',
              verification='a',
              expected_out=[419])
@@ -2623,7 +2653,7 @@ def main():
     TEST.reset_environment()
     main_dev()
     main_stable()
-    # main_slow_tests()
+    main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
 

@@ -18,6 +18,7 @@ import marcel.compilable
 import marcel.core
 import marcel.exception
 import marcel.function
+import marcel.stringliteral
 
 Compilable = marcel.compilable.Compilable
 
@@ -53,8 +54,8 @@ class Assign(marcel.core.Op):
 
     def setup(self, env):
         if self.string is not None:
-            assert isinstance(self.string, str), type(self.string)
-            self.value = self.string
+            assert type(self.string) is marcel.stringliteral.StringLiteral
+            self.value = self.string.value()
         if self.pipeline is not None:
             assert type(self.pipeline) is marcel.core.PipelineExecutable, type(self.pipeline)
             self.value = self.pipeline
@@ -65,9 +66,6 @@ class Assign(marcel.core.Op):
             self.value.set_globals(env.vars())
 
     def run(self, env):
-        # The fix for bug 267 is to use function.source, which may have an extra lambda added on to the
-        # front (for situations such as "inc = (lambda f: f + 1)"). But also allow for self.function to
-        # not have source, or for it to be None.
         source = None
         try:
             source = self.function.source
@@ -93,10 +91,13 @@ class Assign(marcel.core.Op):
         self.var = var
         self.source = source
         if callable(value):
+            # var = (...)
             self.function = value
         elif type(value) is marcel.core.PipelineExecutable:
+            # var = (|...|)
             self.pipeline = value
         elif isinstance(value, str):
+            # var = xyz
             self.string = value
         else:
             assert False, value

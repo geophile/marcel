@@ -85,11 +85,9 @@ class EnvValue(object):
 
     @staticmethod
     def wrap(env, value, source=None):
-        # assert env
         def is_pipeline(value):
             return type(value) is marcel.core.PipelineExecutable
         return (Function(env, value) if inspect.isbuiltin(value) else
-                Function(env, value) if inspect.isfunction(value) else
                 Module(env, value) if inspect.ismodule(value) else
                 Compilable.for_function(env, f'({source})', value) if callable(value) else
                 Compilable.for_pipeline(env, source, value) if is_pipeline(value) else

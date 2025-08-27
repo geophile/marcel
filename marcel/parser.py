@@ -1048,10 +1048,13 @@ class Parser(object):
         arg = self.arg()
         source = None
         if isinstance(arg, Token):
-            if isinstance(arg, Expression):
-                source = arg.source()
-                arg.mark_for_assignment()
             value = arg.value()
+            if isinstance(arg, Expression):
+                arg.mark_for_assignment()
+                assert type(value) is marcel.function.SourceFunction, f'({type(value)}) {value}'
+                source = value.source
+            else:
+                source = arg.value()
         elif type(arg) is marcel.core.PipelineExecutable:
             value = arg
             source = arg.source
