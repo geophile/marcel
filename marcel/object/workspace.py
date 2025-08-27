@@ -114,9 +114,6 @@ class VarHandler(object):
         assert var is not None
         try:
             value = self.workspace.namespace[var]
-            if isinstance(value, marcel.compilable.Compilable):
-                value.setenv(self.workspace.namespace.env)  # Needed for compilation
-                value = value.value()
         except KeyError:
             value = None
         return value
@@ -306,22 +303,7 @@ class Workspace(marcel.object.renderable.Renderable):
         return None if self.is_default() or not hasattr(self.properties, 'home') else self.properties.home
 
     def persistent_state(self):
-        # Things to persist:
-        # - namespace (except for builtins)
-        # - compilables
-        persist = dict()
-        compilable_vars = []
-        for var, value in self.namespace.persistible():
-            persist[var] = value
-            if isinstance(value, marcel.nestednamespace.Compilable):
-                compilable_vars.append(var)
-                value.purge()
-        # Now that we know what to save, remove the compilables. Otherwise, shutdown, which examines the environment,
-        # and does getvars, will fail when getvar is applied to a Compilable.
-        for var in compilable_vars:
-            del self.namespace[var]
-        return {'namespace': persist}  # ,
-                # 'compilables': self.env.compilables}
+        return {'namespace': (dict(self.namespace.persistible()))}
 
     def enforce_immutability(self):
         self.var_handler.enforce_immutability(True)
@@ -330,20 +312,6 @@ class Workspace(marcel.object.renderable.Renderable):
         persistent_state = self.read_environment()
         # Restore vars.
         self.namespace.reconstitute(persistent_state['namespace'], env)
-        # # Recompile compilables. Tracking of compilables in persistent state is new as of 0.26.0, so
-        # # allow for them to be missing. (We are then subject to bug 254, which is why self.compilables
-        # # was introduced.)
-        # try:
-        #     compilables = persistent_state['compilables']
-        # except KeyError:
-        #     compilables = []
-        #     for var, value in saved_vars.items():
-        #         if isinstance(value, Compilable):
-        #             compilables.append(var)
-        # for var in compilables:
-        #     # This assigns env to the var's value, which should be a compilable. This will allow compilation
-        #     # to occur when needed.
-        #     self.getvar(var)
 
     @staticmethod
     def named(name=None):
@@ -391,7 +359,7 @@ class Workspace(marcel.object.renderable.Renderable):
         self.create_dir(locations.data_ws(self))
         self.create_dir(locations.data_ws_res(self))
         # Environment: Write empty persistent env state
-        self.write_environment({'namespace': {}, 'compilables': []})
+        self.write_environment({'namespace': {}})
         if not self.is_default():
             self.properties = WorkspaceProperties()
             self.write_properties()
@@ -576,10 +544,7 @@ class WorkspaceDefault(Workspace):
         except FileNotFoundError:
             # This can happen on startup when the default workspace for this process hasn't been saved yet.
             # EnvironmentScript.restore_persistent_state_from_workspace defines what keys should be in persistent_state.
-            persistent_state = {
-                'namespace': {},
-                'compilables': []
-            }
+            persistent_state = {'namespace': {}}
         return persistent_state
 
     def lock_workspace(self):

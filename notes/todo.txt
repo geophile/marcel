@@ -786,3 +786,8 @@ at least v0.32.0 (new format using prompt_toolkit). E.g.
 ----------------------------------------------------------------------
 
 ws -l should sort by name
+
+----------------------------------------------------------------------
+
+env.pickle should use just native Python types, otherwise we're stuck
+with type definitions forever across migrations.

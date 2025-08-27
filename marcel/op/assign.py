@@ -14,13 +14,10 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import marcel.argsparser
-import marcel.compilable
 import marcel.core
 import marcel.exception
 import marcel.function
 import marcel.stringliteral
-
-Compilable = marcel.compilable.Compilable
 
 
 def assign(var, value):

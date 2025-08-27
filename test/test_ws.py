@@ -339,8 +339,8 @@ def main_stable():
 def main_dev():
     test_workspace_lifecycle()
     test_workspaces_and_reservoirs()
-    # test_workspaces_and_compilables()
-    # test_workspace_validation()
+    test_workspaces_and_compilables()
+    test_workspace_validation()
     pass
 
 

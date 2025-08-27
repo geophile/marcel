@@ -1073,6 +1073,18 @@ Idea:
 
 ----------------------------------------------------------------------
 
+8/27/25
+
+EnvValue.wrap is broken for functions.
+
+x = (1) is mishandled. wrap value is the int 1. The fact that it
+resulted from a function evaluation doesn't matter.
+
+x = (lambda: lambda: 1) is handled correctly. The value is lambda: 1,
+and we get a Compilable Function.
+
+----------------------------------------------------------------------
+
 TODO
 
 - Move out of MainScript init
@@ -1092,3 +1104,16 @@ TODO
 - Get rid of MARCEL_VERSION in env
 
 - Are EnvValue.wrap of module, and the Module subclass needed?
+
+- Try assignment test cases after closing and reopening a workspace.
+
+- Test compilables and imports in
+  testws.test_workspaces_and_compliables, but this comment is no
+  longer true:
+
+    # Pipelines and functions are Compilables, and require special handling, since they aren't persisted as is.
+    # Instead, their source is persisted, and they are recompiled when necessary, e.g. when switching to a workspace
+    # whose environment stores them.
+
+- Workspace.persistent_state() returns {'namespace': persist}. Can just return persist instead.
+
