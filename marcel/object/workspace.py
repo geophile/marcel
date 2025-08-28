@@ -130,7 +130,6 @@ class VarHandler(object):
     def setvar_import(self, var, module, symbol, value):
         assert var is not None
         self.check_mutability(var)
-        assert module.isidentifier(), module
         self.workspace.namespace.assign_import(var, module, symbol, value)
 
     def delvar(self, var):

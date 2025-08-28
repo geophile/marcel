@@ -204,7 +204,64 @@ def test_workspaces_and_reservoirs():
 
 
 @timeit
-def test_workspaces_and_compilables():
+def test_workspace_persistence():
+    def assign_vars():
+        # ----------------------------------------------------------------------
+        # Adapted from test_ops test_assign
+        TEST.run(test='a = 3')
+        TEST.run(test='b = asdf')
+        TEST.run(test='c = (123)')
+        TEST.run(test='d = (hex)')
+        TEST.run(test='e = (lambda: 123)')
+        TEST.run(test='f = (lambda: lambda: 123)')
+        TEST.run(test='g = (dec(1000))')
+        TEST.run(test='h = (dec(1000) + 2)')
+        # ----------------------------------------------------------------------
+        # Pipelines
+        TEST.run(test='gen_3 = (| gen 3 |)')
+        TEST.run(test='gen_n = (| n: gen (int(n)) |)')
+
+    def test_vars():
+        # ----------------------------------------------------------------------
+        # Adapted from test_ops test_assign
+        TEST.run(test='((a, type(a) is str))',
+                 expected_out=[('3', True)])
+        TEST.run(test='((b, type(b) is str))',
+                 expected_out=[('asdf', True)])
+        # Assign Python primitive (implied function)
+        TEST.run(test='((c, type(c) is int))',
+                 expected_out=[(123, True)])
+        # Assign builtin function
+        TEST.run(test='(d(10))',
+                 expected_out=['0xa'])
+        # Explicit int-valued function
+        TEST.run(test='((e, type(e) is int))',
+                 expected_out=[(123, True)])
+        # Explicit function-valued function
+        TEST.run(test='((f(), type(f()) is int))',
+                 expected_out=[(123, True)])
+        # Function from startup (dec)
+        TEST.run(test='(g)',
+                 expected_out=[999])
+        # Function relying on function from startup
+        TEST.run(test='(h)',
+                 expected_out=[1001])
+        # ----------------------------------------------------------------------
+        # Pipelines
+        TEST.run(test='gen_3',
+                 expected_out=[0, 1, 2])
+        TEST.run(test='gen_n 5',
+                 expected_out=[0, 1, 2, 3, 4])
+
+    def test_vars_undefined():
+        TEST.run(test='((a, type(a) is str))', expected_out=[Error('not defined')])
+        TEST.run(test='((c, type(c) is int))', expected_out=[Error('not defined')])
+        TEST.run(test='((e, type(e) is int))', expected_out=[Error('not defined')])
+        TEST.run(test='(g)', expected_out=[Error('not defined')])
+        TEST.run(test='(h)', expected_out=[Error('not defined')])
+        TEST.run(test='gen_3', expected_err='not executable')
+        TEST.run(test='gen_n 5', expected_err='not executable')
+
     # Pipelines and functions are Compilables, and require special handling, since they aren't persisted as is.
     # Instead, their source is persisted, and they are recompiled when necessary, e.g. when switching to a workspace
     # whose environment stores them.
@@ -212,35 +269,14 @@ def test_workspaces_and_compilables():
     TEST.run(test='ws -n w',
              verification='ws | (w: str(w))',
              expected_out=['Workspace(w)'])
-    TEST.run(test='f = (lambda: lambda f: f + 1)',
-             verification='(f(4))',
-             expected_out=[5])
-    TEST.run(test='g3 = (| gen 3 |)',
-             verification='g3',
-             expected_out=[0, 1, 2])
-    TEST.run(test='gn = (| n: gen (int(n)) |)',
-             verification='gn 5',
-             expected_out=[0, 1, 2, 3, 4])
-    # Close the workspace, make sure the vars we've just defined aren't there
-    TEST.run(test='ws -c',
-             verification='ws | (w: str(w))',
-             expected_out=['Workspace()'])
-    TEST.run(test='(f(5))',
-             expected_out=[Error('not defined')])
-    TEST.run(test='g3',
-             expected_err='not executable')
-    TEST.run(test='gn 4',
-             expected_err='not executable')
-    # Re-open the workspace, check that everything works
-    TEST.run(test='ws w',
-             verification='ws | (w: str(w))',
-             expected_out=['Workspace(w)'])
-    TEST.run(test='(f(4))',
-             expected_out=[5])
-    TEST.run(test='g3',
-             expected_out=[0, 1, 2])
-    TEST.run(test='gn 5',
-             expected_out=[0, 1, 2, 3, 4])
+    assign_vars()
+    test_vars()
+    TEST.run('ws -c')
+    TEST.run('ws', expected_out=['Workspace()'])
+    test_vars_undefined()
+    TEST.run('ws w')
+    TEST.run('ws', expected_out=['Workspace(w)'])
+    test_vars()
 
 
 @timeit
@@ -332,22 +368,18 @@ def test_workspace_validation():
 def main_stable():
     test_workspace_lifecycle()
     test_workspaces_and_reservoirs()
-    test_workspaces_and_compilables()
+    test_workspace_persistence()
     test_workspace_validation()
 
 
 def main_dev():
-    test_workspace_lifecycle()
-    test_workspaces_and_reservoirs()
-    test_workspaces_and_compilables()
-    test_workspace_validation()
     pass
 
 
 def main():
     TEST.reset_environment()
-    main_dev()
-    # main_stable()
+    # main_dev()
+    main_stable()
     TEST.report_failures('test_ws')
     sys.exit(TEST.failures)
 

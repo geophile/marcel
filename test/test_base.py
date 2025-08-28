@@ -196,12 +196,12 @@ class TestConsole(TestBase):
         self.test_stderr = open(TestBase.test_stderr, 'w')
         with contextlib.redirect_stdout(self.test_stdout), contextlib.redirect_stderr(self.test_stderr):
             self.main.parse_and_run_command(command)
+        self.test_stdout.flush()
+        self.test_stderr.flush()
         self.test_stdout = open(TestBase.test_stdout, 'r')
         self.test_stderr = open(TestBase.test_stderr, 'r')
         test_stdout_contents = ''.join(self.test_stdout.readlines())
         test_stderr_contents = ''.join(self.test_stderr.readlines())
-        self.test_stdout.close()
-        self.test_stderr.close()
         return test_stdout_contents, test_stderr_contents
 
     # For workspace testing

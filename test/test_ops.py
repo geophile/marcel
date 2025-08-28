@@ -928,7 +928,7 @@ def test_version():
 
 @timeit
 def test_assign():
-    # Assign symbol
+    # Assign command-line string
     TEST.run(test='a = 3',
              verification='((a, type(a) is str))',
              expected_out=[('3', True)])
@@ -940,8 +940,8 @@ def test_assign():
              verification='((a, type(a) is int))',
              expected_out=[(123, True)])
     # Assign builtin function
-    TEST.run(test='a = (hex))',
-             verification='(hex(10))',
+    TEST.run(test='a = (hex)',
+             verification='(a(10))',
              expected_out=['0xa'])
     # Explicit int-valued function
     TEST.run(test='a = (lambda: 123)',

@@ -279,7 +279,6 @@ class WsNew(WsImpl):
             raise marcel.exception.KillCommandException(f'Workspace {name} already exists.')
         else:
             workspace.create()
-            workspace.open(env)
             self.op.send(env, workspace)
             self.reconfigure(workspace)
 
@@ -319,7 +318,6 @@ class WsClose(WsImpl):
     def run(self, env):
         # DON'T close the workspace. That will happen following the ReconfigureException.
         if not env.workspace.is_default():
-            Workspace.default().open(env)
             self.op.send(env, Workspace.default())
             self.reconfigure(Workspace.default())
 
