@@ -775,5 +775,35 @@ util.InputSource thinks we have a heredoc (S_ISFIFO -> True).
 
 ----------------------------------------------------------------------
 
-283.
+283. jobs op crashing
 
+M 0.34.2 jao@loon ~/git/marcel/test$ timer 1
+1756434105.5574405
+1756434106.562499
+1756434107.5675015
+^Z
+M 0.34.2 jao@loon ~/git/marcel/test$ jobs
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/jao/git/marcel/marcel/main.py", line 390, in <module>
+    main()
+  File "/home/jao/git/marcel/marcel/main.py", line 374, in main
+    main_interactive_run()
+  File "/home/jao/git/marcel/marcel/main.py", line 314, in main_interactive_run
+    main.run()
+  File "/home/jao/git/marcel/marcel/main.py", line 228, in run
+    self.parse_and_run_command(self.input)
+  File "/home/jao/git/marcel/marcel/main.py", line 116, in parse_and_run_command
+    self.execute_command(command, pipeline)
+  File "/home/jao/git/marcel/marcel/main.py", line 210, in execute_command
+    command.execute(self.env)
+  File "/home/jao/git/marcel/marcel/core.py", line 245, in execute
+    self.pipeline.run(env)
+  File "/home/jao/git/marcel/marcel/core.py", line 364, in run
+    self.ops[0].run(env)
+  File "/home/jao/git/marcel/marcel/op/jobs.py", line 61, in run
+    description = f'{job_id}({job.state_symbol()}): {job.process.pid}  {job.pattern.source}'
+AttributeError: 'Job' object has no attribute 'pattern'

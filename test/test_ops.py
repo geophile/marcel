@@ -2653,6 +2653,7 @@ def main():
     TEST.reset_environment()
     main_dev()
     main_stable()
+    # print('****************************** SLOW TESTS DISABLED')
     main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)

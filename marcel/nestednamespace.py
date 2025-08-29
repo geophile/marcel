@@ -380,7 +380,6 @@ class NestedNamespace(dict):
 
     def reconstitute(self, persisted, env):
         assert len(self.scopes) == 1, len(self.scopes)
-        assert len(self.scopes[0]) == 0, self.scopes[0]
         scope = self.scopes[0]
         for var, value_wrapper in persisted.items():
             value_wrapper.env = env

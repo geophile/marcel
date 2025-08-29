@@ -53,11 +53,8 @@ class Environment(object):
         assert workspace is not None
         self.workspace = workspace
         self.locations = marcel.locations.Locations()
-        # Directory stack, including current directory.
         self.directory_state = marcel.directorystate.DirectoryState(self)
-        # Source of ops and arg parsers.
         self.op_modules = marcel.opmodule.import_op_modules()
-        # Lax var handling for now. Check immutability after startup is complete.
         self.trace = trace if trace else Trace()
         self.var_handler.add_immutable_vars(('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST'))
 
@@ -99,6 +96,7 @@ class Environment(object):
         builtins['ITALIC'] = lambda env: marcel.object.color.Color.ITALIC
         builtins['COLOR_SCHEME'] = lambda env: marcel.object.color.ColorScheme()
         builtins['Color'] = lambda env: marcel.object.color.Color
+        builtins['set_db_default'] = lambda env: lambda db: env.workspace.var_handler.setvar('DB_DEFAULT', db)
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 builtins[key] = lambda env: value
@@ -107,10 +105,8 @@ class Environment(object):
     def dir_state(self):
         return self.directory_state
 
-    def enforce_var_immutability(self, startup_vars=None):
-        if startup_vars:
-            self.var_handler.add_startup_vars(*startup_vars)
-        self.var_handler.enforce_immutability(True)
+    def enforce_var_immutability(self):
+        self.var_handler.enforce_immutability()
 
     def hasvar(self, var):
         return self.var_handler.hasvar(var)
@@ -129,9 +125,6 @@ class Environment(object):
 
     def vars(self):
         return self.var_handler.vars()
-
-    def reservoirs(self):
-        return self.var_handler.reservoirs()
 
     def cluster(self, name):
         cluster = None
@@ -207,7 +200,6 @@ class Environment(object):
 
 class EnvironmentAPI(Environment):
 
-    # globals: From the module in which marcel.api is imported.
     def __init__(self, workspace=None, trace=None):
         if workspace is None:
             from marcel.object.workspace import Workspace

@@ -9,6 +9,8 @@ import marcel.object.error
 import marcel.object.cluster
 import marcel.version
 from marcel.api import *
+# We really want _MAIN, and import * in the previous line doesn't import it in a way that
+# PyCharm considers kosher. The use of _MAIN gets flagged if not explicitly imported.
 from marcel.api import _MAIN
 
 import test_base
@@ -39,7 +41,7 @@ jdb = database(driver='psycopg2',
                user='jao',
                password='jao')
 ENV = marcel.api._ENV
-set_db_default(jdb)
+ENV.namespace.assign('set_db_default', jdb)
 
 
 # Utilities for testing filename ops

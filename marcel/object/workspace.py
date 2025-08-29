@@ -13,10 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-import importlib
 import shutil
 import pathlib
-import sys
 import time
 
 import dill
@@ -172,8 +170,8 @@ class VarHandler(object):
     def add_written(self, var):
         self.vars_written.add(var)
 
-    def enforce_immutability(self, enforce):
-        self._enforce_immutability = enforce
+    def enforce_immutability(self):
+        self._enforce_immutability = True
 
     def check_mutability(self, var):
         if self._enforce_immutability and var in self.immutable_vars:
@@ -252,7 +250,7 @@ class Workspace(marcel.object.renderable.Renderable):
             # Properties
             self.write_properties()
             # Reservoirs
-            for var, reservoir in env.reservoirs():
+            for var, reservoir in self.var_handler.reservoirs():
                 assert type(reservoir) is marcel.reservoir.Reservoir
                 reservoir.close()
             # Environment
@@ -305,7 +303,7 @@ class Workspace(marcel.object.renderable.Renderable):
         return {'namespace': (dict(self.namespace.persistible()))}
 
     def enforce_immutability(self):
-        self.var_handler.enforce_immutability(True)
+        self.var_handler.enforce_immutability()
 
     def restore_persistent_state_from_workspace(self, env):
         persistent_state = self.read_environment()

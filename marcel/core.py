@@ -228,7 +228,7 @@ class Command:
 
     def execute(self, env, remote=False):
         with env.check_nesting():
-            # Clear env changes iff remote..vars_written
+            # Clear env changes iff remote.vars_written
             # - remote = True: This is top-level execution, on behalf of a Job.
             # - remote = False: Either top-level and not a Job, or nested execution. Either way,
             #       changes aren't tracked or needed.

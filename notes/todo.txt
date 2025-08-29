@@ -797,3 +797,7 @@ with type definitions forever across migrations.
 DB_DEFAULT is documentd in sql op. Kind of ugly. Find some other way
 to record default db. One actual problem is that DB_DEFAULT can't be
 set after importing marcel.api.
+
+----------------------------------------------------------------------
+
+Broken namespace should record the original workspace name

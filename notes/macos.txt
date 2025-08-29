@@ -1085,6 +1085,64 @@ and we get a Compilable Function.
 
 ----------------------------------------------------------------------
 
+8/28/25
+
+Code cleanup
+
+......................................................................
+
+env.py
+
+  - Combine all Environment classes?
+
+  - Do builtins values need to be lambdas? If not Builtins class not
+    needed.
+
+  - "builtins" isn't the right word
+
+  - @properties: namespace, var_handler
+
+    - There aren't many users of Environment.namespace. Should be
+      possible to fix them all.
+
+    - var_handler: Could use __getattr__ to delegate to
+      self.workspace.var_handler.
+
+......................................................................
+
+directorystate.py:
+
+  - Associate with workspace instead of env? Needs self.env for
+    util.print_to_stderr, and workspace doesn't point to env.
+
+......................................................................
+
+workspace.py
+
+  - Should var functions (getvar, setvar etc.) be added to Workspace?
+    Can this be done by inheritance from VarHandler.
+
+......................................................................
+
+api.py
+
+  - Env handling of set_db_default
+
+......................................................................
+
+nestednamespace.py
+
+......................................................................
+
+Migration
+
+......................................................................
+
+Workspace.persistent_state() returns {'namespace': persist}. Can just
+return persist instead.
+
+----------------------------------------------------------------------
+
 TODO
 
 - Move out of MainScript init
@@ -1115,5 +1173,4 @@ TODO
     # Instead, their source is persisted, and they are recompiled when necessary, e.g. when switching to a workspace
     # whose environment stores them.
 
-- Workspace.persistent_state() returns {'namespace': persist}. Can just return persist instead.
 
