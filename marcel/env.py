@@ -49,17 +49,31 @@ class Environment(object):
         def __exit__(self, exc_type, exc_val, exc_tb):
             pass
 
-    def __init__(self, workspace, trace):
-        assert workspace is not None
+    def __init__(self, workspace=None, trace=None):
+        if workspace is None:
+            from marcel.object.workspace import Workspace
+            workspace = Workspace.default()
         self.workspace = workspace
         self.locations = marcel.locations.Locations()
         self.directory_state = marcel.directorystate.DirectoryState(self)
+        self.config_path = None
         self.op_modules = marcel.opmodule.import_op_modules()
+        self.current_op = None  # Needed for pos()
         self.trace = trace if trace else Trace()
-        self.var_handler.add_immutable_vars(('MARCEL_VERSION', 'HOME', 'PWD', 'DIRS', 'USER', 'HOST'))
+        self.var_handler.add_immutable_vars(('BOLD',
+                                             'COLOR_SCHEME',
+                                             'Color',
+                                             'DIRS',
+                                             'HOME',
+                                             'HOST'
+                                             'ITALIC',
+                                             'MARCEL_VERSION',
+                                             'pos',
+                                             'PROMPT',
+                                             'PWD',
+                                             'USER'))
 
     # TODO: These properties are scaffolding during move of namespace to Workspace
-
     @property
     def namespace(self):
         return self.workspace.namespace
@@ -200,12 +214,6 @@ class Environment(object):
 
 class EnvironmentAPI(Environment):
 
-    def __init__(self, workspace=None, trace=None):
-        if workspace is None:
-            from marcel.object.workspace import Workspace
-            workspace = Workspace.default()
-        super().__init__(workspace, trace)
-
     def clear_changes(self):
         self.var_handler.clear_changes()
 
@@ -227,13 +235,6 @@ class EnvironmentScript(Environment):
         def __exit__(self, exc_type, exc_val, exc_tb):
             assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
             self.depth = None
-
-    def __init__(self, workspace, trace=None):
-        super().__init__(workspace, trace)
-        # Support for pos()
-        self.current_op = None
-        # Symbols imported need special handling
-        self.var_handler.add_immutable_vars(('pos',))
 
     def pid(self):
         return self.locations.pid
@@ -290,15 +291,8 @@ class EnvironmentInteractive(EnvironmentScript):
 
     def __init__(self, workspace, trace=None):
         super().__init__(workspace, trace)
-        # Actual config path. Needed to reread config file in case of modification.
-        self.config_path = None
         self.reader = None
         self.next_command = None
-        self.var_handler.add_immutable_vars(('PROMPT',
-                                             'BOLD',
-                                             'ITALIC',
-                                             'COLOR_SCHEME',
-                                             'Color'))
 
     def prompt(self):
         def prompt_dir():
