@@ -338,8 +338,8 @@ class NestedNamespace(dict):
         super().__setitem__(key, value)
         self.current_scope().assign(key, value, source)
 
-    # Builtins don't need to be persisted, and exist at top-level. So they aren't stored in scopes.
-    def assign_builtin(self, key, value):
+    # Permanents don't need to be persisted, and exist at top-level. So they aren't stored in scopes.
+    def assign_permanent(self, key, value):
         assert len(self.scopes) == 1
         super().__setitem__(key, value)
 

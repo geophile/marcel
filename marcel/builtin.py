@@ -73,7 +73,3 @@ def run_on_startup(script):
 def set_prompt(*prompt):
     global PROMPT
     PROMPT = prompt
-
-# def set_db_default(db):
-#     global DB_DEFAULT
-#     DB_DEFAULT = db

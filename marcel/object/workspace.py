@@ -20,7 +20,6 @@ import time
 import dill
 import psutil
 
-import marcel.builtins
 import marcel.configscript
 import marcel.exception
 import marcel.locations
@@ -232,11 +231,10 @@ class Workspace(marcel.object.renderable.Renderable):
                 self.read_properties()  # Noop for default workspace
                 self.namespace = marcel.nestednamespace.NestedNamespace(env)
                 if initial_namespace:
-                    assert type(initial_namespace) is marcel.builtins.Builtins
                     initial_namespace.add_to_namespace(self.namespace, env)
                 config_dict = self.config_script.run()
                 for var, value in config_dict.items():
-                    self.namespace.assign_builtin(var, value)
+                    self.namespace.assign_permanent(var, value)
                 self.var_handler.add_immutable_vars(config_dict.keys())
                 self.restore_persistent_state_from_workspace(env)
             else:

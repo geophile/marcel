@@ -1093,12 +1093,12 @@ Code cleanup
 
 env.py
 
-  - Combine all Environment classes?
+  + Combine all Environment classes?
 
-  - Do builtins values need to be lambdas? If not Builtins class not
-    needed.
+  + Do builtins values need to be lambdas? If not PermanentNamespace class not
+    needed. YES, to get env into functions that need it.
 
-  - "builtins" isn't the right word
+  + "builtins" isn't the right word. Change NN.assign_builtin too
 
   - @properties: namespace, var_handler
 

@@ -20,7 +20,6 @@ import socket
 import sys
 
 import marcel.builtin
-import marcel.builtins
 import marcel.cliargs
 import marcel.core
 import marcel.directorystate
@@ -37,6 +36,15 @@ import marcel.reservoir
 import marcel.structish
 import marcel.util
 import marcel.version
+
+
+# For handling variables assigned during Environment creation. They can always be recreated and don't have to be,
+# and will not be persisted. This allows them to have types that don't pickle, e.g. arbitrary functions.
+class PermanentNamespace(dict):
+
+    def add_to_namespace(self, namespace, env):
+        for var, value_f in self.items():
+            namespace.assign_permanent(var, value_f(env))
 
 
 class CheckNesting(object):
@@ -110,27 +118,27 @@ class Environment(object):
                 return pathlib.Path.cwd().resolve().as_posix()
             except FileNotFoundError:
                 return home_dir()
-        builtins = marcel.builtins.Builtins()
-        builtins['MARCEL_VERSION'] = lambda env: marcel.version.VERSION
-        builtins['HOME'] = lambda env: home_dir()
-        builtins['PWD'] = lambda env: current_dir()
-        builtins['DIRS'] = lambda env: [current_dir()]
-        builtins['USER'] = lambda env: getpass.getuser()
-        builtins['HOST'] = lambda env: socket.gethostname()
-        builtins['parse_args'] = lambda env: lambda usage=None, **kwargs: marcel.cliargs.parse_args(env, usage, **kwargs)
-        builtins['WORKSPACE'] = lambda env: self.workspace.name
-        builtins['pos'] = lambda env: lambda: self.current_op.pos()
-        builtins['o'] = lambda env: marcel.structish.o
-        builtins['PROMPT'] = lambda env: [EnvironmentInteractive.DEFAULT_PROMPT]
-        builtins['BOLD'] = lambda env: marcel.object.color.Color.BOLD
-        builtins['ITALIC'] = lambda env: marcel.object.color.Color.ITALIC
-        builtins['COLOR_SCHEME'] = lambda env: marcel.object.color.ColorScheme()
-        builtins['Color'] = lambda env: marcel.object.color.Color
-        builtins['set_db_default'] = lambda env: lambda db: env.workspace.var_handler.setvar('DB_DEFAULT', db)
+        perm = PermanentNamespace()
+        perm['MARCEL_VERSION'] = lambda env: marcel.version.VERSION
+        perm['HOME'] = lambda env: home_dir()
+        perm['PWD'] = lambda env: current_dir()
+        perm['DIRS'] = lambda env: [current_dir()]
+        perm['USER'] = lambda env: getpass.getuser()
+        perm['HOST'] = lambda env: socket.gethostname()
+        perm['parse_args'] = lambda env: lambda usage=None, **kwargs: marcel.cliargs.parse_args(env, usage, **kwargs)
+        perm['WORKSPACE'] = lambda env: self.workspace.name
+        perm['pos'] = lambda env: lambda: self.current_op.pos()
+        perm['o'] = lambda env: marcel.structish.o
+        perm['PROMPT'] = lambda env: [EnvironmentInteractive.DEFAULT_PROMPT]
+        perm['BOLD'] = lambda env: marcel.object.color.Color.BOLD
+        perm['ITALIC'] = lambda env: marcel.object.color.Color.ITALIC
+        perm['COLOR_SCHEME'] = lambda env: marcel.object.color.ColorScheme()
+        perm['Color'] = lambda env: marcel.object.color.Color
+        perm['set_db_default'] = lambda env: lambda db: env.workspace.var_handler.setvar('DB_DEFAULT', db)
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
-                builtins[key] = lambda env: value
-        return builtins
+                perm[key] = lambda env: value
+        return perm
 
     def dir_state(self):
         return self.directory_state

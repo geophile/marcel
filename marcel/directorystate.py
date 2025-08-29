@@ -47,7 +47,7 @@ class DirectoryState:
                 dir_stack.append(new_dir)
             else:
                 dir_stack[-1] = new_dir
-            self.env.namespace.assign_builtin('PWD', new_dir)
+            self.env.namespace.assign_permanent('PWD', new_dir)
         else:
             home = pathlib.Path.home().resolve()
             marcel.util.print_to_stderr(self.env,
@@ -68,7 +68,7 @@ class DirectoryState:
             assert isinstance(directory, pathlib.Path)
             dir_stack.append(directory.resolve().as_posix())
         self.change_current_dir(pathlib.Path(dir_stack[-1]))
-        self.env.namespace.assign_builtin('DIRS', dir_stack)
+        self.env.namespace.assign_permanent('DIRS', dir_stack)
 
     def pop_dir(self):
         self._clean_dir_stack()
@@ -104,7 +104,7 @@ class DirectoryState:
             else:
                 removed.append(dir)
         if len(removed) > 0:
-            self.env.namespace.assign_builtin('DIRS', clean)
+            self.env.namespace.assign_permanent('DIRS', clean)
             buffer = ['The following directories have been removed from the directory stack because',
                       'they are no longer accessible:']
             buffer.extend(removed)
