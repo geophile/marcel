@@ -99,10 +99,6 @@ class Environment(object):
 
     # TODO: These properties are scaffolding during move of namespace to Workspace
     @property
-    def namespace(self):
-        return self.workspace.namespace
-
-    @property
     def var_handler(self):
         return self.workspace.var_handler
 
@@ -139,6 +135,9 @@ class Environment(object):
             if not key.startswith('_'):
                 perm[key] = lambda env: value
         return perm
+
+    def assign_permanent(self, var, value):
+        self.workspace.namespace.assign_permanent(var, value)
 
     def dir_state(self):
         return self.directory_state

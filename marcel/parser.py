@@ -348,7 +348,7 @@ class Expression(Token):
     def value(self):
         try:
             if self._function is None:
-                globals = self.parser.env.namespace
+                globals = self.parser.env.workspace.namespace
                 # source may be used for compilation eventually, so it has to be valid Python source which, when
                 # evaluated yields a function. (I.e., not the source of marcel shorthand, omitting lambda.)
                 source = self.source()

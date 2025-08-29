@@ -41,7 +41,7 @@ jdb = database(driver='psycopg2',
                user='jao',
                password='jao')
 ENV = marcel.api._ENV
-ENV.namespace.assign('set_db_default', jdb)
+ENV.assign_permanent('set_db_default', jdb)
 
 
 # Utilities for testing filename ops

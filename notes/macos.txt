@@ -1102,7 +1102,7 @@ env.py
 
   - @properties: namespace, var_handler
 
-    - There aren't many users of Environment.namespace. Should be
+    + There aren't many users of Environment.namespace. Should be
       possible to fix them all.
 
     - var_handler: Could use __getattr__ to delegate to
