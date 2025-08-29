@@ -91,7 +91,6 @@ class MainAPI(Main):
 
     def __init__(self, env):
         super().__init__(env)
-        self.env.enforce_var_immutability()
 
 
 class MainScript(Main):

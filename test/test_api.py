@@ -39,7 +39,7 @@ jdb = database(driver='psycopg2',
                user='jao',
                password='jao')
 ENV = marcel.api._ENV
-ENV.setvar('DB_DEFAULT', jdb)
+set_db_default(jdb)
 
 
 # Utilities for testing filename ops

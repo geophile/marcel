@@ -31,6 +31,7 @@ _JSON_UTIL = _JSONUtil()
 
 STARTUP_SCRIPTS = []
 PROMPT = '$ '
+DB_DEFAULT = None
 
 
 def minutes(n):
@@ -72,3 +73,7 @@ def run_on_startup(script):
 def set_prompt(*prompt):
     global PROMPT
     PROMPT = prompt
+
+def set_db_default(db):
+    global DB_DEFAULT
+    DB_DEFAULT = db

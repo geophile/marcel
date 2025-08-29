@@ -95,12 +95,10 @@ class _ShutdownHook(object):
 
 
 _RESERVOIRS = []
-DB_DEFAULT = None
 _ENV = _env_.EnvironmentAPI.create(globals=globals())
 _MAIN = _main.MainAPI(_ENV)
 SHUTDOWN_HOOK = _ShutdownHook()
-
-
+_ENV.enforce_var_immutability()
 
 
 def args(*args, **kwargs): return _generate_op(_args, *args, **kwargs)

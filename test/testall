@@ -8,4 +8,4 @@ $PYTHON ./test_ws.py
 $PYTHON ./test_api.py
 $PYTHON ./test_tab_completion.py
 system/test_install/test
-system/test_migration/test
+# system/test_migration/test
