@@ -329,7 +329,7 @@ def main_interactive_run():
 def main_script_run(script):
     commands = commands_in_script(script)
     workspace = Workspace.default()
-    env = marcel.env.EnvironmentScript.create(workspace=workspace)
+    env = marcel.env.Environment.create(workspace=workspace)
     main = MainScript(env)
     main.run_startup_scripts()
     for command in commands:
@@ -341,7 +341,7 @@ def main_script_run(script):
             # while running a script.
             assert e.workspace_to_open is not None
             workspace = e.workspace_to_open
-            env = marcel.env.EnvironmentScript.create(workspace=workspace, trace=main.env.trace)
+            env = marcel.env.Environment.create(workspace=workspace, trace=main.env.trace)
             main = MainScript(env)
 
 

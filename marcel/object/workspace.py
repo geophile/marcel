@@ -541,7 +541,7 @@ class WorkspaceDefault(Workspace):
             persistent_state = super().read_environment()
         except FileNotFoundError:
             # This can happen on startup when the default workspace for this process hasn't been saved yet.
-            # EnvironmentScript.restore_persistent_state_from_workspace defines what keys should be in persistent_state.
+            # Environment.restore_persistent_state_from_workspace defines what keys should be in persistent_state.
             persistent_state = {'namespace': {}}
         return persistent_state
 

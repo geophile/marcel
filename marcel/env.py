@@ -177,12 +177,17 @@ class Environment(object):
         function.set_globals(self.workspace.namespace)
 
     def color_scheme(self):
-        return None
+        return self.getvar('COLOR_SCHEME')
+
+    def set_color_scheme(self, color_scheme):
+        self.setvar('COLOR_SCHEME', color_scheme)
 
     def is_interactive_executable(self, x):
-        return False
+        interactive_executables = self.getvar('INTERACTIVE_EXECUTABLES')
+        return (interactive_executables is not None and
+                type(interactive_executables) in (tuple, list) and
+                x in interactive_executables)
 
-    # 'script' or 'api'
     def marcel_usage(self):
         return self.usage
 
@@ -200,6 +205,16 @@ class Environment(object):
             current_dir = self.getvar('HOME')
         os.chdir(current_dir)
         self.dir_state().change_current_dir(current_dir)
+
+    def mark_possibly_changed(self, var):
+        self.var_handler.add_changed_var(var)
+
+    def db(self, name):
+        db = None
+        x = self.getvar(name)
+        if type(x) is marcel.object.db.Database:
+            db = x
+        return db
 
     @classmethod
     def create(cls,
@@ -229,33 +244,7 @@ class Environment(object):
         return {'MARCEL_VERSION', 'HOME', 'USER', 'HOST', 'WORKSPACE'}
 
 
-
-class EnvironmentScript(Environment):
-
-    def mark_possibly_changed(self, var):
-        self.var_handler.add_changed_var(var)
-
-    def db(self, name):
-        db = None
-        x = self.getvar(name)
-        if type(x) is marcel.object.db.Database:
-            db = x
-        return db
-
-    def color_scheme(self):
-        return self.getvar('COLOR_SCHEME')
-
-    def set_color_scheme(self, color_scheme):
-        self.setvar('COLOR_SCHEME', color_scheme)
-
-    def is_interactive_executable(self, x):
-        interactive_executables = self.getvar('INTERACTIVE_EXECUTABLES')
-        return (interactive_executables is not None and
-                type(interactive_executables) in (tuple, list) and
-                x in interactive_executables)
-
-
-class EnvironmentInteractive(EnvironmentScript):
+class EnvironmentInteractive(Environment):
 
     DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
 
