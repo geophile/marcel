@@ -39,15 +39,30 @@ import marcel.util
 import marcel.version
 
 
+class CheckNesting(object):
+
+    def __init__(self, env):
+        self.env = env
+        self.depth = None
+
+    def __enter__(self):
+        self.depth = self.env.vars().n_scopes()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
+        self.depth = None
+
+
+class CheckNestingNoop(object):
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
 class Environment(object):
-
-    class CheckNestingNoop(object):
-
-        def __enter__(self):
-            pass
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            pass
 
     def __init__(self, usage, workspace=None, trace=None):
         if workspace is None:
@@ -150,7 +165,7 @@ class Environment(object):
         return cluster
 
     def check_nesting(self):
-        return Environment.CheckNestingNoop()
+        return CheckNestingNoop() if self.api_usage() else CheckNesting(self)
 
     def changes(self):
         return self.var_handler.changes()
@@ -207,8 +222,8 @@ class Environment(object):
         if globals is not None:
             workspace.namespace.update(globals)
         return env
-    # Vars that are not mutable even during startup. I.e., startup script can't modify them.
 
+    # Vars that are not mutable even during startup. I.e., startup script can't modify them.
     @staticmethod
     def never_mutable():
         return {'MARCEL_VERSION', 'HOME', 'USER', 'HOST', 'WORKSPACE'}
@@ -216,42 +231,6 @@ class Environment(object):
 
 
 class EnvironmentScript(Environment):
-
-    class CheckNesting(object):
-
-        def __init__(self, env):
-            self.env = env
-            self.depth = None
-
-        def __enter__(self):
-            self.depth = self.env.vars().n_scopes()
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
-            self.depth = None
-
-    def read_config(self):
-        config_path = self.locations.config_ws_startup(self.workspace)
-        if config_path.exists():
-            with open(config_path) as config_file:
-                config_source = config_file.read()
-            # Execute the config file. Imported and newly-defined symbols go into locals, which
-            # will then be added to self.namespace, for use in the execution of op functions.
-            locals = dict()
-            try:
-                exec(config_source, self.workspace.namespace, locals)
-            except Exception as e:
-                raise marcel.exception.StartupScriptException(self.workspace, e)
-            self.workspace.namespace.update(locals)
-
-    def check_nesting(self):
-        return EnvironmentScript.CheckNesting(self)
-
-    def set_function_globals(self, function):
-        function.set_globals(self.vars())
-
-    def marcel_usage(self):
-        return 'script'
 
     def mark_possibly_changed(self, var):
         self.var_handler.add_changed_var(var)
