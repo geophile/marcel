@@ -230,9 +230,6 @@ class EnvironmentScript(Environment):
             assert self.env.vars().n_scopes() == self.depth, self.env.vars().n_scopes()
             self.depth = None
 
-    def pid(self):
-        return self.locations.pid
-
     def read_config(self):
         config_path = self.locations.config_ws_startup(self.workspace)
         if config_path.exists():

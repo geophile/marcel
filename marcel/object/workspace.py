@@ -513,9 +513,10 @@ class WorkspaceDefault(Workspace):
 
     def close(self, env, restart):
         # Reservoirs
+        current_pid = self.locations.pid
         for var, reservoir in self.var_handler.reservoirs():
             assert type(reservoir) is marcel.reservoir.Reservoir
-            if reservoir.pid() == env.pid():
+            if reservoir.pid() == current_pid:
                 reservoir.close()
                 if not restart:
                     reservoir.ensure_deleted()
