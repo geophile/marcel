@@ -156,12 +156,8 @@ def main():
         marcel_usage = input.load()
         # pipelines from client
         pipeline = input.load()
-        if marcel_usage == 'api':
-            env = marcel.env.EnvironmentAPI.create(globals=dict())
-        elif marcel_usage == 'script':
-            env = marcel.env.EnvironmentScript.create()
-        else:
-            assert False, marcel_usage
+        env = marcel.env.Environment.create(usage=marcel_usage,
+                                            globals=dict() if marcel_usage == 'api' else None)
         version = env.getvar('MARCEL_VERSION')
         TRACE.write(f'Marcel version {version}')
         TRACE.write(f'pipeline: {pipeline}')

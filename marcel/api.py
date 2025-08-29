@@ -95,7 +95,7 @@ class _ShutdownHook(object):
 
 
 _RESERVOIRS = []
-_ENV = _env_.EnvironmentAPI.create(globals=globals())
+_ENV = _env_.Environment.create(globals=globals(), usage='api')
 _MAIN = _main.MainAPI(_ENV)
 SHUTDOWN_HOOK = _ShutdownHook()
 _ENV.enforce_var_immutability()

@@ -486,7 +486,7 @@ class Pipeline(object):
     @staticmethod
     def create_empty_pipeline(env):
         return (marcel.core.OpList(env, None)
-                if type(env) is marcel.env.EnvironmentAPI
+                if env.api_usage()
                 else marcel.core.PipelineExecutable())
 
     # Internal

@@ -49,10 +49,11 @@ class Environment(object):
         def __exit__(self, exc_type, exc_val, exc_tb):
             pass
 
-    def __init__(self, workspace=None, trace=None):
+    def __init__(self, usage, workspace=None, trace=None):
         if workspace is None:
             from marcel.object.workspace import Workspace
             workspace = Workspace.default()
+        self.usage = usage
         self.workspace = workspace
         self.locations = marcel.locations.Locations()
         self.directory_state = marcel.directorystate.DirectoryState(self)
@@ -168,7 +169,7 @@ class Environment(object):
 
     # 'script' or 'api'
     def marcel_usage(self):
-        assert False
+        return self.usage
 
     def api_usage(self):
         return self.marcel_usage() == 'api'
@@ -189,7 +190,9 @@ class Environment(object):
     def create(cls,
                workspace=None,
                globals=None,
-               trace=None):
+               trace=None,
+               usage='script'):
+        assert usage in ('script', 'api'), usage
         # Don't use a default value for workspace. Default value expressions are evaluted
         # on import, which may be too early. Discovered this gotcha on a unit test. Unit tests
         # set HOME (in os.environ). But Workspace.default() creates a Locations object which
@@ -197,10 +200,10 @@ class Environment(object):
         if workspace is None:
             import marcel.object.workspace
             workspace = marcel.object.workspace.Workspace.default()
-        env = cls(workspace=workspace, trace=trace)
+        env = cls(workspace=workspace, trace=trace, usage=usage)
         initial_namespace = env.initial_namespace()
         workspace.open(env, initial_namespace)
-        assert (cls is EnvironmentAPI) == (globals is not None)
+        assert (usage == 'api') == (globals is not None)
         if globals is not None:
             workspace.namespace.update(globals)
         return env
@@ -210,15 +213,6 @@ class Environment(object):
     def never_mutable():
         return {'MARCEL_VERSION', 'HOME', 'USER', 'HOST', 'WORKSPACE'}
 
-
-
-class EnvironmentAPI(Environment):
-
-    def clear_changes(self):
-        self.var_handler.clear_changes()
-
-    def marcel_usage(self):
-        return 'api'
 
 
 class EnvironmentScript(Environment):
@@ -289,8 +283,8 @@ class EnvironmentInteractive(EnvironmentScript):
 
     DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
 
-    def __init__(self, workspace, trace=None):
-        super().__init__(workspace, trace)
+    def __init__(self, usage, workspace, trace=None):
+        super().__init__(usage, workspace, trace)
         self.reader = None
         self.next_command = None
 
