@@ -208,17 +208,6 @@ class Function(EnvValue):
 
 BUILTINS = '__builtins__'
 
-def remove_builtins(x):
-    try:
-        if isinstance(x, dict):
-            del x[BUILTINS]
-        elif isinstance(x, set):
-            x.remove(BUILTINS)
-    except KeyError:
-        pass
-    return x
-
-
 class Scope(dict):
 
     def __init__(self, env, parent=None, params=None):
@@ -370,6 +359,16 @@ class NestedNamespace(dict):
     # assignments from the scopes, with an inner scope taking precedence over an outer scope (relevant
     # when the same var appears in two scopes.
     def validate(self, label=''):
+        def remove_builtins(x):
+            try:
+                if isinstance(x, dict):
+                    del x[BUILTINS]
+                elif isinstance(x, set):
+                    x.remove(BUILTINS)
+            except KeyError:
+                pass
+            return x
+
         def visit_scope(scope, scope_union):
             # Visit the parent before adding this scope's vars. Inner scopes take precedence.
             if scope.parent:

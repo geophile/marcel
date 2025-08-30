@@ -1117,6 +1117,7 @@ nestednamespace.py
   Workspace.write_environment (for example) would have to call a
   function to introduce EnvValues.
 
++ assign, _assign.
 
 ......................................................................
 
