@@ -238,27 +238,18 @@ class Scope(dict):
 
     def __setitem__(self, key, value):
         if key != '__builtins__':
-            self._assign(key, value)
+            self.store_item(key, value)
 
     def __repr__(self):
         return f'Scope({self.level}: {self.keys()})'
 
     def assign(self, var, value, source=None):
         assert not isinstance(value, EnvValue)
-        if var != '__builtins__':
-            value = EnvValue.wrap(self.env, value, source)
-            self._assign(var, value)
-
-    def _assign(self, var, value):
-        if not isinstance(value, EnvValue):
-            value = EnvValue.wrap(self.env, value)
-        if self.parent is None or var in self.params:
-            super().__setitem__(var, value)
-        else:
-            self.parent._assign(var, value)
+        self.store_item(var, EnvValue.wrap(self.env, value, source))
 
     def assign_import(self, var, module, symbol, value):
-        self._assign(var, Import(self.env, module, symbol, var, value))
+        assert not isinstance(value, EnvValue)
+        self.store_item(var, Import(self.env, module, symbol, var, value))
 
     def delete(self, var):
         try:
@@ -268,6 +259,14 @@ class Scope(dict):
                 self.parent.delete(var)
         except KeyError:
             pass
+
+    def store_item(self, var, value):
+        if not isinstance(value, EnvValue):
+            value = EnvValue.wrap(self.env, value)
+        if self.parent is None or var in self.params:
+            super().__setitem__(var, value)
+        else:
+            self.parent.store_item(var, value)
 
     # The vars assigned in this dict should be a subset of params
     def validate(self, label):
