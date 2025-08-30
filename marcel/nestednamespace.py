@@ -221,14 +221,6 @@ def remove_builtins(x):
 
 class Scope(dict):
 
-    # Unpickling bypasses __init__, so object state has to be established in __new__.
-    def __new__(cls, *args, **kwargs):
-        scope = dict.__new__(cls)
-        scope.parent = None
-        scope.params = None
-        scope.env = None
-        return scope
-
     def __init__(self, env, parent=None, params=None):
         super().__init__()
         self.parent = parent
@@ -267,11 +259,6 @@ class Scope(dict):
 
     def assign_import(self, var, module, symbol, value):
         self._assign(var, Import(self.env, module, symbol, var, value))
-
-    def copy_for_pickling(self):
-        copy = Scope(None)
-        copy.update(self)
-        return copy
 
     def delete(self, var):
         try:
@@ -401,14 +388,3 @@ class NestedNamespace(dict):
             print(f'{label}: Namespace does not match union of scopes')
             print(f'Namespace: {self}')
             print(f'Union of scopes: {scope_union}')
-
-
-# For migration to v0.35.0.
-def migrate_namespace(nn_old):
-    assert type(nn_old) is dict
-    # Should be passing an env to NestedNamespace(). But the NestedNamespace being created here
-    # is only for the purpose of writing an updated env.pickle. Should be okay with
-    # NestedNamespace.env = None.
-    nn_new = NestedNamespace(None)
-    nn_new.update(nn_old)
-    return nn_new

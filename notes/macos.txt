@@ -1122,10 +1122,13 @@ nestednamespace.py
 
 Migration
 
+- On-disk representation must use just python types. marcel-defined
+  types not allowed, or they stik around forever.
+
 ......................................................................
 
-Workspace.persistent_state() returns {'namespace': persist}. Can just
-return persist instead. 
++ Workspace.persistent_state() returns {'namespace': persist}. Can just
+  return persist instead. 
 
 ----------------------------------------------------------------------
 
