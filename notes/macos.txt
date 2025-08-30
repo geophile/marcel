@@ -1110,27 +1110,12 @@ env.py
 
 ......................................................................
 
-directorystate.py:
-
-  - Associate with workspace instead of env? Needs self.env for
-    util.print_to_stderr, and workspace doesn't point to env.
-
-......................................................................
-
-workspace.py
-
-  - Should var functions (getvar, setvar etc.) be added to Workspace?
-    Can this be done by inheritance from VarHandler.
-
-......................................................................
-
-api.py
-
-  - Env handling of set_db_default
-
-......................................................................
-
 nestednamespace.py
+
+- Don't need to use EnvValues except for persistence. Introduce them
+  in NN.__getstate__? Although, we aren't storing NN. So
+  Workspace.write_environment (for example) would have to call a
+  function to introduce EnvValues.
 
 ......................................................................
 
@@ -1139,7 +1124,7 @@ Migration
 ......................................................................
 
 Workspace.persistent_state() returns {'namespace': persist}. Can just
-return persist instead.
+return persist instead. 
 
 ----------------------------------------------------------------------
 

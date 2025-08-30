@@ -193,7 +193,6 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
     DEFAULT = None
 
     def __init__(self, name):
-        marcel.object.renderable.Renderable.__init__(self)
         VarHandler.__init__(self)
         assert name is not None
         self.name = name

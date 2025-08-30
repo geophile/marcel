@@ -315,17 +315,14 @@ class NestedNamespace(dict):
             pass
         super().__delitem__(key)
 
+    # We don't want to rely on NestedNamespace pickling and unpickling!
+    # So __get/setstate__ blow up if called.
+
     def __getstate__(self):
-        # Don't store the dict itself, which contains unpickleable stuff. The scopes contain everything that
-        # need to persist, and is pickleable.
-        self.clear()
-        return self.__dict__
+        assert False
 
     def __setstate__(self, state):
-        self.__dict__.update(state)
-        assert len(self.scopes) == 1
-        for var, wrapper in self.scopes[0].items():
-            self.__setstate__(var, wrapper.unwrap())
+        assert False
 
     def update(self, d):
         assert isinstance(d, dict)
