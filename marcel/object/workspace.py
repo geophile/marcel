@@ -91,8 +91,8 @@ class WorkspaceProperties(object):
 class VarHandler(object):
     MISSING_VAR = object()
 
-    def __init__(self, workspace):
-        self.workspace = workspace
+    def __init__(self):
+        self.namespace = None
         # Vars that must not be modified after marcel initialization.
         self.immutable_vars = set()
         # Vars that have changed during execution of a command. Returned from Job execution
@@ -105,12 +105,12 @@ class VarHandler(object):
 
     def hasvar(self, var):
         assert var is not None
-        return var in self.workspace.namespace
+        return var in self.namespace
 
     def getvar(self, var):
         assert var is not None
         try:
-            value = self.workspace.namespace[var]
+            value = self.namespace[var]
         except KeyError:
             value = None
         return value
@@ -118,23 +118,23 @@ class VarHandler(object):
     def setvar(self, var, value, source=None):
         assert var is not None
         self.check_mutability(var)
-        current_value = self.workspace.namespace.get(var, None)
+        current_value = self.namespace.get(var, None)
         self.vars_written.add(var)
         if type(current_value) is marcel.reservoir.Reservoir and value != current_value:
             current_value.ensure_deleted()
-        self.workspace.namespace.assign(var, value, source)
+        self.namespace.assign(var, value, source)
 
     def setvar_import(self, var, module, symbol, value):
         assert var is not None
         self.check_mutability(var)
-        self.workspace.namespace.assign_import(var, module, symbol, value)
+        self.namespace.assign_import(var, module, symbol, value)
 
     def delvar(self, var):
         assert var is not None
         self.check_mutability(var)
-        if var in self.workspace.namespace:
+        if var in self.namespace:
             self.vars_written.discard(var)
-            value = self.workspace.namespace.pop(var)
+            value = self.namespace.pop(var)
             if type(value) is marcel.reservoir.Reservoir:
                 value.ensure_deleted()
             return value
@@ -142,7 +142,7 @@ class VarHandler(object):
             raise KeyError(var)
 
     def vars(self):
-        return self.workspace.namespace
+        return self.namespace
 
     def add_immutable_vars(self, vars):
         self.immutable_vars.update(vars)
@@ -158,7 +158,7 @@ class VarHandler(object):
             # vars_written. If a var is in vars_written but not namespace, I'm assuming this is what happened.
             # Another approach is to maintain vars_written on NestedNamespace.pop_scope. But vars_written
             # isn't a nested structure. This would break if the same variable name were used in different scopes.
-            value = self.workspace.namespace.get(var, VarHandler.MISSING_VAR)
+            value = self.namespace.get(var, VarHandler.MISSING_VAR)
             if value is not VarHandler.MISSING_VAR:
                 changes[var] = value
         return changes
@@ -182,22 +182,22 @@ class VarHandler(object):
     # Returns (var, value), where type(value) is Reservoir.
     def reservoirs(self):
         reservoirs = []
-        for var in self.workspace.namespace.keys():
+        for var in self.namespace.keys():
             value = self.getvar(var)
             if type(value) is marcel.reservoir.Reservoir:
                 reservoirs.append((var, value))
         return reservoirs
 
 
-class Workspace(marcel.object.renderable.Renderable):
+class Workspace(marcel.object.renderable.Renderable, VarHandler):
     DEFAULT = None
 
     def __init__(self, name):
+        marcel.object.renderable.Renderable.__init__(self)
+        VarHandler.__init__(self)
         assert name is not None
         self.name = name
         self.config_script = marcel.configscript.ConfigScript(self)
-        self.namespace = None
-        self.var_handler = VarHandler(self)
         self.properties = None
         self.locations = marcel.locations.Locations()
         self.marker = Marker(self)
@@ -235,7 +235,7 @@ class Workspace(marcel.object.renderable.Renderable):
                 config_dict = self.config_script.run()
                 for var, value in config_dict.items():
                     self.namespace.assign_permanent(var, value)
-                self.var_handler.add_immutable_vars(config_dict.keys())
+                self.add_immutable_vars(config_dict.keys())
                 self.restore_persistent_state_from_workspace(env)
             else:
                 self.cannot_lock_workspace()
@@ -248,7 +248,7 @@ class Workspace(marcel.object.renderable.Renderable):
             # Properties
             self.write_properties()
             # Reservoirs
-            for var, reservoir in self.var_handler.reservoirs():
+            for var, reservoir in self.reservoirs():
                 assert type(reservoir) is marcel.reservoir.Reservoir
                 reservoir.close()
             # Environment
@@ -257,7 +257,6 @@ class Workspace(marcel.object.renderable.Renderable):
             self.properties = None
             # Discard workspace
             self.namespace = None
-            self.var_handler = None
             # Unlock
             self.unlock_workspace()
         else:
@@ -299,9 +298,6 @@ class Workspace(marcel.object.renderable.Renderable):
 
     def persistent_state(self):
         return {'namespace': (dict(self.namespace.persistible()))}
-
-    def enforce_immutability(self):
-        self.var_handler.enforce_immutability()
 
     def restore_persistent_state_from_workspace(self, env):
         persistent_state = self.read_environment()
@@ -512,7 +508,7 @@ class WorkspaceDefault(Workspace):
     def close(self, env, restart):
         # Reservoirs
         current_pid = self.locations.pid
-        for var, reservoir in self.var_handler.reservoirs():
+        for var, reservoir in self.reservoirs():
             assert type(reservoir) is marcel.reservoir.Reservoir
             if reservoir.pid() == current_pid:
                 reservoir.close()

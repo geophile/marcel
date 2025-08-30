@@ -84,23 +84,18 @@ class Environment(object):
         self.op_modules = marcel.opmodule.import_op_modules()
         self.current_op = None  # Needed for pos()
         self.trace = trace if trace else Trace()
-        self.var_handler.add_immutable_vars(('BOLD',
-                                             'COLOR_SCHEME',
-                                             'Color',
-                                             'DIRS',
-                                             'HOME',
-                                             'HOST'
-                                             'ITALIC',
-                                             'MARCEL_VERSION',
-                                             'pos',
-                                             'PROMPT',
-                                             'PWD',
-                                             'USER'))
-
-    # TODO: These properties are scaffolding during move of namespace to Workspace
-    @property
-    def var_handler(self):
-        return self.workspace.var_handler
+        self.workspace.add_immutable_vars(('BOLD',
+                                           'COLOR_SCHEME',
+                                           'Color',
+                                           'DIRS',
+                                           'HOME',
+                                           'HOST'
+                                           'ITALIC',
+                                           'MARCEL_VERSION',
+                                           'pos',
+                                           'PROMPT',
+                                           'PWD',
+                                           'USER'))
 
     def initial_namespace(self):
         def home_dir():
@@ -109,11 +104,13 @@ class Environment(object):
             except FileNotFoundError:
                 raise marcel.exception.KillShellException(
                     'Home directory does not exist!')
+
         def current_dir():
             try:
                 return pathlib.Path.cwd().resolve().as_posix()
             except FileNotFoundError:
                 return home_dir()
+
         perm = PermanentNamespace()
         perm['MARCEL_VERSION'] = lambda env: marcel.version.VERSION
         perm['HOME'] = lambda env: home_dir()
@@ -130,7 +127,7 @@ class Environment(object):
         perm['ITALIC'] = lambda env: marcel.object.color.Color.ITALIC
         perm['COLOR_SCHEME'] = lambda env: marcel.object.color.ColorScheme()
         perm['Color'] = lambda env: marcel.object.color.Color
-        perm['set_db_default'] = lambda env: lambda db: env.workspace.var_handler.setvar('DB_DEFAULT', db)
+        perm['set_db_default'] = lambda env: lambda db: env.workspace.setvar('DB_DEFAULT', db)
         for key, value in marcel.builtin.__dict__.items():
             if not key.startswith('_'):
                 perm[key] = lambda env: value
@@ -143,25 +140,25 @@ class Environment(object):
         return self.directory_state
 
     def enforce_var_immutability(self):
-        self.var_handler.enforce_immutability()
+        self.workspace.enforce_immutability()
 
     def hasvar(self, var):
-        return self.var_handler.hasvar(var)
+        return self.workspace.hasvar(var)
 
     def getvar(self, var):
-        return self.var_handler.getvar(var)
+        return self.workspace.getvar(var)
 
     def setvar(self, var, value):
-        self.var_handler.setvar(var, value)
+        self.workspace.setvar(var, value)
 
     def setvar_with_source(self, var, value, source):
-        self.var_handler.setvar(var, value, source=source)
+        self.workspace.setvar(var, value, source=source)
 
     def delvar(self, var):
-        return self.var_handler.delvar(var)
+        return self.workspace.delvar(var)
 
     def vars(self):
-        return self.var_handler.vars()
+        return self.workspace.vars()
 
     def cluster(self, name):
         cluster = None
@@ -175,10 +172,10 @@ class Environment(object):
         return CheckNestingNoop() if self.api_usage() else CheckNesting(self)
 
     def changes(self):
-        return self.var_handler.changes()
+        return self.workspace.changes()
 
     def clear_changes(self):
-        self.var_handler.clear_changes()
+        self.workspace.clear_changes()
 
     def set_function_globals(self, function):
         function.set_globals(self.workspace.namespace)
@@ -214,7 +211,7 @@ class Environment(object):
         self.dir_state().change_current_dir(current_dir)
 
     def mark_possibly_changed(self, var):
-        self.var_handler.add_changed_var(var)
+        self.workspace.add_changed_var(var)
 
     def db(self, name):
         db = None
@@ -252,7 +249,6 @@ class Environment(object):
 
 
 class EnvironmentInteractive(Environment):
-
     DEFAULT_PROMPT = f'M {marcel.version.VERSION} $ '
 
     def __init__(self, usage, workspace, trace=None):

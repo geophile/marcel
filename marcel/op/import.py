@@ -93,25 +93,25 @@ class Import(marcel.core.Op):
             module = marcel.util.import_module(self.module)
             if self.symbol is None:
                 name = self.module if self.name is None else self.name
-                workspace.var_handler.setvar_import(var=name,
-                                                    module=self.module,
-                                                    symbol=None,
-                                                    value=module)
+                workspace.setvar_import(var=name,
+                                        module=self.module,
+                                        symbol=None,
+                                        value=module)
             elif self.symbol == '*':
                 for name, value in module.__dict__.items():
                     if not name.startswith('_'):
-                        workspace.var_handler.setvar_import(var=name,
-                                                            module=self.module,
-                                                            symbol=name,
-                                                            value=value)
+                        workspace.setvar_import(var=name,
+                                                module=self.module,
+                                                symbol=name,
+                                                value=value)
             else:
                 assert self.symbol.isidentifier(), self.symbol
                 value = module.__dict__[self.symbol]
                 name = self.symbol if self.name is None else self.name
-                workspace.var_handler.setvar_import(var=name,
-                                                    module=self.module,
-                                                    symbol=self.symbol,
-                                                    value=value)
+                workspace.setvar_import(var=name,
+                                        module=self.module,
+                                        symbol=self.symbol,
+                                        value=value)
         except ModuleNotFoundError:
             raise marcel.exception.KillCommandException(f'Module {self.module} not found.')
         except KeyError:
