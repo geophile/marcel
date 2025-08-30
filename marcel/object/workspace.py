@@ -235,7 +235,8 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
                 for var, value in config_dict.items():
                     self.namespace.assign_permanent(var, value)
                 self.add_immutable_vars(config_dict.keys())
-                self.restore_persistent_state_from_workspace(env)
+                persistent_state = self.read_environment()
+                self.namespace.reconstitute(persistent_state, env)
             else:
                 self.cannot_lock_workspace()
         else:
@@ -296,12 +297,8 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
         return None if self.is_default() or not hasattr(self.properties, 'home') else self.properties.home
 
     def persistent_state(self):
-        return {'namespace': (dict(self.namespace.persistible()))}
-
-    def restore_persistent_state_from_workspace(self, env):
-        persistent_state = self.read_environment()
-        # Restore vars.
-        self.namespace.reconstitute(persistent_state['namespace'], env)
+        assert len(self.namespace.scopes) == 1, len(self.namespace.scopes)
+        return dict(self.namespace.scopes[0])
 
     @staticmethod
     def named(name=None):
@@ -349,7 +346,7 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
         self.create_dir(locations.data_ws(self))
         self.create_dir(locations.data_ws_res(self))
         # Environment: Write empty persistent env state
-        self.write_environment({'namespace': {}})
+        self.write_environment({})
         if not self.is_default():
             self.properties = WorkspaceProperties()
             self.write_properties()
@@ -422,10 +419,8 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
                 unpickler = dill.Unpickler(environment_file)
                 return unpickler.load()
 
-    # env_state: dict with keys namespace, compilables.
-    def write_environment(self, persistent_state=None):
-        if persistent_state is None:
-            persistent_state = self.persistent_state()
+    def write_environment(self, persistent_state):
+        assert persistent_state is not None
         with open(self.locations.data_ws_env(self), 'wb') as environment_file:
             pickler = dill.Pickler(environment_file)
             pickler.dump(persistent_state)
@@ -535,7 +530,7 @@ class WorkspaceDefault(Workspace):
         except FileNotFoundError:
             # This can happen on startup when the default workspace for this process hasn't been saved yet.
             # Environment.restore_persistent_state_from_workspace defines what keys should be in persistent_state.
-            persistent_state = {'namespace': {}}
+            persistent_state = {}
         return persistent_state
 
     def lock_workspace(self):

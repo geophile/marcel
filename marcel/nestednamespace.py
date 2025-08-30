@@ -370,11 +370,6 @@ class NestedNamespace(dict):
     def current_scope(self):
         return self.scopes[-1]
 
-    def persistible(self):
-        assert len(self.scopes) == 1, len(self.scopes)
-        for var, value_wrapper in self.scopes[0].items():
-            yield var, value_wrapper
-
     def reconstitute(self, persisted, env):
         assert len(self.scopes) == 1, len(self.scopes)
         scope = self.scopes[0]
