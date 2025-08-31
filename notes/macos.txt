@@ -1133,6 +1133,30 @@ Migration
 
 ----------------------------------------------------------------------
 
+8/30/25
+
+Time to finally make multiprocessing via spawn work, now that
+Environment has been simplified, and NestedNamespace has been
+overhauled.
+
+An Environment can now be created by calling Environment.create, and
+then loading the stored namespace, (just NN.scopes[0], since the env
+is dumped at the top level of a pipeline). So:
+
+Environment.__getstate__:
+
+    - Return {'usage': env.usage, 
+              'workspace': workspace name,
+              'namespace': scopes[0]}
+
+Environment.__setstate__:
+
+    - Environment.create, passing workspace name, usage
+
+    - Add namespace contents
+
+----------------------------------------------------------------------
+
 TODO
 
 - Move out of MainScript init

@@ -1,77 +1,45 @@
 What's New
 ----------
 
-This major version greatly simplifies the parsing of command-line arguments by 
-marcel scripts.
-First, you can use a "shebang" to run a marcel script, e.g.
-```aiignore
-#!/usr/local/bin/marcel
-```
-Next, suppose you want to write a script, `filestats`, to do the following:
+This release contains a major overhaul of marcel internals, intended to anticipate
+Python changes, and to enable porting.
 
-- Find all the files either immediately inside a directory, or inside the directory recursively.
+Most marcel commands execute as jobs, which can be suspended, run in the background, 
+and brought to the foreground, as in other shells. The `multiprocessing` module is used
+to run a job in a process. This module can start processes in one of three ways:
 
-- Optionally, filter the files by extension (e.g. py to find all python source files).
+- **fork**: The child process inherits the parent's resources, including memory. (The memory is not shared,
+as in threading. Changes made by the child are not visible by the parent.)
+- **spawn**: The child process is a new Python interpreter, and resources, including memory, are not shared.
+- **forkserver**: Like fork, but the forking is done by a server process created for the purpose of
+forking processes.
 
-- Count the files and find the total size of those files.
+Fork is the default on Linux. Spawn is the default on MacOS, and will become the default on 
+Python. Prior to this release, marcel relied on fork. But it looks like spawn really needs to be
+supported, especially to support MacOS. Fork on MacOS is known to possibly cause crashes. 
 
-To do this, the script has some optional arguments:
+Marcel environment variables are kept in a *namespace*, which serves as a Python namespace for
+the execution of Python functions that appear in marcel commands. The problem was that the marcel
+namespace worked well with the fork model of multiprocessing, but not spawn. With fork, the namespace
+exists in memory shared with the child process. But when a process is spawned, the namespace isn't 
+shared, it has to be pickled and transmitted, and the namespace contains values that could
+not be pickled: e.g. Python functions and modules.  
 
-* -r or --recursive to specify whether you want recursion.
+So in order to support the spawn model of multiprocessing, the namespace implementation had to be
+overhauled. Values that can be pickled are pickled. Others values require special handling.
+For example, suppose a user has run the command `import math`. The math module cannot be pickled.
+But by noting the import, and replaying it in the child process, we can avoid pickling the math
+module, but still transmit it to the child process.
 
-* -e or --ext to specify the extension of interest.
+For now, marcel uses the spawn model of multiprocessing by default. This results in noticeably slower
+operation, imposing
+a fraction of a second delay to command execution. (It might be worth investigating forkserver
+to fix this problem.) If this delay is intolerable, or you have found a bug and it seems 
+like spawning is implicated, then to use fork instead, set the environment variable 
+`MARCEL_MULTIPROCESSING_START_METHOD`. Valid values are `fork` and `spawn`. 
 
-* An argument to specify a directory. If omitted, the current directory is used.
-
-So to find the count and size of all files in the current directory:
-
-```
-filestats
-```
-To find the count and size of all jpg files recursively under /foo/bar:
-
-```
-filestats -r -e jpg /foo/bar
-```
-or equivalently:
-```
-filestats --recursive --ext jpg /foo/bar
-```
-Command-line parsing is done as follow. 
-```
-(parse_args(ext=flag('-e', '--ext'), \
-            recursive=boolean_flag('-r', '--recursive'), \
-            dir=anon()))
-```
-* `parse_args` is the function that parses the command line arguments.
-
-* It assigns three environment variables, `ext`, `recursive`, and `dir`.
-The command line arguments will be parsed and assigned to these variables for use later in the marcel script.
-
-* `ext=flag('-e', '--ext')`: This says that the value following a command-line flag `-e` or 
-`--ext` will be assigned to the environment variable `ext`.
-
-* `recursive=boolean_flag('-r', '--recursive')`: This says that `-r`
-or `--recursive` is a boolean flag. No value is specified. 
-The value of the environment variable `recursive` will be `True` if `-r` 
-or `--recursive` is specified, `False` otherwise.
-
-* `dir=anon()`: This says all other command-line arguments (i.e., not flagged) 
-will be assigned to the environment variable `dir`.
-
-* In addition, the unparsed command line will be assigned to the environment variable `ARGV`.
-
-So if your command line is:
-```
-filestats --recursive --ext jpg /foo/bar
-```
-then these environment variables are set:
-
-* `recursive`: `True`
-* `ext`: `"jpg"`
-* `dir`: `"/foo/bar"`
-* `ARGV`: `["filestats", "--recursive", "--ext", "jpg", "/foo/bar"]`
-
+With spawn multiprocessing supported, MacOS support should now be possible. Watch this space for
+information on MacOS support.
 
 
 Marcel
