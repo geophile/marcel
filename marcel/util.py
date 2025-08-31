@@ -19,6 +19,7 @@ import grp
 import importlib
 import os
 import pathlib
+import pickle
 import pwd
 import shlex
 import shutil
@@ -325,3 +326,90 @@ class Trace(object):
     # Caller is responsible for closing, e.g. with TRACE.open(...) as file ...
     def open(self):
         return self.path.open(mode='a')
+
+
+class PickleDebugger(object):
+
+    TERMINAL = 'TERMINAL'
+
+    class Problem(Exception):
+
+        def __init__(self, path_to_problem):
+            super().__init__()
+            self.path_to_problem = path_to_problem
+
+    # Hash when possible, use a list otherwise
+    class Visitors(object):
+
+        def __init__(self):
+            self.hashable = set()
+            self.not_hashable = []
+
+        def add(self, x):
+            try:
+                self.hashable.add(x)
+            except TypeError:
+                self.not_hashable.append(x)
+
+        def has(self, x):
+            try:
+                return x in self.hashable
+            except TypeError:
+                return x in self.not_hashable
+
+    def __init__(self):
+        self.ok_types = {int, str, float, bool}
+        self.path_to_problem = []
+        self.visitors = set()  # PickleDebugger.Visitors()
+
+    def check(self, o, debug=False):
+        def indent(level):
+            return '    ' * (level * 1)
+
+        def probe(field, x, level):
+            if debug:
+                print(f'{indent(level)}{field}: ({type(x)}) {hex(id(x))}')
+            if id(x) not in self.visitors and type(x) not in self.ok_types:
+                self.visitors.add(id(x))
+                try:
+                    self.path_to_problem.append(field)
+                    pickle.dumps(x)
+                    self.path_to_problem.pop()
+                except AttributeError as e:
+                    print(f'{indent(level)}Caught AttributeError while pickling {x}: {e}', file=sys.stderr)
+                    print_stack_of_current_exception()
+                    raise PickleDebugger.Problem(self.path_to_problem)
+                except (pickle.PicklingError, TypeError) as e:
+                    print(f'{indent(level)}Caught PicklingError or TypeError: {e}', file=sys.stderr)
+                    if field is PickleDebugger.TERMINAL:
+                        self.path_to_problem.append(str(e))
+                        raise PickleDebugger.Problem(self.path_to_problem)
+                    else:
+                        explore(x, level + 1)
+                        self.path_to_problem.pop()
+
+        def explore(x, level):
+            # Check contents of collections
+            if isinstance(x, tuple) or isinstance(x, list) or isinstance(x, set):
+                for i, e in enumerate(x):
+                    probe(i, e, level)
+            elif isinstance(x, dict):
+                for k, v in x.items():
+                    probe(k, v, level)
+            # Check object internals (unless we have exact builutin collection types)
+            if type(x) not in (tuple, list, set, dict):
+                # A function has both __call__ and __dict__ attributes. Check __call__ first.
+                if hasattr(x, '__call__'):
+                    probe(PickleDebugger.TERMINAL, x, level)
+                elif hasattr(x, '__getstate__'):
+                    for k, v in x.__getstate__().items():
+                        probe(k, v, level)
+                elif hasattr(x, '__dict__'):
+                    for k, v in x.__dict__.items():
+                        probe(k, v, level)
+                else:
+                    probe(PickleDebugger.TERMINAL, x, level)
+
+        if debug:
+            print(f'CHECKING ({type(o)}) {o}')
+        return probe('START', o, 0)

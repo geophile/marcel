@@ -97,6 +97,21 @@ class Environment(object):
                                            'PWD',
                                            'USER'))
 
+    def __getstate__(self):
+        return {'usage': self.usage,
+                'workspace': None if self.workspace.is_default() else self.workspace.name,
+                'namespace': self.workspace.persistible_vars()}
+
+    def __setstate__(self, state):
+        from marcel.object.workspace import Workspace
+        usage = state['usage']
+        workspace_name = state['workspace']
+        workspace = Workspace.default() if workspace_name is None else Workspace(workspace_name)
+        namespace = state['namespace']
+        env = Environment.create(workspace=workspace, usage=usage)
+        env.workspace.namespace.reconstitute(namespace, env)
+        self.__dict__ = env.__dict__
+
     def initial_namespace(self):
         def home_dir():
             try:

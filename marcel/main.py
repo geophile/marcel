@@ -361,7 +361,12 @@ def read_script(script_path):
 
 
 def main():
-    multiprocessing.set_start_method('fork')  # Maybe spawn or forkserver for plaforms other than Linux
+    def start_method():
+        start_method = os.getenv('MARCEL_MULTIPROCESSING_START_METHOD')
+        if start_method is None:
+            start_method = 'spawn'
+        return start_method
+    multiprocessing.set_start_method(start_method())
     marcel.persistence.storagelayout.ensure_current(testing=False)
     # Check that default workspace exists
     if not Workspace.default().exists():
@@ -396,5 +401,4 @@ if __name__ == '__main__':
         # raise KSE instead for switching to a workspace from a marcel commandd.
         print(str(e), file=sys.stderr)
     except marcel.exception.ExitException:
-        # sys.exit(0)
-        pass
+        sys.exit(0)

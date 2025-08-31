@@ -60,6 +60,29 @@ def debug(message):
         print(f'{os.getpid()}: {message}', flush=True)
 
 
+def run_command_in_child(env, command, writer):
+    debug(f'running: {command.source}')
+    child_namespace_changes = None
+    try:
+        child_namespace_changes = command.execute(env, remote=True)
+        debug('execution complete')
+    except marcel.exception.KillCommandException as e:
+        debug(f'caught {e}')
+        marcel.util.print_to_stderr(env, e)
+    except marcel.exception.KillAndResumeException as e:
+        debug(f'caught {e}')
+        # Error handler printed the error
+        pass
+    except KeyboardInterrupt as e:
+        debug(f'caught {e}')
+        raise
+    finally:
+        if child_namespace_changes is not None:
+            debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
+            writer.send(dill.dumps(child_namespace_changes))
+        writer.close()
+
+
 class Job:
 
     # Job state
@@ -142,35 +165,13 @@ class Job:
     # For use by this class
 
     def start_process(self):
-        def run_command_in_child(command, writer):
-            debug(f'running: {command.source}')
-            child_namespace_changes = None
-            try:
-                child_namespace_changes = command.execute(self.env, remote=True)
-                debug('execution complete')
-            except marcel.exception.KillCommandException as e:
-                debug(f'caught {e}')
-                marcel.util.print_to_stderr(self.env, e)
-            except marcel.exception.KillAndResumeException as e:
-                debug(f'caught {e}')
-                # Error handler printed the error
-                pass
-            except KeyboardInterrupt as e:
-                debug(f'caught {e}')
-                raise
-            finally:
-                if child_namespace_changes is not None:
-                    debug(f'completed: {command.source} namespace changes: {child_namespace_changes.keys()}')
-                    writer.send(dill.dumps(child_namespace_changes))
-                writer.close()
-
         # duplex=False: child writes to parent when function completes execution. No need to communicate in the
         # other direction
         debug(f'About to spawn process for {self.command.source}')
         reader, writer = mp.Pipe(duplex=False)
         JobControl.only.child_listener.add_listener(reader)
         debug('Job.start_process')
-        self.process = mp.Process(target=run_command_in_child, args=(self.command, writer))
+        self.process = mp.Process(target=run_command_in_child, args=(self.env, self.command, writer))
         self.process.daemon = False
         try:
             # Set up process handling as it should exist in the child process.
@@ -178,6 +179,10 @@ class Job:
             # - ctrl-z / SIGTSTP: Default handling (pause).
             signal.signal(signal.SIGINT, signal.SIG_IGN)
             signal.signal(signal.SIGTSTP, signal.SIG_DFL)
+
+            # import marcel.util
+            # marcel.util.PickleDebugger().check(self.process, debug=True)
+
             self.process.start()
             writer.close()  # See topmost comment
         finally:

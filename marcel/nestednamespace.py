@@ -290,11 +290,9 @@ class NestedNamespace(dict):
             pass
         super().__delitem__(key)
 
-    # We don't want to rely on NestedNamespace pickling and unpickling!
-    # So __get/setstate__ blow up if called.
-
     def __getstate__(self):
-        assert False
+        assert len(self.scopes) == 1, len(self.scopes)
+        return dict(self.scopes[0])
 
     def __setstate__(self, state):
         assert False
