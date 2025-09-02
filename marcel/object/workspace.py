@@ -375,8 +375,11 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
             owned_marker_path = self.marker.owned()
             self.marker.unowned().rename(owned_marker_path)
             return owned_marker_path.exists()
-        elif owner == self.locations.pid:  # locations.pid is the pid of the topmost process
+        elif owner == self.locations.pid:
             # Already locked
+            return True
+        elif owner == self.locations.ppid:
+            # Locked by parent. This process must be owned by a job executing on behalf of the parent.
             return True
         else:
             # Locked by another process

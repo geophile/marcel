@@ -74,6 +74,7 @@ class Locations(object):
         # Record the pid. Process spawning creates children with different pids, but when a pid shows up in
         # a filename, we want the pid of the topmost process.
         self.pid = os.getpid()
+        self.ppid = os.getppid()
 
     def config(self):
         return Locations.ensure_dir_exists(self.config_base /

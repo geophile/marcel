@@ -1157,6 +1157,40 @@ Environment.__setstate__:
 
 ----------------------------------------------------------------------
 
+9/1/25
+
+This blows up, running with spawn multiprocessing:
+
+     ws -n test
+     gen 3
+
+The problem is that the parent is using a non-default workspace, and
+the child is too. The child fails when it finds that the workspace is
+already locked.
+
+There are two possible fixes here:
+
+1) Parent closes the workspace while the child is using it.
+
+2) The parent and child can use the workspace at the same time.
+
+Either should work assuming that the command runs in foreground. But
+what if the command is put into the background? The child is running,
+using the workspace, and the parent goes on to run other commands,
+also using the workspace. This is exactly what locking is intended to
+prevent!
+
+In other words, this is a collision of features between non-default
+workspaces and background jobs. For default workspaces, there is no
+exclusion, but things could get ugly. What if the child is appending
+to a file, and the parent does something conflicting with the file?
+
+On the other hand, bash has exactly the same problem. I can have a
+background job writing to a file, while in the foreground I use the
+file in incompatible ways.
+
+----------------------------------------------------------------------
+
 TODO
 
 - Move out of MainScript init

@@ -41,6 +41,7 @@ like spawning is implicated, then to use fork instead, set the environment varia
 With spawn multiprocessing supported, MacOS support should now be possible. Watch this space for
 information on MacOS support.
 
+*Late update: Marcel is now working on MacOS!* 
 
 Marcel
 ======
