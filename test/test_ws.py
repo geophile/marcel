@@ -81,7 +81,7 @@ def test_workspace_lifecycle():
     TEST.run(test='ws -c',
              verification='ws | (w: w.is_default())',
              expected_out=[True])
-    TEST.run('ws -l | (w: str(w)) | sort',
+    TEST.run('ws -l | (w: str(w))',
              expected_out=['Workspace()', 'Workspace(hello)'])
     # Switch to the new workspace
     TEST.run(test='ws hello',

@@ -316,7 +316,7 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
 
     @staticmethod
     def list(env):
-        yield Workspace.default()
+        workspaces = [Workspace.default()]
         for dir in env.locations.config_ws().iterdir():
             if dir.is_dir():
                 name = dir.name
@@ -324,7 +324,9 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
                     workspace = Workspace(name)
                     if workspace.marker.exists():
                         workspace.read_properties()  # So that home is known
-                        yield workspace
+                        workspaces.append(workspace)
+        workspaces.sort(key=lambda ws: ws.name)
+        return workspaces
 
     @staticmethod
     def delete_broken(env):

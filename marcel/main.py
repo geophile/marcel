@@ -361,12 +361,7 @@ def read_script(script_path):
 
 
 def main():
-    def start_method():
-        start_method = os.getenv('MARCEL_MULTIPROCESSING_START_METHOD')
-        if start_method is None:
-            start_method = 'spawn'
-        return start_method
-    multiprocessing.set_start_method(start_method())
+    multiprocessing.set_start_method(os.getenv('MARCEL_MULTIPROCESSING_START_METHOD', default='spawn'))
     marcel.persistence.storagelayout.ensure_current(testing=False)
     # Check that default workspace exists
     if not Workspace.default().exists():
