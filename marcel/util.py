@@ -376,11 +376,11 @@ class PickleDebugger(object):
                     pickle.dumps(x)
                     self.path_to_problem.pop()
                 except AttributeError as e:
-                    print(f'{indent(level)}Caught AttributeError while pickling {x}: {e}', file=sys.stderr)
+                    print(f'{indent(level+1)}*** Caught AttributeError on {x}: {e}', file=sys.stderr)
                     print_stack_of_current_exception()
                     raise PickleDebugger.Problem(self.path_to_problem)
                 except (pickle.PicklingError, TypeError) as e:
-                    print(f'{indent(level)}Caught PicklingError or TypeError: {e}', file=sys.stderr)
+                    print(f'{indent(level+1)}*** Caught PicklingError or TypeError on {x}: {e}', file=sys.stderr)
                     if field is PickleDebugger.TERMINAL:
                         self.path_to_problem.append(str(e))
                         raise PickleDebugger.Problem(self.path_to_problem)
@@ -410,6 +410,4 @@ class PickleDebugger(object):
                 else:
                     probe(PickleDebugger.TERMINAL, x, level)
 
-        if debug:
-            print(f'CHECKING ({type(o)}) {o}')
         return probe('START', o, 0)

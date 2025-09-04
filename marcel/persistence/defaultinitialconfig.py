@@ -1,4 +1,4 @@
-from marcel.builtin import *
+CONFIG = '''from marcel.builtin import *
 
 COLOR_EXT_IMAGE = Color(3, 0, 2, BOLD)
 COLOR_EXT_SOURCE = Color(0, 3, 4, BOLD)
@@ -65,3 +65,4 @@ INTERACTIVE_EXECUTABLES = [
     'vi',
     'vim'
 ]
+'''

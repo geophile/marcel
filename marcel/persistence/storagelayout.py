@@ -18,18 +18,15 @@ import shutil
 
 import marcel.exception
 import marcel.locations
+import marcel.persistence.defaultinitialconfig
 import marcel.util
 import marcel.version
 
 from marcel.object.workspace import Workspace
 
 
-DEFAULT_INITIAL_CONFIG_FILENAME = 'default_initial_config.txt'
-
-
 def default_initial_config():
-    startup_file = pathlib.Path(marcel.persistence.__file__).parent / DEFAULT_INITIAL_CONFIG_FILENAME
-    return startup_file.read_text()
+    return marcel.persistence.defaultinitialconfig.CONFIG
 
 
 def storage_layout():
