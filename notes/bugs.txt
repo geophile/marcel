@@ -807,3 +807,59 @@ Traceback (most recent call last):
   File "/home/jao/git/marcel/marcel/op/jobs.py", line 61, in run
     description = f'{job_id}({job.state_symbol()}): {job.process.pid}  {job.pattern.source}'
 AttributeError: 'Job' object has no attribute 'pattern'
+
+----------------------------------------------------------------------
+
+284. Line continuation broken
+
+Enter \ to continue:
+
+    M 0.35.3 jao@loon ~/taxes/2024$ read -cs Chase4551_Activity_20250112.CSV \
+     
+                                    | map (details, date, desc, amount, type, balance, check_id, _: \
+     
+                                    ('chase', fix_date(date), desc, -cents(amount), type))
+    Error in function "details, date, desc, amount, type, balance, check_id, _: \
+    
+    ('chase', fix_date(date), desc, -cents(amount), type)": invalid syntax (<string>, line 2)
+    M 0.35.3 jao@loon ~/taxes/2024$ gen\
+    Traceback (most recent call last):
+      File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+        return _run_code(code, main_globals, None,
+      File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+        exec(code, run_globals)
+      File "/home/jao/git/marcel/marcel/main.py", line 390, in <module>
+        main()
+      File "/home/jao/git/marcel/marcel/main.py", line 374, in main
+        main_interactive_run()
+      File "/home/jao/git/marcel/marcel/main.py", line 314, in main_interactive_run
+        main.run()
+      File "/home/jao/git/marcel/marcel/main.py", line 228, in run
+        self.parse_and_run_command(self.input)
+      File "/home/jao/git/marcel/marcel/main.py", line 112, in parse_and_run_command
+        pipeline = parser.parse()
+      File "/home/jao/git/marcel/marcel/parser.py", line 1017, in parse
+        if not self.tokens.more():
+      File "/home/jao/git/marcel/marcel/parser.py", line 824, in more
+        return self.peek() is not None
+      File "/home/jao/git/marcel/marcel/parser.py", line 815, in peek
+        token = self.next_token()
+      File "/home/jao/git/marcel/marcel/parser.py", line 802, in next_token
+        return self.lexer.next_token()
+      File "/home/jao/git/marcel/marcel/parser.py", line 686, in next_token
+        token = self.next_unconsolidated_token()
+      File "/home/jao/git/marcel/marcel/parser.py", line 772, in next_unconsolidated_token
+        MarcelString(self.parser, self.text, self.end))
+      File "/home/jao/git/marcel/marcel/parser.py", line 485, in __init__
+        super().__init__(parser, text, position, Token.STRING_TERMINATING)
+      File "/home/jao/git/marcel/marcel/parser.py", line 412, in __init__
+        self.scan(scan_termination)
+      File "/home/jao/git/marcel/marcel/parser.py", line 479, in scan
+        self.string = StringLiteral(''.join(chars))
+      File "/home/jao/git/marcel/marcel/stringliteral.py", line 30, in __init__
+        self.compute_unadorned()
+      File "/home/jao/git/marcel/marcel/stringliteral.py", line 76, in compute_unadorned
+        raise Exception(f'string literal terminated by lone escape: {self}')
+    Exception: string literal terminated by lone escape: gen\
+
+Also, using alt-enter (as you're supposed to), breaks after edit.

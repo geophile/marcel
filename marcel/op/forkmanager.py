@@ -25,6 +25,14 @@ import marcel.object.error
 import marcel.util
 
 
+def run_pipeline_in_child(env, pipeline, thread_id, writer):
+    try:
+        pipeline.run_pipeline(env, [thread_id])
+    except BaseException as e:
+        writer.send(dill.dumps(e))
+    writer.close()
+
+
 class ForkManager(object):
 
     def __init__(self,
@@ -74,7 +82,6 @@ class ForkWorker(object):
     def __init__(self, env, fork_manager, thread_id):
         self.env = env
         self.fork_manager = fork_manager
-        op = fork_manager.op
         self.thread_id = thread_id
         self.process = None
         # duplex=False: child writes to parent when function completes execution.
@@ -86,14 +93,15 @@ class ForkWorker(object):
             raise marcel.exception.KillCommandException('Too many pipelines args.')
 
     def start_process(self):
-        def run_pipeline_in_child():
-            try:
-                self.pipeline.run_pipeline(self.env, [self.thread_id])
-            except BaseException as e:
-                self.writer.send(dill.dumps(e))
-            self.writer.close()
-        self.process = mp.Process(target=run_pipeline_in_child, args=tuple())
+        self.process = mp.Process(target=run_pipeline_in_child,
+                                  args=(self.env, self.pipeline, self.thread_id, self.writer))
         self.process.daemon = True
+        #
+        # from marcel.util import PickleDebugger
+        # import sys
+        # PickleDebugger().check(self.pipeline)
+        # sys.exit(123)
+        #
         self.process.start()
         self.writer.close()
 

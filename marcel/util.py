@@ -362,7 +362,7 @@ class PickleDebugger(object):
         self.path_to_problem = []
         self.visitors = set()  # PickleDebugger.Visitors()
 
-    def check(self, o, debug=False):
+    def check(self, o, debug=True):
         def indent(level):
             return '    ' * (level * 1)
 
@@ -377,6 +377,8 @@ class PickleDebugger(object):
                     self.path_to_problem.pop()
                 except AttributeError as e:
                     print(f'{indent(level+1)}*** Caught AttributeError on {x}: {e}', file=sys.stderr)
+
+
                     print_stack_of_current_exception()
                     raise PickleDebugger.Problem(self.path_to_problem)
                 except (pickle.PicklingError, TypeError) as e:
@@ -410,4 +412,9 @@ class PickleDebugger(object):
                 else:
                     probe(PickleDebugger.TERMINAL, x, level)
 
-        return probe('START', o, 0)
+        probe('START', o, 0)
+        if self.path_to_problem:
+            print('PICKLING FAILED')
+            for x in self.path_to_problem:
+                print(x, file=sys.stderr)
+        print(f'END {o}')
