@@ -1191,6 +1191,32 @@ file in incompatible ways.
 
 ----------------------------------------------------------------------
 
+9/9/25
+
+fork N (| ... |) doesn't work. The problem is that the pipeline needs
+to be serialized, and ForkManager relies on the customize_pipeline
+mechanism, in which, the customizer is a method, and methods can't be
+pickled. And this mechanism is used extensively!
+
+From PickleDebugger:
+
+START: (<class 'marcel.core.PipelineMarcel'>) 0x79f6b8195f90
+    *** Caught PicklingError or TypeError on Pipeline(gen 3): cannot pickle '_io.TextIOWrapper' object
+    pipeline_arg: (<class 'marcel.core.PipelineExecutable'>) 0x79f6b81942b0
+    customize_pipeline: (<class 'method'>) 0x79f6b998be00
+        *** Caught PicklingError or TypeError on <bound method ForkWorker.customize_pipeline of <marcel.op.forkmanager.ForkWorker object at 0x79f6b8196980>>: cannot pickle '_io.TextIOWrapper' object
+        TERMINAL: (<class 'method'>) 0x79f6b998be00
+    pipeline: (<class 'marcel.core.PipelineExecutable'>) 0x79f6b8194c70
+    params: (<class 'list'>) 0x79f6b81b4b80
+    scope: (<class 'dict'>) 0x79f6b85c8e00
+END Pipeline(gen 3)
+
+
+But union, join (for example) work! Because the command (e.g. gen 3 |
+union (| gen 3 |)) doesn't contain a customizer.
+
+----------------------------------------------------------------------
+
 TODO
 
 - Move out of MainScript init

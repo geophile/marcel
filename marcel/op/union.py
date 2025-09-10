@@ -66,7 +66,18 @@ class Union(marcel.core.Op):
     def setup(self, env):
         self.pipelines = []
         for pipeline_arg in self.pipelines_arg:
-            pipeline = marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline)
+            # Union is implemented by passing the input stream along in receive(), and then having each pipeline's
+            # arg send its output via flush. This depends on all the pipelines args having the same receiver as the
+            # union op itself. However, we only want one flush after everything is done. PropagateFlushFromLast
+            # makes sure that only the last pipelines propagates the flush.
+            #
+            # About the computation of last: self.pipelines is populated in a loop which invokes this method. (I.e.,
+            # len(self.pipelines) increments with each invocation.)
+            propagate = PropagateFlushFromLast()
+            propagate.last = len(self.pipelines) == len(self.pipelines_arg) - 1
+            pipeline_arg.append(propagate)
+            pipeline_arg.last_op().receiver = self.receiver
+            pipeline = marcel.core.Pipeline.create(pipeline_arg)
             pipeline.setup(env)
             self.pipelines.append(pipeline)
 
@@ -81,24 +92,12 @@ class Union(marcel.core.Op):
         self.pipelines.clear()
         self.propagate_flush(env)
 
-    # Internal
-
-    def customize_pipeline(self, env, pipeline):
-        # Union is implemented by passing the input stream along in receive(), and then having each pipeline's
-        # arg send its output via flush. This depends on all the pipelines args having the same receiver as the
-        # union op itself. However, we only want one flush after everything is done. PropagateFlushFromLast
-        # makes sure that only the last pipelines propagates the flush.
-        last = len(self.pipelines) == len(self.pipelines_arg) - 1
-        pipeline.append(PropagateFlushFromLast(last))
-        pipeline.last_op().receiver = self.receiver
-        return pipeline
-
 
 class PropagateFlushFromLast(marcel.core.Op):
 
-    def __init__(self, last):
+    def __init__(self):
         super().__init__()
-        self.last = last
+        self.last = None  # Should be set by Union.setup
 
     # Op
 
