@@ -1361,6 +1361,17 @@ def test_union():
     TEST.run(
         lambda: run(gen(4) | map(lambda x: (x, x * 100)) | union(gen(4, 2) | map(lambda x: (x, x * 100))) | sort()),
         expected_out=[(0, 0), (1, 100), (2, 200), (2, 200), (3, 300), (3, 300), (4, 400), (5, 500)])
+    # Union inside pipeline with parameters. (Union relies on pipeline customization,
+    # and this could be tricky inside a pipeline with parameters.)
+    TEST.run(lambda: run(gen(3, 1) |
+                         args(lambda n: gen(3, 1) |
+                                        map(lambda x: x*10**n) |
+                                        union(gen(4, 1) | map(lambda x: x*10**n))) |
+                         sort()),
+             expected_out=[
+                 10, 10, 20, 20, 30, 30, 40,
+                 100, 100, 200, 200, 300, 300, 400,
+                 1000, 1000, 2000, 2000, 3000, 3000, 4000])
 
 
 @timeit
@@ -2077,17 +2088,16 @@ def main_stable():
 
 
 def main_dev():
-    test_union()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # # print('fail: ****************************** SLOW TESTS DISABLED')
-    # main_slow_tests()
-    # TEST.report_failures('test_api')
+    main_stable()
+    # print('fail: ****************************** SLOW TESTS DISABLED')
+    main_slow_tests()
+    TEST.report_failures('test_api')
     sys.exit(TEST.failures)
 
 

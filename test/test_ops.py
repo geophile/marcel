@@ -614,7 +614,7 @@ def test_bash():
         TEST.run('''echo (f"hello {who}")''',
                  expected_out='hello world')
         # Test args
-        TEST.run('echo hello  world',          # Two spaces between args should not be reproduced
+        TEST.run('echo hello  world',  # Two spaces between args should not be reproduced
                  expected_out=['hello world'])
         TEST.run('echo hello (who)',
                  expected_out=['hello world'])
@@ -1094,7 +1094,7 @@ def test_pipeline_args():
     TEST.run('gen 3 | f -b (10) -a (100) -a (200)',
              expected_err='Flag a given more than once')
     TEST.run('gen 3 | f -b (10)',
-             expected_out=[Error("unsupported operand type(s) for *: 'int' and 'NoneType'")]*3)
+             expected_out=[Error("unsupported operand type(s) for *: 'int' and 'NoneType'")] * 3)
     # Long flags
     TEST.run('foobar = (|foo, bar: map (f: f * foo) | select (f: f < bar)|)')
     TEST.run('gen 10 | foobar --foo (10) --bar (45)',
@@ -1320,14 +1320,16 @@ def test_redirect_file():
         TEST.run(f'gen 3 | map (f: (f, f*10)) > {testdir}/a')
         TEST.run(f'gen 3 | map (f: (f, f*100)) > {testdir}/b')
         TEST.run(f'gen 3 | map (f: (f, f*1000)) > {testdir}/c')
-        TEST.run(f'{testdir}/a < (f: eval(f)) | join (|{testdir}/b < (f: eval(f))|) | join (|{testdir}/c < (f: eval(f))|)',
-                 expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
+        TEST.run(
+            f'{testdir}/a < (f: eval(f)) | join (|{testdir}/b < (f: eval(f))|) | join (|{testdir}/c < (f: eval(f))|)',
+            expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
         # Bug 74
         TEST.delete_files(f'{testdir}/a', f'{testdir}/b', f'{testdir}/c', f'{testdir}/d')
         TEST.run(f'gen 3 | map (f: (f, f*10)) > {testdir}/a')
         TEST.run(f'gen 3 | map (f: (f, f*100)) > {testdir}/b')
         TEST.run(f'gen 3 | map (f: (f, f*1000)) > {testdir}/c')
-        TEST.run(f'{testdir}/a < (f: eval(f)) | join (|{testdir}/b < (f: eval(f))|) | join (|{testdir}/c < (f: eval(f))|) > {testdir}/d')
+        TEST.run(
+            f'{testdir}/a < (f: eval(f)) | join (|{testdir}/b < (f: eval(f))|) | join (|{testdir}/c < (f: eval(f))|) > {testdir}/d')
         TEST.run(f'{testdir}/d <',
                  expected_out=[(0, 0, 0, 0), (1, 10, 100, 1000), (2, 20, 200, 2000)])
         # ---------------------------------------------------------------------
@@ -1509,6 +1511,7 @@ def test_case():
              expected_err='Expected function')
     TEST.run(test='gen 5 1 | case (f: f < 3) (123)',
              expected_err='Expected pipeline')
+
 
 @timeit
 def test_read():
@@ -1774,6 +1777,13 @@ def test_union():
              expected_out=[100, 101, 102, 200, 201, 202])
     TEST.run('gen 3 100 | union (|gen 3 200|) (|gen 3 300|) | sort',
              expected_out=[100, 101, 102, 200, 201, 202, 300, 301, 302])
+    # Union inside pipeline with parameters. (Union relies on pipeline customization,
+    # and this could be tricky inside a pipeline with parameters.)
+    TEST.run('gen 3 1 | args (| n: gen 3 1 | (x: x*10**n) | union (| gen 4 1 | (x: x*10**n) |) |) | sort',
+             expected_out=[
+                 10, 10, 20, 20, 30, 30, 40,
+                 100, 100, 200, 200, 300, 300, 400,
+                 1000, 1000, 2000, 2000, 3000, 3000, 4000])
 
 
 @timeit
@@ -1975,6 +1985,7 @@ def test_env():
 def test_pos():
     TEST.run('gen 5 | (f: (f, pos())) | select (f, p1: f % 2 == 0) | (f, p1: (f, p1, pos()))',
              expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
+
 
 @timeit
 def test_json():
@@ -2647,15 +2658,15 @@ def main_stable():
 
 
 def main_dev():
-    test_union()
     pass
+
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # # print('fail: ****************************** SLOW TESTS DISABLED')
-    # main_slow_tests()
+    main_stable()
+    # print('fail: ****************************** SLOW TESTS DISABLED')
+    main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
 

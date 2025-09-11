@@ -441,26 +441,19 @@ class PipelineIterator:
 # explicitly managed while PipelinePython pipelines do not.
 class Pipeline(object):
 
-    # customize_pipeline takes pipelines as an argument, returns None
+    # object
+
     def __init__(self, pipeline_arg, customize_pipeline):
-        self.pipeline_arg = pipeline_arg
+        self.pipeline_executable = pipeline_arg
         self.customize_pipeline = customize_pipeline
         self.pipeline = None
 
     def __repr__(self):
-        return f'Pipeline({self.pipeline_arg})'
+        return f'Pipeline({self.pipeline_executable})'
+
+    # Pipeline - Op-like interface
 
     def setup(self, env):
-        assert False
-
-    def n_params(self):
-        assert False
-
-    def pickle(self, env, pickler):
-        self.create_executable(env)
-        pickler.dump(self.pipeline)
-
-    def run_pipeline(self, env, args):
         assert False
 
     def receive(self, env, x):
@@ -471,6 +464,18 @@ class Pipeline(object):
 
     def cleanup(self):
         self.pipeline.cleanup()
+
+    # Pipeline
+
+    def n_params(self):
+        assert False
+
+    def run_pipeline(self, env, args):
+        assert False
+
+    def pickle(self, env, pickler):
+        self.create_executable(env)
+        pickler.dump(self.pipeline)
 
     @staticmethod
     def create(pipeline, customize_pipeline=lambda env, pipeline: pipeline):
@@ -505,16 +510,16 @@ class PipelineMarcel(Pipeline):
     # Pipeline
 
     def setup(self, env):
-        if isinstance(self.pipeline_arg, str):
-            executable = env.getvar(self.pipeline_arg)
-            if type(executable) is not marcel.core.PipelineExecutable:
+        if isinstance(self.pipeline_executable, str):
+            pipeline_arg = env.getvar(self.pipeline_executable)
+            if type(pipeline_arg) is not marcel.core.PipelineExecutable:
                 raise marcel.exception.KillCommandException(
-                    f'The variable {self.pipeline_arg} is not bound to a pipeline')
+                    f'The variable {self.pipeline_executable} is not bound to a pipeline')
         else:
-            executable = self.pipeline_arg
+            pipeline_arg = self.pipeline_executable
         # Make a copy, in case the pipeline needs an instance per fork.
-        executable = executable.copy()
-        self.pipeline = self.customize_pipeline(env, executable)
+        pipeline_arg = pipeline_arg.copy()
+        self.pipeline = self.customize_pipeline(env, pipeline_arg)
         assert self.pipeline is not None
         self.scope = {}
         self.params = self.pipeline.parameters()
@@ -544,16 +549,16 @@ class PipelineMarcel(Pipeline):
     # Internal
 
     def create_executable(self, env):
-        if isinstance(self.pipeline_arg, str):
+        if isinstance(self.pipeline_executable, str):
             # Presumably a var
-            self.pipeline = env.getvar(self.pipeline_arg)
+            self.pipeline = env.getvar(self.pipeline_executable)
             if type(self.pipeline) is not marcel.core.PipelineExecutable:
                 raise marcel.exception.KillCommandException(
-                    f'The variable {self.pipeline_arg} is not bound to a pipeline')
-        elif type(self.pipeline_arg) is PipelineExecutable:
-            self.pipeline = self.pipeline_arg
+                    f'The variable {self.pipeline_executable} is not bound to a pipeline')
+        elif type(self.pipeline_executable) is PipelineExecutable:
+            self.pipeline = self.pipeline_executable
         else:
-            assert False, self.pipeline_arg
+            assert False, self.pipeline_executable
 
 
 # A pipeline created by Python, by using marcel.api. Pipeline variables are ordinary Python variables,
@@ -576,12 +581,12 @@ class PipelinePython(Pipeline):
         pass
 
     def n_params(self):
-        return self.pipeline_arg.n_params()
+        return self.pipeline_executable.n_params()
 
     def run_pipeline(self, env, args):
-        pipeline = (self.pipeline_arg.create_pipeline(args)
+        pipeline = (self.pipeline_executable.create_pipeline(args)
                     if self.n_params() > 0 else
-                    self.pipeline_arg.create_pipeline())
+                    self.pipeline_executable.create_pipeline())
         self.pipeline = self.customize_pipeline(env, pipeline)
         marcel.core.Command(None, self.pipeline).execute(env)
 
@@ -595,4 +600,4 @@ class PipelinePython(Pipeline):
     # Internal
 
     def create_executable(self, env):
-        self.pipeline = self.pipeline_arg.create_pipeline()
+        self.pipeline = self.pipeline_executable.create_pipeline()

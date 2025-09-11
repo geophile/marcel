@@ -1226,7 +1226,58 @@ Fork.setup
 Fork.run
     FM.start_process
         
+----------------------------------------------------------------------
 
+9/11/25
+
+customize_pipeline solves this problem:
+
+- A pipeline is created to express a command.
+
+- Implementation of the command sometimes requires pipelines to be
+  modified, or the derivation of other pipelines.
+
+- The customization step is done at different times by PipelineMarcel,
+  and PipelinePython:
+
+  - PM: setup
+  - PP: run_pipeline, prepare_to_receive
+
+......................................................................
+
+gen 3 | union (| gen 4 |)
+
+
+union via CLI (PipelineMarcel):
+
+- Union.setup gets PipelineExecutable
+
+- setup calls Pipeline.create(pipeline_executable, customize_pipeline)
+  -> PipelineMarcel which wraps a PipelineExecutable.
+
+- PM.setup(): PM has the PE (pipeline_arg). Makes a copy and calls
+  customize_pipeline on the copy, assigning the resulting PE to
+  self.pipeline.
+
+- After input stream to Union.receive is exhausted, we're in
+  Union.flush, where the pipelines are executed by PM.run_pipeline.
+
+
+union via API (PipelinePython):
+
+- Union.setup gets OpList
+
+- setup calls Pipeline.create(oplist, customize_pipeline) ->
+  PipelinePython which wraps a PipelineExecutable.
+
+- PP.setup(): noop
+
+- PP.flush(): PP.run_pipeline, which calls PE.create_pipeline ->
+  self. Then customize_pipeline is applied to the PE. The resulting PE
+  is exeecuted.
+
+
+*** WHY IS CUSTOMIZE_PIPELINE TIMED DIFFERENTLY FOR PM AND PP?
 
 ----------------------------------------------------------------------
 
