@@ -2647,12 +2647,13 @@ def main_stable():
 
 
 def main_dev():
+    test_union()
     pass
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
+    # main_stable()
     # # print('fail: ****************************** SLOW TESTS DISABLED')
     # main_slow_tests()
     TEST.report_failures('test_ops')

@@ -1215,6 +1215,19 @@ END Pipeline(gen 3)
 But union, join (for example) work! Because the command (e.g. gen 3 |
 union (| gen 3 |)) doesn't contain a customizer.
 
+Nesting of ForkManager customize_pipeline functions:
+
+Fork.setup
+    ForkManager() called with default customize_pipeline: lambda env, pipeline, thread_id: pipeline
+    FM.setup()
+        ForkWorker.__init__()
+            Pipeline.create(..., self.customize_pipeline)    customize_pipeline is a method
+
+Fork.run
+    FM.start_process
+        
+
+
 ----------------------------------------------------------------------
 
 TODO
