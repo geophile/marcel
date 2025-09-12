@@ -91,9 +91,9 @@ class Case(marcel.core.Op):
         def pipeline(pipeline_arg):
             pipeline = marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline)
             try:
-                pipeline.prepare_to_receive(env)
                 if not isinstance(pipeline, marcel.core.Pipeline):
                     raise marcel.exception.KillCommandException(f'Expected pipeline, found {arg}')
+                pipeline.prepare_to_receive(env)
                 return pipeline
             except:
                 raise marcel.exception.KillCommandException(f'Expected pipeline, found {arg}')

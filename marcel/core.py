@@ -156,7 +156,6 @@ class Op(AbstractOp):
         pipeline.append(self)
         return pipeline
 
-
     @classmethod
     def op_name(cls):
         return cls.__name__.lower()
@@ -470,7 +469,13 @@ class Pipeline(object):
     def n_params(self):
         assert False
 
+    def prepare_to_receive(self, env):
+        assert False
+
     def run_pipeline(self, env, args):
+        assert False
+
+    def create_executable(self, env):
         assert False
 
     def pickle(self, env, pickler):
@@ -492,11 +497,6 @@ class Pipeline(object):
                 if env.api_usage()
                 else marcel.core.PipelineExecutable())
 
-    # Internal
-
-    def create_executable(self, env):
-        assert False
-
 
 # A pipeline constructed through the marcel parser, via command line or script. Pipeline args are managed
 # by the Environment's NestedNamspace, and are pushed/popped around pipeline execution.
@@ -507,7 +507,7 @@ class PipelineMarcel(Pipeline):
         self.params = None
         self.scope = None
 
-    # Pipeline
+    # AbstractOp
 
     def setup(self, env):
         if isinstance(self.pipeline_executable, str):
@@ -528,6 +528,8 @@ class PipelineMarcel(Pipeline):
         for param in self.params:
             self.scope[param] = None
 
+    # Pipeline
+
     def n_params(self):
         return self.pipeline.n_params()
 
@@ -545,8 +547,6 @@ class PipelineMarcel(Pipeline):
     def prepare_to_receive(self, env):
         self.setup(env)
         self.pipeline.setup(env)
-
-    # Internal
 
     def create_executable(self, env):
         if isinstance(self.pipeline_executable, str):
@@ -573,12 +573,13 @@ class PipelinePython(Pipeline):
         else:
             assert False, pipeline_arg
         super().__init__(pipeline_arg, customize_pipeline)
-        self.pipeline = None
 
-    # Pipeline
+    # Op
 
     def setup(self, env):
         pass
+
+    # Pipeline
 
     def n_params(self):
         return self.pipeline_executable.n_params()
@@ -591,13 +592,10 @@ class PipelinePython(Pipeline):
         marcel.core.Command(None, self.pipeline).execute(env)
 
     def prepare_to_receive(self, env):
-        # assert self.n_params() == 0
         self.setup(env)
         self.create_executable(env)
         self.pipeline = self.customize_pipeline(env, self.pipeline)
         self.pipeline.setup(env)
-
-    # Internal
 
     def create_executable(self, env):
         self.pipeline = self.pipeline_executable.create_pipeline()

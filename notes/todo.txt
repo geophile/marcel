@@ -801,3 +801,7 @@ set after importing marcel.api.
 ----------------------------------------------------------------------
 
 Broken namespace should record the original workspace name
+
+----------------------------------------------------------------------
+
+Are IfBase, Tee obsolete? I think so.

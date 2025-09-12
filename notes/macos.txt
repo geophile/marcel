@@ -1276,8 +1276,32 @@ union via API (PipelinePython):
   self. Then customize_pipeline is applied to the PE. The resulting PE
   is exeecuted.
 
+----------------------------------------------------------------------
+
+9/12/25
 
 *** WHY IS CUSTOMIZE_PIPELINE TIMED DIFFERENTLY FOR PM AND PP?
+
+I think it's because of PipelineFunctions, which are used by the api,
+e.g.
+
+    union(lambda x: ...)
+
+The lambda is evaluated to an OpList given x, which happens during
+pipeline execution, not setup.
+
+prepare_to_receive only used by Case?! (IfBase and Tee are obsolete, I
+think.)
+
+IDEA: 
+
+- customize_pipeline is not attached to the pipeline being modified,
+  attach it to an op.
+
+- For PipelineMarcel, customize after call to op.setup
+
+- For PipelinePython, in run_pipeline (as is done now). But pass op to
+  run_pipeline so that the customizer can be located.
 
 ----------------------------------------------------------------------
 

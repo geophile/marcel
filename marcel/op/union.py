@@ -46,7 +46,6 @@ class UnionArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('union', env)
-        # str: To accommodate var names
         self.add_anon_list('pipelines', convert=self.check_pipeline, target='pipelines_arg')
         self.validate()
 
