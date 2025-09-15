@@ -73,7 +73,6 @@ class Sudo(marcel.core.Op):
     def __init__(self):
         super().__init__()
         self.args = None
-        self.pipeline = None
 
     def __repr__(self):
         return f'sudo({self.pipeline})'
@@ -81,11 +80,12 @@ class Sudo(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
+        self.pipelines = []
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('Missing pipelines')
         pipeline_arg = self.args.pop()
-        self.pipeline = marcel.core.Pipeline.create(pipeline_arg)
-        self.pipeline.setup(env)
+        self.pipelines.append(marcel.core.Pipeline.create(pipeline_arg))
+        self.only_pipeline().setup(env)
 
     # Op
 
@@ -104,7 +104,7 @@ class Sudo(marcel.core.Op):
         pickler = dill.Pickler(buffer)
         pickler.dump(marcel.util.python_version())
         pickler.dump(env.marcel_usage())
-        self.pipeline.pickle(env, pickler)
+        self.only_pipeline().pickle(env, pickler)
         buffer.seek(0)
         stdout, stderr = self.process.communicate(input=buffer.getvalue())
         # Wait for completion (already guaranteed by communicate returning?)

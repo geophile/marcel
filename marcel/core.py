@@ -40,6 +40,9 @@ class Op(AbstractOp):
         self.receiver = None
         # The pipelines to which this op belongs
         self.owner = None
+        # Pipelines of this op
+        self.pipelines = []
+        # Supports pos()
         self._count = -1
 
     def __repr__(self):
@@ -119,6 +122,10 @@ class Op(AbstractOp):
 
     def cleanup(self):
         pass
+
+    def only_pipeline(self):
+        assert len(self.pipelines) == 1, self
+        return self.pipelines[0]
 
     def copy(self):
         copy = self.__class__()
@@ -463,6 +470,9 @@ class Pipeline(object):
 
     def cleanup(self):
         self.pipeline.cleanup()
+
+    def append(self, op):
+        self.pipeline.append(op)
 
     # Pipeline
 

@@ -88,8 +88,13 @@ class Case(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
+        self.pipelines = []
         def pipeline(pipeline_arg):
+            # Unlike other ops, Case tracks its own pipelines, in default_pipeline and branches.
+            # But they still have to be registered with the parent (self.pipelines) for management of
+            # pipelines by core.
             pipeline = marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline)
+            self.pipelines.append(pipeline)
             try:
                 if not isinstance(pipeline, marcel.core.Pipeline):
                     raise marcel.exception.KillCommandException(f'Expected pipeline, found {arg}')

@@ -1296,9 +1296,13 @@ think.)
 IDEA: 
 
 - customize_pipeline is not attached to the pipeline being modified,
-  attach it to an op.
+  attach it to an op. (It's already a method of ops, so just remove it
+  from pipelines).
 
 - For PipelineMarcel, customize after call to op.setup
+
+- In order for this to work, need to register pipelines with op. Add
+  Op.pipelines.
 
 - For PipelinePython, in run_pipeline (as is done now). But pass op to
   run_pipeline so that the customizer can be located.

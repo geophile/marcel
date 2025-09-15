@@ -60,7 +60,6 @@ class Intersect(marcel.core.Op):
         self.pipelines_arg = None
         self.common = None  # item -> count: Accumulated intersection
         self.input = None   # item -> count: From one of the pipelines args
-        self.pipelines = None
 
     def __repr__(self):
         return f'intersect({self.pipelines_arg})'

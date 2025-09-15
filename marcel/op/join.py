@@ -93,7 +93,6 @@ class Join(marcel.core.Op):
         self.pipeline_arg = None
         self.keep = None
         self.inner = None  # Map containing contents of pipelines, keyed by join value
-        self.pipeline = None
         self.first = None
 
     def __repr__(self):
@@ -102,13 +101,14 @@ class Join(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.pipeline = marcel.core.Pipeline.create(self.pipeline_arg, self.customize_pipeline)
-        self.pipeline.setup(env)
+        self.pipelines = []
+        self.pipelines.append(marcel.core.Pipeline.create(self.pipeline_arg, self.customize_pipeline))
+        self.only_pipeline().setup(env)
         self.first = True
 
     def receive(self, env, x):
         if self.first:
-            self.pipeline.run_pipeline(env, None)
+            self.only_pipeline().run_pipeline(env, None)
             self.first = False
         x = tuple(x)
         join_value = x[0]
@@ -145,6 +145,5 @@ class Join(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
         self.inner = {}
-        map = marcel.opmodule.create_op(env, 'map', load_inner)
-        pipeline.append(map)
+        pipeline.append(marcel.opmodule.create_op(env, 'map', load_inner))
         return pipeline

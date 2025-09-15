@@ -67,7 +67,6 @@ class Difference(marcel.core.Op):
         super().__init__()
         self.pipeline_arg = None
         self.right = None
-        self.pipeline = None
         self.first = None
 
     def __repr__(self):
@@ -76,13 +75,14 @@ class Difference(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.pipeline = marcel.core.Pipeline.create(self.pipeline_arg, self.customize_pipeline)
-        self.pipeline.setup(env)
+        self.pipelines = []
+        self.pipelines.append(marcel.core.Pipeline.create(self.pipeline_arg, self.customize_pipeline))
+        self.only_pipeline().setup(env)
         self.first = True
 
     def receive(self, env, x):
         if self.first:
-            self.pipeline.run_pipeline(env, None)
+            self.only_pipeline().run_pipeline(env, None)
             self.first = False
         try:
             count = self.right.get(x, None)

@@ -55,7 +55,6 @@ class Union(marcel.core.Op):
     def __init__(self):
         super().__init__()
         self.pipelines_arg = None
-        self.pipelines = None
 
     def __repr__(self):
         return 'union()'

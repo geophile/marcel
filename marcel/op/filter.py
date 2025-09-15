@@ -103,18 +103,19 @@ class Filter(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.right = set()
+        self.pipelines = []
+        self.pipelines.append(marcel.core.Pipeline.create(self.pipeline_arg))
+        self.right = None
         # self.discard is just for arg processing. self.keep controls execution.
         # This works if keep is already true, and if both keep and discard are false,
         # since keep is the default behavior.
         self.keep = not self.discard
         if self.compare is None:
             self.compare = lambda *x: x
-        pipeline = marcel.core.Pipeline.create(self.pipeline_arg, self.customize_pipeline)
-        pipeline.setup(env)
-        pipeline.run_pipeline(env, None)
 
     def receive(self, env, x):
+        if self.right is None:
+            self.load_right(env)
         c = marcel.util.wrap_op_input(self.compare(*x))
         try:
             if (c in self.right) == self.keep:
@@ -122,13 +123,16 @@ class Filter(marcel.core.Op):
         except TypeError:
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
-    def customize_pipeline(self, env, pipeline):
-        def load_right(*x):
+    # Internal
+
+    def load_right(self, env):
+        def add_to_right(*x):
             try:
                 self.right.add(x)
             except TypeError:
                 raise marcel.exception.KillCommandException(f'{x} is not hashable')
-
         self.right = set()
-        pipeline.append(marcel.opmodule.create_op(env, 'map', load_right))
-        return pipeline
+        self.only_pipeline().create_executable(env)
+        self.only_pipeline().append(marcel.opmodule.create_op(env, 'map', add_to_right))
+        self.only_pipeline().setup(env)
+        self.only_pipeline().run_pipeline(env, None)

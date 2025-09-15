@@ -68,7 +68,6 @@ class Args(marcel.core.Op):
         self.pipeline_arg = None
         self.n_params = None
         self.args = None
-        self.pipeline = None
 
     def __repr__(self):
         flags = 'all, ' if self.all else ''
@@ -77,12 +76,14 @@ class Args(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
+        self.pipelines = []
         pipeline_arg = self.pipeline_arg
-        # Callable: API, PipelineExecutable: CLI
+        # Callable: API
+        # PipelineExecutable: CLI
         assert (callable(pipeline_arg) or isinstance(pipeline_arg, marcel.core.PipelineExecutable)), type(pipeline_arg)
-        self.pipeline = marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline)
-        self.pipeline.setup(env)
-        self.n_params = self.pipeline.n_params()
+        self.pipelines.append(marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline))
+        self.only_pipeline().setup(env)
+        self.n_params = self.only_pipeline().n_params()
         self.check_args()
         self.args = []
 
@@ -90,7 +91,7 @@ class Args(marcel.core.Op):
         self.args.append(unwrap_op_output(x))
         if not self.all and len(self.args) == self.n_params:
             try:
-                self.pipeline.run_pipeline(env, self.args)
+                self.only_pipeline().run_pipeline(env, self.args)
             finally:
                 self.args.clear()
 
@@ -102,7 +103,7 @@ class Args(marcel.core.Op):
                 while len(self.args) < self.n_params:
                     self.args.append(None)
             try:
-                self.pipeline.run_pipeline(env, self.args)
+                self.only_pipeline().run_pipeline(env, self.args)
             finally:
                 self.args.clear()
                 # Need to ensure that flush is propagated no matter what happens
