@@ -46,7 +46,7 @@ class UnionArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('union', env)
-        self.add_anon_list('pipelines', convert=self.check_pipeline, target='pipelines_arg')
+        self.add_anon_list('pipelines', convert=self.check_pipeline)
         self.validate()
 
 
@@ -54,7 +54,7 @@ class Union(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.pipelines_arg = None
+        self.pipelines = None
 
     def __repr__(self):
         return 'union()'
@@ -62,11 +62,8 @@ class Union(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.pipelines = []
-        for pipeline_arg in self.pipelines_arg:
-            pipeline = marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline)
-            pipeline.setup(env)
-            self.pipelines.append(pipeline)
+        for pipeline in self.pipelines:
+            assert type(pipeline) is marcel.core.PipelineMarcel, type(pipeline)
 
     # Op
 
@@ -75,21 +72,24 @@ class Union(marcel.core.Op):
 
     def flush(self, env):
         for pipeline in self.pipelines:
-            pipeline.run_pipeline(env, None)
-        self.pipelines.clear()
+            pipeline.run_pipeline(env, {})
         self.propagate_flush(env)
 
     # Internal
 
-    def customize_pipeline(self, env, pipeline):
+    def customize_pipelines(self, env):
         # Union is implemented by passing the input stream along in receive(), and then having each pipeline's
         # arg send its output via flush. This depends on all the pipelines args having the same receiver as the
         # union op itself. However, we only want one flush after everything is done. PropagateFlushFromLast
         # makes sure that only the last pipelines propagates the flush.
-        last = len(self.pipelines) == len(self.pipelines_arg) - 1
-        pipeline.append(PropagateFlushFromLast(last))
-        pipeline.last_op().receiver = self.receiver
-        return pipeline
+        n_pipelines = len(self.pipelines)
+        customized = []
+        for pipeline in self.pipelines:
+            last = len(customized) == n_pipelines - 1
+            pipeline = pipeline.append_immutable(PropagateFlushFromLast(last))
+            pipeline.route_output(self.receiver)
+            customized.append(pipeline)
+        self.pipelines = customized
 
 
 class PropagateFlushFromLast(marcel.core.Op):

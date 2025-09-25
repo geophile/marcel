@@ -51,8 +51,8 @@ def sudo(pipeline, *args):
 # The sudo command has 0 or more flags and arguments for the native sudo command, followed by a pipelines.
 # There are a lot of flags, and it might not be a great idea to model them all. How much do those flags
 # differ across distros? And since the flags aren't being modeled by the arg parser, we can't say that the
-# last arg is, specifically, a pipelines. So just get all the args, and assume the last one is a pipelines.
-# This means that setup has to convert the pipelines ref to a pipelines.
+# last arg is, specifically, a pipelines. So just get all the args, and assume the last one is a pipeline.
+# This means that setup has to convert the pipeline arg to a Pipeline.
 class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
@@ -62,7 +62,7 @@ class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def check_str_and_pipeline(self, arg, x):
         # This isn't really accurate. The last arg must be a pipelines. The preceding ones must be str.
-        if not marcel.util.one_of(x, (str, marcel.core.PipelineExecutable, marcel.core.OpList)):
+        if not marcel.util.one_of(x, (str, marcel.core.Pipeline, marcel.core.OpList)):
             raise marcel.argsparser.ArgsError(self.op_name,
                                               f'Arguments must be strings (flags to sudo) followed by a pipelines: {x}')
         return x
@@ -80,12 +80,13 @@ class Sudo(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.pipelines = []
         if len(self.args) == 0:
-            raise marcel.exception.KillCommandException('Missing pipelines')
+            raise marcel.exception.KillCommandException('Missing pipeline')
         pipeline_arg = self.args.pop()
-        self.pipelines.append(marcel.core.Pipeline.create(pipeline_arg))
-        self.only_pipeline().setup(env)
+        self.pipeline = marcel.core.convert_to_pipeline(env, pipeline_arg)
+        assert isinstance(self.pipeline, marcel.core.Pipeline)
+        if self.pipeline is None:
+            raise marcel.exception.KillCommandException('Missing pipeline')
 
     # Op
 
@@ -104,7 +105,7 @@ class Sudo(marcel.core.Op):
         pickler = dill.Pickler(buffer)
         pickler.dump(marcel.util.python_version())
         pickler.dump(env.marcel_usage())
-        self.only_pipeline().pickle(env, pickler)
+        self.pipeline.pickle(env, pickler)
         buffer.seek(0)
         stdout, stderr = self.process.communicate(input=buffer.getvalue())
         # Wait for completion (already guaranteed by communicate returning?)

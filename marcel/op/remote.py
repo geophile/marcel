@@ -72,7 +72,7 @@ class RemoteArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('remote', env)
         self.add_anon('cluster', convert=self.cluster)
-        self.add_anon('pipeline', convert=self.check_pipeline, target='pipeline_arg')
+        self.add_anon('pipeline', convert=self.check_pipeline)
         self.validate()
 
 
@@ -185,21 +185,21 @@ class Remote(marcel.core.Op):
     def __init__(self):
         super().__init__()
         self.cluster = None
-        self.pipeline_arg = None
+        self.pipeline = None
         self.fork_manager = None
 
     def __repr__(self):
-        return f'remote({self.cluster}, {self.pipeline_arg})'
+        return f'remote({self.cluster}, {self.pipeline})'
 
     # AbstractOp
 
     def setup(self, env):
+        self.pipeline = self.pipeline.copy()
         self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,
                                                               thread_ids=self.cluster.hosts,
-                                                              pipeline_arg=self.pipeline_arg,
-                                                              max_pipeline_args=0,
-                                                              customize_pipeline=self.customize_pipeline)
-        self.fork_manager.setup(env)
+                                                              pipeline=self.pipeline,
+                                                              max_pipeline_args=0)
+        self.fork_manager.setup(env, self.customize_pipeline)
 
     # Op
 
@@ -211,12 +211,15 @@ class Remote(marcel.core.Op):
 
     # For use by this class
 
+    # Called by ForkManager's ForkWorkers, per thread
     def customize_pipeline(self, env, pipeline, host):
+        assert isinstance(pipeline, marcel.core.Pipeline)
         remote = Remote.RunRemote(host, pipeline)
         label_thread = Remote.LabelThread(host)
         label_thread.receiver = self.receiver
-        customized_pipeline = marcel.core.PipelineExecutable()
-        customized_pipeline.params = pipeline.params
+        customized_pipeline = marcel.core.Pipeline.create_empty_pipeline(env)
+        # TODO: parameters() exits only on PipelineMarcel currently
+        customized_pipeline.params = pipeline.parameters()
         customized_pipeline.append(remote)
         customized_pipeline.append(label_thread)
         return customized_pipeline

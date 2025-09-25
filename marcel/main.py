@@ -110,8 +110,8 @@ class MainScript(Main):
             try:
                 parser = marcel.parser.Parser(text, self.env)
                 pipeline = parser.parse()
-                if not pipeline.last_op().op_name() == 'write':
-                    pipeline.append(marcel.opmodule.create_op(self.env, 'write'))
+                assert type(pipeline) is marcel.core.PipelineMarcel, f'({type(pipeline)}) {pipeline}'
+                pipeline.ensure_terminal_write(self.env)
                 command = marcel.core.Command(text, pipeline)
                 self.execute_command(command, pipeline)
             except marcel.parser.EmptyCommand:
@@ -206,7 +206,7 @@ class MainInteractive(MainScript):
     # MainScript
 
     def execute_command(self, command, pipeline):
-        if self.testing or pipeline.first_op().run_in_main_process():
+        if self.testing or pipeline.run_in_main_process():
             command.execute(self.env)
         else:
             self.job_control.create_job(command)

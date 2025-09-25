@@ -220,15 +220,11 @@ class ArgsParser:
         return x
 
     def check_pipeline(self, arg, x):
-        if self.env.api_usage() and (callable(x) or type(x) is marcel.core.OpList):
-            # There should be more checking later, regarding the number of args
-            return x
-        if ((not self.env.api_usage()) and
-            marcel.util.one_of(x, (str, marcel.core.PipelineExecutable, marcel.core.PipelineFunction))):
-            # str: Presumably the name of a variable bound to a pipelines
-            return x
-        raise marcel.argsparser.ArgsError(self.op_name,
-                                          f'{arg.name} argument must be a Pipeline: {x}')
+        pipeline = marcel.core.convert_to_pipeline(self.env, x)
+        if pipeline is None:
+            raise marcel.argsparser.ArgsError(self.op_name,
+                                              f'{arg.name} argument must be a Pipeline: {x}')
+        return pipeline
 
     def fork_gen(self, arg, x):
         if type(x) is int or callable(x):

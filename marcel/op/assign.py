@@ -54,7 +54,8 @@ class Assign(marcel.core.Op):
             assert type(self.string) is marcel.stringliteral.StringLiteral
             self.value = self.string.value()
         if self.pipeline is not None:
-            assert type(self.pipeline) is marcel.core.PipelineExecutable, type(self.pipeline)
+            assert type(self.pipeline) is marcel.core.PipelineMarcel, type(self.pipeline)
+            self.pipeline.setup(env)
             self.value = self.pipeline
         if self.function is not None:
             assert isinstance(self.function, marcel.function.Function), type(self.function)
@@ -90,7 +91,7 @@ class Assign(marcel.core.Op):
         if callable(value):
             # var = (...)
             self.function = value
-        elif type(value) is marcel.core.PipelineExecutable:
+        elif isinstance(value, marcel.core.Pipeline):
             # var = (|...|)
             self.pipeline = value
         elif isinstance(value, str):

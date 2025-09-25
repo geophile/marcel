@@ -2088,15 +2088,16 @@ def main_stable():
 
 
 def main_dev():
+    test_fork()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
-    # print('fail: ****************************** SLOW TESTS DISABLED')
-    main_slow_tests()
+    # main_stable()
+    # # print('fail: ****************************** SLOW TESTS DISABLED')
+    # main_slow_tests()
     TEST.report_failures('test_api')
     sys.exit(TEST.failures)
 

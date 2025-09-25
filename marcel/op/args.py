@@ -56,7 +56,7 @@ class ArgsArgsParser(marcel.argsparser.ArgsParser):
     def __init__(self, env):
         super().__init__('args', env)
         self.add_flag_no_value('all', '-a', '--all')
-        self.add_anon('pipelines', convert=self.check_pipeline, target='pipeline_arg')
+        self.add_anon('pipeline', convert=self.check_pipeline)
         self.validate()
 
 
@@ -65,25 +65,18 @@ class Args(marcel.core.Op):
     def __init__(self):
         super().__init__()
         self.all = None
-        self.pipeline_arg = None
+        self.pipeline = None
         self.n_params = None
         self.args = None
 
     def __repr__(self):
         flags = 'all, ' if self.all else ''
-        return f'args({flags}{self.pipeline_arg})'
+        return f'args({flags}{self.pipeline})'
 
     # AbstractOp
 
     def setup(self, env):
-        self.pipelines = []
-        pipeline_arg = self.pipeline_arg
-        # Callable: API
-        # PipelineExecutable: CLI
-        assert (callable(pipeline_arg) or isinstance(pipeline_arg, marcel.core.PipelineExecutable)), type(pipeline_arg)
-        self.pipelines.append(marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline))
-        self.only_pipeline().setup(env)
-        self.n_params = self.only_pipeline().n_params()
+        self.n_params = self.pipeline.n_params()
         self.check_args()
         self.args = []
 
@@ -91,7 +84,7 @@ class Args(marcel.core.Op):
         self.args.append(unwrap_op_output(x))
         if not self.all and len(self.args) == self.n_params:
             try:
-                self.only_pipeline().run_pipeline(env, self.args)
+                self.pipeline.run_pipeline(env, self.bindings())
             finally:
                 self.args.clear()
 
@@ -103,7 +96,7 @@ class Args(marcel.core.Op):
                 while len(self.args) < self.n_params:
                     self.args.append(None)
             try:
-                self.only_pipeline().run_pipeline(env, self.args)
+                self.pipeline.run_pipeline(env, self.bindings())
             finally:
                 self.args.clear()
                 # Need to ensure that flush is propagated no matter what happens
@@ -126,6 +119,10 @@ class Args(marcel.core.Op):
         if error:
             raise marcel.exception.KillCommandException(error)
 
-    def customize_pipeline(self, env, pipeline):
-        pipeline.append(marcel.op.redirect.Redirect(self))
-        return pipeline
+    def customize_pipelines(self, env):
+        self.pipeline = self.pipeline.append_immutable(marcel.op.redirect.Redirect(self))
+
+    # Internal
+
+    def bindings(self):
+        return dict(zip(self.pipeline.parameters(), self.args))

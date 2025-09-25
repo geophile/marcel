@@ -313,6 +313,7 @@ Inputs to an Env (from above):
 - Side effects of marcel commands. THESE HAVE TO BE SERIALIZED across
   spawning process.
 
+
 ----------------------------------------------------------------------
 
 5/26/25
@@ -1301,11 +1302,314 @@ IDEA:
 
 - For PipelineMarcel, customize after call to op.setup
 
-- In order for this to work, need to register pipelines with op. Add
++ In order for this to work, need to register pipelines with op. Add
   Op.pipelines.
 
 - For PipelinePython, in run_pipeline (as is done now). But pass op to
   run_pipeline so that the customizer can be located.
+
+----------------------------------------------------------------------
+
+9/16/25
+
+Pipelines are getting to be messy. Lifecycle is unclear; there appear
+to be redundant calls to setup; they are tracked in different places,
+so sometimes you see a customized version sometimes you don't. Need to
+clean this up.
+
+......................................................................
+
+Pipeline types:
+
+Pipeline
+
+    - abstraction unifying CLI and API pipelines
+
+    - owns PipelineExecutable
+
+    - Subclasses:
+
+        - PipelineMarcel: Pipeline created by parsing CLI command
+
+        - PipelinePython: Pipeline expressed in Python. There are two kinds:
+
+            - OpList, constructed by Python code such as gen(...) | map(...)
+
+            - PipelineFunction, wrapping a function whose evaluation
+              yields an OpList.
+
+PipelineExecutable(AbstractOp)
+
+    - constructed by CLI parsing
+
+    - can be executed
+
+......................................................................
+
+DO ALL PIPELINE USERS GO THROUGH Pipeline FOR CREATION, SETUP,
+EXECUTION? Or are there situations where PipelineExecutable is used
+directly?
+
+Survey:
+
+- Command execution
+
+    Command.__init__: takes pipeline as arg, always a PE
+        api._run_pipeline
+            api.first
+            api.gather
+            api.run
+        PipelineIterator.__init__
+        PipelineMarcel.run_pipeline
+        PipelinePython.run_pipeline
+        MainScript.parse_and_run_command
+
+    - API: Pipeline comes from run, gather, first. No type checking, but should be
+      OpList or a Python function (that evaluates to an OpList)
+
+    - API can also use PipelineIterator. Only use is in
+      OpList.__iter__ (e.g. for x in gen(3)). CALLER creates the PE by
+      calling OpList.create_pipeline(). 
+
+      *** BYPASSES PP.
+
+    - CLI: Passes PE. 
+
+      *** BYPASSES PM.
+
+- Ops
+
+      fork: Uses ForkManager, without customization.
+
+          CLI: PE -> PM
+          API: OpList -> PP, function -> PP
+
+      remote: Uses ForkManager, with customizer (append RunRemote,
+      LabelThread ops).
+
+          CLI: PE -> PM
+          API: OpList -> PP
+
+      difference: Append op to load contents into dict which is
+      consulted on each input tuple.
+
+      case: Redirect op appended to each pipeline (which sends
+      pipeline output to the Case op's output).
+
+      args: Append Redirect op
+
+      join: Append op to load contents into dict which is consulted on
+      each input tuple.
+
+      sudo: No customization.
+
+      filter: Append op to load contents into set which is consulted
+      on each input tuple.
+
+      union: Append op to propagate flush after last
+      pipeline. Pipelines run from flush().
+
+          CLI: PE -> PM
+          API: OpList -> PP
+
+      intersect: Append op to save pipeline contents. Run on first
+      receive.
+
+          CLI: PE -> PM, StringLiteral -> PM (in case of pipeline-valued var)
+          API: OpList -> PP
+
+      ForkManager: Pipeline passed in is sent to each ForkWorker. FW
+      calls Pipeline.create, and passes in FW.customize_pipeline,
+      which runs the FM customizer, and then appends SendToParent.
+
+
+- Union does pipeline.setup, intersect does not.
+
+- CLI: Parser should convert PE to PM
+
+- API: _generate_op should convert Op, OpList, function to PP.
+
+----------------------------------------------------------------------
+
+9/18/25
+
+Modified Parser.parse() to return a PM, not a PE, so that is creating
+expected problems, getting into issues regarding the pipeline
+lifecycle.
+
+Need to get stricter about the Pipeline interface. First up: When does
+Write op get appended? Currently done by
+Main.parse_and_run_command. (Terminal write is not needed for API.)
+
+- Add something like Pipeline.ensure_terminal_write_op
+
+- PM implements it
+
+- PP asserts False
+
+......................................................................
+
+PE lifecycle:
+
+These are the steps carried out by Command.execute.
+
+- setup:
+
+    - Connect ops via Op.receiver.
+
+    - Customize op pipelines
+
+    - Op setup
+
+- run/receive: delegate to first op
+
+- flush: deletage to first op (which will propagate, like receive)
+
+- cleanup: cleanup each op (don't rely on propagation)
+
+......................................................................
+
+Pipeline caching of PE
+
+Pipeline
+
+- pipeline_executable: assigned from init arg. No check for correct
+  type. Pipeline.create shows that it could be something other than PE
+
+- pipeline: Assigned in subclass, should be a PE (?)
+
+PipelineMarcel:
+
+- setup: pipeline_arg set to PE (taking care of
+  self.pipeline_executable being a str). MAKES A COPY. self.pipeline
+  is assigned the pipeline returned by customize_pipeline of the copy.
+
+----------------------------------------------------------------------
+
+9/19/25
+
+Pipelines are getting better organized, but their mutability is a
+problem. A pipeline stored in a var is subject to customization,
+changing the var's value.
+
+So make pipeline structure immutable:
+
+- Get rid of op.pipelines, each op tracks their own as before.
+
+- Replace op.customize_pipeline(pipeline) by
+  customize_pipelines(). The function modifies all of the ops
+  pipelines. Don't forget to setup appended ops.
+
+- Customization is not in-place, it yields a new
+  pipeline. E.g. PipelineMarcel.append -> new pipeline.
+
+----------------------------------------------------------------------
+
+9/22/25
+
+Fork op
+
+fork.setup
+
+    - Create ForkManager, passing in self, pipeline
+
+    - FM.setup(): Create ForkWorkers
+    
+fork.run
+
+    - ForkManager.run()
+      - start workers
+      - wait for them to end
+
+ForkWorker
+
+    - init: Use MP.Pipe to get reader and writer
+
+    - start_process
+
+      - Create Process to execute run_pipeline_in_child, passing in pipeline
+      - process.start()
+
+    - wait:
+      - Unpickle stream from process and pass to op.send()
+      - join
+
+*** How does FWs pipeline get customized?
+
+- Each FW has its own pipeline, since they are separate processes.
+
+----------------------------------------------------------------------
+
+9/25/25
+
+Fork is working (in test_ops.test_fork -- that doesn't rely on
+jobs). But getting all of test_ops to work is proving fussy. Fixing
+one thing breaks another. The problem appears to be details of
+pipeline lifecycle, e.g. tweaking where setup is run. The lifecycle is
+stilly poorly defined.
+
+The original idea (going back to osh) was this:
+
+- A command is a pipeline, which is a sequence of ops.
+
+- To run that (top-level) pipeline:
+
+  - Run setup() on each op. This prepares each op for execution.
+
+  - Start the pipeline by calling run() on the first op. 
+
+  - Subsequent execution is via receive/send calls.
+
+Later additions, to PipelineExecutable:
+
+  - Added flush(), to clear out any pending output, e.g. for Sort,
+    Window ops.
+
+  - Added cleanup(), for resource management, (e.g. Write op).
+
+Later still, Pipeline, and subclasses PipelineMarcel and
+PipelinePython, were added to abstract PE, in particular the handling
+of pipeline vars.
+
+Pipeline also adds prepare_to_receive, which is muddled -- how does it
+relate to setup?
+
+- PM.prepare_to_receive: calls PE.setup
+
+- PM.setup: delegates to PE.setup
+
+- PM.run_pipeline: 
+
+  - push scope
+  - executable.setup
+  - executable.run
+  - executable.flush
+  - executable.cleanup
+  - pop scope
+
+- PP.prepare_to_receive: 
+  - self.setup: noop
+  - self.create_executable: noop
+  - self.pipeline.setup (after customization)
+
+- PP.setup: noop, not even PE.setup?!
+
+- PP.run_pipeline: 
+
+  - Calls executable.create_pipeline, which just returns self?!
+
+  - Calls Command.execute (Pipeline.run is very recent -- haven't
+    updated PP yet).
+
+*** PM.scope seems useless
+
+*** prepare_to_receive is used by
+
+    - IfBase: obsolete, should be deleted
+    - Tee: same
+    - Case: Called from Case.setup, for each pipeline.
+
+    prepare_to_receive should be removable.
 
 ----------------------------------------------------------------------
 

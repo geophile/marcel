@@ -27,8 +27,11 @@ import marcel.util
 
 def run_pipeline_in_child(env, pipeline, thread_id, writer):
     try:
-        pipeline.run_pipeline(env, [thread_id])
+        params = pipeline.parameters()
+        bindings = {} if len(params) == 0 else {params[0]: thread_id}
+        pipeline.run_pipeline(env, bindings)
     except BaseException as e:
+        marcel.util.print_stack_of_current_exception()
         writer.send(dill.dumps(e))
     writer.close()
 
@@ -38,22 +41,21 @@ class ForkManager(object):
     def __init__(self,
                  op,
                  thread_ids,
-                 pipeline_arg,
-                 max_pipeline_args=0,
-                 customize_pipeline=lambda env, pipeline, thread_id: pipeline):
+                 pipeline,
+                 max_pipeline_args=0):
+        if pipeline.n_params() > max_pipeline_args:
+            raise marcel.exception.KillCommandException('Too many pipeline args.')
         self.op = op
         self.thread_ids = thread_ids
-        self.customize_pipeline = customize_pipeline
-        self.pipeline_arg = pipeline_arg
+        self.pipeline = pipeline
         self.max_pipeline_args = max_pipeline_args
-        self.workers = []
+        self.workers = None
 
     def __repr__(self):
         return f'forkmanager({self.thread_ids})'
 
-    def setup(self, env):
-        for thread_id in self.thread_ids:
-            self.workers.append(ForkWorker(env, self, thread_id))
+    def setup(self, env, customize_pipeline=None):
+        self.workers = [ForkWorker(env, self, thread_id, customize_pipeline) for thread_id in self.thread_ids]
 
     def run(self, env):
         for worker in self.workers:
@@ -61,38 +63,40 @@ class ForkManager(object):
         for worker in self.workers:
             worker.wait()
 
-
 class ForkWorker(object):
 
     class SendToParent(marcel.core.Op):
 
-        def __init__(self, parent):
+        def __init__(self, writer):
             super().__init__()
-            self.parent = parent
+            self.writer = writer
 
         def __repr__(self):
             return 'sendtoparent()'
 
         def receive(self, env, x):
-            self.parent.send(dill.dumps(x))
+            self.writer.send(dill.dumps(x))
 
         def receive_error(self, env, error):
-            self.parent.send(dill.dumps(error))
+            self.writer.send(dill.dumps(error))
 
-    def __init__(self, env, fork_manager, thread_id):
+    def __init__(self, env, fork_manager, thread_id, customize_pipeline):
         self.env = env
-        self.fork_manager = fork_manager
+        self.op = fork_manager.op
+        self.pipeline = (customize_pipeline(env, fork_manager.pipeline, thread_id)
+                         if customize_pipeline else
+                         fork_manager.pipeline)
         self.thread_id = thread_id
         self.process = None
         # duplex=False: child writes to parent when function completes execution.
         # No need to communicate in the other direction
         self.reader, self.writer = mp.Pipe(duplex=False)
-        self.pipeline = marcel.core.Pipeline.create(fork_manager.pipeline_arg, self.customize_pipeline)
-        self.pipeline.setup(env)
-        if self.pipeline.n_params() > fork_manager.max_pipeline_args:
-            raise marcel.exception.KillCommandException('Too many pipelines args.')
 
     def start_process(self):
+        # Extending pipeline, as Ops do in customize_pipelines
+        send_to_parent = ForkWorker.SendToParent(self.writer)
+        self.pipeline = self.pipeline.append_immutable(send_to_parent)
+        #
         self.process = mp.Process(target=run_pipeline_in_child,
                                   args=(self.env, self.pipeline, self.thread_id, self.writer))
         self.process.daemon = True
@@ -107,19 +111,12 @@ class ForkWorker(object):
 
     def wait(self):
         try:
-            op = self.fork_manager.op
             while True:
                 input = self.reader.recv()
                 x = dill.loads(input)
-                op.send(self.env, x)
+                self.op.send(self.env, x)
         except EOFError:
             pass
         while self.process.is_alive():
             self.process.join(0.1)
         self.env = None
-
-    def customize_pipeline(self, env, pipeline):
-        pipeline = self.fork_manager.customize_pipeline(env, pipeline, self.thread_id)
-        send_to_parent = ForkWorker.SendToParent(self.writer)
-        pipeline.append(send_to_parent)
-        return pipeline

@@ -57,7 +57,7 @@ class DifferenceArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('difference', env)
-        self.add_anon('pipelines', convert=self.check_pipeline, target='pipeline_arg')
+        self.add_anon('pipeline', convert=self.check_pipeline, target='pipeline')
         self.validate()
 
 
@@ -65,24 +65,21 @@ class Difference(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.pipeline_arg = None
+        self.pipeline = None
         self.right = None
         self.first = None
 
     def __repr__(self):
-        return f'difference({self.pipeline_arg})'
+        return f'difference({self.pipeline})'
 
     # AbstractOp
 
     def setup(self, env):
-        self.pipelines = []
-        self.pipelines.append(marcel.core.Pipeline.create(self.pipeline_arg, self.customize_pipeline))
-        self.only_pipeline().setup(env)
         self.first = True
 
     def receive(self, env, x):
         if self.first:
-            self.only_pipeline().run_pipeline(env, None)
+            self.pipeline.run_pipeline(env, {})
             self.first = False
         try:
             count = self.right.get(x, None)
@@ -96,7 +93,7 @@ class Difference(marcel.core.Op):
         except TypeError:
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
-    def customize_pipeline(self, env, pipeline):
+    def customize_pipelines(self, env):
         def load_right(*x):
             try:
                 count = self.right.get(x, None)
@@ -105,5 +102,4 @@ class Difference(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
         self.right = {}
-        pipeline.append(marcel.opmodule.create_op(env, 'map', load_right))
-        return pipeline
+        self.pipeline = self.pipeline.append_immutable(marcel.opmodule.create_op(env, 'map', load_right))

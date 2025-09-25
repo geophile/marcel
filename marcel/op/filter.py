@@ -80,7 +80,7 @@ class FilterArgsParser(marcel.argsparser.ArgsParser):
         self.add_flag_no_value('keep', '-k', '--keep')
         self.add_flag_no_value('discard', '-d', '--discard')
         self.add_flag_one_value('compare', '-c', '--compare')
-        self.add_anon('pipelines', convert=self.check_pipeline, target='pipeline_arg')
+        self.add_anon('pipeline', convert=self.check_pipeline)
         self.at_most_one('keep', 'discard')
         self.validate()
 
@@ -90,7 +90,7 @@ class Filter(marcel.core.Op):
     def __init__(self):
         super().__init__()
         self.compare = None
-        self.pipeline_arg = None
+        self.pipeline = None
         self.keep = None
         self.discard = None
         self.right = None
@@ -98,13 +98,12 @@ class Filter(marcel.core.Op):
     def __repr__(self):
         assert self.keep != self.discard
         behavior = 'keep' if self.keep else 'discard'
-        return f'filter({behavior}, {self.pipeline_arg})'
+        return f'filter({behavior}, {self.pipeline})'
 
     # AbstractOp
 
     def setup(self, env):
-        self.pipelines = []
-        self.pipelines.append(marcel.core.Pipeline.create(self.pipeline_arg))
+        assert type(self.pipeline) is marcel.core.PipelineMarcel, type(self.pipeline)
         self.right = None
         # self.discard is just for arg processing. self.keep controls execution.
         # This works if keep is already true, and if both keep and discard are false,
@@ -132,7 +131,7 @@ class Filter(marcel.core.Op):
             except TypeError:
                 raise marcel.exception.KillCommandException(f'{x} is not hashable')
         self.right = set()
-        self.only_pipeline().create_executable(env)
-        self.only_pipeline().append(marcel.opmodule.create_op(env, 'map', add_to_right))
-        self.only_pipeline().setup(env)
-        self.only_pipeline().run_pipeline(env, None)
+        self.pipeline.create_executable(env)
+        self.pipeline.append(marcel.opmodule.create_op(env, 'map', add_to_right))
+        self.pipeline.setup(env)
+        self.pipeline.run_pipeline(env, {})

@@ -47,7 +47,7 @@ class IntersectArgsParser(marcel.argsparser.ArgsParser):
 
     def __init__(self, env):
         super().__init__('intersect', env)
-        self.add_anon_list('pipelines', convert=self.check_pipeline, target='pipelines_arg')
+        self.add_anon_list('pipelines', convert=self.check_pipeline)
         self.validate()
 
 
@@ -57,17 +57,16 @@ class Intersect(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.pipelines_arg = None
         self.common = None  # item -> count: Accumulated intersection
         self.input = None   # item -> count: From one of the pipelines args
+        self.pipelines = None
 
     def __repr__(self):
-        return f'intersect({self.pipelines_arg})'
+        return f'intersect({self.pipelines})'
 
     def setup(self, env):
-        self.pipelines = []
-        for pipeline_arg in self.pipelines_arg:
-            self.pipelines.append(marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline))
+        for pipeline in self.pipelines:
+            assert type(pipeline) is marcel.core.PipelineMarcel, type(pipeline)
 
     def receive(self, env, x):
         self.ensure_args_consumed(env)
@@ -81,24 +80,26 @@ class Intersect(marcel.core.Op):
 
     # Internal
 
-    def customize_pipeline(self, env, pipeline):
+    def customize_pipelines(self, env):
         def count_inputs(*x):
+            input = self.input
             try:
                 input[x] = input.get(x, 0) + 1
             except TypeError:
                 raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
-        input = self.input
-        pipeline.append(marcel.opmodule.create_op(env, 'map', count_inputs))
-        return pipeline
+        customized = []
+        for pipeline in self.pipelines:
+            pipeline = pipeline.append_immutable(marcel.opmodule.create_op(env, 'map', count_inputs))
+            customized.append(pipeline)
+        self.pipelines = customized
 
     def ensure_args_consumed(self, env):
         if self.common is None:
             # Compute the intersection of all the pipeline args
             for pipeline in self.pipelines:
                 self.input = {}
-                pipeline.setup(env)
-                pipeline.run_pipeline(env, None)  # Populates self.input
+                pipeline.run_pipeline(env, {})  # Populates self.input
                 if self.common is None:
                     self.common = self.input
                 else:

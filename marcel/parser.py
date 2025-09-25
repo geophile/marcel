@@ -1055,7 +1055,7 @@ class Parser(object):
                 source = value.source
             else:
                 source = arg.value()
-        elif type(arg) is marcel.core.PipelineExecutable:
+        elif type(arg) is marcel.core.PipelineMarcel:
             value = arg
             source = arg.source
         elif arg is None:
@@ -1122,14 +1122,14 @@ class Parser(object):
             if self.next_token(String, Comma) or self.next_token(String, Colon):
                 parameters = self.vars()
             else:
-                parameters = None
+                parameters = []
             pipeline.set_parameters(parameters)
             op_sequence = (pipeline_str_lt() if self.next_token(String, Lt) else
                            pipeline_gt_str() if self.next_token(Gt, String) else
                            pipeline_op_sequence())
             for op_args in op_sequence:
                 pipeline.append(self.create_op(*op_args))
-        return pipeline
+        return marcel.core.Pipeline.create(self.env, pipeline)
 
     def redirect_in_op(self, arrow_token, source=None):
         op_name = 'load' if arrow_token.is_var() else 'read'
@@ -1327,8 +1327,9 @@ class Parser(object):
         assert assign_module is not None
         op = assign_module.create_op()
         op.set_var_and_value(var, value, source)
-        pipeline = marcel.core.PipelineExecutable()
-        pipeline.append(op)
+        executable = marcel.core.PipelineExecutable()
+        executable.append(op)
+        pipeline = marcel.core.Pipeline.create(self.env, executable)
         return pipeline
 
     # Tab completion support

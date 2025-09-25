@@ -35,16 +35,18 @@ class RunPipeline(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.args = self.eval_function(env, 'args_arg')
-        self.kwargs = self.eval_function(env, 'kwargs_arg')
+        def ifnone(x, default):
+            return default if x is None else x
+        self.args = ifnone(self.eval_function(env, 'args_arg'), [])
+        self.kwargs = ifnone(self.eval_function(env, 'kwargs_arg'), {})
         self.pipeline = env.getvar(self.var)
         if self.pipeline is None:
             raise marcel.exception.KillCommandException(
-                f'{self.var} is not executable.')
-        if not isinstance(self.pipeline, marcel.core.PipelineExecutable):
+                f'The value of {self.var} is None, so it is not executable.')
+        if not isinstance(self.pipeline, marcel.core.PipelineMarcel):
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is not bound to anything executable.')
-        n_params = 0 if self.pipeline.parameters() is None else len(self.pipeline.parameters())
+        n_params = self.pipeline.n_params()
         n_args = 0 if self.args is None else len(self.args)
         n_kwargs = 0 if self.kwargs is None else len(self.kwargs)
         if n_params < n_args + n_kwargs:
@@ -57,8 +59,8 @@ class RunPipeline(marcel.core.Op):
         # command. This potentially breaks the use of Op state during execution, and also
         # breaks the structure of the pipelines, e.g. Op.receiver.
         self.pipeline = self.pipeline.copy()
-        self.pipeline.last_op().receiver = self.receiver
-        env.vars().push_scope(self.pipeline_args())
+        self.pipeline.route_output(self.receiver)
+        env.vars().push_scope(self.bindings())
         try:
             self.pipeline.setup(env)
         finally:
@@ -67,21 +69,22 @@ class RunPipeline(marcel.core.Op):
     # Op
 
     def run(self, env):
-        env.vars().push_scope(self.pipeline_args())
+        bindings = self.bindings()
+        env.vars().push_scope(bindings)
         try:
-            self.pipeline.run(env)
+            self.pipeline.run_pipeline(env, bindings)
         finally:
             env.vars().pop_scope()
 
     def receive(self, env, x):
-        env.vars().push_scope(self.pipeline_args())
+        env.vars().push_scope(self.bindings())
         try:
             self.pipeline.receive(env, x)
         finally:
             env.vars().pop_scope()
 
     def flush(self, env):
-        env.vars().push_scope(self.pipeline_args())
+        env.vars().push_scope(self.bindings())
         try:
             self.pipeline.flush(env)
             self.propagate_flush(env)
@@ -94,30 +97,29 @@ class RunPipeline(marcel.core.Op):
     # RunPipeline
 
     def set_pipeline_args(self, args, kwargs):
+        assert type(args) is list, args
+        assert type(kwargs) is dict, kwargs
         self.args_arg = args
         self.kwargs_arg = kwargs
 
-    def pipeline_args(self):
-        pipeline_arg_bindings = None
+    def bindings(self):
         params = self.pipeline.parameters()
-        if params is not None:
-            pipeline_arg_bindings = {}
-            # Set anonymous args
-            if self.args is not None:
-                if len(self.args) > len(params):
-                    raise marcel.exception.KillCommandException(
-                        f'Provided {len(self.args)} arguments for {len(params)} pipeline parameter(s)')
-                for i in range(len(self.args)):
-                    pipeline_arg_bindings[params[i]] = self.args[i]
-            # Set named args
-            if self.kwargs is not None:
-                already_set = set(pipeline_arg_bindings.keys()).intersection(self.kwargs.keys())
-                if len(already_set) > 0:
-                    raise marcel.exception.KillCommandException(
-                        f'Attempt to set these arguments twice (anonymous and named): {", ".join(already_set)}')
-                pipeline_arg_bindings.update(self.kwargs)
-            all_params = set(params)
-            unset = all_params.difference(pipeline_arg_bindings.keys())
-            for param in unset:
-                pipeline_arg_bindings[param] = None
-        return pipeline_arg_bindings
+        bindings = {}
+        # Set anonymous args
+        if len(self.args) > len(params):
+            raise marcel.exception.KillCommandException(
+                f'Provided {len(self.args)} arguments for {len(params)} pipeline parameter(s)')
+        for i in range(len(self.args)):
+            bindings[params[i]] = self.args[i]
+        # Set named args
+        if self.kwargs is not None:
+            already_set = set(bindings.keys()).intersection(self.kwargs.keys())
+            if len(already_set) > 0:
+                raise marcel.exception.KillCommandException(
+                    f'Attempt to set these arguments twice (anonymous and named): {", ".join(already_set)}')
+            bindings.update(self.kwargs)
+        all_params = set(params)
+        unset = all_params.difference(bindings.keys())
+        for param in unset:
+            bindings[param] = None
+        return bindings

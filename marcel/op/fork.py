@@ -137,7 +137,7 @@ class Fork(marcel.core.Op):
         pipeline = self.pipeline_arg
         self.manager = marcel.op.forkmanager.ForkManager(op=self,
                                                          thread_ids=self.thread_ids,
-                                                         pipeline_arg=pipeline,
+                                                         pipeline=pipeline,
                                                          max_pipeline_args=1)
         self.manager.setup(env)
 

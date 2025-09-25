@@ -889,7 +889,7 @@ def test_fork():
                            (1, 100), (1, 101), (1, 102),
                            (2, 100), (2, 101), (2, 102)])
     TEST.run('fork 3 (|t, u: gen 3 100 | (f: (t, f))|) | sort',
-             expected_err='Too many pipelines args')
+             expected_err='Too many pipeline args')
     # iterable forkgen
     TEST.run('fork "abc" (|gen 3 100|) | sort',
              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
@@ -898,14 +898,14 @@ def test_fork():
                            ('b', 100), ('b', 101), ('b', 102),
                            ('c', 100), ('c', 101), ('c', 102)])
     TEST.run('fork "abc" (|t, u: gen 3 100 | (f: (t, f))|) | sort',
-             expected_err='Too many pipelines args')
+             expected_err='Too many pipeline args')
     # Cluster forkgen
     TEST.run('fork CLUSTER1 (|gen 3 100|)',
              expected_out=[100, 101, 102])
     TEST.run('fork CLUSTER1 (|t: gen 3 100 | (f: (str(t), f))|)',
              expected_out=[('127.0.0.1', 100), ('127.0.0.1', 101), ('127.0.0.1', 102)])
     TEST.run('fork CLUSTER1 (|t, u: gen 3 100 | (f: (str(t), f))|)',
-             expected_err='Too many pipelines args')
+             expected_err='Too many pipeline args')
 
 
 @timeit
@@ -1763,7 +1763,7 @@ def test_union():
              expected_out=[0, 1, 2])
     TEST.run('empty <$ union (|gen 3|) | sort',
              expected_out=[0, 1, 2])
-    # Non-empty inputs4
+    # Non-empty inputs
     TEST.run('gen 3 | union (|gen 3 100|) | sort',
              expected_out=[0, 1, 2, 100, 101, 102])
     # Duplicates
@@ -2658,15 +2658,20 @@ def main_stable():
 
 
 def main_dev():
+    test_fork()
+    # TEST.run('p = (| n: gen (1 if n is None else int(n)) |)')
+    # TEST.run('p 3',
+    #          expected_out=[0, 1, 2])
+    # test_pipeline_args()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
-    # print('fail: ****************************** SLOW TESTS DISABLED')
-    main_slow_tests()
+    # main_stable()
+    # # print('fail: ****************************** SLOW TESTS DISABLED')
+    # main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
 

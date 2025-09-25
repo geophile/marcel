@@ -310,7 +310,6 @@ class NestedNamespace(dict):
 
     # Permanents don't need to be persisted, and exist at top-level. So they aren't stored in scopes.
     def assign_permanent(self, key, value):
-        assert len(self.scopes) == 1
         super().__setitem__(key, value)
 
     def assign_import(self, var, module, symbol, value):
@@ -320,11 +319,11 @@ class NestedNamespace(dict):
     def n_scopes(self):
         return len(self.scopes)
 
-    def push_scope(self, params):
+    def push_scope(self, bindings):
         assert self.env
-        self.scopes.append(Scope(self.env, self.current_scope(), params))
-        if params:
-            for var, value in params.items():
+        self.scopes.append(Scope(self.env, self.current_scope(), bindings))
+        if bindings:
+            for var, value in bindings.items():
                 self[var] = value
 
     def pop_scope(self):

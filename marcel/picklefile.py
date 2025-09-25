@@ -92,7 +92,7 @@ class PickleFile:
             raise PickleFileUsageError(self)
 
 
-class Access:
+class Access(object):
 
     def __init__(self, owner):
         self.owner = owner

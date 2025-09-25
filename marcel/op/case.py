@@ -13,14 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
-from collections import namedtuple
-
 import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.op.redirect
-import marcel.opmodule
-
 
 HELP = '''
 {L,wrap=F}case PREDICATE (| PIPELINE |) ... [(| PIPELINE |)]
@@ -73,12 +69,16 @@ class CaseArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Case(marcel.core.Op):
+    class Branch(object):
 
-    Branch = namedtuple('Branch', ['predicate', 'pipeline'])
+        def __init__(self, predicate, pipeline):
+            self.predicate = predicate
+            self.pipeline = pipeline
 
     def __init__(self):
         super().__init__()
         self.branches = None
+        self.pipelines = None
         self.default_pipeline = None
         self.args = None
 
@@ -88,21 +88,20 @@ class Case(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.pipelines = []
-        def pipeline(pipeline_arg):
-            # Unlike other ops, Case tracks its own pipelines, in default_pipeline and branches.
-            # But they still have to be registered with the parent (self.pipelines) for management of
-            # pipelines by core.
-            pipeline = marcel.core.Pipeline.create(pipeline_arg, self.customize_pipeline)
-            self.pipelines.append(pipeline)
+        def pipeline(pipeline):
+            # PyCharm sees a syntax error (on references to marcel.core.Pipeline and
+            # marcel.exception) without these?!
+            import marcel.core
+            import marcel.exception
             try:
                 if not isinstance(pipeline, marcel.core.Pipeline):
                     raise marcel.exception.KillCommandException(f'Expected pipeline, found {arg}')
                 pipeline.prepare_to_receive(env)
                 return pipeline
-            except:
+            except Exception as e:
                 raise marcel.exception.KillCommandException(f'Expected pipeline, found {arg}')
 
+        self.pipelines = []
         if len(self.args) < 2:
             raise marcel.exception.KillCommandException('case requires at least 2 arguments')
         # Functions and args alternate. For the API, pipelines can show up as functions, so testing to distinguish
@@ -147,6 +146,11 @@ class Case(marcel.core.Op):
 
     # Internal
 
-    def customize_pipeline(self, env, pipeline):
-        pipeline.append(marcel.op.redirect.Redirect(self))
-        return pipeline
+    def customize_pipelines(self, env):
+        def redirect():
+            return marcel.op.redirect.Redirect(self)
+
+        if self.default_pipeline:
+            self.default_pipeline = self.default_pipeline.append_immutable(redirect())
+        for branch in self.branches:
+            branch.pipeline = branch.pipeline.append_immutable(redirect())

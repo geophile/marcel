@@ -102,7 +102,7 @@ class PipelineRunner(threading.Thread):
             TRACE.write(f'PipelineRunner: About to setup {self.pipeline}')
             self.pipeline.setup(self.env)
             TRACE.write(f'PipelineRunner: About to run {self.pipeline}')
-            self.pipeline.first_op().run(self.env)
+            self.pipeline.run(self.env)
             self.pipeline.flush(self.env)
         except BaseException as e:
             TRACE.write(f'PipelineRunner.run caught {type(e)}: {e}')
@@ -156,6 +156,7 @@ def main():
         marcel_usage = input.load()
         # pipelines from client
         pipeline = input.load()
+        assert type(pipeline) is marcel.core.PipelineExecutable
         env = marcel.env.Environment.create(usage=marcel_usage,
                                             globals=dict() if marcel_usage == 'api' else None)
         version = env.getvar('MARCEL_VERSION')

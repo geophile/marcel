@@ -82,7 +82,7 @@ class JoinArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('join', env)
         self.add_flag_no_value('keep', '-k', '--keep')
         # str: To accommodate var names
-        self.add_anon('pipelines', convert=self.check_pipeline, target='pipeline_arg')
+        self.add_anon('pipeline', convert=self.check_pipeline)
         self.validate()
 
 
@@ -90,25 +90,23 @@ class Join(marcel.core.Op):
 
     def __init__(self):
         super().__init__()
-        self.pipeline_arg = None
+        self.pipeline = None
         self.keep = None
         self.inner = None  # Map containing contents of pipelines, keyed by join value
         self.first = None
 
     def __repr__(self):
-        return f'join(keep, {self.pipeline_arg})' if self.keep else f'join({self.pipeline_arg})'
+        return f'join(keep, {self.pipeline})' if self.keep else f'join({self.pipeline})'
 
     # AbstractOp
 
     def setup(self, env):
-        self.pipelines = []
-        self.pipelines.append(marcel.core.Pipeline.create(self.pipeline_arg, self.customize_pipeline))
-        self.only_pipeline().setup(env)
+        assert type(self.pipeline) is marcel.core.PipelineMarcel, type(self.pipeline)
         self.first = True
 
     def receive(self, env, x):
         if self.first:
-            self.only_pipeline().run_pipeline(env, None)
+            self.pipeline.run_pipeline(env, {})
             self.first = False
         x = tuple(x)
         join_value = x[0]
@@ -127,7 +125,7 @@ class Join(marcel.core.Op):
 
     # Internal
 
-    def customize_pipeline(self, env, pipeline):
+    def customize_pipelines(self, env):
         def load_inner(*x):
             assert len(x) > 0
             x = tuple(x)
@@ -145,5 +143,4 @@ class Join(marcel.core.Op):
                 raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
         self.inner = {}
-        pipeline.append(marcel.opmodule.create_op(env, 'map', load_inner))
-        return pipeline
+        self.pipeline = self.pipeline.append_immutable(marcel.opmodule.create_op(env, 'map', load_inner))

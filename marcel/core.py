@@ -24,6 +24,12 @@ import marcel.util
 Error = marcel.object.error.Error
 
 
+def convert_to_pipeline(env, x):
+    if isinstance(x, str):
+        x = marcel.util.string_value(x)
+    return x if isinstance(x, marcel.core.Pipeline) else marcel.core.Pipeline.create(env, x)
+
+
 class AbstractOp(object):
 
     def setup(self, env):
@@ -40,8 +46,6 @@ class Op(AbstractOp):
         self.receiver = None
         # The pipelines to which this op belongs
         self.owner = None
-        # Pipelines of this op
-        self.pipelines = []
         # Supports pos()
         self._count = -1
 
@@ -72,6 +76,9 @@ class Op(AbstractOp):
     def propagate_flush(self, env):
         if self.receiver:
             self.receiver.flush(env)
+
+    def customize_pipelines(self, env):
+        pass
 
     # For use by subclasses
 
@@ -122,10 +129,6 @@ class Op(AbstractOp):
 
     def cleanup(self):
         pass
-
-    def only_pipeline(self):
-        assert len(self.pipelines) == 1, self
-        return self.pipelines[0]
 
     def copy(self):
         copy = self.__class__()
@@ -224,11 +227,12 @@ class Op(AbstractOp):
 class Command:
 
     def __init__(self, source, pipeline):
+        assert isinstance(pipeline, Pipeline)
         self.source = source
         self.pipeline = pipeline
 
     def __repr__(self):
-        return str(self.pipeline)
+        return f'({type(self.pipeline)}) {self.pipeline}'
 
     def execute(self, env, remote=False):
         with env.check_nesting():
@@ -240,16 +244,7 @@ class Command:
             # relevant to the top-level command.
             if remote:
                 env.clear_changes()
-            try:
-                self.pipeline.setup(env)
-            except marcel.exception.KillAndResumeException as e:
-                # KARE is fatal during setup.
-                raise marcel.exception.KillCommandException(str(e))
-            try:
-                self.pipeline.run(env)
-            finally:
-                self.pipeline.flush(env)
-                self.pipeline.cleanup()
+            self.pipeline.run_pipeline(env, {})
         # An interactive Command is executed by a multiprocessing.Process (i.e., remotely).
         # Need to transmit the Environment's vars relating to the directory, to the parent
         # process, because they may have changed. This doesn't apply to API usage.
@@ -326,19 +321,16 @@ class PipelineExecutable(AbstractOp):
         super().__init__()
         self.ops = []
         # Parameters declared for a pipelines
-        self.params = None
+        self.params = tuple()
         self.source = None
 
     def __repr__(self):
-        if self.source:
-            return self.source
-        else:
-            params = ', '.join(self.params) if self.params else None
-            op_buffer = []
-            for op in self.ops:
-                op_buffer.append(str(op))
-            ops = ' | '.join(op_buffer)
-            return f'(| {params}: {ops} |)' if params else f'(| {ops} |)'
+        params = ', '.join(self.params) if self.params else None
+        op_buffer = []
+        for op in self.ops:
+            op_buffer.append(str(op))
+        ops = ' | '.join(op_buffer)
+        return f'(| {params}: {ops} |)' if params else f'(| {ops} |)'
 
     def dump(self, label):
         print(f'{label}: {id(self)}  {self}')
@@ -361,8 +353,10 @@ class PipelineExecutable(AbstractOp):
             if env.trace.is_enabled():
                 env.trace.write(op, 'SETUP')
             op.setup(env)
+        for op in self.ops:
+            op.customize_pipelines(env)
 
-    # PipelineExecutable (mostly like Op)
+    # PipelineExecutable lifecycle
 
     def run(self, env):
         self.ops[0].run(env)
@@ -381,10 +375,11 @@ class PipelineExecutable(AbstractOp):
         for op in self.ops:
             op.cleanup()
 
+    # PipelineExecutable editing
+
     def set_parameters(self, parameters):
-        if parameters is not None:
-            assert len(parameters) > 0
-            self.params = parameters
+        assert type(parameters) in (tuple, list)
+        self.params = tuple(parameters)
 
     def parameters(self):
         return self.params
@@ -394,16 +389,25 @@ class PipelineExecutable(AbstractOp):
         # and be sure that the copy doesn't share state or structure (i.e. Op.receiver) with other uses of the
         # "same" pipelines within the same command.
         copy = PipelineExecutable()
+        copy.params = self.params
+        copy.source = self.source
         for op in self.ops:
             copy.append(op.copy())
-        copy.params = self.params
         return copy
 
     def append(self, op):
         self.ops.append(op)
 
-    def prepend(self, op):
-        self.ops = [op] + self.ops
+    def append_immutable(self, op):
+        copy = PipelineExecutable()
+        copy.params = self.params
+        copy.source = self.source
+        copy.ops = self.ops.copy()
+        if len(copy.ops) > 0:
+            current_last_op = copy.ops[-1]
+            current_last_op.receiver = op
+        copy.ops.append(op)
+        return copy
 
     def first_op(self):
         return self.ops[0]
@@ -412,7 +416,7 @@ class PipelineExecutable(AbstractOp):
         return self.ops[-1]
 
     def n_params(self):
-        return len(self.params) if self.params else 0
+        return len(self.params)
 
     def create_pipeline(self, args=None):
         assert args is None
@@ -449,13 +453,13 @@ class Pipeline(object):
 
     # object
 
-    def __init__(self, pipeline_arg, customize_pipeline):
-        self.pipeline_executable = pipeline_arg
+    def __init__(self, executable, customize_pipeline):
+        assert isinstance(executable, PipelineExecutable), executable
+        self.executable = executable
         self.customize_pipeline = customize_pipeline
-        self.pipeline = None
 
     def __repr__(self):
-        return f'Pipeline({self.pipeline_executable})'
+        return f'Pipeline({self.executable})'
 
     # Pipeline - Op-like interface
 
@@ -463,16 +467,19 @@ class Pipeline(object):
         assert False
 
     def receive(self, env, x):
-        self.pipeline.receive(env, x)
+        self.executable.receive(env, x)
 
     def flush(self, env):
-        self.pipeline.flush(env)
+        self.executable.flush(env)
 
     def cleanup(self):
-        self.pipeline.cleanup()
+        self.executable.cleanup()
 
     def append(self, op):
-        self.pipeline.append(op)
+        self.executable.append(op)
+
+    def append_immutable(self, op):
+        assert False
 
     # Pipeline
 
@@ -482,7 +489,10 @@ class Pipeline(object):
     def prepare_to_receive(self, env):
         assert False
 
-    def run_pipeline(self, env, args):
+    def route_output(self, receiver):
+        assert False
+
+    def run_pipeline(self, env, bindings):
         assert False
 
     def create_executable(self, env):
@@ -490,85 +500,105 @@ class Pipeline(object):
 
     def pickle(self, env, pickler):
         self.create_executable(env)
-        pickler.dump(self.pipeline)
+        pickler.dump(self.executable)
 
     @staticmethod
-    def create(pipeline, customize_pipeline=lambda env, pipeline: pipeline):
-        if marcel.util.one_of(pipeline, (str, PipelineExecutable)):
-            # str: Presumably the name of a variable bound to a PipelineExecutable
-            return PipelineMarcel(pipeline, customize_pipeline)
-        if callable(pipeline) or type(pipeline) is OpList:
+    def create(env, pipeline, customize_pipeline=lambda env, pipeline: pipeline):
+        pipeline_type = type(pipeline)
+        if pipeline_type is str:
+            value = env.getvar(pipeline)
+            if type(value) is marcel.core.PipelineMarcel:
+                return value
+            else:
+                raise marcel.exception.KillCommandException(
+                    f'The variable {pipeline} is not bound to a pipeline: {pipeline_type}')
+        elif pipeline_type is PipelineExecutable:
+            return PipelineMarcel(pipeline, pipeline.source, customize_pipeline)
+        elif pipeline_type is marcel.function.SourceFunction:
+            # Callable, but indicates user error
+            return None
+        elif callable(pipeline) or pipeline_type is OpList:
             return PipelinePython(pipeline, customize_pipeline)
-        assert False, pipeline
+        else:
+            return None
 
     @staticmethod
     def create_empty_pipeline(env):
-        return (marcel.core.OpList(env, None)
+        return (PipelinePython(marcel.core.OpList(env, None), None)
                 if env.api_usage()
-                else marcel.core.PipelineExecutable())
+                else PipelineMarcel(marcel.core.PipelineExecutable(), '', None))
 
 
 # A pipeline constructed through the marcel parser, via command line or script. Pipeline args are managed
 # by the Environment's NestedNamspace, and are pushed/popped around pipeline execution.
 class PipelineMarcel(Pipeline):
 
-    def __init__(self, pipeline_arg, customize_pipeline):
-        super().__init__(pipeline_arg, customize_pipeline)
-        self.params = None
+    def __init__(self, executable, source, customize_pipeline):
+        super().__init__(executable, customize_pipeline)
         self.scope = None
+        self.source = source
 
     # AbstractOp
 
     def setup(self, env):
-        if isinstance(self.pipeline_executable, str):
-            pipeline_arg = env.getvar(self.pipeline_executable)
-            if type(pipeline_arg) is not marcel.core.PipelineExecutable:
-                raise marcel.exception.KillCommandException(
-                    f'The variable {self.pipeline_executable} is not bound to a pipeline')
-        else:
-            pipeline_arg = self.pipeline_executable
-        # Make a copy, in case the pipeline needs an instance per fork.
-        pipeline_arg = pipeline_arg.copy()
-        self.pipeline = self.customize_pipeline(env, pipeline_arg)
-        assert self.pipeline is not None
+        self.executable.setup(env)
         self.scope = {}
-        self.params = self.pipeline.parameters()
-        if self.params is None:
-            self.params = []
-        for param in self.params:
-            self.scope[param] = None
+        if self.executable.params:
+            for param in self.executable.params:
+                self.scope[param] = None
 
     # Pipeline
 
     def n_params(self):
-        return self.pipeline.n_params()
+        return self.executable.n_params()
 
-    def run_pipeline(self, env, args):
-        scope = dict()
-        if args:
-            for i in range(len(self.params)):
-                scope[self.params[i]] = args[i]
-        env.vars().push_scope(scope)
+    def run_pipeline(self, env, bindings):
+        assert isinstance(env, marcel.env.Environment), f'{type(env)} {env}'
+        params = self.executable.parameters()
+        assert set(params) == set(bindings.keys()), f'params = {params}, binding keys = {bindings.keys()}'
+        env.vars().push_scope(bindings)
         try:
-            marcel.core.Command(None, self.pipeline).execute(env)
+            with env.check_nesting():
+                try:
+                    self.executable.setup(env)
+                except marcel.exception.KillAndResumeException as e:
+                    # KARE is fatal during setup.
+                    raise marcel.exception.KillCommandException(str(e))
+                try:
+                    self.executable.run(env)
+                finally:
+                    self.executable.flush(env)
+                    self.executable.cleanup()
         finally:
             env.vars().pop_scope()
 
     def prepare_to_receive(self, env):
-        self.setup(env)
-        self.pipeline.setup(env)
+        self.setup(env)  # Calls executable.setup
+
+    def route_output(self, receiver):
+        self.executable.last_op().receiver = receiver
 
     def create_executable(self, env):
-        if isinstance(self.pipeline_executable, str):
-            # Presumably a var
-            self.pipeline = env.getvar(self.pipeline_executable)
-            if type(self.pipeline) is not marcel.core.PipelineExecutable:
-                raise marcel.exception.KillCommandException(
-                    f'The variable {self.pipeline_executable} is not bound to a pipeline')
-        elif type(self.pipeline_executable) is PipelineExecutable:
-            self.pipeline = self.pipeline_executable
-        else:
-            assert False, self.pipeline_executable
+        return self.executable
+
+    def append_immutable(self, op):
+        return PipelineMarcel(self.executable.append_immutable(op), self.source, self.customize_pipeline)
+
+    # PipelineMarcel
+
+    def copy(self):
+        return PipelineMarcel(self.executable.copy(), self.source, self.customize_pipeline)
+
+    def parameters(self):
+        return self.executable.parameters()
+
+    def ensure_terminal_write(self, env):
+        self.create_executable(env)
+        if not self.executable.last_op().op_name() == 'write':
+            self.executable.append(marcel.opmodule.create_op(env, 'write'))
+
+    def run_in_main_process(self):
+        return self.executable.first_op().run_in_main_process()
 
 
 # A pipeline created by Python, by using marcel.api. Pipeline variables are ordinary Python variables,
@@ -592,12 +622,12 @@ class PipelinePython(Pipeline):
     # Pipeline
 
     def n_params(self):
-        return self.pipeline_executable.n_params()
+        return self.executable.n_params()
 
-    def run_pipeline(self, env, args):
-        pipeline = (self.pipeline_executable.create_pipeline(args)
+    def run_pipeline(self, env, bindings):
+        pipeline = (self.executable.create_pipeline(bindings)
                     if self.n_params() > 0 else
-                    self.pipeline_executable.create_pipeline())
+                    self.executable.create_pipeline())
         self.pipeline = self.customize_pipeline(env, pipeline)
         marcel.core.Command(None, self.pipeline).execute(env)
 
@@ -608,4 +638,4 @@ class PipelinePython(Pipeline):
         self.pipeline.setup(env)
 
     def create_executable(self, env):
-        self.pipeline = self.pipeline_executable.create_pipeline()
+        self.pipeline = self.executable.create_pipeline()
