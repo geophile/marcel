@@ -131,7 +131,6 @@ class Filter(marcel.core.Op):
             except TypeError:
                 raise marcel.exception.KillCommandException(f'{x} is not hashable')
         self.right = set()
-        self.pipeline.create_executable(env)
-        self.pipeline.append(marcel.opmodule.create_op(env, 'map', add_to_right))
+        self.pipeline = self.pipeline.append_immutable(marcel.opmodule.create_op(env, 'map', add_to_right))
         self.pipeline.setup(env)
         self.pipeline.run_pipeline(env, {})

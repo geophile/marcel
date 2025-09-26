@@ -252,7 +252,7 @@ def _run_pipeline(pipeline):
 # don't want to modify the original.
 def _prepare_pipeline(x):
     assert isinstance(x, _core.OpList)
-    return x.create_pipeline()
+    return x.create_executable_pipeline()
 
 
 def run(x):

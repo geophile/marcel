@@ -1611,6 +1611,15 @@ relate to setup?
 
     prepare_to_receive should be removable.
 
+create_pipeline:
+
+- OpList: Used by:
+
+  - PipelinePython.__init__ to convert OpList to PE
+  - PipelineFunction: invoke function -> OpList -> PE
+
+- PE: noop
+
 ----------------------------------------------------------------------
 
 TODO

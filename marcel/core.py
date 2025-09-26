@@ -160,12 +160,6 @@ class Op(AbstractOp):
     def run_in_main_process(self):
         return False
 
-    def create_pipeline(self, args=None):
-        assert args is None
-        pipeline = PipelineExecutable()
-        pipeline.append(self)
-        return pipeline
-
     @classmethod
     def op_name(cls):
         return cls.__name__.lower()
@@ -300,9 +294,9 @@ class OpList(object):
         return self
 
     def __iter__(self):
-        return PipelineIterator(self.env, self.create_pipeline())
+        return PipelineIterator(self.env, self.create_executable_pipeline())
 
-    def create_pipeline(self, args=None):
+    def create_executable_pipeline(self, args=None):
         assert args is None
         assert not (self.op is not None and self.ops is not None)
         # self.op and ops could both be None. E.g., this happens with upload, which starts with an empty pipeline.
@@ -495,11 +489,11 @@ class Pipeline(object):
     def run_pipeline(self, env, bindings):
         assert False
 
+    # TODO: Obsolete? Should always be able to just refer to self.executable
     def create_executable(self, env):
         assert False
 
     def pickle(self, env, pickler):
-        self.create_executable(env)
         pickler.dump(self.executable)
 
     @staticmethod
@@ -593,7 +587,6 @@ class PipelineMarcel(Pipeline):
         return self.executable.parameters()
 
     def ensure_terminal_write(self, env):
-        self.create_executable(env)
         if not self.executable.last_op().op_name() == 'write':
             self.executable.append(marcel.opmodule.create_op(env, 'write'))
 
@@ -609,7 +602,7 @@ class PipelinePython(Pipeline):
         if callable(pipeline_arg):
             pipeline_arg = marcel.core.PipelineFunction(pipeline_arg)
         elif type(pipeline_arg) is OpList:
-            pipeline_arg = pipeline_arg.create_pipeline()
+            pipeline_arg = pipeline_arg.create_executable_pipeline()
         else:
             assert False, pipeline_arg
         super().__init__(pipeline_arg, customize_pipeline)
@@ -625,17 +618,23 @@ class PipelinePython(Pipeline):
         return self.executable.n_params()
 
     def run_pipeline(self, env, bindings):
-        pipeline = (self.executable.create_pipeline(bindings)
-                    if self.n_params() > 0 else
-                    self.executable.create_pipeline())
-        self.pipeline = self.customize_pipeline(env, pipeline)
-        marcel.core.Command(None, self.pipeline).execute(env)
+        # TODO: Looks useless. self.executable.create_pipeline() evaluates to self.executable.
+        assert False
+        # pipeline = (self.executable.create_pipeline(bindings)
+        #             if self.n_params() > 0 else
+        #             self.executable.create_pipeline())
+        # self.pipeline = self.customize_pipeline(env, pipeline)
+        # marcel.core.Command(None, self.pipeline).execute(env)
 
+    # TODO: Was used by case, and that was the only caller. Get rid of this.
     def prepare_to_receive(self, env):
-        self.setup(env)
-        self.create_executable(env)
-        self.pipeline = self.customize_pipeline(env, self.pipeline)
-        self.pipeline.setup(env)
+        assert False
+        # self.setup(env)
+        # self.create_executable(env)
+        # self.pipeline = self.customize_pipeline(env, self.pipeline)
+        # self.pipeline.setup(env)
 
+    # TODO: Looks useless. self.executable.create_pipeline() evaluates to self.executable.
     def create_executable(self, env):
-        self.pipeline = self.executable.create_pipeline()
+        assert False
+        # self.pipeline = self.executable.create_pipeline()
