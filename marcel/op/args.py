@@ -76,7 +76,7 @@ class Args(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.n_params = self.pipeline.n_params()
+        self.n_params = len(self.pipeline.parameters())
         self.check_args()
         self.args = []
 

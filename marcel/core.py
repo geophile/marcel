@@ -467,7 +467,7 @@ class Pipeline(object):
     def __repr__(self):
         return f'Pipeline({self.executable})'
 
-    # Pipeline
+    # Pipeline - execution
 
     def setup(self, env):
         assert False
@@ -481,22 +481,29 @@ class Pipeline(object):
     def cleanup(self):
         self.executable.cleanup()
 
+    def parameters(self):
+        return self.executable.parameters()
+
+    def run_pipeline(self, env, bindings):
+        assert False
+
+    # Pipeline - construction
+
+    def copy(self):
+        assert False
+
     def append(self, op):
         self.executable.append(op)
 
     def append_immutable(self, op):
         assert False
 
-    def n_params(self):
-        assert False
-
     def route_output(self, receiver):
         assert False
 
-    def run_pipeline(self, env, bindings):
-        assert False
+    # Pipeline - transmission
 
-    def pickle(self, env, pickler):
+    def pickle(self, pickler):
         pickler.dump(self.executable)
 
     @staticmethod
@@ -536,7 +543,7 @@ class PipelineMarcel(Pipeline):
         self.source = source
         self.state = PipelineState.IDLE
 
-    # AbstractOp
+    # Pipeline - execution
 
     def setup(self, env):
         assert self.state in (PipelineState.IDLE, PipelineState.SETUP), self.state
@@ -547,11 +554,6 @@ class PipelineMarcel(Pipeline):
                 for param in self.executable.params:
                     self.scope[param] = None
         self.state = PipelineState.SETUP
-
-    # Pipeline
-
-    def n_params(self):
-        return self.executable.n_params()
 
     def run_pipeline(self, env, bindings):
         assert self.state in (PipelineState.IDLE, PipelineState.SETUP), self.state
@@ -582,16 +584,18 @@ class PipelineMarcel(Pipeline):
             env.vars().pop_scope()
             self.state = PipelineState.IDLE
 
-    def route_output(self, receiver):
-        self.executable.last_op().receiver = receiver
+    # Pipeline - construction
+
+    def copy(self):
+        return PipelineMarcel(self.executable.copy(), self.source, self.customize_pipeline)
 
     def append_immutable(self, op):
         return PipelineMarcel(self.executable.append_immutable(op), self.source, self.customize_pipeline)
 
-    # PipelineMarcel
+    def route_output(self, receiver):
+        self.executable.last_op().receiver = receiver
 
-    def parameters(self):
-        return self.executable.parameters()
+    # PipelineMarcel
 
     def ensure_terminal_write(self, env):
         if not self.executable.last_op().op_name() == 'write':
@@ -621,14 +625,11 @@ class PipelinePython(Pipeline):
 
     # Pipeline
 
-    def n_params(self):
-        return self.executable.n_params()
-
     def run_pipeline(self, env, bindings):
         # TODO: Looks useless. self.executable.create_pipeline() evaluates to self.executable.
         assert False
         # pipeline = (self.executable.create_pipeline(bindings)
-        #             if self.n_params() > 0 else
+        #             if len(self.parameters()) > 0 else
         #             self.executable.create_pipeline())
         # self.pipeline = self.customize_pipeline(env, pipeline)
         # marcel.core.Command(None, self.pipeline).execute(env)

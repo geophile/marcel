@@ -43,7 +43,7 @@ class ForkManager(object):
                  thread_ids,
                  pipeline,
                  max_pipeline_args=0):
-        if pipeline.n_params() > max_pipeline_args:
+        if len(pipeline.parameters()) > max_pipeline_args:
             raise marcel.exception.KillCommandException('Too many pipeline args.')
         self.op = op
         self.thread_ids = thread_ids

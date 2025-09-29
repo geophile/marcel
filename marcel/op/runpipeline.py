@@ -46,7 +46,7 @@ class RunPipeline(marcel.core.Op):
         if not isinstance(self.pipeline, marcel.core.PipelineMarcel):
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is not bound to anything executable.')
-        n_params = self.pipeline.n_params()
+        n_params = len(self.pipeline.parameters())
         n_args = 0 if self.args is None else len(self.args)
         n_kwargs = 0 if self.kwargs is None else len(self.kwargs)
         if n_params < n_args + n_kwargs:

@@ -1694,18 +1694,19 @@ __init__:
 Pipeline interface:
 
     Execution:
-
-    - n_params(self)
-    - run_pipeline(self, env, bindings)
+    
     - setup(self, env)
     - receive(self, env, x)
     - flush(self, env)
     - cleanup(self)
-    - route_output(self, receiver)
+    - parameters(self)
+    - run_pipeline(self, bindings)
 
     Modification:
+    - copy(self)
     - append(self, op)
     - append_immutable(self, op)
+    - route_output(self, receiver)
 
     Transmission:
     - pickle(self, env, pickler)
@@ -1715,8 +1716,6 @@ PM interface (in addition to Pipeline):
     - def parameters(self)
     - def ensure_terminal_write(self, env)
     - def run_in_main_process(self)
-
-*** PM.copy used only by Remote. Needed?
 
 ----------------------------------------------------------------------
 
