@@ -1620,6 +1620,56 @@ create_pipeline:
 
 - PE: noop
 
+......................................................................
+
+- prepare_to_receive is gone
+
+- create_pipeline renamed to create_executable_pipeline, it's only used by API.
+
+- create_executable is mostly disabled, should be possible to remove completely.
+
+----------------------------------------------------------------------
+
+9/26/25
+
+PM issuing calls to executable.setup is tricky.
+
+- If the PM is invoked via run_pipeline(), then that method does setup.
+
+- If the PM is used downstream, and the first use is receive(), then
+  receive() doesn't do setup.
+
+So PM.setup() should do executable.setup() in the first case, but not
+the second, and we can't tell them apart at the time that PM.setup()
+is called. Which means that PM.setup() cannot do the right thing in
+all cases.
+
+Can't just have a need_to_setup flag, because a pipeline can be run
+multiple times. Need something more complicated: state tracking
+pipeline lifecycle.
+
+But: extra setup() call seems OK?!
+
+----------------------------------------------------------------------
+
+9/27/25
+
+NO, IT ISN'T OK. If a pipeline's setup calls Store.setup, we fail on
+the second call because we try to create another reservoir. I.e., in
+this case, setup is not idempotent.
+
+......................................................................
+
+PM lifecycle:
+
+READY   SETUP    RUNNING
+init -> setup -> run_pipeline
+         ^ |
+         | |
+         +-+
+
+At end of run_pipeline, set state to READY.
+
 ----------------------------------------------------------------------
 
 TODO

@@ -13,6 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+
+DEBUG = False
+
+def debug(message):
+    if DEBUG:
+        print(message, flush=True)
+
 try:
     import psycopg2
 except ModuleNotFoundError:
@@ -50,27 +57,33 @@ class Connection:
         self.connection.autocommit = autocommit
 
     def query(self, sql, args):
+        debug(f'sql query {sql}')
         with self.connection.cursor() as cursor:
             cursor.execute(sql, args)
             return cursor.fetchall()
 
     def insert(self, sql, args):
+        debug(f'sql insert {sql}')
         with self.connection.cursor() as cursor:
             cursor.execute(sql, args)
             return cursor.rowcount
 
     def execute(self, sql, args):
+        debug(f'sql execute {sql}')
         with self.connection.cursor() as cursor:
             cursor.execute(sql, args)
             return cursor.rowcount
 
     def commit(self):
+        debug(f'sql commit')
         self.connection.commit()
 
     def rollback(self):
+        debug(f'sql rollback')
         self.connection.rollback()
 
     def close(self):
+        debug(f'sql close')
         self.connection.close()
 
 

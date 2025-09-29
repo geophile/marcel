@@ -92,7 +92,8 @@ class RunPipeline(marcel.core.Op):
             env.vars().pop_scope()
 
     def cleanup(self):
-        self.pipeline.cleanup()
+        if self.pipeline:
+            self.pipeline.cleanup()
 
     # RunPipeline
 

@@ -75,6 +75,7 @@ class Upload(marcel.core.Op):
         self.filenames_arg = None
         self.filenames = None
         self.fork_manager = None
+        self.pipeline = None
 
     def __repr__(self):
         return f'upload({self.filenames_arg} -> {self.cluster}:{self.dir_arg})'
@@ -94,13 +95,12 @@ class Upload(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
         # Empty pipelines will be filled in by customize_pipeline
-        pipeline_template = marcel.core.Pipeline.create_empty_pipeline(env)
+        self.pipeline = marcel.core.Pipeline.create_empty_pipeline(env)
         self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,
                                                               thread_ids=self.cluster.hosts,
-                                                              pipeline_arg=pipeline_template,
-                                                              max_pipeline_args=0,
-                                                              customize_pipeline=self.customize_pipeline)
-        self.fork_manager.setup(env)
+                                                              pipeline=self.pipeline,
+                                                              max_pipeline_args=0)
+        self.fork_manager.setup(env, self.customize_pipeline)
 
     def run(self, env):
         self.fork_manager.run(env)
@@ -122,6 +122,7 @@ class Upload(marcel.core.Op):
         return scp_command
 
     def customize_pipeline(self, env, pipeline, host):
-        scp_command = Upload.scp_command(host, self.filenames, self.dir)
-        pipeline.append(marcel.opmodule.create_op(env, 'bash', scp_command))
-        return pipeline
+        return pipeline.append_immutable(
+            marcel.opmodule.create_op(env,
+                                      'bash',
+                                      Upload.scp_command(host, self.filenames, self.dir)))

@@ -64,6 +64,9 @@ The lines of {r:/etc/passwd} are read by the host executable {r:cat}, and the st
 # See https://pymotw.com/2/subprocess/#process-groups-sessions for more information.
 
 
+def dump(x):
+    print(f'{threading.current_thread().name}: {x}', flush=True)
+
 def bash(*bash_args, interactive=False):
     args = ['--interactive'] if interactive else []
     args.extend(bash_args)
@@ -148,9 +151,6 @@ class NonInteractive(Escape):
         self.process = None
         self.out_handler = None
         self.err_handler = None
-        # There is a race between receive() (from an upstream command's ProcessOutputHandler),
-        # and flush(), coming from Command execution.
-        self.lock = threading.Lock()
 
     def receive(self, env, x):
         self.ensure_command_running(env)
@@ -159,10 +159,6 @@ class NonInteractive(Escape):
                 x = x[0]
             self.process.stdin.write(str(x))
             self.process.stdin.write('\n')
-
-    def flush(self, env):
-        self.ensure_command_running(env)
-        self.cleanup()
 
     def cleanup(self):
         if self.process:
@@ -173,26 +169,32 @@ class NonInteractive(Escape):
                 self.err_handler.join(0.1)
             self.process.stdout.close()
             self.process.stderr.close()
+            self.process.wait()
             self.process = None
 
     def ensure_command_running(self, env):
         if self.process is None:
-            self.lock.acquire()
-            if self.process is None:
-                command = self.command()
-                self.process = subprocess.Popen(command,
-                                                shell=True,
-                                                executable=self.bash,
-                                                stdin=subprocess.PIPE,
-                                                stdout=subprocess.PIPE,
-                                                stderr=subprocess.PIPE,
-                                                universal_newlines=True,
-                                                preexec_fn=os.setsid)
-                self.out_handler = ProcessStdoutHandler(env, self.process.stdout, self.op)
-                self.out_handler.start()
-                self.err_handler = ProcessStderrHandler(env, self.process.stderr, self.op)
-                self.err_handler.start()
-            self.lock.release()
+            command = self.command()
+            self.process = subprocess.Popen(command,
+                                            shell=True,
+                                            executable=self.bash,
+                                            stdin=subprocess.PIPE,
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE,
+                                            universal_newlines=True,
+                                            preexec_fn=os.setsid)
+            self.out_handler = ProcessStdoutHandler(env, self.process.stdout, self.op)
+            self.out_handler.start()
+            self.err_handler = ProcessStderrHandler(env, self.process.stderr, self.op)
+            self.err_handler.start()
+            while self.out_handler.is_alive():
+                self.out_handler.join(0.1)
+            self.process.stdout.close()
+            while self.err_handler.is_alive():
+                self.err_handler.join(0.1)
+            self.process.stderr.close()
+            self.process.stdin.close()
+            x = self.process.wait()
 
 
 class Interactive(Escape):

@@ -169,11 +169,15 @@ class Sql(marcel.core.Op):
             self.delegate.flush()
             self.connection.commit()
         except Exception as e:
+            import marcel.util
+            marcel.util.print_stack_of_current_exception()
             self.connection.rollback()
             raise marcel.exception.KillCommandException(e)
         finally:
-            self.connection.close()
             self.propagate_flush(env)
+
+    def cleanup(self):
+        self.connection.close()
 
     # For use by this class
 

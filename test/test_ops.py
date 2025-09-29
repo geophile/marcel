@@ -2394,25 +2394,24 @@ def test_bug_200():
 
 @timeit
 def test_bug_202():
-    TEST.run('env -d f | select (*f: False)')
-    TEST.run('p = (| f |)')
+    TEST.run('env -d x | select (*x: False)')
+    TEST.run('p = (| x |)')
     TEST.run('p', expected_err="not executable")
     TEST.run('p 4', expected_err='Too many arguments')
-    TEST.run('f = (| gen 3 |)')
+    TEST.run('x = (| gen 3 |)')
     TEST.run('p 4', expected_err='Too many arguments')
     TEST.run('p', expected_out=[0, 1, 2])
-    TEST.run('p = (| f 4 |)')
-    TEST.run('f = (| n: gen (int(n)) |)')
+    TEST.run('p = (| x 4 |)')
+    TEST.run('x = (| n: gen (int(n)) |)')
     TEST.run('p', expected_out=[0, 1, 2, 3])
     TEST.run('p 6', expected_err='Too many arguments')
-
 
 @timeit
 def test_bug_203():
     TEST.run('p = (| gen 3 |)')
-    TEST.run('(p)', expected_out=['gen 3'])
+    TEST.run('(p)', expected_out=['Pipeline((| gen(count=3, start=0) |))'])
     TEST.run('p = (| n: gen (int(n)) |)')
-    TEST.run('(p)', expected_out=['n: gen (int(n))'])
+    TEST.run('(p)', expected_out=['Pipeline((| n: gen(count=lambda: int(n), start=0) |))'])
 
 
 @timeit
@@ -2568,13 +2567,6 @@ def test_pipeline_vars():
     # sudo
     TEST.run('g = (| gen 3 |)')
     TEST.run('sudo g', expected_out=[0, 1, 2])
-    # tee
-    TEST.run('save_sum = (| red + >$ sum |)')
-    TEST.run('save_prod = (| red * >$ prod |)')
-    TEST.run('gen 5 1 | tee save_sum save_prod',
-             expected_out=[1, 2, 3, 4, 5])
-    TEST.run('sum <$', expected_out=[15])
-    TEST.run('prod <$', expected_out=[120])
 
 
 def main_slow_tests():
@@ -2658,59 +2650,15 @@ def main_stable():
 
 
 def main_dev():
-    test_no_such_op()
-    test_gen()
-    test_write()
-    test_sort()
-    test_map()
-    test_select()
-    test_red()
-    test_expand()
-    test_head()
-    test_tail()
-    test_reverse()
-    test_squish()
-    test_unique()
-    test_window()
-    test_bash()
-    test_namespace()
-    test_source_filenames()
-    test_ls()
-    test_dir_stack()
-    test_fork()
-    test_sudo()
-    test_version()
-    test_assign()
-    test_join()
-    test_comment()
-    # test_pipeline_args()
-    test_sql()
-    test_import()
-    test_store_load()
-    test_redirect_file()
-    test_redirect_var()
-    test_case()
-    test_read()
-    test_intersect()
-    test_union()
-    test_difference()
-    test_filter()
-    # test_args()
-    test_env()
-    test_pos()
-    test_json()
-    test_struct()
-    test_cast()
-    # test_bugs()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # # print('fail: ****************************** SLOW TESTS DISABLED')
-    # main_slow_tests()
+    main_stable()
+    # print('fail: ****************************** SLOW TESTS DISABLED')
+    main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
 

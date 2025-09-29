@@ -211,6 +211,8 @@ class PredicateWindow(WindowBase):
 
 class OverlapWindow(WindowBase):
 
+    PADDING = None
+
     def __init__(self, op):
         super().__init__(op)
 
@@ -223,14 +225,13 @@ class OverlapWindow(WindowBase):
 
     def flush(self, env):
         if len(self.window) > 0:
-            padding = None
             if len(self.window) < self.op.n:
                 while len(self.window) < self.op.n:
-                    self.window.append(padding)
+                    self.window.append(OverlapWindow.PADDING)
                 self.send_window(env)
             for i in range(self.op.n - 1):
                 self.window = self.window[1:]
-                self.window.append(padding)
+                self.window.append(OverlapWindow.PADDING)
                 self.send_window(env)
             self.op.propagate_flush(env)
 

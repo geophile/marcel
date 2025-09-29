@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+from enum import Enum, auto
+
 import marcel.env
 import marcel.exception
 import marcel.function
@@ -368,6 +370,7 @@ class PipelineExecutable(AbstractOp):
     def cleanup(self):
         for op in self.ops:
             op.cleanup()
+        self.state = PipelineState.IDLE
 
     # PipelineExecutable editing
 
@@ -433,6 +436,15 @@ class PipelineIterator:
 
     def __next__(self):
         return next(self.iterator)
+
+
+# Pipeline execution is generally IDLE -> SETUP -> RUNNING. There are situations where pipeline use can encounter
+# two successive calls to setup(), so the transitions have to allow for that.
+class PipelineState(Enum):
+
+    IDLE = auto()
+    SETUP = auto()
+    RUNNING = auto()
 
 
 # There are a few kinds of pipelines:
@@ -531,15 +543,19 @@ class PipelineMarcel(Pipeline):
         super().__init__(executable, customize_pipeline)
         self.scope = None
         self.source = source
+        self.state = PipelineState.IDLE
 
     # AbstractOp
 
     def setup(self, env):
-        self.executable.setup(env)
-        self.scope = {}
-        if self.executable.params:
-            for param in self.executable.params:
-                self.scope[param] = None
+        assert self.state in (PipelineState.IDLE, PipelineState.SETUP), self.state
+        if self.state is PipelineState.IDLE:
+            self.executable.setup(env)
+            self.scope = {}
+            if self.executable.params:
+                for param in self.executable.params:
+                    self.scope[param] = None
+        self.state = PipelineState.SETUP
 
     # Pipeline
 
@@ -547,6 +563,7 @@ class PipelineMarcel(Pipeline):
         return self.executable.n_params()
 
     def run_pipeline(self, env, bindings):
+        assert self.state in (PipelineState.IDLE, PipelineState.SETUP), self.state
         assert isinstance(env, marcel.env.Environment), f'{type(env)} {env}'
         params = self.executable.parameters()
         assert set(params) == set(bindings.keys()), f'params = {params}, binding keys = {bindings.keys()}'
@@ -554,20 +571,25 @@ class PipelineMarcel(Pipeline):
         try:
             with env.check_nesting():
                 try:
-                    self.executable.setup(env)
+                    # setup() might have been run already. If a pipeline is run by itself, then
+                    # setup() hasn't been run and is needed here. But if a pipeline is receving
+                    # input, then the containing pipeline's setup ensures that this pipeline's
+                    # setup() has been run.
+                    if self.state is PipelineState.IDLE:
+                        self.executable.setup(env)
+                        self.state = PipelineState.SETUP
                 except marcel.exception.KillAndResumeException as e:
                     # KARE is fatal during setup.
                     raise marcel.exception.KillCommandException(str(e))
                 try:
+                    self.state = PipelineState.RUNNING
                     self.executable.run(env)
-                finally:
                     self.executable.flush(env)
+                finally:
                     self.executable.cleanup()
         finally:
             env.vars().pop_scope()
-
-    def prepare_to_receive(self, env):
-        self.setup(env)  # Calls executable.setup
+            self.state = PipelineState.IDLE
 
     def route_output(self, receiver):
         self.executable.last_op().receiver = receiver

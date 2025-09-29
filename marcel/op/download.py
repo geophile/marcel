@@ -74,6 +74,7 @@ class Download(marcel.core.Op):
         self.filenames_arg = None
         self.filenames = None
         self.fork_manager = None
+        self.pipeline = None
 
     def __repr__(self):
         return f'download({self.dir_arg} <- {self.cluster} {self.filenames_arg})'
@@ -97,13 +98,12 @@ class Download(marcel.core.Op):
             if not filename.startswith('/'):
                 raise marcel.exception.KillCommandException(f'Remote filenames must be absolute: {filename}')
         # Empty pipelines will be filled in by customize_pipeline
-        pipeline_template = marcel.core.Pipeline.create_empty_pipeline(env)
+        self.pipeline = marcel.core.Pipeline.create_empty_pipeline(env)
         self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,
                                                               thread_ids=self.cluster.hosts,
-                                                              pipeline_arg=pipeline_template,
-                                                              max_pipeline_args=0,
-                                                              customize_pipeline=self.customize_pipeline)
-        self.fork_manager.setup(env)
+                                                              pipeline=self.pipeline,
+                                                              max_pipeline_args=0)
+        self.fork_manager.setup(env, customize_pipeline=self.customize_pipeline)
         self.ensure_node_directories_exist()
 
     def run(self, env):
@@ -128,9 +128,10 @@ class Download(marcel.core.Op):
         return scp_command
 
     def customize_pipeline(self, env, pipeline, host):
-        scp_command = Download.scp_command(self.filenames, host, self.dir)
-        pipeline.append(marcel.opmodule.create_op(env, 'bash', scp_command))
-        return pipeline
+        return pipeline.append_immutable(
+            marcel.opmodule.create_op(env,
+                                      'bash',
+                                      Download.scp_command(self.filenames, host, self.dir)))
 
     def ensure_node_directories_exist(self):
         for host in self.cluster:

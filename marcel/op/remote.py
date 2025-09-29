@@ -115,11 +115,11 @@ class Remote(marcel.core.Op):
         def __init__(self, host, pipeline):
             super().__init__()
             self.host = host
-            self.pipeline_wrapper = pipeline
+            self.pipeline = pipeline
             self.process = None
 
         def __repr__(self):
-            return f'runremote({self.host}, {self.pipeline_wrapper})'
+            return f'runremote({self.host}, {self.pipeline})'
 
         # AbstractOp
 
@@ -137,7 +137,7 @@ class Remote(marcel.core.Op):
             try:
                 pickler.dump(marcel.util.python_version())
                 pickler.dump(env.marcel_usage())
-                pickler.dump(self.pipeline_wrapper)
+                self.pipeline.pickle(env, pickler)
             except Exception as e:
                 print(f'Caught ({type(e)} {e}', file=sys.stderr)
             buffer.seek(0)
@@ -212,14 +212,14 @@ class Remote(marcel.core.Op):
     # For use by this class
 
     # Called by ForkManager's ForkWorkers, per thread
-    def customize_pipeline(self, env, pipeline, host):
-        assert isinstance(pipeline, marcel.core.Pipeline)
-        remote = Remote.RunRemote(host, pipeline)
+    def customize_pipeline(self, env, remote_pipeline, host):
+        assert isinstance(remote_pipeline, marcel.core.Pipeline)
+        remote = Remote.RunRemote(host, remote_pipeline)
         label_thread = Remote.LabelThread(host)
         label_thread.receiver = self.receiver
-        customized_pipeline = marcel.core.Pipeline.create_empty_pipeline(env)
+        pipeline = marcel.core.Pipeline.create_empty_pipeline(env)
         # TODO: parameters() exits only on PipelineMarcel currently
-        customized_pipeline.params = pipeline.parameters()
-        customized_pipeline.append(remote)
-        customized_pipeline.append(label_thread)
-        return customized_pipeline
+        pipeline.params = remote_pipeline.parameters()
+        pipeline = pipeline.append_immutable(remote)
+        pipeline = pipeline.append_immutable(label_thread)
+        return pipeline
