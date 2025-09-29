@@ -1672,6 +1672,54 @@ At end of run_pipeline, set state to READY.
 
 ----------------------------------------------------------------------
 
+9/28/25
+
+PipelineMarcel is working! On to PipelinePython.
+
+__init__:
+
+    - Input can be:
+
+        - callable() (a function that yields an OpList, for pipelines
+          with parameters) -> PipelineFunction
+
+        - OpList -> PE
+
+      super.executable is set to the PF or the PE
+
+      *** SO THERE MUST BE SPECIAL CASE HANDLING LATER
+
+      *** WHY DOES PF not extend Pipeline?
+
+Pipeline interface:
+
+    Execution:
+
+    - n_params(self)
+    - run_pipeline(self, env, bindings)
+    - setup(self, env)
+    - receive(self, env, x)
+    - flush(self, env)
+    - cleanup(self)
+    - route_output(self, receiver)
+
+    Modification:
+    - append(self, op)
+    - append_immutable(self, op)
+
+    Transmission:
+    - pickle(self, env, pickler)
+
+PM interface (in addition to Pipeline):
+
+    - def parameters(self)
+    - def ensure_terminal_write(self, env)
+    - def run_in_main_process(self)
+
+*** PM.copy used only by Remote. Needed?
+
+----------------------------------------------------------------------
+
 TODO
 
 - Move out of MainScript init

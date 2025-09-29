@@ -2088,7 +2088,7 @@ def main_stable():
 
 
 def main_dev():
-    test_fork()
+    TEST.run(lambda: run(gen(3)))
     pass
 
 
@@ -2096,7 +2096,7 @@ def main():
     TEST.reset_environment()
     main_dev()
     # main_stable()
-    # # print('fail: ****************************** SLOW TESTS DISABLED')
+    print('fail: ****************************** SLOW TESTS DISABLED')
     # main_slow_tests()
     TEST.report_failures('test_api')
     sys.exit(TEST.failures)

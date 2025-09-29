@@ -194,7 +194,6 @@ class Remote(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        self.pipeline = self.pipeline.copy()
         self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,
                                                               thread_ids=self.cluster.hosts,
                                                               pipeline=self.pipeline,

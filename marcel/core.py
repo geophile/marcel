@@ -467,7 +467,7 @@ class Pipeline(object):
     def __repr__(self):
         return f'Pipeline({self.executable})'
 
-    # Pipeline - Op-like interface
+    # Pipeline
 
     def setup(self, env):
         assert False
@@ -487,22 +487,13 @@ class Pipeline(object):
     def append_immutable(self, op):
         assert False
 
-    # Pipeline
-
     def n_params(self):
-        assert False
-
-    def prepare_to_receive(self, env):
         assert False
 
     def route_output(self, receiver):
         assert False
 
     def run_pipeline(self, env, bindings):
-        assert False
-
-    # TODO: Obsolete? Should always be able to just refer to self.executable
-    def create_executable(self, env):
         assert False
 
     def pickle(self, env, pickler):
@@ -594,16 +585,10 @@ class PipelineMarcel(Pipeline):
     def route_output(self, receiver):
         self.executable.last_op().receiver = receiver
 
-    def create_executable(self, env):
-        return self.executable
-
     def append_immutable(self, op):
         return PipelineMarcel(self.executable.append_immutable(op), self.source, self.customize_pipeline)
 
     # PipelineMarcel
-
-    def copy(self):
-        return PipelineMarcel(self.executable.copy(), self.source, self.customize_pipeline)
 
     def parameters(self):
         return self.executable.parameters()
