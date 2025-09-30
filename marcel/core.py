@@ -370,7 +370,7 @@ class PipelineExecutable(AbstractOp):
     def cleanup(self):
         for op in self.ops:
             op.cleanup()
-        self.state = PipelineState.IDLE
+        self.state = PipelineMarcel.State.IDLE
 
     # PipelineExecutable editing
 
@@ -438,15 +438,6 @@ class PipelineIterator:
         return next(self.iterator)
 
 
-# Pipeline execution is generally IDLE -> SETUP -> RUNNING. There are situations where pipeline use can encounter
-# two successive calls to setup(), so the transitions have to allow for that.
-class PipelineState(Enum):
-
-    IDLE = auto()
-    SETUP = auto()
-    RUNNING = auto()
-
-
 # There are a few kinds of pipelines:
 # - PipelineExecutable: Created directly by Parser, and used for execution of pipelines.
 # - OpList: Constructed by marcel.api, can be used to generate PipelineExecutable.
@@ -460,9 +451,11 @@ class Pipeline(object):
     # object
 
     def __init__(self, executable, customize_pipeline):
-        assert isinstance(executable, PipelineExecutable), executable
+        # executable is None if we're using the API, and the pipeline is specified as a lambda.
+        assert executable is None or isinstance(executable, PipelineExecutable), type(executable)
         self.executable = executable
         self.customize_pipeline = customize_pipeline
+        self.state = PipelineMarcel.State.IDLE
 
     def __repr__(self):
         return f'Pipeline({self.executable})'
@@ -496,10 +489,14 @@ class Pipeline(object):
         self.executable.append(op)
 
     def append_immutable(self, op):
-        assert False
+        self.executable.append_immutable(op)
 
     def route_output(self, receiver):
         assert False
+
+    def ensure_terminal_write(self, env):
+        if not self.executable.last_op().op_name() == 'write':
+            self.executable.append(marcel.opmodule.create_op(env, 'write'))
 
     # Pipeline - transmission
 
@@ -532,32 +529,44 @@ class Pipeline(object):
                 if env.api_usage()
                 else PipelineMarcel(marcel.core.PipelineExecutable(), '', None))
 
+    # Internal
+
+    def check_setup_state(self):
+        assert self.state in (PipelineMarcel.State.IDLE, PipelineMarcel.State.SETUP), self.state
+
 
 # A pipeline constructed through the marcel parser, via command line or script. Pipeline args are managed
 # by the Environment's NestedNamspace, and are pushed/popped around pipeline execution.
 class PipelineMarcel(Pipeline):
+    
+    # Pipeline execution is generally IDLE -> SETUP -> RUNNING. There are situations where pipeline use can encounter
+    # two successive calls to setup(), so the transitions have to allow for that.
+    class State(Enum):
 
+        IDLE = auto()
+        SETUP = auto()
+        RUNNING = auto()
+        
     def __init__(self, executable, source, customize_pipeline):
         super().__init__(executable, customize_pipeline)
         self.scope = None
         self.source = source
-        self.state = PipelineState.IDLE
+        self.state = PipelineMarcel.State.IDLE
 
     # Pipeline - execution
 
     def setup(self, env):
-        assert self.state in (PipelineState.IDLE, PipelineState.SETUP), self.state
-        if self.state is PipelineState.IDLE:
+        assert self.state in (PipelineMarcel.State.IDLE, PipelineMarcel.State.SETUP), self.state
+        if self.state is PipelineMarcel.State.IDLE:
             self.executable.setup(env)
             self.scope = {}
             if self.executable.params:
                 for param in self.executable.params:
                     self.scope[param] = None
-        self.state = PipelineState.SETUP
+        self.state = PipelineMarcel.State.SETUP
 
     def run_pipeline(self, env, bindings):
-        assert self.state in (PipelineState.IDLE, PipelineState.SETUP), self.state
-        assert isinstance(env, marcel.env.Environment), f'{type(env)} {env}'
+        assert self.state in (PipelineMarcel.State.IDLE, PipelineMarcel.State.SETUP), self.state
         params = self.executable.parameters()
         assert set(params) == set(bindings.keys()), f'params = {params}, binding keys = {bindings.keys()}'
         env.vars().push_scope(bindings)
@@ -568,21 +577,21 @@ class PipelineMarcel(Pipeline):
                     # setup() hasn't been run and is needed here. But if a pipeline is receving
                     # input, then the containing pipeline's setup ensures that this pipeline's
                     # setup() has been run.
-                    if self.state is PipelineState.IDLE:
+                    if self.state is PipelineMarcel.State.IDLE:
                         self.executable.setup(env)
-                        self.state = PipelineState.SETUP
+                        self.state = PipelineMarcel.State.SETUP
                 except marcel.exception.KillAndResumeException as e:
                     # KARE is fatal during setup.
                     raise marcel.exception.KillCommandException(str(e))
                 try:
-                    self.state = PipelineState.RUNNING
+                    self.state = PipelineMarcel.State.RUNNING
                     self.executable.run(env)
                     self.executable.flush(env)
                 finally:
                     self.executable.cleanup()
         finally:
             env.vars().pop_scope()
-            self.state = PipelineState.IDLE
+            self.state = PipelineMarcel.State.IDLE
 
     # Pipeline - construction
 
@@ -597,10 +606,6 @@ class PipelineMarcel(Pipeline):
 
     # PipelineMarcel
 
-    def ensure_terminal_write(self, env):
-        if not self.executable.last_op().op_name() == 'write':
-            self.executable.append(marcel.opmodule.create_op(env, 'write'))
-
     def run_in_main_process(self):
         return self.executable.first_op().run_in_main_process()
 
@@ -609,40 +614,48 @@ class PipelineMarcel(Pipeline):
 # and scoping is taken care of by Python.
 class PipelinePython(Pipeline):
 
-    def __init__(self, pipeline_arg, customize_pipeline):
-        if callable(pipeline_arg):
-            pipeline_arg = marcel.core.PipelineFunction(pipeline_arg)
-        elif type(pipeline_arg) is OpList:
-            pipeline_arg = pipeline_arg.create_executable_pipeline()
+    def __init__(self, pipeline, customize_pipeline):
+        if callable(pipeline):
+            executable = None
+            self.pipeline_function = PipelineFunction(pipeline)
+        elif type(pipeline) is OpList:
+            executable = pipeline.create_executable_pipeline()
+            self.pipeline_function = None
+        elif type(pipeline) is PipelineExecutable:
+            executable = pipeline
+            self.pipeline_function = None
         else:
-            assert False, pipeline_arg
-        super().__init__(pipeline_arg, customize_pipeline)
+            assert False, pipeline
+        super().__init__(executable, customize_pipeline)
 
-    # Op
+    # Pipeline - execution
 
     def setup(self, env):
         pass
 
-    # Pipeline
-
     def run_pipeline(self, env, bindings):
-        # TODO: Looks useless. self.executable.create_pipeline() evaluates to self.executable.
-        assert False
-        # pipeline = (self.executable.create_pipeline(bindings)
-        #             if len(self.parameters()) > 0 else
-        #             self.executable.create_pipeline())
-        # self.pipeline = self.customize_pipeline(env, pipeline)
-        # marcel.core.Command(None, self.pipeline).execute(env)
+        if self.pipeline_function:
+            params = self.executable.parameters()
+            assert set(params) == set(bindings.keys()), f'params = {params}, binding keys = {bindings.keys()}'
+            args = []
+            for param in params:
+                args.append(bindings[param])
+            op_list = self.pipeline_function.create_pipeline(args)
+            self.executable = op_list.create_executable_pipeline()
+        try:
+            self.executable.setup(env)
+        except marcel.exception.KillAndResumeException as e:
+            # KARE is fatal during setup.
+            raise marcel.exception.KillCommandException(str(e))
+        try:
+            self.state = PipelineMarcel.State.RUNNING
+            self.executable.run(env)
+            self.executable.flush(env)
+        finally:
+            self.executable.cleanup()
+            self.state = PipelineMarcel.State.IDLE
 
-    # TODO: Was used by case, and that was the only caller. Get rid of this.
-    def prepare_to_receive(self, env):
-        assert False
-        # self.setup(env)
-        # self.create_executable(env)
-        # self.pipeline = self.customize_pipeline(env, self.pipeline)
-        # self.pipeline.setup(env)
+    # Pipeline - construction
 
-    # TODO: Looks useless. self.executable.create_pipeline() evaluates to self.executable.
-    def create_executable(self, env):
-        assert False
-        # self.pipeline = self.executable.create_pipeline()
+    def append_immutable(self, op):
+        return PipelinePython(self.executable.append_immutable(op), self.customize_pipeline)

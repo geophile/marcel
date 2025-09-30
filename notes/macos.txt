@@ -1702,11 +1702,12 @@ Pipeline interface:
     - parameters(self)
     - run_pipeline(self, bindings)
 
-    Modification:
+    Construction:
     - copy(self)
     - append(self, op)
     - append_immutable(self, op)
     - route_output(self, receiver)
+    - def ensure_terminal_write(self, env)
 
     Transmission:
     - pickle(self, env, pickler)
@@ -1714,8 +1715,15 @@ Pipeline interface:
 PM interface (in addition to Pipeline):
 
     - def parameters(self)
-    - def ensure_terminal_write(self, env)
     - def run_in_main_process(self)
+
+......................................................................
+
+env.check_nesting is overly complicated. Only needed for PM.
+
+Can customzie_pipeline arg to PM, PP be removed?
+
+Does OpList.create_executable_pipeline needs args arg?
 
 ----------------------------------------------------------------------
 

@@ -240,7 +240,7 @@ def _generate_op(f, *args, **kwargs):
 def _run_pipeline(pipeline):
     command = marcel.core.Command(None, pipeline)
     try:
-        command.execute(_ENV)
+        pipeline.run_pipeline(_ENV, {})
     except marcel.exception.KillCommandException as e:
         marcel.util.print_to_stderr(_ENV, e)
     except marcel.exception.KillAndResumeException:
@@ -248,18 +248,15 @@ def _run_pipeline(pipeline):
         pass
 
 
-# Create a pipelines, by copying if necessary. The caller is going to append an op, and we
-# don't want to modify the original.
 def _prepare_pipeline(x):
     assert isinstance(x, _core.OpList)
-    return x.create_executable_pipeline()
+    return marcel.core.Pipeline.create(_ENV, x)
 
 
 def run(x):
     SHUTDOWN_HOOK.ensure_registered()
     pipeline = _prepare_pipeline(x)
-    if not isinstance(pipeline.last_op(), _Write):
-        pipeline.append(write().op)
+    pipeline.ensure_terminal_write(_ENV)
     _run_pipeline(pipeline)
 
 

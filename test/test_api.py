@@ -2088,7 +2088,12 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run(lambda: run(gen(3)))
+    TEST.run(lambda: run(fork(3, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()))
+    # TEST.run(lambda: run(fork(3, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
+    #          expected_out=[(0, 100), (0, 101), (0, 102),
+    #                        (1, 100), (1, 101), (1, 102),
+    #                        (2, 100), (2, 101), (2, 102)])
+    # test_fork()
     pass
 
 
