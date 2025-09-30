@@ -14,8 +14,6 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import atexit
-import os as _os
-import pathlib as _pathlib
 import tempfile
 
 import marcel.core as _core
@@ -24,6 +22,7 @@ import marcel.exception as _exception
 import marcel.main as _main
 import marcel.object.error as _error
 import marcel.opmodule
+import marcel.pipeline
 import marcel.reservoir as _reservoir
 import marcel.structish
 import marcel.util
@@ -249,8 +248,8 @@ def _run_pipeline(pipeline):
 
 
 def _prepare_pipeline(x):
-    assert isinstance(x, _core.OpList)
-    return marcel.core.Pipeline.create(_ENV, x)
+    assert isinstance(x, marcel.pipeline.OpList)
+    return marcel.pipeline.Pipeline.create(_ENV, x)
 
 
 def run(x):

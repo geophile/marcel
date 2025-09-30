@@ -24,6 +24,7 @@ import marcel.opmodule
 import marcel.op.bash
 import marcel.op.filenames
 import marcel.op.forkmanager
+import marcel.pipeline
 import marcel.util
 
 File = marcel.object.file.File
@@ -95,7 +96,7 @@ class Upload(marcel.core.Op):
             raise marcel.exception.KillCommandException(f'No qualifying paths, (possibly due to permission errors):'
                                                         f' {self.filenames}')
         # Empty pipelines will be filled in by customize_pipeline
-        self.pipeline = marcel.core.Pipeline.create_empty_pipeline(env)
+        self.pipeline = marcel.pipeline.Pipeline.create_empty_pipeline(env)
         self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,
                                                               thread_ids=self.cluster.hosts,
                                                               pipeline=self.pipeline,

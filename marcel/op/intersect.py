@@ -18,6 +18,7 @@ import marcel.core
 import marcel.exception
 import marcel.opmodule
 import marcel.object.error
+import marcel.pipeline
 
 HELP = '''
 {L,wrap=F}intersect (| PIPELINE |) ...
@@ -39,7 +40,7 @@ output is unspecified.
 
 
 def intersect(pipeline):
-    assert isinstance(pipeline, marcel.core.OpList), pipeline
+    assert isinstance(pipeline, marcel.pipeline.OpList), pipeline
     return Intersect(), [pipeline]
 
 
@@ -66,7 +67,7 @@ class Intersect(marcel.core.Op):
 
     def setup(self, env):
         for pipeline in self.pipelines:
-            assert type(pipeline) is marcel.core.PipelineMarcel, type(pipeline)
+            assert type(pipeline) is marcel.pipeline.PipelineMarcel, type(pipeline)
 
     def receive(self, env, x):
         self.ensure_args_consumed(env)

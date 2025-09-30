@@ -18,6 +18,7 @@ import marcel.core
 import marcel.exception
 import marcel.opmodule
 import marcel.object.error
+import marcel.pipeline
 import marcel.util
 
 HELP = '''
@@ -70,7 +71,7 @@ If the {r:--keep} flag were included, the output would have two additional rows:
 
 
 def join(pipeline, keep=False):
-    assert isinstance(pipeline, marcel.core.OpList)
+    assert isinstance(pipeline, marcel.pipeline.OpList)
     args = ['--keep'] if keep else []
     args.append(pipeline)
     return Join(), args
@@ -101,7 +102,7 @@ class Join(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        assert type(self.pipeline) is marcel.core.PipelineMarcel, type(self.pipeline)
+        assert type(self.pipeline) is marcel.pipeline.PipelineMarcel, type(self.pipeline)
         self.first = True
 
     def receive(self, env, x):

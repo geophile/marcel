@@ -20,6 +20,7 @@ import marcel.exception
 import marcel.function
 import marcel.object.cluster
 import marcel.object.file
+import marcel.pipeline
 import marcel.reservoir
 import marcel.stringliteral
 import marcel.util
@@ -220,7 +221,7 @@ class ArgsParser:
         return x
 
     def check_pipeline(self, arg, x):
-        pipeline = marcel.core.convert_to_pipeline(self.env, x)
+        pipeline = marcel.pipeline.convert_to_pipeline(self.env, x)
         if pipeline is None:
             raise marcel.argsparser.ArgsError(self.op_name,
                                               f'{arg.name} argument must be a Pipeline: {x}')

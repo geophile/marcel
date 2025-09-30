@@ -18,6 +18,7 @@ import marcel.core
 import marcel.exception
 import marcel.opmodule
 import marcel.object.error
+import marcel.pipeline
 import marcel.util
 
 HELP = '''
@@ -37,7 +38,7 @@ output is unspecified.
 def union(*pipelines):
     args = []
     for pipeline in pipelines:
-        assert isinstance(pipeline, marcel.core.OpList), pipeline
+        assert isinstance(pipeline, marcel.pipeline.OpList), pipeline
         args.append(pipeline)
     return Union(), args
 
@@ -63,7 +64,7 @@ class Union(marcel.core.Op):
 
     def setup(self, env):
         for pipeline in self.pipelines:
-            assert type(pipeline) is marcel.core.PipelineMarcel, type(pipeline)
+            assert type(pipeline) is marcel.pipeline.PipelineMarcel, type(pipeline)
 
     # Op
 

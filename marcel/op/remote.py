@@ -25,6 +25,7 @@ import marcel.exception
 import marcel.object.cluster
 import marcel.object.error
 import marcel.op.forkmanager
+import marcel.pipeline
 import marcel.util
 
 HELP = '''
@@ -62,7 +63,7 @@ the output might look like this:
 
 def remote(cluster, pipeline):
     assert isinstance(pipeline, marcel.core.OpList), pipeline
-    pipeline_arg = marcel.core.PipelineFunction(pipeline) if callable(pipeline) else pipeline
+    pipeline_arg = marcel.pipeline.PipelineFunction(pipeline) if callable(pipeline) else pipeline
     return Remote(), [cluster, pipeline_arg]
 
 
@@ -216,7 +217,7 @@ class Remote(marcel.core.Op):
         remote = Remote.RunRemote(host, remote_pipeline)
         label_thread = Remote.LabelThread(host)
         label_thread.receiver = self.receiver
-        pipeline = marcel.core.Pipeline.create_empty_pipeline(env)
+        pipeline = marcel.pipeline.Pipeline.create_empty_pipeline(env)
         # TODO: parameters() exits only on PipelineMarcel currently
         pipeline.params = remote_pipeline.parameters()
         pipeline = pipeline.append_immutable(remote)

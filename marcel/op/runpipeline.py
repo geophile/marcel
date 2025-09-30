@@ -15,6 +15,7 @@
 
 import marcel.core
 import marcel.exception
+import marcel.pipeline
 import marcel.util
 
 
@@ -43,7 +44,7 @@ class RunPipeline(marcel.core.Op):
         if self.pipeline is None:
             raise marcel.exception.KillCommandException(
                 f'The value of {self.var} is None, so it is not executable.')
-        if not isinstance(self.pipeline, marcel.core.PipelineMarcel):
+        if not isinstance(self.pipeline, marcel.pipeline.PipelineMarcel):
             raise marcel.exception.KillCommandException(
                 f'The variable {self.var} is not bound to anything executable.')
         n_params = len(self.pipeline.parameters())

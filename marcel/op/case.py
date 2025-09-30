@@ -17,6 +17,7 @@ import marcel.argsparser
 import marcel.core
 import marcel.exception
 import marcel.op.redirect
+import marcel.pipeline
 
 HELP = '''
 {L,wrap=F}case PREDICATE (| PIPELINE |) ... [(| PIPELINE |)]
@@ -94,7 +95,7 @@ class Case(marcel.core.Op):
             import marcel.core
             import marcel.exception
             try:
-                if not isinstance(pipeline, marcel.core.Pipeline):
+                if not isinstance(pipeline, marcel.pipeline.Pipeline):
                     raise marcel.exception.KillCommandException(f'Expected pipeline, found {arg}')
                 pipeline.setup(env)
                 return pipeline

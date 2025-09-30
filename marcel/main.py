@@ -46,6 +46,7 @@ import marcel.persistence.storagelayout
 import marcel.object.workspace
 import marcel.opmodule
 import marcel.parser
+import marcel.pipeline
 import marcel.reader
 import marcel.reservoir
 import marcel.tabcompleter
@@ -110,7 +111,7 @@ class MainScript(Main):
             try:
                 parser = marcel.parser.Parser(text, self.env)
                 pipeline = parser.parse()
-                assert type(pipeline) is marcel.core.PipelineMarcel, f'({type(pipeline)}) {pipeline}'
+                assert type(pipeline) is marcel.pipeline.PipelineMarcel, f'({type(pipeline)}) {pipeline}'
                 pipeline.ensure_terminal_write(self.env)
                 command = marcel.core.Command(text, pipeline)
                 self.execute_command(command, pipeline)

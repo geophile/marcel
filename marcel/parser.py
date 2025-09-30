@@ -18,6 +18,7 @@ import marcel.core
 import marcel.exception
 import marcel.function
 import marcel.opmodule
+import marcel.pipeline
 import marcel.util
 from marcel.function_args_parser import FunctionArgsParser
 from marcel.stringliteral import StringLiteral
@@ -1030,7 +1031,7 @@ class Parser(object):
     # Used by Compilable which contains pipeline source and caches the compiled pipeline.
     def parse_pipeline(self):
         pipeline = self.pipeline()
-        assert type(pipeline) is marcel.core.PipelineExecutable
+        assert type(pipeline) is marcel.pipeline.PipelineExecutable
         return pipeline
 
     def command(self):
@@ -1055,7 +1056,7 @@ class Parser(object):
                 source = value.source
             else:
                 source = arg.value()
-        elif type(arg) is marcel.core.PipelineMarcel:
+        elif type(arg) is marcel.pipeline.PipelineMarcel:
             value = arg
             source = arg.source
         elif arg is None:
@@ -1115,7 +1116,7 @@ class Parser(object):
             # else:  op_sequence is OK as is
             return op_sequence
 
-        pipeline = marcel.core.PipelineExecutable()
+        pipeline = marcel.pipeline.PipelineExecutable()
         with Parser.PipelineSourceTracker(self, pipeline):
             # If the next tokens are var comma, or var colon, then we have
             # pipeline variables being declared.
@@ -1129,7 +1130,7 @@ class Parser(object):
                            pipeline_op_sequence())
             for op_args in op_sequence:
                 pipeline.append(self.create_op(*op_args))
-        return marcel.core.Pipeline.create(self.env, pipeline)
+        return marcel.pipeline.Pipeline.create(self.env, pipeline)
 
     def redirect_in_op(self, arrow_token, source=None):
         op_name = 'load' if arrow_token.is_var() else 'read'
@@ -1302,7 +1303,7 @@ class Parser(object):
                 pipeline_args = []
                 for token in arg_tokens:
                     pipeline_args.append(token
-                                         if type(token) is marcel.core.PipelineExecutable else
+                                         if type(token) is marcel.pipeline.PipelineExecutable else
                                          token.value())
                 args, kwargs = marcel.argsparser.PipelineArgsParser(var).parse_pipeline_args(pipeline_args)
                 op.set_pipeline_args(args, kwargs)
@@ -1327,9 +1328,9 @@ class Parser(object):
         assert assign_module is not None
         op = assign_module.create_op()
         op.set_var_and_value(var, value, source)
-        executable = marcel.core.PipelineExecutable()
+        executable = marcel.pipeline.PipelineExecutable()
         executable.append(op)
-        pipeline = marcel.core.Pipeline.create(self.env, executable)
+        pipeline = marcel.pipeline.Pipeline.create(self.env, executable)
         return pipeline
 
     # Tab completion support

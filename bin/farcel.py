@@ -30,6 +30,7 @@ import marcel.exception
 import marcel.object.error
 import marcel.object.workspace
 import marcel.opmodule
+import marcel.pipeline
 import marcel.nestednamespace
 import marcel.util
 import marcel.version
@@ -156,7 +157,7 @@ def main():
         marcel_usage = input.load()
         # pipelines from client
         pipeline = input.load()
-        assert type(pipeline) is marcel.core.PipelineExecutable
+        assert type(pipeline) is marcel.pipeline.PipelineExecutable
         env = marcel.env.Environment.create(usage=marcel_usage,
                                             globals=dict() if marcel_usage == 'api' else None)
         version = env.getvar('MARCEL_VERSION')

@@ -18,6 +18,7 @@ import marcel.core
 import marcel.exception
 import marcel.opmodule
 import marcel.object.error
+import marcel.pipeline
 import marcel.util
 
 HELP = '''
@@ -61,7 +62,7 @@ If neither {r:--keep} nor {r:--discard} are specified, then {r:--keep} is assume
 
 # 'filter' is a builtin Python function
 def filt(pipeline, compare=None, keep=False, discard=False):
-    assert isinstance(pipeline, marcel.core.OpList), pipeline
+    assert isinstance(pipeline, marcel.pipeline.OpList), pipeline
     args = []
     if keep:
         args.append('--keep')
@@ -103,7 +104,7 @@ class Filter(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        assert type(self.pipeline) is marcel.core.PipelineMarcel, type(self.pipeline)
+        assert type(self.pipeline) is marcel.pipeline.PipelineMarcel, type(self.pipeline)
         self.right = None
         # self.discard is just for arg processing. self.keep controls execution.
         # This works if keep is already true, and if both keep and discard are false,

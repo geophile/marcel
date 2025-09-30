@@ -22,6 +22,7 @@ import dill
 import marcel.argsparser
 import marcel.core
 import marcel.exception
+import marcel.pipeline
 import marcel.util
 
 
@@ -42,7 +43,7 @@ Running the command via {r:sudo} would work:
 
 
 def sudo(pipeline, *args):
-    assert isinstance(pipeline, marcel.core.OpList), pipeline
+    assert isinstance(pipeline, marcel.pipeline.OpList), pipeline
     args = list(args)
     args.append(pipeline)
     return Sudo(), args
@@ -62,7 +63,7 @@ class SudoArgsParser(marcel.argsparser.ArgsParser):
 
     def check_str_and_pipeline(self, arg, x):
         # This isn't really accurate. The last arg must be a pipelines. The preceding ones must be str.
-        if not marcel.util.one_of(x, (str, marcel.core.Pipeline, marcel.core.OpList)):
+        if not marcel.util.one_of(x, (str, marcel.pipeline.Pipeline, marcel.pipeline.OpList)):
             raise marcel.argsparser.ArgsError(self.op_name,
                                               f'Arguments must be strings (flags to sudo) followed by a pipelines: {x}')
         return x
@@ -83,8 +84,8 @@ class Sudo(marcel.core.Op):
         if len(self.args) == 0:
             raise marcel.exception.KillCommandException('Missing pipeline')
         pipeline_arg = self.args.pop()
-        self.pipeline = marcel.core.convert_to_pipeline(env, pipeline_arg)
-        assert isinstance(self.pipeline, marcel.core.Pipeline)
+        self.pipeline = marcel.pipeline.convert_to_pipeline(env, pipeline_arg)
+        assert isinstance(self.pipeline, marcel.pipeline.Pipeline)
         if self.pipeline is None:
             raise marcel.exception.KillCommandException('Missing pipeline')
 
