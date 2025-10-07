@@ -104,7 +104,7 @@ class Filter(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        assert type(self.pipeline) is marcel.pipeline.PipelineMarcel, type(self.pipeline)
+        assert isinstance(self.pipeline, marcel.pipeline.Pipeline), type(self.pipeline)
         self.right = None
         # self.discard is just for arg processing. self.keep controls execution.
         # This works if keep is already true, and if both keep and discard are false,

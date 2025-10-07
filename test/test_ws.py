@@ -378,7 +378,7 @@ def main_dev():
 
 def main():
     TEST.reset_environment()
-    # main_dev()
+    main_dev()
     main_stable()
     TEST.report_failures('test_ws')
     sys.exit(TEST.failures)

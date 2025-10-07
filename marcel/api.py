@@ -22,7 +22,7 @@ import marcel.exception as _exception
 import marcel.main as _main
 import marcel.object.error as _error
 import marcel.opmodule
-import marcel.pipeline
+import marcel.pipeline as _pipeline
 import marcel.reservoir as _reservoir
 import marcel.structish
 import marcel.util
@@ -233,11 +233,10 @@ def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 def _generate_op(f, *args, **kwargs):
     op, arglist = f(*args, **kwargs)
     _ENV.op_modules[op.op_name()].args_parser(_ENV).parse(arglist, op)
-    return _core.OpList(_MAIN.env, op)
+    return _pipeline.OpList(_MAIN.env, op)
 
 
 def _run_pipeline(pipeline):
-    command = marcel.core.Command(None, pipeline)
     try:
         pipeline.run_pipeline(_ENV, {})
     except marcel.exception.KillCommandException as e:
@@ -248,8 +247,8 @@ def _run_pipeline(pipeline):
 
 
 def _prepare_pipeline(x):
-    assert isinstance(x, marcel.pipeline.OpList)
-    return marcel.pipeline.Pipeline.create(_ENV, x)
+    assert isinstance(x, _pipeline.OpList)
+    return _pipeline.Pipeline.create(_ENV, x)
 
 
 def run(x):

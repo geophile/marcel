@@ -29,12 +29,6 @@ class Function(object):
     def __repr__(self):
         return str(self.function) if self.display is None else self.display
 
-    def __getstate__(self):
-        assert False
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-
     def __call__(self, *args, **kwargs):
         return self.function(*args, **kwargs)
 

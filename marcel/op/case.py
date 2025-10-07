@@ -90,7 +90,7 @@ class Case(marcel.core.Op):
 
     def setup(self, env):
         def pipeline(pipeline):
-            # PyCharm sees a syntax error (on references to marcel.core.Pipeline and
+            # PyCharm sees a syntax error (on references to marcel.pipeline.Pipeline and
             # marcel.exception) without these?!
             import marcel.core
             import marcel.exception

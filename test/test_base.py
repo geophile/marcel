@@ -48,6 +48,7 @@ class TestBase:
     def reset_environment(self):
         if self.main is not None:
             self.main.shutdown()
+            self.main = None
         os.environ['HOME'] = TestBase.test_home
         shutil.rmtree(TestBase.test_home, ignore_errors=True)
 

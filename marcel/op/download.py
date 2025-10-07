@@ -98,13 +98,13 @@ class Download(marcel.core.Op):
         for filename in self.filenames:
             if not filename.startswith('/'):
                 raise marcel.exception.KillCommandException(f'Remote filenames must be absolute: {filename}')
-        # Empty pipelines will be filled in by customize_pipeline
+        # Empty pipelines will be filled in by fork customizer
         self.pipeline = marcel.pipeline.Pipeline.create_empty_pipeline(env)
         self.fork_manager = marcel.op.forkmanager.ForkManager(op=self,
                                                               thread_ids=self.cluster.hosts,
                                                               pipeline=self.pipeline,
                                                               max_pipeline_args=0)
-        self.fork_manager.setup(env, customize_pipeline=self.customize_pipeline)
+        self.fork_manager.setup(env, fork_customizer=self.fork_customizer)
         self.ensure_node_directories_exist()
 
     def run(self, env):
@@ -128,7 +128,7 @@ class Download(marcel.core.Op):
         scp_command = ' '.join(buffer)
         return scp_command
 
-    def customize_pipeline(self, env, pipeline, host):
+    def fork_customizer(self, env, pipeline, host):
         return pipeline.append_immutable(
             marcel.opmodule.create_op(env,
                                       'bash',

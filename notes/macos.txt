@@ -1733,7 +1733,7 @@ There are actually two PipelinePython cases: OpList and
 PipelineFunction. It would be cleaner to replace PP by two classes
 (both subclasses of Pipeline):
 
-= PipelineOpList
+- PipelineOpList
 
 - PipelineFunction
 

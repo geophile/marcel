@@ -102,7 +102,7 @@ class Join(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
-        assert type(self.pipeline) is marcel.pipeline.PipelineMarcel, type(self.pipeline)
+        assert isinstance(self.pipeline, marcel.pipeline.Pipeline), type(self.pipeline)
         self.first = True
 
     def receive(self, env, x):

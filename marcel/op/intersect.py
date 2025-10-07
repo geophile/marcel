@@ -67,7 +67,7 @@ class Intersect(marcel.core.Op):
 
     def setup(self, env):
         for pipeline in self.pipelines:
-            assert type(pipeline) is marcel.pipeline.PipelineMarcel, type(pipeline)
+            assert isinstance(pipeline, marcel.pipeline.Pipeline), type(pipeline)
 
     def receive(self, env, x):
         self.ensure_args_consumed(env)

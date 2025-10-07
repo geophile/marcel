@@ -106,7 +106,7 @@ class Sudo(marcel.core.Op):
         pickler = dill.Pickler(buffer)
         pickler.dump(marcel.util.python_version())
         pickler.dump(env.marcel_usage())
-        self.pipeline.pickle(pickler)
+        self.pipeline.pickle(env, pickler)
         buffer.seek(0)
         stdout, stderr = self.process.communicate(input=buffer.getvalue())
         # Wait for completion (already guaranteed by communicate returning?)

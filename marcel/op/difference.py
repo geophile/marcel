@@ -18,6 +18,7 @@ import marcel.core
 import marcel.exception
 import marcel.opmodule
 import marcel.object.error
+import marcel.pipeline
 import marcel.util
 
 HELP = '''
@@ -49,7 +50,7 @@ output is unspecified.
 
 
 def difference(pipeline):
-    assert isinstance(pipeline, marcel.core.OpList), pipeline
+    assert isinstance(pipeline, marcel.pipeline.OpList), pipeline
     return Difference(), [pipeline]
 
 

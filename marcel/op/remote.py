@@ -62,7 +62,7 @@ the output might look like this:
 
 
 def remote(cluster, pipeline):
-    assert isinstance(pipeline, marcel.core.OpList), pipeline
+    assert isinstance(pipeline, marcel.pipeline.OpList), pipeline
     pipeline_arg = marcel.pipeline.PipelineFunction(pipeline) if callable(pipeline) else pipeline
     return Remote(), [cluster, pipeline_arg]
 
@@ -83,7 +83,8 @@ class Remote(marcel.core.Op):
 
         ID_COUNTER = 0
 
-        def __init__(self, label):
+        # The default value for label is needed because Op.copy() calls __init__() with no args.
+        def __init__(self, label=None):
             super().__init__()
             self.label_list = [label]
             self.label_tuple = (label,)
@@ -113,7 +114,9 @@ class Remote(marcel.core.Op):
 
     class RunRemote(marcel.core.Op):
 
-        def __init__(self, host, pipeline):
+        # The default args are needed because Op.copy() calls __init__() with no args.
+        def __init__(self, host=None, pipeline=None):
+            assert (host is None) == (pipeline is None)
             super().__init__()
             self.host = host
             self.pipeline = pipeline
@@ -138,7 +141,7 @@ class Remote(marcel.core.Op):
             try:
                 pickler.dump(marcel.util.python_version())
                 pickler.dump(env.marcel_usage())
-                self.pipeline.pickle(pickler)
+                self.pipeline.pickle(env, pickler)
             except Exception as e:
                 print(f'Caught ({type(e)} {e}', file=sys.stderr)
             buffer.seek(0)
@@ -199,7 +202,7 @@ class Remote(marcel.core.Op):
                                                               thread_ids=self.cluster.hosts,
                                                               pipeline=self.pipeline,
                                                               max_pipeline_args=0)
-        self.fork_manager.setup(env, self.customize_pipeline)
+        self.fork_manager.setup(env, self.fork_customizer)
 
     # Op
 
@@ -212,8 +215,8 @@ class Remote(marcel.core.Op):
     # For use by this class
 
     # Called by ForkManager's ForkWorkers, per thread
-    def customize_pipeline(self, env, remote_pipeline, host):
-        assert isinstance(remote_pipeline, marcel.core.Pipeline)
+    def fork_customizer(self, env, remote_pipeline, host):
+        assert isinstance(remote_pipeline, marcel.pipeline.Pipeline)
         remote = Remote.RunRemote(host, remote_pipeline)
         label_thread = Remote.LabelThread(host)
         label_thread.receiver = self.receiver

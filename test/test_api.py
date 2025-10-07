@@ -902,7 +902,7 @@ def test_fork():
                            (1, 100), (1, 101), (1, 102),
                            (2, 100), (2, 101), (2, 102)])
     TEST.run(lambda: run(fork(3, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-             expected_err='Too many pipelines args')
+             expected_err='Too many pipeline args')
     # iterable forkgen
     TEST.run(lambda: run(fork('abc', lambda: gen(3, 100)) | sort()),
              expected_out=[100, 100, 100, 101, 101, 101, 102, 102, 102])
@@ -911,7 +911,7 @@ def test_fork():
                            ('b', 100), ('b', 101), ('b', 102),
                            ('c', 100), ('c', 101), ('c', 102)])
     TEST.run(lambda: run(fork('abc', lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-             expected_err='Too many pipelines args')
+             expected_err='Too many pipeline args')
     # Cluster forkgen
     localhost = marcel.object.cluster.Host(None, '127.0.0.1')
     TEST.run(lambda: run(fork(CLUSTER1, lambda: gen(3, 100)) | sort()),
@@ -919,7 +919,7 @@ def test_fork():
     TEST.run(lambda: run(fork(CLUSTER1, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
              expected_out=[(localhost, 100), (localhost, 101), (localhost, 102)])
     TEST.run(lambda: run(fork(CLUSTER1, lambda t, u: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-             expected_err='Too many pipelines args')
+             expected_err='Too many pipeline args')
 
 
 @timeit
@@ -2088,21 +2088,15 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run(lambda: run(fork(3, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()))
-    # TEST.run(lambda: run(fork(3, lambda t: gen(3, 100) | map(lambda x: (t, x))) | sort()),
-    #          expected_out=[(0, 100), (0, 101), (0, 102),
-    #                        (1, 100), (1, 101), (1, 102),
-    #                        (2, 100), (2, 101), (2, 102)])
-    # test_fork()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    print('fail: ****************************** SLOW TESTS DISABLED')
-    # main_slow_tests()
+    main_stable()
+    # print('fail: ****************************** SLOW TESTS DISABLED')
+    main_slow_tests()
     TEST.report_failures('test_api')
     sys.exit(TEST.failures)
 

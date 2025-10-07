@@ -205,6 +205,7 @@ class ChildListener(threading.Thread):
         self.child_completion_handler = child_completion_handler
         self.waiter = threading.Condition()
         self.listeners = []
+        self.stop = False
 
     def add_listener(self, listener):
         self.waiter.acquire()
@@ -221,8 +222,10 @@ class ChildListener(threading.Thread):
                 self.listeners.remove(listener)
             to_remove.clear()
             # Wait until a listener has something
-            while len(self.listeners) == 0:
+            while not self.stop and len(self.listeners) == 0:
                 self.waiter.wait(1)
+            if self.stop:
+                return
             listeners = list(self.listeners)
             self.waiter.release()
             # Process the listeners that are ready
@@ -233,6 +236,9 @@ class ChildListener(threading.Thread):
                         self.child_completion_handler(dill.loads(input))
                 except EOFError:
                     to_remove.append(listener)
+
+    def stop_listening(self):
+        self.stop = True
 
 
 class JobControl:
@@ -249,8 +255,12 @@ class JobControl:
         signal.signal(signal.SIGTSTP, self.ctrl_z_handler)
 
     def shutdown(self):
+        debug('Shutting down job control')
+        job_control = JobControl.only
+        JobControl.only = None
         for job in self._jobs:
             job.kill()
+        job_control.child_listener.stop_listening()
 
     def create_job(self, command):
         job = Job(self.env, command)
@@ -318,5 +328,6 @@ class JobControl:
     @staticmethod
     def start(env, child_completion_handler):
         debug('starting job control')
+        assert JobControl.only is None
         JobControl.only = JobControl(env, child_completion_handler)
         return JobControl.only

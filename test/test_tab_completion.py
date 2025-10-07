@@ -12,7 +12,7 @@ OPS = ['args', 'assign', 'bash', 'bg', 'case', 'cast', 'cd', 'difference',
        'fork', 'gen', 'head', 'help', 'history', 'import', 'intersect',
        'jobs', 'join', 'load', 'ls', 'map', 'popd', 'ps', 'pushd', 'pwd', 'read',
        'red', 'remote', 'reverse', 'run', 'select', 'sort', 'sql', 'squish', 'store',
-       'sudo', 'tail', 'tee', 'timer', 'trace', 'union', 'unique', 'upload', 'version',
+       'sudo', 'tail', 'timer', 'trace', 'union', 'unique', 'upload', 'version',
        'window', 'write', 'ws']
 
 ALL_OPS = [op + ' ' for op in OPS]

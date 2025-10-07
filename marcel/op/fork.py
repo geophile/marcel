@@ -19,6 +19,7 @@ import marcel.exception
 import marcel.object.cluster
 import marcel.object.error
 import marcel.op.forkmanager
+import marcel.pipeline
 import marcel.util
 
 HELP = '''
@@ -91,7 +92,7 @@ the {n:remote} operator.
 
 
 def fork(forkgen, pipeline):
-    assert isinstance(pipeline, marcel.core.OpList) or callable(pipeline), pipeline
+    assert isinstance(pipeline, marcel.pipeline.OpList) or callable(pipeline), pipeline
     return Fork(), [forkgen, pipeline]
 
 

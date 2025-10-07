@@ -1031,7 +1031,7 @@ class Parser(object):
     # Used by Compilable which contains pipeline source and caches the compiled pipeline.
     def parse_pipeline(self):
         pipeline = self.pipeline()
-        assert type(pipeline) is marcel.pipeline.PipelineExecutable
+        assert type(pipeline) is marcel.pipeline.PipelineMarcel
         return pipeline
 
     def command(self):

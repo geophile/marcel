@@ -64,7 +64,7 @@ class Union(marcel.core.Op):
 
     def setup(self, env):
         for pipeline in self.pipelines:
-            assert type(pipeline) is marcel.pipeline.PipelineMarcel, type(pipeline)
+            assert isinstance(pipeline, marcel.pipeline.Pipeline), type(pipeline)
 
     # Op
 
