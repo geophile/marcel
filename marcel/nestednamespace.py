@@ -352,6 +352,15 @@ class NestedNamespace(dict):
             super().__setitem__(var, value_wrapper.unwrap())
             scope.__setitem__(var, value_wrapper)
 
+    # TODO: With set_env, is reconstitute needed? That's just an eager form of reconstitution.
+    # TODO: Having the env available in all the EnvValues is a lazy form.
+    def set_env(self, env):
+        # This should only be called at the top level of execution, so there should only be one scope.
+        assert len(self.scopes)== 1, len(self.scopes)
+        scope = self.scopes[0]
+        for value_wrapper in scope.values():
+            value_wrapper.env = env
+
 
     # The NN dict maps environment variables to values. That mapping is the combined set of variable
     # assignments from the scopes, with an inner scope taking precedence over an outer scope (relevant

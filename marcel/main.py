@@ -108,17 +108,19 @@ class MainScript(Main):
 
     def parse_and_run_command(self, text):
         if text:
+            env = self.env
             try:
-                parser = marcel.parser.Parser(text, self.env)
+                env.workspace.namespace.set_env(env)
+                parser = marcel.parser.Parser(text, env)
                 pipeline = parser.parse()
                 assert type(pipeline) is marcel.pipeline.PipelineMarcel, f'({type(pipeline)}) {pipeline}'
-                pipeline.ensure_terminal_write(self.env)
+                pipeline.ensure_terminal_write(env)
                 command = marcel.core.Command(text, pipeline)
                 self.execute_command(command, pipeline)
             except marcel.parser.EmptyCommand:
                 pass
             except marcel.exception.KillCommandException as e:
-                marcel.util.print_to_stderr(self.env, e)
+                marcel.util.print_to_stderr(env, e)
             except marcel.exception.KillAndResumeException:
                 # Error handler printed the error
                 pass

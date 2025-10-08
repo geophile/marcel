@@ -809,3 +809,10 @@ Are IfBase, Tee obsolete? I think so.
 ----------------------------------------------------------------------
 
 Download uses sshpass. Should probably avoid that dependency.
+
+----------------------------------------------------------------------
+
+Unify OpList, PipelineOpList, PipelineExecutable? They are doing very
+similar things. PE is more general, as it supports params, while
+OpList assumes no params, due to usage in API. (If there are params,
+use lambda x: <<pipeline>> which turns into a PipelineFunction.)
