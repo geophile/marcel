@@ -873,14 +873,5 @@ They don't work when used in Jobs, e.g. (interactively, not in test):
     gen (3)
 
 The SourceFunction representing (3) has fields source and
-function. The function was created by parser.Expression.value, trying
-various lambda prefixes (so that code is going to need to be made more
-globally available).
-
-SourceFunction.__getstate__ drop s the function, so it needs to be
-recreated in the Job's process. Which means:
-
-- The namespace has to be made available to job.run_command_in_child.
-
-- The lambda-prefixing code (from parser) needs to be available to
-  SourceFunction.
+function. SourceFunction.__getstate__ drops the function, so it needs
+to be recreated in the Job's process.

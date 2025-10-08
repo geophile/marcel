@@ -193,7 +193,7 @@ class Environment(object):
         self.workspace.clear_changes()
 
     def set_function_globals(self, function):
-        function.set_globals(self.workspace.namespace)
+        function.ensure_compiled(self.workspace.namespace)
 
     def color_scheme(self):
         return self.getvar('COLOR_SCHEME')

@@ -349,7 +349,7 @@ class Expression(Token):
     def value(self):
         try:
             if self._function is None:
-                globals = self.parser.env.workspace.namespace
+                globals = self.parser.env.vars()
                 # source may be used for compilation eventually, so it has to be valid Python source which, when
                 # evaluated yields a function. (I.e., not the source of marcel shorthand, omitting lambda.)
                 source = self.source()
@@ -369,8 +369,8 @@ class Expression(Token):
                     else:
                         prefix = 'lambda ' if function_args_parser.explicit_colon else 'lambda: '
                 source = prefix + source
-                function = eval(source, globals)
-                self._function = marcel.function.SourceFunction(function=function, source=source)
+                self._function = marcel.function.SourceFunction(source=source)
+                self._function.ensure_compiled(globals)
             return self._function
         except Exception as e:
             raise marcel.exception.KillCommandException(f'Error in function "{self.source()}": {e}')
@@ -1047,7 +1047,6 @@ class Parser(object):
         self.op_arg_context.reset()
         self.next_token(Assign)
         arg = self.arg()
-        source = None
         if isinstance(arg, Token):
             value = arg.value()
             if isinstance(arg, Expression):

@@ -32,8 +32,8 @@ class Function(object):
     def __call__(self, *args, **kwargs):
         return self.function(*args, **kwargs)
 
-    def set_globals(self, globals):
-        assert False
+    def ensure_compiled(self, globals):
+        assert False, self
 
     def snippet(self):
         return self.display.split('\n')[0].strip()
@@ -57,7 +57,7 @@ class NativeFunction(Function):
     def __getstate__(self):
         return self.__dict__
 
-    def set_globals(self, globals):
+    def ensure_compiled(self, globals):
         pass
 
     def is_grouping(self):
@@ -67,16 +67,17 @@ class NativeFunction(Function):
 
 class SourceFunction(Function):
 
-    def __init__(self, function, source):
-        super().__init__(function, source, source)
+    def __init__(self, source):
+        super().__init__(None, source, source)
 
     def __getstate__(self):
         map = self.__dict__.copy()
         map['function'] = None
         return map
 
-    def set_globals(self, globals):
-        self.function = eval(self.source, globals)
+    def ensure_compiled(self, globals):
+        if self.function is None:
+            self.function = eval(self.source, globals)
 
 
 class SymbolFunction(Function):
@@ -102,7 +103,7 @@ class SymbolFunction(Function):
     def __getstate__(self):
         return self.__dict__
 
-    def set_globals(self, globals):
+    def ensure_compiled(self, globals):
         pass
 
     def is_grouping(self):

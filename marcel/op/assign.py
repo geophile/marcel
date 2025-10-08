@@ -61,7 +61,7 @@ class Assign(marcel.core.Op):
             assert isinstance(self.function, marcel.function.Function), type(self.function)
             self.value = self.call(env, self.function)
         if isinstance(self.value, marcel.function.Function):
-            self.value.set_globals(env.vars())
+            self.value.ensure_compiled(env.vars())
 
     def run(self, env):
         source = None
