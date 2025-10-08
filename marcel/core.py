@@ -76,6 +76,9 @@ class Op(AbstractOp):
     def customize_pipelines(self, env):
         pass
 
+    def ensure_functions_compiled(self, globals):
+        pass
+
     # For use by subclasses
 
     def call(self, env, function, *args, **kwargs):
@@ -198,6 +201,11 @@ class Op(AbstractOp):
             val = evaled
         return val
 
+    def ensure_function_compiled(self, arg, globals):
+        if type(arg) is marcel.function.SourceFunction:
+            arg.ensure_compiled(globals)
+
+
     @staticmethod
     def check_arg(ok, arg, message):
         if not ok:
@@ -238,3 +246,6 @@ class Command:
         # Need to transmit the Environment's vars relating to the directory, to the parent
         # process, because they may have changed. This doesn't apply to API usage.
         return env.changes() if remote else None
+
+    def ensure_functions_compiled(self, globals):
+        self.pipeline.ensure_functions_compiled(globals)

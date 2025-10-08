@@ -64,6 +64,7 @@ def run_command_in_child(env, command, writer):
     debug(f'running: {command.source}')
     child_namespace_changes = None
     try:
+        command.ensure_functions_compiled(env.vars())
         child_namespace_changes = command.execute(env, remote=True)
         debug('execution complete')
     except marcel.exception.KillCommandException as e:

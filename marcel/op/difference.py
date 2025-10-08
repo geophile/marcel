@@ -104,3 +104,6 @@ class Difference(marcel.core.Op):
 
         self.right = {}
         self.pipeline = self.pipeline.append_immutable(marcel.opmodule.create_op(env, 'map', load_right))
+
+    def ensure_functions_compiled(self, globals):
+        self.pipeline.ensure_functions_compiled(globals)

@@ -145,6 +145,14 @@ class Case(marcel.core.Op):
         if self.default_pipeline:
             self.default_pipeline.cleanup()
 
+    def ensure_functions_compiled(self, globals):
+        for branch in self.branches:
+            self.ensure_function_compiled(branch.predicate, globals)
+        for pipeline in self.pipelines:
+            pipeline.ensure_functions_compiled(globals)
+        if self.default_pipeline:
+            self.default_pipeline.ensure_functions_compiled(globals)
+
     # Internal
 
     def customize_pipelines(self, env):

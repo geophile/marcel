@@ -114,6 +114,12 @@ class PipelineExecutable(object):
         copy.ops.append(op)
         return copy
 
+    def ensure_functions_compiled(self, globals):
+        for op in self.ops:
+            op.ensure_functions_compiled(globals)
+
+    # PipelineExecutable
+
     def first_op(self):
         return self.ops[0]
 
@@ -226,6 +232,9 @@ class Pipeline(object):
     def ensure_terminal_write(self, env):
         if not self.executable.last_op().op_name() == 'write':
             self.executable = self.executable.append_immutable(marcel.opmodule.create_op(env, 'write'))
+
+    def ensure_functions_compiled(self, env):
+        self.executable.ensure_functions_compiled(env)
 
     # Pipeline - transmission
 

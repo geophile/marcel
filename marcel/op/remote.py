@@ -212,6 +212,9 @@ class Remote(marcel.core.Op):
     def must_be_first_in_pipeline(self):
         return True
 
+    def ensure_functions_compiled(self, globals):
+        self.pipeline.ensure_functions_compiled(globals)
+
     # For use by this class
 
     # Called by ForkManager's ForkWorkers, per thread

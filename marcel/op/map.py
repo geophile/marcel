@@ -65,3 +65,6 @@ class Map(marcel.core.Op):
 
     def run_in_main_process(self):
         return True
+
+    def ensure_functions_compiled(self, globals):
+        self.ensure_function_compiled(self.function, globals)

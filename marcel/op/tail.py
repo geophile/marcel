@@ -68,6 +68,9 @@ class Tail(marcel.core.Op):
         self.impl.flush(env)
         super().flush(env)
 
+    def ensure_functions_compiled(self, globals):
+        self.ensure_function_compiled(self.n_arg, globals)
+
 
 class TailImpl:
 

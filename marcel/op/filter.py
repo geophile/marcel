@@ -22,7 +22,7 @@ import marcel.pipeline
 import marcel.util
 
 HELP = '''
-{L,wrap=F}filter [-k|--keep] [-d|--discard] [--c|--compare COMPARE] (| PIPELINE |)
+{L,wrap=F}filter [-k|--keep] [-d|--discard] [-c|--compare COMPARE] (| PIPELINE |)
 
 {L,indent=4:28}-k, --keep              Keep input tuples that match any tuple from the PIPELINE.
 
@@ -122,6 +122,10 @@ class Filter(marcel.core.Op):
                 self.send(env, x)
         except TypeError:
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
+
+    def ensure_functions_compiled(self, globals):
+        self.ensure_function_compiled(self.compare, globals)
+        self.pipeline.ensure_functions_compiled(globals)
 
     # Internal
 

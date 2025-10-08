@@ -74,3 +74,7 @@ class Squish(marcel.core.Op):
         self.send(env, functools.reduce(lambda *args, **kwargs: self.call(env, self.function, *args, **kwargs),
                                         x,
                                         None))
+
+    def ensure_functions_compiled(self, globals):
+        if self.function:
+            self.ensure_function_compiled(self.function, globals)

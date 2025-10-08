@@ -104,3 +104,7 @@ class Gen(marcel.core.Op):
 
     def must_be_first_in_pipeline(self):
         return True
+
+    def ensure_functions_compiled(self, globals):
+        self.ensure_function_compiled(self.count_arg, globals)
+        self.ensure_function_compiled(self.start_arg, globals)
