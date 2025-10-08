@@ -863,15 +863,3 @@ Enter \ to continue:
     Exception: string literal terminated by lone escape: gen\
 
 Also, using alt-enter (as you're supposed to), breaks after edit.
-
-----------------------------------------------------------------------
-
-285. SourceFunctions broken
-
-They don't work when used in Jobs, e.g. (interactively, not in test):
-
-    gen (3)
-
-The SourceFunction representing (3) has fields source and
-function. SourceFunction.__getstate__ drops the function, so it needs
-to be recreated in the Job's process.
