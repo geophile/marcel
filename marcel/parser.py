@@ -1048,13 +1048,14 @@ class Parser(object):
         self.next_token(Assign)
         arg = self.arg()
         if isinstance(arg, Token):
-            value = arg.value()
             if isinstance(arg, Expression):
                 arg.mark_for_assignment()
+                value = arg.value()
                 assert type(value) is marcel.function.SourceFunction, f'({type(value)}) {value}'
                 source = value.source
             else:
-                source = arg.value()
+                value = arg.value()
+                source = value
         elif type(arg) is marcel.pipeline.PipelineMarcel:
             value = arg
             source = arg.source

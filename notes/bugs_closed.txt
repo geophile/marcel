@@ -6166,3 +6166,21 @@ They don't work when used in Jobs, e.g. (interactively, not in test):
 The SourceFunction representing (3) has fields source and
 function. SourceFunction.__getstate__ drops the function, so it needs
 to be recreated in the Job's process.
+
+----------------------------------------------------------------------
+
+FIXED
+
+286. Streamlined function notation broke
+
+    inc = (x: x+1)
+
+used to work. It doesn't now.
+
+M 0.36.1 jao@loon ~/git/marcel/test$ inc = (x: x+1)
+<lambda>() missing 1 required positional argument: 'x'
+M 0.36.1 jao@loon ~/git/marcel/test$ inc = (lambda x: x+1)
+<lambda>() missing 1 required positional argument: 'x'
+M 0.36.1 jao@loon ~/git/marcel/test$ inc = (lambda: lambda x: x+1)
+M 0.36.1 jao@loon ~/git/marcel/test$ (inc(3))
+4
