@@ -14,14 +14,14 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 HELP = '''
-A {i:pipelines} is a sequence of commands connected by pipes.
-A marcel command is executed by executing a pipelines.
+A {i:pipeline} is a sequence of marcel operators connected by pipes.
+Each marcel command, other than an assignment statement, is a pipeline.
 
-{b:A pipelines can be an argument to an operator}
+{b:A pipeline can be an argument to an operator}
 
-A pipelines can also appear as an argument for some operators.
-In this case, the pipelines is bracketed: using {n:(|...|)} 
-For example, this pipelines lists the sum of file sizes under 
+A pipeline can also appear as an argument for some operators.
+In this case, the pipeline is bracketed: using {n:(|...|)} 
+For example, this pipeline lists the sum of file sizes under 
 {n:/tmp}:
 
 {p,wrap=F}
@@ -36,7 +36,7 @@ Comments:
 
 {L}- {r:@fred}: The name {r:fred} has been configured to refer to some host, and to 
 provide login credentials.
-{L}- {r:(|...|)}: The pipelines to be executed on {r:fred} is delimited by {r:(|...|)}
+{L}- {r:(|...|)}: The pipeline to be executed on {r:fred} is delimited by {r:(|...|)}
 {L}- The output includes the name of the host on which the command executed, e.g.
 {n:(fred, 1366422)}
 
@@ -53,17 +53,17 @@ Comments:
       and extracts the size of the {n:File}. (The file's size was captured remotely 
       and returned with the {n:File} object.)
 
-{b:A pipelines can be used to define a new operator}
+{b:A pipeline can be used to define a new operator}
 
-A pipelines can also be assigned to a variable, essentially creating a
-new operator. For example, this command assigns a pipelines to the {r:recent}
+A pipeline can also be assigned to a variable, essentially creating a
+new operator. For example, this command assigns a pipeline to the {r:recent}
 variable:
 
 {L,wrap=F}recent = (| select (file: now() - file.mtime < days(1)) |)
 
 Explanation:
 
-{L}- {r:select(file: ...)} The pipelines uses one operator, {r:select}, to take
+{L}- {r:select(file: ...)} The pipeline uses the {r:select} operator to take
 {n:File}s as input, and keep those that have been changed in the past day.
 {L}- {r:now()} is a function provided by marcel, which simply runs {n:time.time()}. I.e.,
 it returns the number of seconds since the epoch.
@@ -71,7 +71,7 @@ it returns the number of seconds since the epoch.
 {n:File}s last modification.
 {L}- {r:days(1)} returns the number of seconds in 1 day.
 
-In other words, this pipelines expects {n:File}s to be piped in, and it keeps those
+In other words, this pipeline expects {n:File}s to be piped in, and it keeps those
 that have been modified in the past day. This can be used with any source of {n:File}s, 
 e.g.
 
@@ -80,7 +80,7 @@ e.g.
 This command lists all files inside the current directory,
 recursively, and prints out those that changed within the past day.
 
-Pipelines can be parameterized. So to generalize the {n:recent} pipelines to
+Pipelines can be parameterized. So to generalize the {n:recent} pipeline to
 go back {n:d} days instead of 1:
 
 {L,wrap=F}recent = (| d: select (file: now() - file.mtime < days(float(d))) |)
