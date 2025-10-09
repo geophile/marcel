@@ -251,7 +251,8 @@ class Scope(dict):
             pass
 
     def store_item(self, var, value):
-        if not isinstance(value, EnvValue):
+        # About self.parent is not None: EnvValues are only needed for the outermost scope.
+        if self.parent is not None and not isinstance(value, EnvValue):
             value = EnvValue.wrap(self.env, value)
         if self.parent is None or var in self.params:
             super().__setitem__(var, value)
