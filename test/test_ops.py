@@ -681,62 +681,62 @@ def test_source_filenames():
 
 @timeit
 def test_ls():
-    # with TestDir(TEST.env) as testdir:
-    #     filename_op_setup(testdir)
-    #     # 0/1/r flags with no files specified.
-    #     TEST.run('ls -0 | map (f: f.render_compact())',
-    #              expected_out=sorted(['.']))
-    #     TEST.run('ls -1 | map (f: f.render_compact())',
-    #              expected_out=sorted(['.',
-    #                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-    #                                   ]))
-    #     TEST.run('ls -r | map (f: f.render_compact())',
-    #              expected_out=sorted(['.',
-    #                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-    #                                   'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-    #                                   'd/dd/ddf']))
-    #     TEST.run('ls | map (f: f.render_compact())',
-    #              expected_out=sorted(['.',
-    #                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-    #                                   ]))
-    #     # 0/1/r flags with file
-    #     TEST.run('ls -0 f | map (f: f.render_compact())',
-    #              expected_out=sorted(['f']))
-    #     TEST.run('ls -1 f | map (f: f.render_compact())',
-    #              expected_out=sorted(['f']))
-    #     TEST.run('ls -r f | map (f: f.render_compact())',
-    #              expected_out=sorted(['f']))
-    #     # 0/1/r flags with directory
-    #     TEST.run(f'ls -0 {testdir} | map (f: f.render_compact())',
-    #              expected_out=sorted(['.']))
-    #     TEST.run(f'ls -1 {testdir} | map (f: f.render_compact())',
-    #              expected_out=sorted(['.', 'f', 'sf', 'lf', 'sd', 'd']))
-    #     TEST.run(f'ls -r {testdir} | map (f: f.render_compact())',
-    #              expected_out=sorted(['.',
-    #                                   'f', 'sf', 'lf', 'sd', 'd',  # Top-level
-    #                                   'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
-    #                                   'd/dd/ddf']))
-    #     # Test f/d/s flags
-    #     TEST.run('ls -fr | map (f: f.render_compact())',
-    #              expected_out=sorted(['f', 'lf',  # Top-level
-    #                                   'd/df', 'd/ldf',  # Contents of d
-    #                                   'd/dd/ddf']))
-    #     TEST.run('ls -dr | map (f: f.render_compact())',
-    #              expected_out=sorted(['.',
-    #                                   'd',  # Top-level
-    #                                   'd/dd']))  # Contents of d
-    #     TEST.run('ls -sr | map (f: f.render_compact())',
-    #              expected_out=sorted(['sf', 'sd',  # Top-level
-    #                                   'd/sdf', 'd/sdd'  # Contents of d
-    #                                   ]))
-    #     # Duplicates
-    #     TEST.run('ls -0 *d ? | map (f: f.render_compact())',
-    #              expected_out=sorted(['d', 'sd', 'f']))
-    #     # This should find d twice
-    #     expected = sorted(['.', 'f', 'sf', 'lf', 'd', 'sd'])
-    #     expected.extend(sorted(['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']))
-    #     TEST.run('ls -1 . d | map (f: f.render_compact())',
-    #              expected_out=expected)
+    with TestDir(TEST.env) as testdir:
+        filename_op_setup(testdir)
+        # 0/1/r flags with no files specified.
+        TEST.run('ls -0 | map (f: f.render_compact())',
+                 expected_out=sorted(['.']))
+        TEST.run('ls -1 | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                      ]))
+        TEST.run('ls -r | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                      'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                      'd/dd/ddf']))
+        TEST.run('ls | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                      ]))
+        # 0/1/r flags with file
+        TEST.run('ls -0 f | map (f: f.render_compact())',
+                 expected_out=sorted(['f']))
+        TEST.run('ls -1 f | map (f: f.render_compact())',
+                 expected_out=sorted(['f']))
+        TEST.run('ls -r f | map (f: f.render_compact())',
+                 expected_out=sorted(['f']))
+        # 0/1/r flags with directory
+        TEST.run(f'ls -0 {testdir} | map (f: f.render_compact())',
+                 expected_out=sorted(['.']))
+        TEST.run(f'ls -1 {testdir} | map (f: f.render_compact())',
+                 expected_out=sorted(['.', 'f', 'sf', 'lf', 'sd', 'd']))
+        TEST.run(f'ls -r {testdir} | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'f', 'sf', 'lf', 'sd', 'd',  # Top-level
+                                      'd/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd',  # Contents of d
+                                      'd/dd/ddf']))
+        # Test f/d/s flags
+        TEST.run('ls -fr | map (f: f.render_compact())',
+                 expected_out=sorted(['f', 'lf',  # Top-level
+                                      'd/df', 'd/ldf',  # Contents of d
+                                      'd/dd/ddf']))
+        TEST.run('ls -dr | map (f: f.render_compact())',
+                 expected_out=sorted(['.',
+                                      'd',  # Top-level
+                                      'd/dd']))  # Contents of d
+        TEST.run('ls -sr | map (f: f.render_compact())',
+                 expected_out=sorted(['sf', 'sd',  # Top-level
+                                      'd/sdf', 'd/sdd'  # Contents of d
+                                      ]))
+        # Duplicates
+        TEST.run('ls -0 *d ? | map (f: f.render_compact())',
+                 expected_out=sorted(['d', 'sd', 'f']))
+        # This should find d twice
+        expected = sorted(['.', 'f', 'sf', 'lf', 'd', 'sd'])
+        expected.extend(sorted(['d/df', 'd/sdf', 'd/ldf', 'd/dd', 'd/sdd']))
+        TEST.run('ls -1 . d | map (f: f.render_compact())',
+                 expected_out=expected)
     # ls should continue past permission error
     with TestDir(TEST.env) as testdir:
         os.system(f'mkdir {testdir}/d1')
@@ -2650,15 +2650,16 @@ def main_stable():
 
 
 def main_dev():
+    test_ls()
     pass
 
 
 def main():
     TEST.reset_environment()
     main_dev()
-    main_stable()
-    # print('fail: ****************************** SLOW TESTS DISABLED')
-    main_slow_tests()
+    # main_stable()
+    print('fail: ****************************** SLOW TESTS DISABLED')
+    # main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
 
