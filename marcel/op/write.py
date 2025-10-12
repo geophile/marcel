@@ -1,15 +1,15 @@
 # This file is part of Marcel.
-# 
+#
 # Marcel is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
 # Free Software Foundation, either version 3 of the License, (or at your
 # option) any later version.
-# 
+#
 # Marcel is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -199,25 +199,34 @@ class Writer(object):
     def cleanup(self):
         pass
 
+# About TextWriter.output() and DefaultWriter.color_scheme(): It would be nice to set output and color_scheme
+# in the respective __init__ functions. But this would mean that TextWriter had a field of type _io.TextIOWrapper
+# which cannot be pickled, which renders pipelines containing write unpickleable.
 
 class TextWriter(Writer):
 
     def __init__(self, op):
         super().__init__(op)
-        if op.filename:
-            path = pathlib.Path(os.path.normpath(op.filename)).expanduser()
-            self.output = marcel.util.open_file(path,
-                                                'a' if op.append else 'w',
-                                                marcel.exception.KillCommandException)
-        else:
-            self.output = sys.stdout
+        self._output = None
 
     def cleanup(self):
-        if self.output != sys.stdout:
-            self.output.close()
+        if self.output() != sys.stdout:
+            self.output().close()
 
     def write_line(self, x):
-        print(x, file=self.output, flush=True)
+        print(x, file=self.output(), flush=True)
+
+    def output(self):
+        if self._output is None:
+            op = self.op
+            if op.filename:
+                path = pathlib.Path(os.path.normpath(op.filename)).expanduser()
+                self._output = marcel.util.open_file(path,
+                                                     'a' if op.append else 'w',
+                                                     marcel.exception.KillCommandException)
+            else:
+                self._output = sys.stdout
+        return self._output
 
 
 class CSVWriter(TextWriter):
@@ -253,9 +262,7 @@ class DefaultWriter(TextWriter):
 
     def __init__(self, op, color_scheme):
         super().__init__(op)
-        self.color_scheme = (color_scheme
-                             if self.output == sys.__stdout__ else
-                             None)
+        self._color_scheme = color_scheme
 
     def receive(self, env, x):
         if x is None:
@@ -266,14 +273,17 @@ class DefaultWriter(TextWriter):
                 if len(x) == 1:
                     out = x[0]
                     if isinstance(out, Renderable):
-                        out = out.render_full(self.color_scheme)
+                        out = out.render_full(self.color_scheme())
                 else:
                     out = str(x)
             elif t is marcel.object.error.Error:
-                out = x.render_full(self.color_scheme)
+                out = x.render_full(self.color_scheme())
             else:
                 assert False, type(x)
         self.write_line(out)
+
+    def color_scheme(self):
+        return self._color_scheme if self.output() == sys.__stdout__ else None
 
 
 class PickleWriter(Writer):

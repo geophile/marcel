@@ -251,7 +251,8 @@ class Scope(dict):
             pass
 
     def store_item(self, var, value):
-        if not isinstance(value, EnvValue):
+        # About self.parent is not None: EnvValues are only needed for the outermost scope.
+        if self.parent is not None and not isinstance(value, EnvValue):
             value = EnvValue.wrap(self.env, value)
         if self.parent is None or var in self.params:
             super().__setitem__(var, value)
@@ -336,7 +337,9 @@ class NestedNamespace(dict):
         popped_scope = self.scopes.pop()
         for var in popped_scope.keys():
             super().__delitem__(var)
-        for scope in self.scopes:
+        # Don't have to reset the topmost scope, and that can be problematic anyway, e.g. if env isn't
+        # known and EnvValue cache is unset.
+        for scope in self.scopes[1:]:
             for var, value in scope.items():
                 super().__setitem__(var, value.unwrap())
 

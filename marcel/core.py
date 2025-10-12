@@ -40,8 +40,6 @@ class Op(AbstractOp):
         # containing this op.
         # The op receiving this op's output
         self.receiver = None
-        # The pipelines to which this op belongs
-        self.owner = None
         # Supports pos()
         self._count = -1
 

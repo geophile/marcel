@@ -19,7 +19,6 @@ import marcel.util
 
 TEST_TIMING = False
 
-
 def timeit(f):
     def timetest():
         start = time.time()
