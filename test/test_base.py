@@ -136,6 +136,10 @@ class TestBase:
     def report_failures(self, label):
         print(f'{self.failures} failures: {label}')
 
+    @staticmethod
+    def homedir(user):
+        return os.path.expanduser(f'~{user}')
+
 
 class TestConsole(TestBase):
 
@@ -381,7 +385,7 @@ class TestDir(object):
 
     def __init__(self, env):
         self.env = env
-        self.test_dir = pathlib.Path(tempfile.mkdtemp())
+        self.test_dir = pathlib.Path(tempfile.mkdtemp()).resolve()
 
     def __enter__(self):
         return self.test_dir

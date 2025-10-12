@@ -30,7 +30,7 @@ import marcel.util
 DEBUG = False
 
 # See discussion in notes/tab_completion.txt, 3/15/25.
-NEEDS_ESCAPE = string.whitespace + '''$!"&'()*:;<>?@[\`{|'''
+NEEDS_ESCAPE = string.whitespace + '''$!"&'()*:;<>?@[\\`{|'''
 ESCAPE = '\\'
 
 
