@@ -52,7 +52,6 @@ class PipelineExecutable(object):
             if isinstance(op, marcel.core.Op) and op is not self.ops[0] and op.must_be_first_in_pipeline():
                 raise marcel.exception.KillCommandException(
                     f'{op.op_name()} cannot receive input from a pipe')
-            op.owner = self
             if prev_op:
                 prev_op.receiver = op
             prev_op = op

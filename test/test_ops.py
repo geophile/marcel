@@ -1,5 +1,6 @@
 import getpass
 import math
+import multiprocessing
 import os
 import pathlib
 import sys
@@ -18,7 +19,6 @@ TestDir = test_base.TestDir
 
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
-TEST = test_base.TestConsole()
 
 SQL = True
 
@@ -747,8 +747,8 @@ def test_ls():
         os.system(f'touch {testdir}/d2/f2')
         os.system(f'touch {testdir}/d3/f3')
         os.system(f'touch {testdir}/d4/f4')
-        os.system(f'sudo chown root.root {testdir}/d2')
-        os.system(f'sudo chown root.root {testdir}/d3')
+        os.system(f'sudo chown root {testdir}/d2')
+        os.system(f'sudo chown root {testdir}/d3')
         os.system(f'sudo chmod 700 {testdir}/d?')
         TEST.run(test=f'ls -r {testdir} | map (f: f.render_compact())',
                  expected_out=['.',
@@ -762,8 +762,8 @@ def test_ls():
                                'd4/f4'])
         # Restore owners so that cleanup can proceed
         me = os.getlogin()
-        os.system(f'sudo chown {me}.{me} {testdir}/d2')
-        os.system(f'sudo chown {me}.{me} {testdir}/d3')
+        os.system(f'sudo chown {me} {testdir}/d2')
+        os.system(f'sudo chown {me} {testdir}/d3')
         # Args with vars
     with TestDir(TEST.env) as testdir:
         filename_op_setup(f'{testdir}/vartest')
@@ -2650,18 +2650,21 @@ def main_stable():
 
 
 def main_dev():
-    test_ls()
     pass
 
 
 def main():
+    global TEST
+    multiprocessing.set_start_method('spawn')
+    TEST = test_base.TestConsole()
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    print('fail: ****************************** SLOW TESTS DISABLED')
-    # main_slow_tests()
+    main_stable()
+    # print('fail: ****************************** SLOW TESTS DISABLED')
+    main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
 
 
-main()
+if __name__ == '__main__':
+    main()

@@ -337,7 +337,9 @@ class NestedNamespace(dict):
         popped_scope = self.scopes.pop()
         for var in popped_scope.keys():
             super().__delitem__(var)
-        for scope in self.scopes:
+        # Don't have to reset the topmost scope, and that can be problematic anyway, e.g. if env isn't
+        # known and EnvValue cache is unset.
+        for scope in self.scopes[1:]:
             for var, value in scope.items():
                 super().__setitem__(var, value.unwrap())
 

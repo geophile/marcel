@@ -33,10 +33,10 @@ def validate_all(error_handler):
     def check_file_exists(path, description):
         if not path.exists():
             raise marcel.exception.KillShellException(
-                f'{description} file missing.')
+                f'{description} file missing: {path}')
         if not path.is_file():
             raise marcel.exception.KillShellException(
-                f'{description} is not actually a file.')
+                f'{description} is not actually a file: {path}')
 
     def workspace_named(name):
         return (Workspace.default()

@@ -145,7 +145,6 @@ class VarHandler(object):
         return self.namespace
 
     def persistible_vars(self):
-        assert len(self.namespace.scopes) == 1
         return dict(self.namespace.scopes[0])
 
     def add_immutable_vars(self, vars):
