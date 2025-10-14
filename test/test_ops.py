@@ -2127,6 +2127,7 @@ def test_upload():
         os.system(f'touch {testdir}/nope1')
         os.system(f'touch {testdir}/nope2')
         os.system(f'chmod 000 {testdir}/nope?')
+        TEST.run(f'upload CLUSTER1 {testdir}/dest {testdir}/nope1')
         TEST.run(f'upload CLUSTER1 {testdir}/dest {testdir}/nope1',
                  expected_out=[Error('nope1: Permission denied')])
         TEST.run(f'upload CLUSTER1 {testdir}/dest {testdir}/nope?',
