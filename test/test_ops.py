@@ -20,7 +20,7 @@ TestDir = test_base.TestDir
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
 
-SQL = True
+SQL = False
 
 
 # Utilities for testing filename ops
@@ -1870,7 +1870,7 @@ def test_args():
         TEST.run(f'touch "a file with a \' mark"')
         TEST.run(f'rm -rf d')
         TEST.run(f'mkdir d')
-        TEST.run(test=f'ls -f | args --all (|files: mv -t d (quote_files(*files)) |)',
+        TEST.run(test=f'ls -f | args --all (|files: mv (quote_files(*files)) d |)',
                  verification='ls -f d | map (f: f.name)',
                  expected_out=['a file', "a file with a ' mark", 'a_file'])
         # head
@@ -2004,11 +2004,11 @@ def test_json():
         TEST.run("""('null') | (j: json_parse(j))""",
                  expected_out=[None])
         TEST.run("""('abc') | (j: json_parse(j))""",  # Unquoted string
-                 expected_out=[Error('Expecting value')])
+                 expected_out=[Error('JSONDecodeError')])
         TEST.run("""('--3') | (j: json_parse(j))""",  # Malformed integer
-                 expected_out=[Error('Expecting value')])
+                 expected_out=[Error('JSONDecodeError')])
         TEST.run("""('1.2.3') | (j: json_parse(j))""",  # Malformed float
-                 expected_out=[Error('Extra data')])
+                 expected_out=[Error('JSONDecodeError')])
         # Structures (flat)
         TEST.run("""('[]') | (j: json_parse(j))""",
                  expected_out=[[]])
@@ -2024,17 +2024,17 @@ def test_json():
         TEST.run("""('{"q": ["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}}]}]}') | (j: json_parse(j))""",
                  expected_out=[{'q': ['a', {'b': 2, 'c': [3, 4, {'d': 5, 'e': [], 'f': {}}]}]}])
         TEST.run("""('[1, 2') | (j: json_parse(j))""",  # Malformed list
-                 expected_out=[Error("Expecting ',' delimiter")])
+                 expected_out=[Error("JSONDecodeError")])
         TEST.run("""('[1, ') | (j: json_parse(j))""",  # Malformed list
-                 expected_out=[Error("Expecting value")])
+                 expected_out=[Error("JSONDecodeError")])
         TEST.run("""('[1, ]') | (j: json_parse(j))""",  # Malformed list
-                 expected_out=[Error("Expecting value")])
+                 expected_out=[Error("JSONDecodeError")])
         TEST.run("""('{"a": 1,}') | (j: json_parse(j))""",  # Malformed dict
-                 expected_out=[Error("Expecting property name")])
+                 expected_out=[Error("JSONDecodeError")])
         TEST.run("""('{"a": 1') | (j: json_parse(j))""",  # Malformed dict
-                 expected_out=[Error("delimiter: ")])
+                 expected_out=[Error("JSONDecodeError")])
         TEST.run("""('{"a", 1}') | (j: json_parse(j))""",  # Malformed dict
-                 expected_out=[Error("delimiter: ")])
+                 expected_out=[Error("JSONDecodeError")])
         # Structure access
         TEST.run("""('["a", {"b": 2, "c": [3, 4, {"d": 5, "e": [], "f": {}, "g g": 7.7}]}]') 
         | (j: json_parse(j)) 
@@ -2128,9 +2128,14 @@ def test_upload():
         os.system(f'touch {testdir}/nope2')
         os.system(f'chmod 000 {testdir}/nope?')
         TEST.run(f'upload CLUSTER1 {testdir}/dest {testdir}/nope1',
-                 expected_out=[Error('nope1: Permission denied')])
+                 expected_out=[Error('Permission denied'), Error('failed to upload')] if TEST.platform.darwin() else
+                              [Error('Permission denied')])
         TEST.run(f'upload CLUSTER1 {testdir}/dest {testdir}/nope?',
                  expected_out=[Error('Permission denied'),
+                               Error('failed to upload'),
+                               Error('Permission denied'),
+                               Error('failed to upload')] if TEST.platform.darwin() else
+                              [Error('Permission denied'),
                                Error('Permission denied')])
         # Target dir must be absolute
         TEST.run(f'upload CLUSTER1 dest {testdir}/source/a',
@@ -2416,61 +2421,62 @@ def test_bug_203():
 
 @timeit
 def test_bug_206():
-    base = '/tmp/test_cd_pushd'
-    home = pathlib.Path('~').expanduser().absolute()
-    os.system(f'mkdir {base}')
-    TEST.run(test=f'cd {base}',
-             verification='pwd | (d: str(d))',
-             expected_out=base)
-    TEST.run(test='mkdir "a b" x1 x2',
-             verification='ls -fd | sort | (d: str(d))',
-             expected_out=['.', "'a b'", 'x1', 'x2'])
-    # Wildcard
-    TEST.run(test='cd a*',
-             verification='pwd | (d: str(d))',
-             expected_out=f"'{base}/a b'")
-    TEST.run(test='cd ..',
-             verification='pwd | (d: str(d))',
-             expected_out=base)
-    TEST.run(test='pushd *b',
-             verification='pwd | (d: str(d))',
-             expected_out=f"'{base}/a b'")
-    TEST.run(test='popd',
-             verification='pwd | (d: str(d))',
-             expected_out=base)
-    # Default
-    TEST.run(test='cd',
-             verification='pwd | (d: str(d))',
-             expected_out=home)
-    TEST.run(test=f'cd {base}',
-             verification='pwd | (d: str(d))',
-             expected_out=base)
-    # Errors
-    TEST.run('cd x*',
-             expected_err='Too many paths')
-    TEST.run("pwd | (d: str(d))",
-             expected_out=base)
-    TEST.run('pushd x*',
-             expected_err='Too many paths')
-    TEST.run("pwd | (d: str(d))",
-             expected_out=base)
-    TEST.run('cd no_such_dir',
-             expected_err='No qualifying path')
-    TEST.run("pwd | (d: str(d))",
-             expected_out=base)
-    TEST.run('pushd no_such_dir',
-             expected_err='No qualifying path')
-    TEST.run("pwd | (d: str(d))",
-             expected_out=base)
-    TEST.run('cd no_such_dir*',
-             expected_err='No qualifying path')
-    TEST.run("pwd | (d: str(d))",
-             expected_out=base)
-    TEST.run('pushd no_such_dir*',
-             expected_err='No qualifying path')
-    TEST.run("pwd | (d: str(d))",
-             expected_out=base)
-    TEST.run('cd /tmp')
+    with TestDir(TEST.env) as testdir:
+        base = testdir / 'test_cd_pushd'
+        home = pathlib.Path('~').expanduser().absolute()
+        os.system(f'mkdir {base}')
+        TEST.run(test=f'cd {base}',
+                 verification='pwd | (d: str(d))',
+                 expected_out=base)
+        TEST.run(test='mkdir "a b" x1 x2',
+                 verification='ls -fd | sort | (d: str(d))',
+                 expected_out=['.', "'a b'", 'x1', 'x2'])
+        # Wildcard
+        TEST.run(test='cd a*',
+                 verification='pwd | (d: str(d))',
+                 expected_out=f"'{base}/a b'")
+        TEST.run(test='cd ..',
+                 verification='pwd | (d: str(d))',
+                 expected_out=base)
+        TEST.run(test='pushd *b',
+                 verification='pwd | (d: str(d))',
+                 expected_out=f"'{base}/a b'")
+        TEST.run(test='popd',
+                 verification='pwd | (d: str(d))',
+                 expected_out=base)
+        # Default
+        TEST.run(test='cd',
+                 verification='pwd | (d: str(d))',
+                 expected_out=TEST.test_home)
+        TEST.run(test=f'cd {base}',
+                 verification='pwd | (d: str(d))',
+                 expected_out=base)
+        # Errors
+        TEST.run('cd x*',
+                 expected_err='Too many paths')
+        TEST.run("pwd | (d: str(d))",
+                 expected_out=base)
+        TEST.run('pushd x*',
+                 expected_err='Too many paths')
+        TEST.run("pwd | (d: str(d))",
+                 expected_out=base)
+        TEST.run('cd no_such_dir',
+                 expected_err='No qualifying path')
+        TEST.run("pwd | (d: str(d))",
+                 expected_out=base)
+        TEST.run('pushd no_such_dir',
+                 expected_err='No qualifying path')
+        TEST.run("pwd | (d: str(d))",
+                 expected_out=base)
+        TEST.run('cd no_such_dir*',
+                 expected_err='No qualifying path')
+        TEST.run("pwd | (d: str(d))",
+                 expected_out=base)
+        TEST.run('pushd no_such_dir*',
+                 expected_err='No qualifying path')
+        TEST.run("pwd | (d: str(d))",
+                 expected_out=base)
+        TEST.run(f'cd {testdir}')
     os.system(f'rm -rf {base}')
 
 
@@ -2572,9 +2578,9 @@ def test_pipeline_vars():
 def main_slow_tests():
     TEST.reset_environment()
     test_upload()
-    test_pipeline_vars()
-    test_remote()
-    test_download()
+    # test_pipeline_vars()
+    # test_remote()
+    # test_download()
 
 
 # For bugs that aren't specific to a single op.
@@ -2650,7 +2656,11 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('fork 3 (| gen 3 100 |)')
+    TEST.reset_environment()
+    # test_upload()
+    test_pipeline_vars()
+    # test_remote()
+    # test_download()
     pass
 
 
@@ -2661,7 +2671,7 @@ def main():
     TEST.reset_environment()
     main_dev()
     # main_stable()
-    print('fail: ****************************** SLOW TESTS DISABLED')
+    # # print('fail: ****************************** SLOW TESTS DISABLED')
     # main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)

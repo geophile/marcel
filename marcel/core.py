@@ -89,7 +89,7 @@ class Op(AbstractOp):
             if kwargs and len(kwargs) > 0:
                 function_input.append(str(kwargs))
             args_description = None if len(function_input) == 0 else ', '.join(function_input)
-            self.fatal_error(env, args_description, str(e))
+            self.fatal_error(env, args_description, f'{type(e)}: {e}')
 
     # This function is performance-critical, so assertions are commented out,
     # and util.wrap_op_input is inlined.

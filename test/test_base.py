@@ -1,4 +1,5 @@
 import contextlib
+import getpass
 import os
 import pathlib
 import sys
@@ -29,9 +30,34 @@ def timeit(f):
     return timetest if TEST_TIMING else f
 
 
+
+class Platform(object):
+
+    @staticmethod
+    def create():
+        if sys.platform == 'linux':
+            return PlatformLinux()
+        elif sys.platform == 'darwin':
+            return PlatformDarwin()
+        else:
+            raise NotImplementedError(f'Unsupported platform: {sys.platform}')
+
+    def darwin(self):
+        return False
+
+
+class PlatformLinux(Platform):
+    pass
+
+class PlatformDarwin(Platform):
+
+    def darwin(self):
+        return True
+
+
 class TestBase:
     start_dir = os.getcwd()
-    test_home = '/tmp/test_home'
+    test_home = pathlib.Path('/tmp/test_home').resolve().as_posix()
     test_stdout = f'{test_home}/test_stdout.txt'
     test_stderr = f'{test_home}/test_stderr.txt'
 
@@ -43,6 +69,7 @@ class TestBase:
         self.reset_environment()
         self.test_stdout = None
         self.test_stderr = None
+        self.platform = Platform.create()
 
     def reset_environment(self):
         if self.main is not None:
@@ -136,7 +163,7 @@ class TestBase:
         print(f'{self.failures} failures: {label}')
 
     @staticmethod
-    def homedir(user):
+    def homedir(user=getpass.getuser()):
         return os.path.expanduser(f'~{user}')
 
 
