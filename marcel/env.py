@@ -32,6 +32,7 @@ import marcel.object.color
 import marcel.object.file
 import marcel.object.process
 import marcel.opmodule
+import marcel.platform
 import marcel.reservoir
 import marcel.structish
 import marcel.util
@@ -96,6 +97,7 @@ class Environment(object):
                                            'PROMPT',
                                            'PWD',
                                            'USER'))
+        self.platform = marcel.platform.Platform.create()
 
     def __getstate__(self):
         return {'usage': self.usage,
