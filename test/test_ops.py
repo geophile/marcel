@@ -2657,11 +2657,6 @@ def main_stable():
 
 
 def main_dev():
-    TEST.reset_environment()
-    # test_upload()
-    test_pipeline_vars()
-    # test_remote()
-    # test_download()
     pass
 
 
@@ -2671,9 +2666,9 @@ def main():
     TEST = test_base.TestConsole()
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # # print('fail: ****************************** SLOW TESTS DISABLED')
-    # main_slow_tests()
+    main_stable()
+    # print('fail: ****************************** SLOW TESTS DISABLED')
+    main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
 
