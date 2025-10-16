@@ -1739,6 +1739,25 @@ PipelineFunction. It would be cleaner to replace PP by two classes
 
 ----------------------------------------------------------------------
 
+10/16/25
+
+farcel invocation on MacOS fails, because the remote shell doesn't do
+login processing, which means that PATH is not set. Discussed here:
+https://www.reddit.com/r/MacOS/comments/1o7o64s/why_is_this_executable_not_being_found_via_ssh. This
+should fix it:
+
+    ssh -t jao@127.0.0.1 'zsh -l -c "which foobar.py"'
+
+Sample farcel invocations:
+
+- remote: ssh -i ~jao/.ssh/id_rsa jao@127.0.0.1 farcel.py
+
+- sudo: sudo farcel.py: Seems to work
+
+So remote needs to be fixed in a platform-specific way.
+
+----------------------------------------------------------------------
+
 TODO
 
 - Move out of MainScript init

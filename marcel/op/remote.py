@@ -129,7 +129,7 @@ class Remote(marcel.core.Op):
 
         def run(self, env):
             # Start the remote process
-            farcel_invocation = self.farcel_invocation()
+            farcel_invocation = self.farcel_invocation(env)
             self.process = subprocess.Popen(farcel_invocation,
                                             stdin=subprocess.PIPE,
                                             stdout=subprocess.PIPE,
@@ -168,7 +168,7 @@ class Remote(marcel.core.Op):
                 marcel.util.print_stack_of_current_exception()
                 print(e)
 
-        def farcel_invocation(self):
+        def farcel_invocation(self, env):
             cluster = self.host.cluster
             buffer = []
             if cluster.password:
@@ -178,7 +178,7 @@ class Remote(marcel.core.Op):
                 buffer.extend(['-i', cluster.identity])
             if self.host.port is not None:
                 buffer.extend(['-p', str(self.host.port)])
-            buffer.extend([f'{cluster.user}@{self.host.addr}', 'farcel.py'])
+            buffer.extend([f'{cluster.user}@{self.host.addr}', env.platform.remote_farcel_invocation()])
             return ' '.join(buffer)
 
         # Op
