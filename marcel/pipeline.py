@@ -341,7 +341,7 @@ class PipelineMarcel(Pipeline):
     def route_output(self, receiver):
         self.executable.last_op().receiver = receiver
 
-    def ensure_exeutable(self, env, bindings):
+    def ensure_executable(self, env, bindings):
         assert self.executable is not None, self
 
     # PipelineMarcel

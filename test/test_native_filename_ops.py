@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import pathlib
 
@@ -81,6 +82,10 @@ def test_cp():
 
 
 def main():
+    global TEST
+    multiprocessing.set_start_method('spawn')
+    TEST = test_base.TestConsole()
+    TEST.reset_environment()
     test_mv()
     test_cp()
     TEST.report_failures('test_native_filename_ops')

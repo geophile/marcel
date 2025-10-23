@@ -16,6 +16,7 @@ import test_base
 
 timeit = test_base.timeit
 TestDir = test_base.TestDir
+TEST = test_base.TestConsole()
 
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
@@ -2651,7 +2652,6 @@ def main_stable():
 
 
 def main_dev():
-    TEST.run('fork 1 (| gen 3 |)')
     pass
 
 
@@ -2661,9 +2661,9 @@ def main():
     TEST = test_base.TestConsole()
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # # print('fail: ****************************** SLOW TESTS DISABLED')
-    # main_slow_tests()
+    main_stable()
+    # print('fail: ****************************** SLOW TESTS DISABLED')
+    main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
 

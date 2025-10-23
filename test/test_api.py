@@ -6,7 +6,6 @@ import shutil
 import sys
 from math import pi
 
-import api
 import marcel.object.error
 import marcel.object.cluster
 import marcel.version
@@ -2120,8 +2119,8 @@ def main():
     TEST.reset_environment()
     main_dev()
     main_stable()
-    # # print('fai: ****************************** SLOW TESTS DISABLED')
-    # main_slow_tests()
+    # print('fail: ****************************** SLOW TESTS DISABLED')
+    main_slow_tests()
     TEST.report_failures('test_api')
     sys.exit(TEST.failures)
 
