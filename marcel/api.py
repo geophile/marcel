@@ -76,15 +76,22 @@ from marcel.builtin import *
 from marcel.reduction import *
 
 
-class _ShutdownHook(object):
+class _Initialization(object):
 
     def __init__(self):
-        self.registered = False
+        self.initialized = False
 
-    def ensure_registered(self):
-        if not self.registered:
-            atexit.register(_ShutdownHook.shutdown)
-            self.registered = True
+    def ensure_initialized(self):
+        if not self.initialized:
+            # Environment and Main
+            global _ENV, _MAIN
+            _ENV = _env_.Environment.create(globals=globals(), usage='api')
+            _MAIN = _main.MainAPI(_ENV)
+            _ENV.enforce_var_immutability()
+            # Shutdown hook
+            atexit.register(_Initialization.shutdown)
+            #
+            self.initialized = True
 
     @staticmethod
     def shutdown():
@@ -93,10 +100,9 @@ class _ShutdownHook(object):
 
 
 _RESERVOIRS = []
-_ENV = _env_.Environment.create(globals=globals(), usage='api')
-_MAIN = _main.MainAPI(_ENV)
-SHUTDOWN_HOOK = _ShutdownHook()
-_ENV.enforce_var_immutability()
+_ENV = None
+_MAIN = None
+INITIALIZATION = _Initialization()
 
 
 def args(*args, **kwargs): return _generate_op(_args, *args, **kwargs)
@@ -252,14 +258,14 @@ def _prepare_pipeline(x):
 
 
 def run(x):
-    SHUTDOWN_HOOK.ensure_registered()
+    INITIALIZATION.ensure_initialized()
     pipeline = _prepare_pipeline(x)
     pipeline.ensure_terminal_write(_ENV)
     _run_pipeline(pipeline)
 
 
 def gather(x, unwrap_singleton=True, errors=None):
-    SHUTDOWN_HOOK.ensure_registered()
+    INITIALIZATION.ensure_initialized()
     pipeline = _prepare_pipeline(x)
     output = []
     terminal_op = _gather(output=output,
@@ -271,7 +277,7 @@ def gather(x, unwrap_singleton=True, errors=None):
 
 
 def first(x, unwrap_singleton=True, errors=None):
-    SHUTDOWN_HOOK.ensure_registered()
+    INITIALIZATION.ensure_initialized()
     pipeline = _prepare_pipeline(x)
     output = []
     terminal_op = _first(output=output,

@@ -1758,6 +1758,57 @@ So remote needs to be fixed in a platform-specific way.
 
 ----------------------------------------------------------------------
 
+10/17/25
+
+API is failing because marcel.api._ENV uses globals() as namespace,
+which pulls in way too much.
+
+----------------------------------------------------------------------
+
+10/20/25
+
+Current pipeline interface:
+
+    Execution:
+    
+    - setup(self, env)
+    - receive(self, env, x)
+    - flush(self, env)
+    - cleanup(self)
+    - parameters(self)
+    - run_pipeline(self, bindings)
+
+    Construction:
+    - copy(self)
+    - append(self, op)
+    - append_immutable(self, op)
+    - route_output(self, receiver)
+    - def ensure_terminal_write(self, env)
+
+    Transmission:
+    - pickle(self, env, pickler)
+
+Consider this API usage:
+
+    run(fork(1, lambda t: gen(3, 100) | map(lambda x: (t, x))))
+
+The pipeline arg to fork (lambda t: ...) is represented by a
+PipelineFunction. This cannot be pickled, and so the binding of t (to
+a ForkWorker's thread id), and the generation of the executable has to
+happen before pickling. To do this, we need a new pipeline API
+method for construction:
+
+    - ensure_executable(env, bindings)
+
+----------------------------------------------------------------------
+
+10/23/25
+
+Pipeline.ensure_executable(self, env, bindings)
+    PipelineFunction.ensure_executable(...)
+
+----------------------------------------------------------------------
+
 TODO
 
 - Move out of MainScript init

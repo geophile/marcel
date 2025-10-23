@@ -1,4 +1,5 @@
 import getpass
+import multiprocessing
 import os
 import pathlib
 import shutil
@@ -8,20 +9,36 @@ from math import pi
 import marcel.object.error
 import marcel.object.cluster
 import marcel.version
+
+import test_base
+
+os.environ['HOME'] = test_base.TestBase.test_home
 from marcel.api import *
 # We really want _MAIN, and import * in the previous line doesn't import it in a way that
 # PyCharm considers kosher. The use of _MAIN gets flagged if not explicitly imported.
 from marcel.api import _MAIN
 
-import test_base
-
 timeit = test_base.timeit
 TestDir = test_base.TestDir
 
 Error = marcel.object.error.Error
-TEST = test_base.TestAPI(_MAIN)
+
+class TestDummy(test_base.TestBase):
+
+    def run(self, *args, **kwargs):
+        assert False
+
+# Value will be replaced, but this shuts up IDE complaints about TEST.run()
+TEST = TestDummy()
 
 SQL = True
+
+CLUSTER1 = None
+CLUSTER2 = None
+NODE1 = None
+NODE2 = None
+jdb = None
+ENV = None
 
 
 # Convenient for testing to have NODE1 precede NODE2 lexicographically
@@ -32,16 +49,19 @@ def find_node(cluster, node_name):
     return None
 
 
-CLUSTER1 = cluster(user='jao', host='127.0.0.1', identity='/home/jao/.ssh/id_rsa')
-CLUSTER2 = cluster(user='jao', hosts=['127.0.0.1', 'localhost'], identity='/home/jao/.ssh/id_rsa')
-NODE1 = find_node(CLUSTER2, '127.0.0.1')
-NODE2 = find_node(CLUSTER2, 'localhost')
-jdb = database(driver='psycopg2',
-               dbname='jao',
-               user='jao',
-               password='jao')
-ENV = marcel.api._ENV
-ENV.assign_permanent('set_db_default', jdb)
+def setup_test_resources():
+    global ENV, CLUSTER1, CLUSTER2, NODE1, NODE2, jdb
+    CLUSTER1 = cluster(user='jao', host='127.0.0.1', identity='/home/jao/.ssh/id_rsa')
+    CLUSTER2 = cluster(user='jao', hosts=['127.0.0.1', 'localhost'], identity='/home/jao/.ssh/id_rsa')
+    NODE1 = find_node(CLUSTER2, '127.0.0.1')
+    NODE2 = find_node(CLUSTER2, 'localhost')
+    jdb = database(driver='psycopg2',
+                   dbname='jao',
+                   user='jao',
+                   password='jao')
+    marcel.api.INITIALIZATION.ensure_initialized()  # Cheat to make sure that we can set and use ENV here
+    ENV = marcel.api._ENV
+    ENV.assign_permanent('set_db_default', jdb)
 
 
 # Utilities for testing filename ops
@@ -2092,6 +2112,10 @@ def main_dev():
 
 
 def main():
+    global TEST
+    multiprocessing.set_start_method('spawn')
+    TEST = test_base.TestAPI(_MAIN)
+    setup_test_resources()
     TEST.reset_environment()
     main_dev()
     main_stable()
@@ -2101,4 +2125,5 @@ def main():
     sys.exit(TEST.failures)
 
 
-main()
+if __name__ == '__main__':
+    main()

@@ -32,7 +32,7 @@ import marcel.object.color
 import marcel.object.file
 import marcel.object.process
 import marcel.opmodule
-import marcel.platform
+import marcel.plat
 import marcel.reservoir
 import marcel.structish
 import marcel.util
@@ -97,7 +97,7 @@ class Environment(object):
                                            'PROMPT',
                                            'PWD',
                                            'USER'))
-        self.platform = marcel.platform.Platform.create()
+        self.platform = marcel.plat.Platform.create()
 
     def __getstate__(self):
         return {'usage': self.usage,
@@ -110,7 +110,12 @@ class Environment(object):
         workspace_name = state['workspace']
         workspace = Workspace.default() if workspace_name is None else Workspace(workspace_name)
         namespace = state['namespace']
-        env = Environment.create(workspace=workspace, usage=usage)
+        if usage == 'api':
+            import marcel.api
+            marcel.api.INITIALIZATION.ensure_initialized()
+            env = marcel.api._ENV
+        else:
+            env = Environment.create(workspace=workspace, usage=usage)
         env.workspace.namespace.reconstitute(namespace, env)
         self.__dict__ = env.__dict__
 
@@ -254,9 +259,9 @@ class Environment(object):
         env = cls(workspace=workspace, trace=trace, usage=usage)
         initial_namespace = env.initial_namespace()
         workspace.open(env, initial_namespace)
-        assert (usage == 'api') == (globals is not None)
+        assert (usage == 'api') == (globals is not None), f'usage: {usage}, globals: {"..." if globals else None}'
         if globals is not None:
-            workspace.namespace.update(globals)
+            workspace.namespace.update_permanent(globals)
         return env
 
     # Vars that are not mutable even during startup. I.e., startup script can't modify them.

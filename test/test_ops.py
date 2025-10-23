@@ -16,6 +16,7 @@ import test_base
 
 timeit = test_base.timeit
 TestDir = test_base.TestDir
+TEST = test_base.TestConsole()
 
 Error = marcel.object.error.Error
 start_dir = os.getcwd()
