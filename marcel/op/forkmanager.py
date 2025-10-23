@@ -33,8 +33,35 @@ def dump(message):
         print(f'{os.getpid()}: {message}')
 
 
+class SendToParent(marcel.core.Op):
+
+    def __init__(self, writer, thread_id):
+        super().__init__()
+        self.writer = writer
+        self.thread_id = thread_id
+        dump(f'{self} init writer {id(writer)}')
+
+    def __repr__(self):
+        return f'sendtoparent({self.thread_id})'
+
+    def receive(self, env, x):
+        dump(f'{self} receive {x}')
+        self.writer.send(dill.dumps(x))
+        dump(f'{self} receive sent {x}')
+
+    def receive_error(self, env, error):
+        dump(f'{self} receive_error {error}')
+        self.writer.send(dill.dumps(error))
+
+    def cleanup(self):
+        dump(f'{self} cleanup, close writer {id(self.writer)}')
+        self.writer.close()
+
+
 def run_pipeline_in_child(env, pipeline, thread_id, writer):
     try:
+        pipeline = dill.loads(pipeline)
+        pipeline.append(SendToParent(writer, thread_id))
         params = pipeline.parameters()
         bindings = {} if len(params) == 0 else {params[0]: thread_id}
         dump(f'child running pipeline {pipeline}, writer {id(writer)}')
@@ -86,45 +113,35 @@ class ForkManager(object):
 
 class ForkWorker(object):
 
-    class SendToParent(marcel.core.Op):
-
-        def __init__(self, writer, thread_id):
-            super().__init__()
-            self.writer = writer
-            self.thread_id = thread_id
-            dump(f'{self} init')
-
-        def __repr__(self):
-            return f'sendtoparent({self.thread_id})'
-
-        def receive(self, env, x):
-            dump(f'{self} receive {x}')
-            self.writer.send(dill.dumps(x))
-            dump(f'{self} receive sent {x}')
-
-        def receive_error(self, env, error):
-            dump(f'{self} receive_error {error}')
-            self.writer.send(dill.dumps(error))
-
-        def cleanup(self):
-            dump(f'{self} cleanup, close writer {id(self.writer)}')
-            self.writer.close()
-
     def __init__(self, env, fork_manager, thread_id, fork_customizer):
         self.env = env
-        self.op = fork_manager.op
-        self.pipeline = (fork_customizer(env, fork_manager.pipeline, thread_id)
-                         if fork_customizer else
-                         fork_manager.pipeline)
-        self.pipeline = self.pipeline.copy()
         self.thread_id = thread_id
-        self.process = None
+        self.op = fork_manager.op
         # duplex=False: child writes to parent when function completes execution.
         # No need to communicate in the other direction
-        self.reader, self.writer = mp.Pipe(duplex=False)
         # Extending pipeline, as Ops do in customize_pipelines
-        send_to_parent = ForkWorker.SendToParent(self.writer, self.thread_id)
-        self.pipeline = self.pipeline.append_immutable(send_to_parent)
+        self.reader, self.writer = mp.Pipe(duplex=False)
+        dump(f'{self} init writer {id(self.writer)}')
+        pipeline = (fork_customizer(env, fork_manager.pipeline, thread_id)
+                    if fork_customizer else
+                    fork_manager.pipeline)
+        pipeline = pipeline.copy()
+        # It would be nice to complete the modification of the pipeline here, but the pipeline pickling,
+        # transmission and unpickling results in a copy of the writer, which breaks things. So instead,
+        # transmit the writer to the child, which is needed anyway, and then modify the pipeline (appending
+        # SendToParent) in the child.
+        self.pipeline = pipeline
+        params = self.pipeline.parameters()
+        # The pipeline may or may not have a parameter for the thread id.
+        if len(params) == 0:
+            bindings = {}
+            pass
+        elif len(params) == 1:
+            bindings = {params[0]: thread_id}
+        else:
+            assert False, f'fork pipeline cannot have more than one parameter: {pipeline}'
+        self.pipeline.ensure_executable(env, bindings)
+        self.process = None
         dump(f'{self} init {self.pipeline}')
 
     def __repr__(self):
@@ -133,13 +150,14 @@ class ForkWorker(object):
     def start(self):
         dump(f'{self} start_process {self.pipeline}')
         self.process = mp.Process(target=run_pipeline_in_child,
-                                  args=(self.env, self.pipeline, self.thread_id, self.writer))
+                                  args=(self.env, dill.dumps(self.pipeline), self.thread_id, self.writer))
         dump(f'{self} created {self.process}')
         self.process.daemon = True
         #
         # from marcel.util import PickleDebugger
         # import sys
-        # PickleDebugger().check(self.pipeline)
+        # import dill
+        # PickleDebugger().check(dill.dumps(self.pipeline))
         # sys.exit(123)
         #
         self.process.start()

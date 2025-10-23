@@ -46,6 +46,7 @@ class ConfigScript(object):
             with open(config_path) as config_file:
                 config_source = config_file.read()
         except Exception as e:
+            marcel.util.print_stack_of_current_exception()
             raise marcel.exception.KillCommandException(
                 f'Unable to locate or read config script for {self.workspace}: {config_path}')
         # Execute the config file. Imported and newly-defined symbols go into locals, which

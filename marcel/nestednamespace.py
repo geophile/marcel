@@ -306,6 +306,11 @@ class NestedNamespace(dict):
         for key, value in d.items():
             scope[key] = value
 
+    # For use in updating marcel.api globals
+    def update_permanent(self, d):
+        assert isinstance(d, dict)
+        super().update(d)
+
     def assign(self, key, value, source=None):
         super().__setitem__(key, value)
         self.current_scope().assign(key, value, source)

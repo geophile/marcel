@@ -40,7 +40,7 @@ class TestBase:
         self.main = main
         self.env = None
         self.failures = 0
-        self.reset_environment()
+        # self.reset_environment()
         self.test_stdout = None
         self.test_stderr = None
 
@@ -237,11 +237,13 @@ class TestAPI(TestBase):
 
     def reset_environment(self, config_file='./.marcel.py'):
         super().reset_environment()
+        test_config = pathlib.Path(f'{TestBase.start_dir}/{config_file}').read_text()
+        marcel.persistence.storagelayout.ensure_current(testing=True, initial_config=test_config)
         self.env = marcel.api._ENV
-        try:
-            os.mkdir(TestBase.test_home)
-        except FileExistsError:
-            pass
+        # try:
+        #     os.mkdir(TestBase.test_home)
+        # except FileExistsError:
+        #     pass
         self.env.dir_state().change_current_dir(TestBase.start_dir)
 
     def run(self,

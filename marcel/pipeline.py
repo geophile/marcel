@@ -235,6 +235,9 @@ class Pipeline(object):
     def ensure_functions_compiled(self, env):
         self.executable.ensure_functions_compiled(env)
 
+    def ensure_executable(self, env, bindings):
+        assert False, self
+
     # Pipeline - transmission
 
     def pickle(self, env, pickler):
@@ -259,7 +262,7 @@ class Pipeline(object):
         elif pipeline_type is OpList:
             return PipelineOpList(pipeline)
         elif callable(pipeline) or pipeline_type is OpList:
-            return PipelineFunction(pipeline)
+            return PipelineFunction(env, pipeline)
         else:
             return None
 
@@ -338,6 +341,9 @@ class PipelineMarcel(Pipeline):
     def route_output(self, receiver):
         self.executable.last_op().receiver = receiver
 
+    def ensure_exeutable(self, env, bindings):
+        assert self.executable is not None, self
+
     # PipelineMarcel
 
     def run_in_main_process(self):
@@ -385,6 +391,9 @@ class PipelineOpList(Pipeline):
     def route_output(self, receiver):
         self.executable.last_op().receiver = receiver
 
+    def ensure_executable(self, env, bindings):
+        assert self.executable is not None, self
+
 
 # Used to represent a function yielding an OpList (which then yields a Pipeline).
 class PipelineFunction(Pipeline):
@@ -403,9 +412,17 @@ class PipelineFunction(Pipeline):
                 buffer.append(self.receiver)
             return f'({", ".join(buffer)})'
 
-    def __init__(self, function):
+        def copy(self):
+            copy = PipelineFunction.Customizations()
+            for op in self.ops:
+                copy.ops.append(op.copy())
+            copy.receiver = self.receiver
+            return copy
+
+    def __init__(self, env, function):
         assert callable(function), type(function)
         super().__init__(None)
+        self.env = env
         self.function = function
         self.customizations = PipelineFunction.Customizations()
 
@@ -433,21 +450,36 @@ class PipelineFunction(Pipeline):
             self.executable.flush(env)
         finally:
             self.executable.cleanup()
+            # Each time the pipeline is run, a new executable may be needed due to changes
+            # in arg values. So remove the cached executable, which prevents regeneration
+            # of the executable.
+            self.executable = None
 
     # Pipeline - construction
 
     def copy(self):
-        return PipelineFunction(self.function)
+        copy = PipelineFunction(self.env, self.function)
+        copy.customizations = self.customizations.copy()
+        return copy
 
     def append(self, op):
         self.customizations.ops.append(op)
+        if self.executable:
+            self.executable.append(op)
 
     def append_immutable(self, op):
         self.customizations.ops.append(op)
+        if self.executable:
+            self.executable = self.executable.append_immutable(op)
         return self
 
     def route_output(self, receiver):
         self.customizations.receiver = receiver
+
+    def ensure_executable(self, env, bindings):
+        if self.executable is None:
+            self.create_executable(env, bindings)
+        assert self.executable is not None, self
 
     # Pipeline - transmission
 
@@ -457,26 +489,23 @@ class PipelineFunction(Pipeline):
 
     # PipelineFunction internal
 
-    def ensure_executable(self, env):
-        if self.executable is None:
-            self.create_executable(env, )
-
     def create_executable(self, env, bindings):
-        # Create args to the pipeline-creating function
-        params = self.parameters()
-        assert set(params) == set(bindings.keys()), f'params = {params}, binding keys = {bindings.keys()}'
-        args = []
-        for param in params:
-            args.append(bindings[param])
-        # Create the OpList
-        op_list = self.function(*args)
-        # Append customization ops
-        for op in self.customizations.ops:
-            new_op = OpList(env, op)
-            op_list = (op_list | new_op) if op_list else new_op
-        self.executable = op_list.create_executable_pipeline()
-        if self.customizations.receiver:
-            self.executable.last_op().receiver = self.customizations.receiver
+        if self.executable is None:
+            # Create args to the pipeline-creating function
+            params = self.parameters()
+            # assert set(params) == set(bindings.keys()), f'params = {params}, binding keys = {bindings.keys()}'
+            args = []
+            for param in params:
+                args.append(bindings[param])
+            # Create the OpList
+            op_list = self.function(*args)
+            # Append customization ops
+            for op in self.customizations.ops:
+                new_op = OpList(env, op)
+                op_list = (op_list | new_op) if op_list else new_op
+            self.executable = op_list.create_executable_pipeline()
+            if self.customizations.receiver:
+                self.executable.last_op().receiver = self.customizations.receiver
 
 
 class PipelineIterator:
