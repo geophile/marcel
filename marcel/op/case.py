@@ -76,6 +76,9 @@ class Case(marcel.core.Op):
             self.predicate = predicate
             self.pipeline = pipeline
 
+        def __repr__(self):
+            return f'Branch({self.predicate}, {self.pipeline})'
+
     def __init__(self):
         super().__init__()
         self.branches = None
@@ -89,10 +92,47 @@ class Case(marcel.core.Op):
     # AbstractOp
 
     def setup(self, env):
+        self.ensure_args_processed(env)
+
+    def receive(self, env, x):
+        pipeline = self.default_pipeline
+        for branch in self.branches:
+            px = self.call(env, branch.predicate, *x)
+            if px:
+                pipeline = branch.pipeline
+                break
+        if pipeline:
+            pipeline.receive(env, x)
+
+    def flush(self, env):
+        for branch in self.branches:
+            branch.pipeline.flush(env)
+        if self.default_pipeline:
+            self.default_pipeline.flush(env)
+        self.propagate_flush(env)
+
+    def cleanup(self):
+        for branch in self.branches:
+            branch.pipeline.cleanup()
+        if self.default_pipeline:
+            self.default_pipeline.cleanup()
+
+    def ensure_functions_compiled(self, env):
+        self.ensure_args_processed(env)
+        for branch in self.branches:
+            self.ensure_function_compiled(branch.predicate, env)
+        for pipeline in self.pipelines:
+            pipeline.ensure_functions_compiled(env)
+        if self.default_pipeline:
+            self.default_pipeline.ensure_functions_compiled(env)
+
+    # Internal
+
+    def ensure_args_processed(self, env):
         def pipeline(pipeline):
             # PyCharm sees a syntax error (on references to marcel.pipeline.Pipeline and
             # marcel.exception) without these?!
-            import marcel.core
+            import marcel.pipeline
             import marcel.exception
             try:
                 if not isinstance(pipeline, marcel.pipeline.Pipeline):
@@ -121,39 +161,6 @@ class Case(marcel.core.Op):
                 predicate = None
         if len(self.args) & 1 == 1:
             self.default_pipeline = pipeline(self.args[-1])
-
-    def receive(self, env, x):
-        pipeline = self.default_pipeline
-        for branch in self.branches:
-            px = self.call(env, branch.predicate, *x)
-            if px:
-                pipeline = branch.pipeline
-                break
-        if pipeline:
-            pipeline.receive(env, x)
-
-    def flush(self, env):
-        for branch in self.branches:
-            branch.pipeline.flush(env)
-        if self.default_pipeline:
-            self.default_pipeline.flush(env)
-        self.propagate_flush(env)
-
-    def cleanup(self):
-        for branch in self.branches:
-            branch.pipeline.cleanup()
-        if self.default_pipeline:
-            self.default_pipeline.cleanup()
-
-    def ensure_functions_compiled(self, globals):
-        for branch in self.branches:
-            self.ensure_function_compiled(branch.predicate, globals)
-        for pipeline in self.pipelines:
-            pipeline.ensure_functions_compiled(globals)
-        if self.default_pipeline:
-            self.default_pipeline.ensure_functions_compiled(globals)
-
-    # Internal
 
     def customize_pipelines(self, env):
         def redirect():

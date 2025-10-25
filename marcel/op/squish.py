@@ -75,6 +75,6 @@ class Squish(marcel.core.Op):
                                         x,
                                         None))
 
-    def ensure_functions_compiled(self, globals):
+    def ensure_functions_compiled(self, env):
         if self.function:
-            self.ensure_function_compiled(self.function, globals)
+            self.ensure_function_compiled(self.function, env)

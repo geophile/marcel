@@ -76,9 +76,9 @@ class Union(marcel.core.Op):
             pipeline.run_pipeline(env, {})
         self.propagate_flush(env)
 
-    def ensure_functions_compiled(self, globals):
+    def ensure_functions_compiled(self, env):
         for pipeline in self.pipelines:
-            pipeline.ensure_functions_compiled(globals)
+            pipeline.ensure_functions_compiled(env)
 
     # Internal
 

@@ -79,9 +79,9 @@ class Intersect(marcel.core.Op):
         except TypeError:
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
-    def ensure_functions_compiled(self, globals):
+    def ensure_functions_compiled(self, env):
         for pipeline in self.pipelines:
-            pipeline.ensure_functions_compiled(globals)
+            pipeline.ensure_functions_compiled(env)
 
     # Internal
 

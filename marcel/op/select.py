@@ -64,5 +64,5 @@ class Select(marcel.core.Op):
         if fx:
             self.send(env, x)
 
-    def ensure_functions_compiled(self, globals):
-        self.ensure_function_compiled(self.function, globals)
+    def ensure_functions_compiled(self, env):
+        self.ensure_function_compiled(self.function, env)

@@ -1211,3 +1211,7 @@ run_pipeline to receive.
 
 Error in ws startup script: Can't go into the ws to run edit -s, so
 fixing the problem is difficult.
+
+----------------------------------------------------------------------
+
+Are IfBase, Tee obsolete? I think so.

@@ -113,9 +113,9 @@ class PipelineExecutable(object):
         copy.ops.append(op)
         return copy
 
-    def ensure_functions_compiled(self, globals):
+    def ensure_functions_compiled(self, env):
         for op in self.ops:
-            op.ensure_functions_compiled(globals)
+            op.ensure_functions_compiled(env)
 
     # PipelineExecutable
 
@@ -355,10 +355,11 @@ class PipelineMarcel(Pipeline):
 class PipelineOpList(Pipeline):
 
     def __init__(self, pipeline):
-        # PE needed to support append_immutable
         if type(pipeline) is OpList:
             super().__init__(pipeline.create_executable_pipeline())
         elif type(pipeline) is PipelineExecutable:
+            # PE needed to support append_immutable
+            assert len(pipeline.parameters()) == 0, pipeline
             super().__init__(pipeline)
         else:
             assert False, type(pipeline)

@@ -167,9 +167,9 @@ class Red(marcel.core.Op):
     def flush(self, env):
         self.reducer.flush(env)
 
-    def ensure_functions_compiled(self, globals):
+    def ensure_functions_compiled(self, env):
         for function in self.functions:
-            self.ensure_function_compiled(function, globals)
+            self.ensure_function_compiled(function, env)
 
 
 class Reducer:

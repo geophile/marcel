@@ -108,7 +108,8 @@ class  FilenamesOp(marcel.core.Op):
             except marcel.exception.KillAndResumeException:
                 pass
 
-    def ensure_functions_compiled(self, globals):
+    def ensure_functions_compiled(self, env):
+        globals = env.workspace.namespace()
         for f in self.filenames_arg:
             self.ensure_function_compiled(f, globals)
 

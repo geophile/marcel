@@ -212,8 +212,8 @@ class Remote(marcel.core.Op):
     def must_be_first_in_pipeline(self):
         return True
 
-    def ensure_functions_compiled(self, globals):
-        self.pipeline.ensure_functions_compiled(globals)
+    def ensure_functions_compiled(self, env):
+        self.pipeline.ensure_functions_compiled(env)
 
     # For use by this class
 
