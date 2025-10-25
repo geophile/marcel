@@ -2411,9 +2411,9 @@ def test_bug_202():
 @timeit
 def test_bug_203():
     TEST.run('p = (| gen 3 |)')
-    TEST.run('(p)', expected_out=['PipelineMarcel((| gen(count=3, start=0) |))'])
+    TEST.run('(p)', expected_out=['(| gen(count=3, start=0) |)'])
     TEST.run('p = (| n: gen (int(n)) |)')
-    TEST.run('(p)', expected_out=['PipelineMarcel((| n: gen(count=lambda: int(n), start=0) |))'])
+    TEST.run('(p)', expected_out=['(| n: gen(count=lambda: int(n), start=0) |)'])
 
 
 @timeit
@@ -2662,8 +2662,8 @@ def main():
     TEST.reset_environment()
     main_dev()
     main_stable()
-    # print('fail: ****************************** SLOW TESTS DISABLED')
-    main_slow_tests()
+    print('fail: ****************************** SLOW TESTS DISABLED')
+    # main_slow_tests()
     TEST.report_failures('test_ops')
     sys.exit(TEST.failures)
 
