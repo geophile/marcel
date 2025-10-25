@@ -109,9 +109,8 @@ class  FilenamesOp(marcel.core.Op):
                 pass
 
     def ensure_functions_compiled(self, env):
-        globals = env.workspace.namespace()
         for f in self.filenames_arg:
-            self.ensure_function_compiled(f, globals)
+            self.ensure_function_compiled(f, env)
 
     # For use by this class
 

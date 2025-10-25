@@ -21,6 +21,7 @@ import marcel.exception
 import marcel.function
 import marcel.helpformatter
 import marcel.object.error
+import marcel.object.renderable
 import marcel.opmodule
 import marcel.util
 
@@ -184,7 +185,7 @@ class OpList(object):
 # Pipeline provides a uniform interface to all of these. There are subclasses (PipelineMarcel, PipelinePython)
 # corresponding to script/interactive vs. API usage. E.g. PipelineMarcel pipelines need parameters and scopes
 # explicitly managed while PipelinePython pipelines do not.
-class Pipeline(object):
+class Pipeline(marcel.object.renderable.Renderable):
 
     def __init__(self, executable):
         # executable is None if we're using the API, and the pipeline is specified as a lambda.
@@ -193,6 +194,11 @@ class Pipeline(object):
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.executable})'
+
+    # Renderable
+
+    def render_full(self, color_scheme):
+        return str(self.executable)
 
     # Pipeline - execution
 

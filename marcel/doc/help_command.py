@@ -16,9 +16,9 @@
 HELP = '''
 A marcel {i:command} is what you type following the prompt. A command may 
 be a single marcel operator, or host OS executable, or it can combine several
-of these via piping, (run {n:help pipelines} for more information on this topic). 
-A single marcel command may span multiple lines, as long as a \\\\ is typed at the
-end of each non-terminal line.
+of these via piping, (run {n:help pipeline} for more information on this topic). 
+A single marcel command may span multiple lines. The Enter key ends a command. Alt-Enter
+allows you to continue your command on a new line.
 Marcel operators and host OS executables are distinguished as follows:
 
 {L,indent=4:4}{i:Marcel operator:} An operator that is built into marcel. In its most 
@@ -36,7 +36,7 @@ be carried by marcel pipes.
 A marcel operator does one well-defined thing. For example, the {n:map} operator
 applies a function to each tuple arriving on its input stream, and writes the result
 to the output stream. {n:map} does not concern itself with printing these results -- that 
-would be done by using the {n:out} operator later in the pipelines.
+would be done by using the {n:write} operator later in the pipeline.
 
 Many host OS commands have large collections of flags and options controlling the selection
 and printing of relevant information. Marcel aims for simpler operators, and relies on
