@@ -177,9 +177,12 @@ class TabCompleter(Completer):
         executables = []
         path = os.environ['PATH'].split(':')
         for p in path:
-            for f in os.listdir(p):
-                if marcel.util.is_executable(f) and f not in executables:
-                    executables.append(f)
+            try:
+                for f in os.listdir(pathlib.Path(p).expanduser()):
+                    if marcel.util.is_executable(f) and f not in executables:
+                        executables.append(f)
+            except FileNotFoundError:
+                pass
         return executables
 
     # For use in testing

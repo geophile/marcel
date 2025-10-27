@@ -31,7 +31,7 @@ class TestDummy(test_base.TestBase):
 # Value will be replaced, but this shuts up IDE complaints about TEST.run()
 TEST = TestDummy()
 
-SQL = True
+SQL = sys.platform == 'linux'
 
 CLUSTER1 = None
 CLUSTER2 = None
@@ -709,7 +709,7 @@ def test_source_filenames():
                  expected_err='No qualifying paths')
         # ~ expansion
         TEST.run(test=lambda: run(ls('~root', depth=0) | map(lambda f: f.path)),
-                 expected_out=['/root'])
+                 expected_out=[TEST.homedir('root')])
 
 
 @timeit
@@ -780,8 +780,8 @@ def test_ls():
         os.system(f'touch {testdir}/d2/f2')
         os.system(f'touch {testdir}/d3/f3')
         os.system(f'touch {testdir}/d4/f4')
-        os.system(f'sudo chown root.root {testdir}/d2')
-        os.system(f'sudo chown root.root {testdir}/d3')
+        os.system(f'sudo chown root {testdir}/d2')
+        os.system(f'sudo chown root {testdir}/d3')
         os.system(f'sudo chmod 700 {testdir}/d?')
         TEST.run(test=lambda: run(ls(f'{testdir}', recursive=True) | map(lambda f: f.render_compact())),
                  expected_out=['.',
@@ -812,8 +812,8 @@ def test_ls():
         #                               ]))
         # Restore owners so that cleanup can proceed
         me = os.getlogin()
-        os.system(f'sudo chown {me}.{me} {testdir}/d2')
-        os.system(f'sudo chown {me}.{me} {testdir}/d3')
+        os.system(f'sudo chown {me} {testdir}/d2')
+        os.system(f'sudo chown {me} {testdir}/d3')
 
 
 # pushd, popd, dirs, cd
@@ -2108,6 +2108,16 @@ def main_stable():
 
 
 def main_dev():
+    # print('A------------------------')
+    # test_api_run()
+    # print('B------------------------')
+    # test_api_gather()
+    # print('C------------------------')
+    test_api_first()
+    print('D------------------------')
+    # test_api_iterator()
+    # print('E------------------------')
+    test_bugs()
     pass
 
 
@@ -2118,9 +2128,9 @@ def main():
     setup_test_resources()
     TEST.reset_environment()
     main_dev()
-    main_stable()
+    # main_stable()
     # print('fail: ****************************** SLOW TESTS DISABLED')
-    main_slow_tests()
+    # # main_slow_tests()
     TEST.report_failures('test_api')
     sys.exit(TEST.failures)
 

@@ -161,14 +161,14 @@ def test_arg_absolute_path():
         TEST.run(line=f'ls {testdir}',
                  expected=[f'/'])
     # Homedir is a special case of absolute
-    # Whoever is running this test should have ~/.bash_history
-    user = os.getlogin()
+    # Whoever is running this test should have ~/.ssh
+    user = os.environ.get('USER')
     # test harness resets the HOME env var, but we want a real one for this test
     os.environ['HOME'] = pathlib.Path(f'~{user}').expanduser().as_posix()
-    TEST.run(line=f'ls ~/.bash_h',
-             expected=['istory '])
-    TEST.run(line=f'ls ~{user}/.bash_h',
-             expected=[f'istory '])
+    TEST.run(line=f'ls ~/.ss',
+             expected=['h/'])
+    TEST.run(line=f'ls ~{user}/.ss',
+             expected=[f'h/'])
     # Restore HOME var for testing
     TEST.reset_environment()
 
@@ -227,13 +227,13 @@ def test_arg_quoted():
         TEST.run(line=f"ls '{testdir}/f",
                  expected=[f"g 1' ", f"g 2' "])
     # Special case: ~ inside quoted string
-    user = os.getlogin()
+    user = os.environ.get('USER')
     os.environ['HOME'] = pathlib.Path(f'~{user}').expanduser().as_posix()
-    TEST.run(line='ls ~/.bash_h',
-             expected=['istory '])
-    TEST.run(line="ls '~/.bash_h",
-             expected=["istory' "])
-    TEST.run(line='ls "~/.bash_h',
+    TEST.run(line='ls ~/.ss',
+             expected=['h/'])
+    TEST.run(line="ls '~/.ss",
+             expected=["h/"])
+    TEST.run(line='ls "~/.ss',
              expected=[])
     # Restore HOME var for testing
     TEST.reset_environment()
@@ -252,7 +252,7 @@ def test_arg_escaped():
         TEST.run(line='ls a\\!',
                  expected=['b '])
         TEST.run(line='ls c',
-                 expected=['\\ \\ d ', '=\ d '])
+                 expected=['\\ \\ d ', '=\\ d '])
         TEST.run(line='ls c\\ ',
                  expected=['\\ d '])
         TEST.run(line='ls c=',
