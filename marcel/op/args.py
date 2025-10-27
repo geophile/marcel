@@ -122,8 +122,8 @@ class Args(marcel.core.Op):
     def customize_pipelines(self, env):
         self.pipeline = self.pipeline.append_immutable(marcel.op.redirect.Redirect(self))
 
-    def ensure_functions_compiled(self, globals):
-        self.pipeline.ensure_functions_compiled(globals)
+    def ensure_functions_compiled(self, env):
+        self.pipeline.ensure_functions_compiled(env)
 
     # Internal
 

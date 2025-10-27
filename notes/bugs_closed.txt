@@ -6184,3 +6184,37 @@ M 0.36.1 jao@loon ~/git/marcel/test$ inc = (lambda x: x+1)
 M 0.36.1 jao@loon ~/git/marcel/test$ inc = (lambda: lambda x: x+1)
 M 0.36.1 jao@loon ~/git/marcel/test$ (inc(3))
 4
+
+----------------------------------------------------------------------
+
+FIXED
+
+287. case is broken
+
+M 0.36.5 jao@loon ~/git/marcel/test$ gen 100 1 | case
+                                     (f: f%15==0) (| (f: (f, 'FizzBuzz')) |)
+                                     (f: f%3==0)  (| (f: (f, 'Fizz')) |)
+                                     (f: f%5==0)  (| (f: (f, 'Buzz')) |)
+                                                  (| (f: (f, f)) |)
+Process Process-5:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 67, in run_command_in_child
+    command.ensure_functions_compiled(env.vars())
+  File "/home/jao/git/marcel/marcel/core.py", line 249, in ensure_functions_compiled
+    self.pipeline.ensure_functions_compiled(globals)
+  File "/home/jao/git/marcel/marcel/pipeline.py", line 236, in ensure_functions_compiled
+    self.executable.ensure_functions_compiled(env)
+  File "/home/jao/git/marcel/marcel/pipeline.py", line 118, in ensure_functions_compiled
+    op.ensure_functions_compiled(globals)
+  File "/home/jao/git/marcel/marcel/op/case.py", line 149, in ensure_functions_compiled
+    for branch in self.branches:
+TypeError: 'NoneType' object is not iterable
+
+
+Case fails when run as a Job, because arg processing by setup()
+doesn't occur before the pipeline is sent to the job. Not sure why
+this isn't being seen more often, with other ops that have pipelines.

@@ -863,3 +863,7 @@ Enter \ to continue:
     Exception: string literal terminated by lone escape: gen\
 
 Also, using alt-enter (as you're supposed to), breaks after edit.
+
+----------------------------------------------------------------------
+
+288.

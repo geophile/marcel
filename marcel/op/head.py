@@ -63,8 +63,8 @@ class Head(marcel.core.Op):
     def receive(self, env, x):
         self.impl.receive(env, x)
 
-    def ensure_functions_compiled(self, globals):
-        self.ensure_function_compiled(self.n_arg, globals)
+    def ensure_functions_compiled(self, env):
+        self.ensure_function_compiled(self.n_arg, env)
 
 class HeadImpl:
 

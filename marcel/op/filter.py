@@ -123,9 +123,9 @@ class Filter(marcel.core.Op):
         except TypeError:
             raise marcel.exception.KillCommandException(f'{x} is not hashable')
 
-    def ensure_functions_compiled(self, globals):
-        self.ensure_function_compiled(self.compare, globals)
-        self.pipeline.ensure_functions_compiled(globals)
+    def ensure_functions_compiled(self, env):
+        self.ensure_function_compiled(self.compare, env)
+        self.pipeline.ensure_functions_compiled(env)
 
     # Internal
 

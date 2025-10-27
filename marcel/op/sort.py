@@ -90,5 +90,5 @@ class Sort(marcel.core.Op):
     def must_not_be_first_in_pipeline(self):
         return True
 
-    def ensure_functions_compiled(self, globals):
-        self.ensure_function_compiled(self.key, globals)
+    def ensure_functions_compiled(self, env):
+        self.ensure_function_compiled(self.key, env)

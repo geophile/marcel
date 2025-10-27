@@ -21,6 +21,7 @@ import marcel.exception
 import marcel.function
 import marcel.helpformatter
 import marcel.object.error
+import marcel.object.renderable
 import marcel.opmodule
 import marcel.util
 
@@ -113,9 +114,9 @@ class PipelineExecutable(object):
         copy.ops.append(op)
         return copy
 
-    def ensure_functions_compiled(self, globals):
+    def ensure_functions_compiled(self, env):
         for op in self.ops:
-            op.ensure_functions_compiled(globals)
+            op.ensure_functions_compiled(env)
 
     # PipelineExecutable
 
@@ -184,7 +185,7 @@ class OpList(object):
 # Pipeline provides a uniform interface to all of these. There are subclasses (PipelineMarcel, PipelinePython)
 # corresponding to script/interactive vs. API usage. E.g. PipelineMarcel pipelines need parameters and scopes
 # explicitly managed while PipelinePython pipelines do not.
-class Pipeline(object):
+class Pipeline(marcel.object.renderable.Renderable):
 
     def __init__(self, executable):
         # executable is None if we're using the API, and the pipeline is specified as a lambda.
@@ -193,6 +194,11 @@ class Pipeline(object):
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.executable})'
+
+    # Renderable
+
+    def render_full(self, color_scheme):
+        return str(self.executable)
 
     # Pipeline - execution
 
@@ -355,10 +361,11 @@ class PipelineMarcel(Pipeline):
 class PipelineOpList(Pipeline):
 
     def __init__(self, pipeline):
-        # PE needed to support append_immutable
         if type(pipeline) is OpList:
             super().__init__(pipeline.create_executable_pipeline())
         elif type(pipeline) is PipelineExecutable:
+            # PE needed to support append_immutable
+            assert len(pipeline.parameters()) == 0, pipeline
             super().__init__(pipeline)
         else:
             assert False, type(pipeline)

@@ -124,8 +124,8 @@ class Join(marcel.core.Op):
         else:
             self.send(env, x + match[1:])
 
-    def ensure_functions_compiled(self, globals):
-        self.pipeline.ensure_functions_compiled(globals)
+    def ensure_functions_compiled(self, env):
+        self.pipeline.ensure_functions_compiled(env)
 
     # Internal
 

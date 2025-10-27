@@ -74,7 +74,7 @@ class Op(AbstractOp):
     def customize_pipelines(self, env):
         pass
 
-    def ensure_functions_compiled(self, globals):
+    def ensure_functions_compiled(self, env):
         pass
 
     # For use by subclasses
@@ -199,7 +199,8 @@ class Op(AbstractOp):
             val = evaled
         return val
 
-    def ensure_function_compiled(self, arg, globals):
+    def ensure_function_compiled(self, arg, env):
+        globals = env.workspace.namespace
         if type(arg) is marcel.function.SourceFunction:
             arg.ensure_compiled(globals)
 
@@ -245,5 +246,5 @@ class Command:
         # process, because they may have changed. This doesn't apply to API usage.
         return env.changes() if remote else None
 
-    def ensure_functions_compiled(self, globals):
-        self.pipeline.ensure_functions_compiled(globals)
+    def ensure_functions_compiled(self, env):
+        self.pipeline.ensure_functions_compiled(env)

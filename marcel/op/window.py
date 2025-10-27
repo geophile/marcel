@@ -172,9 +172,9 @@ class Window(marcel.core.Op):
     def must_not_be_first_in_pipeline(self):
         return True
 
-    def ensure_functions_compiled(self, globals):
+    def ensure_functions_compiled(self, env):
         if self.predicate:
-            self.ensure_function_compiled(self.predicate, globals)
+            self.ensure_function_compiled(self.predicate, env)
 
 
 class WindowBase:
