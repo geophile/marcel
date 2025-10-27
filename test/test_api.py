@@ -2108,16 +2108,6 @@ def main_stable():
 
 
 def main_dev():
-    # print('A------------------------')
-    # test_api_run()
-    # print('B------------------------')
-    # test_api_gather()
-    # print('C------------------------')
-    test_api_first()
-    print('D------------------------')
-    # test_api_iterator()
-    # print('E------------------------')
-    test_bugs()
     pass
 
 
@@ -2128,9 +2118,9 @@ def main():
     setup_test_resources()
     TEST.reset_environment()
     main_dev()
-    # main_stable()
-    # print('fail: ****************************** SLOW TESTS DISABLED')
-    # # main_slow_tests()
+    main_stable()
+    print('fail: ****************************** SLOW TESTS DISABLED')
+    # main_slow_tests()
     TEST.report_failures('test_api')
     sys.exit(TEST.failures)
 
