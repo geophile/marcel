@@ -57,8 +57,8 @@ class Jobs(marcel.core.Op):
     def run(self, env):
         job_id = 0
         for job in marcel.job.JobControl.only.jobs():
-            # TODO: If job were a marcel.object, then it would have render_compact/full methods.
-            description = f'{job_id}({job.state_symbol()}): {job.producer.pid}  {job.command.source}'
+            # TODO: If job were a marcel.renderable.Renderable, then it would have render_compact/full methods.
+            description = f'{job_id}({job.state_symbol()}): {job.process.pid}  {job.command.source}'
             self.send(env, description)
             job_id += 1
 
