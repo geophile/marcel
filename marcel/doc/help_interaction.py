@@ -86,7 +86,7 @@ The {n:jobs} command will list all current jobs. (Those will all be in the backg
 since the {n:jobs} command itself was running in the foreground when it produced
 the list of commands.)
 
-To run a suspended job in the background, use the {n:bg} command, identifying the
-job by its job number. The {n:fg} command will run a suspended job, placing it in
-the foreground.
+To resume a suspended background job in the background, use the {n:bg} command, identifying the
+job by its job number. The job will start running again, but in the background. 
+The {n:fg} command will run a suspended job, placing it in the foreground.
 '''

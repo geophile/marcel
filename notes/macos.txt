@@ -1827,16 +1827,4 @@ TODO
 
 - Get rid of MARCEL_VERSION in env
 
-- Are EnvValue.wrap of module, and the Module subclass needed?
-
 - Try assignment test cases after closing and reopening a workspace.
-
-- Test compilables and imports in
-  testws.test_workspaces_and_compliables, but this comment is no
-  longer true:
-
-    # Pipelines and functions are Compilables, and require special handling, since they aren't persisted as is.
-    # Instead, their source is persisted, and they are recompiled when necessary, e.g. when switching to a workspace
-    # whose environment stores them.
-
-
