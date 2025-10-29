@@ -22,7 +22,7 @@ set of properties and functions for obtaining information on processes.
 {b:Process properties}
 
 A {n:Process} is based on an object of the same name from the
-{n:psutil} module. The properties of {n:Process} derived from {n:pustil}
+{n:psutil} module. The properties of {n:Process} derived from {n:psutil}
 are:
 
 {L, indent=4:6}- {n:cmdline}

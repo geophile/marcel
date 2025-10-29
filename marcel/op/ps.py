@@ -128,7 +128,6 @@ class Ps(marcel.core.Op):
         #
         # user and group can be True if -u or -g are specified with no value.
         self.filter = lambda p: True
-        print(f'ps user: {self.user}, group: {self.group}')
         if self.user is not None:
             self.user = os.getuid() if self.user is True else Ps.convert_to_id(self.user, marcel.util.uid)
             self.filter = lambda p: self.user in p.uids
