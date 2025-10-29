@@ -121,6 +121,8 @@ class Expander:
             return list(only)
         elif isinstance(only, dict):
             return list(only.items())
+        elif marcel.util.is_struct(only):
+            return only.items()
         else:
             return x
 

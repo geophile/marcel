@@ -21,6 +21,9 @@ class Struct(object):
     def __getitem__(self, key):
         return self.__dict__[key]
 
+    def items(self):
+        return self.__dict__.items()
+
     def assign(self, kwargs):
         self.__dict__ = kwargs
 

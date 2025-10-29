@@ -31,6 +31,8 @@ import traceback
 
 import dill
 
+import marcel.structish
+
 from marcel.stringliteral import StringLiteral
 
 
@@ -277,6 +279,10 @@ def import_symbols(module_name):
     module = importlib.import_module(module_name)
     for symbol, value in module.__dict__.items():
         yield symbol, value
+
+
+def is_struct(x):
+    return type(x) is marcel.structish.Struct
 
 
 class InputSource(object):
