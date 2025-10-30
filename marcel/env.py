@@ -101,12 +101,14 @@ class Environment(object):
 
     def __getstate__(self):
         return {'usage': self.usage,
+                'trace': self.trace,
                 'workspace': None if self.workspace.is_default() else self.workspace.name,
                 'namespace': self.workspace.persistible_vars()}
 
     def __setstate__(self, state):
         from marcel.object.workspace import Workspace
         usage = state['usage']
+        trace = state['trace']
         workspace_name = state['workspace']
         workspace = Workspace.default() if workspace_name is None else Workspace(workspace_name)
         namespace = state['namespace']
@@ -117,6 +119,7 @@ class Environment(object):
         else:
             env = Environment.create(workspace=workspace, usage=usage)
         env.workspace.namespace.reconstitute(namespace, env)
+        env.trace = trace
         self.__dict__ = env.__dict__
 
     def initial_namespace(self):
@@ -341,9 +344,25 @@ class EnvironmentInteractive(Environment):
 
 class Trace(object):
 
+    # Trace.target is a string or a pathlib.Path. It can't be an int,
+    # so an int is a good marker for a distinct value.
+    STDOUT_MARKER = 0
+
     def __init__(self):
+        self.target = None  # A path
         self.tracefile = None
         self.description = None
+
+    def __getstate__(self):
+        self.tracefile = None
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        if self.target == Trace.STDOUT_MARKER:
+            self.tracefile = sys.stdout
+        elif self.target:
+            self.tracefile = open(self.target, 'a')
 
     def is_enabled(self):
         return self.tracefile is not None
@@ -351,10 +370,12 @@ class Trace(object):
     def enable(self, target):
         if target is sys.stdout:
             self.tracefile = sys.stdout
+            self.target = Trace.STDOUT_MARKER
             self.description = 'stdout'
         else:
             try:
                 self.tracefile = open(target, 'a')
+                self.target = target
                 self.description = target
             except Exception as e:
                 raise marcel.exception.KillCommandException(
@@ -364,6 +385,7 @@ class Trace(object):
         if self.tracefile and self.tracefile is not sys.stdout:
             self.tracefile.close()
         self.tracefile = None
+        self.target = None
         self.description = None
 
     # output argument: output from the execution of the op
