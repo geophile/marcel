@@ -16,10 +16,11 @@
 HELP = '''
 Python code always runs in the context of a namespace. The {i:marcel namespace}
 is the namespace used by marcel to execute user-supplied code. During startup, 
-the configuration script, usually {n:~/.config/marcel/startup.py}, is executed. At this point, the 
+the configuration script is executed (run {n:help configuration}
+for details on the location of the startup script). At this point, the 
 marcel namespace contains a few variables (such as {n:USER}, {n:HOME},
 and {n:PROMPT}), and functions for configuring access to various
-resources (e.g. {n:define_remote}).
+resources (e.g. {n:cluster()}).
 
 The configuration script is ordinary Python code, so you can use
 {n:import} statements to add symbols from modules, and define your own

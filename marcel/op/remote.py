@@ -30,10 +30,11 @@ import marcel.util
 
 HELP = '''
 {L,wrap=F}remote CLUSTER (| PIPELINE |)
+{L,wrap=F}@ CLUSTER (| PIPELINE |)
 
 {L,indent=4:28}{r:CLUSTER}                The name of a cluster.
    
-{L,indent=4:28}{r:PIPELINE}                A pipelines whose instances are to be executed on nodes
+{L,indent=4:28}{r:PIPELINE}                A pipeline whose instances are to be executed on nodes
 of the cluster.
 
 The pipeline is executed on each node of the named cluster. Output comprises 

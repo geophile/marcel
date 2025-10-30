@@ -41,5 +41,5 @@ The following topics will explain these concepts in more detail:
 {p,wrap=F}
     - {n:command}
     - {n:function}
-    - {n:pipelines}
+    - {n:pipeline}
 '''

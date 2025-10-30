@@ -21,7 +21,7 @@ hosts, processes, and files and directories.
 
 Objects sometimes need to be described textually. For example, the
 {n:ls} command produces a stream of {n:File} objects.
-Every pipelines has an implicit {n:out} operator at the end,
+Every pipeline has an implicit {n:out} operator at the end,
 and when {n:out} receives a {n:File}, it uses one of two {i:rendering}
 functions:
 

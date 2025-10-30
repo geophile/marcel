@@ -36,7 +36,7 @@ class Op(AbstractOp):
 
     def __init__(self):
         super().__init__()
-        # The following fields are set and have defined values only during the execution of a pipelines
+        # The following fields are set and have defined values only during the execution of a pipeline
         # containing this op.
         # The op receiving this op's output
         self.receiver = None

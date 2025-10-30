@@ -113,9 +113,9 @@ class Args(marcel.core.Op):
     def check_args(self):
         error = None
         if self.all and self.n_params != 1:
-            error = 'With -a|--all option, the pipelines must have exactly one parameter.'
+            error = 'With -a|--all option, the pipeline must have exactly one parameter.'
         elif self.n_params == 0:
-            error = 'The args pipelines must be parameterized.'
+            error = 'The args pipeline must be parameterized.'
         if error:
             raise marcel.exception.KillCommandException(error)
 

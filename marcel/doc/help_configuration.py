@@ -15,9 +15,9 @@
 
 HELP = '''
 Marcel is configured and customized by running the startup script {n:startup.py}.
-This script is typically located in the directory {n:~/.config/marcel},
-but may be in a different location, specified by the environment
-variable {n:XDG_CONFIG_HOME}.
+This script is typically located in the directory {n:~/.config/marcel/workspace/<WORKSPACE>},
+for your current workspace. (If you have set the environment variable {n:XDG_CONFIG_HOME}
+in the process that started marcel, that overrides ~/.config/marcel).
 
 In this script, you can 
 customize the prompt, output colorization, remote host configuration,

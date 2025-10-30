@@ -40,7 +40,7 @@ from marcel.api import *
 # stdin carries the following from the client process:
 #   - The client's python version (checked to match server's, see bug 169.)
 #   - The client's environment
-#   - The pipelines to be executed
+#   - The pipeline to be executed
 #   - Possibly a kill signal
 # The kill signal may be delayed and may never arrive. Pipeline execution takes place
 # on a thread so that stdin can be monitored for the kill signal and then acted upon.
@@ -155,7 +155,7 @@ def main():
         client_python_version = input.load()
         # Client-side marcel usage, api or script.
         marcel_usage = input.load()
-        # pipelines from client
+        # pipeline from client
         pipeline = input.load()
         assert type(pipeline) is marcel.pipeline.PipelineExecutable
         env = marcel.env.Environment.create(usage=marcel_usage,

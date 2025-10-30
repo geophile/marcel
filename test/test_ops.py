@@ -1916,11 +1916,11 @@ def test_args():
                  expected_out=[])
         # negative testing
         TEST.run('gen 3 | args --all (|f, y: (123) |)',
-                 expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
+                 expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
         TEST.run('gen 3 | args --all (| (123) |)',
-                 expected_err="With -a|--all option, the pipelines must have exactly one parameter.")
+                 expected_err="With -a|--all option, the pipeline must have exactly one parameter.")
         TEST.run('gen 3 | args (| (123) |)',
-                 expected_err="The args pipelines must be parameterized")
+                 expected_err="The args pipeline must be parameterized")
         # Bug 94
         TEST.run('gen 4 1 | args (|n: gen (n)|) | window (f: f == 0)',
                  expected_out=[0, (0, 1), (0, 1, 2), (0, 1, 2, 3)])

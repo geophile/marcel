@@ -30,7 +30,7 @@ WHITE = Color(5, 5, 5)
 RED_BOLD = Color(5, 0, 0, BOLD)
 DARK_GREY_BOLD_ITALIC = Color(2, 2, 2, BOLD | ITALIC)
 
-The RGB values are in the range 0-5, which make for a 6 f 6 f 6 color cube.
+The RGB values are in the range 0-5, which make for a 6x6x6 color cube.
 These values are used to define an ANSI escape
 sequence. 
 

@@ -15,13 +15,12 @@
 
 HELP = '''
 The default marcel prompt is {n:$}. 
-You can customize the prompt by assigning to the {r:PROMPT}
-environment variable, 
+You can customize the prompt by calling the {r:set_prompt} function
 in your configuration script, (run
 {n:help configuration} for more information on configuration). For example:
 
 {p,wrap=F,indent=4}
-PROMPT = [
+set_prompt(
     Color(5, 0, 0, BOLD),
     'M ',
     Color(1, 2, 4, BOLD),
@@ -32,8 +31,7 @@ PROMPT = [
     ':',
     Color(0, 3, 3, BOLD),
     lambda: ('~' + PWD[len(HOME):]) if PWD.startswith(HOME) else PWD,
-    '$ '
-]
+    '$ ')
 
 This produces the following prompt (for me):
 

@@ -62,7 +62,7 @@ being executed.
 
 {b:Marcel as a calculator}
 
-You can also evaluate a function as the first command in a pipelines. This
+You can also evaluate a function as the first command in a pipeline. This
 allows you to use marcel as a calculator, e.g. 
 
 {L}(hex(123))

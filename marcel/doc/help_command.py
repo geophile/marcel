@@ -104,8 +104,8 @@ Run {n:help function} for more information on functions.
 {b:Executables}
 
 Executables can be run from marcel, just as in any other shell. stdout
-and stderr from an executable can flow into a marcel pipelines, and will show up 
-as a stream of strings, each terminated by \\\\n. Similarly, a marcel pipelines can
+and stderr from an executable can flow into a marcel pipeline, and will show up 
+as a stream of strings, each terminated by \\\\n. Similarly, a marcel pipeline can
 deliver data to an executable via stdin.
 
 {b:Combining operators and executables}

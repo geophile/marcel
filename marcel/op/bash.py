@@ -38,7 +38,7 @@ is interactive. stdin, stdout, and stderr are not handled by marcel.
 Runs a bash command, which may be given as a single string ({r:COMMAND}), or as a sequence of strings
 ({r:EXECUTABLE} {r:ARG} ...).
 
-The bash command to be executed can receive stdin from a marcel pipelines, e.g.
+The bash command to be executed can receive stdin from a marcel pipeline, e.g.
 
 {p,indent=4}gen 20 | map (x: (x, x)) | bash "grep 2"
 
