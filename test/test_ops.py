@@ -15,6 +15,7 @@ import marcel.version
 import test_base
 
 timeit = test_base.timeit
+tracktest = test_base.tracktest
 TestDir = test_base.TestDir
 TEST = test_base.TestConsole()
 
@@ -72,11 +73,13 @@ def filename_op_setup(testdir):
 
 
 @timeit
+@tracktest
 def test_no_such_op():
     TEST.run('gen 5 | abc', expected_err='not executable')
 
 
 @timeit
+@tracktest
 def test_gen():
     # Explicit write
     TEST.run('gen 5 | write',
@@ -119,6 +122,7 @@ def test_gen():
 
 
 @timeit
+@tracktest
 def test_write():
     # Write to stdout
     TEST.run('gen 3 | (f: (f, -f))',
@@ -210,6 +214,7 @@ def test_write():
 
 
 @timeit
+@tracktest
 def test_sort():
     TEST.run('gen 5 | sort',
              expected_out=[0, 1, 2, 3, 4])
@@ -224,6 +229,7 @@ def test_sort():
 
 
 @timeit
+@tracktest
 def test_map():
     TEST.run('gen 5 | map (f: -f)',
              expected_out=[0, -1, -2, -3, -4])
@@ -249,6 +255,7 @@ def test_map():
 
 
 @timeit
+@tracktest
 def test_select():
     TEST.run('gen 5 | select (f: True)',
              expected_out=[0, 1, 2, 3, 4])
@@ -259,6 +266,7 @@ def test_select():
 
 
 @timeit
+@tracktest
 def test_red():
     # Test function symbols
     TEST.run('gen 5 1 | red +',
@@ -339,6 +347,7 @@ def test_red():
 
 
 @timeit
+@tracktest
 def test_expand():
     # Test singletons
     TEST.run('gen 5 | expand',
@@ -437,6 +446,7 @@ def test_expand():
 
 
 @timeit
+@tracktest
 def test_head():
     TEST.run('gen 100 | head 0',
              expected_err="must not be 0")
@@ -465,6 +475,7 @@ def test_head():
 
 
 @timeit
+@tracktest
 def test_tail():
     TEST.run('gen 100 | tail 0',
              expected_err='must not be 0')
@@ -493,6 +504,7 @@ def test_tail():
 
 
 @timeit
+@tracktest
 def test_reverse():
     TEST.run('gen 5 | select (f: False) | reverse',
              expected_out=[])
@@ -501,6 +513,7 @@ def test_reverse():
 
 
 @timeit
+@tracktest
 def test_squish():
     TEST.run('gen 5 | squish',
              expected_out=[0, 1, 2, 3, 4])
@@ -525,6 +538,7 @@ def test_squish():
 
 
 @timeit
+@tracktest
 def test_unique():
     TEST.run('gen 10 | unique',
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -547,6 +561,7 @@ def test_unique():
 
 
 @timeit
+@tracktest
 def test_window():
     TEST.run('gen 10 | window (f: False)',
              expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)])
@@ -597,6 +612,7 @@ def test_window():
 
 
 @timeit
+@tracktest
 def test_bash():
     with TestDir(TEST.env) as testdir:
         os.system(f'touch {testdir}/x1')
@@ -622,6 +638,7 @@ def test_bash():
 
 
 @timeit
+@tracktest
 def test_namespace():
     TEST.run(test='ws -n namespace_test',
              verification='ws | (w: str(w))',
@@ -643,6 +660,7 @@ def test_namespace():
 
 
 @timeit
+@tracktest
 def test_source_filenames():
     with TestDir(TEST.env) as testdir:
         filename_op_setup(testdir)
@@ -681,6 +699,7 @@ def test_source_filenames():
 
 
 @timeit
+@tracktest
 def test_ls():
     with TestDir(TEST.env) as testdir:
         filename_op_setup(testdir)
@@ -784,6 +803,7 @@ def test_ls():
 
 # pushd, popd, dirs, cd
 @timeit
+@tracktest
 def test_dir_stack():
     with TestDir(TEST.env) as testdir:
         filename_op_setup(testdir)
@@ -854,6 +874,7 @@ def test_dir_stack():
 
 
 @timeit
+@tracktest
 def test_remote():
     node1 = marcel.object.cluster.Host(None, TEST.env.getvar('NODE1'))
     TEST.run('@CLUSTER1 (| gen 3 |)',
@@ -881,6 +902,7 @@ def test_remote():
 
 
 @timeit
+@tracktest
 def test_fork():
     # int forkgen
     TEST.run('fork 3 (|gen 3 100|) | sort',
@@ -910,6 +932,7 @@ def test_fork():
 
 
 @timeit
+@tracktest
 def test_sudo():
     with TestDir(TEST.env) as testdir:
         TEST.run(test='sudo (| gen 3 |)', expected_out=[0, 1, 2])
@@ -922,12 +945,14 @@ def test_sudo():
 
 
 @timeit
+@tracktest
 def test_version():
     TEST.run(test='version',
              expected_out=[marcel.version.VERSION])
 
 
 @timeit
+@tracktest
 def test_assign():
     # Assign command-line string
     TEST.run(test='a = 3',
@@ -1013,6 +1038,7 @@ def test_assign():
 
 
 @timeit
+@tracktest
 def test_join():
     # Join losing right inputs
     TEST.run(test='gen 4 | map (f: (f, -f)) | join (|gen 3 | map (f: (f, f * 100))|)',
@@ -1058,6 +1084,7 @@ def test_join():
 
 
 @timeit
+@tracktest
 def test_comment():
     TEST.run('# this is a comment',
              expected_out=[])
@@ -1070,6 +1097,7 @@ def test_comment():
 
 
 @timeit
+@tracktest
 def test_pipeline_args():
     TEST.run('add = (|a: map (f: (f, f + a))|)')
     TEST.run('gen 3 | add (100)',
@@ -1112,6 +1140,7 @@ def test_pipeline_args():
 
 
 @timeit
+@tracktest
 def test_sql():
     if not SQL:
         return
@@ -1140,6 +1169,7 @@ def test_sql():
 
 
 @timeit
+@tracktest
 def test_import():
     # import MODULE
     TEST.run(test='import math',
@@ -1175,6 +1205,7 @@ def test_import():
 
 
 @timeit
+@tracktest
 def test_store_load():
     TEST.reset_environment()
     # Basics
@@ -1209,6 +1240,7 @@ def test_store_load():
 
 
 @timeit
+@tracktest
 def test_redirect_file():
     with TestDir(TEST.env) as testdir:
         # ------------------------ Test all the paths through Parser.pipelines() for files
@@ -1342,6 +1374,7 @@ def test_redirect_file():
 
 
 @timeit
+@tracktest
 def test_redirect_var():
     # ------------------------ Test all the paths through Parser.pipelines() for vars
     # var <$
@@ -1475,6 +1508,7 @@ def test_redirect_var():
 
 
 @timeit
+@tracktest
 def test_loop():
     TEST.run('loop (0) [select (f: f < 3) | emit | map (f: f + 1)]',
              expected_out=[0, 1, 2])
@@ -1494,6 +1528,7 @@ def test_loop():
 
 
 @timeit
+@tracktest
 def test_case():
     TEST.run(test='gen 5 1 | case (f: f < 3) (| (f: (100 * f)) |) '
                   '               (f: f > 3) (| (f: (1000 * f)) |)',
@@ -1515,6 +1550,7 @@ def test_case():
 
 
 @timeit
+@tracktest
 def test_read():
     with TestDir(TEST.env) as testdir:
         file = open(f'{testdir}/f1.csv', 'w')
@@ -1684,6 +1720,7 @@ def test_read():
 
 
 @timeit
+@tracktest
 def test_intersect():
     TEST.reset_environment()
     # Empty inputs
@@ -1754,6 +1791,7 @@ def test_intersect():
 
 
 @timeit
+@tracktest
 def test_union():
     TEST.reset_environment()
     # Empty inputs
@@ -1788,6 +1826,7 @@ def test_union():
 
 
 @timeit
+@tracktest
 def test_filter():
     TEST.run('gen 6 | (f: (f, f)) | expand | filter (| gen 3|)',
              expected_out=[0, 0, 1, 1, 2, 2])
@@ -1810,6 +1849,7 @@ def test_filter():
 
 
 @timeit
+@tracktest
 def test_difference():
     TEST.reset_environment()
     # Empty inputs
@@ -1848,6 +1888,7 @@ def test_difference():
 
 
 @timeit
+@tracktest
 def test_args():
     TEST.reset_environment()
     # gen
@@ -1939,6 +1980,7 @@ def test_args():
 
 
 @timeit
+@tracktest
 def test_env():
     TEST.reset_environment()
     # Env vars defined by user
@@ -1983,12 +2025,14 @@ def test_env():
 
 
 @timeit
+@tracktest
 def test_pos():
     TEST.run('gen 5 | (f: (f, pos())) | select (f, p1: f % 2 == 0) | (f, p1: (f, p1, pos()))',
              expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
 
 
 @timeit
+@tracktest
 def test_json():
     def test_json_parse():
         # Scalars
@@ -2080,12 +2124,14 @@ def test_json():
 
 
 @timeit
+@tracktest
 def test_struct():
     TEST.run('gen 3 | (f: o(f=f, y=f+1)) | (o: o.f + o.y)',
              expected_out=[1, 3, 5])
 
 
 @timeit
+@tracktest
 def test_cast():
     TEST.run('gen 3 | cast str | (s: f"<<<{s}>>>")',
              expected_out=['<<<0>>>', '<<<1>>>', '<<<2>>>'])
@@ -2114,6 +2160,7 @@ def test_cast():
 
 
 @timeit
+@tracktest
 def test_upload():
     with TestDir(TEST.env) as testdir:
         os.system(f'mkdir {testdir}/source')
@@ -2163,6 +2210,7 @@ def test_upload():
 
 
 @timeit
+@tracktest
 def test_download():
     with TestDir(TEST.env) as testdir:
         node1 = TEST.env.getvar("NODE1")
@@ -2219,6 +2267,7 @@ def test_download():
 
 
 @timeit
+@tracktest
 def test_bug_126():
     TEST.run('fact = (|x: gen (x) 1 | args (|n: gen (n) 1 | red * | map (f: (n, f))|)|)')
     TEST.run(test='fact (5) >$ f',
@@ -2227,12 +2276,14 @@ def test_bug_126():
 
 
 @timeit
+@tracktest
 def test_bug_136():
     TEST.run('gen 3 1 | args (|n: gen 2 100 | (f: f+n)|) | red +',
              expected_out=[615])
 
 
 @timeit
+@tracktest
 def test_bug_151():
     TEST.run('bytime = (|sort (f: f.mtime)|)')
     TEST.run('ls ~ | bytime >$ a')
@@ -2244,12 +2295,14 @@ def test_bug_151():
 
 
 @timeit
+@tracktest
 def test_bug_152():
     # Same test case as for bug 126. Failure was different as code changes.
     pass
 
 
 @timeit
+@tracktest
 def test_bug_10():
     TEST.run('sort', expected_err='cannot be the first operator in a pipeline')
     TEST.run('unique', expected_err='cannot be the first operator in a pipeline')
@@ -2259,6 +2312,7 @@ def test_bug_10():
 
 
 @timeit
+@tracktest
 def test_bug_154():
     TEST.reset_environment()
     TEST.run('gen 3 >$ f')
@@ -2266,6 +2320,7 @@ def test_bug_154():
 
 
 @timeit
+@tracktest
 def test_bug_168():
     os.system('rm -rf /tmp/hello')
     os.system('echo hello1 > /tmp/hello')
@@ -2278,6 +2333,7 @@ def test_bug_168():
 
 
 @timeit
+@tracktest
 def test_bug_185():
     # Unbound var
     TEST.run('varop',
@@ -2288,6 +2344,7 @@ def test_bug_185():
 
 
 @timeit
+@tracktest
 def test_bug_190():
     with TestDir(TEST.env) as testdir:
         os.system(f'echo xa1 > {testdir}/a1')
@@ -2335,6 +2392,7 @@ def test_bug_190():
 
 
 @timeit
+@tracktest
 def test_bug_196():
     TEST.run('gn = (| n: (n is None) |)')
     TEST.run('gn', expected_out=[True])
@@ -2349,11 +2407,13 @@ def test_bug_196():
 
 
 @timeit
+@tracktest
 def test_bug_197():
     TEST.run('runpipeline', expected_err='not executable')
 
 
 @timeit
+@tracktest
 def test_bug_198():
     with TestDir(TEST.env) as testdir:
         # IsADirectoryError
@@ -2366,6 +2426,7 @@ def test_bug_198():
 
 
 @timeit
+@tracktest
 def test_bug_200():
     with TestDir(TEST.env) as testdir:
         source = f'{testdir}/source.csv'
@@ -2400,6 +2461,7 @@ def test_bug_200():
 
 
 @timeit
+@tracktest
 def test_bug_202():
     TEST.run('env -d x | select (*x: False)')
     TEST.run('p = (| x |)')
@@ -2414,6 +2476,7 @@ def test_bug_202():
     TEST.run('p 6', expected_err='Too many arguments')
 
 @timeit
+@tracktest
 def test_bug_203():
     TEST.run('p = (| gen 3 |)')
     TEST.run('(p)', expected_out=['(| gen(count=3, start=0) |)'])
@@ -2422,6 +2485,7 @@ def test_bug_203():
 
 
 @timeit
+@tracktest
 def test_bug_206():
     with TestDir(TEST.env) as testdir:
         base = testdir / 'test_cd_pushd'
@@ -2483,6 +2547,7 @@ def test_bug_206():
 
 
 @timeit
+@tracktest
 def test_bug_212():
     TEST.run('gen 3 | args (| f: ((f, -f)) |)',
              expected_out=[(0, 0), (1, -1), (2, -2)])
@@ -2491,6 +2556,7 @@ def test_bug_212():
 
 
 @timeit
+@tracktest
 def test_bug_229():
     TEST.run('gn = (| n: gen (int(n)) >$ g |)')
     TEST.run('gn 3')
@@ -2499,6 +2565,7 @@ def test_bug_229():
 
 
 @timeit
+@tracktest
 def test_bug_230():
     with TestDir(TEST.env) as testdir:
         TEST.cd(testdir)
@@ -2510,6 +2577,7 @@ def test_bug_230():
 
 
 @timeit
+@tracktest
 def test_bug_247():
     TEST.run('gen 3 | (f: f / (1-f))',
              expected_out=[0.0, Error('division by zero'), -2.0])
@@ -2520,6 +2588,7 @@ def test_bug_247():
 
 
 @timeit
+@tracktest
 def test_bug_252():
     TEST.run('gen 9 | args (| a, b, c: ((-a, -b, -c)) |)',
              expected_out=[(0, -1, -2),
@@ -2532,6 +2601,7 @@ def test_bug_252():
 
 
 @timeit
+@tracktest
 def test_bug_258():
     TEST.run(test='cd /',
              verification='pwd | (p: str(p))',
@@ -2540,6 +2610,7 @@ def test_bug_258():
 
 # Generalization of bug 195
 @timeit
+@tracktest
 def test_pipeline_vars():
     TEST.reset_environment()
     # union

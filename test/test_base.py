@@ -19,16 +19,24 @@ import marcel.persistence.storagelayout
 import marcel.util
 
 TEST_TIMING = False
+CURRENT_TEST = None
 
-def timeit(f):
+def timeit(t):
     def timetest():
         start = time.time()
-        f()
+        t()
         stop = time.time()
         usec = (stop - start) * 1000000
-        print(f'TEST TIMING -- {f.__name__}: {usec}')
-    return timetest if TEST_TIMING else f
+        print(f'TEST TIMING -- {t.__name__}: {usec}')
+    return timetest if TEST_TIMING else t
 
+
+def tracktest(t):
+    def tracktest():
+        global CURRENT_TEST
+        CURRENT_TEST = t.__name__
+        t()
+    return tracktest
 
 
 class Platform(object):
@@ -66,6 +74,7 @@ class TestBase:
         self.main = main
         self.env = None
         self.failures = 0
+        self.failed_tests = set()
         # self.reset_environment()
         self.test_stdout = None
         self.test_stderr = None
@@ -161,6 +170,8 @@ class TestBase:
 
     def report_failures(self, label):
         print(f'{self.failures} failures: {label}')
+        for ft in self.failed_tests:
+            print(f'    {ft}')
 
     @staticmethod
     def homedir(user=getpass.getuser()):
@@ -192,6 +203,8 @@ class TestConsole(TestBase):
             expected_out=None,
             expected_err=None,
             file=None):
+        global  CURRENT_TEST
+        failures_before = self.failures
         # test is the thing being tested. Usually it will produce output that can be used for verification.
         # For operations with side effects (e.g. rm), a separate verification command is needed.
         if verification is None and expected_out is None and expected_err is None and file is None:
@@ -218,6 +231,10 @@ class TestConsole(TestBase):
                 self.failures += 1
             except marcel.exception.KillCommandException as e:
                 print(f'{self.description(test)}: Terminated by KillCommandException: {e}', file=sys.__stderr__)
+            finally:
+                if self.failures > failures_before and CURRENT_TEST:
+                    self.failed_tests.add(CURRENT_TEST)
+                CURRENT_TEST = None
 
     def cd(self, path):
         self.main.parse_and_run_command(f'cd {path}')
