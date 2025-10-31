@@ -15,7 +15,6 @@ import test_base
 
 Workspace = marcel.object.workspace.Workspace
 ValidationError = marcel.object.workspace.WorkspaceValidater.Error
-timeit = test_base.timeit
 TestDir = test_base.TestDir
 
 Error = marcel.object.error.Error
@@ -52,7 +51,6 @@ def expect_exception(f, exception_class, expected_message):
                               f'got {e}')
 
 
-@timeit
 def test_workspace_lifecycle():
     TEST.reset_environment()
     # Starting state: There is only a default workspace, and it is the current workspace.
@@ -161,7 +159,6 @@ def test_workspace_lifecycle():
              expected_err='There is no workspace')
 
 
-@timeit
 def test_workspaces_and_reservoirs():
     TEST.reset_environment()
     ws_default = Workspace.default()
@@ -203,7 +200,6 @@ def test_workspaces_and_reservoirs():
              expected_out=[0, 1, 2])
 
 
-@timeit
 def test_workspace_persistence():
     def assign_vars():
         # ----------------------------------------------------------------------
@@ -279,7 +275,6 @@ def test_workspace_persistence():
     test_vars()
 
 
-@timeit
 def test_workspace_validation():
     def validation_error_handler(broken_workspace_names, errors):
         pass

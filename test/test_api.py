@@ -11,6 +11,7 @@ import marcel.object.cluster
 import marcel.version
 
 import test_base
+tracktest = test_base.tracktest
 
 os.environ['HOME'] = test_base.TestBase.test_home
 from marcel.api import *
@@ -18,7 +19,6 @@ from marcel.api import *
 # PyCharm considers kosher. The use of _MAIN gets flagged if not explicitly imported.
 from marcel.api import _MAIN
 
-timeit = test_base.timeit
 TestDir = test_base.TestDir
 
 Error = marcel.object.error.Error
@@ -113,7 +113,7 @@ def filename_op_setup(testdir):
     TEST.run(lambda: run(cd(testdir)))
 
 
-@timeit
+@tracktest
 def test_gen():
     # Explicit out
     TEST.run(test=lambda: run(gen(5) | write()),
@@ -153,7 +153,7 @@ def test_gen():
              expected_out=['010', '011', '012', '013', '014'])
 
 
-@timeit
+@tracktest
 def test_write():
     # Write to stdout
     TEST.run(test=lambda: run(gen(3) | map(lambda x: (x, -x)) | write()),
@@ -223,7 +223,7 @@ def test_write():
                  file=output_filename)
 
 
-@timeit
+@tracktest
 def test_sort():
     TEST.run(test=lambda: run(gen(5) | sort()),
              expected_out=[0, 1, 2, 3, 4])
@@ -240,7 +240,7 @@ def test_sort():
     TEST.run(test=lambda: run(sort()), expected_err='sort cannot be the first operator in a pipeline')
 
 
-@timeit
+@tracktest
 def test_map():
     TEST.run(test=lambda: run(gen(5) | map(lambda x: -x)),
              expected_out=[0, -1, -2, -3, -4])
@@ -253,7 +253,7 @@ def test_map():
              expected_out=[1.0, Error('division by zero'), -1.0])
 
 
-@timeit
+@tracktest
 def test_select():
     TEST.run(lambda: run(gen(5) | select(lambda x: True)),
              expected_out=[0, 1, 2, 3, 4])
@@ -268,7 +268,7 @@ def test_select():
              expected_err='function argument must be a function')
 
 
-@timeit
+@tracktest
 def test_red():
     # Test function symbols
     TEST.run(lambda: run(gen(5, 1) | red(r_plus)),
@@ -357,7 +357,7 @@ def test_red():
              expected_out=[(0, 2), (1, 2), (2, 1)])
 
 
-@timeit
+@tracktest
 def test_expand():
     # Test singletons
     TEST.run(lambda: run(gen(5) | expand()),
@@ -462,7 +462,7 @@ def test_expand():
              expected_out=[(1, 4), (2, 5), (3, 6)])
 
 
-@timeit
+@tracktest
 def test_head():
     TEST.run(lambda: run(gen(100) | head(0)),
              expected_err="must not be 0")
@@ -490,7 +490,7 @@ def test_head():
              expected_out=[0, 1, 2])
 
 
-@timeit
+@tracktest
 def test_tail():
     TEST.run(lambda: run(gen(100) | tail(0)),
              expected_err="must not be 0")
@@ -518,7 +518,7 @@ def test_tail():
              expected_out=[0, 1, 2])
 
 
-@timeit
+@tracktest
 def test_reverse():
     TEST.run(lambda: run(gen(5) | select(lambda x: False) | reverse()),
              expected_out=[])
@@ -526,7 +526,7 @@ def test_reverse():
              expected_out=[4, 3, 2, 1, 0])
 
 
-@timeit
+@tracktest
 def test_squish():
     TEST.run(lambda: run(gen(5) | squish()),
              expected_out=[0, 1, 2, 3, 4])
@@ -550,7 +550,7 @@ def test_squish():
                            [-4, 4, -4, 4]])
 
 
-@timeit
+@tracktest
 def test_unique():
     TEST.run(lambda: run(gen(10) | unique()),
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -568,7 +568,7 @@ def test_unique():
              expected_out=[0, 1, 2])
 
 
-@timeit
+@tracktest
 def test_window():
     TEST.run(lambda: run(gen(10) | window(lambda x: False)),
              expected_out=[(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)])
@@ -622,7 +622,7 @@ def test_window():
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
 
-@timeit
+@tracktest
 def test_bash():
     with TestDir(TEST.env) as testdir:
         os.system(f'touch {testdir}/x1')
@@ -645,7 +645,7 @@ def test_bash():
                  expected_out=['hello world'])
 
 
-@timeit
+@tracktest
 def test_namespace():
     config_file = '/tmp/.marcel.py'
     config_path = pathlib.Path(config_file)
@@ -674,7 +674,7 @@ def test_namespace():
     TEST.reset_environment()
 
 
-@timeit
+@tracktest
 def test_source_filenames():
     with TestDir(TEST.env) as testdir:
         filename_op_setup(testdir)
@@ -712,7 +712,7 @@ def test_source_filenames():
                  expected_out=[TEST.homedir('root')])
 
 
-@timeit
+@tracktest
 def test_ls():
     with TestDir(TEST.env) as testdir:
         filename_op_setup(testdir)
@@ -817,7 +817,7 @@ def test_ls():
 
 
 # pushd, popd, dirs, cd
-@timeit
+@tracktest
 def test_dir_stack():
     with TestDir(TEST.env) as testdir:
         filename_op_setup(testdir)
@@ -888,7 +888,7 @@ def test_dir_stack():
                  expected_out=[f'{testdir}/y'])
 
 
-@timeit
+@tracktest
 def test_remote():
     TEST.run(lambda: run(remote(CLUSTER1, gen(3))),
              expected_out=[(NODE1, 0), (NODE1, 1), (NODE1, 2)])
@@ -912,7 +912,7 @@ def test_remote():
              expected_err='notacluster is not a Cluster')
 
 
-@timeit
+@tracktest
 def test_fork():
     # int forkgen
     TEST.run(lambda: run(fork(3, gen(3, 100)) | sort()),
@@ -942,7 +942,7 @@ def test_fork():
              expected_err='Too many pipeline args')
 
 
-@timeit
+@tracktest
 def test_sudo():
     with TestDir(TEST.env) as testdir:
         TEST.run(test=lambda: run(sudo(gen(3))),
@@ -957,13 +957,13 @@ def test_sudo():
         os.system(f'sudo rm -rf {testdir}/sudotest')
 
 
-@timeit
+@tracktest
 def test_version():
     TEST.run(test=lambda: run(version()),
              expected_out=[marcel.version.VERSION])
 
 
-@timeit
+@tracktest
 def test_assign():
     TEST.run(test=lambda: run(assign('a', 3)),
              verification=lambda: run(env(var='a')),
@@ -998,7 +998,7 @@ def test_assign():
              expected_out=['abc'])
 
 
-@timeit
+@tracktest
 def test_join():
     # Join losing right inputs
     TEST.run(test=lambda: run(gen(4) | map(lambda x: (x, -x)) | join(gen(3) | map(lambda x: (x, x * 100)))),
@@ -1033,7 +1033,7 @@ def test_join():
              expected_err='not hashable')
 
 
-@timeit
+@tracktest
 def test_pipeline_args():
     add = lambda a: map(lambda x: (x, x + a))
     TEST.run(test=lambda: run(gen(3) | add(100)),
@@ -1057,7 +1057,7 @@ def test_pipeline_args():
              expected_out=[(0, 10), (1, 110), (2, 210)])
 
 
-@timeit
+@tracktest
 def test_sql():
     if not SQL:
         return
@@ -1090,7 +1090,7 @@ def test_sql():
     # TODO: sql types
 
 
-@timeit
+@tracktest
 def test_store_load():
     # Load
     x = reservoir('f')
@@ -1120,7 +1120,7 @@ def test_store_load():
              expected_err='is not a Python identifier')
 
 
-@timeit
+@tracktest
 def test_case():
     TEST.run(test=lambda: run(gen(5, 1) |
                               case(lambda x: x < 3, map(lambda x: (100 * x)),
@@ -1147,7 +1147,7 @@ def test_case():
              expected_err='Expected pipeline')
 
 
-@timeit
+@tracktest
 def test_read():
     with TestDir(TEST.env) as testdir:
         file = open(f'{testdir}/f1.csv', 'w')
@@ -1319,7 +1319,7 @@ def test_read():
                                ('c', 'ccc')])
 
 
-@timeit
+@tracktest
 def test_intersect():
     # Empty inputs
     empty = reservoir('empty')
@@ -1361,7 +1361,7 @@ def test_intersect():
              expected_err='not hashable')
 
 
-@timeit
+@tracktest
 def test_union():
     # Empty inputs
     empty = reservoir('empty')
@@ -1394,7 +1394,7 @@ def test_union():
                  1000, 1000, 2000, 2000, 3000, 3000, 4000])
 
 
-@timeit
+@tracktest
 def test_difference():
     # Empty inputs
     empty = reservoir('empty')
@@ -1437,7 +1437,7 @@ def test_difference():
              expected_err='not hashable')
 
 
-@timeit
+@tracktest
 def test_filter():
     TEST.run(test=lambda: run(gen(6) | map(lambda x: (x, x)) | expand() | filt(gen(3))),
              expected_out=[0, 0, 1, 1, 2, 2])
@@ -1455,7 +1455,7 @@ def test_filter():
              expected_err='Cannot specify more than one')
 
 
-@timeit
+@tracktest
 def test_args():
     # gen
     TEST.run(test=lambda: run(gen(5, 1) | args(lambda n: gen(n)) | map(lambda x: -x)),
@@ -1533,7 +1533,7 @@ def test_args():
              expected_out=[0, 0, 1, 0, 1, 2])
 
 
-@timeit
+@tracktest
 def test_env():
     TEST.reset_environment()
     # Env vars defined by user
@@ -1570,7 +1570,7 @@ def test_env():
              expected_err='Cannot specify more than one of')
 
 
-@timeit
+@tracktest
 def test_pos():
     TEST.run(test=lambda: run(gen(5) |
                               map(lambda x: (x, pos())) |
@@ -1579,7 +1579,7 @@ def test_pos():
              expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
 
 
-@timeit
+@tracktest
 def test_json():
     def test_json_parse():
         # Scalars
@@ -1659,7 +1659,7 @@ def test_json():
     test_json_format()
 
 
-@timeit
+@tracktest
 def test_upload():
     with TestDir(TEST.env) as testdir:
         os.system(f'mkdir {testdir}/source')
@@ -1703,7 +1703,7 @@ def test_upload():
         os.system(f'rm {testdir}/dest/*')
 
 
-@timeit
+@tracktest
 def test_download():
     with TestDir(TEST.env) as testdir:
         os.system(f'rm -rf {testdir}/source')
@@ -1769,7 +1769,7 @@ def test_download():
         os.system(f'rm -rf {testdir}/dest/*')
 
 
-@timeit
+@tracktest
 def test_api_run():
     # Error-free output, just an op
     TEST.run(test=lambda: run(gen(3)),
@@ -1782,7 +1782,7 @@ def test_api_run():
              expected_out=[-1.0, Error('division by zero'), 1.0])
 
 
-@timeit
+@tracktest
 def test_api_gather():
     # Default gather behavior
     TEST.run(test=lambda: gather(gen(3, -1) | map(lambda x: 1 / x)),
@@ -1792,7 +1792,7 @@ def test_api_gather():
              expected_return=[(-1.0,), Error('division by zero'), (1.0,)])
 
 
-@timeit
+@tracktest
 def test_api_first():
     # Default first behavior
     TEST.run(test=lambda: first(gen(3, -1) | map(lambda x: 1 / x)),
@@ -1805,7 +1805,7 @@ def test_api_first():
              expected_exception='division by zero')
 
 
-@timeit
+@tracktest
 def test_api_iterator():
     TEST.run(test=lambda: list(gen(3)),
              expected_return=[0, 1, 2])
@@ -1813,13 +1813,13 @@ def test_api_iterator():
              expected_return=[-1.0, Error('division by zero'), 1.0])
 
 
-@timeit
+@tracktest
 def test_struct():
     TEST.run(test=lambda: run(gen(3) | map(lambda x: o(x=x, y=x + 1)) | map(lambda o: o.x + o.y)),
              expected_out=[1, 3, 5])
 
 
-@timeit
+@tracktest
 def test_cast():
     TEST.run(test=lambda: run(gen(3) | cast(str) | map(lambda s: f"<<<{s}>>>")),
              expected_out=['<<<0>>>', '<<<1>>>', '<<<2>>>'])
@@ -1847,7 +1847,7 @@ def test_cast():
              expected_out=[Error('list')])
 
 
-@timeit
+@tracktest
 def test_bug_10():
     TEST.run(lambda: run(sort()), expected_err='cannot be the first operator in a pipeline')
     TEST.run(lambda: run(unique()), expected_err='cannot be the first operator in a pipeline')
@@ -1856,7 +1856,7 @@ def test_bug_10():
     TEST.run(lambda: run(args(lambda x: gen(3))), expected_err='cannot be the first operator in a pipeline')
 
 
-@timeit
+@tracktest
 def test_bug_126():
     f = reservoir('f')
     fact = lambda x: gen(x, 1) | args(lambda n: gen(n, 1) | red(r_times) | map(lambda f: (n, f)))
@@ -1865,13 +1865,13 @@ def test_bug_126():
              expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
 
 
-@timeit
+@tracktest
 def test_bug_136():
     TEST.run(lambda: run(gen(3, 1) | args(lambda n: gen(2, 100) | map(lambda x: x + n)) | red(r_plus)),
              expected_out=[615])
 
 
-@timeit
+@tracktest
 def test_bug_198():
     with TestDir(TEST.env) as testdir:
         # IsADirectoryError
@@ -1885,7 +1885,7 @@ def test_bug_198():
         # FileExistsError: Can't happen?
 
 
-@timeit
+@tracktest
 def test_bug_200():
     with TestDir(TEST.env) as testdir:
         source = f'{testdir}/source.csv'
@@ -1919,7 +1919,7 @@ def test_bug_200():
                                'd,e'])
 
 
-@timeit
+@tracktest
 def test_bug_206():
     with TestDir(TEST.env) as testdir:
         home = pathlib.Path('~').expanduser().absolute()
@@ -1978,7 +1978,7 @@ def test_bug_206():
         os.system(f'rm -rf {testdir}')
 
 
-@timeit
+@tracktest
 def test_bug_212():
     TEST.run(test=lambda: run(gen(3) | args(lambda x: map(lambda: (x, -x)))),
              expected_out=[(0, 0), (1, -1), (2, -2)])
@@ -1986,7 +1986,7 @@ def test_bug_212():
              expected_out=[(0, 0), (1, -1), (2, -2)])
 
 
-@timeit
+@tracktest
 def test_bug_229():
     g = reservoir('g')
     gn = lambda n: gen(int(n)) | store(g)
@@ -1995,7 +1995,7 @@ def test_bug_229():
              expected_out=[0, 1, 2])
 
 
-@timeit
+@tracktest
 def test_bug_230():
     with TestDir(TEST.env) as testdir:
         TEST.run(lambda: run(cd(testdir)))
@@ -2006,7 +2006,7 @@ def test_bug_230():
                  expected_out=['a1', 'a2'])
 
 
-@timeit
+@tracktest
 def test_bug_247():
     TEST.run(test=lambda: run(gen(3) | map(lambda x: x / (1 - x))),
              expected_out=[0.0, Error('division by zero'), -2.0])
@@ -2018,7 +2018,7 @@ def test_bug_247():
              expected_out=[0, 100, Error('by zero'), 300, 2, 500])
 
 
-@timeit
+@tracktest
 def test_bug_252():
     TEST.run(test=lambda: run(gen(9) | args(lambda a, b, c: map(lambda: (-a, -b, -c)))),
              expected_out=[(0, -1, -2),
@@ -2030,7 +2030,7 @@ def test_bug_252():
                            Error('bad operand type')])
 
 
-@timeit
+@tracktest
 def test_bug_258():
     TEST.run(test=lambda: run(cd('/')),
              verification=lambda: run(pwd() | map(lambda p: str(p))),
@@ -2038,7 +2038,7 @@ def test_bug_258():
 
 
 # For bugs that aren't specific to a single op.
-@timeit
+@tracktest
 def test_bugs():
     test_bug_10()
     test_bug_126()

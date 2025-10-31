@@ -21,21 +21,20 @@ import marcel.util
 TEST_TIMING = False
 CURRENT_TEST = None
 
-def timeit(t):
+def tracktest(t):
     def timetest():
         start = time.time()
         t()
         stop = time.time()
         usec = (stop - start) * 1000000
         print(f'TEST TIMING -- {t.__name__}: {usec}')
-    return timetest if TEST_TIMING else t
-
-
-def tracktest(t):
     def tracktest():
         global CURRENT_TEST
         CURRENT_TEST = t.__name__
-        t()
+        if TEST_TIMING:
+            timetest()
+        else:
+            t()
     return tracktest
 
 
@@ -304,6 +303,8 @@ class TestAPI(TestBase):
             actual_errors=None,
             expected_exception=None,
             file=None):
+        global  CURRENT_TEST
+        failures_before = self.failures
         # test is the thing being tested. Usually it will produce output that can be used for verification.
         # For operations with side effects (e.g. rm), a separate verification command is needed.
         if (verification is None and
@@ -347,6 +348,10 @@ class TestAPI(TestBase):
                     print(f'{self.description(test)}: Terminated by unexpected exception: {e}', file=sys.__stdout__)
                     marcel.util.print_stack_of_current_exception()
                     self.failures += 1
+            finally:
+                if self.failures > failures_before and CURRENT_TEST:
+                    self.failed_tests.add(CURRENT_TEST)
+                CURRENT_TEST = None
 
     def run_and_capture_output(self, command):
         self.test_stdout = open(TestBase.test_stdout, 'w')

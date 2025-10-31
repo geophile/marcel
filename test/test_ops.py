@@ -14,7 +14,6 @@ import marcel.version
 
 import test_base
 
-timeit = test_base.timeit
 tracktest = test_base.tracktest
 TestDir = test_base.TestDir
 TEST = test_base.TestConsole()
@@ -72,13 +71,11 @@ def filename_op_setup(testdir):
     TEST.cd(f'{testdir}')
 
 
-@timeit
 @tracktest
 def test_no_such_op():
     TEST.run('gen 5 | abc', expected_err='not executable')
 
 
-@timeit
 @tracktest
 def test_gen():
     # Explicit write
@@ -121,7 +118,6 @@ def test_gen():
     #          expected_err="unsupported operand type(s) for -: 'str' and 'int'")
 
 
-@timeit
 @tracktest
 def test_write():
     # Write to stdout
@@ -213,7 +209,6 @@ def test_write():
                  file=output_filename)
 
 
-@timeit
 @tracktest
 def test_sort():
     TEST.run('gen 5 | sort',
@@ -228,7 +223,6 @@ def test_sort():
     TEST.run('(', expected_err='Malformed Python expression')
 
 
-@timeit
 @tracktest
 def test_map():
     TEST.run('gen 5 | map (f: -f)',
@@ -254,7 +248,6 @@ def test_map():
              expected_out=[1.0, Error('division by zero'), -1.0])
 
 
-@timeit
 @tracktest
 def test_select():
     TEST.run('gen 5 | select (f: True)',
@@ -265,7 +258,6 @@ def test_select():
              expected_out=[1, 3])
 
 
-@timeit
 @tracktest
 def test_red():
     # Test function symbols
@@ -346,7 +338,6 @@ def test_red():
              expected_out=[{0, 1, 2}])
 
 
-@timeit
 @tracktest
 def test_expand():
     # Test singletons
@@ -445,7 +436,6 @@ def test_expand():
              expected_out=[(1, 4), (2, 5), (3, 6)])
 
 
-@timeit
 @tracktest
 def test_head():
     TEST.run('gen 100 | head 0',
@@ -474,7 +464,6 @@ def test_head():
              expected_out=[0, 1, 2])
 
 
-@timeit
 @tracktest
 def test_tail():
     TEST.run('gen 100 | tail 0',
@@ -503,7 +492,6 @@ def test_tail():
              expected_out=[0, 1, 2])
 
 
-@timeit
 @tracktest
 def test_reverse():
     TEST.run('gen 5 | select (f: False) | reverse',
@@ -512,7 +500,6 @@ def test_reverse():
              expected_out=[4, 3, 2, 1, 0])
 
 
-@timeit
 @tracktest
 def test_squish():
     TEST.run('gen 5 | squish',
@@ -537,7 +524,6 @@ def test_squish():
                            [-4, 4, -4, 4]])
 
 
-@timeit
 @tracktest
 def test_unique():
     TEST.run('gen 10 | unique',
@@ -560,7 +546,6 @@ def test_unique():
              expected_err='not hashable')
 
 
-@timeit
 @tracktest
 def test_window():
     TEST.run('gen 10 | window (f: False)',
@@ -611,7 +596,6 @@ def test_window():
              expected_out=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
 
-@timeit
 @tracktest
 def test_bash():
     with TestDir(TEST.env) as testdir:
@@ -637,7 +621,6 @@ def test_bash():
                  expected_out=['hello world'])
 
 
-@timeit
 @tracktest
 def test_namespace():
     TEST.run(test='ws -n namespace_test',
@@ -659,7 +642,6 @@ def test_namespace():
              expected_out=[Error('not defined')])
 
 
-@timeit
 @tracktest
 def test_source_filenames():
     with TestDir(TEST.env) as testdir:
@@ -698,7 +680,6 @@ def test_source_filenames():
                  expected_out=[TEST.homedir('root')])
 
 
-@timeit
 @tracktest
 def test_ls():
     with TestDir(TEST.env) as testdir:
@@ -802,7 +783,6 @@ def test_ls():
 
 
 # pushd, popd, dirs, cd
-@timeit
 @tracktest
 def test_dir_stack():
     with TestDir(TEST.env) as testdir:
@@ -873,7 +853,6 @@ def test_dir_stack():
                  expected_out=[f'{testdir}/y'])
 
 
-@timeit
 @tracktest
 def test_remote():
     node1 = marcel.object.cluster.Host(None, TEST.env.getvar('NODE1'))
@@ -901,7 +880,6 @@ def test_remote():
              expected_out=[(node1, 0), (node1, 1), (node1, 2)])
 
 
-@timeit
 @tracktest
 def test_fork():
     # int forkgen
@@ -931,7 +909,6 @@ def test_fork():
              expected_err='Too many pipeline args')
 
 
-@timeit
 @tracktest
 def test_sudo():
     with TestDir(TEST.env) as testdir:
@@ -944,14 +921,12 @@ def test_sudo():
         os.system(f'sudo rm -rf {testdir}/sudotest')
 
 
-@timeit
 @tracktest
 def test_version():
     TEST.run(test='version',
              expected_out=[marcel.version.VERSION])
 
 
-@timeit
 @tracktest
 def test_assign():
     # Assign command-line string
@@ -1037,7 +1012,6 @@ def test_assign():
              expected_out=[18])
 
 
-@timeit
 @tracktest
 def test_join():
     # Join losing right inputs
@@ -1083,7 +1057,6 @@ def test_join():
              expected_err='not hashable')
 
 
-@timeit
 @tracktest
 def test_comment():
     TEST.run('# this is a comment',
@@ -1096,7 +1069,6 @@ def test_comment():
              expected_out=[0, -1, -2])
 
 
-@timeit
 @tracktest
 def test_pipeline_args():
     TEST.run('add = (|a: map (f: (f, f + a))|)')
@@ -1139,7 +1111,6 @@ def test_pipeline_args():
              expected_out=[0])
 
 
-@timeit
 @tracktest
 def test_sql():
     if not SQL:
@@ -1168,7 +1139,6 @@ def test_sql():
     # TODO: sql types
 
 
-@timeit
 @tracktest
 def test_import():
     # import MODULE
@@ -1204,7 +1174,6 @@ def test_import():
     TEST.reset_environment()
 
 
-@timeit
 @tracktest
 def test_store_load():
     TEST.reset_environment()
@@ -1239,7 +1208,6 @@ def test_store_load():
              expected_err='is not a Python identifier')
 
 
-@timeit
 @tracktest
 def test_redirect_file():
     with TestDir(TEST.env) as testdir:
@@ -1373,7 +1341,6 @@ def test_redirect_file():
                  expected_err='excess tokens')
 
 
-@timeit
 @tracktest
 def test_redirect_var():
     # ------------------------ Test all the paths through Parser.pipelines() for vars
@@ -1507,7 +1474,6 @@ def test_redirect_var():
              expected_err='excess tokens')
 
 
-@timeit
 @tracktest
 def test_loop():
     TEST.run('loop (0) [select (f: f < 3) | emit | map (f: f + 1)]',
@@ -1527,7 +1493,6 @@ def test_loop():
              expected_out=[0, 1, 2, 3, 4])
 
 
-@timeit
 @tracktest
 def test_case():
     TEST.run(test='gen 5 1 | case (f: f < 3) (| (f: (100 * f)) |) '
@@ -1549,7 +1514,6 @@ def test_case():
              expected_err='Expected pipeline')
 
 
-@timeit
 @tracktest
 def test_read():
     with TestDir(TEST.env) as testdir:
@@ -1719,7 +1683,6 @@ def test_read():
                                ('c', 'ccc')])
 
 
-@timeit
 @tracktest
 def test_intersect():
     TEST.reset_environment()
@@ -1790,7 +1753,6 @@ def test_intersect():
     TEST.run('x2 | intersect x3 x0', expected_out=[])
 
 
-@timeit
 @tracktest
 def test_union():
     TEST.reset_environment()
@@ -1825,7 +1787,6 @@ def test_union():
                  1000, 1000, 2000, 2000, 3000, 3000, 4000])
 
 
-@timeit
 @tracktest
 def test_filter():
     TEST.run('gen 6 | (f: (f, f)) | expand | filter (| gen 3|)',
@@ -1848,7 +1809,6 @@ def test_filter():
              expected_err='Cannot specify more than one')
 
 
-@timeit
 @tracktest
 def test_difference():
     TEST.reset_environment()
@@ -1887,7 +1847,6 @@ def test_difference():
              expected_err='not hashable')
 
 
-@timeit
 @tracktest
 def test_args():
     TEST.reset_environment()
@@ -1979,7 +1938,6 @@ def test_args():
                  expected_err='must be a Pipeline')
 
 
-@timeit
 @tracktest
 def test_env():
     TEST.reset_environment()
@@ -2024,14 +1982,12 @@ def test_env():
              expected_err='Cannot specify more than one of')
 
 
-@timeit
 @tracktest
 def test_pos():
     TEST.run('gen 5 | (f: (f, pos())) | select (f, p1: f % 2 == 0) | (f, p1: (f, p1, pos()))',
              expected_out=[(0, 0, 0), (2, 2, 1), (4, 4, 2)])
 
 
-@timeit
 @tracktest
 def test_json():
     def test_json_parse():
@@ -2123,14 +2079,12 @@ def test_json():
     test_json_format()
 
 
-@timeit
 @tracktest
 def test_struct():
     TEST.run('gen 3 | (f: o(f=f, y=f+1)) | (o: o.f + o.y)',
              expected_out=[1, 3, 5])
 
 
-@timeit
 @tracktest
 def test_cast():
     TEST.run('gen 3 | cast str | (s: f"<<<{s}>>>")',
@@ -2159,7 +2113,6 @@ def test_cast():
              expected_out=[Error('list')])
 
 
-@timeit
 @tracktest
 def test_upload():
     with TestDir(TEST.env) as testdir:
@@ -2209,7 +2162,6 @@ def test_upload():
         os.system(f'rm {testdir}/dest/*')
 
 
-@timeit
 @tracktest
 def test_download():
     with TestDir(TEST.env) as testdir:
@@ -2266,7 +2218,6 @@ def test_download():
         os.system(f'rm -rf {testdir}/dest/*')
 
 
-@timeit
 @tracktest
 def test_bug_126():
     TEST.run('fact = (|x: gen (x) 1 | args (|n: gen (n) 1 | red * | map (f: (n, f))|)|)')
@@ -2275,14 +2226,12 @@ def test_bug_126():
              expected_out=[(1, 1), (2, 2), (3, 6), (4, 24), (5, 120)])
 
 
-@timeit
 @tracktest
 def test_bug_136():
     TEST.run('gen 3 1 | args (|n: gen 2 100 | (f: f+n)|) | red +',
              expected_out=[615])
 
 
-@timeit
 @tracktest
 def test_bug_151():
     TEST.run('bytime = (|sort (f: f.mtime)|)')
@@ -2294,14 +2243,12 @@ def test_bug_151():
              expected_out=[0])
 
 
-@timeit
 @tracktest
 def test_bug_152():
     # Same test case as for bug 126. Failure was different as code changes.
     pass
 
 
-@timeit
 @tracktest
 def test_bug_10():
     TEST.run('sort', expected_err='cannot be the first operator in a pipeline')
@@ -2311,7 +2258,6 @@ def test_bug_10():
     TEST.run('args(|f: gen(3)|)', expected_err='cannot be the first operator in a pipeline')
 
 
-@timeit
 @tracktest
 def test_bug_154():
     TEST.reset_environment()
@@ -2319,7 +2265,6 @@ def test_bug_154():
     TEST.run('f <$ (y: -y)', expected_out=[0, -1, -2])
 
 
-@timeit
 @tracktest
 def test_bug_168():
     os.system('rm -rf /tmp/hello')
@@ -2332,7 +2277,6 @@ def test_bug_168():
     os.system('rm -rf /tmp/hello')
 
 
-@timeit
 @tracktest
 def test_bug_185():
     # Unbound var
@@ -2343,7 +2287,6 @@ def test_bug_185():
     # Remove masking var
 
 
-@timeit
 @tracktest
 def test_bug_190():
     with TestDir(TEST.env) as testdir:
@@ -2391,7 +2334,6 @@ def test_bug_190():
                  expected_out=['a2', 'b2'])
 
 
-@timeit
 @tracktest
 def test_bug_196():
     TEST.run('gn = (| n: (n is None) |)')
@@ -2406,13 +2348,11 @@ def test_bug_196():
     TEST.run('gn 3 4', expected_err='Too many arguments')
 
 
-@timeit
 @tracktest
 def test_bug_197():
     TEST.run('runpipeline', expected_err='not executable')
 
 
-@timeit
 @tracktest
 def test_bug_198():
     with TestDir(TEST.env) as testdir:
@@ -2425,7 +2365,6 @@ def test_bug_198():
         # FileExistsError: Can't happen?
 
 
-@timeit
 @tracktest
 def test_bug_200():
     with TestDir(TEST.env) as testdir:
@@ -2460,7 +2399,6 @@ def test_bug_200():
                                'd,e'])
 
 
-@timeit
 @tracktest
 def test_bug_202():
     TEST.run('env -d x | select (*x: False)')
@@ -2475,7 +2413,6 @@ def test_bug_202():
     TEST.run('p', expected_out=[0, 1, 2, 3])
     TEST.run('p 6', expected_err='Too many arguments')
 
-@timeit
 @tracktest
 def test_bug_203():
     TEST.run('p = (| gen 3 |)')
@@ -2484,7 +2421,6 @@ def test_bug_203():
     TEST.run('(p)', expected_out=['(| n: gen(count=lambda: int(n), start=0) |)'])
 
 
-@timeit
 @tracktest
 def test_bug_206():
     with TestDir(TEST.env) as testdir:
@@ -2546,7 +2482,6 @@ def test_bug_206():
     os.system(f'rm -rf {base}')
 
 
-@timeit
 @tracktest
 def test_bug_212():
     TEST.run('gen 3 | args (| f: ((f, -f)) |)',
@@ -2555,7 +2490,6 @@ def test_bug_212():
              expected_out=[(0, 0), (1, -1), (2, -2)])
 
 
-@timeit
 @tracktest
 def test_bug_229():
     TEST.run('gn = (| n: gen (int(n)) >$ g |)')
@@ -2564,7 +2498,6 @@ def test_bug_229():
              expected_out=[0, 1, 2])
 
 
-@timeit
 @tracktest
 def test_bug_230():
     with TestDir(TEST.env) as testdir:
@@ -2576,7 +2509,6 @@ def test_bug_230():
                  expected_out=['a1', 'a2'])
 
 
-@timeit
 @tracktest
 def test_bug_247():
     TEST.run('gen 3 | (f: f / (1-f))',
@@ -2587,7 +2519,6 @@ def test_bug_247():
              expected_out=[0, 100, Error('by zero'), 300, 2, 500])
 
 
-@timeit
 @tracktest
 def test_bug_252():
     TEST.run('gen 9 | args (| a, b, c: ((-a, -b, -c)) |)',
@@ -2600,7 +2531,6 @@ def test_bug_252():
                            Error('bad operand type')])
 
 
-@timeit
 @tracktest
 def test_bug_258():
     TEST.run(test='cd /',
@@ -2609,7 +2539,6 @@ def test_bug_258():
 
 
 # Generalization of bug 195
-@timeit
 @tracktest
 def test_pipeline_vars():
     TEST.reset_environment()
@@ -2657,7 +2586,6 @@ def main_slow_tests():
 
 
 # For bugs that aren't specific to a single op.
-@timeit
 def test_bugs():
     test_bug_10()
     test_bug_126()
