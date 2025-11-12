@@ -8,21 +8,22 @@ Most marcel commands execute as jobs, which can be suspended, run in the backgro
 and brought to the foreground, as in other shells. The `multiprocessing` module is used
 to run a job in a process. This module can start processes in one of three ways:
 
-- **fork**: The child process inherits the parent's resources, including memory. (The memory is not shared,
-as in threading. Changes made by the child are not visible by the parent.)
-- **spawn**: The child process is a new Python interpreter, and resources, including memory, are not shared.
+- **fork**: The child process is initialized with a copy of the parent's resources, including memory.
+(The memory is not shared, as in threading. Changes made by the child are not visible by the parent.)
+- **spawn**: The child process is a new Python interpreter. The parents resources are not copied to the child.
 - **forkserver**: Like fork, but the forking is done by a server process created for the purpose of
 forking processes.
 
 Fork is the default on Linux. Spawn is the default on MacOS, and will become the default on 
-Python. Prior to this release, marcel relied on fork. But it looks like spawn really needs to be
-supported, especially to support MacOS. Fork on MacOS is known to possibly cause crashes. 
+Linux. Prior to this release, marcel relied on fork. But it looks like spawn really needs to be
+supported, especially to support MacOS, as fork on MacOS is known to possibly cause crashes. 
 
 Marcel environment variables are kept in a *namespace*, which serves as a Python namespace for
 the execution of Python functions that appear in marcel commands. The problem was that the marcel
 namespace worked well with the fork model of multiprocessing, but not spawn. With fork, the namespace
-exists in memory shared with the child process. But when a process is spawned, the namespace isn't 
-shared, it has to be pickled and transmitted, and the namespace contains values that could
+exists in memory copied to the child process. But when a process is spawned, the namespace isn't 
+copied by Linux, it has to be pickled and transmitted at the Python level,
+and the namespace (prior to this release) contained values that could
 not be pickled: e.g. Python functions and modules.  
 
 So in order to support the spawn model of multiprocessing, the namespace implementation had to be
