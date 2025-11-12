@@ -1,48 +1,24 @@
 What's New
 ----------
 
-This release contains a major overhaul of marcel internals, intended to anticipate
-Python changes, and to enable porting.
+The bad news is that I am the only marcel user, as far as I know.
 
-Most marcel commands execute as jobs, which can be suspended, run in the background, 
-and brought to the foreground, as in other shells. The `multiprocessing` module is used
-to run a job in a process. This module can start processes in one of three ways:
+The good news is that I am therefore free to make incompatible changes. Which I've just done.
+The last several versions of marcel
+have overhauled the namespace implementation to support the spawn
+model of multiprocessing (from the `multiprocessing` module). As of this version, it should be
+the case that marcel's on-disk state, from the marcel namespace, 
+and from the workspace's `env.pickle` and `properties.pickle` files, do not rely on
+marcel-defined types, only builtin Python types. 
 
-- **fork**: The child process is initialized with a copy of the parent's resources, including memory.
-(The memory is not shared, as in threading. Changes made by the child are not visible by the parent.)
-- **spawn**: The child process is a new Python interpreter. The parent's resources are not copied to the child.
-- **forkserver**: Like fork, but the forking is done by a server process created for the purpose of
-forking processes.
+I had been careful to provide migration of on-disk state across version upgrades. But this became
+unwieldy, because marcel type definitions would change, and sometimes type names, or package structure,
+but the code had to maintain old names and structure to support migration. Which is just terrible for
+code cleanliness and maintenance. So I've done an incompatible upgrade. 
+Old workspaces need to be discarded.
+However, as of version 0.37.0, workspaces should be migrated seamlessly.
 
-Fork is the default on Linux. Spawn is the default on MacOS, and will become the default on 
-Linux. Prior to this release, marcel relied on fork. But it looks like spawn really needs to be
-supported, especially to support MacOS, as fork on MacOS is known to possibly cause crashes. 
-
-Marcel environment variables are kept in a *namespace*, which serves as a Python namespace for
-the execution of Python functions that appear in marcel commands. The problem was that the marcel
-namespace worked well with the fork model of multiprocessing, but not spawn. With fork, the namespace
-exists in memory copied to the child process. But when a process is spawned, the namespace isn't 
-copied by Linux, it has to be pickled and transmitted at the Python level,
-and the namespace (prior to this release) contained values that could
-not be pickled: e.g. Python functions and modules.  
-
-So in order to support the spawn model of multiprocessing, the namespace implementation had to be
-overhauled. Values that can be pickled are pickled. Others values require special handling.
-For example, suppose a user has run the command `import math`. The math module cannot be pickled.
-But by noting the import, and replaying it in the child process, we can avoid pickling the math
-module, but still transmit it to the child process.
-
-For now, marcel uses the spawn model of multiprocessing by default. This results in noticeably slower
-operation, imposing
-a fraction of a second delay to command execution. (It might be worth investigating forkserver
-to fix this problem.) If this delay is intolerable, or you have found a bug and it seems 
-like spawning is implicated, then to use fork instead, set the environment variable 
-`MARCEL_MULTIPROCESSING_START_METHOD`. Valid values are `fork` and `spawn`. 
-
-With spawn multiprocessing supported, MacOS support should now be possible. Watch this space for
-information on MacOS support.
-
-*Late update: Marcel is now working on MacOS!* 
+My sincere apologies to me.
 
 Marcel
 ======
