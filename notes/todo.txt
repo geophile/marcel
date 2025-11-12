@@ -813,12 +813,3 @@ there too, since EnvValues are needed only around pickling/unpickling.
 
 test_* runs tests directly, not as Jobs. This hides lots of
 problems. Find a way to run tests as jobs.
-
-----------------------------------------------------------------------
-
-env.pickle should use just native Python types, otherwise we're stuck
-with type definitions forever across migrations.
-
-- properties.pickle: Stores WorkspaceProperties
-
-- env.pickle: values are EnvValues

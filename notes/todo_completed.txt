@@ -1219,3 +1219,12 @@ Are IfBase, Tee obsolete? I think so.
 ----------------------------------------------------------------------
 
 ws -l should sort by name
+
+----------------------------------------------------------------------
+
+env.pickle should use just native Python types, otherwise we're stuck
+with type definitions forever across migrations.
+
+- properties.pickle: Stores WorkspaceProperties
+
+- env.pickle: values are EnvValues

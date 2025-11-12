@@ -69,6 +69,10 @@ class EnvValue(object):
         self.env = env
         self.cached = EMPTY
 
+    # EnvValue should never be pickled directly, only via namespace.
+    def __getstate__(self):
+        assert False, self
+
     # EnvValue
 
     def unwrap(self):

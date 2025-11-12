@@ -10,7 +10,7 @@ to run a job in a process. This module can start processes in one of three ways:
 
 - **fork**: The child process is initialized with a copy of the parent's resources, including memory.
 (The memory is not shared, as in threading. Changes made by the child are not visible by the parent.)
-- **spawn**: The child process is a new Python interpreter. The parents resources are not copied to the child.
+- **spawn**: The child process is a new Python interpreter. The parent's resources are not copied to the child.
 - **forkserver**: Like fork, but the forking is done by a server process created for the purpose of
 forking processes.
 

@@ -78,6 +78,9 @@ class WorkspaceProperties(object):
         buffer.append(f'save = {WorkspaceProperties.format_time(self.save_time)})')
         return ''.join(buffer)
 
+    def __getstate__(self):
+        assert False, self
+
     def update_open_time(self):
         self.open_time = time.time()
 
@@ -86,6 +89,18 @@ class WorkspaceProperties(object):
 
     def set_home(self, home):
         self.home = home
+
+    def to_persistent_state(self):
+        return {'home': self.home,
+                'create_time': self.create_time,
+                'open_time': self.open_time,
+                'save_time': self.save_time}
+
+    def from_persistent_state(self, persistent):
+        self.home = persistent['home']
+        self.create_time = persistent['create_time']
+        self.open_time = persistent['open_time']
+        self.save_time = persistent['save_time']
 
 
 class VarHandler(object):
@@ -409,7 +424,9 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
     def read_properties(self):
         with open(self.locations.data_ws_prop(self), 'rb') as properties_file:
             unpickler = dill.Unpickler(properties_file)
-            self.properties = unpickler.load()
+            persistent_properties = unpickler.load()
+            self.properties = WorkspaceProperties()
+            self.properties.from_persistent_state(persistent_properties)
         self.properties.update_open_time()
 
     def write_properties(self):
@@ -417,7 +434,7 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
         self.properties.update_save_time()
         with open(self.locations.data_ws_prop(self), 'wb') as properties_file:
             pickler = dill.Pickler(properties_file)
-            pickler.dump(self.properties)
+            pickler.dump(self.properties.to_persistent_state())
 
     def read_environment(self):
             with open(self.locations.data_ws_env(self), 'rb') as environment_file:
