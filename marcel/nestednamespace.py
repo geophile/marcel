@@ -63,73 +63,122 @@ def isempty(x):
 
 class EnvValue(object):
 
-    def __init__(self, env, cached=EMPTY):
-        assert not isinstance(cached, EnvValue), cached
+    # object
+
+    def __init__(self, env):
         self.env = env
-        self.cached = cached
-
-    def __getstate__(self):
-        self.env = None
         self.cached = EMPTY
-        return self.__dict__
 
-    def __setstate__(self, state):
-        self.__dict__.update(state)
+    # EnvValue
 
     def unwrap(self):
         if isempty(self.cached):
             self.cached = self.reconstitute()
         return self.cached
 
+    def to_persistent_state(self):
+        assert False, self
+
+    def from_persistent_state(self, persisted):
+        assert False, self
+
     def reconstitute(self):
-        assert False
+        assert False, self
+
+    @staticmethod
+    def restore(env, classname, persisted):
+        if classname == 'Simple':
+            value = Simple(env)
+        elif classname == 'Module':
+            value = Module(env)
+        elif classname == 'CompilableFunction':
+            value = CompilableFunction(env)
+        elif classname == 'CompilablePipeline':
+            value = CompilablePipeline(env)
+        elif classname == 'Function':
+            value = Function(env)
+        elif classname == 'Import':
+            value = Import(env)
+        else:
+            assert False, classname
+        value.from_persistent_state(persisted)
+        return value
 
     @staticmethod
     def wrap(env, value, source=None):
         def is_pipeline(value):
             return isinstance(value, marcel.pipeline.Pipeline)
-        return (Function(env, value) if inspect.isbuiltin(value) else
-                Module(env, value) if inspect.ismodule(value) else
-                Compilable.for_function(env, f'({source})', value) if callable(value) else
-                Compilable.for_pipeline(env, source, value) if is_pipeline(value) else
-                Simple(env, value))
+        if inspect.isbuiltin(value):
+            ev = Function(env)
+            ev.assign(value)
+        elif inspect.ismodule(value):
+            ev = Module(env)
+            ev.assign(value)
+        elif callable(value):
+            ev = CompilableFunction(env)
+            ev.assign(value, f'({source})')
+        elif is_pipeline(value):
+            ev = CompilablePipeline(env)
+            ev.assign(value, source)
+        else:
+            ev = Simple(env)
+            ev.assign(value)
+        return ev
+
 
 class Simple(EnvValue):
 
-    def __init__(self, env, value):
-        super().__init__(env, value)
-        self.value = value
+    def __init__(self, env):
+        super().__init__(env)
+        self.value = None
 
     def __repr__(self):
         return str(self.value)
 
+    def to_persistent_state(self):
+        return {'value': self.value}
+
+    def from_persistent_state(self, persisted):
+        self.value = persisted['value']
+
     def reconstitute(self):
         return self.value
+
+    def assign(self, value):
+        self.value = value
+        self.cached = value
 
 
 class Compilable(EnvValue):
 
-    def __init__(self, env, source, compiled):
-        assert source is not None
-        assert compiled is not None
-        super().__init__(env, compiled)
-        self.source = source
+    def __init__(self, env):
+        super().__init__(env)
+        self.source = None
 
     def __repr__(self):
         return self.source
 
-    @staticmethod
-    def for_function(env, source, function):
-        assert callable(function), function
-        return CompilableFunction(env, source, function)
-
-    @staticmethod
-    def for_pipeline(env, source, pipeline):
-        assert isinstance(pipeline, marcel.pipeline.Pipeline), pipeline
-        return CompilablePipeline(env, source, pipeline)
+    def assign(self, compiled, source):
+        assert compiled is not None
+        assert source is not None
+        self.source = source
+        self.cached = compiled
 
 
 class CompilableFunction(Compilable):
+
+    # A function-valued env var can be called as a function. In that case, env.getvar is bypassed and the Compilable
+    # is invoked directly.
+    def __call__(self, *args, **kwargs):
+        function = self.unwrap()
+        assert callable(function), function
+        return function(*args, **kwargs)
+
+    def to_persistent_state(self):
+        return {'source': self.source}
+
+    def from_persistent_state(self, persisted):
+        self.source = persisted['source']
 
     def reconstitute(self):
         assert self.env is not None
@@ -140,15 +189,14 @@ class CompilableFunction(Compilable):
         # what happened during the original assign op.
         return function()
 
-    # A function-valued env var can be called as a function. In that case, env.getvar is bypassed and the Compilable
-    # is invoked directly.
-    def __call__(self, *args, **kwargs):
-        function = self.unwrap()
-        assert callable(function), function
-        return function(*args, **kwargs)
-
 
 class CompilablePipeline(Compilable):
+
+    def to_persistent_state(self):
+        return {'source': self.source}
+
+    def from_persistent_state(self, persisted):
+        self.source = persisted['source']
 
     def reconstitute(self):
         assert self.env is not None
@@ -157,52 +205,92 @@ class CompilablePipeline(Compilable):
 
 class Module(EnvValue):
 
-    def __init__(self, env, module):
-        super().__init__(env, module)
-        self.module_name = module.__name__
+    def __init__(self, env):
+        super().__init__(env)
+        self.module_name = None
 
     def __repr__(self):
         return self.module_name
 
+    def to_persistent_state(self):
+        return {'module_name': self.module_name}
+
+    def from_persistent_state(self, persisted):
+        self.module_name = persisted['module_name']
+        return marcel.util.import_module(self.module_name)
+
     def reconstitute(self):
         return marcel.util.import_module(self.module_name)
+
+    def assign(self, module):
+        self.module_name = module.__name__
 
 
 class Import(EnvValue):
 
-    def __init__(self, env, module, symbol, name, value):
-        assert type(module) is str, module
-        assert (symbol is None) or (type(symbol) is str), symbol
-        assert name is None or type(name) is str
-        super().__init__(env, value)
-        self.module = module
-        self.symbol = symbol
-        self.name = name if name else symbol
+    def __init__(self, env):
+        super().__init__(env)
+        self.module = None
+        self.symbol = None
+        self.name = None
 
     def __repr__(self):
         return (f'import({self.module}.{self.symbol})'
                 if self.name == self.symbol else
                 f'import({self.module}.{self.symbol} -> {self.name})')
 
+    def to_persistent_state(self):
+        return {'module': self.module, 'symbol': self.symbol}
+
+    def from_persistent_state(self, persisted):
+        self.module = persisted['module']
+        self.symbol = persisted['symbol']
+
     def reconstitute(self):
         return (marcel.util.import_module(self.module)
                 if self.symbol is None else
                 marcel.util.import_symbol(self.module, self.symbol))
 
+    def assign(self, module, symbol, name, value):
+        assert type(module) is str, module
+        assert (symbol is None) or (type(symbol) is str), symbol
+        assert name is None or type(name) is str
+        self.module = module
+        self.symbol = symbol
+        self.name = name if name else symbol
+        self.cached = value
+
+    @staticmethod
+    def new(env, module, symbol, name, value):
+        imp = Import(env)
+        imp.assign(module, symbol, name, value)
+        return imp
+
 class Function(EnvValue):
 
-    def __init__(self, env, function):
-        super().__init__(env, function)
-        self.module_name = function.__module__
-        self.function_name = function.__name__
-        assert self.function_name.isidentifier(), self.function_name
+    def __init__(self, env):
+        super().__init__(env)
+        self.module_name = None
+        self.function_name = None
 
     def __repr__(self):
         return f'{self.module_name}.{self.function_name}'
 
+    def to_persistent_state(self):
+        return {'module_name': self.module_name, 'function_name': self.function_name}
+
+    def from_persistent_state(self, persisted):
+        self.module_name = persisted['module_name']
+        self.function_name = persisted['function_name']
+
     def reconstitute(self):
         return marcel.util.import_symbol(self.module_name, self.function_name)
 
+    def assign(self, function):
+        self.module_name = function.__module__
+        self.function_name = function.__name__
+        assert self.function_name.isidentifier(), self.function_name
+        self.cached = function
 
 #------------------------------------------------------------------------------------------------------------
 # NestedNamespace and Scope
@@ -239,7 +327,7 @@ class Scope(dict):
 
     def assign_import(self, var, module, symbol, value):
         assert not isinstance(value, EnvValue)
-        self.store_item(var, Import(self.env, module, symbol, var, value))
+        self.store_item(var, Import.new(self.env, module, symbol, var, value))
 
     def delete(self, var):
         try:
@@ -251,8 +339,7 @@ class Scope(dict):
             pass
 
     def store_item(self, var, value):
-        # About self.parent is not None: EnvValues are only needed for the outermost scope.
-        if self.parent is not None and not isinstance(value, EnvValue):
+        if not isinstance(value, EnvValue):
             value = EnvValue.wrap(self.env, value)
         if self.parent is None or var in self.params:
             super().__setitem__(var, value)
@@ -291,13 +378,6 @@ class NestedNamespace(dict):
         except KeyError:
             pass
         super().__delitem__(key)
-
-    def __getstate__(self):
-        assert len(self.scopes) == 1, len(self.scopes)
-        return dict(self.scopes[0])
-
-    def __setstate__(self, state):
-        assert False
 
     def update(self, d):
         assert isinstance(d, dict)
@@ -351,14 +431,21 @@ class NestedNamespace(dict):
     def current_scope(self):
         return self.scopes[-1]
 
-    def reconstitute(self, persisted, env):
+    def to_persistent_state(self):
+        persistent = {}
+        for k, v in self.scopes[0].items():
+            assert isinstance(v, EnvValue), f'{k}: {v}'
+            persistent[k] = (v.__class__.__name__, v.to_persistent_state())
+        return persistent
+
+    def from_persistent_state(self, env, persisted):
         assert len(self.scopes) == 1, len(self.scopes)
         scope = self.scopes[0]
-        for var, value_wrapper in persisted.items():
-            value_wrapper.env = env
-            value_wrapper.reconstitute()
-            super().__setitem__(var, value_wrapper.unwrap())
-            scope.__setitem__(var, value_wrapper)
+        for var, persisted_value in persisted.items():
+            classname, persisted_state = persisted_value
+            value = EnvValue.restore(env, classname, persisted_state)
+            scope.__setitem__(var, value)
+            super().__setitem__(var, value.unwrap())
 
     # TODO: With set_env, is reconstitute needed? That's just an eager form of reconstitution.
     # TODO: Having the env available in all the EnvValues is a lazy form.

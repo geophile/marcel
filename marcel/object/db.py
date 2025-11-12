@@ -28,7 +28,7 @@ except ModuleNotFoundError:
 import marcel.exception
 
 
-class Database:
+class Database(object):
 
     def __init__(self, driver, dbname, user, password=None, host=None, port=None):
         if driver not in ('psycopg2'):
@@ -48,7 +48,7 @@ class Database:
         return self.connection_class(self)
 
 
-class Connection:
+class Connection(object):
 
     def __init__(self, connection):
         self.connection = connection

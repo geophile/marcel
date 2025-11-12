@@ -1809,6 +1809,17 @@ Pipeline.ensure_executable(self, env, bindings)
 
 ----------------------------------------------------------------------
 
+11/8/25
+
+Environment.create
+    workspace.open
+        self.read_environment
+            unpickler.load
+                Environment.__setstate__
+                    env.create  LOOP
+
+----------------------------------------------------------------------
+
 TODO
 
 - Move out of MainScript init

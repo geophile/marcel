@@ -144,9 +144,6 @@ class VarHandler(object):
     def vars(self):
         return self.namespace
 
-    def persistible_vars(self):
-        return dict(self.namespace.scopes[0])
-
     def add_immutable_vars(self, vars):
         self.immutable_vars.update(vars)
 
@@ -239,7 +236,7 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
                     self.namespace.assign_permanent(var, value)
                 self.add_immutable_vars(config_dict.keys())
                 persistent_state = self.read_environment()
-                self.namespace.reconstitute(persistent_state, env)
+                self.namespace.from_persistent_state(env, persistent_state)
             else:
                 self.cannot_lock_workspace()
         else:
@@ -301,7 +298,7 @@ class Workspace(marcel.object.renderable.Renderable, VarHandler):
 
     def persistent_state(self):
         assert len(self.namespace.scopes) == 1, len(self.namespace.scopes)
-        return dict(self.namespace.scopes[0])
+        return self.namespace.to_persistent_state()
 
     @staticmethod
     def named(name=None):

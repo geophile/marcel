@@ -1215,3 +1215,7 @@ fixing the problem is difficult.
 ----------------------------------------------------------------------
 
 Are IfBase, Tee obsolete? I think so.
+
+----------------------------------------------------------------------
+
+ws -l should sort by name

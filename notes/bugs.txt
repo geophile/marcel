@@ -878,3 +878,58 @@ RUN write() -> ('RUN write() -> (\'RUN write() -> (\\\'RUN write() -> (\\\\\\\'R
 RUN write() -> ('RUN read(depth=1, filenames=[\'/tmp/trace.txt\']) -> RUN read(depth=1, filenames=[\'/tmp/trace.txt\']) -> RUN read(depth=1, filenames=[\'/tmp/trace.txt\']) -> RUN write() -> (\'RUN read(depth=1, filenames=[\\\'/tmp/trace.txt\\\']) -> RUN read(depth=1, filenames=[\\\'/tmp/trace.txt\\\']) -> RUN read(depth=1, filenames=[\\\'/tmp/trace.txt\\\']) -> RUN write() -> (\\\'RUN read(depth=1, filenames=[\\\\\\\'/tmp/trace.txt\\\\\\\']) -> RUN read(depth=1, filenames=[\\\\\\\'/tmp/trace.txt\\\\\\\']) -> RUN write() -> ("RUN read(depth=1, filenames=[\\\\\\\'/tmp/trace.txt\\\\\\\']) -> RUN write() -> (2,)",)\\\',)\',)',)
 RUN read(depth=1, filenames=['/tmp/trace.txt']) -> RUN write() -> ('RUN read(depth=1, filenames=[\'/tmp/trace.txt\']) -> RUN read(depth=1, filenames=[\'/tmp/trace.txt\']) -> RUN write() -> (\'RUN read(depth=1, filenames=[\\\'/tmp/trace.txt\\\']) -> RUN read(depth=1, filenames=[\\\'/tmp/trace.txt\\\']) -> RUN read(depth=1, filenames=[\\\'/tmp/trace.txt\\\']) -> RUN write() -> (\\\'RUN read(depth=1, filenames=[\\\\\\\'/tmp/trace.txt\\\\\\\']) -> RUN read(depth=1, filenames=[\\\\\\\'/tmp/trace.txt\\\\\\\']) -> RUN write() -> ("RUN read(depth=1, filenames=[\\\\\\\'/tmp/trace.txt\\\\\\\']) -> RUN write() -> (2,)",)\\\',)\',)',)
 RUN write() -> ('RUN write() -> (\'RUN read(depth=1, filenames=[\\\'/tmp/trace.txt\\\']) -> RUN read(depth=1, filenames=[\\\'/tmp/trace.txt\\\']) -> RUN write() -> (\\\'RUN read(depth=1, filenames=[\\\\\\\'/tmp/trace.txt\\\\\\\']) -> RUN read(depth=1, filenames=[\\\\\\\'/tmp/trace.txt\\\\\\\']) -> RUN read(depth=1, filenames=[\\\\\\\'/tmp/trace.txt\\\\\\\']) -> RUN write() -> (\\\\\\\'RUN read(depth=1, filenames=[\\\\\\\\\\\\\\\'/tmp/trace.txt\\\\\\\\\\\\\\\']) -> RUN read(depth=1, filenames=[\\\\\\\\\\\\\\\'/tmp/trace.txt\\\\\\\\\\\\\\\']) -> RUN write() -> ("RUN read(depth=1, filenames=[\\\\\\\\\\\\\\\'/tmp/trace.txt\\\\\\\\\\\\\\\']) -> RUN write() -> (2,)",)\\\\\\\',)\\\',)\',)',)
+
+----------------------------------------------------------------------
+
+289. Piping to bash is broken
+
+Hang:
+
+    M 0.36.11 jao@loon ~/git/marcel/test$ gen 20 | map (x: (x, x)) | bash "grep 2"
+
+Crash:
+
+    M 0.36.11 jao@loon ~/git/marcel/test$ gen 20 | map (x: (x, x)) | bash echo
+
+Process Process-6:
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jao/git/marcel/marcel/job.py", line 68, in run_command_in_child
+    child_namespace_changes = command.execute(env, remote=True)
+  File "/home/jao/git/marcel/marcel/core.py", line 243, in execute
+    self.pipeline.run_pipeline(env, {})
+  File "/home/jao/git/marcel/marcel/pipeline.py", line 331, in run_pipeline
+    self.executable.run(env)
+  File "/home/jao/git/marcel/marcel/pipeline.py", line 67, in run
+    self.ops[0].run(env)
+  File "/home/jao/git/marcel/marcel/op/gen.py", line 101, in run
+    self.send(env, format.format(x) if format else x)
+  File "/home/jao/git/marcel/marcel/core.py", line 61, in send
+    receiver.receive_input(env, x)
+  File "/home/jao/git/marcel/marcel/core.py", line 102, in receive_input
+    self.receive(env, x if type(x) in (tuple, list) else (x,))
+  File "/home/jao/git/marcel/marcel/op/map.py", line 64, in receive
+    self.send(env, self.call(env, self.function, *x))
+  File "/home/jao/git/marcel/marcel/core.py", line 61, in send
+    receiver.receive_input(env, x)
+  File "/home/jao/git/marcel/marcel/core.py", line 102, in receive_input
+    self.receive(env, x if type(x) in (tuple, list) else (x,))
+  File "/home/jao/git/marcel/marcel/op/bash.py", line 115, in receive
+    self.escape.receive(env, x)
+  File "/home/jao/git/marcel/marcel/op/bash.py", line 160, in receive
+    self.process.stdin.write(str(x))
+ValueError: I/O operation on closed file.
+M 0.36.11 jao@loon ~/git/marcel/test$ 
+
+----------------------------------------------------------------------
+
+290. Editing prompt while in marcel leads to crashes and infinite recursion
+
+Try edit -s, modify a Color setting in set_prompt. Exit the
+editor. Unending error messages about stack depth, have to kill the
+terminal.
+
+Other bad things happen with a bad color definition, e.g. RGB value > 5.

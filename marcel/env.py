@@ -103,7 +103,7 @@ class Environment(object):
         return {'usage': self.usage,
                 'trace': self.trace,
                 'workspace': None if self.workspace.is_default() else self.workspace.name,
-                'namespace': self.workspace.persistible_vars()}
+                'namespace': self.workspace.vars().to_persistent_state()}
 
     def __setstate__(self, state):
         from marcel.object.workspace import Workspace
@@ -118,7 +118,7 @@ class Environment(object):
             env = marcel.api._ENV
         else:
             env = Environment.create(workspace=workspace, usage=usage)
-        env.workspace.namespace.reconstitute(namespace, env)
+        env.workspace.namespace.from_persistent_state(env, namespace)
         env.trace = trace
         self.__dict__ = env.__dict__
 
