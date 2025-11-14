@@ -60,6 +60,9 @@ class AnonArg(Arg):
     def is_boolean(self):
         return False
 
+    def is_int(self):
+        return False
+
 
 class FlagArg(AnonArg):
 
@@ -88,9 +91,10 @@ class FlagArg(AnonArg):
         self.boolean = False
 
     def __repr__(self):
-        return (f'{self.short}|{self.long}' if self.short and self.long else
+        flag = (f'{self.short}|{self.long}' if self.short and self.long else
                 self.short if self.short else
                 self.long)
+        return f'{flag[flag.find("("):]}'
 
     def register_flags(self, all_flags):
         def register(flag):
@@ -138,11 +142,17 @@ class BooleanFlagArg(FlagArg):
         super().__init__(short, long, default, required)
         self.boolean = True
 
-    def __repr__(self):
-        flag_str = super().__repr__()
-        return f'BooleanFlag{flag_str[flag_str.find("("):]}'
-
     def is_boolean(self):
+        return True
+
+
+class IntFlagArg(FlagArg):
+
+    def __init__(self, short, long, default, required):
+        super().__init__(short, long, default, required)
+        self.value = default
+
+    def is_int(self):
         return True
 
 
@@ -156,8 +166,11 @@ class CommandLine(object):
         for var, arg in self.var_arg.items():
             if not (type(var) is str and var.isidentifier()):
                 _report_error(f'Var must be valid as a Python identifier: {var}')
-            if type(arg) not in (AnonArg, FlagArg, BooleanFlagArg):
-                _report_error(f'Arg value must be flag(), boolean_flag(), or anon(): {arg}')
+            if type(arg) not in (AnonArg,
+                                 FlagArg,
+                                 IntFlagArg,
+                                 BooleanFlagArg):
+                _report_error(f'Arg value must be flag(), int_flag(), boolean_flag(), or anon(): {arg}')
             if arg.is_anon():
                 if anon_seen:
                     _report_error('Too many anon() specified.')
@@ -205,12 +218,13 @@ class CommandLine(object):
                         if a == len(argv):
                             _report_error(f'Value missing for flag: {token}')
                         else:
-                            x = argv[a]
-                            if isflag(x):
+                            value = argv[a]
+                            if isflag(value):
                                 _report_error(f'Value missing for flag: {arg}')
-                            else:
-                                a += 1
-                                yield arg, x
+                            a += 1
+                            if arg.is_int():
+                                value = int(value)
+                            yield arg, value
                 else:
                     yield None, token
 
@@ -249,6 +263,9 @@ def flag(f1, f2=None, default=None, required=False):
 
 def boolean_flag(f1, f2=None, default=False):
     return BooleanFlagArg(f1, f2, default=default, required=False)
+
+def int_flag(f1, f2=None, default=0, required=False):
+    return IntFlagArg(f1, f2, default=default, required=required)
 
 
 def anon():

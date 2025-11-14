@@ -69,7 +69,7 @@ class EnvValue(object):
         self.env = env
         self.cached = EMPTY
 
-    # EnvValue should never be pickled directly, only via namespace.
+    # EnvValue should never be pickled directly. Scope takes care of serializing EVs.
     def __getstate__(self):
         assert False, self
 

@@ -926,10 +926,9 @@ M 0.36.11 jao@loon ~/git/marcel/test$
 
 ----------------------------------------------------------------------
 
-290. Editing prompt while in marcel leads to crashes and infinite recursion
+291. After edit -s, changes to startup file don't take effect until the following command
 
-Try edit -s, modify a Color setting in set_prompt. Exit the
-editor. Unending error messages about stack depth, have to kill the
-terminal.
+E.g. edit the startup file, add x = 1 and exit the editor
 
-Other bad things happen with a bad color definition, e.g. RGB value > 5.
+(x) shows that x is defined (no error messatge about x not being
+defined), but has no value. But on the next try x has the value 1.

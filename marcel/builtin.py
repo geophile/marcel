@@ -22,7 +22,7 @@ from marcel.object.cluster import Cluster
 from marcel.object.db import Database
 from marcel.object.file import File
 from marcel.object.process import Process
-from marcel.cliargs import anon, flag, boolean_flag
+from marcel.cliargs import anon, flag, boolean_flag, int_flag
 from marcel.util import username, groupname, quote_files
 
 # Needed here but we don't want them public

@@ -806,10 +806,9 @@ use lambda x: <<pipeline>> which turns into a PipelineFunction.)
 
 ----------------------------------------------------------------------
 
-EnvValues used only for outermost scope. They could be eliminated
-there too, since EnvValues are needed only around pickling/unpickling.
+test_* runs tests directly, not as Jobs. This hides lots of
+problems. Find a way to run tests as jobs.
 
 ----------------------------------------------------------------------
 
-test_* runs tests directly, not as Jobs. This hides lots of
-problems. Find a way to run tests as jobs.
+env command should omit __builtins__

@@ -6218,3 +6218,15 @@ TypeError: 'NoneType' object is not iterable
 Case fails when run as a Job, because arg processing by setup()
 doesn't occur before the pipeline is sent to the job. Not sure why
 this isn't being seen more often, with other ops that have pipelines.
+
+----------------------------------------------------------------------
+
+NOT A BUG
+
+290. Editing prompt while in marcel leads to crashes and infinite recursion
+
+Try edit -s, modify a Color setting in set_prompt. Exit the
+editor. Unending error messages about stack depth, have to kill the
+terminal.
+
+Other bad things happen with a bad color definition, e.g. RGB value > 5.
