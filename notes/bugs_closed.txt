@@ -6230,3 +6230,25 @@ editor. Unending error messages about stack depth, have to kill the
 terminal.
 
 Other bad things happen with a bad color definition, e.g. RGB value > 5.
+
+----------------------------------------------------------------------
+
+FIXED
+
+292. env crashes marcel
+
+Running env produces expected output, ending with __builtins__, and then:
+
+    Cannot understand acme as a host name or as an IP address.
+    jao@loon:~/git/marcel$ 
+
+Narrowing it down:
+
+    M 0.37.0 jao@loon ~/git/marcel$ env acme
+    Cannot understand acme as a host name or as an IP address.
+
+Startup has this:
+
+    acme = cluster(user='jao',
+                   identity='/home/jao/.ssh/id_rsa',
+                   host='acme')

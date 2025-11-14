@@ -76,7 +76,7 @@ class Host(object):
                     self._addr = str(ipaddress.ip_address(socket.gethostbyname(self._host)))
                     self._name = self._host
                 except socket.gaierror:
-                    raise marcel.exception.KillShellException(
+                    raise marcel.exception.KillAndResumeException(
                         f'Cannot understand {self._host} as a host name or as an IP address.')
 
 

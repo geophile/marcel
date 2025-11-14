@@ -932,3 +932,7 @@ E.g. edit the startup file, add x = 1 and exit the editor
 
 (x) shows that x is defined (no error messatge about x not being
 defined), but has no value. But on the next try x has the value 1.
+
+----------------------------------------------------------------------
+
+293.
