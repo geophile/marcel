@@ -237,6 +237,7 @@ def window(*args, **kwargs): return _generate_op(_window, *args, **kwargs)
 # Utilities
 
 def _generate_op(f, *args, **kwargs):
+    INITIALIZATION.ensure_initialized()
     op, arglist = f(*args, **kwargs)
     _ENV.op_modules[op.op_name()].args_parser(_ENV).parse(arglist, op)
     return _pipeline.OpList(_MAIN.env, op)
