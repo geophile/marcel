@@ -21,14 +21,16 @@ import marcel.exception
 import marcel.object.error
 
 HELP = '''
-{L,wrap=F}env [-o|--os]
+{L,wrap=F}env [-o|--os] [-b|--builtins]
 {L,wrap=F}env [-o|--os] VAR
-{L,wrap=F}env [-o|--os] -p|--pattern PATTERN
+{L,wrap=F}env [-o|--os] [-b|--builtins] -p|--pattern PATTERN
 {L,wrap=F}env -d|--delete VAR
 
 {L,indent=4:28}{r:VAR}                     The name of an environment variable.
 
 {L,indent=4:28}{r:-o}, {r:--os}                Search the host OS environment, not marcel's.
+
+{L,indent=4:28}{r:-b}, {r:--builtins}          Include __builtins__ in output.
 
 {L,indent=4:28}{r:-d}, {r:--delete}            Output the named variable and its value, and remove the variable 
 from the environment.
@@ -54,10 +56,13 @@ If the {r:--pattern} flag is specified, then the variables output are those whos
 
 If {r:--os} is specified, then the host OS environment, (obtained by Python's os.environ) is searched instead of the 
 marcel namespace. This option is incompatible with {r:--delete}.
+
+For the marcel namespace (i.e., omitting {r:--os}), the value of {n:__builtins__} is omitted by default.
+Specify {r:--builtins} to include {n:__builtins__}.
 '''
 
 
-def env(var=None, delete=None, pattern=None, os=False):
+def env(var=None, delete=None, pattern=None, os=False, builtins=False):
     args = []
     if delete:
         args.extend(['-d', delete])
@@ -65,6 +70,8 @@ def env(var=None, delete=None, pattern=None, os=False):
         args.extend(['-p', pattern])
     if os:
         args.append('--os')
+    if builtins:
+        args.append('--builtins')
     if var:
         args.append(var)
     return Env(), args
@@ -76,10 +83,12 @@ class EnvArgsParser(marcel.argsparser.ArgsParser):
         super().__init__('env', env)
         self.add_flag_one_value('delete', '-d', '--delete')
         self.add_flag_one_value('pattern', '-p', '--pattern')
+        self.add_flag_no_value('builtins', '-b', '--builtins')
         self.add_flag_no_value('os', '-o', '--os')
         self.add_anon('var', default=None)
         self.at_most_one('delete', 'var', 'pattern')
         self.at_most_one('delete', 'os')
+        self.at_most_one('builtins', 'os')
         self.validate()
 
 
@@ -90,6 +99,7 @@ class Env(marcel.core.Op):
         self.delete = None
         self.var = None
         self.pattern = None
+        self.builtins = False
         self.os = None
         self.list_all = None
         self.impl = None
@@ -98,6 +108,8 @@ class Env(marcel.core.Op):
         buffer = []
         if self.os:
             buffer.append('os')
+        if self.builtins:
+            buffer.append('builtins')
         if self.delete:
             buffer.append(f'delete {self.delete}')
         if self.pattern:
@@ -174,13 +186,18 @@ class EnvMarcel(EnvImpl):
         output = []
         for var, value in env.vars().items():
             if self.op.pattern in var:
-                output.append((var, value))
+                if self.include(var):
+                    output.append((var, value))
         for var, value in sorted(output):
             self.op.send(env, (var, value))
 
     def all_vars(self, env):
         for var, value in sorted(env.vars().items()):
-            self.op.send(env, (var, value))
+            if self.include(var):
+                self.op.send(env, (var, value))
+
+    def include(self, var):
+        return self.op.builtins or var != '__builtins__'
 
 
 class EnvOS(EnvImpl):

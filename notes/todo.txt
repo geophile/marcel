@@ -808,7 +808,3 @@ use lambda x: <<pipeline>> which turns into a PipelineFunction.)
 
 test_* runs tests directly, not as Jobs. This hides lots of
 problems. Find a way to run tests as jobs.
-
-----------------------------------------------------------------------
-
-env command should omit __builtins__

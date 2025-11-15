@@ -1228,3 +1228,7 @@ with type definitions forever across migrations.
 - properties.pickle: Stores WorkspaceProperties
 
 - env.pickle: values are EnvValues
+
+----------------------------------------------------------------------
+
+env command should omit __builtins__
