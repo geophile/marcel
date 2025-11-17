@@ -114,13 +114,9 @@ class Download(marcel.core.Op):
     def scp_command(sources, host, dest):
         cluster = host.cluster
         buffer = []
-        if cluster.password:
-            buffer.append(f'sshpass -p "{cluster.password}"')
         buffer.append('scp -Cpqr')
         if cluster.identity:
             buffer.extend(['-i', cluster.identity])
-        if cluster.password:
-            buffer.append(f'-P {cluster.password}')
         for source in sources:
             buffer.append(f'{cluster.user}@{host.addr}:{marcel.util.quote_files(source)}')
         node_dir = dest / host.name

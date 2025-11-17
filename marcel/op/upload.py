@@ -111,8 +111,6 @@ class Upload(marcel.core.Op):
         sources = marcel.util.quote_files(*sources)
         cluster = host.cluster
         buffer = []
-        if cluster.password:
-            buffer.extend(['sshpass -p', cluster.password])
         buffer.append('scp -Cpqr')
         if cluster.identity:
             buffer.extend(['-i', cluster.identity])

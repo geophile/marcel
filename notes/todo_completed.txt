@@ -1232,3 +1232,9 @@ with type definitions forever across migrations.
 ----------------------------------------------------------------------
 
 env command should omit __builtins__
+
+----------------------------------------------------------------------
+
+Download uses sshpass. Should probably avoid that dependency.
+
+Might be time to drop password support.

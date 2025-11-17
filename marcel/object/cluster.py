@@ -90,12 +90,12 @@ class Host(object):
 #
 # Authentication: Authentication is done by specifying:
 # - user (str), and
-# - Either identity (name of a file containing a public key), or password.
+# - identity (name of a file containing a public key)
 # The same authentication values must be used for all nodes of the cluster.
 
 class Cluster(object):
 
-    def __init__(self, user, host=None, hosts=None, identity=None, password=None):
+    def __init__(self, user, host=None, hosts=None, identity=None):
         if (host is None) == (hosts is None):
             raise marcel.exception.KillShellException(
                 'Remote configuration requires the specification of host, or hosts, but not both.')
@@ -108,16 +108,14 @@ class Cluster(object):
         if hosts is not None and type(hosts) not in (tuple, list):
             raise marcel.exception.KillShellException(
                 'hosts specification must not be single-valued. Did you mean host?')
-        if (identity is None) == (password is None):
+        if identity is None:
             raise marcel.exception.KillShellException(
-                'Remote configuration requires the specification of identity '
-                '(public key file), or password, but not both.')
+                'Remote configuration requires the specification of identity (public key file)')
         if host is not None:
             hosts = [host]
         self.hosts = [Host(self, host) for host in hosts]
         self.user = user
         self.identity = identity
-        self.password = password
 
     def __repr__(self):
         return f'Cluster({self.user} @ {self.hosts})'

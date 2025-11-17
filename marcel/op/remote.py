@@ -172,8 +172,6 @@ class Remote(marcel.core.Op):
         def farcel_invocation(self, env):
             cluster = self.host.cluster
             buffer = []
-            if cluster.password:
-                buffer.extend(['sshpass', '-p', f'"{cluster.password}"'])
             buffer.append('ssh')
             if cluster.identity:
                 buffer.extend(['-i', cluster.identity])
