@@ -1,0 +1,81 @@
+Shell scripting with marcel
+
+You can write shell scripts using marcel. I created a source file,
+hello.m containing these commands:
+
+#!/usr/bin/env marcel
+
+('Hello world')
+
+I then made the file executable and executed it:
+
+jao@loon:/tmp$ ./hello.m
+Hello world
+
+Here is a script, recent.m, to find files recursively inside the
+current directory, that have changed in the last 10 days.
+
+#!/usr/bin/env marcel
+
+ls -fr | select (f: now() - f.mtime < days(10))
+
+What about modifying this so that it works in a directory given on the
+command line? This is one way:
+
+#!/usr/bin/env marcel
+
+(parse_args(dir=anon()))
+
+ls -fr (dir[0]) | select (f: now() - f.mtime < days(10))
+
+The parse_args function parses the scripts command-line
+arguments. anon() yields a list of the command line arguments and puts
+them into the variable dir. You could also do this:
+
+ls -fr (ARGV[1]) | select (f: now() - f.mtime < days(10))
+
+since parse_args puts all of the command line arguments, including the
+name of the script itself, into the variable ARGV.
+
+What if you wanted to pass in the number of days to check for, instead
+of hard-wiring 10? This works:
+
+(parse_args(_=anon()))
+
+ls -fr (ARGV[1]) | select (f: now() - f.mtime < days(int(ARGV[2])))
+
+But this has a few problems:
+
+- A user of the script needs to know the order of the arguments. 
+
+- The code is hard to read because the arguments are not assigned to separate variables.
+
+- The cast of the second argument to int has to be explicit.
+
+Another way is to rely on parse_args to provide command-line flags,
+e.g.
+
+#!/usr/bin/env marcel
+
+(parse_args(dir=flag('-d'), \
+            n=int_flag('-n')))
+
+ls -fr (dir) | select (f: now() - f.mtime < days(n))
+
+Now, the recent.m command has flags, -d to specify the directory, and
+-n to specify the number of days. You can also provide for longer
+flags, e.g.
+
+(parse_args(dir=flag('-d', '--dir'), \
+            n=int_flag('-n')))
+
+And you can specify default values:
+
+(parse_args(dir=flag('-d', '--dir', default='.'), \
+            n=int_flag('-n', default=1)))
+
+If you don't have a good default value, and the command-line must
+specify the flag's value, you can make the flag required:
+
+(parse_args(dir=flag('-d', '--dir', default='.'), \
+            n=int_flag('-n', required=True))

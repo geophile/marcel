@@ -797,6 +797,8 @@ Broken namespace should record the original workspace name
 
 Download uses sshpass. Should probably avoid that dependency.
 
+Might be time to drop password support.
+
 ----------------------------------------------------------------------
 
 Unify OpList, PipelineOpList, PipelineExecutable? They are doing very
