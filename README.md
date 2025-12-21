@@ -106,6 +106,16 @@ the recently changed files in `~/git/myproject`:
 ```shell script
 ls ~/git/myproject | recent
 ```
+Pipelines can have parameters. So to have the `recent` pipeline take the number of days as input:
+```shell script
+recent = (| d: select (file: now() - file.mtime < days(int(d))) |) 
+``` 
+And then you can use the pipeline with an argument to specify now far back to search, e.g.
+
+```shell script
+ls ~/git/myproject | recent 5
+```
+
 
 Functions
 ---------
