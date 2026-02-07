@@ -24,6 +24,8 @@ HELP = '''
 
 {L,indent=4:28}{r:-c}, {r:--command}           Report only the commands containing the specified STRING.
 
+{L,indent=4:28}{r:-a}, {r:--all}               Report all histroy, not just the last 20 commands.
+
 {L,indent=4:28}{r:N}                       Include the last N qualifying items.
 
 Generates a stream containing the history of commands executed, in chronological order (newest last).
