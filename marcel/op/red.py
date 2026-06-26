@@ -196,6 +196,7 @@ class NonGroupingReducer(Reducer):
                 self.accumulator[i] = 0
 
     def receive(self, env, x):
+        print(f'red receive {x}')
         op = self.op
         if len(x) < self.n:
             op.fatal_error(env, x, 'Input too short.')
@@ -210,6 +211,7 @@ class NonGroupingReducer(Reducer):
             op.send(env, x + tuple(accumulator))
 
     def flush(self, env):
+        print(f'red flush {self.accumulator}')
         op = self.op
         if not op.incremental and self.accumulator is not None:
             op.send(env, tuple(self.accumulator))

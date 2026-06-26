@@ -109,16 +109,18 @@ class Bash(marcel.core.Op):
                        NonInteractive(self))
 
     def run(self, env):
-        self.receive(env, None)
+        self.escape.run(env)
 
     def receive(self, env, x):
         self.escape.receive(env, x)
 
     def flush(self, env):
+        print('bash flush')
         self.escape.flush(env)
         self.propagate_flush(env)
 
     def cleanup(self):
+        print('bash cleanup')
         self.escape.cleanup()
 
 
@@ -130,6 +132,9 @@ class Escape:
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.op})'
+
+    def run(self, env):
+        assert False
 
     def receive(self, env, _):
         assert False
@@ -152,7 +157,11 @@ class NonInteractive(Escape):
         self.out_handler = None
         self.err_handler = None
 
+    def run(self, env):
+        pass
+
     def receive(self, env, x):
+        print(f'bash receive {x}')
         self.ensure_command_running(env)
         if x is not None:
             if len(x) == 1:
@@ -163,13 +172,10 @@ class NonInteractive(Escape):
     def cleanup(self):
         if self.process:
             self.process.stdin.close()
-            while self.out_handler.is_alive():
-                self.out_handler.join(0.1)
-            while self.err_handler.is_alive():
-                self.err_handler.join(0.1)
-            self.process.stdout.close()
-            self.process.stderr.close()
+            self.close_output()
+            print('bash cleanup wait')
             self.process.wait()
+            print('bash cleanup wait done')
             self.process = None
 
     def ensure_command_running(self, env):
@@ -185,16 +191,17 @@ class NonInteractive(Escape):
                                             preexec_fn=os.setsid)
             self.out_handler = ProcessStdoutHandler(env, self.process.stdout, self.op)
             self.out_handler.start()
+            print('POH started')
             self.err_handler = ProcessStderrHandler(env, self.process.stderr, self.op)
             self.err_handler.start()
-            while self.out_handler.is_alive():
-                self.out_handler.join(0.1)
-            self.process.stdout.close()
-            while self.err_handler.is_alive():
-                self.err_handler.join(0.1)
-            self.process.stderr.close()
-            self.process.stdin.close()
-            x = self.process.wait()
+
+    def close_output(self):
+        while self.out_handler.is_alive():
+            self.out_handler.join(0.1)
+        while self.err_handler.is_alive():
+            self.err_handler.join(0.1)
+        self.process.stdout.close()
+        self.process.stderr.close()
 
 
 class Interactive(Escape):
@@ -207,7 +214,7 @@ class Interactive(Escape):
                                         universal_newlines=True,
                                         preexec_fn=os.setsid)
 
-    def receive(self, env, _):
+    def run(self, env):
         self.process.wait()
         if self.process.returncode != 0:
             marcel.util.print_to_stderr(env, self.process.stderr)
@@ -239,9 +246,11 @@ class ProcessOutputHandler(threading.Thread):
     def run(self):
         stream = self.stream
         line = stream.readline()
+        print(f'POH {line}')
         while len(line) > 0:
             self.send(ProcessOutputHandler.normalize_output(line))
             line = stream.readline()
+            print(f'POH {line}')
         self.env = None
 
     def send(self, x):

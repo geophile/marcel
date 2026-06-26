@@ -64,6 +64,8 @@ class PipelineExecutable(object):
             op.customize_pipelines(env)
 
     def run(self, env):
+        if env.trace.is_enabled():
+            env.trace.write(self.ops[0], 'RUN')
         self.ops[0].run(env)
 
     def receive(self, env, x):

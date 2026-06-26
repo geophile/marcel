@@ -54,9 +54,9 @@ class Op(AbstractOp):
     # Op
 
     def send(self, env, x):
-        if env.trace.is_enabled():
-            env.trace.write(self, 'RUN', str(x))
         receiver = self.receiver
+        if env.trace.is_enabled() and receiver:
+            env.trace.write(receiver, 'RUN', str(x))
         if receiver:
             receiver.receive_input(env, x)
 
