@@ -394,7 +394,7 @@ class Trace(object):
         if output is None:
             print(f'{op} {phase}', file=self.tracefile, flush=True)
         else:
-            print(f'{op} {phase} -> {output}', file=self.tracefile, flush=True)
+            print(f'{op} {phase} <- {output}', file=self.tracefile, flush=True)
 
     def print_status(self):
         if self.tracefile is None:
