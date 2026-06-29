@@ -52,3 +52,63 @@ Parsing collects token values in args, not tokens. token.value()
 discards quote marks.
 
 Keep tokens too? Or replace args by tokens?
+
+----------------------------------------------------------------------
+
+6/26/26
+
+bash had (or has?) lots of bugs. Not really sure, since some bugs
+don't show up in unit tests, which run directly (not via jobs). Also,
+the ProcessOutputHandler mechanism is clunky and dumb -- a thread to
+consume each of stdout and stderr.
+
+Redesign: Use selectors module to get input from stdout and stderr.
+
+Requirements:
+
+- Non-interactive:
+
+  - Works with no stdin
+
+  - Works with stdin
+
+  - stdout and stderr content delivered.
+
+- Interactive
+
+  - Operates by side effect. 
+
+  - process runs
+
+  - marcel blocks until completion.
+
+
+Running a pipeline:
+
+- setup
+
+- run: first op: receive
+
+- flush
+
+- cleanup
+
+If bash is one of the ops, we don't know how the bash command behaves
+wrt input and output. 
+
+- It could be read one input, write out output, repeating.
+
+- It could accumulate all input and then write all output (e.g. sort).
+
+- Or any other pattern.
+
+Bash input comes from marcel pipeline. Bash output is received by
+selector output and sent downstream. Bash execution CANNOT BLOCK
+waiting for execution to complete, because that would block the
+pipeline leading into it, and input could not accumulate (as required
+for the sort case).
+
+*** So selector loop must be in a thread.
+
+*** BUT: if bash process doesn't block, then we cleanup and have a
+    race with execution.

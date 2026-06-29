@@ -808,3 +808,7 @@ problems. Find a way to run tests as jobs.
 ----------------------------------------------------------------------
 
 Use streamlit to make marcel usable via browser.
+
+----------------------------------------------------------------------
+
+bash testing

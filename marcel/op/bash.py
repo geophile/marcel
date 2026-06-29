@@ -14,6 +14,7 @@
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import selectors
 import subprocess
 import threading
 
@@ -115,12 +116,10 @@ class Bash(marcel.core.Op):
         self.escape.receive(env, x)
 
     def flush(self, env):
-        print('bash flush')
         self.escape.flush(env)
         self.propagate_flush(env)
 
     def cleanup(self):
-        print('bash cleanup')
         self.escape.cleanup()
 
 
@@ -134,7 +133,7 @@ class Escape:
         return f'{self.__class__.__name__}({self.op})'
 
     def run(self, env):
-        assert False
+        self.receive(env, None)
 
     def receive(self, env, _):
         assert False
@@ -154,29 +153,26 @@ class NonInteractive(Escape):
     def __init__(self, op):
         super().__init__(op)
         self.process = None
-        self.out_handler = None
-        self.err_handler = None
-
-    def run(self, env):
-        pass
+        self.output_handler = None
+        self.lock = threading.Lock()
 
     def receive(self, env, x):
-        print(f'bash receive {x}')
         self.ensure_command_running(env)
         if x is not None:
             if len(x) == 1:
                 x = x[0]
             self.process.stdin.write(str(x))
             self.process.stdin.write('\n')
+            self.process.stdin.flush()
+
+    def flush(self, env):
+        self.process.stdin.close()
+        self.output_handler.join()
 
     def cleanup(self):
-        if self.process:
-            self.process.stdin.close()
-            self.close_output()
-            print('bash cleanup wait')
-            self.process.wait()
-            print('bash cleanup wait done')
-            self.process = None
+        self.shutdown()
+
+    # Implementation
 
     def ensure_command_running(self, env):
         if self.process is None:
@@ -189,19 +185,21 @@ class NonInteractive(Escape):
                                             stderr=subprocess.PIPE,
                                             universal_newlines=True,
                                             preexec_fn=os.setsid)
-            self.out_handler = ProcessStdoutHandler(env, self.process.stdout, self.op)
-            self.out_handler.start()
-            print('POH started')
-            self.err_handler = ProcessStderrHandler(env, self.process.stderr, self.op)
-            self.err_handler.start()
+            self.output_handler = ProcessOutputHandler(env, self)
+            self.output_handler.start()
 
-    def close_output(self):
-        while self.out_handler.is_alive():
-            self.out_handler.join(0.1)
-        while self.err_handler.is_alive():
-            self.err_handler.join(0.1)
-        self.process.stdout.close()
-        self.process.stderr.close()
+    def shutdown(self):
+        while self.output_handler.is_alive():
+            self.output_handler.join(0.1)
+        self.lock.acquire()
+        try:
+            if self.process:
+                self.process.wait()
+                self.process.stdout.close()
+                self.process.stderr.close()
+                self.process = None
+        finally:
+            self.lock.release()
 
 
 class Interactive(Escape):
@@ -237,51 +235,41 @@ class BashShell(Escape):
 
 class ProcessOutputHandler(threading.Thread):
 
-    def __init__(self, env, stream, op):
+    def __init__(self, env, owner):
         super().__init__()
         self.env = env
-        self.stream = stream
-        self.op = op
+        self.owner = owner
 
     def run(self):
-        stream = self.stream
-        line = stream.readline()
-        print(f'POH {line}')
-        while len(line) > 0:
-            self.send(ProcessOutputHandler.normalize_output(line))
-            line = stream.readline()
-            print(f'POH {line}')
-        self.env = None
-
-    def send(self, x):
-        assert False
+        process = self.owner.process
+        op = self.owner.op
+        lock = self.owner.lock
+        sel = selectors.DefaultSelector()
+        sel.register(process.stdout, selectors.EVENT_READ)
+        sel.register(process.stderr, selectors.EVENT_READ)
+        while True:
+            events = sel.select(timeout=0.1)
+            lock.acquire()
+            try:
+                if not events and process.poll() is not None:
+                    break
+                for key, _ in events:
+                    stream = key.fileobj
+                    line = stream.readline()
+                    if not line:
+                        sel.unregister(key.fileobj)
+                    else:
+                        output = ProcessOutputHandler.normalize_output(line)
+                        if stream is process.stdout:
+                            op.send(self.env, output)
+                        elif stream is process.stderr:
+                            op.send(self.env, marcel.object.error.Error(output))
+            finally:
+                lock.release()
+        process.wait()
 
     @staticmethod
     def normalize_output(x):
         if x[-1] == '\n':
             x = x[:-1]
         return x
-
-
-class ProcessStdoutHandler(ProcessOutputHandler):
-
-    def __init__(self, env, stream, op):
-        super().__init__(env, stream, op)
-
-    def __repr__(self):
-        return f'ProcessStdoutHandler for {str(self.op)}'
-
-    def send(self, x):
-        self.op.send(self.env, x)
-
-
-class ProcessStderrHandler(ProcessOutputHandler):
-
-    def __init__(self, env, stream, op):
-        super().__init__(env, stream, op)
-
-    def __repr__(self):
-        return f'ProcessStderrHandler for {str(self.op)}'
-
-    def send(self, x):
-        self.op.send(self.env, marcel.object.error.Error(x))
