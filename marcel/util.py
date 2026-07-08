@@ -188,12 +188,12 @@ def iterable(x):
     return isinstance(x, collections.abc.Iterable)
 
 
-def open_file(path, mode, exception_class):
+def open_file(path, mode, encoding, exception_class):
     try:
-        return open(path, mode)
+        return open(path, mode=mode, encoding=encoding)
     # FileNotFoundError should not occur. Missing files handled by FilenamesOp.
-    except (IsADirectoryError, FileExistsError, PermissionError) as e:
-        raise exception_class(f'Unable to open {path} with mode {mode}: {str(e)}')
+    except (IsADirectoryError, FileExistsError, PermissionError, LookupError) as e:
+        raise exception_class(f'Unable to open {path} with mode {mode} and encoding {encoding}: {str(e)}')
 
 
 def bash_executable():

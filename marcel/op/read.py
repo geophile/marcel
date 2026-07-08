@@ -27,7 +27,13 @@ import marcel.util
 File = marcel.object.file.File
 
 HELP = '''
-{L,indent=4:9}read [[-01] [-r|--recursive]] [-c|--csv] [-t|--tsv] [-h|--headings] [-s|--skip-headings] [-p|--pickle] 
+{L,indent=4:9}read [[-01] [-r|--recursive]] 
+                   [-c|--csv] 
+                   [-t|--tsv] 
+                   [-h|--headings] 
+                   [-s|--skip-headings] 
+                   [-p|--pickle]
+                   [-e|--encoding ENCODING] 
  [-j|--json] [-l|--label] [FILENAME ...]
 
 {L,indent=4:28}{r:-0}                      Include only files matching the specified FILENAMEs, (i.e., depth 0).
@@ -49,6 +55,8 @@ to any depth.
 {L,indent=4:28}{r:-p}, {r:--pickle}            Parse pickle format
 
 {L,indent=4:28}{r:-l}, {r:--label}             Include the input {n:File} with output tuple.
+
+{L,indent=4:28}{r:-e}, {r:--encoding}          When reading a text file, the encoding of the file.
 
 {L,indent=4:28}{r:FILENAME}                A filename or glob pattern.
 
@@ -84,6 +92,10 @@ characters are removed.
 If {r:--label} is specified, then the input {n:File} is included in the output, in the first
 position of each output tuple. If {r:--headings} is specified, then the label column will be named
 {r:LABEL}.
+
+If {r:--encoding} is specified, then the file will be opened with the specified encoding. Otherwise, the default
+platform encoding is used. If the file begins with a BOM unicode character, such as 0xfeff, then use 'utf-8-sig'
+to skip that marker. If you specify 'utf-8' then the first character read will by the marker.
 '''
 
 COMMA = ','
@@ -99,7 +111,8 @@ def read(*filenames,
          skip_headings=False,
          pickle=False,
          json=False,
-         label=False):
+         label=False,
+         encoding=None):
     args = []
     if depth == 0:
         args.append('-0')
@@ -121,6 +134,8 @@ def read(*filenames,
         args.append('--json')
     if label:
         args.append('--label')
+    if encoding:
+        args.extend(['--encoding', encoding])
     args.extend(filenames)
     return Read(), args
 
@@ -136,8 +151,10 @@ class ReadArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
         self.add_flag_no_value('pickle', '-p', '--pickle')
         self.add_flag_no_value('json', '-j', '--json')
         self.add_flag_no_value('label', '-l', '--label')
+        self.add_flag_one_value('encoding', '-e', '--encoding')
         self.at_most_one('csv', 'tsv', 'pickle', 'json')
         self.at_most_one('headings', 'skip_headings')
+        self.at_most_one('pickle', 'encoding')
         self.validate()
 
 
@@ -153,6 +170,7 @@ class Read(marcel.op.filenamesop.FilenamesOp):
         self.json = None
         self.label = None
         self.reader = None
+        self.encoding = None
 
     def __repr__(self):
         depth = ('0' if self.d0 else
@@ -171,9 +189,11 @@ class Read(marcel.op.filenamesop.FilenamesOp):
             options.append('pickle')
         if self.json:
             options.append('json')
-        if self.filenames:
-            filenames = [str(p) for p in self.filenames]
-            return f'read({",".join(options)}, filenames={filenames})'
+        if self.encoding:
+            options.append(self.encoding)
+        if self.filenames_arg:
+            filenames_arg = [str(p) for p in self.filenames_arg]
+            return f'read({",".join(options)}, filenames={filenames_arg})'
         else:
             return f'read({",".join(options)})'
 
@@ -239,6 +259,7 @@ class TextReader(Reader):
     def read_file(self, env, file, label):
         with marcel.util.open_file(file.path,
                                    'r',
+                                   self.op.encoding,
                                    marcel.exception.KillAndResumeException) as input:
             try:
                 line = input.readline()
@@ -274,6 +295,7 @@ class JSONReader(Reader):
         lines = None
         with marcel.util.open_file(file.path,
                                    'r',
+                                   self.op.encoding,
                                    marcel.exception.KillAndResumeException) as input:
             lines = input.readlines()
         assert lines is not None
@@ -297,6 +319,7 @@ class CSVReader(Reader):
     def read_file(self, env, file, label):
         with marcel.util.open_file(file.path,
                                    'r',
+                                   self.op.encoding,
                                    marcel.exception.KillAndResumeException) as input:
             try:
                 first = True

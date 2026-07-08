@@ -56,5 +56,7 @@ class ConfigScript(object):
             exec(config_source, self.workspace.namespace, locals)
         except Exception as e:
             marcel.util.print_stack_of_current_exception()
+            with open('/tmp/debug.txt', 'w') as debug:
+                print(config_source, file=debug)
             raise marcel.exception.StartupScriptException(self.workspace, e)
         return locals

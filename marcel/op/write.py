@@ -223,6 +223,7 @@ class TextWriter(Writer):
                 path = pathlib.Path(os.path.normpath(op.filename)).expanduser()
                 self._output = marcel.util.open_file(path,
                                                      'a' if op.append else 'w',
+                                                     None,
                                                      marcel.exception.KillCommandException)
             else:
                 self._output = sys.stdout
