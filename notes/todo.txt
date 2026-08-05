@@ -812,3 +812,23 @@ Use streamlit to make marcel usable via browser.
 ----------------------------------------------------------------------
 
 bash testing
+
+----------------------------------------------------------------------
+
+It's hard to identify some files and move them all. This doesn't work. NEither does (f).
+
+ls -f | recent 1 | args (| f: bash "mv $f jul27" |)
+
+----------------------------------------------------------------------
+
+Remote execution: Some distros can't do a normal python install at
+system level, has to be in a virtual env, e.g. AWS, and I think the
+recent RPI os on acme.
+
+So remote execution will need to deal with this. Maybe something in
+.config/marcel.
+
+On acme: jao already has an env in .venv. marcel is installed, and
+working after "source .venv/bin/activate".
+
+This affects farcel.py too.
