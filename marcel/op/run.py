@@ -51,6 +51,7 @@ class RunArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Run(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'expected_args', 'id', 'editor', 'tmp_file')
 
     def __init__(self):
         super().__init__()

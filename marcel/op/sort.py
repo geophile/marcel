@@ -46,6 +46,7 @@ class SortArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Sort(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'key', 'contents')
 
     def __init__(self):
         super().__init__()

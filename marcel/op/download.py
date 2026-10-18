@@ -66,6 +66,7 @@ class DownloadArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Download(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'dir_arg', 'dir', 'cluster', 'filenames_arg', 'filenames', 'fork_manager', 'pipeline')
 
     def __init__(self):
         super().__init__()

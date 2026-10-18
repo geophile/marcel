@@ -87,6 +87,7 @@ class FilterArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Filter(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'compare', 'pipeline', 'keep', 'discard', 'right')
 
     def __init__(self):
         super().__init__()

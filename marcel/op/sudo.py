@@ -70,10 +70,13 @@ class SudoArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Sudo(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'args', 'process', 'pipeline')
 
     def __init__(self):
         super().__init__()
         self.args = None
+        self.process = None
+        self.pipeline = None
 
     def __repr__(self):
         return f'sudo({self.pipeline})'

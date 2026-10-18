@@ -106,6 +106,7 @@ class PsArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Ps(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'user', 'group', 'pid', 'command', 'filter')
 
     def __init__(self):
         super().__init__()

@@ -35,6 +35,7 @@ class ReverseArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Reverse(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'contents')
 
     def __init__(self):
         super().__init__()

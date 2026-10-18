@@ -145,6 +145,7 @@ class WsArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Ws(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'list', 'new', 'open', 'close', 'delete', 'delete_broken', 'home', 'rename', 'copy', 'exp', 'imp', 'name', 'impl')
 
     def __init__(self):
         super().__init__()

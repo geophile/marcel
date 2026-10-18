@@ -41,6 +41,7 @@ class DirsArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Dirs(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'clear')
 
     def __init__(self):
         super().__init__()

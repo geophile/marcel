@@ -53,6 +53,7 @@ class SquishArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Squish(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'function')
 
     def __init__(self):
         super().__init__()

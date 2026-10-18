@@ -44,6 +44,7 @@ class SelectArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Select(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'function')
 
     def __init__(self):
         super().__init__()

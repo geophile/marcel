@@ -70,6 +70,7 @@ class TraceArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Trace(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'off', 'on', 'filename')
 
     def __init__(self):
         super().__init__()

@@ -104,6 +104,7 @@ class SqlArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Sql(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'dbvar', 'db', 'autocommit', 'update_counts', 'commit', 'statement_arg', 'statement', 'args_arg', 'args', 'connection', 'delegate', 'total_update_count')
 
     def __init__(self):
         super().__init__()

@@ -70,6 +70,7 @@ class CaseArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Case(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'branches', 'pipelines', 'default_pipeline', 'args')
     class Branch(object):
 
         def __init__(self, predicate, pipeline):

@@ -59,6 +59,7 @@ class ImportArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Import(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'module', 'symbol', 'name')
 
     def __init__(self):
         super().__init__()

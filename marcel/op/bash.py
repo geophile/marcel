@@ -84,9 +84,11 @@ class BashArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Bash(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'args', 'args_arg', 'escape', 'interactive', 'command')
 
     def __init__(self):
         super().__init__()
+        self.args_arg = None
         self.args = None
         self.escape = None
         self.interactive = None

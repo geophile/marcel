@@ -82,6 +82,7 @@ class ExpandArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Expand(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'position_arg', 'position', 'expander')
 
     def __init__(self):
         super().__init__()

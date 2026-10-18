@@ -66,6 +66,7 @@ class EditArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Edit(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'command', 'startup', 'editor', 'ws_name')
 
     def __init__(self):
         super().__init__()

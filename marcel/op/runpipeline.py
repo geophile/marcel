@@ -20,6 +20,7 @@ import marcel.util
 
 
 class RunPipeline(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'var', 'args_arg', 'args', 'kwargs_arg', 'kwargs', 'pipeline')
 
     def __init__(self):
         super().__init__()

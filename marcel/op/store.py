@@ -77,6 +77,7 @@ class StoreArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Store(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'var', 'append', 'reservoir', 'writer')
 
     def __init__(self):
         super().__init__()

@@ -18,6 +18,7 @@ import marcel.exception
 
 
 class APIOp(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'output', 'unwrap_singleton', 'errors', 'stop_after_first')
 
     def __init__(self, output, unwrap_singleton, errors, stop_after_first):
         super().__init__()

@@ -93,6 +93,7 @@ class EnvArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Env(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'delete', 'var', 'pattern', 'builtins', 'os', 'list_all', 'impl')
 
     def __init__(self):
         super().__init__()

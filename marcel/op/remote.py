@@ -81,6 +81,7 @@ class RemoteArgsParser(marcel.argsparser.ArgsParser):
 class Remote(marcel.core.Op):
 
     class LabelThread(marcel.core.Op):
+        __slots__ = (*marcel.core.Op.__slots__, 'label_list', 'label_tuple', 'id')
 
         ID_COUNTER = 0
 
@@ -114,6 +115,7 @@ class Remote(marcel.core.Op):
             return id
 
     class RunRemote(marcel.core.Op):
+        __slots__ = (*marcel.core.Op.__slots__, 'host', 'pipeline', 'process')
 
         # The default args are needed because Op.copy() calls __init__() with no args.
         def __init__(self, host=None, pipeline=None):
@@ -184,6 +186,8 @@ class Remote(marcel.core.Op):
 
         def must_be_first_in_pipeline(self):
             return True
+
+    __slots__ = (*marcel.core.Op.__slots__, 'cluster', 'pipeline', 'fork_manager')
 
     def __init__(self):
         super().__init__()

@@ -67,6 +67,7 @@ class LoadArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Load(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'var', 'picklefile', 'reader')
 
     def __init__(self):
         super().__init__()

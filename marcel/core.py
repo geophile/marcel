@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Marcel.  If not, see <https://www.gnu.org/licenses/>.
 
+import copy
+
 from enum import Enum, auto
 
 import marcel.env
@@ -27,12 +29,14 @@ Error = marcel.object.error.Error
 
 
 class AbstractOp(object):
+    __slots__ = ('receiver', '_count')
 
     def setup(self, env):
         pass
 
 
 class Op(AbstractOp):
+    __slots__ = (*AbstractOp.__slots__,)
 
     def __init__(self):
         super().__init__()
@@ -128,9 +132,7 @@ class Op(AbstractOp):
         pass
 
     def copy(self):
-        copy = self.__class__()
-        copy.__dict__.update(self.__dict__)
-        return copy
+        return copy.copy(self)
 
     def non_fatal_error(self, env, input=None, message=None, error=None):
         assert (message is None) != (error is None)
@@ -179,8 +181,7 @@ class Op(AbstractOp):
                     f'Type of {self.op_name()}.{field} is {type(x)}, but must be one of {types}')
             return x
 
-        state = self.__dict__
-        val = state.get(field, None)
+        val = getattr(self, field)
         if callable(val):
             val = call(val)
         elif type(val) in (tuple, list):

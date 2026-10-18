@@ -39,6 +39,7 @@ class FilenamesOpArgsParser(marcel.argsparser.ArgsParser):
 
 
 class  FilenamesOp(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'action', 'd0', 'd1', 'dr', 'file', 'dir', 'symlink', 'filenames_arg', 'filenames', 'current_dir', 'roots', 'base', 'emitted_paths', 'visited_dirs', 'metadata_cache', 'formatting')
 
     def __init__(self, action):
         super().__init__()

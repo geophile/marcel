@@ -128,6 +128,7 @@ class RedArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Red(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'incremental', 'functions', 'reducer')
 
     def __init__(self):
         super().__init__()

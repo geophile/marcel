@@ -44,6 +44,7 @@ class CastArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Cast(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'types', 'functions')
 
     def __init__(self):
         super().__init__()

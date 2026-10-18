@@ -308,13 +308,12 @@ class ArgsParser:
         self.check_exactly_one_constraints(names)
         self.complete_anon_processing(anon, anon_list)
         # Transfer args to op
-        op_dict = op.__dict__
         for k, v in flags.items():
             arg = self.find_by_name(k)
-            op_dict[arg.target] = v
+            setattr(op, arg.target, v)
         for k, v in anon.items():
             arg = self.find_by_name(k)
-            op_dict[arg.target] = v
+            setattr(op, arg.target, v)
 
     # ------------------------------------------------------------------------------------------------------------------
 

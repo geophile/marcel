@@ -52,6 +52,7 @@ class UnionArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Union(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'pipelines')
 
     def __init__(self):
         super().__init__()
@@ -98,6 +99,7 @@ class Union(marcel.core.Op):
 
 
 class PropagateFlushFromLast(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'last')
 
     def __init__(self, last):
         super().__init__()

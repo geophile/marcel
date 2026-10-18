@@ -47,6 +47,7 @@ class MapArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Map(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'function')
 
     def __init__(self):
         super().__init__()

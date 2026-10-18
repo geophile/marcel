@@ -67,6 +67,7 @@ class UploadArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Upload(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'cluster', 'dir_arg', 'dir', 'filenames_arg', 'filenames', 'fork_manager', 'pipeline')
 
     def __init__(self):
         super().__init__()

@@ -43,6 +43,7 @@ class HeadArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Head(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'n_arg', 'impl')
 
     def __init__(self):
         super().__init__()

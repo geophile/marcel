@@ -54,6 +54,7 @@ class GenArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Gen(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'count_arg', 'start_arg', 'pad_arg', 'count', 'start', 'format')
 
     def __init__(self):
         super().__init__()

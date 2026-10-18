@@ -98,6 +98,7 @@ class WriteArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Write(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'csv', 'tsv', 'pickle', 'format', 'append', 'filename_arg', 'filename', 'output', 'writer')
 
     def __init__(self):
         super().__init__()

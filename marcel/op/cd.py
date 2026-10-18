@@ -44,6 +44,7 @@ class CdArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Cd(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'directory_arg', 'directory')
 
     def __init__(self):
         super().__init__()

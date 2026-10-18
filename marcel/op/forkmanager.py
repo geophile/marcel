@@ -34,6 +34,7 @@ def dump(message):
 
 
 class SendToParent(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'writer', 'thread_id')
 
     def __init__(self, writer, thread_id):
         super().__init__()

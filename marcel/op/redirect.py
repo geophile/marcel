@@ -18,6 +18,7 @@ import marcel.core
 
 # Op for redirecting output from an op's pipeline to the parent pipeline's output.
 class Redirect(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'parent')
 
     def __init__(self, parent):
         super().__init__()

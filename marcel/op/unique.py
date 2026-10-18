@@ -47,6 +47,7 @@ class UniqueArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Unique(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'consecutive', 'uniquer')
 
     def __init__(self):
         super().__init__()

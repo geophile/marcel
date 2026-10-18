@@ -88,6 +88,7 @@ class JoinArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Join(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'pipeline', 'keep', 'inner', 'first')
 
     def __init__(self):
         super().__init__()

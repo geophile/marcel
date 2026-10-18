@@ -159,6 +159,7 @@ class ReadArgsParser(marcel.op.filenamesop.FilenamesOpArgsParser):
 
 
 class Read(marcel.op.filenamesop.FilenamesOp):
+    __slots__ = (*marcel.op.filenamesop.FilenamesOp.__slots__, 'csv', 'tsv', 'headings', 'skip_headings', 'pickle', 'json', 'label', 'reader', 'encoding')
 
     def __init__(self):
         super().__init__(Read.read_file)

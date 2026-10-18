@@ -62,6 +62,7 @@ class HistoryArgsParser(marcel.argsparser.ArgsParser):
 
 
 class History(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'pattern', 'all', 'n')
 
     N_DEFAULT = 20
 

@@ -107,6 +107,7 @@ class ForkArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Fork(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'forkgen', 'thread_ids', 'pipeline_arg', 'manager', 'workers')
 
     def __init__(self):
         super().__init__()

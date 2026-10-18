@@ -44,6 +44,7 @@ class TimerArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Timer(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'metronome', 'interval', 'lock', 'done', 'now')
 
     def __init__(self):
         super().__init__()

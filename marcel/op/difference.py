@@ -63,6 +63,7 @@ class DifferenceArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Difference(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'pipeline', 'right', 'first')
 
     def __init__(self):
         super().__init__()

@@ -53,6 +53,7 @@ class IntersectArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Intersect(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'common', 'input', 'pipelines')
 
     # AbstractOp
 

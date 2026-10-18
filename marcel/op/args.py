@@ -61,6 +61,7 @@ class ArgsArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Args(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'all', 'pipeline', 'n_params', 'args')
 
     def __init__(self):
         super().__init__()

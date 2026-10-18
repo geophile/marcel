@@ -119,6 +119,7 @@ class WindowArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Window(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'predicate', 'overlap_arg', 'overlap', 'disjoint_arg', 'disjoint', 'window_generator', 'n')
 
     def __init__(self):
         super().__init__()

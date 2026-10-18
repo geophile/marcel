@@ -35,6 +35,7 @@ class AssignArgsParser(marcel.argsparser.ArgsParser):
 
 
 class Assign(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'var', 'string', 'pipeline', 'function', 'value', 'source')
 
     def __init__(self):
         super().__init__()

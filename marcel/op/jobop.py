@@ -31,6 +31,7 @@ class JobOpArgsParser(marcel.argsparser.ArgsParser):
 
 
 class JobOp(marcel.core.Op):
+    __slots__ = (*marcel.core.Op.__slots__, 'jid', 'pid', 'job_id', 'job')
     
     def __init__(self):
         super().__init__()
